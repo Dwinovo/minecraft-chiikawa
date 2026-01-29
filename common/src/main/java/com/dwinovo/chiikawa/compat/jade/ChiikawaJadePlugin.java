@@ -9,7 +9,7 @@ import snownee.jade.api.WailaPlugin;
 
 @WailaPlugin
 public class ChiikawaJadePlugin implements IWailaPlugin {
-    public static final ResourceLocation PET_JOB_UID = ResourceLocation.fromNamespaceAndPath("chiikawa", "pet_job");
+    public static final ResourceLocation PET_JOB_UID = new ResourceLocation("chiikawa", "pet_job");
 
     @Override
     public void register(IWailaCommonRegistration registration) {

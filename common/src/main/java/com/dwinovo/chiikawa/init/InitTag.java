@@ -31,14 +31,14 @@ public final class InitTag {
     }
 
     private static TagKey<Item> tag(String name) {
-        return TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name));
+        return TagKey.create(Registries.ITEM, new ResourceLocation(Constants.MOD_ID, name));
     }
 
     private static TagKey<EntityType<?>> tagEntity(String name) {
-        return TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name));
+        return TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(Constants.MOD_ID, name));
     }
 
     private static TagKey<Block> tagBlock(String name) {
-        return TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name));
+        return TagKey.create(Registries.BLOCK, new ResourceLocation(Constants.MOD_ID, name));
     }
 }

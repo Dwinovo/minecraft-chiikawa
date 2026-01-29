@@ -20,23 +20,23 @@ public final class InitRegistry {
     public static final int ARCHER_ID = 3;
 
     public static final ResourceKey<Registry<IPetJob>> PET_JOB_KEY = ResourceKey.createRegistryKey(
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "pet_jobs")
+        new ResourceLocation(Constants.MOD_ID, "pet_jobs")
     );
 
     public static final Registry<IPetJob> PET_JOB_REGISTRY = Services.REGISTRY.createRegistry(
         PET_JOB_KEY,
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "none"),
+        new ResourceLocation(Constants.MOD_ID, "none"),
         true
     );
 
     public static final Supplier<IPetJob> NONE = Services.REGISTRY.register(
         PET_JOB_REGISTRY,
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "none"),
+        new ResourceLocation(Constants.MOD_ID, "none"),
         () -> new NoneJob(NONE_ID)
     );
     public static final Supplier<IPetJob> FARMER = Services.REGISTRY.register(
         PET_JOB_REGISTRY,
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "farmer"),
+        new ResourceLocation(Constants.MOD_ID, "farmer"),
         () -> new BasicJob(
             FARMER_ID,
             10,
@@ -47,7 +47,7 @@ public final class InitRegistry {
     );
     public static final Supplier<IPetJob> FENCER = Services.REGISTRY.register(
         PET_JOB_REGISTRY,
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "fencer"),
+        new ResourceLocation(Constants.MOD_ID, "fencer"),
         () -> new BasicJob(
             FENCER_ID,
             10,
@@ -58,7 +58,7 @@ public final class InitRegistry {
     );
     public static final Supplier<IPetJob> ARCHER = Services.REGISTRY.register(
         PET_JOB_REGISTRY,
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "archer"),
+        new ResourceLocation(Constants.MOD_ID, "archer"),
         () -> new BasicJob(
             ARCHER_ID,
             10,

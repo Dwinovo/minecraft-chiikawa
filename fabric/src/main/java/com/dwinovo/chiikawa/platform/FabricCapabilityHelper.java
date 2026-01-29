@@ -14,7 +14,7 @@ import net.minecraft.world.entity.EntityType;
 public class FabricCapabilityHelper implements ICapabilityHelper {
     public static final EntityApiLookup<Storage<ItemVariant>, Void> ENTITY_ITEM_STORAGE =
         EntityApiLookup.get(
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "entity_item_storage"),
+            new ResourceLocation(Constants.MOD_ID, "entity_item_storage"),
             Storage.asClass(),
             Void.class
         );

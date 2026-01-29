@@ -34,11 +34,11 @@ public final class BiomeSpawnData {
     }
 
     private static ResourceKey<Biome> biomeKey(String path) {
-        return ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("minecraft", path));
+        return ResourceKey.create(Registries.BIOME, new ResourceLocation("minecraft", path));
     }
 
     private static ResourceKey<EntityType<?>> entityKey(String path) {
-        return ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path));
+        return ResourceKey.create(Registries.ENTITY_TYPE, new ResourceLocation(Constants.MOD_ID, path));
     }
 
     public record SpawnEntry(ResourceKey<EntityType<?>> entityKey, MobCategory category, int weight, int minCount, int maxCount) {

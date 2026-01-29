@@ -37,21 +37,14 @@ public class ModRecipeProvider extends RecipeProvider {
 
     @Override
     public void buildRecipes(RecipeOutput recipeOutput) {
-        HolderLookup.Provider registries = registriesFuture.join();
-        Holder<Enchantment> fireAspect = registries.lookupOrThrow(Registries.ENCHANTMENT)
-                .get(Enchantments.FIRE_ASPECT)
-                .orElseThrow();
-        Holder<Enchantment> knockback = registries.lookupOrThrow(Registries.ENCHANTMENT)
-                .get(Enchantments.KNOCKBACK)
-                .orElseThrow();
         ItemStack result = new ItemStack(InitItems.USAGI_WEAPON.get());
-        result.enchant(fireAspect, 1);
+        result.enchant(Enchantments.FIRE_ASPECT, 1);
 
         saveEnchantedShaped(
                 recipeOutput,
                 RecipeCategory.COMBAT,
                 result,
-                ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "usagi_weapon"),
+                new ResourceLocation(Constants.MOD_ID, "usagi_weapon"),
                 getHasName(Items.YELLOW_WOOL),
                 has(Items.YELLOW_WOOL),
                 Map.of(
@@ -65,12 +58,12 @@ public class ModRecipeProvider extends RecipeProvider {
         );
 
         ItemStack hachiwareResult = new ItemStack(InitItems.HACHIWARE_WEAPON.get());
-        hachiwareResult.enchant(knockback, 1);
+        hachiwareResult.enchant(Enchantments.KNOCKBACK, 1);
         saveEnchantedShaped(
                 recipeOutput,
                 RecipeCategory.COMBAT,
                 hachiwareResult,
-                ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "hachiware_weapon"),
+                new ResourceLocation(Constants.MOD_ID, "hachiware_weapon"),
                 getHasName(Items.BLUE_WOOL),
                 has(Items.BLUE_WOOL),
                 Map.of(
@@ -83,12 +76,12 @@ public class ModRecipeProvider extends RecipeProvider {
         );
 
         ItemStack chiikawaResult = new ItemStack(InitItems.CHIIKAWA_WEAPON.get());
-        chiikawaResult.enchant(knockback, 1);
+        chiikawaResult.enchant(Enchantments.KNOCKBACK, 1);
         saveEnchantedShaped(
                 recipeOutput,
                 RecipeCategory.COMBAT,
                 chiikawaResult,
-                ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "chiikawa_weapon"),
+                new ResourceLocation(Constants.MOD_ID, "chiikawa_weapon"),
                 getHasName(Items.PINK_WOOL),
                 has(Items.PINK_WOOL),
                 Map.of(

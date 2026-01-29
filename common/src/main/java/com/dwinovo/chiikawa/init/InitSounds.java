@@ -45,8 +45,8 @@ public final class InitSounds {
     private static Supplier<SoundEvent> register(String path) {
         Supplier<SoundEvent> holder = Services.REGISTRY.register(
             BuiltInRegistries.SOUND_EVENT,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path),
-            () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path))
+            new ResourceLocation(Constants.MOD_ID, path),
+            () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(Constants.MOD_ID, path))
         );
         ENTRIES.add(new SoundEntry(path, holder));
         return holder;

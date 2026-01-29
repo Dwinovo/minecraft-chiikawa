@@ -20,17 +20,17 @@ public abstract class AbstractPetModel<T extends AbstractPet> extends GeoModel<T
 
     @Override
     public ResourceLocation getModelResource(T animatable) {
-        return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "geo/" + id + ".geo.json");
+        return new ResourceLocation(Constants.MOD_ID, "geo/" + id + ".geo.json");
     }
 
     @Override
     public ResourceLocation getTextureResource(T animatable) {
-        return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/entities/" + id + ".png");
+        return new ResourceLocation(Constants.MOD_ID, "textures/entities/" + id + ".png");
     }
 
     @Override
     public ResourceLocation getAnimationResource(T animatable) {
-        return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "animations/" + id + ".animation.json");
+        return new ResourceLocation(Constants.MOD_ID, "animations/" + id + ".animation.json");
     }
 
     @Override

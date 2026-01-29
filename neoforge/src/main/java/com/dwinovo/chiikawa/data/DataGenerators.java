@@ -13,7 +13,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import java.util.Set;
 
-@EventBusSubscriber(modid = Chiikawa.MODID)
+@EventBusSubscriber(modid = Chiikawa.MODID, bus = EventBusSubscriber.Bus.MOD)
 public final class DataGenerators {
     private DataGenerators() {
     }

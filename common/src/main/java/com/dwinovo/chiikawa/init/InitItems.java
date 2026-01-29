@@ -47,7 +47,7 @@ public final class InitItems {
         int primaryColor,
         int secondaryColor
     ) {
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name);
+        ResourceLocation id = new ResourceLocation(Constants.MOD_ID, name);
         return Services.REGISTRY.<SpawnEggItem>register(
             BuiltInRegistries.ITEM,
             id,
@@ -56,7 +56,7 @@ public final class InitItems {
     }
 
     private static <T extends Item> Supplier<T> registerItem(String name, Supplier<T> factory) {
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name);
+        ResourceLocation id = new ResourceLocation(Constants.MOD_ID, name);
         return Services.REGISTRY.<T>register(
             BuiltInRegistries.ITEM,
             id,

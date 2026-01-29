@@ -21,7 +21,7 @@ import com.dwinovo.chiikawa.init.InitMenu;
 // Client-only mod entry.
 @Mod(value = Chiikawa.MODID, dist = Dist.CLIENT)
 // Auto-register @SubscribeEvent methods.
-@EventBusSubscriber(modid = Chiikawa.MODID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = Chiikawa.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class ChiikawaClient {
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {

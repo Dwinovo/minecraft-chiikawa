@@ -32,7 +32,7 @@ public final class InitEntity {
     }
 
     private static <T extends Animal> Supplier<EntityType<T>> registerPet(String name, EntityType.EntityFactory<T> factory) {
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name);
+        ResourceLocation id = new ResourceLocation(Constants.MOD_ID, name);
         return Services.REGISTRY.<EntityType<T>>register(
             BuiltInRegistries.ENTITY_TYPE,
             id,

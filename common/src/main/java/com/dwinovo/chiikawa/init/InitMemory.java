@@ -13,28 +13,28 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<BlockPos>> HARVEST_POS =
         Services.REGISTRY.<MemoryModuleType<BlockPos>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "harvest_pos"),
+            new ResourceLocation(Constants.MOD_ID, "harvest_pos"),
             () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC))
         );
 
     public static final Supplier<MemoryModuleType<BlockPos>> PLANT_POS =
         Services.REGISTRY.<MemoryModuleType<BlockPos>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "plant_pos"),
+            new ResourceLocation(Constants.MOD_ID, "plant_pos"),
             () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC))
         );
 
     public static final Supplier<MemoryModuleType<BlockPos>> CONTAINER_POS =
         Services.REGISTRY.<MemoryModuleType<BlockPos>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "container_pos"),
+            new ResourceLocation(Constants.MOD_ID, "container_pos"),
             () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC))
         );
 
     public static final Supplier<MemoryModuleType<net.minecraft.world.entity.item.ItemEntity>> PICKABLE_ITEM =
         Services.REGISTRY.<MemoryModuleType<net.minecraft.world.entity.item.ItemEntity>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "pickable_item"),
+            new ResourceLocation(Constants.MOD_ID, "pickable_item"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 

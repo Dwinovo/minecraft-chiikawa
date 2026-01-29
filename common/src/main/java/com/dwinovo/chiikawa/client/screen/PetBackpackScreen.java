@@ -15,7 +15,7 @@ import net.minecraft.world.entity.player.Inventory;
 public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> {
 
 
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/pet_backpack.png");
+    private static final ResourceLocation TEXTURE = new ResourceLocation(Constants.MOD_ID, "textures/gui/pet_backpack.png");
 
     public PetBackpackScreen(PetBackpackMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);

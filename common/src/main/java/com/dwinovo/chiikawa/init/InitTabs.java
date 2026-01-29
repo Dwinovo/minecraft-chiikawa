@@ -13,7 +13,7 @@ public final class InitTabs {
     public static final Supplier<CreativeModeTab> MAIN =
         Services.REGISTRY.<CreativeModeTab>register(
             BuiltInRegistries.CREATIVE_MODE_TAB,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "main"),
+            new ResourceLocation(Constants.MOD_ID, "main"),
             () -> CreativeModeTab.builder(CreativeModeTab.Row.TOP, 0)
                 .title(Component.translatable("itemGroup.chiikawa"))
                 .icon(() -> new ItemStack(InitItems.USAGI_SPAWN_EGG.get()))

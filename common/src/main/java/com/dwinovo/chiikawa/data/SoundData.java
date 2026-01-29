@@ -32,7 +32,7 @@ public final class SoundData {
     public static List<ResourceLocation> findVariants(String basePath, Path resourceRoot) {
         List<ResourceLocation> sounds = new ArrayList<>();
         for (int i = 1; i <= MAX_VARIANTS; i++) {
-            ResourceLocation candidate = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, basePath + "_" + i);
+            ResourceLocation candidate = new ResourceLocation(Constants.MOD_ID, basePath + "_" + i);
             if (!soundExists(candidate, resourceRoot)) {
                 break;
             }
@@ -40,7 +40,7 @@ public final class SoundData {
         }
 
         if (sounds.isEmpty()) {
-            ResourceLocation direct = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, basePath);
+            ResourceLocation direct = new ResourceLocation(Constants.MOD_ID, basePath);
             if (soundExists(direct, resourceRoot)) {
                 sounds.add(direct);
             }

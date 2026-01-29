@@ -229,7 +229,7 @@ public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttac
         if (ammo.isEmpty() || !(ammo.getItem() instanceof ArrowItem arrowItem)) {
             return;
         }
-        AbstractArrow arrow = arrowItem.createArrow(serverLevel, ammo, this, weapon);
+        AbstractArrow arrow = arrowItem.createArrow(serverLevel, ammo, this);
         Vec3 from = getEyePosition();
         Vec3 to = target.getEyePosition();
         Vec3 delta = to.subtract(from);
@@ -238,12 +238,7 @@ public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttac
         arrow.setOwner(this);
         serverLevel.addFreshEntity(arrow);
         boolean infinite = ammo.is(Items.ARROW)
-            && EnchantmentHelper.getItemEnchantmentLevel(
-                serverLevel.registryAccess()
-                    .lookupOrThrow(Registries.ENCHANTMENT)
-                    .getOrThrow(Enchantments.INFINITY),
-                weapon
-            ) > 0;
+            && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY, weapon) > 0;
         if (!infinite) {
             ammo.shrink(1);
         }

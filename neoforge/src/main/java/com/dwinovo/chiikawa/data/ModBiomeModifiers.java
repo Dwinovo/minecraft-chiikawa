@@ -21,7 +21,7 @@ import java.util.List;
 public final class ModBiomeModifiers {
     public static final ResourceKey<BiomeModifier> ADD_PET_SPAWNS = ResourceKey.create(
             NeoForgeRegistries.Keys.BIOME_MODIFIERS,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "add_pet_spawns"));
+            new ResourceLocation(Constants.MOD_ID, "add_pet_spawns"));
 
     private ModBiomeModifiers() {
     }

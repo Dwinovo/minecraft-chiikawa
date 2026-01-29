@@ -15,14 +15,14 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
-import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
+import net.neoforged.neoforge.event.entity.SpawnPlacementRegisterEvent;
 
 public class NeoForgeEntityHelper implements IEntityHelper {
     @Override
     public void registerToEventBus(Object eventBus) {
         IEventBus bus = (IEventBus) eventBus;
         bus.addListener((EntityAttributeCreationEvent event) -> registerAttributes(event));
-        bus.addListener((RegisterSpawnPlacementsEvent event) -> registerSpawnPlacements(event));
+        bus.addListener((SpawnPlacementRegisterEvent event) -> registerSpawnPlacements(event));
     }
 
     @Override
@@ -45,7 +45,7 @@ public class NeoForgeEntityHelper implements IEntityHelper {
         event.put(InitEntity.RAKKO_PET.get(), RakkoPet.createAttributes().build());
     }
 
-    private void registerSpawnPlacements(RegisterSpawnPlacementsEvent event) {
+    private void registerSpawnPlacements(SpawnPlacementRegisterEvent event) {
         registerSpawnPlacement(event, InitEntity.USAGI_PET.get());
         registerSpawnPlacement(event, InitEntity.HACHIWARE_PET.get());
         registerSpawnPlacement(event, InitEntity.CHIIKAWA_PET.get());
@@ -55,8 +55,8 @@ public class NeoForgeEntityHelper implements IEntityHelper {
         registerSpawnPlacement(event, InitEntity.RAKKO_PET.get());
     }
 
-    private static <T extends Animal> void registerSpawnPlacement(RegisterSpawnPlacementsEvent event, EntityType<T> entity) {
+    private static <T extends Animal> void registerSpawnPlacement(SpawnPlacementRegisterEvent event, EntityType<T> entity) {
         event.register(entity, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-            Animal::checkAnimalSpawnRules, RegisterSpawnPlacementsEvent.Operation.OR);
+            Animal::checkAnimalSpawnRules, SpawnPlacementRegisterEvent.Operation.OR);
     }
 }

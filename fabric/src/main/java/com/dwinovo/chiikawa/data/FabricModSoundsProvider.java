@@ -45,7 +45,7 @@ public class FabricModSoundsProvider implements DataProvider {
         }
         PackOutput.PathProvider pathProvider = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "");
         return DataProvider.saveStable(cache, root,
-            pathProvider.json(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "sounds")));
+            pathProvider.json(new ResourceLocation(Constants.MOD_ID, "sounds")));
     }
 
     @Override
