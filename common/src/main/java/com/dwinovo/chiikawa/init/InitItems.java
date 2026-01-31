@@ -48,10 +48,13 @@ public final class InitItems {
         int secondaryColor
     ) {
         ResourceLocation id = new ResourceLocation(Constants.MOD_ID, name);
-        return Services.REGISTRY.<SpawnEggItem>register(
-            BuiltInRegistries.ITEM,
+        // 使用平台特定的 registerSpawnEgg 以处理 Forge 上的延迟实体获取
+        return Services.REGISTRY.registerSpawnEgg(
             id,
-            () -> new SpawnEggItem(type.get(), primaryColor, secondaryColor, new Item.Properties())
+            type,
+            primaryColor,
+            secondaryColor,
+            new Item.Properties()
         );
     }
 

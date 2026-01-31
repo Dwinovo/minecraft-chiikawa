@@ -30,12 +30,12 @@ public final class InitRegistry {
     );
 
     public static final Supplier<IPetJob> NONE = Services.REGISTRY.register(
-        PET_JOB_REGISTRY,
+        PET_JOB_KEY,
         new ResourceLocation(Constants.MOD_ID, "none"),
         () -> new NoneJob(NONE_ID)
     );
     public static final Supplier<IPetJob> FARMER = Services.REGISTRY.register(
-        PET_JOB_REGISTRY,
+        PET_JOB_KEY,
         new ResourceLocation(Constants.MOD_ID, "farmer"),
         () -> new BasicJob(
             FARMER_ID,
@@ -46,7 +46,7 @@ public final class InitRegistry {
         )
     );
     public static final Supplier<IPetJob> FENCER = Services.REGISTRY.register(
-        PET_JOB_REGISTRY,
+        PET_JOB_KEY,
         new ResourceLocation(Constants.MOD_ID, "fencer"),
         () -> new BasicJob(
             FENCER_ID,
@@ -57,7 +57,7 @@ public final class InitRegistry {
         )
     );
     public static final Supplier<IPetJob> ARCHER = Services.REGISTRY.register(
-        PET_JOB_REGISTRY,
+        PET_JOB_KEY,
         new ResourceLocation(Constants.MOD_ID, "archer"),
         () -> new BasicJob(
             ARCHER_ID,

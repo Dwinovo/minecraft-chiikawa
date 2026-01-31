@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.entity;
 
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
+import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.entity.job.api.IPetJob;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
@@ -157,7 +158,7 @@ public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttac
 
         IPetJob best = null;
         int bestPriority = Integer.MIN_VALUE;
-        for (IPetJob job : InitRegistry.PET_JOB_REGISTRY) {
+        for (IPetJob job : Services.REGISTRY.getRegistry(InitRegistry.PET_JOB_KEY)) {
             if (!job.canAssume(this)) {
                 continue;
             }
