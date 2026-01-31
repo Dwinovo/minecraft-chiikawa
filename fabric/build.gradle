@@ -21,7 +21,9 @@ dependencies {
     modCompileOnlyApi("maven.modrinth:jade:${jade_version_fabric}")
     modLocalRuntime("maven.modrinth:jade:${jade_version_fabric}")
 }
-
+fabricApi {
+    configureDataGeneration()
+}
 loom {
     if (project(":common").file("src/main/resources/${mod_id}.accesswidener").exists()) {
         accessWidenerPath.set(project(":common").file("src/main/resources/${mod_id}.accesswidener"))
