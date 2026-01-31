@@ -15,16 +15,6 @@ java {
 
 repositories {
     mavenCentral()
-    maven { url = 'https://api.modrinth.com/maven' }
-    exclusiveContent {
-        forRepository {
-            maven {
-                name = 'GeckoLib'
-                url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
-            }
-        }
-        filter { includeGroup('software.bernie.geckolib') }
-    }
     // https://docs.gradle.org/current/userguide/declaring_repositories.html#declaring_content_exclusively_found_in_one_repository
     exclusiveContent {
         forRepository {
@@ -51,6 +41,21 @@ repositories {
     maven {
         name = 'BlameJared'
         url = 'https://maven.blamejared.com'
+    }
+    maven {
+        name = 'GeckoLib'
+        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
+        content {
+            includeGroupByRegex("software\\.bernie.*")
+            includeGroup("com.eliotlash.mclib")
+        }
+    }
+    maven {
+        name = 'Modrinth'
+        url = 'https://api.modrinth.com/maven'
+        content {
+            includeGroup("maven.modrinth")
+        }
     }
 }
 
@@ -105,8 +110,8 @@ processResources {
             'mod_id'                       : mod_id,
             'license'                      : license,
             'description'                  : project.description,
-            'neoforge_version'             : neoforge_version,
-            'neoforge_loader_version_range': neoforge_loader_version_range,
+            "forge_version": forge_version,
+            "forge_loader_version_range": forge_loader_version_range,
             'credits'                      : credits,
             'java_version'                 : java_version
     ]
@@ -115,7 +120,7 @@ processResources {
         key, value -> [(key): value instanceof String ? value.replace("\n", "\\\\n") : value]
     }
 
-    filesMatching(['META-INF/mods.toml', 'META-INF/neoforge.mods.toml']) {
+    filesMatching(['META-INF/mods.toml']) {
         expand expandProps
     }
 

@@ -10,64 +10,37 @@ dependencies {
     }
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
-    modImplementation "software.bernie.geckolib:geckolib-fabric-${minecraft_version}:${geckolib_version}"
-    include "software.bernie.geckolib:geckolib-fabric-${minecraft_version}:${geckolib_version}"
-    modCompileOnly "maven.modrinth:jade:${jade_version_fabric}"
-    modRuntimeOnly "maven.modrinth:jade:${jade_version_fabric}"
+    implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
+    implementation project(":common")
+    
+    // GeckoLib - 动画和渲染引擎
+    modImplementation("software.bernie.geckolib:geckolib-fabric-${minecraft_version}:${geckolib_version}")
+    implementation("com.eliotlash.mclib:mclib:20")
+    
+    // Jade - 可选联动 (信息显示)
+    modCompileOnlyApi("maven.modrinth:jade:${jade_version_fabric}")
+    modLocalRuntime("maven.modrinth:jade:${jade_version_fabric}")
 }
 
 loom {
-    def aw = project(':common').file("src/main/resources/${mod_id}.accesswidener")
-    if (aw.exists()) {
-        accessWidenerPath.set(aw)
+    if (project(":common").file("src/main/resources/${mod_id}.accesswidener").exists()) {
+        accessWidenerPath.set(project(":common").file("src/main/resources/${mod_id}.accesswidener"))
+    }
+    mixin {
+        defaultRefmapName.set("${mod_id}.refmap.json")
     }
     runs {
         client {
             client()
-            setConfigName('Fabric Client')
+            setConfigName("Fabric Client")
             ideConfigGenerated(true)
-            runDir('runs/client')
+            runDir("run")
         }
         server {
             server()
-            setConfigName('Fabric Server')
+            setConfigName("Fabric Server")
             ideConfigGenerated(true)
-            runDir('runs/server')
-        }
-        
-    }
-}
-
-fabricApi {
-	configureDataGeneration {
-		client = true
-	}
-}
-
-// Implement mcgradleconventions loader attribute
-def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
-['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements', 'includeInternal', 'modCompileClasspath'].each { variant ->
-    configurations.named("$variant") {
-        attributes {
-            attribute(loaderAttribute, 'fabric')
+            runDir("run")
         }
     }
 }
-sourceSets.configureEach {
-    [it.compileClasspathConfigurationName, it.runtimeClasspathConfigurationName].each { variant->
-        configurations.named("$variant") {
-            attributes {
-                attribute(loaderAttribute, 'fabric')
-            }
-        }
-    }
-}
-loom.remapConfigurations.configureEach {
-    configurations.named(it.name) {
-        attributes {
-            attribute(loaderAttribute, 'fabric')
-        }
-    }
-}
-
-sourceSets.main.resources { srcDir 'src/generated/resources' }
