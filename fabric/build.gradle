@@ -15,6 +15,7 @@ dependencies {
     
     // GeckoLib - 动画和渲染引擎
     modImplementation("software.bernie.geckolib:geckolib-fabric-${minecraft_version}:${geckolib_version}")
+    include("software.bernie.geckolib:geckolib-fabric-${minecraft_version}:${geckolib_version}")
     implementation("com.eliotlash.mclib:mclib:20")
     
     // Jade - 可选联动 (信息显示)
