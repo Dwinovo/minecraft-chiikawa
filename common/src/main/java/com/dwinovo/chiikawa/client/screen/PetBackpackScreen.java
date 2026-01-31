@@ -30,17 +30,15 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
         if (pet != null) {
             int centerX = this.leftPos + 51;
             int centerY = this.topPos + 50;
-            int halfSize = 30;
+            int size = 30;
+            // 1.20.1 API: renderEntityInInventoryFollowsMouse(graphics, x, y, size, rotationX, rotationY, entity)
             InventoryScreen.renderEntityInInventoryFollowsMouse(
                     graphics,
-                    centerX - halfSize,
-                    centerY - halfSize,
-                    centerX + halfSize,
-                    centerY + halfSize,
-                    30,
-                    0.0F,
-                    mouseX,
-                    mouseY,
+                    centerX,
+                    centerY,
+                    size,
+                    (float) (centerX - mouseX),
+                    (float) (centerY - mouseY - pet.getEyeHeight() * size),
                     pet);
         }
     }

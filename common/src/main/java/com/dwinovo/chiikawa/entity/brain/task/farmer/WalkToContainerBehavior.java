@@ -119,7 +119,7 @@ public class WalkToContainerBehavior extends Behavior<AbstractPet>{
                 if (slotStack.isEmpty()) {
                     return true;
                 }
-                if (net.minecraft.world.item.ItemStack.isSameItemSameComponents(slotStack, stack)
+                if (net.minecraft.world.item.ItemStack.isSameItemSameTags(slotStack, stack)
                     && slotStack.getCount() < slotStack.getMaxStackSize()) {
                     return true;
                 }

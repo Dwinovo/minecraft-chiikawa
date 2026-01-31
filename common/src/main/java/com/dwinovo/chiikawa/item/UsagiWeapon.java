@@ -6,7 +6,6 @@ import net.minecraft.world.item.Tiers;
 
 public class UsagiWeapon extends SwordItem {
     public UsagiWeapon() {
-        super(Tiers.IRON,
-                new Item.Properties().attributes(SwordItem.createAttributes(Tiers.IRON, 3, -2.4F)));
+        super(Tiers.IRON, 3, -2.4F, new Item.Properties());
     }
 }

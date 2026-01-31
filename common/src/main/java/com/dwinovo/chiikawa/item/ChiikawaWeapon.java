@@ -7,7 +7,6 @@ import net.minecraft.world.item.Tiers;
 
 public class ChiikawaWeapon extends SwordItem {
     public ChiikawaWeapon() {
-        super(Tiers.STONE,
-                new Item.Properties().attributes(SwordItem.createAttributes(Tiers.STONE, 3, -2.4F)));
+        super(Tiers.STONE, 3, -2.4F, new Item.Properties());
     }
 }

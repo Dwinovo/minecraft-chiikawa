@@ -94,7 +94,7 @@ public class HarvestCropBehavior extends Behavior<AbstractPet>{
             if (Utils.canHarvesr(world, cropPos)) {
                 pet.triggerAnim("main", "use_mainhand");
                 world.destroyBlock(cropPos, true, pet);
-                tool.hurtAndBreak(1, pet, EquipmentSlot.MAINHAND);
+                tool.hurtAndBreak(1, pet, (e) -> e.broadcastBreakEvent(EquipmentSlot.MAINHAND));
             }
         }
         pet.getBrain().eraseMemory(InitMemory.HARVEST_POS.get());

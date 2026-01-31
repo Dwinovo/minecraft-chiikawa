@@ -10,7 +10,6 @@ import com.dwinovo.chiikawa.utils.BlockSearch;
 import com.dwinovo.chiikawa.utils.Utils;
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
-import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.Sensor;
@@ -105,7 +104,7 @@ public class PetContainerSensor extends Sensor<AbstractPet> {
                 if (slotStack.isEmpty()) {
                     return true;
                 }
-                if (net.minecraft.world.item.ItemStack.isSameItemSameComponents(slotStack, stack)
+                if (net.minecraft.world.item.ItemStack.isSameItemSameTags(slotStack, stack)
                     && slotStack.getCount() < slotStack.getMaxStackSize()) {
                     return true;
                 }

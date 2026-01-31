@@ -50,7 +50,7 @@ public class PetHeldItemLayer<T extends AbstractPet> extends BlockAndItemGeoLaye
         if (stack.is(ItemTags.SWORDS) || stack.is(ItemTags.HOES)) {
             poseStack.mulPose(Axis.XP.rotationDegrees(-90f));
         }
-        if (stack.is(ItemTags.BOW_ENCHANTABLE)) {
+        if (stack.is(ItemTags.ARROWS) || stack.getItem() instanceof net.minecraft.world.item.BowItem) {
             poseStack.translate(
                     0.10F,
                     -0.20F,

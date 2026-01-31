@@ -39,15 +39,15 @@ import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.NonNullList;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
+import software.bernie.geckolib.core.animation.AnimatableManager;
+import software.bernie.geckolib.core.animation.AnimationController;
+import software.bernie.geckolib.core.animation.RawAnimation;
+import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.PlayState;
-import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 /**
@@ -238,7 +238,7 @@ public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttac
         arrow.setOwner(this);
         serverLevel.addFreshEntity(arrow);
         boolean infinite = ammo.is(Items.ARROW)
-            && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY, weapon) > 0;
+            && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.INFINITY_ARROWS, weapon) > 0;
         if (!infinite) {
             ammo.shrink(1);
         }
@@ -301,10 +301,10 @@ public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttac
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);
-        builder.define(PET_MODE, (byte) PetMode.FOLLOW.ordinal());
-        builder.define(PET_JOB, InitRegistry.NONE_ID);
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(PET_MODE, (byte) PetMode.FOLLOW.ordinal());
+        this.entityData.define(PET_JOB, InitRegistry.NONE_ID);
     }
 
     @Override
@@ -312,10 +312,32 @@ public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttac
         return false;
     }
 
+    /**
+     * Helper to get items as NonNullList from SimpleContainer for 1.20.1 compatibility.
+     */
+    private NonNullList<ItemStack> getBackpackItems() {
+        NonNullList<ItemStack> items = NonNullList.withSize(backpack.getContainerSize(), ItemStack.EMPTY);
+        for (int i = 0; i < backpack.getContainerSize(); i++) {
+            items.set(i, backpack.getItem(i));
+        }
+        return items;
+    }
+
+    /**
+     * Helper to set items from NonNullList to SimpleContainer for 1.20.1 compatibility.
+     */
+    private void setBackpackItems(NonNullList<ItemStack> items) {
+        for (int i = 0; i < Math.min(items.size(), backpack.getContainerSize()); i++) {
+            backpack.setItem(i, items.get(i));
+        }
+    }
+
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
-        tag.put("Backpack", ContainerHelper.saveAllItems(new CompoundTag(), backpack.getItems(), level().registryAccess()));
+        NonNullList<ItemStack> items = getBackpackItems();
+        ContainerHelper.saveAllItems(tag.getCompound("Backpack") == null ? new CompoundTag() : tag.getCompound("Backpack"), items);
+        tag.put("Backpack", ContainerHelper.saveAllItems(new CompoundTag(), items));
         tag.putInt("PetJob", getPetJobId());
         tag.putByte("PetMode", this.entityData.get(PET_MODE));
     }
@@ -324,7 +346,9 @@ public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttac
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         if (tag.contains("Backpack", Tag.TAG_COMPOUND)) {
-            ContainerHelper.loadAllItems(tag.getCompound("Backpack"), backpack.getItems(), level().registryAccess());
+            NonNullList<ItemStack> items = NonNullList.withSize(backpack.getContainerSize(), ItemStack.EMPTY);
+            ContainerHelper.loadAllItems(tag.getCompound("Backpack"), items);
+            setBackpackItems(items);
         }
         if (tag.contains("PetJob", Tag.TAG_INT)) {
             setPetJobId(tag.getInt("PetJob"));

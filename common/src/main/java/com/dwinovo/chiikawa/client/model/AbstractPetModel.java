@@ -5,11 +5,11 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import software.bernie.geckolib.cache.object.GeoBone;
+import software.bernie.geckolib.core.animatable.model.CoreGeoBone;
 import software.bernie.geckolib.constant.DataTickets;
 import software.bernie.geckolib.model.GeoModel;
 import software.bernie.geckolib.model.data.EntityModelData;
-import software.bernie.geckolib.animation.AnimationState;
+import software.bernie.geckolib.core.animation.AnimationState;
 
 public abstract class AbstractPetModel<T extends AbstractPet> extends GeoModel<T> {
     private final String id;
@@ -37,7 +37,7 @@ public abstract class AbstractPetModel<T extends AbstractPet> extends GeoModel<T
     public void setCustomAnimations(T animatable, long instanceId, AnimationState<T> animationState) {
         super.setCustomAnimations(animatable, instanceId, animationState);
         EntityModelData modelData = animationState.getData(DataTickets.ENTITY_MODEL_DATA);
-        GeoBone headBone = this.getAnimationProcessor().getBone("AllHead");
+        CoreGeoBone headBone = this.getAnimationProcessor().getBone("AllHead");
         if (headBone != null) {
             float netHeadYaw = modelData != null ? modelData.netHeadYaw() : 0.0F;
             float headPitch = modelData != null ? modelData.headPitch() : 0.0F;
@@ -45,9 +45,9 @@ public abstract class AbstractPetModel<T extends AbstractPet> extends GeoModel<T
             headBone.setRotX(headPitch * ((float) Math.PI / 180F));
         }
 
-        GeoBone leftEarBone = this.getAnimationProcessor().getBone("LeftEar");
-        GeoBone rightEarBone = this.getAnimationProcessor().getBone("RightEar");
-        GeoBone tailBone = this.getAnimationProcessor().getBone("tail");
+        CoreGeoBone leftEarBone = this.getAnimationProcessor().getBone("LeftEar");
+        CoreGeoBone rightEarBone = this.getAnimationProcessor().getBone("RightEar");
+        CoreGeoBone tailBone = this.getAnimationProcessor().getBone("tail");
 
         double animationTicks = animationState.getData(DataTickets.TICK);
         float limbSwingAmount = animationState.getLimbSwingAmount();

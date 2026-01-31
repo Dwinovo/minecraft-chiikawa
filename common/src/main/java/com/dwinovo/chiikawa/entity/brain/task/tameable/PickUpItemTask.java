@@ -110,7 +110,7 @@ public class PickUpItemTask extends Behavior<AbstractPet> {
             if (slotStack.isEmpty()) {
                 int maxSize = Math.min(remaining.getCount(), remaining.getMaxStackSize());
                 container.setItem(slot, remaining.split(maxSize));
-            } else if (ItemStack.isSameItemSameComponents(slotStack, remaining)) {
+            } else if (ItemStack.isSameItemSameTags(slotStack, remaining)) {
                 int space = slotStack.getMaxStackSize() - slotStack.getCount();
                 int transfer = Math.min(remaining.getCount(), space);
                 slotStack.grow(transfer);

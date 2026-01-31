@@ -7,8 +7,9 @@ public class FabricDataGenerators implements DataGeneratorEntrypoint {
     @Override
     public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator) {
         FabricDataGenerator.Pack pack = fabricDataGenerator.createPack();
-        pack.addProvider((output, registries) -> new FabricModLanguageProvider(output, "en_us", registries));
-        pack.addProvider((output, registries) -> new FabricModLanguageProvider(output, "zh_cn", registries));
+        // 1.20.1: Use explicit Factory cast to avoid ambiguous method call
+        pack.addProvider((FabricDataGenerator.Pack.Factory<FabricModLanguageProvider>) output -> new FabricModLanguageProvider(output, "en_us"));
+        pack.addProvider((FabricDataGenerator.Pack.Factory<FabricModLanguageProvider>) output -> new FabricModLanguageProvider(output, "zh_cn"));
         pack.addProvider(FabricModItemModelProvider::new);
         pack.addProvider(FabricModBlockTagsProvider::new);
         pack.addProvider(FabricModItemTagsProvider::new);
