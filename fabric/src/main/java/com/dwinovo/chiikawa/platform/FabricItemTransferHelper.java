@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.Container;
+import com.dwinovo.chiikawa.entity.AbstractPet;
 
 public class FabricItemTransferHelper implements IItemTransferHelper {
     @Override
@@ -51,6 +52,9 @@ public class FabricItemTransferHelper implements IItemTransferHelper {
     }
 
     private static Storage<ItemVariant> findEntityStorage(Entity entity) {
+        if (entity instanceof AbstractPet pet) {
+            return InventoryStorage.of(pet.getBackpack(), null);
+        }
         if (entity instanceof Container container) {
             return InventoryStorage.of(container, null);
         }

@@ -8,9 +8,10 @@ import net.minecraft.util.Mth;
 import software.bernie.geckolib.animatable.processing.AnimationState;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.model.GeoModel;
-import software.bernie.geckolib.constant.DataTickets;
 import software.bernie.geckolib.constant.dataticket.DataTicket;
 import software.bernie.geckolib.renderer.base.GeoRenderState;
+import software.bernie.geckolib.constant.DataTickets;
+import com.dwinovo.chiikawa.client.render.AbstractPetRender;
 
 public abstract class AbstractPetModel<T extends AbstractPet> extends GeoModel<T> {
     private static final DataTicket<Float> LIMB_SWING_AMOUNT = DataTicket.create("chiikawa_limb_swing_amount", Float.class);
@@ -46,10 +47,10 @@ public abstract class AbstractPetModel<T extends AbstractPet> extends GeoModel<T
         super.setCustomAnimations(animationState);
         GeoBone headBone = this.getAnimationProcessor().getBone("AllHead");
         if (headBone != null) {
-            float netHeadYaw = animationState.getData(DataTickets.ENTITY_YAW);
-            float headPitch = animationState.getData(DataTickets.ENTITY_PITCH);
-            headBone.setRotY(netHeadYaw * ((float) Math.PI / 180F));
-            headBone.setRotX(headPitch * ((float) Math.PI / 180F));
+            float netHeadYaw = animationState.getDataOrDefault(AbstractPetRender.HEAD_YAW, 0f);
+            float headPitch = animationState.getDataOrDefault(AbstractPetRender.HEAD_PITCH, 0f);
+            headBone.setRotY(-netHeadYaw * ((float) Math.PI / 180F));
+            headBone.setRotX(-headPitch * ((float) Math.PI / 180F));
         }
 
         GeoBone leftEarBone = this.getAnimationProcessor().getBone("LeftEar");
@@ -79,5 +80,4 @@ public abstract class AbstractPetModel<T extends AbstractPet> extends GeoModel<T
         }
     }
 }
-
 
