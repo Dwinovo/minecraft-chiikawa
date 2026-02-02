@@ -2,7 +2,6 @@ package com.dwinovo.chiikawa.platform;
 
 import com.dwinovo.chiikawa.platform.services.IItemTransferHelper;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
@@ -11,7 +10,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.Container;
 
 public class FabricItemTransferHelper implements IItemTransferHelper {
     @Override
@@ -51,14 +49,7 @@ public class FabricItemTransferHelper implements IItemTransferHelper {
     }
 
     private static Storage<ItemVariant> findEntityStorage(Entity entity) {
-        Storage<ItemVariant> lookupStorage = FabricCapabilityHelper.ENTITY_ITEM_STORAGE.find(entity, null);
-        if (lookupStorage != null) {
-            return lookupStorage;
-        }
-        if (entity instanceof Container container) {
-            return InventoryStorage.of(container, null);
-        }
-        return null;
+        return FabricCapabilityHelper.ENTITY_ITEM_STORAGE.find(entity, null);
     }
 
     private static int insertIntoStorage(Storage<ItemVariant> storage, ItemStack stack, boolean simulate) {

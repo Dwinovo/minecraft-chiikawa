@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.platform;
 
+import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.platform.services.IItemTransferHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -28,12 +29,12 @@ public class ForgeItemTransferHelper implements IItemTransferHelper {
 
     @Override
     public boolean hasEntityStorage(Entity entity) {
-        return entity.getCapability(ForgeCapabilities.ITEM_HANDLER).isPresent();
+        return findEntityHandler(entity) != null;
     }
 
     @Override
     public int insertIntoEntity(Entity entity, ItemStack stack, boolean simulate) {
-        IItemHandler handler = entity.getCapability(ForgeCapabilities.ITEM_HANDLER).orElse(null);
+        IItemHandler handler = findEntityHandler(entity);
         if (handler == null || stack.isEmpty()) {
             return 0;
         }
@@ -60,6 +61,13 @@ public class ForgeItemTransferHelper implements IItemTransferHelper {
             }
         }
         return null;
+    }
+
+    private static IItemHandler findEntityHandler(Entity entity) {
+        if (entity instanceof AbstractPet) {
+            return entity.getCapability(ForgeCapabilityHelper.PET_BACKPACK_CAPABILITY).orElse(null);
+        }
+        return entity.getCapability(ForgeCapabilities.ITEM_HANDLER).orElse(null);
     }
 
     private static ItemStack insertIntoHandler(IItemHandler handler, ItemStack stack, boolean simulate) {
