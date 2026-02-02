@@ -18,9 +18,6 @@ dependencies {
     include("software.bernie.geckolib:geckolib-fabric-${minecraft_version}:${geckolib_version}")
     implementation("com.eliotlash.mclib:mclib:20")
     
-    // Jade - 可选联动 (信息显示)
-    modCompileOnlyApi("maven.modrinth:jade:${jade_version_fabric}")
-    modLocalRuntime("maven.modrinth:jade:${jade_version_fabric}")
 }
 fabricApi {
     configureDataGeneration()

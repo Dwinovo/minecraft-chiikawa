@@ -84,9 +84,6 @@ public class PickUpItemTask extends Behavior<AbstractPet> {
         }
         ItemStack stack = target.getItem();
         int inserted = Services.ITEM_TRANSFER.insertIntoEntity(entity, stack, false);
-        if (inserted == 0) {
-            inserted = insertIntoContainer(entity.getBackpack(), stack);
-        }
         int pickedCount = inserted;
         if (pickedCount <= 0) {
             return;
@@ -102,23 +99,4 @@ public class PickUpItemTask extends Behavior<AbstractPet> {
         entity.onItemPickup(target);
         entity.getBrain().eraseMemory(InitMemory.PICKABLE_ITEM.get());
     }
-
-    private static int insertIntoContainer(net.minecraft.world.Container container, ItemStack stack) {
-        ItemStack remaining = stack.copy();
-        for (int slot = 0; slot < container.getContainerSize() && !remaining.isEmpty(); slot++) {
-            ItemStack slotStack = container.getItem(slot);
-            if (slotStack.isEmpty()) {
-                int maxSize = Math.min(remaining.getCount(), remaining.getMaxStackSize());
-                container.setItem(slot, remaining.split(maxSize));
-            } else if (ItemStack.isSameItemSameTags(slotStack, remaining)) {
-                int space = slotStack.getMaxStackSize() - slotStack.getCount();
-                int transfer = Math.min(remaining.getCount(), space);
-                slotStack.grow(transfer);
-                remaining.shrink(transfer);
-                container.setItem(slot, slotStack);
-            }
-        }
-        return stack.getCount() - remaining.getCount();
-    }
 }
-

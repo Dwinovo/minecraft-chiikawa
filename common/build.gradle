@@ -1,28 +1,18 @@
 plugins {
     id 'multiloader-common'
-    id 'net.neoforged.moddev.legacyforge'
+    id 'net.neoforged.moddev'
 }
 
-legacyForge {
-    mcpVersion = minecraft_version
-    if (file("src/main/resources/META-INF/accesstransformer.cfg").exists()) {
-        accessTransformers = ["src/main/resources/META-INF/accesstransformer.cfg"]
-    }
-    parchment {
-        minecraftVersion = parchment_minecraft
-        mappingsVersion = parchment_version
+neoForge {
+    neoFormVersion = neo_form_version
+    if(file("src/main/resources/${mod_id}.accesswidener").exists()){
+        accessWideners(file("src/main/resources/${mod_id}.accesswidener"))
     }
 }
 
 dependencies {
-    compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
-    implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
-    
     // GeckoLib - 动画和渲染引擎
     compileOnly("software.bernie.geckolib:geckolib-forge-${minecraft_version}:${geckolib_version}")
-    
-    // Jade - 可选联动 (信息显示)
-    compileOnly("maven.modrinth:jade:${jade_version_forge}")
 }
 
 configurations {

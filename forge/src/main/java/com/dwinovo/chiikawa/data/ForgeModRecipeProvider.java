@@ -3,14 +3,12 @@ package com.dwinovo.chiikawa.data;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.init.InitItems;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
-
-import java.util.function.Consumer;
 
 public class ForgeModRecipeProvider extends RecipeProvider {
 
@@ -19,7 +17,7 @@ public class ForgeModRecipeProvider extends RecipeProvider {
     }
 
     @Override
-    public void buildRecipes(Consumer<FinishedRecipe> recipeOutput) {
+    public void buildRecipes(RecipeOutput recipeOutput) {
         // Usagi Weapon recipe
         ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, InitItems.USAGI_WEAPON.get())
                 .pattern("  Y")

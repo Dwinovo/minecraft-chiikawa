@@ -7,7 +7,7 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.recipes.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 
@@ -18,7 +18,7 @@ public class ModRecipeProvider extends RecipeProvider {
     }
 
     @Override
-    public void buildRecipes(Consumer<FinishedRecipe> recipeOutput) {
+    public void buildRecipes(RecipeOutput recipeOutput) {
         // Usagi Weapon recipe
         ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, InitItems.USAGI_WEAPON.get())
                 .pattern("  Y")

@@ -62,7 +62,6 @@ public final class LanguageData {
         adder.add("tooltip.chiikawa.pet_job.fencer", fencer);
         adder.add("tooltip.chiikawa.pet_job.archer", archer);
         adder.add("tooltip.chiikawa.pet_job.unknown", unknown);
-        adder.add("config.jade.plugin_chiikawa.pet_job", jobLabel);
     }
 
     private static void addEntityTranslations(Adder adder, String usagi, String hachiware, String chiikawa,
