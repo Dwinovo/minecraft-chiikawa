@@ -11,11 +11,11 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.registries.RegistriesDatapackGenerator;
 import com.mojang.serialization.Lifecycle;
+import net.minecraft.resources.RegistryDataLoader;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.DataPackRegistriesHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.concurrent.CompletableFuture;
@@ -59,7 +59,7 @@ public class ForgeDataGenerators {
             RegistryAccess registryAccess = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
 
             Cloner.Factory clonerFactory = new Cloner.Factory();
-            DataPackRegistriesHooks.getDataPackRegistriesWithDimensions()
+            RegistryDataLoader.getWorldGenAndDimensionStream()
                 .forEach(data -> data.runWithArguments(clonerFactory::addCodec));
 
             HolderLookup.Provider base = original;
