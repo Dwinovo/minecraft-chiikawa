@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.GeckoLibConstants;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -18,9 +19,25 @@ import software.bernie.geckolib.renderer.base.GeoRenderState;
 import java.util.Map;
 
 public abstract class AbstractPetRender<T extends AbstractPet> extends GeoEntityRenderer<T, AbstractPetRender.PetRenderState> {
+    public static final DataTicket<Float> HEAD_YAW = DataTicket.create("chiikawa_head_yaw", Float.class);
+    public static final DataTicket<Float> HEAD_PITCH = DataTicket.create("chiikawa_head_pitch", Float.class);
+
     protected AbstractPetRender(Context renderManager, GeoModel<T> model) {
         super(renderManager, model);
         addRenderLayer(new PetHeldItemLayer<>(this));
+    }
+
+    @Override
+    public void extractRenderState(T entity, PetRenderState renderState, float partialTick) {
+        super.extractRenderState(entity, renderState, partialTick);
+
+        float headYaw = Mth.rotLerp(partialTick, entity.yHeadRotO, entity.getYHeadRot());
+        float bodyYaw = Mth.rotLerp(partialTick, entity.yBodyRotO, entity.yBodyRot);
+        float netHeadYaw = headYaw - bodyYaw;
+        float headPitch = Mth.rotLerp(partialTick, entity.xRotO, entity.getXRot());
+
+        renderState.addGeckolibData(HEAD_YAW, netHeadYaw);
+        renderState.addGeckolibData(HEAD_PITCH, headPitch);
     }
 
     @Override

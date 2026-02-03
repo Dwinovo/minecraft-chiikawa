@@ -22,8 +22,6 @@ dependencies {
     compileOnly group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
     annotationProcessor group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
     implementation "software.bernie.geckolib:geckolib-common-${minecraft_version}:${geckolib_version}"
-    // Compile-only for optional Jade compat in common.
-    compileOnly "maven.modrinth:jade:${jade_version_neoforge}"
 }
 
 configurations {
