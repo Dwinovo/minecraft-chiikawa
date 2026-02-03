@@ -20,9 +20,6 @@ dependencies {
     
     // GeckoLib - 动画和渲染引擎
     compileOnly("software.bernie.geckolib:geckolib-forge-${minecraft_version}:${geckolib_version}")
-    
-    // Jade - 可选联动 (信息显示)
-    compileOnly("maven.modrinth:jade:${jade_version_forge}")
 }
 
 configurations {

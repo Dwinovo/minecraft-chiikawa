@@ -79,10 +79,6 @@ dependencies {
         jarJar.ranged(it, "[${geckolib_version},)")
     }
     implementation("com.eliotlash.mclib:mclib:20")
-
-    // Jade - 可选联动
-    compileOnly fg.deobf("maven.modrinth:jade:${jade_version_forge}")
-    runtimeOnly fg.deobf("maven.modrinth:jade:${jade_version_forge}")
 }
 
 jar {
