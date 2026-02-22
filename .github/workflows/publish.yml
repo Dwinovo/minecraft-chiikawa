@@ -39,14 +39,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          jars=()
-          loaders=()
+          minecraft_version="$(grep -E '^minecraft_version=' gradle.properties | head -n1 | cut -d= -f2)"
+          if [ -z "${minecraft_version}" ]; then
+            echo "Failed to read minecraft_version from gradle.properties"
+            exit 1
+          fi
 
-          for pair in "fabric:fabric" "neoforge:neoforge" "forge:forge"; do
-            module="${pair%%:*}"
-            loader="${pair##*:}"
+          jars=()
+
+          for module in fabric neoforge forge; do
             if [ -d "$module/build/libs" ]; then
-              loaders+=("$loader")
               while IFS= read -r -d '' f; do
                 jars+=("$f")
               done < <(
@@ -65,17 +67,17 @@ jobs:
             echo "files<<EOF"
             printf '%s\n' "${jars[@]}"
             echo "EOF"
-            echo "loaders<<EOF"
-            printf '%s\n' "${loaders[@]}"
-            echo "EOF"
+            echo "minecraft_version=${minecraft_version}"
           } >> "$GITHUB_OUTPUT"
 
       - name: Publish to Modrinth and CurseForge
         uses: Kira-NT/mc-publish@v3.3.0
         with:
           files: ${{ steps.collect.outputs.files }}
-          loaders: ${{ steps.collect.outputs.loaders }}
-          version-type: ${{ contains(github.ref_name, '-') && 'beta' || 'release' }}
+          game-versions: ${{ steps.collect.outputs.minecraft_version }}
+          game-version-filter: none
+          version-type: ${{ contains(github.ref_name, '-alpha') && 'alpha' || contains(github.ref_name, '-beta') && 'beta' || 'release' }}
+          github-prerelease: ${{ contains(github.ref_name, '-alpha') || contains(github.ref_name, '-beta') }}
           dependencies: |
             geckolib(embedded)
 
