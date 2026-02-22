@@ -85,6 +85,25 @@ jobs:
 
           fabric_name="${mod_id}-${mod_version}-${channel}-fabric-${minecraft_version}"
           neoforge_name="${mod_id}-${mod_version}-${channel}-neoforge-${minecraft_version}"
+          fabric_version_base="${mod_version}-${channel}-fabric-${minecraft_version}"
+          neoforge_version_base="${mod_version}-${channel}-neoforge-${minecraft_version}"
+
+          # Modrinth version_number has a strict length limit; keep deterministic uniqueness if truncated.
+          make_version_number() {
+            local base="$1"
+            local max_len=32
+            if [ "${#base}" -le "${max_len}" ]; then
+              echo "${base}"
+              return 0
+            fi
+            local hash
+            hash="$(printf '%s' "${base}" | sha1sum | cut -c1-6)"
+            local keep_len=$((max_len - 1 - ${#hash}))
+            echo "${base:0:${keep_len}}-${hash}"
+          }
+
+          fabric_version="$(make_version_number "${fabric_version_base}")"
+          neoforge_version="$(make_version_number "${neoforge_version_base}")"
 
           {
             echo "version_type=${channel}"
@@ -94,6 +113,8 @@ jobs:
             echo "neoforge_file=${neoforge_file}"
             echo "fabric_name=${fabric_name}"
             echo "neoforge_name=${neoforge_name}"
+            echo "fabric_version=${fabric_version}"
+            echo "neoforge_version=${neoforge_version}"
           } >> "$GITHUB_OUTPUT"
 
       - name: Publish Fabric to Modrinth and CurseForge
@@ -103,7 +124,7 @@ jobs:
           files: ${{ steps.meta.outputs.fabric_file }}
           loaders: fabric
           name: ${{ steps.meta.outputs.fabric_name }}
-          version: ${{ steps.meta.outputs.fabric_name }}
+          version: ${{ steps.meta.outputs.fabric_version }}
           game-versions: ${{ steps.meta.outputs.minecraft_version }}
           game-version-filter: none
           version-type: ${{ steps.meta.outputs.version_type }}
@@ -126,7 +147,7 @@ jobs:
           files: ${{ steps.meta.outputs.neoforge_file }}
           loaders: neoforge
           name: ${{ steps.meta.outputs.neoforge_name }}
-          version: ${{ steps.meta.outputs.neoforge_name }}
+          version: ${{ steps.meta.outputs.neoforge_version }}
           game-versions: ${{ steps.meta.outputs.minecraft_version }}
           game-version-filter: none
           version-type: ${{ steps.meta.outputs.version_type }}
