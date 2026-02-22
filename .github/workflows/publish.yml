@@ -34,50 +34,103 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew :fabric:build :neoforge:build --no-daemon
 
-      - name: Collect publish artifacts
-        id: collect
+      - name: Prepare publish metadata
+        id: meta
         shell: bash
         run: |
           set -euo pipefail
-          minecraft_version="$(grep -E '^minecraft_version=' gradle.properties | head -n1 | cut -d= -f2)"
-          if [ -z "${minecraft_version}" ]; then
-            echo "Failed to read minecraft_version from gradle.properties"
+          read_prop() {
+            local key="$1"
+            grep -E "^${key}=" gradle.properties | head -n1 | cut -d= -f2-
+          }
+
+          mod_id="$(read_prop mod_id)"
+          mod_version="$(read_prop version)"
+          minecraft_version="$(read_prop minecraft_version)"
+
+          if [ -z "${mod_id}" ] || [ -z "${mod_version}" ] || [ -z "${minecraft_version}" ]; then
+            echo "Failed to read required properties from gradle.properties"
             exit 1
           fi
 
-          jars=()
+          channel="release"
+          if [[ "${GITHUB_REF_NAME}" == *"-alpha"* ]]; then
+            channel="alpha"
+          elif [[ "${GITHUB_REF_NAME}" == *"-beta"* ]]; then
+            channel="beta"
+          fi
 
-          for module in fabric neoforge forge; do
-            if [ -d "$module/build/libs" ]; then
-              while IFS= read -r -d '' f; do
-                jars+=("$f")
-              done < <(
-                find "$module/build/libs" -maxdepth 1 -type f -name '*.jar' \
-                  ! -name '*-sources.jar' ! -name '*-javadoc.jar' ! -name '*-dev.jar' -print0
-              )
+          prerelease="false"
+          if [ "${channel}" != "release" ]; then
+            prerelease="true"
+          fi
+
+          find_loader_jar() {
+            local module="$1"
+            if [ ! -d "${module}/build/libs" ]; then
+              return 0
             fi
-          done
+            find "${module}/build/libs" -maxdepth 1 -type f -name '*.jar' \
+              ! -name '*-sources.jar' ! -name '*-javadoc.jar' ! -name '*-dev.jar' \
+              | LC_ALL=C sort | head -n1
+          }
 
-          if [ "${#jars[@]}" -eq 0 ]; then
-            echo "No publishable jars found"
+          fabric_file="$(find_loader_jar fabric)"
+          neoforge_file="$(find_loader_jar neoforge)"
+
+          if [ -z "${fabric_file}" ] && [ -z "${neoforge_file}" ]; then
+            echo "No publishable loader jars found"
             exit 1
           fi
+
+          fabric_name="${mod_id}-${mod_version}-${channel}-fabric-${minecraft_version}"
+          neoforge_name="${mod_id}-${mod_version}-${channel}-neoforge-${minecraft_version}"
 
           {
-            echo "files<<EOF"
-            printf '%s\n' "${jars[@]}"
-            echo "EOF"
+            echo "version_type=${channel}"
+            echo "github_prerelease=${prerelease}"
             echo "minecraft_version=${minecraft_version}"
+            echo "fabric_file=${fabric_file}"
+            echo "neoforge_file=${neoforge_file}"
+            echo "fabric_name=${fabric_name}"
+            echo "neoforge_name=${neoforge_name}"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Publish to Modrinth and CurseForge
+      - name: Publish Fabric to Modrinth and CurseForge
+        if: ${{ steps.meta.outputs.fabric_file != '' }}
         uses: Kira-NT/mc-publish@v3.3.0
         with:
-          files: ${{ steps.collect.outputs.files }}
-          game-versions: ${{ steps.collect.outputs.minecraft_version }}
+          files: ${{ steps.meta.outputs.fabric_file }}
+          loaders: fabric
+          name: ${{ steps.meta.outputs.fabric_name }}
+          version: ${{ steps.meta.outputs.fabric_name }}
+          game-versions: ${{ steps.meta.outputs.minecraft_version }}
           game-version-filter: none
-          version-type: ${{ contains(github.ref_name, '-alpha') && 'alpha' || contains(github.ref_name, '-beta') && 'beta' || 'release' }}
-          github-prerelease: ${{ contains(github.ref_name, '-alpha') || contains(github.ref_name, '-beta') }}
+          version-type: ${{ steps.meta.outputs.version_type }}
+          github-prerelease: ${{ steps.meta.outputs.github_prerelease }}
+          dependencies: |
+            geckolib(embedded)
+
+          curseforge-id: 1106419
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          modrinth-id: pT971QUb
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish NeoForge to Modrinth and CurseForge
+        if: ${{ steps.meta.outputs.neoforge_file != '' }}
+        uses: Kira-NT/mc-publish@v3.3.0
+        with:
+          files: ${{ steps.meta.outputs.neoforge_file }}
+          loaders: neoforge
+          name: ${{ steps.meta.outputs.neoforge_name }}
+          version: ${{ steps.meta.outputs.neoforge_name }}
+          game-versions: ${{ steps.meta.outputs.minecraft_version }}
+          game-version-filter: none
+          version-type: ${{ steps.meta.outputs.version_type }}
+          github-prerelease: ${{ steps.meta.outputs.github_prerelease }}
           dependencies: |
             geckolib(embedded)
 
