@@ -1,0 +1,88 @@
+name: Publish Mod
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Run data generation
+        run: ./gradlew :fabric:runDatagen :neoforge:runData --no-daemon
+
+      - name: Build with Gradle
+        run: ./gradlew :fabric:build :neoforge:build --no-daemon
+
+      - name: Collect publish artifacts
+        id: collect
+        shell: bash
+        run: |
+          set -euo pipefail
+          jars=()
+          loaders=()
+
+          for pair in "fabric:fabric" "neoforge:neoforge" "forge:forge"; do
+            module="${pair%%:*}"
+            loader="${pair##*:}"
+            if [ -d "$module/build/libs" ]; then
+              loaders+=("$loader")
+              while IFS= read -r -d '' f; do
+                jars+=("$f")
+              done < <(
+                find "$module/build/libs" -maxdepth 1 -type f -name '*.jar' \
+                  ! -name '*-sources.jar' ! -name '*-javadoc.jar' ! -name '*-dev.jar' -print0
+              )
+            fi
+          done
+
+          if [ "${#jars[@]}" -eq 0 ]; then
+            echo "No publishable jars found"
+            exit 1
+          fi
+
+          {
+            echo "files<<EOF"
+            printf '%s\n' "${jars[@]}"
+            echo "EOF"
+            echo "loaders<<EOF"
+            printf '%s\n' "${loaders[@]}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Publish to Modrinth and CurseForge
+        uses: Kira-NT/mc-publish@v3.3.0
+        with:
+          files: ${{ steps.collect.outputs.files }}
+          loaders: ${{ steps.collect.outputs.loaders }}
+          version-type: ${{ contains(github.ref_name, '-') && 'beta' || 'release' }}
+          dependencies: |
+            geckolib(embedded)
+
+          curseforge-id: 1106419
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          modrinth-id: pT971QUb
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+
+          github-token: ${{ secrets.GITHUB_TOKEN }}
