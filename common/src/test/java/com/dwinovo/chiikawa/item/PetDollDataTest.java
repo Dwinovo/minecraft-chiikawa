@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import org.junit.jupiter.api.Test;
@@ -19,7 +18,7 @@ class PetDollDataTest {
         root.put(PetDollData.PET_DATA_KEY, petData.copy());
 
         CompoundTag extracted = PetDollData.extractPetData(root).orElseThrow();
-        assertEquals(Optional.of("tester"), extracted.getString("OwnerName"));
+        assertEquals("tester", extracted.getString("OwnerName"));
     }
 
     @Test

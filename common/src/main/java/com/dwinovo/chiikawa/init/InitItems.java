@@ -36,11 +36,11 @@ public final class InitItems {
     public static final Supplier<Item> CHIIKAWA_WEAPON =
         registerItem("chiikawa_weapon", ChiikawaWeapon::new);
     public static final Supplier<Item> USAGI_DOLL =
-        registerItem("usagi_doll", properties -> new PetDollItem(properties, InitEntity.USAGI_PET));
+        registerItem("usagi_doll", () -> new PetDollItem(new Item.Properties(), InitEntity.USAGI_PET));
     public static final Supplier<Item> HACHIWARE_DOLL =
-        registerItem("hachiware_doll", properties -> new PetDollItem(properties, InitEntity.HACHIWARE_PET));
+        registerItem("hachiware_doll", () -> new PetDollItem(new Item.Properties(), InitEntity.HACHIWARE_PET));
     public static final Supplier<Item> CHIIKAWA_DOLL =
-        registerItem("chiikawa_doll", properties -> new PetDollItem(properties, InitEntity.CHIIKAWA_PET));
+        registerItem("chiikawa_doll", () -> new PetDollItem(new Item.Properties(), InitEntity.CHIIKAWA_PET));
 
     private InitItems() {
     }

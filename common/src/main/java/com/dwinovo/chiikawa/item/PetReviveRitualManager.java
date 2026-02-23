@@ -14,7 +14,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -113,7 +112,7 @@ public final class PetReviveRitualManager {
             level.setBlock(cakePos, cakeState.setValue(CakeBlock.BITES, nextBites), 3);
         }
         level.gameEvent(GameEvent.BLOCK_CHANGE, cakePos, GameEvent.Context.of(player, cakeState));
-        level.playSound(null, cakePos, SoundEvents.GENERIC_EAT.value(), SoundSource.BLOCKS, 0.9F, 1.0F);
+        level.playSound(null, cakePos, SoundEvents.GENERIC_EAT, SoundSource.BLOCKS, 0.9F, 1.0F);
     }
 
     private static void sendRitualParticles(ServerLevel level, Vec3 center) {
@@ -122,7 +121,7 @@ public final class PetReviveRitualManager {
     }
 
     private static boolean spawnRevivedPet(ServerLevel level, PendingRevive revive) {
-        AbstractPet pet = revive.entityType.get().create(level, EntitySpawnReason.SPAWN_ITEM_USE);
+        AbstractPet pet = revive.entityType.get().create(level);
         if (pet == null) {
             return false;
         }
@@ -133,7 +132,9 @@ public final class PetReviveRitualManager {
             pet.load(petDataCopy);
         }
 
-        pet.snapTo(revive.spawnPos.x, revive.spawnPos.y, revive.spawnPos.z, revive.yRot, revive.xRot);
+        pet.teleportTo(revive.spawnPos.x, revive.spawnPos.y, revive.spawnPos.z);
+        pet.setYRot(revive.yRot);
+        pet.setXRot(revive.xRot);
         pet.setHealth(pet.getMaxHealth());
 
         if (!level.noCollision(pet)) {

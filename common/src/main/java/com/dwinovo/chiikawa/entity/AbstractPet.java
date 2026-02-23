@@ -357,7 +357,7 @@ public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttac
 
         ItemStack dollStack = new ItemStack(dollItem);
         PetDollData.writePetToDoll(dollStack, this);
-        this.spawnAtLocation(level, dollStack);
+        this.spawnAtLocation(dollStack, 0.0F);
     }
 
     protected Item getReviveDollItem() {
