@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.entity.impl;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.sound.PetSoundSet;
 import com.dwinovo.chiikawa.sound.PetSoundSets;
 
@@ -8,6 +9,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 
 public class ChiikawaPet extends AbstractPet {
@@ -27,5 +29,9 @@ public class ChiikawaPet extends AbstractPet {
     protected PetSoundSet getSoundSet() {
         return PetSoundSets.CHIIKAWA;
     }
-}
 
+    @Override
+    protected Item getReviveDollItem() {
+        return InitItems.CHIIKAWA_DOLL.get();
+    }
+}

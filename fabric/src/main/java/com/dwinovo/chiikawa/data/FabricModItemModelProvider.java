@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.model.ModelTemplates;
-import net.minecraft.world.item.Item;
 
 public class FabricModItemModelProvider extends FabricModelProvider {
     public FabricModItemModelProvider(FabricDataOutput output) {
@@ -21,6 +20,7 @@ public class FabricModItemModelProvider extends FabricModelProvider {
     @Override
     public void generateItemModels(ItemModelGenerators itemModelGenerator) {
         generateSpawnEggs(itemModelGenerator);
+        generateDolls(itemModelGenerator);
 
         // Weapons use custom Blockbench models under resources.
         itemModelGenerator.declareCustomModelItem(InitItems.USAGI_WEAPON.get());
@@ -36,5 +36,11 @@ public class FabricModItemModelProvider extends FabricModelProvider {
         itemModelGenerator.generateFlatItem(InitItems.MOMONGA_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
         itemModelGenerator.generateFlatItem(InitItems.KURIMANJU_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
         itemModelGenerator.generateFlatItem(InitItems.RAKKO_SPAWN_EGG.get(), ModelTemplates.FLAT_ITEM);
+    }
+
+    private static void generateDolls(ItemModelGenerators itemModelGenerator) {
+        itemModelGenerator.generateFlatItem(InitItems.USAGI_DOLL.get(), ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(InitItems.HACHIWARE_DOLL.get(), ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(InitItems.CHIIKAWA_DOLL.get(), ModelTemplates.FLAT_ITEM);
     }
 }
