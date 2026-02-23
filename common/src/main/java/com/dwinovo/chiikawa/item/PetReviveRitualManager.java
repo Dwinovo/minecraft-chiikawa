@@ -133,7 +133,9 @@ public final class PetReviveRitualManager {
             pet.load(petDataCopy);
         }
 
-        pet.snapTo(revive.spawnPos.x, revive.spawnPos.y, revive.spawnPos.z, revive.yRot, revive.xRot);
+        pet.teleportTo(revive.spawnPos.x, revive.spawnPos.y, revive.spawnPos.z);
+        pet.setYRot(revive.yRot);
+        pet.setXRot(revive.xRot);
         pet.setHealth(pet.getMaxHealth());
 
         if (!level.noCollision(pet)) {
