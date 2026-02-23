@@ -22,6 +22,7 @@ eclipse
 run
 runs
 run-data
+common/logs/
 
 repo
 .vscode
