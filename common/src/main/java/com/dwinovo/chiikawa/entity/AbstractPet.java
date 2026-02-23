@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.entity.job.api.IPetJob;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.init.InitSensor;
+import com.dwinovo.chiikawa.item.PetDollData;
 import com.dwinovo.chiikawa.sound.PetSoundSet;
 import com.dwinovo.chiikawa.utils.Utils;
 import com.mojang.serialization.Dynamic;
@@ -34,6 +35,7 @@ import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ArrowItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.Items;
@@ -342,6 +344,24 @@ public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttac
             return result;
         }
         return super.mobInteract(player, hand);
+    }
+
+    @Override
+    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
+        super.dropCustomDeathLoot(level, source, recentlyHit);
+
+        Item dollItem = getReviveDollItem();
+        if (dollItem == null) {
+            return;
+        }
+
+        ItemStack dollStack = new ItemStack(dollItem);
+        PetDollData.writePetToDoll(dollStack, this);
+        this.spawnAtLocation(level, dollStack);
+    }
+
+    protected Item getReviveDollItem() {
+        return null;
     }
 
     protected PetSoundSet getSoundSet() {

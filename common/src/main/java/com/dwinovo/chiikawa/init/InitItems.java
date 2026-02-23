@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.init;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.item.ChiikawaWeapon;
 import com.dwinovo.chiikawa.item.HachiwareWeapon;
+import com.dwinovo.chiikawa.item.PetDollItem;
 import com.dwinovo.chiikawa.item.UsagiWeapon;
 import com.dwinovo.chiikawa.platform.Services;
 import java.util.function.Supplier;
@@ -34,6 +35,12 @@ public final class InitItems {
         registerItem("hachiware_weapon", HachiwareWeapon::new);
     public static final Supplier<Item> CHIIKAWA_WEAPON =
         registerItem("chiikawa_weapon", ChiikawaWeapon::new);
+    public static final Supplier<Item> USAGI_DOLL =
+        registerItem("usagi_doll", properties -> new PetDollItem(properties, InitEntity.USAGI_PET));
+    public static final Supplier<Item> HACHIWARE_DOLL =
+        registerItem("hachiware_doll", properties -> new PetDollItem(properties, InitEntity.HACHIWARE_PET));
+    public static final Supplier<Item> CHIIKAWA_DOLL =
+        registerItem("chiikawa_doll", properties -> new PetDollItem(properties, InitEntity.CHIIKAWA_PET));
 
     private InitItems() {
     }
