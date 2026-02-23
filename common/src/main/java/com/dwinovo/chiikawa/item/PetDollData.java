@@ -2,10 +2,8 @@ package com.dwinovo.chiikawa.item;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import java.util.Optional;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
 
 public final class PetDollData {
     public static final String PET_DATA_KEY = "PetData";
@@ -17,17 +15,15 @@ public final class PetDollData {
         CompoundTag petData = new CompoundTag();
         pet.saveWithoutId(petData);
 
-        CompoundTag root = new CompoundTag();
-        root.put(PET_DATA_KEY, petData);
-        CustomData.set(DataComponents.CUSTOM_DATA, stack, root);
+        stack.getOrCreateTag().put(PET_DATA_KEY, petData);
     }
 
     public static Optional<CompoundTag> readPetData(ItemStack stack) {
-        CustomData customData = stack.get(DataComponents.CUSTOM_DATA);
-        if (customData == null || customData.isEmpty()) {
+        CompoundTag root = stack.getTag();
+        if (root == null || root.isEmpty()) {
             return Optional.empty();
         }
-        return extractPetData(customData.copyTag());
+        return extractPetData(root.copy());
     }
 
     public static Optional<CompoundTag> extractPetData(CompoundTag root) {
