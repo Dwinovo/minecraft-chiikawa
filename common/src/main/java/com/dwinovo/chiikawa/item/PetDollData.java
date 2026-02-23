@@ -4,10 +4,8 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import java.util.Optional;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
-import net.minecraft.world.level.storage.TagValueOutput;
 
 public final class PetDollData {
     public static final String PET_DATA_KEY = "PetData";
@@ -16,11 +14,11 @@ public final class PetDollData {
     }
 
     public static void writePetToDoll(ItemStack stack, AbstractPet pet) {
-        TagValueOutput output = TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING);
-        pet.saveWithoutId(output);
+        CompoundTag petData = new CompoundTag();
+        pet.saveWithoutId(petData);
 
         CompoundTag root = new CompoundTag();
-        root.put(PET_DATA_KEY, output.buildResult());
+        root.put(PET_DATA_KEY, petData);
         CustomData.set(DataComponents.CUSTOM_DATA, stack, root);
     }
 
