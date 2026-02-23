@@ -34,11 +34,8 @@ public final class PetDollData {
         if (root.isEmpty()) {
             return Optional.empty();
         }
-        if (root.contains(PET_DATA_KEY)) {
-            Optional<CompoundTag> wrapped = root.getCompound(PET_DATA_KEY);
-            if (wrapped.isPresent()) {
-                return wrapped;
-            }
+        if (root.contains(PET_DATA_KEY, 10)) {
+            return Optional.of(root.getCompound(PET_DATA_KEY));
         }
 
         // Backward compatibility: treat root itself as entity data if no wrapper exists.
