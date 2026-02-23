@@ -16,20 +16,27 @@ public class ForgeModItemModelProvider extends ItemModelProvider {
     @Override
     protected void registerModels() {
         generateSpawnEggs();
+        generateDolls();
         // Weapons have prebuilt models under resources; no datagen needed.
     }
 
     private void generateSpawnEggs() {
-        spawnEggItem(InitItems.USAGI_SPAWN_EGG.get());
-        spawnEggItem(InitItems.HACHIWARE_SPAWN_EGG.get());
-        spawnEggItem(InitItems.CHIIKAWA_SPAWN_EGG.get());
-        spawnEggItem(InitItems.SHISA_SPAWN_EGG.get());
-        spawnEggItem(InitItems.MOMONGA_SPAWN_EGG.get());
-        spawnEggItem(InitItems.KURIMANJU_SPAWN_EGG.get());
-        spawnEggItem(InitItems.RAKKO_SPAWN_EGG.get());
+        generatedItem(InitItems.USAGI_SPAWN_EGG.get());
+        generatedItem(InitItems.HACHIWARE_SPAWN_EGG.get());
+        generatedItem(InitItems.CHIIKAWA_SPAWN_EGG.get());
+        generatedItem(InitItems.SHISA_SPAWN_EGG.get());
+        generatedItem(InitItems.MOMONGA_SPAWN_EGG.get());
+        generatedItem(InitItems.KURIMANJU_SPAWN_EGG.get());
+        generatedItem(InitItems.RAKKO_SPAWN_EGG.get());
     }
 
-    private void spawnEggItem(net.minecraft.world.item.Item item) {
+    private void generateDolls() {
+        generatedItem(InitItems.USAGI_DOLL.get());
+        generatedItem(InitItems.HACHIWARE_DOLL.get());
+        generatedItem(InitItems.CHIIKAWA_DOLL.get());
+    }
+
+    private void generatedItem(net.minecraft.world.item.Item item) {
         ResourceLocation id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item);
         getBuilder(id.getPath())
             .parent(new net.minecraftforge.client.model.generators.ModelFile.UncheckedModelFile("item/generated"))
