@@ -25,6 +25,9 @@ public final class InitTabs {
                     output.accept(InitItems.MOMONGA_SPAWN_EGG.get());
                     output.accept(InitItems.KURIMANJU_SPAWN_EGG.get());
                     output.accept(InitItems.RAKKO_SPAWN_EGG.get());
+                    output.accept(InitItems.USAGI_DOLL.get());
+                    output.accept(InitItems.HACHIWARE_DOLL.get());
+                    output.accept(InitItems.CHIIKAWA_DOLL.get());
                     output.accept(InitItems.USAGI_WEAPON.get());
                     output.accept(InitItems.HACHIWARE_WEAPON.get());
                     output.accept(InitItems.CHIIKAWA_WEAPON.get());
