@@ -372,8 +372,8 @@ public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttac
     }
 
     @Override
-    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
-        super.dropCustomDeathLoot(level, source, recentlyHit);
+    protected void dropCustomDeathLoot(DamageSource source, int looting, boolean recentlyHit) {
+        super.dropCustomDeathLoot(source, looting, recentlyHit);
 
         Item dollItem = getReviveDollItem();
         if (dollItem == null) {
