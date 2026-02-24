@@ -144,7 +144,7 @@ public final class PetReviveRitualManager {
             return false;
         }
 
-        level.playSound(null, pet.blockPosition(), SoundEvents.TOTEM_USE, SoundSource.NEUTRAL, 0.8F, 1.15F);
+        pet.playTameSound();
         sendRitualParticles(level, revive.spawnPos);
         return true;
     }
