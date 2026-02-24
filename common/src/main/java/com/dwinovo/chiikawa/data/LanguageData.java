@@ -12,6 +12,7 @@ public final class LanguageData {
     public static void addTranslations(String locale, Adder adder) {
         if ("zh_cn".equals(locale)) {
             addCommonTranslations(adder, "Chiikawa", "背包", "跟随", "坐下", "工作");
+            addDollTooltipTranslations(adder, "试着把玩偶放在蛋糕上？");
             addJobTranslations(adder, "职业", "无", "农夫", "剑士", "弓箭手", "未知");
             addEntityTranslations(adder, "乌萨奇", "小八", "吉伊", "狮萨", "飞鼠", "栗子馒头", "獭师父");
             addItemTagTranslations(adder, "农夫工具", "剑士工具", "弓箭手工具", "驯服食物", "种植作物", "运送物品", "可拾取物品");
@@ -33,6 +34,7 @@ public final class LanguageData {
             );
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Work");
+            addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
             addJobTranslations(adder, "Job", "None", "Farmer", "Fencer", "Archer", "Unknown");
             addEntityTranslations(adder, "Usagi", "Hachiware", "Chiikawa", "Shisa", "Momonga", "Kurimanju", "Rakko");
             addItemTagTranslations(adder, "Farmer Tools", "Fencer Tools", "Archer Tools", "Tame Foods", "Plant Crops", "Deliver Items", "Pickable Items");
@@ -61,6 +63,10 @@ public final class LanguageData {
         adder.add("message.chiikawa.pet_follow", follow + ": %s");
         adder.add("message.chiikawa.pet_sit", sit + ": %s");
         adder.add("message.chiikawa.pet_work", work + ": %s");
+    }
+
+    private static void addDollTooltipTranslations(Adder adder, String placeOnCakeHint) {
+        adder.add("tooltip.chiikawa.doll.place_on_cake", placeOnCakeHint);
     }
 
     private static void addJobTranslations(Adder adder, String jobLabel, String none, String farmer, String fencer, String archer, String unknown) {
