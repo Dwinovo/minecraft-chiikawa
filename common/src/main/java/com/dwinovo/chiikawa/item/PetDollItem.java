@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.item;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import java.util.function.Supplier;
-import java.util.function.Consumer;
+import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -15,7 +15,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -48,12 +47,11 @@ public class PetDollItem extends Item {
     public void appendHoverText(
         ItemStack stack,
         Item.TooltipContext context,
-        TooltipDisplay tooltipDisplay,
-        Consumer<Component> tooltipAdder,
+        List<Component> tooltipComponents,
         TooltipFlag tooltipFlag
     ) {
-        super.appendHoverText(stack, context, tooltipDisplay, tooltipAdder, tooltipFlag);
-        tooltipAdder.accept(Component.translatable("tooltip.chiikawa.doll.place_on_cake").withStyle(ChatFormatting.GRAY));
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+        tooltipComponents.add(Component.translatable("tooltip.chiikawa.doll.place_on_cake").withStyle(ChatFormatting.GRAY));
     }
 
     public InteractionResult tryStartCakeRitual(
