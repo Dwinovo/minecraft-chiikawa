@@ -113,8 +113,7 @@
 				{
 					"name": "RightHandLocator",
 					"parent": "RightArm",
-					"pivot": [-3.6, 3.425, -0.05],
-					"rotation": [0, 0, 32.5]
+					"pivot": [-3.6, 3.425, -0.05]
 				},
 				{
 					"name": "LeftArm",
@@ -127,14 +126,12 @@
 				{
 					"name": "LeftHandLocator",
 					"parent": "LeftArm",
-					"pivot": [3.85, 3.425, -0.3],
-					"rotation": [0, 0, -32.5]
+					"pivot": [3.85, 3.425, -0.3]
 				},
 				{
 					"name": "ElytraLocator",
 					"parent": "UpperBody",
-					"pivot": [0, 4.75, 2.5],
-					"rotation": [0, 180, 0]
+					"pivot": [0, 4.75, 2.5]
 				},
 				{
 					"name": "DownBody",
