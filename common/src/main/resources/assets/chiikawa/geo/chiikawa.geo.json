@@ -114,8 +114,7 @@
 				{
 					"name": "RightHandLocator",
 					"parent": "RightArm",
-					"pivot": [-4.4, 3.425, -0.3],
-					"rotation": [0, 0, 57.5]
+					"pivot": [-4.4, 3.425, -0.3]
 				},
 				{
 					"name": "LeftArm",
@@ -129,8 +128,7 @@
 				{
 					"name": "LeftHandLocator",
 					"parent": "LeftArm",
-					"pivot": [4.4, 3.425, -0.3],
-					"rotation": [0, 0, -57.5]
+					"pivot": [4.4, 3.425, -0.3]
 				},
 				{
 					"name": "ElytraLocator",
