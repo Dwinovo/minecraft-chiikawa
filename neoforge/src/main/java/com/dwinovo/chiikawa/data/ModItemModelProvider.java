@@ -24,5 +24,9 @@ public final class ModItemModelProvider extends ItemModelProvider {
         basicItem(InitItems.USAGI_DOLL.get());
         basicItem(InitItems.HACHIWARE_DOLL.get());
         basicItem(InitItems.CHIIKAWA_DOLL.get());
+        basicItem(InitItems.SHISA_DOLL.get());
+        basicItem(InitItems.MOMONGA_DOLL.get());
+        basicItem(InitItems.KURIMANJU_DOLL.get());
+        basicItem(InitItems.RAKKO_DOLL.get());
     }
 }
