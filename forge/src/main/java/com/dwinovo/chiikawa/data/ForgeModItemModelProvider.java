@@ -34,6 +34,10 @@ public class ForgeModItemModelProvider extends ItemModelProvider {
         generatedItem(InitItems.USAGI_DOLL.get());
         generatedItem(InitItems.HACHIWARE_DOLL.get());
         generatedItem(InitItems.CHIIKAWA_DOLL.get());
+        generatedItem(InitItems.SHISA_DOLL.get());
+        generatedItem(InitItems.MOMONGA_DOLL.get());
+        generatedItem(InitItems.KURIMANJU_DOLL.get());
+        generatedItem(InitItems.RAKKO_DOLL.get());
     }
 
     private void generatedItem(net.minecraft.world.item.Item item) {

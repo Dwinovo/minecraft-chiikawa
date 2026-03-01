@@ -28,6 +28,10 @@ public final class InitTabs {
                     output.accept(InitItems.USAGI_DOLL.get());
                     output.accept(InitItems.HACHIWARE_DOLL.get());
                     output.accept(InitItems.CHIIKAWA_DOLL.get());
+                    output.accept(InitItems.SHISA_DOLL.get());
+                    output.accept(InitItems.MOMONGA_DOLL.get());
+                    output.accept(InitItems.KURIMANJU_DOLL.get());
+                    output.accept(InitItems.RAKKO_DOLL.get());
                     output.accept(InitItems.USAGI_WEAPON.get());
                     output.accept(InitItems.HACHIWARE_WEAPON.get());
                     output.accept(InitItems.CHIIKAWA_WEAPON.get());
