@@ -28,15 +28,50 @@ jobs:
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
 
+      - name: Detect secondary loader module
+        id: loader
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -E "include\\(['\"]neoforge['\"]\\)" settings.gradle >/dev/null; then
+            echo "module=neoforge" >> "$GITHUB_OUTPUT"
+            echo "loader=neoforge" >> "$GITHUB_OUTPUT"
+          elif grep -E "include\\(['\"]forge['\"]\\)" settings.gradle >/dev/null; then
+            echo "module=forge" >> "$GITHUB_OUTPUT"
+            echo "loader=forge" >> "$GITHUB_OUTPUT"
+          else
+            echo "module=" >> "$GITHUB_OUTPUT"
+            echo "loader=" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Run data generation
-        run: ./gradlew :fabric:runDatagen :neoforge:runData --no-daemon
+        env:
+          SECONDARY_MODULE: ${{ steps.loader.outputs.module }}
+        run: |
+          set -euo pipefail
+          if [ -n "${SECONDARY_MODULE}" ]; then
+            ./gradlew :fabric:runDatagen :${SECONDARY_MODULE}:runData --no-daemon
+          else
+            ./gradlew :fabric:runDatagen --no-daemon
+          fi
 
       - name: Build with Gradle
-        run: ./gradlew :fabric:build :neoforge:build --no-daemon
+        env:
+          SECONDARY_MODULE: ${{ steps.loader.outputs.module }}
+        run: |
+          set -euo pipefail
+          if [ -n "${SECONDARY_MODULE}" ]; then
+            ./gradlew :fabric:build :${SECONDARY_MODULE}:build --no-daemon
+          else
+            ./gradlew :fabric:build --no-daemon
+          fi
 
       - name: Prepare publish metadata
         id: meta
         shell: bash
+        env:
+          SECONDARY_MODULE: ${{ steps.loader.outputs.module }}
+          SECONDARY_LOADER: ${{ steps.loader.outputs.loader }}
         run: |
           set -euo pipefail
           read_prop() {
@@ -67,7 +102,7 @@ jobs:
 
           find_loader_jar() {
             local module="$1"
-            if [ ! -d "${module}/build/libs" ]; then
+            if [ -z "${module}" ] || [ ! -d "${module}/build/libs" ]; then
               return 0
             fi
             find "${module}/build/libs" -maxdepth 1 -type f -name '*.jar' \
@@ -76,17 +111,22 @@ jobs:
           }
 
           fabric_file="$(find_loader_jar fabric)"
-          neoforge_file="$(find_loader_jar neoforge)"
+          secondary_file="$(find_loader_jar "${SECONDARY_MODULE:-}")"
 
-          if [ -z "${fabric_file}" ] && [ -z "${neoforge_file}" ]; then
+          if [ -z "${fabric_file}" ] && [ -z "${secondary_file}" ]; then
             echo "No publishable loader jars found"
             exit 1
           fi
 
           fabric_name="${mod_id}-${mod_version}-${channel}-fabric-${minecraft_version}"
-          neoforge_name="${mod_id}-${mod_version}-${channel}-neoforge-${minecraft_version}"
+          secondary_name=""
           fabric_version_base="${mod_version}-${channel}-fabric-${minecraft_version}"
-          neoforge_version_base="${mod_version}-${channel}-neoforge-${minecraft_version}"
+          secondary_version_base=""
+
+          if [ -n "${secondary_file}" ] && [ -n "${SECONDARY_LOADER:-}" ]; then
+            secondary_name="${mod_id}-${mod_version}-${channel}-${SECONDARY_LOADER}-${minecraft_version}"
+            secondary_version_base="${mod_version}-${channel}-${SECONDARY_LOADER}-${minecraft_version}"
+          fi
 
           # Modrinth version_number has a strict length limit; keep deterministic uniqueness if truncated.
           make_version_number() {
@@ -103,18 +143,22 @@ jobs:
           }
 
           fabric_version="$(make_version_number "${fabric_version_base}")"
-          neoforge_version="$(make_version_number "${neoforge_version_base}")"
+          secondary_version=""
+          if [ -n "${secondary_version_base}" ]; then
+            secondary_version="$(make_version_number "${secondary_version_base}")"
+          fi
 
           {
             echo "version_type=${channel}"
             echo "github_prerelease=${prerelease}"
             echo "minecraft_version=${minecraft_version}"
             echo "fabric_file=${fabric_file}"
-            echo "neoforge_file=${neoforge_file}"
+            echo "secondary_file=${secondary_file}"
+            echo "secondary_loader=${SECONDARY_LOADER:-}"
             echo "fabric_name=${fabric_name}"
-            echo "neoforge_name=${neoforge_name}"
+            echo "secondary_name=${secondary_name}"
             echo "fabric_version=${fabric_version}"
-            echo "neoforge_version=${neoforge_version}"
+            echo "secondary_version=${secondary_version}"
           } >> "$GITHUB_OUTPUT"
 
       - name: Publish Fabric to Modrinth and CurseForge
@@ -140,14 +184,14 @@ jobs:
 
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish NeoForge to Modrinth and CurseForge
-        if: ${{ steps.meta.outputs.neoforge_file != '' }}
+      - name: Publish Secondary Loader to Modrinth and CurseForge
+        if: ${{ steps.meta.outputs.secondary_file != '' && steps.meta.outputs.secondary_loader != '' }}
         uses: Kira-NT/mc-publish@v3.3.0
         with:
-          files: ${{ steps.meta.outputs.neoforge_file }}
-          loaders: neoforge
-          name: ${{ steps.meta.outputs.neoforge_name }}
-          version: ${{ steps.meta.outputs.neoforge_version }}
+          files: ${{ steps.meta.outputs.secondary_file }}
+          loaders: ${{ steps.meta.outputs.secondary_loader }}
+          name: ${{ steps.meta.outputs.secondary_name }}
+          version: ${{ steps.meta.outputs.secondary_version }}
           game-versions: ${{ steps.meta.outputs.minecraft_version }}
           game-version-filter: none
           version-type: ${{ steps.meta.outputs.version_type }}
