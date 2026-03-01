@@ -44,6 +44,14 @@ public final class InitItems {
         registerItem("hachiware_doll", properties -> new PetDollItem(properties, InitEntity.HACHIWARE_PET));
     public static final Supplier<Item> CHIIKAWA_DOLL =
         registerItem("chiikawa_doll", properties -> new PetDollItem(properties, InitEntity.CHIIKAWA_PET));
+    public static final Supplier<Item> SHISA_DOLL =
+        registerItem("shisa_doll", properties -> new PetDollItem(properties, InitEntity.SHISA_PET));
+    public static final Supplier<Item> MOMONGA_DOLL =
+        registerItem("momonga_doll", properties -> new PetDollItem(properties, InitEntity.MOMONGA_PET));
+    public static final Supplier<Item> KURIMANJU_DOLL =
+        registerItem("kurimanju_doll", properties -> new PetDollItem(properties, InitEntity.KURIMANJU_PET));
+    public static final Supplier<Item> RAKKO_DOLL =
+        registerItem("rakko_doll", properties -> new PetDollItem(properties, InitEntity.RAKKO_PET));
 
     private InitItems() {
     }
