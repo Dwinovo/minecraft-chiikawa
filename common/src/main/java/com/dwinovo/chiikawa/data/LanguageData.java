@@ -28,6 +28,10 @@ public final class LanguageData {
                 "乌萨奇玩偶",
                 "小八玩偶",
                 "吉伊玩偶",
+                "狮萨玩偶",
+                "飞鼠玩偶",
+                "栗子馒头玩偶",
+                "獭师父玩偶",
                 "乌萨奇的讨伐棒",
                 "小八的讨伐棒",
                 "吉伊的讨伐棒"
@@ -50,6 +54,10 @@ public final class LanguageData {
                 "Usagi Doll",
                 "Hachiware Doll",
                 "Chiikawa Doll",
+                "Shisa Doll",
+                "Momonga Doll",
+                "Kurimanju Doll",
+                "Rakko Doll",
                 "Usagi Weapon",
                 "Hachiware Weapon",
                 "Chiikawa Weapon"
@@ -111,6 +119,7 @@ public final class LanguageData {
     private static void addItemTranslations(Adder adder, String usagiEgg, String hachiwareEgg, String chiikawaEgg,
         String shisaEgg, String momongaEgg, String kurimanjuEgg, String rakkoEgg,
         String usagiDoll, String hachiwareDoll, String chiikawaDoll,
+        String shisaDoll, String momongaDoll, String kurimanjuDoll, String rakkoDoll,
         String usagiWeapon, String hachiwareWeapon, String chiikawaWeapon) {
         adder.add("item.chiikawa.usagi_spawn_egg", usagiEgg);
         adder.add("item.chiikawa.hachiware_spawn_egg", hachiwareEgg);
@@ -122,6 +131,10 @@ public final class LanguageData {
         adder.add("item.chiikawa.usagi_doll", usagiDoll);
         adder.add("item.chiikawa.hachiware_doll", hachiwareDoll);
         adder.add("item.chiikawa.chiikawa_doll", chiikawaDoll);
+        adder.add("item.chiikawa.shisa_doll", shisaDoll);
+        adder.add("item.chiikawa.momonga_doll", momongaDoll);
+        adder.add("item.chiikawa.kurimanju_doll", kurimanjuDoll);
+        adder.add("item.chiikawa.rakko_doll", rakkoDoll);
         adder.add("item.chiikawa.usagi_weapon", usagiWeapon);
         adder.add("item.chiikawa.hachiware_weapon", hachiwareWeapon);
         adder.add("item.chiikawa.chiikawa_weapon", chiikawaWeapon);
