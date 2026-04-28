@@ -1,5 +1,7 @@
 package com.dwinovo.chiikawa.entity;
 
+import com.dwinovo.chiikawa.anim.api.ChiikawaAnimated;
+import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
 import com.dwinovo.chiikawa.entity.job.api.IPetJob;
 import com.dwinovo.chiikawa.init.InitMemory;
@@ -52,7 +54,7 @@ import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttackMob {
+public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttackMob, ChiikawaAnimated {
     public static final int BACKPACK_SIZE = 16;
     private static final EntityDataAccessor<Byte> PET_MODE = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Integer> PET_JOB = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.INT);
@@ -82,6 +84,8 @@ public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttac
         InitSensor.PET_ITEM_ENTITY_SENSOR.get()
     );
     private final AnimatableInstanceCache animatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
+    /** Lazily allocated on first client-side read; server instances pay nothing. */
+    private PetAnimator petAnimator;
     private final SimpleContainer backpack = new SimpleContainer(BACKPACK_SIZE);
 
     protected AbstractPet(EntityType<? extends TamableAnimal> entityType, Level level) {
@@ -270,6 +274,24 @@ public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttac
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return this.animatableInstanceCache;
+    }
+
+    @Override
+    public PetAnimator getPetAnimator() {
+        if (petAnimator == null) {
+            petAnimator = new PetAnimator();
+        }
+        return petAnimator;
+    }
+
+    @Override
+    public String getMainAnimationName(float walkSpeed) {
+        if (getPetMode() == PetMode.SIT) return "sit";
+        // Threshold matches GeckoLib's AnimationState.isMoving (0.15) — the
+        // smoothed walkAnimation.speed decays exponentially toward 0, so
+        // a `> 0` check would latch the run state forever.
+        if (walkSpeed > 0.15f) return "run";
+        return "idle";
     }
 
     @Override
