@@ -1,12 +1,15 @@
 package com.dwinovo.chiikawa;
 
 import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import com.dwinovo.chiikawa.anim.compile.BedrockResourceLoader;
 import com.dwinovo.chiikawa.anim.render.impl.ChiikawaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.HachiwareRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.KurimanjuRenderer;
@@ -40,6 +43,16 @@ public class ChiikawaClient {
     @SubscribeEvent
     static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);
+    }
+
+    @SubscribeEvent
+    static void registerReloadListeners(AddClientReloadListenersEvent event) {
+        // Bakes the .geo.json / .animation.json into ModelLibrary + AnimationLibrary.
+        // Without this the renderer's ModelLibrary.get(...) returns null and submit()
+        // short-circuits — entity exists and is interactable but renders as nothing.
+        event.addListener(
+                Identifier.fromNamespaceAndPath(Chiikawa.MODID, "anim_loader"),
+                new BedrockResourceLoader());
     }
 }
 
