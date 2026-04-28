@@ -5,7 +5,7 @@ package com.dwinovo.chiikawa.anim.molang;
  * to integer slot indices at compile time — no string lookup happens during
  * sampling.
  *
- * <h3>What's in scope</h3>
+ * <h2>What's in scope</h2>
  * Only the two Molang variables this mod actually drives:
  * <ul>
  *   <li>{@code query.anim_time} — set per channel by
@@ -14,7 +14,7 @@ package com.dwinovo.chiikawa.anim.molang;
  *       {@code walkAnimation.speed}</li>
  * </ul>
  *
- * <h3>What's intentionally not in scope</h3>
+ * <h2>What's intentionally not in scope</h2>
  * Bedrock animation files exported via Blockbench / Yes Steve Model often
  * carry references to {@code ysm.head_yaw}, {@code ysm.head_pitch}, and
  * Blockbench's IK helper variables ({@code v.L6_P0}, {@code v.L4_P0},
@@ -24,7 +24,7 @@ package com.dwinovo.chiikawa.anim.molang;
  * renderer (see {@link com.dwinovo.chiikawa.anim.render.PetBoneInterceptor}),
  * not by Molang. Resolving them to a real slot only opens the door to
  * mis-evaluation (e.g. {@code Root.rotZ = 0.4*ysm.head_yaw} flopping the
- * body sideways). They're left to {@link MolangCompiler}'s soft-fail path,
+ * body sideways). They're left to {@link com.dwinovo.chiikawa.anim.compile.MolangCompiler}'s soft-fail path,
  * which warns once at load and emits a {@code Const(0)} stand-in.
  *
  * <p>Add a slot here only when the renderer actually has a value to feed.
