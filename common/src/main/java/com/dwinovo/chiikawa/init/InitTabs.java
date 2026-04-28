@@ -5,7 +5,7 @@ import com.dwinovo.chiikawa.platform.Services;
 import java.util.function.Supplier;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 
@@ -13,7 +13,7 @@ public final class InitTabs {
     public static final Supplier<CreativeModeTab> MAIN =
         Services.REGISTRY.<CreativeModeTab>register(
             BuiltInRegistries.CREATIVE_MODE_TAB,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "main"),
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "main"),
             () -> CreativeModeTab.builder(CreativeModeTab.Row.TOP, 0)
                 .title(Component.translatable("itemGroup.chiikawa"))
                 .icon(() -> new ItemStack(InitItems.USAGI_SPAWN_EGG.get()))

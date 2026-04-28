@@ -4,7 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import java.util.List;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.Biome;
@@ -34,11 +34,11 @@ public final class BiomeSpawnData {
     }
 
     private static ResourceKey<Biome> biomeKey(String path) {
-        return ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("minecraft", path));
+        return ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("minecraft", path));
     }
 
     private static ResourceKey<EntityType<?>> entityKey(String path) {
-        return ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path));
+        return ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(Constants.MOD_ID, path));
     }
 
     public record SpawnEntry(ResourceKey<EntityType<?>> entityKey, MobCategory category, int weight, int minCount, int maxCount) {

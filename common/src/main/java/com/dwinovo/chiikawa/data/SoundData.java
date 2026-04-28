@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public final class SoundData {
     private static final int MAX_VARIANTS = 64;
@@ -17,22 +17,22 @@ public final class SoundData {
     private SoundData() {
     }
 
-    public static Map<String, List<ResourceLocation>> collectVariants(PackOutput output) {
+    public static Map<String, List<Identifier>> collectVariants(PackOutput output) {
         return collectVariants(resolveResourceRoot(output));
     }
 
-    public static Map<String, List<ResourceLocation>> collectVariants(Path resourceRoot) {
-        Map<String, List<ResourceLocation>> variants = new HashMap<>();
+    public static Map<String, List<Identifier>> collectVariants(Path resourceRoot) {
+        Map<String, List<Identifier>> variants = new HashMap<>();
         for (InitSounds.SoundEntry entry : InitSounds.entries()) {
             variants.put(entry.path(), findVariants(entry.path(), resourceRoot));
         }
         return variants;
     }
 
-    public static List<ResourceLocation> findVariants(String basePath, Path resourceRoot) {
-        List<ResourceLocation> sounds = new ArrayList<>();
+    public static List<Identifier> findVariants(String basePath, Path resourceRoot) {
+        List<Identifier> sounds = new ArrayList<>();
         for (int i = 1; i <= MAX_VARIANTS; i++) {
-            ResourceLocation candidate = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, basePath + "_" + i);
+            Identifier candidate = Identifier.fromNamespaceAndPath(Constants.MOD_ID, basePath + "_" + i);
             if (!soundExists(candidate, resourceRoot)) {
                 break;
             }
@@ -40,7 +40,7 @@ public final class SoundData {
         }
 
         if (sounds.isEmpty()) {
-            ResourceLocation direct = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, basePath);
+            Identifier direct = Identifier.fromNamespaceAndPath(Constants.MOD_ID, basePath);
             if (soundExists(direct, resourceRoot)) {
                 sounds.add(direct);
             }
@@ -49,7 +49,7 @@ public final class SoundData {
         return sounds;
     }
 
-    public static boolean soundExists(ResourceLocation sound, Path resourceRoot) {
+    public static boolean soundExists(Identifier sound, Path resourceRoot) {
         Path path = resourceRoot.resolve("assets")
             .resolve(sound.getNamespace())
             .resolve("sounds")

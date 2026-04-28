@@ -11,7 +11,7 @@ import com.dwinovo.chiikawa.platform.services.IPlatformRegistryAccess;
 import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.inventory.MenuType;
@@ -56,8 +56,8 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
         return () -> menuType;
     }
 
-    private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path);
+    private static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(Constants.MOD_ID, path);
     }
 
     @Override

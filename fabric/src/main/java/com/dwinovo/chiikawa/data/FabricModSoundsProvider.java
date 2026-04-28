@@ -10,10 +10,10 @@ import net.fabricmc.fabric.api.client.datagen.v1.builder.SoundTypeBuilder;
 import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricSoundsProvider;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class FabricModSoundsProvider extends FabricSoundsProvider {
-    private final Map<String, List<ResourceLocation>> variants;
+    private final Map<String, List<Identifier>> variants;
 
     public FabricModSoundsProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
         super(output, registriesFuture);
@@ -23,13 +23,13 @@ public class FabricModSoundsProvider extends FabricSoundsProvider {
     @Override
     protected void configure(HolderLookup.Provider registryLookup, SoundExporter exporter) {
         for (InitSounds.SoundEntry entry : InitSounds.entries()) {
-            List<ResourceLocation> sounds = variants.get(entry.path());
+            List<Identifier> sounds = variants.get(entry.path());
             if (sounds == null || sounds.isEmpty()) {
                 continue;
             }
             SoundTypeBuilder builder = SoundTypeBuilder.of();
             sounds.stream()
-                .sorted(Comparator.comparing(ResourceLocation::toString))
+                .sorted(Comparator.comparing(Identifier::toString))
                 .map(SoundTypeBuilder.EntryBuilder::ofFile)
                 .forEach(builder::sound);
             exporter.add(entry.holder().get(), builder);

@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NewRegistryEvent;
@@ -20,7 +20,7 @@ public class NeoForgeRegistryHelper implements IRegistryHelper {
     private final List<Registry<?>> customRegistries = new ArrayList<>();
 
     @Override
-    public <T> Supplier<T> register(Registry<? super T> registry, ResourceLocation id, Supplier<? extends T> factory) {
+    public <T> Supplier<T> register(Registry<? super T> registry, Identifier id, Supplier<? extends T> factory) {
         DeferredRegister<T> deferredRegister = getDeferredRegister(registry);
         if (!Constants.MOD_ID.equals(id.getNamespace())) {
             throw new IllegalArgumentException("Unexpected namespace for registry entry: " + id);
@@ -29,7 +29,7 @@ public class NeoForgeRegistryHelper implements IRegistryHelper {
     }
 
     @Override
-    public <T> Registry<T> createRegistry(ResourceKey<Registry<T>> key, ResourceLocation defaultId, boolean sync) {
+    public <T> Registry<T> createRegistry(ResourceKey<Registry<T>> key, Identifier defaultId, boolean sync) {
         RegistryBuilder<T> builder = new RegistryBuilder<>(key);
         if (sync) {
             builder.sync(true);

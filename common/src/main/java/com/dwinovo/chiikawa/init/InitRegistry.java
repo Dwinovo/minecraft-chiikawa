@@ -11,7 +11,7 @@ import com.dwinovo.chiikawa.platform.Services;
 import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public final class InitRegistry {
     public static final int NONE_ID = 0;
@@ -20,23 +20,23 @@ public final class InitRegistry {
     public static final int ARCHER_ID = 3;
 
     public static final ResourceKey<Registry<IPetJob>> PET_JOB_KEY = ResourceKey.createRegistryKey(
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "pet_jobs")
+        Identifier.fromNamespaceAndPath(Constants.MOD_ID, "pet_jobs")
     );
 
     public static final Registry<IPetJob> PET_JOB_REGISTRY = Services.REGISTRY.createRegistry(
         PET_JOB_KEY,
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "none"),
+        Identifier.fromNamespaceAndPath(Constants.MOD_ID, "none"),
         true
     );
 
     public static final Supplier<IPetJob> NONE = Services.REGISTRY.register(
         PET_JOB_REGISTRY,
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "none"),
+        Identifier.fromNamespaceAndPath(Constants.MOD_ID, "none"),
         () -> new NoneJob(NONE_ID)
     );
     public static final Supplier<IPetJob> FARMER = Services.REGISTRY.register(
         PET_JOB_REGISTRY,
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "farmer"),
+        Identifier.fromNamespaceAndPath(Constants.MOD_ID, "farmer"),
         () -> new BasicJob(
             FARMER_ID,
             10,
@@ -47,7 +47,7 @@ public final class InitRegistry {
     );
     public static final Supplier<IPetJob> FENCER = Services.REGISTRY.register(
         PET_JOB_REGISTRY,
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "fencer"),
+        Identifier.fromNamespaceAndPath(Constants.MOD_ID, "fencer"),
         () -> new BasicJob(
             FENCER_ID,
             10,
@@ -58,7 +58,7 @@ public final class InitRegistry {
     );
     public static final Supplier<IPetJob> ARCHER = Services.REGISTRY.register(
         PET_JOB_REGISTRY,
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "archer"),
+        Identifier.fromNamespaceAndPath(Constants.MOD_ID, "archer"),
         () -> new BasicJob(
             ARCHER_ID,
             10,

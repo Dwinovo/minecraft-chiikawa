@@ -169,7 +169,7 @@ public final class PetReviveRitualManager {
 
     private record LevelKey(String location) {
         private static LevelKey from(ServerLevel level) {
-            return new LevelKey(level.dimension().location().toString());
+            return new LevelKey(level.dimension().identifier().toString());
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.client.render;
 
+import com.dwinovo.chiikawa.client.model.AbstractPetModel;
 import com.dwinovo.chiikawa.client.render.layer.PetHeldItemLayer;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 
@@ -8,11 +9,13 @@ import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.GeckoLibConstants;
+import software.bernie.geckolib.constant.DataTickets;
 import software.bernie.geckolib.constant.dataticket.DataTicket;
 import software.bernie.geckolib.model.GeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
+import software.bernie.geckolib.renderer.base.BoneSnapshots;
 import software.bernie.geckolib.renderer.base.GeoRenderState;
+import software.bernie.geckolib.renderer.base.RenderPassInfo;
 
 import java.util.Map;
 
@@ -43,6 +46,39 @@ public abstract class AbstractPetRender<T extends AbstractPet> extends GeoEntity
         renderState.addGeckolibData(HEAD_PITCH, headPitch);
     }
 
+    @Override
+    public void adjustModelBonesForRender(RenderPassInfo<PetRenderState> renderPass, BoneSnapshots boneSnapshots) {
+        super.adjustModelBonesForRender(renderPass, boneSnapshots);
+
+        PetRenderState renderState = renderPass.renderState();
+        float netHeadYaw = renderState.getOrDefaultGeckolibData(HEAD_YAW, 0f);
+        float headPitch = renderState.getOrDefaultGeckolibData(HEAD_PITCH, 0f);
+        float limbSwingAmount = renderState.getOrDefaultGeckolibData(AbstractPetModel.LIMB_SWING_AMOUNT, 0f);
+        double animationTicks = renderState.getOrDefaultGeckolibData(DataTickets.TICK, 0.0);
+
+        boneSnapshots.ifPresent("AllHead", snapshot -> {
+            snapshot.setRotY(-netHeadYaw * ((float) Math.PI / 180F));
+            snapshot.setRotX(-headPitch * ((float) Math.PI / 180F));
+        });
+
+        float breathingSpeed = 0.1F;
+        float earSwingAmount = 0.1F;
+        float earTwistAmount = 0.1F;
+        float earBackwardSwing = -limbSwingAmount * 1.0F;
+
+        boneSnapshots.ifPresent("LeftEar", snapshot -> {
+            snapshot.setRotY(Mth.cos((float) animationTicks * breathingSpeed) * earSwingAmount - earBackwardSwing);
+            snapshot.setRotZ(Mth.sin((float) animationTicks * breathingSpeed) * earTwistAmount);
+        });
+        boneSnapshots.ifPresent("RightEar", snapshot -> {
+            snapshot.setRotY(-Mth.cos((float) animationTicks * breathingSpeed) * earSwingAmount + earBackwardSwing);
+            snapshot.setRotZ(-Mth.sin((float) animationTicks * breathingSpeed) * earTwistAmount);
+        });
+        boneSnapshots.ifPresent("tail", snapshot -> {
+            snapshot.setRotY(Mth.cos((float) animationTicks * breathingSpeed) * 0.15F);
+        });
+    }
+
     public static class PetRenderState extends LivingEntityRenderState implements GeoRenderState {
         private final Map<DataTicket<?>, Object> geckolibData = new Reference2ObjectOpenHashMap<>();
 
@@ -54,42 +90,6 @@ public abstract class AbstractPetRender<T extends AbstractPet> extends GeoEntity
         @Override
         public boolean hasGeckolibData(DataTicket<?> dataTicket) {
             return this.geckolibData.containsKey(dataTicket);
-        }
-
-        @Nullable
-        @Override
-        public <D> D getGeckolibData(DataTicket<D> dataTicket) {
-            Object data = this.geckolibData.get(dataTicket);
-
-            if (data == null && !hasGeckolibData(dataTicket))
-                throw new IllegalArgumentException("Attempted to retrieve data from GeoRenderState that does not exist. Check your code!");
-
-            try {
-                return (D)data;
-            }
-            catch (ClassCastException ex) {
-                GeckoLibConstants.LOGGER.error("Attempted to retrieve incorrectly typed data from GeoRenderState. Possibly a mod or DataTicket conflict? Expected: {}, found data type {}", dataTicket, data.getClass().getName(), ex);
-
-                throw ex;
-            }
-        }
-
-        @Nullable
-        @Override
-        public <D> D getOrDefaultGeckolibData(DataTicket<D> dataTicket, @Nullable D defaultValue) {
-            Object data = this.geckolibData.get(dataTicket);
-
-            if (data == null && !hasGeckolibData(dataTicket))
-                return defaultValue;
-
-            try {
-                return (D)data;
-            }
-            catch (ClassCastException ex) {
-                GeckoLibConstants.LOGGER.error("Attempted to retrieve incorrectly typed data from GeoRenderState. Possibly a mod or DataTicket conflict? Expected: {}, found data type {}", dataTicket, data.getClass().getName(), ex);
-
-                return defaultValue;
-            }
         }
 
         @Override

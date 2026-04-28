@@ -10,7 +10,7 @@ import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
@@ -30,7 +30,7 @@ public final class ModRecipeProvider extends RecipeProvider {
             .pattern("FSF")
             .pattern("Y  ")
             .unlockedBy(getHasName(Items.YELLOW_WOOL), has(Items.YELLOW_WOOL))
-            .save(this.output, ResourceKey.create(Registries.RECIPE, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "usagi_weapon")));
+            .save(this.output, ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(Constants.MOD_ID, "usagi_weapon")));
 
         ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.COMBAT, InitItems.HACHIWARE_WEAPON.get())
             .define('B', Items.BLUE_WOOL)
@@ -39,7 +39,7 @@ public final class ModRecipeProvider extends RecipeProvider {
             .pattern(" SB")
             .pattern("S  ")
             .unlockedBy(getHasName(Items.BLUE_WOOL), has(Items.BLUE_WOOL))
-            .save(this.output, ResourceKey.create(Registries.RECIPE, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "hachiware_weapon")));
+            .save(this.output, ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hachiware_weapon")));
 
         ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.COMBAT, InitItems.CHIIKAWA_WEAPON.get())
             .define('P', Items.PINK_WOOL)
@@ -48,6 +48,6 @@ public final class ModRecipeProvider extends RecipeProvider {
             .pattern(" SP")
             .pattern("S  ")
             .unlockedBy(getHasName(Items.PINK_WOOL), has(Items.PINK_WOOL))
-            .save(this.output, ResourceKey.create(Registries.RECIPE, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "chiikawa_weapon")));
+            .save(this.output, ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(Constants.MOD_ID, "chiikawa_weapon")));
     }
 }

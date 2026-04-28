@@ -9,12 +9,12 @@ import com.dwinovo.chiikawa.data.SoundData;
 import com.dwinovo.chiikawa.init.InitSounds;
 
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.data.SoundDefinition;
 import net.neoforged.neoforge.common.data.SoundDefinitionsProvider;
 
 public final class ModSoundDefinitionsProvider extends SoundDefinitionsProvider {
-    private final Map<String, List<ResourceLocation>> variants;
+    private final Map<String, List<Identifier>> variants;
 
     public ModSoundDefinitionsProvider(PackOutput output) {
         super(output, Constants.MOD_ID);
@@ -24,12 +24,12 @@ public final class ModSoundDefinitionsProvider extends SoundDefinitionsProvider 
     @Override
     public void registerSounds() {
         for (InitSounds.SoundEntry entry : InitSounds.entries()) {
-            List<ResourceLocation> sounds = variants.get(entry.path());
+            List<Identifier> sounds = variants.get(entry.path());
             if (sounds == null || sounds.isEmpty()) {
                 continue;
             }
             SoundDefinition.Sound[] soundEntries = sounds.stream()
-                    .sorted(Comparator.comparing(ResourceLocation::toString))
+                    .sorted(Comparator.comparing(Identifier::toString))
                     .map(SoundDefinitionsProvider::sound)
                     .toArray(SoundDefinition.Sound[]::new);
             add(entry.holder().get(), SoundDefinition.definition().with(soundEntries));

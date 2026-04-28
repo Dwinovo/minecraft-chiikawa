@@ -7,7 +7,7 @@ import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.core.HolderSet;
 import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.entity.EntityType;
@@ -20,7 +20,7 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 public final class ModBiomeModifiers {
     public static final ResourceKey<BiomeModifier> ADD_PET_SPAWNS = ResourceKey.create(
             NeoForgeRegistries.Keys.BIOME_MODIFIERS,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "add_pet_spawns"));
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "add_pet_spawns"));
 
     private ModBiomeModifiers() {
     }

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 
 public final class InitSounds {
@@ -45,8 +45,8 @@ public final class InitSounds {
     private static Supplier<SoundEvent> register(String path) {
         Supplier<SoundEvent> holder = Services.REGISTRY.register(
             BuiltInRegistries.SOUND_EVENT,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path),
-            () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path))
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, path),
+            () -> SoundEvent.createVariableRangeEvent(Identifier.fromNamespaceAndPath(Constants.MOD_ID, path))
         );
         ENTRIES.add(new SoundEntry(path, holder));
         return holder;
