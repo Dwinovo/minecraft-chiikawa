@@ -7,12 +7,12 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import com.dwinovo.chiikawa.anim.render.impl.ChiikawaRenderer;
-import com.dwinovo.chiikawa.client.render.impl.HachiwareRender;
-import com.dwinovo.chiikawa.client.render.impl.KurimanjuRender;
-import com.dwinovo.chiikawa.client.render.impl.MomongaRender;
-import com.dwinovo.chiikawa.client.render.impl.RakkoRender;
-import com.dwinovo.chiikawa.client.render.impl.ShisaRender;
-import com.dwinovo.chiikawa.client.render.impl.UsagiRender;
+import com.dwinovo.chiikawa.anim.render.impl.HachiwareRenderer;
+import com.dwinovo.chiikawa.anim.render.impl.KurimanjuRenderer;
+import com.dwinovo.chiikawa.anim.render.impl.MomongaRenderer;
+import com.dwinovo.chiikawa.anim.render.impl.RakkoRenderer;
+import com.dwinovo.chiikawa.anim.render.impl.ShisaRenderer;
+import com.dwinovo.chiikawa.anim.render.impl.UsagiRenderer;
 import com.dwinovo.chiikawa.client.screen.PetBackpackScreen;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitMenu;
@@ -23,16 +23,15 @@ public class ChiikawaForgeClient {
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            // Phase 1: only chiikawa swaps onto the new Bedrock pipeline; the rest stay
-            // on the GeckoLib-based renderer until phase 4. Mirrors the Fabric setup.
-            EntityRenderers.register(InitEntity.USAGI_PET.get(), UsagiRender::new);
-            EntityRenderers.register(InitEntity.HACHIWARE_PET.get(), HachiwareRender::new);
+            // All 7 pets on the Bedrock pipeline. Mirrors the Fabric setup.
+            EntityRenderers.register(InitEntity.USAGI_PET.get(), UsagiRenderer::new);
+            EntityRenderers.register(InitEntity.HACHIWARE_PET.get(), HachiwareRenderer::new);
             EntityRenderers.register(InitEntity.CHIIKAWA_PET.get(), ChiikawaRenderer::new);
-            EntityRenderers.register(InitEntity.SHISA_PET.get(), ShisaRender::new);
-            EntityRenderers.register(InitEntity.MOMONGA_PET.get(), MomongaRender::new);
-            EntityRenderers.register(InitEntity.KURIMANJU_PET.get(), KurimanjuRender::new);
-            EntityRenderers.register(InitEntity.RAKKO_PET.get(), RakkoRender::new);
-            
+            EntityRenderers.register(InitEntity.SHISA_PET.get(), ShisaRenderer::new);
+            EntityRenderers.register(InitEntity.MOMONGA_PET.get(), MomongaRenderer::new);
+            EntityRenderers.register(InitEntity.KURIMANJU_PET.get(), KurimanjuRenderer::new);
+            EntityRenderers.register(InitEntity.RAKKO_PET.get(), RakkoRenderer::new);
+
             MenuScreens.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);
         });
     }
