@@ -24,8 +24,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 public class ChiikawaFabricClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        // All 7 pets on the Bedrock pipeline. GeckoLib renderers and AnimatableInstanceCache
-        // still hang off AbstractPet during the migration; phase 4.7 strips them.
+        // All 7 pets on the Bedrock pipeline.
         EntityRendererRegistry.register(InitEntity.USAGI_PET.get(), UsagiRenderer::new);
         EntityRendererRegistry.register(InitEntity.HACHIWARE_PET.get(), HachiwareRenderer::new);
         EntityRendererRegistry.register(InitEntity.CHIIKAWA_PET.get(), ChiikawaRenderer::new);

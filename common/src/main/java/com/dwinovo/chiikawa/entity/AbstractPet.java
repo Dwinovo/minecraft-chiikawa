@@ -51,18 +51,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animatable.manager.AnimatableManager;
-import software.bernie.geckolib.animatable.processing.AnimationController;
-import software.bernie.geckolib.animation.PlayState;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 /**
  * Base implementation of a tamable pet with job, inventory, and ranged attack support.
  */
-public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttackMob, ChiikawaAnimated {
+public class AbstractPet extends TamableAnimal implements RangedAttackMob, ChiikawaAnimated {
     /** Number of slots available in the pet's backpack inventory. */
     public static final int BACKPACK_SIZE = 16;
     private static final EntityDataAccessor<Byte> PET_MODE = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.BYTE);
@@ -108,7 +101,6 @@ public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttac
         InitSensor.PET_CONTAINER_SENSOR.get(),
         InitSensor.PET_ITEM_ENTITY_SENSOR.get()
     );
-    private final AnimatableInstanceCache animatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
     /** Lazily allocated on first client-side read; server instances pay nothing. */
     private PetAnimator petAnimator;
     /** Last {@link #ANIM_TRIGGER} sequence number this client handled. Server copy is unused. */
@@ -304,33 +296,6 @@ public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttac
     @Override
     public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob partner) {
         return null; // Safety: no offspring.
-    }
-
-    @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        AnimationController<AbstractPet> main = new AnimationController<>("main", 5, state -> {
-            RawAnimation builder = RawAnimation.begin();
-            if (this.getPetMode() == PetMode.SIT) {
-                builder.thenLoop("sit");
-            } else if (state.isMoving()) {
-                builder.thenLoop("run");
-            } else {
-                builder.thenLoop("idle");
-            }
-            state.setAndContinue(builder);
-            return PlayState.CONTINUE;
-        });
-
-        AnimationController<AbstractPet> sub = new AnimationController<>("sub", 1, state -> PlayState.STOP);
-
-        main.triggerableAnim("use_mainhand", RawAnimation.begin().thenPlay("use_mainhand"))
-            .triggerableAnim("sword_attack", RawAnimation.begin().thenPlay("sword_attack"));
-        controllers.add(main, sub);
-    }
-
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return this.animatableInstanceCache;
     }
 
     @Override
