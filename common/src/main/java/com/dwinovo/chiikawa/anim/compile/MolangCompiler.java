@@ -13,7 +13,7 @@ import java.util.List;
  * {@link MolangNode} AST. Run once at resource load — the AST is shared
  * between all entities playing the animation.
  *
- * <h3>Grammar</h3>
+ * <h2>Grammar</h2>
  * <pre>
  *   expr      = term (('+' | '-') term)*
  *   term      = unary (('*' | '/') unary)*
@@ -22,7 +22,7 @@ import java.util.List;
  *   args      = expr (',' expr)*
  * </pre>
  *
- * <h3>Soft failure</h3>
+ * <h2>Soft failure</h2>
  * Unknown variables / functions / unparseable input log a warning and yield
  * {@code Const(0)} rather than throwing. The animation still plays — the
  * affected channel just stays at zero. This matches GeckoLib's "missing
