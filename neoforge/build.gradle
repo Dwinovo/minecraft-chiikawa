@@ -61,8 +61,6 @@ configurations {
 }
 
 dependencies {
-    jarJar("software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}")
-    implementation "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
 }
 
 // Implement mcgradleconventions loader attribute
