@@ -92,7 +92,7 @@ public class HarvestCropBehavior extends Behavior<AbstractPet>{
         if (!world.isClientSide()) {
             ItemStack tool = pet.getMainHandItem();
             if (Utils.canHarvesr(world, cropPos)) {
-                pet.triggerAnim("main", "use_mainhand");
+                pet.triggerAnim("use_mainhand");
                 world.destroyBlock(cropPos, true, pet);
                 tool.hurtAndBreak(1, pet, EquipmentSlot.MAINHAND);
             }

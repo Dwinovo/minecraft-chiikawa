@@ -34,7 +34,7 @@ public final class MeleeAttackWithAnim {
                             return false;
                         }
                         lookTarget.set(new EntityTracker(target, true));
-                        pet.triggerAnim("main", "use_mainhand");
+                        pet.triggerAnim("use_mainhand");
                         pet.swing(InteractionHand.MAIN_HAND);
                         pet.doHurtTarget(target);
                         pet.playAttackSound();
