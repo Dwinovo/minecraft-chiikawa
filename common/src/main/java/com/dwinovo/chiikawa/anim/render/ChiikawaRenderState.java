@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.anim.render;
 import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Render-state snapshot for chiikawa-animated entities. Extends vanilla
@@ -42,4 +43,7 @@ public class ChiikawaRenderState extends LivingEntityRenderState {
     public float netHeadYaw;
     /** Head pitch (entity X rotation) in degrees, captured at extract time for the same reason. */
     public float headPitch;
+
+    /** Mainhand item snapshot. Resolved into a fresh ItemStackRenderState in submit. */
+    public ItemStack heldItemStack = ItemStack.EMPTY;
 }
