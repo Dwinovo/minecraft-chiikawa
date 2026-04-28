@@ -47,6 +47,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     private final ModelRenderer mesh = new ModelRenderer();
     private final Quaternionf rotBuf = new Quaternionf();
     private final MolangContext molangCtx = new MolangContext();
+    private final BoneInterceptor[] interceptors = { new PetBoneInterceptor() };
 
     protected ChiikawaEntityRenderer(EntityRendererProvider.Context ctx, String name) {
         super(ctx);
@@ -73,12 +74,17 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         if (entity instanceof LivingEntity living) {
             float bodyRot = net.minecraft.util.Mth.rotLerp(partialTick, living.yBodyRotO, living.yBodyRot);
             float headRot = net.minecraft.util.Mth.rotLerp(partialTick, living.yHeadRotO, living.getYHeadRot());
+            float pitch   = net.minecraft.util.Mth.rotLerp(partialTick, living.xRotO, living.getXRot());
             state.bodyRot = bodyRot;
             state.yRot = headRot;
-            state.xRot = net.minecraft.util.Mth.rotLerp(partialTick, living.xRotO, living.getXRot());
+            state.xRot = pitch;
             state.scale = living.getScale();
             state.ageInTicks = living.tickCount + partialTick;
             state.walkSpeed = living.walkAnimation.speed(partialTick);
+            // Capture the head-look snapshot here so it survives the post-extract
+            // bodyRot/yRot stomp performed by InventoryScreen.renderEntityInInventoryFollowsMouse.
+            state.netHeadYaw = net.minecraft.util.Mth.wrapDegrees(headRot - bodyRot);
+            state.headPitch  = pitch;
         }
 
         if (entity instanceof ChiikawaAnimated animated) {
@@ -129,21 +135,11 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         float[] poseBuf = new float[boneCount * PoseSampler.FLOATS_PER_BONE];
         PoseSampler.resetIdentity(poseBuf, boneCount);
 
-        // Frame-level Molang context. query.anim_time is filled per-channel by
-        // PoseSampler; ground_speed feeds the locomotion math.
-        //
-        // ysm.head_yaw / ysm.head_pitch are intentionally LEFT AT 0 (the value
-        // installed by reset()). The chiikawa animation file references them
-        // for both Root.rotZ (`0.4*ysm.head_yaw`, a body-lean term) and
-        // AllHead.rotY (`math.clamp(ysm.head_yaw,-60,60)`), but the legacy
-        // GeckoLib pipeline never resolved the ysm namespace either — head /
-        // ear / tail orientation was driven procedurally by
-        // AbstractPetRender.adjustModelBonesForRender, which OVERRIDES whatever
-        // the animation said for those bones. Phase 4 ships a BoneInterceptor
-        // that replicates that procedural path; until then keeping these slots
-        // at 0 matches the proven behaviour and prevents the run animation
-        // from tilting the body 70°+ when head_yaw approaches ±180 (the
-        // "GUI flop on its side" symptom).
+        // Frame-level Molang context. query.anim_time is filled per-channel
+        // by PoseSampler; ground_speed feeds the locomotion math. Head /
+        // ear / tail orientation is owned by PetBoneInterceptor — see
+        // MolangContext for why ysm.* and v.L*_P* are deliberately not in
+        // scope.
         molangCtx.reset();
         molangCtx.vars[MolangContext.SLOT_GROUND_SPEED] = state.walkSpeed;
 
@@ -155,6 +151,13 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             for (AnimationChannel sub : state.subChannels) {
                 if (sub != null) PoseSampler.sample(sub, nowNs, molangCtx, poseBuf);
             }
+        }
+        // Procedural overrides (head look-at, ear sway, tail wag). Run after
+        // sampling so they cleanly replace the animation's contribution to
+        // the affected bones — same semantics as GeckoLib's
+        // adjustModelBonesForRender hook.
+        for (BoneInterceptor interceptor : interceptors) {
+            interceptor.apply(model, state, molangCtx, poseBuf);
         }
 
         poseStack.pushPose();
