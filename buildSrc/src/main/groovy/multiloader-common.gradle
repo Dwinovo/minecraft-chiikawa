@@ -16,15 +16,6 @@ java {
 repositories {
     mavenCentral()
     maven { url = 'https://api.modrinth.com/maven' }
-    exclusiveContent {
-        forRepository {
-            maven {
-                name = 'GeckoLib'
-                url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
-            }
-        }
-        filter { includeGroup('software.bernie.geckolib') }
-    }
     // https://docs.gradle.org/current/userguide/declaring_repositories.html#declaring_content_exclusively_found_in_one_repository
     exclusiveContent {
         forRepository {
