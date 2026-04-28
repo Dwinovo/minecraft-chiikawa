@@ -10,7 +10,7 @@ import com.dwinovo.chiikawa.anim.molang.MolangNode;
  * cache-friendly access. This layout is also {@code repr(C)} friendly for a
  * future Rust port — no boxing, no object pointers in the hot path.
  *
- * <h3>Keyframe layout</h3>
+ * <h2>Keyframe layout</h2>
  * Each keyframe stores both a {@code pre} and {@code post} value to handle
  * Bedrock's discontinuity case (a single time stamp with different incoming
  * and outgoing values). When the source JSON only specifies one of the two,
@@ -20,13 +20,13 @@ import com.dwinovo.chiikawa.anim.molang.MolangNode;
  *   values[6*i + 3..5] = post.xyz
  * </pre>
  *
- * <h3>Constant channels</h3>
+ * <h2>Constant channels</h2>
  * If the source uses the shorthand form {@code "rotation": {"vector": [..]}}
  * with no time keys, the channel is marked {@link #constant}: {@code times}
  * is empty, {@code values} is exactly three floats, and {@code lerpModes}
  * is empty.
  *
- * <h3>Rotations</h3>
+ * <h2>Rotations</h2>
  * Rotation values are pre-converted to radians at bake time. Position and
  * scale are stored as-is (pixel units / dimensionless).
  */
