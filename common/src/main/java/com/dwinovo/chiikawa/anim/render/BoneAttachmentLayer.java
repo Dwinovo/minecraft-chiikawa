@@ -16,7 +16,7 @@ import org.joml.Quaternionf;
  * Submits an {@link ItemStack} at a named bone's pivot. New-pipeline analogue
  * of GeckoLib's {@code BlockAndItemGeoLayer.submitItemStackRender}.
  *
- * <h3>Chain transform</h3>
+ * <h2>Chain transform</h2>
  * Walks the bone chain root → target reproducing the same
  * {@code T(pivot + dPos) · R(rest + delta) · S · T(-pivot)} composition that
  * {@link ModelRenderer} applies. For the chain's last bone the trailing
@@ -24,7 +24,7 @@ import org.joml.Quaternionf;
  * locator's pivot (with parent rotations applied), which is the natural
  * anchor for item display transforms.
  *
- * <h3>Unit conversion</h3>
+ * <h2>Unit conversion</h2>
  * The caller's {@code PoseStack} is in 1/16-scaled pixel space — bone pivots
  * use raw pixel values so {@code translate(pivotX)} works directly. Items
  * however render in <b>block</b> units (their {@code BakedQuad} verts are

@@ -7,7 +7,7 @@ package com.dwinovo.chiikawa.anim.molang;
  * between all entities playing the animation — this matches GeckoLib's
  * caching of parsed expressions but with a far smaller surface area.
  *
- * <h3>Scope</h3>
+ * <h2>Scope</h2>
  * Only the operators / functions / variables actually used in the chiikawa
  * animation files are supported (see {@code MolangCompiler} for the full
  * grammar). Everything else parses to a {@link Const}{@code (0)} so we can
