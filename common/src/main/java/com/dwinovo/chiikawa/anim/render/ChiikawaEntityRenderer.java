@@ -30,8 +30,8 @@ import org.joml.Quaternionf;
  *
  * <p>{@code modelKey} is the {@code namespace:path} address under which the
  * baked model was registered (e.g. {@code chiikawa:chiikawa}); the matching
- * texture is resolved at submit time via {@link #getTextureLocation}, and
- * the default loop animation is registered as
+ * texture is resolved at submit time from the {@code textureLocation} field,
+ * and the default loop animation is registered as
  * {@code <modelKey>/<DEFAULT_LOOP_NAME>} (e.g. {@code chiikawa:chiikawa/idle}).
  */
 public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRenderer<T, ChiikawaRenderState> {
