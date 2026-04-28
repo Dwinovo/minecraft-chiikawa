@@ -102,7 +102,7 @@ public class PlantCropBehavior extends Behavior<AbstractPet>{
         ItemStack seed = Utils.getSeed(pet);
         Optional<BlockState> cropState = getPlantBlockState(seed);
         if (cropState.isPresent() && Utils.isCanPlantFarmland(world, farmlandPos)) {
-            pet.triggerAnim("main", "use_mainhand");
+            pet.triggerAnim("use_mainhand");
             world.setBlock(farmlandPos.above(), cropState.get(), 2);
             seed.shrink(1);
         }
