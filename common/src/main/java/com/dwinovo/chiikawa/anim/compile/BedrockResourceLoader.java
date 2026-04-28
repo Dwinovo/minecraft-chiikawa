@@ -1,10 +1,14 @@
 package com.dwinovo.chiikawa.anim.compile;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.anim.api.AnimationLibrary;
 import com.dwinovo.chiikawa.anim.api.ModelLibrary;
+import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
 import com.dwinovo.chiikawa.anim.format.BedrockGeoFile;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -19,24 +23,34 @@ import java.util.Map;
  * animation JSON, and replaces the contents of the model / animation
  * libraries.
  *
- * <p>Phase 1 only loads models. Animations come online in Phase 2.
+ * <p>Animations live at {@code assets/<ns>/animations/<file>.json} and are
+ * baked against the model with the matching short key. Each animation in the
+ * file is registered under {@code <ns>:<file>/<anim_name>} (e.g.
+ * {@code chiikawa:chiikawa/idle}).
  */
 public final class BedrockResourceLoader implements ResourceManagerReloadListener {
 
-    /** Resource path prefix (relative to namespace) where geo files live. */
     public static final String MODEL_PATH_PREFIX = "models/entity";
-    /** File extension that marks a Bedrock geometry file. */
-    public static final String MODEL_EXTENSION = ".json";
+    public static final String ANIMATION_PATH_PREFIX = "animations";
+    public static final String JSON_EXTENSION = ".json";
 
     private static final Gson GSON = new Gson();
 
     @Override
     public void onResourceManagerReload(ResourceManager manager) {
+        Map<Identifier, BakedModel> bakedModels = loadModels(manager);
+        ModelLibrary.replaceAll(bakedModels);
+        Constants.LOG.info("[chiikawa-anim] loaded {} baked models", bakedModels.size());
+
+        Map<Identifier, BakedAnimation> bakedAnims = loadAnimations(manager, bakedModels);
+        AnimationLibrary.replaceAll(bakedAnims);
+        Constants.LOG.info("[chiikawa-anim] loaded {} baked animations", bakedAnims.size());
+    }
+
+    private static Map<Identifier, BakedModel> loadModels(ResourceManager manager) {
         Map<Identifier, BakedModel> baked = new HashMap<>();
-
         Map<Identifier, Resource> resources = manager.listResources(MODEL_PATH_PREFIX,
-                id -> id.getPath().endsWith(MODEL_EXTENSION));
-
+                id -> id.getPath().endsWith(JSON_EXTENSION));
         for (Map.Entry<Identifier, Resource> e : resources.entrySet()) {
             Identifier rid = e.getKey();
             try (BufferedReader reader = e.getValue().openAsReader()) {
@@ -47,22 +61,55 @@ public final class BedrockResourceLoader implements ResourceManagerReloadListene
                 Constants.LOG.error("[chiikawa-anim] failed to load geo {}: {}", rid, ex.toString());
             }
         }
-
-        ModelLibrary.replaceAll(baked);
-        Constants.LOG.info("[chiikawa-anim] loaded {} baked models", baked.size());
+        return baked;
     }
 
-    /**
-     * Strips the prefix and {@code .geo.json} suffix from the resource path so
-     * callers can address models by short keys (e.g. {@code chiikawa:usagi}).
-     */
-    public static Identifier toModelKey(Identifier resourceId) {
-        String path = resourceId.getPath();
-        if (path.startsWith(MODEL_PATH_PREFIX + "/")) {
-            path = path.substring(MODEL_PATH_PREFIX.length() + 1);
+    private static Map<Identifier, BakedAnimation> loadAnimations(ResourceManager manager,
+                                                                  Map<Identifier, BakedModel> models) {
+        Map<Identifier, BakedAnimation> baked = new HashMap<>();
+        Map<Identifier, Resource> resources = manager.listResources(ANIMATION_PATH_PREFIX,
+                id -> id.getPath().endsWith(JSON_EXTENSION));
+        for (Map.Entry<Identifier, Resource> e : resources.entrySet()) {
+            Identifier rid = e.getKey();
+            Identifier modelKey = toAnimationFileKey(rid);
+            BakedModel model = models.get(modelKey);
+            if (model == null) {
+                Constants.LOG.warn("[chiikawa-anim] animation file {} has no matching model {} — skipping",
+                        rid, modelKey);
+                continue;
+            }
+            try (BufferedReader reader = e.getValue().openAsReader()) {
+                JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
+                Map<String, BakedAnimation> anims = AnimationBaker.bake(root, model);
+                for (Map.Entry<String, BakedAnimation> a : anims.entrySet()) {
+                    Identifier id = Identifier.fromNamespaceAndPath(modelKey.getNamespace(),
+                            modelKey.getPath() + "/" + a.getKey());
+                    baked.put(id, a.getValue());
+                }
+            } catch (Exception ex) {
+                Constants.LOG.error("[chiikawa-anim] failed to load animations {}: {}", rid, ex.toString());
+            }
         }
-        if (path.endsWith(MODEL_EXTENSION)) {
-            path = path.substring(0, path.length() - MODEL_EXTENSION.length());
+        return baked;
+    }
+
+    /** Strips {@value #MODEL_PATH_PREFIX}/ prefix and .json suffix. */
+    public static Identifier toModelKey(Identifier resourceId) {
+        return stripPrefixAndExt(resourceId, MODEL_PATH_PREFIX);
+    }
+
+    /** Strips {@value #ANIMATION_PATH_PREFIX}/ prefix and .json suffix. */
+    public static Identifier toAnimationFileKey(Identifier resourceId) {
+        return stripPrefixAndExt(resourceId, ANIMATION_PATH_PREFIX);
+    }
+
+    private static Identifier stripPrefixAndExt(Identifier resourceId, String prefix) {
+        String path = resourceId.getPath();
+        if (path.startsWith(prefix + "/")) {
+            path = path.substring(prefix.length() + 1);
+        }
+        if (path.endsWith(JSON_EXTENSION)) {
+            path = path.substring(0, path.length() - JSON_EXTENSION.length());
         }
         return Identifier.fromNamespaceAndPath(resourceId.getNamespace(), path);
     }

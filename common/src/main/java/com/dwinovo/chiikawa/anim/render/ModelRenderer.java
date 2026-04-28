@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.anim.render;
 import com.dwinovo.chiikawa.anim.baked.BakedBone;
 import com.dwinovo.chiikawa.anim.baked.BakedCube;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
+import com.dwinovo.chiikawa.anim.runtime.PoseSampler;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import org.joml.Quaternionf;
@@ -12,9 +13,18 @@ import org.joml.Quaternionf;
  * {@link PoseStack} and pushes 6 face quads per cube into the supplied
  * vertex consumer.
  *
- * <p>Phase 1 only applies the bone's rest rotation. Animation pose blending
- * arrives in Phase 2 — the {@code render} signature will gain a per-bone
- * pose buffer parameter then.
+ * <p>For each bone it composes:
+ * <pre>
+ *   M_bone = M_parent
+ *          * T(pivot + animPos)
+ *          * R(restRot + animRot)
+ *          * S(animScale)
+ *          * T(-pivot)
+ * </pre>
+ * which gives, for a vertex {@code v} in absolute pixel coords,
+ * {@code R * S * (v - pivot) + pivot + animPos} in the parent frame —
+ * scale and rotation around the (animated) pivot, plus a clean
+ * translation by the animation offset.
  */
 public final class ModelRenderer {
 
@@ -50,32 +60,57 @@ public final class ModelRenderer {
     private final Quaternionf rotBuf = new Quaternionf();
 
     /**
-     * Renders the entire model. The caller's {@code initial} pose should already
+     * Renders the entire model with the supplied {@code poseBuf} (laid out per
+     * {@link PoseSampler}). The caller's {@code initial} pose should already
      * include the entity transform, body rotation, and pixel→block scale.
      */
     public void render(BakedModel model, PoseStack.Pose initial, VertexConsumer vc,
-                       int packedLight, int packedOverlay) {
+                       int packedLight, int packedOverlay, float[] poseBuf) {
         PoseStack stack = new PoseStack();
         stack.last().set(initial);
         for (int rootIdx : model.rootBones) {
-            renderBone(model, rootIdx, stack, vc, packedLight, packedOverlay);
+            renderBone(model, rootIdx, stack, vc, packedLight, packedOverlay, poseBuf);
         }
     }
 
     private void renderBone(BakedModel model, int boneIdx, PoseStack stack,
-                            VertexConsumer vc, int packedLight, int packedOverlay) {
+                            VertexConsumer vc, int packedLight, int packedOverlay,
+                            float[] poseBuf) {
         BakedBone bone = model.bones[boneIdx];
+        int base = boneIdx * PoseSampler.FLOATS_PER_BONE;
+        float dRotX = poseBuf[base];
+        float dRotY = poseBuf[base + 1];
+        float dRotZ = poseBuf[base + 2];
+        float dPosX = poseBuf[base + 3];
+        float dPosY = poseBuf[base + 4];
+        float dPosZ = poseBuf[base + 5];
+        float sX    = poseBuf[base + 6];
+        float sY    = poseBuf[base + 7];
+        float sZ    = poseBuf[base + 8];
+
+        float rotX = bone.restRotX + dRotX;
+        float rotY = bone.restRotY + dRotY;
+        float rotZ = bone.restRotZ + dRotZ;
+        boolean hasRot = rotX != 0f || rotY != 0f || rotZ != 0f;
+        boolean hasScale = sX != 1f || sY != 1f || sZ != 1f;
+
         stack.pushPose();
-        if (bone.hasRestRotation) {
-            rotBuf.identity().rotationXYZ(bone.restRotX, bone.restRotY, bone.restRotZ);
-            stack.last().rotateAround(rotBuf, bone.pivotX, bone.pivotY, bone.pivotZ);
+        // Conjugated bone transform: T(pivot + dPos) · R · S · T(-pivot).
+        stack.translate(bone.pivotX + dPosX, bone.pivotY + dPosY, bone.pivotZ + dPosZ);
+        if (hasRot) {
+            rotBuf.identity().rotationXYZ(rotX, rotY, rotZ);
+            stack.last().rotate(rotBuf);
         }
+        if (hasScale) {
+            stack.scale(sX, sY, sZ);
+        }
+        stack.translate(-bone.pivotX, -bone.pivotY, -bone.pivotZ);
 
         for (int c = bone.cubeStart, end = bone.cubeStart + bone.cubeCount; c < end; c++) {
             renderCube(model.cubes[c], stack, vc, packedLight, packedOverlay);
         }
         for (int childIdx : bone.children) {
-            renderBone(model, childIdx, stack, vc, packedLight, packedOverlay);
+            renderBone(model, childIdx, stack, vc, packedLight, packedOverlay, poseBuf);
         }
 
         stack.popPose();
