@@ -115,17 +115,39 @@ public final class BoneAttachmentLayer {
         float rotZ = bone.restRotZ + dRotZ;
         boolean hasRot   = rotX != 0f || rotY != 0f || rotZ != 0f;
         boolean hasScale = sX != 1f || sY != 1f || sZ != 1f;
+        boolean hasPos   = dPosX != 0f || dPosY != 0f || dPosZ != 0f;
 
-        poseStack.translate(bone.pivotX + dPosX, bone.pivotY + dPosY, bone.pivotZ + dPosZ);
-        if (hasRot) {
-            rotBuf.identity().rotationXYZ(rotX, rotY, rotZ);
-            poseStack.last().rotate(rotBuf);
+        if (isTarget) {
+            // Target bone is the item anchor — always translate to (pivot+dPos)
+            // so the PoseStack ends at the locator's pivot, with rotation/scale
+            // composed on top. The trailing T(-pivot) is intentionally omitted
+            // so the item attaches at the pivot rather than absolute zero.
+            poseStack.translate(bone.pivotX + dPosX, bone.pivotY + dPosY, bone.pivotZ + dPosZ);
+            if (hasRot) {
+                rotBuf.identity().rotationXYZ(rotX, rotY, rotZ);
+                poseStack.last().rotate(rotBuf);
+            }
+            if (hasScale) {
+                poseStack.scale(sX, sY, sZ);
+            }
+            return;
         }
-        if (hasScale) {
-            poseStack.scale(sX, sY, sZ);
-        }
-        if (!isTarget) {
+
+        // Non-target chain links: same identity / pos-only fast paths as
+        // ModelRenderer.renderBone — collapse the pivot sandwich when no
+        // rotation/scale is in play, no-op when nothing is in play.
+        if (hasRot || hasScale) {
+            poseStack.translate(bone.pivotX + dPosX, bone.pivotY + dPosY, bone.pivotZ + dPosZ);
+            if (hasRot) {
+                rotBuf.identity().rotationXYZ(rotX, rotY, rotZ);
+                poseStack.last().rotate(rotBuf);
+            }
+            if (hasScale) {
+                poseStack.scale(sX, sY, sZ);
+            }
             poseStack.translate(-bone.pivotX, -bone.pivotY, -bone.pivotZ);
+        } else if (hasPos) {
+            poseStack.translate(dPosX, dPosY, dPosZ);
         }
     }
 }
