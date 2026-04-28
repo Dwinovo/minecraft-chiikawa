@@ -39,7 +39,7 @@ public class HurtRangedAttackTargetTask extends Behavior<AbstractPet>{
         if (pet.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).isPresent())
         {
             LivingEntity target = pet.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get();
-            pet.triggerAnim("main", "sword_attack");
+            pet.triggerAnim("sword_attack");
             pet.startUsingItem(InteractionHand.MAIN_HAND);
             pet.getLookControl().setLookAt(target, 30.0f, 30.0f);
         }
