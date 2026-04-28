@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
 import com.dwinovo.chiikawa.anim.baked.BakedBoneChannel;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
+import com.dwinovo.chiikawa.anim.molang.MolangNode;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -25,20 +26,24 @@ import java.util.Map;
  * raw {@code JsonObject} rather than introducing a Gson POJO layer that would
  * otherwise be mostly {@code JsonElement} fields anyway.
  *
- * <p>Phase 2 scope: numeric values only. Molang-string vector components are
- * silently treated as {@code 0} — Phase 3 will replace this fallback with a
- * compiled {@code MolangNode} slot.
+ * <h3>Numbers vs Molang</h3>
+ * Each scalar slot can be either a numeric literal or a Molang expression
+ * string. Numeric values are pre-converted (deg→rad, X-mirror) at bake time
+ * and stored in the channel's {@code values} array. Molang strings are
+ * compiled to a {@link MolangNode} AST, then wrapped in the same axis
+ * transform (negate / scale to radians) so the sampler can read both kinds
+ * uniformly without knowing about mirror semantics.
  */
 public final class AnimationBaker {
 
-    private static final float DEG_TO_RAD = (float) (Math.PI / 180.0);
+    private static final double DEG_TO_RAD = Math.PI / 180.0;
+    private static final float DEG_TO_RAD_F = (float) DEG_TO_RAD;
 
     private static final float[] EMPTY_FLOATS = new float[0];
     private static final byte[]  EMPTY_BYTES  = new byte[0];
 
     private AnimationBaker() {}
 
-    /** Bakes every animation in {@code root.animations} against {@code model}. */
     public static Map<String, BakedAnimation> bake(JsonObject root, BakedModel model) {
         Map<String, BakedAnimation> out = new HashMap<>();
         JsonElement animsEl = root.get("animations");
@@ -66,7 +71,7 @@ public final class AnimationBaker {
         if (bonesEl != null && bonesEl.isJsonObject()) {
             for (Map.Entry<String, JsonElement> e : bonesEl.getAsJsonObject().entrySet()) {
                 Integer boneIdx = model.boneIndex.get(e.getKey());
-                if (boneIdx == null) continue; // animation references a bone the model doesn't have
+                if (boneIdx == null) continue;
                 if (!e.getValue().isJsonObject()) continue;
                 addBoneChannels(boneIdx, e.getValue().getAsJsonObject(), channels);
             }
@@ -90,9 +95,9 @@ public final class AnimationBaker {
     private static void bakeChannel(int boneIdx, byte type, JsonElement data, List<BakedBoneChannel> out) {
         if (data.isJsonArray()) {
             // Bare-array shorthand ("rotation": [x, y, z]).
-            float[] v = readVec3(data);
+            Vec3WithMolang v = readVec3(data);
             applyMirrorAndUnits(v, type);
-            out.add(new BakedBoneChannel(boneIdx, type, true, EMPTY_FLOATS, v, EMPTY_BYTES));
+            out.add(new BakedBoneChannel(boneIdx, type, true, EMPTY_FLOATS, v.num, EMPTY_BYTES, v.molang));
             return;
         }
         if (!data.isJsonObject()) return;
@@ -100,9 +105,9 @@ public final class AnimationBaker {
 
         // Detect form: shorthand "vector" with no time keys = constant channel.
         if (obj.has("vector") && !hasTimeKeys(obj)) {
-            float[] v = readVec3(obj.get("vector"));
+            Vec3WithMolang v = readVec3(obj.get("vector"));
             applyMirrorAndUnits(v, type);
-            out.add(new BakedBoneChannel(boneIdx, type, true, EMPTY_FLOATS, v, EMPTY_BYTES));
+            out.add(new BakedBoneChannel(boneIdx, type, true, EMPTY_FLOATS, v.num, EMPTY_BYTES, v.molang));
             return;
         }
 
@@ -125,35 +130,42 @@ public final class AnimationBaker {
         float[] times = new float[n];
         float[] values = new float[n * 6];
         byte[] lerpModes = new byte[n];
+        MolangNode[] molangSlots = null;
+
         for (int i = 0; i < n; i++) {
             TimedKey key = keys.get(i);
             times[i] = key.time;
 
-            float[] pre = new float[3];
-            float[] post = new float[3];
+            Vec3WithMolang pre;
+            Vec3WithMolang post;
             byte lerp = BakedBoneChannel.LERP_LINEAR;
 
             if (key.value.isJsonArray()) {
-                // Shorthand: time -> [x, y, z]
-                float[] v = readVec3(key.value);
-                System.arraycopy(v, 0, pre, 0, 3);
-                System.arraycopy(v, 0, post, 0, 3);
+                Vec3WithMolang v = readVec3(key.value);
+                pre = v;
+                post = v.shallowCopy();
             } else {
                 JsonObject kf = key.value.getAsJsonObject();
                 if (kf.has("vector")) {
-                    // Shorthand: time -> { "vector": [...] }
-                    float[] v = readVec3(kf.get("vector"));
-                    System.arraycopy(v, 0, pre, 0, 3);
-                    System.arraycopy(v, 0, post, 0, 3);
+                    Vec3WithMolang v = readVec3(kf.get("vector"));
+                    pre = v;
+                    post = v.shallowCopy();
                 } else {
-                    // Expanded: time -> { "pre"?: ..., "post"?: ..., "lerp_mode"?: ... }
                     JsonElement preEl = kf.get("pre");
                     JsonElement postEl = kf.get("post");
-                    if (preEl != null) pre = readKfPart(preEl);
-                    if (postEl != null) post = readKfPart(postEl);
-                    // If only one side specified, mirror onto the other.
-                    if (preEl == null && postEl != null) System.arraycopy(post, 0, pre, 0, 3);
-                    if (postEl == null && preEl != null) System.arraycopy(pre, 0, post, 0, 3);
+                    if (preEl == null && postEl == null) {
+                        pre = Vec3WithMolang.zero();
+                        post = Vec3WithMolang.zero();
+                    } else if (preEl == null) {
+                        post = readVec3FromKfPart(postEl);
+                        pre = post.shallowCopy();
+                    } else if (postEl == null) {
+                        pre = readVec3FromKfPart(preEl);
+                        post = pre.shallowCopy();
+                    } else {
+                        pre = readVec3FromKfPart(preEl);
+                        post = readVec3FromKfPart(postEl);
+                    }
                 }
                 if (kf.has("lerp_mode")) {
                     JsonElement lm = kf.get("lerp_mode");
@@ -167,16 +179,30 @@ public final class AnimationBaker {
             applyMirrorAndUnits(post, type);
 
             int base = i * 6;
-            values[base]     = pre[0];
-            values[base + 1] = pre[1];
-            values[base + 2] = pre[2];
-            values[base + 3] = post[0];
-            values[base + 4] = post[1];
-            values[base + 5] = post[2];
+            values[base]     = pre.num[0];
+            values[base + 1] = pre.num[1];
+            values[base + 2] = pre.num[2];
+            values[base + 3] = post.num[0];
+            values[base + 4] = post.num[1];
+            values[base + 5] = post.num[2];
+
+            if (pre.molang != null || post.molang != null) {
+                if (molangSlots == null) molangSlots = new MolangNode[n * 6];
+                if (pre.molang != null) {
+                    molangSlots[base]     = pre.molang[0];
+                    molangSlots[base + 1] = pre.molang[1];
+                    molangSlots[base + 2] = pre.molang[2];
+                }
+                if (post.molang != null) {
+                    molangSlots[base + 3] = post.molang[0];
+                    molangSlots[base + 4] = post.molang[1];
+                    molangSlots[base + 5] = post.molang[2];
+                }
+            }
             lerpModes[i] = lerp;
         }
 
-        out.add(new BakedBoneChannel(boneIdx, type, false, times, values, lerpModes));
+        out.add(new BakedBoneChannel(boneIdx, type, false, times, values, lerpModes, molangSlots));
     }
 
     private static boolean hasTimeKeys(JsonObject obj) {
@@ -191,9 +217,10 @@ public final class AnimationBaker {
         return false;
     }
 
-    private static float[] readVec3(JsonElement el) {
-        float[] out = new float[3];
-        if (el == null || !el.isJsonArray()) return out;
+    private static Vec3WithMolang readVec3(JsonElement el) {
+        float[] num = new float[3];
+        MolangNode[] molang = null;
+        if (el == null || !el.isJsonArray()) return new Vec3WithMolang(num, null);
         JsonArray arr = el.getAsJsonArray();
         int n = Math.min(3, arr.size());
         for (int i = 0; i < n; i++) {
@@ -201,28 +228,64 @@ public final class AnimationBaker {
             if (!c.isJsonPrimitive()) continue;
             JsonPrimitive p = c.getAsJsonPrimitive();
             if (p.isNumber()) {
-                out[i] = p.getAsFloat();
+                num[i] = p.getAsFloat();
             } else if (p.isString()) {
                 String s = p.getAsString();
                 try {
-                    out[i] = Float.parseFloat(s);
+                    num[i] = Float.parseFloat(s);
                 } catch (NumberFormatException ignored) {
-                    // Molang expression (Phase 3) — fall back to 0.
+                    if (molang == null) molang = new MolangNode[3];
+                    molang[i] = MolangCompiler.compile(s);
                 }
             }
         }
-        return out;
+        return new Vec3WithMolang(num, molang);
     }
 
-    /** Resolves {@code "pre"}/{@code "post"} payload into a vec3. */
-    private static float[] readKfPart(JsonElement kfPart) {
-        if (kfPart == null) return new float[3];
+    private static Vec3WithMolang readVec3FromKfPart(JsonElement kfPart) {
+        if (kfPart == null) return Vec3WithMolang.zero();
         if (kfPart.isJsonArray()) return readVec3(kfPart);
         if (kfPart.isJsonObject()) {
             JsonObject o = kfPart.getAsJsonObject();
             if (o.has("vector")) return readVec3(o.get("vector"));
         }
-        return new float[3];
+        return Vec3WithMolang.zero();
+    }
+
+    /**
+     * In-place mirror + unit conversion to match the bake-time X flip applied
+     * to {@link BakedModel} bones. Both numeric and Molang slots get the same
+     * treatment so the sampler can ignore the difference.
+     *
+     * <ul>
+     *   <li>{@code rotation}: convert to radians, negate X and Y, keep Z.</li>
+     *   <li>{@code position}: negate X.</li>
+     *   <li>{@code scale}: unchanged (mirror-symmetric).</li>
+     * </ul>
+     */
+    private static void applyMirrorAndUnits(Vec3WithMolang v, byte type) {
+        if (type == BakedBoneChannel.TYPE_ROTATION) {
+            v.num[0] = -v.num[0] * DEG_TO_RAD_F;
+            v.num[1] = -v.num[1] * DEG_TO_RAD_F;
+            v.num[2] =  v.num[2] * DEG_TO_RAD_F;
+            if (v.molang != null) {
+                v.molang[0] = wrap(v.molang[0], -DEG_TO_RAD);
+                v.molang[1] = wrap(v.molang[1], -DEG_TO_RAD);
+                v.molang[2] = wrap(v.molang[2],  DEG_TO_RAD);
+            }
+        } else if (type == BakedBoneChannel.TYPE_POSITION) {
+            v.num[0] = -v.num[0];
+            if (v.molang != null) {
+                v.molang[0] = wrap(v.molang[0], -1.0);
+            }
+        }
+    }
+
+    /** Wraps a Molang node so its result is multiplied by {@code factor}. {@code null} stays {@code null}. */
+    private static MolangNode wrap(MolangNode n, double factor) {
+        if (n == null) return null;
+        if (factor == 1.0) return n;
+        return new MolangNode.Mul(new MolangNode.Const(factor), n);
     }
 
     private static byte parseLerpMode(String s) {
@@ -244,31 +307,6 @@ public final class AnimationBaker {
         return max;
     }
 
-    /**
-     * In-place mirror + unit conversion to match the bake-time X flip applied
-     * to {@link com.dwinovo.chiikawa.anim.baked.BakedModel} bones (see
-     * {@link ModelBaker}). Animation values come from the un-flipped Bedrock
-     * frame, so we apply the same mirror here so that combining a sampled
-     * delta with a baked rest pose produces a consistent local frame.
-     *
-     * <ul>
-     *   <li>{@code rotation}: convert to radians, negate X and Y, keep Z
-     *       (matches {@code ModelBaker.bakeCube}'s rest-rotation flip).</li>
-     *   <li>{@code position}: negate X, keep Y and Z (matches the pivot.x
-     *       negation).</li>
-     *   <li>{@code scale}: unchanged — scale is mirror-symmetric.</li>
-     * </ul>
-     */
-    private static void applyMirrorAndUnits(float[] v, byte type) {
-        if (type == BakedBoneChannel.TYPE_ROTATION) {
-            v[0] = -v[0] * DEG_TO_RAD;
-            v[1] = -v[1] * DEG_TO_RAD;
-            v[2] =  v[2] * DEG_TO_RAD;
-        } else if (type == BakedBoneChannel.TYPE_POSITION) {
-            v[0] = -v[0];
-        }
-    }
-
     private static boolean asBoolean(JsonElement el) {
         if (el.isJsonPrimitive()) {
             JsonPrimitive p = el.getAsJsonPrimitive();
@@ -279,4 +317,34 @@ public final class AnimationBaker {
     }
 
     private record TimedKey(float time, JsonElement value) {}
+
+    /**
+     * Mutable carrier used during baking: numeric values + parallel optional
+     * Molang nodes. We mutate it in {@code applyMirrorAndUnits} rather than
+     * allocating new arrays.
+     */
+    private static final class Vec3WithMolang {
+        final float[] num;
+        MolangNode[] molang;
+
+        Vec3WithMolang(float[] num, MolangNode[] molang) {
+            this.num = num;
+            this.molang = molang;
+        }
+
+        static Vec3WithMolang zero() {
+            return new Vec3WithMolang(new float[3], null);
+        }
+
+        Vec3WithMolang shallowCopy() {
+            float[] n = new float[3];
+            System.arraycopy(num, 0, n, 0, 3);
+            MolangNode[] m = null;
+            if (molang != null) {
+                m = new MolangNode[3];
+                System.arraycopy(molang, 0, m, 0, 3);
+            }
+            return new Vec3WithMolang(n, m);
+        }
+    }
 }

@@ -24,4 +24,8 @@ public class ChiikawaRenderState extends LivingEntityRenderState {
     public Identifier texture;
     /** Snapshot of layer-0 (main) animation channel. {@code null} if nothing is playing. */
     public AnimationChannel mainChannel;
+    /** Snapshots of any non-main triggered channels. {@code null} entries are skipped. */
+    public AnimationChannel[] subChannels;
+    /** {@code walkAnimation.speed(partialTick)} — feeds Molang {@code query.ground_speed}. */
+    public float walkSpeed;
 }
