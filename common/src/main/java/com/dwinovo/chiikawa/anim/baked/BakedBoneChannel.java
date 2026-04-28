@@ -1,5 +1,7 @@
 package com.dwinovo.chiikawa.anim.baked;
 
+import com.dwinovo.chiikawa.anim.molang.MolangNode;
+
 /**
  * One animation channel (rotation, position, or scale) for one bone.
  *
@@ -48,14 +50,24 @@ public final class BakedBoneChannel {
     public final float[] values;
     /** Per-keyframe interpolation mode for the segment starting at this key. Length = numKeys. */
     public final byte[] lerpModes;
+    /**
+     * Optional per-slot Molang AST. {@code null} for pure-numeric channels (the
+     * common case). When non-null, has the same length as {@link #values}; a
+     * non-null entry overrides the corresponding numeric slot at sample time.
+     * Each entry has the bake-time mirror / unit conversion already wrapped in,
+     * so the sampler treats Molang and numeric slots identically.
+     */
+    public final MolangNode[] molangSlots;
 
     public BakedBoneChannel(int boneIdx, byte channelType, boolean constant,
-                            float[] times, float[] values, byte[] lerpModes) {
+                            float[] times, float[] values, byte[] lerpModes,
+                            MolangNode[] molangSlots) {
         this.boneIdx = boneIdx;
         this.channelType = channelType;
         this.constant = constant;
         this.times = times;
         this.values = values;
         this.lerpModes = lerpModes;
+        this.molangSlots = molangSlots;
     }
 }

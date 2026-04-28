@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.entity.impl;
 import com.dwinovo.chiikawa.anim.api.ChiikawaAnimated;
 import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.PetMode;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.sound.PetSoundSet;
 import com.dwinovo.chiikawa.sound.PetSoundSets;
@@ -38,6 +39,17 @@ public class ChiikawaPet extends AbstractPet implements ChiikawaAnimated {
             petAnimator = new PetAnimator();
         }
         return petAnimator;
+    }
+
+    @Override
+    public String getMainAnimationName(float walkSpeed) {
+        if (getPetMode() == PetMode.SIT) return "sit";
+        // Threshold matches GeckoLib's AnimationState.isMoving (0.15). The
+        // smoothed walkAnimation.speed decays exponentially toward 0 after
+        // the entity stops, so a `> 0` check would treat the tail of the
+        // decay as still-moving and never fall back to idle.
+        if (walkSpeed > 0.15f) return "run";
+        return "idle";
     }
 
     @Override
