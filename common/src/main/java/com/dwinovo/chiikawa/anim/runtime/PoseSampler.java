@@ -13,7 +13,7 @@ import com.dwinovo.chiikawa.anim.molang.MolangNode;
  * counter to advance, so {@code InventoryScreen}'s second
  * {@code extractRenderState} call cannot accidentally double-step animation.
  *
- * <h3>Pose buffer layout</h3>
+ * <h2>Pose buffer layout</h2>
  * Caller-owned, reused across frames. Per bone:
  * <pre>
  *   [b * 9 + 0..2] rotation delta  (radians, XYZ Euler, applied on top of rest pose)
@@ -22,7 +22,7 @@ import com.dwinovo.chiikawa.anim.molang.MolangNode;
  * </pre>
  * Use {@link #resetIdentity} before each frame to clear stale data.
  *
- * <h3>Molang slots</h3>
+ * <h2>Molang slots</h2>
  * Channels carry an optional parallel {@link MolangNode} array. When a slot
  * is non-null, it is evaluated against the supplied {@link MolangContext}
  * and overrides the numeric value at that slot. The compiler has already

@@ -26,7 +26,7 @@ import java.util.Map;
  * raw {@code JsonObject} rather than introducing a Gson POJO layer that would
  * otherwise be mostly {@code JsonElement} fields anyway.
  *
- * <h3>Numbers vs Molang</h3>
+ * <h2>Numbers vs Molang</h2>
  * Each scalar slot can be either a numeric literal or a Molang expression
  * string. Numeric values are pre-converted (deg→rad, X-mirror) at bake time
  * and stored in the channel's {@code values} array. Molang strings are
