@@ -57,16 +57,7 @@ sourceSets.each {
     it.java.destinationDirectory = dir
 }
 
-// GeckoLib Maven repository
 repositories {
-    maven {
-        name = 'GeckoLib'
-        url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
-        content {
-            includeGroupByRegex("software\\.bernie.*")
-            includeGroup("com.eliotlash.mclib")
-        }
-    }
     maven {
         name = 'Modrinth'
         url = 'https://api.modrinth.com/maven'
@@ -77,14 +68,6 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
-
-    // GeckoLib - 使用 fg.deobf() 进行反混淆 (参考 Context7 官方文档)
-    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-${minecraft_version}:${geckolib_version}")
-    jarJar("software.bernie.geckolib:geckolib-forge-${minecraft_version}:${geckolib_version}") {
-        jarJar.ranged(it, "[${geckolib_version},)")
-    }
-    
-
 }
 
 jar {
