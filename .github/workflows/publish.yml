@@ -129,8 +129,6 @@ jobs:
           game-version-filter: none
           version-type: ${{ steps.meta.outputs.version_type }}
           github-prerelease: ${{ steps.meta.outputs.github_prerelease }}
-          dependencies: |
-            geckolib(embedded)
 
           curseforge-id: 1106419
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
@@ -152,8 +150,6 @@ jobs:
           game-version-filter: none
           version-type: ${{ steps.meta.outputs.version_type }}
           github-prerelease: ${{ steps.meta.outputs.github_prerelease }}
-          dependencies: |
-            geckolib(embedded)
 
           curseforge-id: 1106419
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
