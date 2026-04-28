@@ -91,20 +91,31 @@ public final class ModelRenderer {
         float rotX = bone.restRotX + dRotX;
         float rotY = bone.restRotY + dRotY;
         float rotZ = bone.restRotZ + dRotZ;
-        boolean hasRot = rotX != 0f || rotY != 0f || rotZ != 0f;
+        boolean hasRot   = rotX != 0f || rotY != 0f || rotZ != 0f;
         boolean hasScale = sX != 1f || sY != 1f || sZ != 1f;
+        boolean hasPos   = dPosX != 0f || dPosY != 0f || dPosZ != 0f;
+        boolean modifiesPose = hasRot || hasScale || hasPos;
 
-        stack.pushPose();
-        // Conjugated bone transform: T(pivot + dPos) · R · S · T(-pivot).
-        stack.translate(bone.pivotX + dPosX, bone.pivotY + dPosY, bone.pivotZ + dPosZ);
-        if (hasRot) {
-            rotBuf.identity().rotationXYZ(rotX, rotY, rotZ);
-            stack.last().rotate(rotBuf);
+        // Skip the push/pop entirely for identity bones (the common case for
+        // organizational bones with no rest rotation and no animation slot).
+        // For pos-only bones the full T(pivot+dPos) · I · I · T(-pivot)
+        // sandwich collapses to a single T(dPos), saving one matrix mul.
+        if (modifiesPose) {
+            stack.pushPose();
+            if (hasRot || hasScale) {
+                stack.translate(bone.pivotX + dPosX, bone.pivotY + dPosY, bone.pivotZ + dPosZ);
+                if (hasRot) {
+                    rotBuf.identity().rotationXYZ(rotX, rotY, rotZ);
+                    stack.last().rotate(rotBuf);
+                }
+                if (hasScale) {
+                    stack.scale(sX, sY, sZ);
+                }
+                stack.translate(-bone.pivotX, -bone.pivotY, -bone.pivotZ);
+            } else {
+                stack.translate(dPosX, dPosY, dPosZ);
+            }
         }
-        if (hasScale) {
-            stack.scale(sX, sY, sZ);
-        }
-        stack.translate(-bone.pivotX, -bone.pivotY, -bone.pivotZ);
 
         for (int c = bone.cubeStart, end = bone.cubeStart + bone.cubeCount; c < end; c++) {
             renderCube(model.cubes[c], stack, vc, packedLight, packedOverlay);
@@ -113,7 +124,9 @@ public final class ModelRenderer {
             renderBone(model, childIdx, stack, vc, packedLight, packedOverlay, poseBuf);
         }
 
-        stack.popPose();
+        if (modifiesPose) {
+            stack.popPose();
+        }
     }
 
     private void renderCube(BakedCube cube, PoseStack stack, VertexConsumer vc,
