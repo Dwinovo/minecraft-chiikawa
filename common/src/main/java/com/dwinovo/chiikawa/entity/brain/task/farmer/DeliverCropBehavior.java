@@ -90,7 +90,7 @@ public class DeliverCropBehavior extends Behavior<AbstractPet> {
                 this.openContainerPos = containerPos;
                 BlockEntity blockEntity = world.getBlockEntity(containerPos);
                 if (blockEntity instanceof ChestBlockEntity) {
-                    pet.triggerAnim("main", "use_mainhand");
+                    pet.triggerAnim("use_mainhand");
                     world.playSound(null, containerPos.getX(), containerPos.getY(), containerPos.getZ(),
                         SoundEvents.CHEST_OPEN, SoundSource.BLOCKS, 1.0F, 1.0F);
                     world.blockEvent(containerPos, world.getBlockState(containerPos).getBlock(), 1, 1);
