@@ -11,7 +11,6 @@ import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
 import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
 import com.dwinovo.chiikawa.anim.runtime.PoseSampler;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -21,6 +20,7 @@ import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import org.joml.Quaternionf;
 
 /**
@@ -44,10 +44,14 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     protected final Identifier textureLocation;
     protected final Identifier defaultLoopKey;
 
+    /** Bone name on every pet model where the mainhand item attaches. */
+    private static final String HELD_ITEM_BONE = "RightHandLocator";
+
     private final ModelRenderer mesh = new ModelRenderer();
     private final Quaternionf rotBuf = new Quaternionf();
     private final MolangContext molangCtx = new MolangContext();
     private final BoneInterceptor[] interceptors = { new PetBoneInterceptor() };
+    private final BoneAttachmentLayer heldItemLayer = new BoneAttachmentLayer();
 
     protected ChiikawaEntityRenderer(EntityRendererProvider.Context ctx, String name) {
         super(ctx);
@@ -85,6 +89,12 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             // bodyRot/yRot stomp performed by InventoryScreen.renderEntityInInventoryFollowsMouse.
             state.netHeadYaw = net.minecraft.util.Mth.wrapDegrees(headRot - bodyRot);
             state.headPitch  = pitch;
+
+            // Stash the live mainhand stack — we resolve it into a fresh
+            // ItemStackRenderState at submit time, matching GeckoLib's call
+            // pattern exactly (per-frame fresh state, updateForTopItem, level
+            // pulled from Minecraft, owner = null).
+            state.heldItemStack = living.getMainHandItem();
         }
 
         if (entity instanceof ChiikawaAnimated animated) {
@@ -179,6 +189,9 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         collector.submitCustomGeometry(poseStack, type, (drawPose, vc) -> {
             mesh.render(model, drawPose, vc, packedLight, packedOverlay, poseBuf);
         });
+
+        heldItemLayer.submit(model, poseBuf, HELD_ITEM_BONE, poseStack, collector,
+                state.heldItemStack, packedLight);
 
         poseStack.popPose();
     }
