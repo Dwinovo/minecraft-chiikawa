@@ -2,6 +2,8 @@ package com.dwinovo.chiikawa.anim.runtime;
 
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
 import com.dwinovo.chiikawa.anim.baked.BakedBoneChannel;
+import com.dwinovo.chiikawa.anim.molang.MolangContext;
+import com.dwinovo.chiikawa.anim.molang.MolangNode;
 
 /**
  * Pure-function pose sampler. The core of solving GeckoLib issue #848:
@@ -20,11 +22,12 @@ import com.dwinovo.chiikawa.anim.baked.BakedBoneChannel;
  * </pre>
  * Use {@link #resetIdentity} before each frame to clear stale data.
  *
- * <h3>Interpolation</h3>
- * Linear and Catmull-Rom (uniform, 4 control points with end clamping). Step
- * mode is honored as a hold to {@code post[i]}. Edge cases ({@code t}
- * outside {@code [times[0], times[n-1]]}) clamp to the boundary
- * {@code pre} / {@code post} values.
+ * <h3>Molang slots</h3>
+ * Channels carry an optional parallel {@link MolangNode} array. When a slot
+ * is non-null, it is evaluated against the supplied {@link MolangContext}
+ * and overrides the numeric value at that slot. The compiler has already
+ * wrapped each node so its output includes the same X-mirror / unit
+ * conversion as the numeric path — no special-case branching here.
  */
 public final class PoseSampler {
 
@@ -35,11 +38,6 @@ public final class PoseSampler {
 
     private PoseSampler() {}
 
-    /**
-     * Writes identity pose (rotation 0, position 0, scale 1) into every bone
-     * slot of {@code poseBuf}. Caller is responsible for sizing {@code poseBuf}
-     * to at least {@code boneCount * FLOATS_PER_BONE}.
-     */
     public static void resetIdentity(float[] poseBuf, int boneCount) {
         for (int b = 0; b < boneCount; b++) {
             int base = b * FLOATS_PER_BONE;
@@ -49,18 +47,23 @@ public final class PoseSampler {
         }
     }
 
-    /** Samples one channel into {@code poseBuf}. {@code null} channels are skipped. */
-    public static void sample(AnimationChannel channel, long nowNs, float[] poseBuf) {
+    /**
+     * Samples one channel into {@code poseBuf}. {@code null} channels are
+     * skipped. Updates {@code ctx.vars[SLOT_ANIM_TIME]} so any Molang nodes
+     * referencing {@code query.anim_time} see this channel's local time.
+     */
+    public static void sample(AnimationChannel channel, long nowNs,
+                              MolangContext ctx, float[] poseBuf) {
         if (channel == null) return;
         BakedAnimation anim = channel.animation();
         if (anim == null) return;
         float t = computeAnimTime(channel, nowNs);
+        ctx.vars[MolangContext.SLOT_ANIM_TIME] = t;
         for (BakedBoneChannel ch : anim.channels) {
-            applyChannel(ch, t, poseBuf);
+            applyChannel(ch, t, ctx, poseBuf);
         }
     }
 
-    /** Computes the local animation time in seconds for {@code channel} at {@code nowNs}. */
     public static float computeAnimTime(AnimationChannel channel, long nowNs) {
         BakedAnimation anim = channel.animation();
         float elapsed = (float) ((nowNs - channel.startTimeNs()) / 1.0e9);
@@ -75,15 +78,15 @@ public final class PoseSampler {
         return elapsed;
     }
 
-    private static void applyChannel(BakedBoneChannel ch, float t, float[] poseBuf) {
+    private static void applyChannel(BakedBoneChannel ch, float t, MolangContext ctx, float[] poseBuf) {
         int base = ch.boneIdx * FLOATS_PER_BONE + offsetFor(ch.channelType);
         if (ch.constant) {
-            poseBuf[base]     = ch.values[0];
-            poseBuf[base + 1] = ch.values[1];
-            poseBuf[base + 2] = ch.values[2];
+            poseBuf[base]     = readSlot(ch, 0, ctx);
+            poseBuf[base + 1] = readSlot(ch, 1, ctx);
+            poseBuf[base + 2] = readSlot(ch, 2, ctx);
             return;
         }
-        sampleKeyframed(ch, t, poseBuf, base);
+        sampleKeyframed(ch, t, ctx, poseBuf, base);
     }
 
     private static int offsetFor(byte type) {
@@ -95,25 +98,33 @@ public final class PoseSampler {
         };
     }
 
-    private static void sampleKeyframed(BakedBoneChannel ch, float t, float[] poseBuf, int base) {
+    /** Returns slot {@code i}'s value, evaluating its Molang node if one is bound. */
+    private static float readSlot(BakedBoneChannel ch, int slotIdx, MolangContext ctx) {
+        MolangNode[] slots = ch.molangSlots;
+        if (slots != null && slotIdx < slots.length && slots[slotIdx] != null) {
+            return (float) slots[slotIdx].eval(ctx);
+        }
+        return ch.values[slotIdx];
+    }
+
+    private static void sampleKeyframed(BakedBoneChannel ch, float t, MolangContext ctx,
+                                        float[] poseBuf, int base) {
         float[] times = ch.times;
-        float[] values = ch.values;
         int n = times.length;
         if (n == 0) return;
 
         if (t <= times[0]) {
             // Before first key — use its pre.
-            poseBuf[base]     = values[0];
-            poseBuf[base + 1] = values[1];
-            poseBuf[base + 2] = values[2];
+            poseBuf[base]     = readSlot(ch, 0, ctx);
+            poseBuf[base + 1] = readSlot(ch, 1, ctx);
+            poseBuf[base + 2] = readSlot(ch, 2, ctx);
             return;
         }
         if (t >= times[n - 1]) {
-            // After last key — use its post.
             int last = (n - 1) * 6;
-            poseBuf[base]     = values[last + 3];
-            poseBuf[base + 1] = values[last + 4];
-            poseBuf[base + 2] = values[last + 5];
+            poseBuf[base]     = readSlot(ch, last + 3, ctx);
+            poseBuf[base + 1] = readSlot(ch, last + 4, ctx);
+            poseBuf[base + 2] = readSlot(ch, last + 5, ctx);
             return;
         }
 
@@ -130,22 +141,21 @@ public final class PoseSampler {
         int p2Base = (i + 1) * 6;      // pre[i+1]
 
         if (lerp == BakedBoneChannel.LERP_STEP) {
-            poseBuf[base]     = values[p1Base];
-            poseBuf[base + 1] = values[p1Base + 1];
-            poseBuf[base + 2] = values[p1Base + 2];
+            poseBuf[base]     = readSlot(ch, p1Base,     ctx);
+            poseBuf[base + 1] = readSlot(ch, p1Base + 1, ctx);
+            poseBuf[base + 2] = readSlot(ch, p1Base + 2, ctx);
             return;
         }
 
         if (lerp == BakedBoneChannel.LERP_CATMULL_ROM) {
-            // Edge clamping: P0 = post[i-1] (or post[i] at start), P3 = pre[i+2] (or pre[i+1] at end).
             int p0Base = i > 0 ? (i - 1) * 6 + 3 : p1Base;
             int p3Base = (i + 2 < n) ? (i + 2) * 6 : p2Base;
             for (int axis = 0; axis < 3; axis++) {
                 poseBuf[base + axis] = catmullRom(
-                        values[p0Base + axis],
-                        values[p1Base + axis],
-                        values[p2Base + axis],
-                        values[p3Base + axis],
+                        readSlot(ch, p0Base + axis, ctx),
+                        readSlot(ch, p1Base + axis, ctx),
+                        readSlot(ch, p2Base + axis, ctx),
+                        readSlot(ch, p3Base + axis, ctx),
                         u);
             }
             return;
@@ -153,16 +163,12 @@ public final class PoseSampler {
 
         // Linear (default).
         for (int axis = 0; axis < 3; axis++) {
-            float a = values[p1Base + axis];
-            float b = values[p2Base + axis];
+            float a = readSlot(ch, p1Base + axis, ctx);
+            float b = readSlot(ch, p2Base + axis, ctx);
             poseBuf[base + axis] = a + (b - a) * u;
         }
     }
 
-    /**
-     * Uniform Catmull-Rom basis: passes through P1 at u=0 and P2 at u=1.
-     * Tangents use neighbors P0 and P3.
-     */
     private static float catmullRom(float p0, float p1, float p2, float p3, float u) {
         float u2 = u * u;
         float u3 = u2 * u;
@@ -174,7 +180,6 @@ public final class PoseSampler {
         );
     }
 
-    /** Returns the largest {@code i} with {@code arr[i] <= t}. Caller ensures {@code t} is in range. */
     private static int binarySearchLE(float[] arr, float t) {
         int lo = 0;
         int hi = arr.length - 1;
