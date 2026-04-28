@@ -49,16 +49,20 @@ public final class AnimationBaker {
         JsonElement animsEl = root.get("animations");
         if (animsEl == null || !animsEl.isJsonObject()) return out;
 
+        int totalChannels = 0;
         for (Map.Entry<String, JsonElement> entry : animsEl.getAsJsonObject().entrySet()) {
             String name = entry.getKey();
             if (!entry.getValue().isJsonObject()) continue;
             try {
                 BakedAnimation baked = bakeOne(name, entry.getValue().getAsJsonObject(), model);
                 out.put(name, baked);
+                totalChannels += baked.channels.length;
             } catch (Exception ex) {
                 Constants.LOG.error("[chiikawa-anim] failed to bake animation {}: {}", name, ex.toString());
             }
         }
+        Constants.LOG.debug("[chiikawa-anim] baked {} animations, {} live channels (identity channels pruned)",
+                out.size(), totalChannels);
         return out;
     }
 
@@ -97,6 +101,7 @@ public final class AnimationBaker {
             // Bare-array shorthand ("rotation": [x, y, z]).
             Vec3WithMolang v = readVec3(data);
             applyMirrorAndUnits(v, type);
+            if (isConstantIdentity(type, v)) return;
             out.add(new BakedBoneChannel(boneIdx, type, true, EMPTY_FLOATS, v.num, EMPTY_BYTES, v.molang));
             return;
         }
@@ -107,6 +112,7 @@ public final class AnimationBaker {
         if (obj.has("vector") && !hasTimeKeys(obj)) {
             Vec3WithMolang v = readVec3(obj.get("vector"));
             applyMirrorAndUnits(v, type);
+            if (isConstantIdentity(type, v)) return;
             out.add(new BakedBoneChannel(boneIdx, type, true, EMPTY_FLOATS, v.num, EMPTY_BYTES, v.molang));
             return;
         }
@@ -202,7 +208,38 @@ public final class AnimationBaker {
             lerpModes[i] = lerp;
         }
 
+        if (molangSlots == null && isKeyframedIdentity(type, values)) return;
         out.add(new BakedBoneChannel(boneIdx, type, false, times, values, lerpModes, molangSlots));
+    }
+
+    /**
+     * True when a constant channel's value is the no-op identity for its
+     * type — rotation/position must be all zero, scale must be all one.
+     * Identity channels never affect the pose buffer (which is reset to
+     * identity each frame), so dropping them at bake time saves a per-frame
+     * sample call and a buffer write per skipped channel.
+     */
+    private static boolean isConstantIdentity(byte type, Vec3WithMolang v) {
+        if (v.molang != null) return false;
+        if (type == BakedBoneChannel.TYPE_SCALE) {
+            return v.num[0] == 1f && v.num[1] == 1f && v.num[2] == 1f;
+        }
+        return v.num[0] == 0f && v.num[1] == 0f && v.num[2] == 0f;
+    }
+
+    /**
+     * True when every keyframe slot in {@code values} (laid out as 6 floats
+     * per key — pre.xyz then post.xyz) is the identity value for the channel
+     * type. Some authoring tools emit fully-zero rotation tracks alongside
+     * real data; pruning them avoids the binary search + interpolation work
+     * for a channel that contributes nothing.
+     */
+    private static boolean isKeyframedIdentity(byte type, float[] values) {
+        float identity = type == BakedBoneChannel.TYPE_SCALE ? 1f : 0f;
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] != identity) return false;
+        }
+        return true;
     }
 
     private static boolean hasTimeKeys(JsonObject obj) {
