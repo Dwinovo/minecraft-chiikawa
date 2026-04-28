@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.anim.api.ChiikawaAnimated;
 import com.dwinovo.chiikawa.anim.api.ModelLibrary;
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
+import com.dwinovo.chiikawa.anim.molang.MolangContext;
 import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
 import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
 import com.dwinovo.chiikawa.anim.runtime.PoseSampler;
@@ -45,6 +46,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
 
     private final ModelRenderer mesh = new ModelRenderer();
     private final Quaternionf rotBuf = new Quaternionf();
+    private final MolangContext molangCtx = new MolangContext();
 
     protected ChiikawaEntityRenderer(EntityRendererProvider.Context ctx, String name) {
         super(ctx);
@@ -76,22 +78,40 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             state.xRot = net.minecraft.util.Mth.rotLerp(partialTick, living.xRotO, living.getXRot());
             state.scale = living.getScale();
             state.ageInTicks = living.tickCount + partialTick;
+            state.walkSpeed = living.walkAnimation.speed(partialTick);
         }
 
         if (entity instanceof ChiikawaAnimated animated) {
             PetAnimator animator = animated.getPetAnimator();
-            // Idempotent: setMain is a no-op if the same animation+looping pair is
-            // already on layer 0, so a second extractRenderState in the same frame
-            // (e.g. InventoryScreen.renderEntityInInventoryFollowsMouse) does not
-            // restart the timer. The captured channel is immutable, so submit can
-            // sample it freely.
-            BakedAnimation idle = AnimationLibrary.get(defaultLoopKey);
-            if (idle != null && animator.get(0) == null) {
-                animator.setMain(idle, true);
+            // Pick the desired main loop based on entity state. setMain is
+            // idempotent — switches only when the wanted animation actually
+            // changes, so a second extractRenderState in the same frame
+            // (InventoryScreen.renderEntityInInventoryFollowsMouse) does not
+            // restart the timer.
+            String wantedName = animated.getMainAnimationName(state.walkSpeed);
+            BakedAnimation wanted = AnimationLibrary.get(animKey(wantedName));
+            if (wanted == null) wanted = AnimationLibrary.get(defaultLoopKey);
+            if (wanted != null) {
+                animator.setMain(wanted, true);
             }
-            AnimationChannel current = animator.get(0);
-            state.mainChannel = current;
+            state.mainChannel = animator.get(0);
+            // Snapshot any non-main channels populated by trigger(). The
+            // AnimationChannel records are immutable so this is a safe shallow
+            // copy.
+            AnimationChannel[] subs = null;
+            for (int i = 1; i < PetAnimator.CHANNEL_COUNT; i++) {
+                AnimationChannel sub = animator.get(i);
+                if (sub == null) continue;
+                if (subs == null) subs = new AnimationChannel[PetAnimator.CHANNEL_COUNT - 1];
+                subs[i - 1] = sub;
+            }
+            state.subChannels = subs;
         }
+    }
+
+    private Identifier animKey(String name) {
+        return Identifier.fromNamespaceAndPath(modelKey.getNamespace(),
+                modelKey.getPath() + "/" + name);
     }
 
     @Override
@@ -108,8 +128,33 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         int boneCount = model.bones.length;
         float[] poseBuf = new float[boneCount * PoseSampler.FLOATS_PER_BONE];
         PoseSampler.resetIdentity(poseBuf, boneCount);
+
+        // Frame-level Molang context. query.anim_time is filled per-channel by
+        // PoseSampler; ground_speed feeds the locomotion math.
+        //
+        // ysm.head_yaw / ysm.head_pitch are intentionally LEFT AT 0 (the value
+        // installed by reset()). The chiikawa animation file references them
+        // for both Root.rotZ (`0.4*ysm.head_yaw`, a body-lean term) and
+        // AllHead.rotY (`math.clamp(ysm.head_yaw,-60,60)`), but the legacy
+        // GeckoLib pipeline never resolved the ysm namespace either — head /
+        // ear / tail orientation was driven procedurally by
+        // AbstractPetRender.adjustModelBonesForRender, which OVERRIDES whatever
+        // the animation said for those bones. Phase 4 ships a BoneInterceptor
+        // that replicates that procedural path; until then keeping these slots
+        // at 0 matches the proven behaviour and prevents the run animation
+        // from tilting the body 70°+ when head_yaw approaches ±180 (the
+        // "GUI flop on its side" symptom).
+        molangCtx.reset();
+        molangCtx.vars[MolangContext.SLOT_GROUND_SPEED] = state.walkSpeed;
+
+        long nowNs = System.nanoTime();
         if (state.mainChannel != null) {
-            PoseSampler.sample(state.mainChannel, System.nanoTime(), poseBuf);
+            PoseSampler.sample(state.mainChannel, nowNs, molangCtx, poseBuf);
+        }
+        if (state.subChannels != null) {
+            for (AnimationChannel sub : state.subChannels) {
+                if (sub != null) PoseSampler.sample(sub, nowNs, molangCtx, poseBuf);
+            }
         }
 
         poseStack.pushPose();
