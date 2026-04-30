@@ -2,8 +2,8 @@ package com.dwinovo.chiikawa;
 
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.entity.EntityRenderers;
-import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -40,6 +40,9 @@ public class ChiikawaForgeClient {
 
     @SubscribeEvent
     static void registerReloadListeners(RegisterClientReloadListenersEvent event) {
+        // Bakes the .geo.json / .animation.json into ModelLibrary + AnimationLibrary.
+        // Without this the renderer's ModelLibrary.get(...) returns null and submit()
+        // short-circuits — entity exists and is interactable but renders as nothing.
         event.registerReloadListener(new BedrockResourceLoader());
     }
 }
