@@ -47,6 +47,3 @@ jobs:
           loaders: neoforge
 
           version-type: ${{ github.event.release.prerelease && 'beta' || 'release' }}
-
-          dependencies: |
-            geckolib(embedded)

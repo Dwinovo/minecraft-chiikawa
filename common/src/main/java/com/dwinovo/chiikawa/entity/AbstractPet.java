@@ -1,16 +1,24 @@
 package com.dwinovo.chiikawa.entity;
 
+import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.anim.api.AnimationLibrary;
+import com.dwinovo.chiikawa.anim.api.ChiikawaAnimated;
+import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
+import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
 import com.dwinovo.chiikawa.entity.job.api.IPetJob;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.init.InitSensor;
+import com.dwinovo.chiikawa.item.PetDollData;
 import com.dwinovo.chiikawa.sound.PetSoundSet;
 import com.dwinovo.chiikawa.utils.Utils;
 import com.mojang.serialization.Dynamic;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.Container;
@@ -32,6 +40,7 @@ import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ArrowItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.Items;
@@ -42,18 +51,27 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animatable.manager.AnimatableManager;
-import software.bernie.geckolib.animatable.processing.AnimationController;
-import software.bernie.geckolib.animation.PlayState;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
-public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttackMob {
+public class AbstractPet extends TamableAnimal implements RangedAttackMob, ChiikawaAnimated {
     public static final int BACKPACK_SIZE = 16;
     private static final EntityDataAccessor<Byte> PET_MODE = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Integer> PET_JOB = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.INT);
+    /**
+     * Synced packed integer that drives one-shot animation triggers across the
+     * server/client boundary. Layout: high 24 bits = monotonic sequence
+     * counter, low 8 bits = animation id (see {@code TRIGGER_*}). Bumping the
+     * sequence on the server causes {@link #onSyncedDataUpdated} to fire on
+     * every client watcher, which in turn calls {@link PetAnimator#trigger}.
+     */
+    private static final EntityDataAccessor<Integer> ANIM_TRIGGER = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.INT);
+
+    /** Animation-id namespace for {@link #ANIM_TRIGGER}'s low byte. */
+    public static final int TRIGGER_NONE         = 0;
+    public static final int TRIGGER_USE_MAINHAND = 1;
+    public static final int TRIGGER_SWORD_ATTACK = 2;
+
+    /** Layer used by triggered one-shots; main loop owns layer 0. */
+    private static final int TRIGGER_LAYER = 1;
     private static final java.util.List<MemoryModuleType<?>> MEMORY_TYPES = java.util.List.of(
         MemoryModuleType.PATH,
         MemoryModuleType.DOORS_TO_CLOSE,
@@ -79,7 +97,10 @@ public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttac
         InitSensor.PET_CONTAINER_SENSOR.get(),
         InitSensor.PET_ITEM_ENTITY_SENSOR.get()
     );
-    private final AnimatableInstanceCache animatableInstanceCache = GeckoLibUtil.createInstanceCache(this);
+    /** Lazily allocated on first client-side read; server instances pay nothing. */
+    private PetAnimator petAnimator;
+    /** Last {@link #ANIM_TRIGGER} sequence number this client handled. Server copy is unused. */
+    private int lastSeenTriggerSeq;
     private final SimpleContainer backpack = new SimpleContainer(BACKPACK_SIZE);
 
     protected AbstractPet(EntityType<? extends TamableAnimal> entityType, Level level) {
@@ -244,30 +265,21 @@ public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttac
     }
 
     @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        AnimationController<AbstractPet> main = new AnimationController<>("main", 5, state -> {
-            RawAnimation builder = RawAnimation.begin();
-            if (this.getPetMode() == PetMode.SIT) {
-                builder.thenLoop("sit");
-            } else if (state.isMoving()) {
-                builder.thenLoop("run");
-            } else {
-                builder.thenLoop("idle");
-            }
-            state.setAndContinue(builder);
-            return PlayState.CONTINUE;
-        });
-
-        AnimationController<AbstractPet> sub = new AnimationController<>("sub", 1, state -> PlayState.STOP);
-
-        main.triggerableAnim("use_mainhand", RawAnimation.begin().thenPlay("use_mainhand"))
-            .triggerableAnim("sword_attack", RawAnimation.begin().thenPlay("sword_attack"));
-        controllers.add(main, sub);
+    public PetAnimator getPetAnimator() {
+        if (petAnimator == null) {
+            petAnimator = new PetAnimator();
+        }
+        return petAnimator;
     }
 
     @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return this.animatableInstanceCache;
+    public String getMainAnimationName(float walkSpeed) {
+        if (getPetMode() == PetMode.SIT) return "sit";
+        // Small movement threshold: the smoothed walkAnimation.speed decays
+        // exponentially toward 0, so
+        // a `> 0` check would latch the run state forever.
+        if (walkSpeed > 0.15f) return "run";
+        return "idle";
     }
 
     @Override
@@ -275,6 +287,60 @@ public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttac
         super.defineSynchedData(builder);
         builder.define(PET_MODE, (byte) PetMode.FOLLOW.ordinal());
         builder.define(PET_JOB, InitRegistry.NONE_ID);
+        builder.define(ANIM_TRIGGER, 0);
+    }
+
+    /**
+     * Bumps the synced trigger so all client watchers fire {@code name} once
+     * on the pet's animator. Server-only; calling on the client is a no-op
+     * because the value would not propagate. Unknown animation names are
+     * silently ignored.
+     */
+    public void triggerAnim(String name) {
+        if (level().isClientSide()) return;
+        int id = animIdFor(name);
+        if (id == TRIGGER_NONE) return;
+        int packed = entityData.get(ANIM_TRIGGER);
+        int seq = ((packed >>> 8) + 1) & 0xFFFFFF;
+        // Avoid the wrap-to-zero ambiguity (seq 0 = "never triggered").
+        if (seq == 0) seq = 1;
+        entityData.set(ANIM_TRIGGER, (seq << 8) | (id & 0xFF));
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if (!level().isClientSide() || !ANIM_TRIGGER.equals(key)) return;
+        int packed = entityData.get(ANIM_TRIGGER);
+        int seq = packed >>> 8;
+        if (seq == 0 || seq == lastSeenTriggerSeq) return;
+        lastSeenTriggerSeq = seq;
+        String name = animNameFor(packed & 0xFF);
+        if (name == null) return;
+        ResourceLocation typeId = BuiltInRegistries.ENTITY_TYPE.getKey(getType());
+        BakedAnimation anim = AnimationLibrary.get(
+                ResourceLocation.fromNamespaceAndPath(typeId.getNamespace(), typeId.getPath() + "/" + name));
+        if (anim != null) {
+            getPetAnimator().trigger(TRIGGER_LAYER, anim);
+        } else {
+            Constants.LOG.warn("[chiikawa-anim] no baked animation for trigger '{}' on {}", name, typeId);
+        }
+    }
+
+    private static int animIdFor(String name) {
+        return switch (name) {
+            case "use_mainhand" -> TRIGGER_USE_MAINHAND;
+            case "sword_attack" -> TRIGGER_SWORD_ATTACK;
+            default -> TRIGGER_NONE;
+        };
+    }
+
+    private static String animNameFor(int id) {
+        return switch (id) {
+            case TRIGGER_USE_MAINHAND -> "use_mainhand";
+            case TRIGGER_SWORD_ATTACK -> "sword_attack";
+            default -> null;
+        };
     }
 
     @Override
@@ -306,6 +372,24 @@ public class AbstractPet extends TamableAnimal implements GeoEntity, RangedAttac
             return result;
         }
         return super.mobInteract(player, hand);
+    }
+
+    @Override
+    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
+        super.dropCustomDeathLoot(level, source, recentlyHit);
+
+        Item dollItem = getReviveDollItem();
+        if (dollItem == null) {
+            return;
+        }
+
+        ItemStack dollStack = new ItemStack(dollItem);
+        PetDollData.writePetToDoll(dollStack, this);
+        this.spawnAtLocation(level, dollStack);
+    }
+
+    protected Item getReviveDollItem() {
+        return null;
     }
 
     protected PetSoundSet getSoundSet() {

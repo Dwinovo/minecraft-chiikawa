@@ -118,6 +118,8 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Publish Fabric to Modrinth and CurseForge
+        id: publish_fabric
+        continue-on-error: true
         if: ${{ steps.meta.outputs.fabric_file != '' }}
         uses: Kira-NT/mc-publish@v3.3.0
         with:
@@ -129,8 +131,6 @@ jobs:
           game-version-filter: none
           version-type: ${{ steps.meta.outputs.version_type }}
           github-prerelease: ${{ steps.meta.outputs.github_prerelease }}
-          dependencies: |
-            geckolib(embedded)
 
           curseforge-id: 1106419
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
@@ -152,8 +152,6 @@ jobs:
           game-version-filter: none
           version-type: ${{ steps.meta.outputs.version_type }}
           github-prerelease: ${{ steps.meta.outputs.github_prerelease }}
-          dependencies: |
-            geckolib(embedded)
 
           curseforge-id: 1106419
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}

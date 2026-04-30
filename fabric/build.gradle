@@ -10,10 +10,6 @@ dependencies {
     }
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
-    modImplementation "software.bernie.geckolib:geckolib-fabric-${minecraft_version}:${geckolib_version}"
-    include "software.bernie.geckolib:geckolib-fabric-${minecraft_version}:${geckolib_version}"
-    modCompileOnly "maven.modrinth:jade:${jade_version_fabric}"
-    modRuntimeOnly "maven.modrinth:jade:${jade_version_fabric}"
 }
 
 loom {
@@ -27,6 +23,7 @@ loom {
             setConfigName('Fabric Client')
             ideConfigGenerated(true)
             runDir('runs/client')
+            programArgs '--username', 'dev'
         }
         server {
             server()
