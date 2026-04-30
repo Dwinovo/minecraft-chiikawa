@@ -11,11 +11,11 @@ import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
 import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
 import com.dwinovo.chiikawa.anim.runtime.PoseSampler;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -29,7 +29,7 @@ import org.joml.Quaternionf;
  *
  * <p>{@code modelKey} is the {@code namespace:path} address under which the
  * baked model was registered (e.g. {@code chiikawa:chiikawa}); the matching
- * texture is resolved at submit time from the {@code textureLocation} field,
+ * texture is resolved at render time from the {@code textureLocation} field,
  * and the default loop animation is registered as
  * {@code <modelKey>/<DEFAULT_LOOP_NAME>} (e.g. {@code chiikawa:chiikawa/idle}).
  */
@@ -90,7 +90,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             state.headPitch  = pitch;
 
             // Stash the live mainhand stack. We resolve it into a fresh
-            // ItemStackRenderState at submit time, matching vanilla's
+            // ItemStackRenderState at render time, matching vanilla's
             // per-frame item render state pattern.
             state.heldItemStack = living.getMainHandItem();
         }
@@ -129,16 +129,14 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     }
 
     @Override
-    public void submit(ChiikawaRenderState state, PoseStack poseStack,
-                       SubmitNodeCollector collector, CameraRenderState camera) {
+    public void render(ChiikawaRenderState state, PoseStack poseStack,
+                       MultiBufferSource bufferSource, int packedLight) {
         BakedModel model = ModelLibrary.get(state.modelKey);
         if (model == null) {
+            super.render(state, poseStack, bufferSource, packedLight);
             return;
         }
 
-        // Pose buffer is allocated per-submit because submitCustomGeometry may
-        // defer the draw lambda; a renderer-shared buffer would be overwritten
-        // by the next entity's submit before this one's lambda runs.
         int boneCount = model.bones.length;
         float[] poseBuf = new float[boneCount * PoseSampler.FLOATS_PER_BONE];
         PoseSampler.resetIdentity(poseBuf, boneCount);
@@ -181,15 +179,14 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         poseStack.scale(PIXEL_SCALE, PIXEL_SCALE, PIXEL_SCALE);
 
         RenderType type = RenderType.entityCutoutNoCull(state.texture);
-        int packedLight = state.lightCoords;
         int packedOverlay = net.minecraft.client.renderer.entity.LivingEntityRenderer.getOverlayCoords(state, 0.0f);
-        collector.submitCustomGeometry(poseStack, type, (drawPose, vc) -> {
-            mesh.render(model, drawPose, vc, packedLight, packedOverlay, poseBuf);
-        });
+        VertexConsumer vc = bufferSource.getBuffer(type);
+        mesh.render(model, poseStack, vc, packedLight, packedOverlay, poseBuf);
 
-        heldItemLayer.submit(model, poseBuf, HELD_ITEM_BONE, poseStack, collector,
+        heldItemLayer.render(model, poseBuf, HELD_ITEM_BONE, poseStack, bufferSource,
                 state.heldItemStack, packedLight);
 
         poseStack.popPose();
+        super.render(state, poseStack, bufferSource, packedLight);
     }
 }
