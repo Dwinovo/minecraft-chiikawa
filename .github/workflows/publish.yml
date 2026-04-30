@@ -162,6 +162,8 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Publish Fabric to Modrinth and CurseForge
+        id: publish_fabric
+        continue-on-error: true
         if: ${{ steps.meta.outputs.fabric_file != '' }}
         uses: Kira-NT/mc-publish@v3.3.0
         with:
