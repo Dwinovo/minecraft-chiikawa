@@ -16,7 +16,9 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -33,7 +35,7 @@ import org.joml.Quaternionf;
  * and the default loop animation is registered as
  * {@code <modelKey>/<DEFAULT_LOOP_NAME>} (e.g. {@code chiikawa:chiikawa/idle}).
  */
-public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRenderer<T, ChiikawaRenderState> {
+public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRenderer<T> {
 
     private static final float PIXEL_SCALE = 1.0f / 16.0f;
     /** Animation name played on the main channel when nothing else is set. */
@@ -61,37 +63,27 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
                 name + "/" + DEFAULT_LOOP_NAME);
     }
 
-    @Override
-    public ChiikawaRenderState createRenderState() {
-        return new ChiikawaRenderState();
-    }
-
-    @Override
-    public void extractRenderState(T entity, ChiikawaRenderState state, float partialTick) {
-        super.extractRenderState(entity, state, partialTick);
+    private void fillRenderState(T entity, ChiikawaRenderState state, float partialTick) {
         state.modelKey = modelKey;
         state.texture = textureLocation;
+        state.mainChannel = null;
+        state.subChannels = null;
+        state.walkSpeed = 0.0f;
+        state.bodyRot = 0.0f;
+        state.ageInTicks = entity.tickCount + partialTick;
+        state.netHeadYaw = 0.0f;
+        state.headPitch = 0.0f;
+        state.heldItemStack = ItemStack.EMPTY;
 
-        // Body rotation copied from LivingEntity — vanilla LivingEntityRenderState
-        // owns this normally but EntityRenderer.extractRenderState does not.
         if (entity instanceof LivingEntity living) {
-            float bodyRot = net.minecraft.util.Mth.rotLerp(partialTick, living.yBodyRotO, living.yBodyRot);
-            float headRot = net.minecraft.util.Mth.rotLerp(partialTick, living.yHeadRotO, living.getYHeadRot());
-            float pitch   = net.minecraft.util.Mth.rotLerp(partialTick, living.xRotO, living.getXRot());
+            float bodyRot = Mth.rotLerp(partialTick, living.yBodyRotO, living.yBodyRot);
+            float headRot = Mth.rotLerp(partialTick, living.yHeadRotO, living.getYHeadRot());
+            float pitch   = Mth.rotLerp(partialTick, living.xRotO, living.getXRot());
             state.bodyRot = bodyRot;
-            state.yRot = headRot;
-            state.xRot = pitch;
-            state.scale = living.getScale();
             state.ageInTicks = living.tickCount + partialTick;
             state.walkSpeed = living.walkAnimation.speed(partialTick);
-            // Capture the head-look snapshot here so it survives the post-extract
-            // bodyRot/yRot stomp performed by InventoryScreen.renderEntityInInventoryFollowsMouse.
-            state.netHeadYaw = net.minecraft.util.Mth.wrapDegrees(headRot - bodyRot);
+            state.netHeadYaw = Mth.wrapDegrees(headRot - bodyRot);
             state.headPitch  = pitch;
-
-            // Stash the live mainhand stack. We resolve it into a fresh
-            // ItemStackRenderState at render time, matching vanilla's
-            // per-frame item render state pattern.
             state.heldItemStack = living.getMainHandItem();
         }
 
@@ -129,11 +121,23 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     }
 
     @Override
-    public void render(ChiikawaRenderState state, PoseStack poseStack,
+    public ResourceLocation getTextureLocation(T entity) {
+        return textureLocation;
+    }
+
+    @Override
+    public void render(T entity, float entityYaw, float partialTick, PoseStack poseStack,
                        MultiBufferSource bufferSource, int packedLight) {
+        ChiikawaRenderState state = new ChiikawaRenderState();
+        fillRenderState(entity, state, partialTick);
+        renderState(entity, state, poseStack, bufferSource, packedLight);
+        super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
+    }
+
+    private void renderState(T entity, ChiikawaRenderState state, PoseStack poseStack,
+                             MultiBufferSource bufferSource, int packedLight) {
         BakedModel model = ModelLibrary.get(state.modelKey);
         if (model == null) {
-            super.render(state, poseStack, bufferSource, packedLight);
             return;
         }
 
@@ -175,11 +179,13 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         //  - Y is not flipped (Bedrock is already Y-up; vanilla's scale(-1,-1,1) Y
         //    is for legacy Java entity models with Y-down convention).
         rotBuf.identity().rotationY((float) Math.toRadians(180.0f - state.bodyRot));
-        poseStack.last().rotate(rotBuf);
+        poseStack.mulPose(rotBuf);
         poseStack.scale(PIXEL_SCALE, PIXEL_SCALE, PIXEL_SCALE);
 
         RenderType type = RenderType.entityCutoutNoCull(state.texture);
-        int packedOverlay = net.minecraft.client.renderer.entity.LivingEntityRenderer.getOverlayCoords(state, 0.0f);
+        int packedOverlay = entity instanceof LivingEntity living
+                ? net.minecraft.client.renderer.entity.LivingEntityRenderer.getOverlayCoords(living, 0.0f)
+                : OverlayTexture.NO_OVERLAY;
         VertexConsumer vc = bufferSource.getBuffer(type);
         mesh.render(model, poseStack, vc, packedLight, packedOverlay, poseBuf);
 
@@ -187,6 +193,5 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
                 state.heldItemStack, packedLight);
 
         poseStack.popPose();
-        super.render(state, poseStack, bufferSource, packedLight);
     }
 }
