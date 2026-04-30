@@ -1,15 +1,13 @@
 package com.dwinovo.chiikawa.anim.render;
 
 import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
-import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Render-state snapshot for chiikawa-animated entities. Extends vanilla
- * {@link LivingEntityRenderState} (so all standard fields are populated by
- * the vanilla extract pipeline) and adds the model / texture identity that
- * the renderer uses to look up baked data and bind a texture.
+ * Render-state snapshot for chiikawa-animated entities. Older Minecraft
+ * versions do not expose vanilla entity render states, so this class carries
+ * just the fields needed by the Bedrock renderer.
  *
  * <p>Animation timing is captured as a snapshot of the entity's
  * {@link AnimationChannel} records ({@link AnimationChannel} is immutable, so
@@ -18,7 +16,7 @@ import net.minecraft.world.item.ItemStack;
  * {@link com.dwinovo.chiikawa.anim.runtime.PoseSampler} — extract carries no
  * mutable cursor that could double-step on a second extract call.
  */
-public class ChiikawaRenderState extends LivingEntityRenderState {
+public class ChiikawaRenderState {
     /** Resource key under which the model was registered in {@link com.dwinovo.chiikawa.anim.api.ModelLibrary}. */
     public ResourceLocation modelKey;
     /** Texture path. */
@@ -29,21 +27,20 @@ public class ChiikawaRenderState extends LivingEntityRenderState {
     public AnimationChannel[] subChannels;
     /** {@code walkAnimation.speed(partialTick)} — feeds Molang {@code query.ground_speed}. */
     public float walkSpeed;
+    /** Body yaw in degrees. */
+    public float bodyRot;
+    /** Render age in ticks. */
+    public float ageInTicks;
     /**
      * Head yaw relative to body, in degrees, captured at extract time.
      *
-     * <p>Stored here rather than recomputed from {@link #yRot} − {@link #bodyRot}
-     * at render time because {@link net.minecraft.client.gui.screens.inventory.InventoryScreen#renderEntityInInventoryFollowsMouse}
-     * <em>overwrites</em> {@code bodyRot} / {@code yRot} after extract finishes
-     * (it sets {@code yRot = f * 20}, {@code bodyRot = 180 + f * 20}, giving a
-     * −180 difference that has nothing to do with the entity's real head turn).
-     * Snapshot during extract so render never has to infer it from display
-     * rotations.
+     * <p>Stored here rather than recomputed during drawing so GUI/entity
+     * preview transforms cannot stomp the real head turn.
      */
     public float netHeadYaw;
     /** Head pitch (entity X rotation) in degrees, captured at extract time for the same reason. */
     public float headPitch;
 
-    /** Mainhand item snapshot. Resolved into a fresh ItemStackRenderState while rendering. */
+    /** Mainhand item snapshot rendered while drawing attachments. */
     public ItemStack heldItemStack = ItemStack.EMPTY;
 }

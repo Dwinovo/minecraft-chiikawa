@@ -348,7 +348,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         if (name == null) return;
         ResourceLocation typeId = BuiltInRegistries.ENTITY_TYPE.getKey(getType());
         BakedAnimation anim = AnimationLibrary.get(
-                ResourceLocation.fromNamespaceAndPath(typeId.getNamespace(), typeId.getPath() + "/" + name));
+                new ResourceLocation(typeId.getNamespace(), typeId.getPath() + "/" + name));
         if (anim != null) {
             getPetAnimator().trigger(TRIGGER_LAYER, anim);
         } else {

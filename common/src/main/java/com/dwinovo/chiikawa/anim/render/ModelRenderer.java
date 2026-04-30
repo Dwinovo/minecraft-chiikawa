@@ -104,7 +104,7 @@ public final class ModelRenderer {
                 stack.translate(bone.pivotX + dPosX, bone.pivotY + dPosY, bone.pivotZ + dPosZ);
                 if (hasRot) {
                     rotBuf.identity().rotationXYZ(rotX, rotY, rotZ);
-                    stack.last().rotate(rotBuf);
+                    stack.mulPose(rotBuf);
                 }
                 if (hasScale) {
                     stack.scale(sX, sY, sZ);
@@ -132,7 +132,7 @@ public final class ModelRenderer {
         stack.pushPose();
         if (cube.hasRotation) {
             rotBuf.identity().rotationXYZ(cube.rotX, cube.rotY, cube.rotZ);
-            stack.last().rotateAround(rotBuf, cube.pivotX, cube.pivotY, cube.pivotZ);
+            stack.rotateAround(rotBuf, cube.pivotX, cube.pivotY, cube.pivotZ);
         }
 
         PoseStack.Pose pose = stack.last();
@@ -149,12 +149,13 @@ public final class ModelRenderer {
                 float z = ((mask & 4) != 0) ? cube.maxZ : cube.minZ;
                 float u = cube.faceUV[face][v][0] * invW;
                 float vv = cube.faceUV[face][v][1] * invH;
-                vc.addVertex(pose, x, y, z)
-                        .setColor(255, 255, 255, 255)
-                        .setUv(u, vv)
-                        .setOverlay(packedOverlay)
-                        .setLight(packedLight)
-                        .setNormal(pose, n[0], n[1], n[2]);
+                vc.vertex(pose, x, y, z)
+                        .color(255, 255, 255, 255)
+                        .uv(u, vv)
+                        .overlayCoords(packedOverlay)
+                        .uv2(packedLight)
+                        .normal(pose, n[0], n[1], n[2])
+                        .endVertex();
             }
         }
 
