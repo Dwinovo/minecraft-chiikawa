@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.anim.render;
 
 import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -19,10 +19,10 @@ import net.minecraft.world.item.ItemStack;
  * mutable cursor that could double-step on a second extract call.
  */
 public class ChiikawaRenderState extends LivingEntityRenderState {
-    /** Identifier under which the model was registered in {@link com.dwinovo.chiikawa.anim.api.ModelLibrary}. */
-    public Identifier modelKey;
+    /** Resource key under which the model was registered in {@link com.dwinovo.chiikawa.anim.api.ModelLibrary}. */
+    public ResourceLocation modelKey;
     /** Texture path. */
-    public Identifier texture;
+    public ResourceLocation texture;
     /** Snapshot of layer-0 (main) animation channel. {@code null} if nothing is playing. */
     public AnimationChannel mainChannel;
     /** Snapshots of any non-main triggered channels. {@code null} entries are skipped. */
@@ -37,8 +37,8 @@ public class ChiikawaRenderState extends LivingEntityRenderState {
      * <em>overwrites</em> {@code bodyRot} / {@code yRot} after extract finishes
      * (it sets {@code yRot = f * 20}, {@code bodyRot = 180 + f * 20}, giving a
      * −180 difference that has nothing to do with the entity's real head turn).
-     * Mirrors GeckoLib's strategy of stashing the value in a DataTicket during
-     * extract.
+     * Snapshot during extract so submit never has to infer it from display
+     * rotations.
      */
     public float netHeadYaw;
     /** Head pitch (entity X rotation) in degrees, captured at extract time for the same reason. */
