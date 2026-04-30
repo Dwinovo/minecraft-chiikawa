@@ -25,8 +25,8 @@ import java.util.List;
  * <h2>Soft failure</h2>
  * Unknown variables / functions / unparseable input log a warning and yield
  * {@code Const(0)} rather than throwing. The animation still plays — the
- * affected channel just stays at zero. This matches GeckoLib's "missing
- * variable defaults to 0" behavior and keeps a single bad expression from
+ * affected channel just stays at zero. This keeps missing optional variables
+ * harmless and prevents a single bad expression from
  * breaking the entire pipeline.
  */
 public final class MolangCompiler {
