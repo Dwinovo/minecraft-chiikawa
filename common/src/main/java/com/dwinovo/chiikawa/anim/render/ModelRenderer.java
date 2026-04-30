@@ -104,7 +104,7 @@ public final class ModelRenderer {
                 stack.translate(bone.pivotX + dPosX, bone.pivotY + dPosY, bone.pivotZ + dPosZ);
                 if (hasRot) {
                     rotBuf.identity().rotationXYZ(rotX, rotY, rotZ);
-                    stack.last().rotate(rotBuf);
+                    stack.mulPose(rotBuf);
                 }
                 if (hasScale) {
                     stack.scale(sX, sY, sZ);
@@ -132,7 +132,7 @@ public final class ModelRenderer {
         stack.pushPose();
         if (cube.hasRotation) {
             rotBuf.identity().rotationXYZ(cube.rotX, cube.rotY, cube.rotZ);
-            stack.last().rotateAround(rotBuf, cube.pivotX, cube.pivotY, cube.pivotZ);
+            stack.rotateAround(rotBuf, cube.pivotX, cube.pivotY, cube.pivotZ);
         }
 
         PoseStack.Pose pose = stack.last();

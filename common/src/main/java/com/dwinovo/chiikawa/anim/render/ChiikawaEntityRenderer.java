@@ -175,7 +175,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         //  - Y is not flipped (Bedrock is already Y-up; vanilla's scale(-1,-1,1) Y
         //    is for legacy Java entity models with Y-down convention).
         rotBuf.identity().rotationY((float) Math.toRadians(180.0f - state.bodyRot));
-        poseStack.last().rotate(rotBuf);
+        poseStack.mulPose(rotBuf);
         poseStack.scale(PIXEL_SCALE, PIXEL_SCALE, PIXEL_SCALE);
 
         RenderType type = RenderType.entityCutoutNoCull(state.texture);

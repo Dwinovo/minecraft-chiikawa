@@ -61,6 +61,7 @@ public final class BoneAttachmentLayer {
                 itemRenderState,
                 stack,
                 ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,
+                false,
                 mc.level,
                 null,
                 0);
@@ -124,7 +125,7 @@ public final class BoneAttachmentLayer {
             poseStack.translate(bone.pivotX + dPosX, bone.pivotY + dPosY, bone.pivotZ + dPosZ);
             if (hasRot) {
                 rotBuf.identity().rotationXYZ(rotX, rotY, rotZ);
-                poseStack.last().rotate(rotBuf);
+                poseStack.mulPose(rotBuf);
             }
             if (hasScale) {
                 poseStack.scale(sX, sY, sZ);
@@ -139,7 +140,7 @@ public final class BoneAttachmentLayer {
             poseStack.translate(bone.pivotX + dPosX, bone.pivotY + dPosY, bone.pivotZ + dPosZ);
             if (hasRot) {
                 rotBuf.identity().rotationXYZ(rotX, rotY, rotZ);
-                poseStack.last().rotate(rotBuf);
+                poseStack.mulPose(rotBuf);
             }
             if (hasScale) {
                 poseStack.scale(sX, sY, sZ);
