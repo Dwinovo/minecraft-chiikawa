@@ -18,7 +18,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.Container;
@@ -309,8 +309,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     @Override
     public String getMainAnimationName(float walkSpeed) {
         if (getPetMode() == PetMode.SIT) return "sit";
-        // Threshold matches GeckoLib's AnimationState.isMoving (0.15) — the
-        // smoothed walkAnimation.speed decays exponentially toward 0, so
+        // Small movement threshold: the smoothed walkAnimation.speed decays
+        // exponentially toward 0, so
         // a `> 0` check would latch the run state forever.
         if (walkSpeed > 0.15f) return "run";
         return "idle";
@@ -327,9 +327,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     /**
      * Bumps the synced trigger so all client watchers fire {@code name} once
      * on the pet's animator. Server-only; calling on the client is a no-op
-     * (the value would not propagate). Replaces GeckoLib's
-     * {@code triggerAnim("main", name)} for AI behaviors. Unknown animation
-     * names are silently ignored.
+     * because the value would not propagate. Unknown animation names are
+     * silently ignored.
      */
     public void triggerAnim(String name) {
         if (level().isClientSide()) return;
@@ -352,9 +351,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         lastSeenTriggerSeq = seq;
         String name = animNameFor(packed & 0xFF);
         if (name == null) return;
-        Identifier typeId = BuiltInRegistries.ENTITY_TYPE.getKey(getType());
+        ResourceLocation typeId = BuiltInRegistries.ENTITY_TYPE.getKey(getType());
         BakedAnimation anim = AnimationLibrary.get(
-                Identifier.fromNamespaceAndPath(typeId.getNamespace(), typeId.getPath() + "/" + name));
+                ResourceLocation.fromNamespaceAndPath(typeId.getNamespace(), typeId.getPath() + "/" + name));
         if (anim != null) {
             getPetAnimator().trigger(TRIGGER_LAYER, anim);
         } else {
