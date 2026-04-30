@@ -36,7 +36,7 @@ public class ChiikawaFabricClient implements ClientModInitializer {
         MenuScreens.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);
 
         BedrockResourceLoader loader = new BedrockResourceLoader();
-        ResourceLocation loaderId = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "anim_loader");
+        ResourceLocation loaderId = new ResourceLocation(Constants.MOD_ID, "anim_loader");
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES)
                 .registerReloadListener(new SimpleSynchronousResourceReloadListener() {
                     @Override

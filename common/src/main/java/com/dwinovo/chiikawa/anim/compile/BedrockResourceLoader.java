@@ -82,7 +82,7 @@ public final class BedrockResourceLoader implements ResourceManagerReloadListene
                 JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
                 Map<String, BakedAnimation> anims = AnimationBaker.bake(root, model);
                 for (Map.Entry<String, BakedAnimation> a : anims.entrySet()) {
-                    ResourceLocation id = ResourceLocation.fromNamespaceAndPath(modelKey.getNamespace(),
+                    ResourceLocation id = new ResourceLocation(modelKey.getNamespace(),
                             modelKey.getPath() + "/" + a.getKey());
                     baked.put(id, a.getValue());
                 }
@@ -111,6 +111,6 @@ public final class BedrockResourceLoader implements ResourceManagerReloadListene
         if (path.endsWith(JSON_EXTENSION)) {
             path = path.substring(0, path.length() - JSON_EXTENSION.length());
         }
-        return ResourceLocation.fromNamespaceAndPath(resourceId.getNamespace(), path);
+        return new ResourceLocation(resourceId.getNamespace(), path);
     }
 }

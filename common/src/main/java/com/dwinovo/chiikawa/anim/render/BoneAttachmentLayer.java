@@ -6,7 +6,6 @@ import com.dwinovo.chiikawa.anim.runtime.PoseSampler;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -52,20 +51,7 @@ public final class BoneAttachmentLayer {
         Integer targetIdx = model.boneIndex.get(targetBoneName);
         if (targetIdx == null) return;
 
-        // Resolve the item model fresh per render. The state is small and
-        // short-lived, so the allocation is cheaper than the bookkeeping of a
-        // cached instance.
         Minecraft mc = Minecraft.getInstance();
-        ItemStackRenderState itemRenderState = new ItemStackRenderState();
-        mc.getItemModelResolver().updateForTopItem(
-                itemRenderState,
-                stack,
-                ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,
-                mc.level,
-                null,
-                0);
-        if (itemRenderState.isEmpty()) return;
-
         int chainLen = buildChain(model, targetIdx);
 
         poseStack.pushPose();
@@ -74,7 +60,15 @@ public final class BoneAttachmentLayer {
         }
         // Cancel the entity-level scale(1/16): items expect block-unit space.
         poseStack.scale(16f, 16f, 16f);
-        itemRenderState.render(poseStack, bufferSource, packedLight, OverlayTexture.NO_OVERLAY);
+        mc.getItemRenderer().renderStatic(
+                stack,
+                ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,
+                packedLight,
+                OverlayTexture.NO_OVERLAY,
+                poseStack,
+                bufferSource,
+                mc.level,
+                0);
         poseStack.popPose();
     }
 
@@ -124,7 +118,7 @@ public final class BoneAttachmentLayer {
             poseStack.translate(bone.pivotX + dPosX, bone.pivotY + dPosY, bone.pivotZ + dPosZ);
             if (hasRot) {
                 rotBuf.identity().rotationXYZ(rotX, rotY, rotZ);
-                poseStack.last().rotate(rotBuf);
+                poseStack.mulPose(rotBuf);
             }
             if (hasScale) {
                 poseStack.scale(sX, sY, sZ);
@@ -139,7 +133,7 @@ public final class BoneAttachmentLayer {
             poseStack.translate(bone.pivotX + dPosX, bone.pivotY + dPosY, bone.pivotZ + dPosZ);
             if (hasRot) {
                 rotBuf.identity().rotationXYZ(rotX, rotY, rotZ);
-                poseStack.last().rotate(rotBuf);
+                poseStack.mulPose(rotBuf);
             }
             if (hasScale) {
                 poseStack.scale(sX, sY, sZ);
