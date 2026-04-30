@@ -11,13 +11,12 @@ import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
 import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
 import com.dwinovo.chiikawa.anim.runtime.PoseSampler;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.CameraRenderState;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -40,9 +39,9 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     /** Animation name played on the main channel when nothing else is set. */
     private static final String DEFAULT_LOOP_NAME = "idle";
 
-    protected final Identifier modelKey;
-    protected final Identifier textureLocation;
-    protected final Identifier defaultLoopKey;
+    protected final ResourceLocation modelKey;
+    protected final ResourceLocation textureLocation;
+    protected final ResourceLocation defaultLoopKey;
 
     /** Bone name on every pet model where the mainhand item attaches. */
     private static final String HELD_ITEM_BONE = "RightHandLocator";
@@ -55,10 +54,10 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
 
     protected ChiikawaEntityRenderer(EntityRendererProvider.Context ctx, String name) {
         super(ctx);
-        this.modelKey = Identifier.fromNamespaceAndPath(Constants.MOD_ID, name);
-        this.textureLocation = Identifier.fromNamespaceAndPath(Constants.MOD_ID,
+        this.modelKey = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name);
+        this.textureLocation = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,
                 "textures/entities/" + name + ".png");
-        this.defaultLoopKey = Identifier.fromNamespaceAndPath(Constants.MOD_ID,
+        this.defaultLoopKey = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,
                 name + "/" + DEFAULT_LOOP_NAME);
     }
 
@@ -90,10 +89,9 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             state.netHeadYaw = net.minecraft.util.Mth.wrapDegrees(headRot - bodyRot);
             state.headPitch  = pitch;
 
-            // Stash the live mainhand stack — we resolve it into a fresh
-            // ItemStackRenderState at submit time, matching GeckoLib's call
-            // pattern exactly (per-frame fresh state, updateForTopItem, level
-            // pulled from Minecraft, owner = null).
+            // Stash the live mainhand stack. We resolve it into a fresh
+            // ItemStackRenderState at submit time, matching vanilla's
+            // per-frame item render state pattern.
             state.heldItemStack = living.getMainHandItem();
         }
 
@@ -125,8 +123,8 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         }
     }
 
-    private Identifier animKey(String name) {
-        return Identifier.fromNamespaceAndPath(modelKey.getNamespace(),
+    private ResourceLocation animKey(String name) {
+        return ResourceLocation.fromNamespaceAndPath(modelKey.getNamespace(),
                 modelKey.getPath() + "/" + name);
     }
 
@@ -164,14 +162,13 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         }
         // Procedural overrides (head look-at, ear sway, tail wag). Run after
         // sampling so they cleanly replace the animation's contribution to
-        // the affected bones — same semantics as GeckoLib's
-        // adjustModelBonesForRender hook.
+        // the affected bones.
         for (BoneInterceptor interceptor : interceptors) {
             interceptor.apply(model, state, molangCtx, poseBuf);
         }
 
         poseStack.pushPose();
-        // Bedrock entity rendering — matches Blockbench display and GeckoLib output.
+        // Bedrock entity rendering, aligned to the Blockbench display.
         //  - Model forward = -Z (Bedrock convention). bodyRot=0 = entity faces +Z
         //    (south), so rotateY(180 - bodyRot) aligns the model with world facing.
         //  - The X mirror needed to undo Blockbench's display→JSON X negation is
@@ -183,7 +180,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         poseStack.last().rotate(rotBuf);
         poseStack.scale(PIXEL_SCALE, PIXEL_SCALE, PIXEL_SCALE);
 
-        RenderType type = RenderTypes.entityCutoutNoCull(state.texture);
+        RenderType type = RenderType.entityCutoutNoCull(state.texture);
         int packedLight = state.lightCoords;
         int packedOverlay = net.minecraft.client.renderer.entity.LivingEntityRenderer.getOverlayCoords(state, 0.0f);
         collector.submitCustomGeometry(poseStack, type, (drawPose, vc) -> {

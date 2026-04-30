@@ -5,10 +5,10 @@ import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
 /**
  * Marker interface for entities driven by the Bedrock animation pipeline.
  * Implementing this lets the entity renderer find the per-entity
- * {@link PetAnimator} without going through GeckoLib's {@code GeoEntity} chain.
+ * {@link PetAnimator} without going through a third-party entity renderer.
  *
- * <p>Phase 2 only chiikawa implements this; the other six pets continue with
- * GeckoLib until Phase 4 moves the implementation up to {@code AbstractPet}.
+ * <p>All pets implement this through {@code AbstractPet}, so client renderers
+ * can stay on the in-repo animation runtime.
  */
 public interface ChiikawaAnimated {
 

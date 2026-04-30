@@ -13,8 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import org.joml.Quaternionf;
 
 /**
- * Submits an {@link ItemStack} at a named bone's pivot. New-pipeline analogue
- * of GeckoLib's {@code BlockAndItemGeoLayer.submitItemStackRender}.
+ * Submits an {@link ItemStack} at a named bone's pivot.
  *
  * <h2>Chain transform</h2>
  * Walks the bone chain root → target reproducing the same
@@ -53,9 +52,9 @@ public final class BoneAttachmentLayer {
         Integer targetIdx = model.boneIndex.get(targetBoneName);
         if (targetIdx == null) return;
 
-        // Resolve the item model fresh per submit, matching GeckoLib's
-        // submitItemStackRender. The state is small and short-lived so the
-        // allocation is cheaper than the bookkeeping of a cached instance.
+        // Resolve the item model fresh per submit. The state is small and
+        // short-lived, so the allocation is cheaper than the bookkeeping of a
+        // cached instance.
         Minecraft mc = Minecraft.getInstance();
         ItemStackRenderState itemRenderState = new ItemStackRenderState();
         mc.getItemModelResolver().updateForTopItem(

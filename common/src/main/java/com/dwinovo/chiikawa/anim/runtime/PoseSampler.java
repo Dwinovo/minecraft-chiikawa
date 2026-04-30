@@ -6,7 +6,7 @@ import com.dwinovo.chiikawa.anim.molang.MolangContext;
 import com.dwinovo.chiikawa.anim.molang.MolangNode;
 
 /**
- * Pure-function pose sampler. The core of solving GeckoLib issue #848:
+ * Pure-function pose sampler. The core of solving double-sampling bugs:
  * given an animation, a per-channel start time, and {@code System.nanoTime()},
  * produces the exact pose for that instant. Calling this twice in the same
  * frame returns identical output — no mutable {@code lastAnimatableAge}

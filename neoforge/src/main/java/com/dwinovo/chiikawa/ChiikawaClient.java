@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa;
 
 import net.minecraft.client.renderer.entity.EntityRenderers;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -51,9 +51,8 @@ public class ChiikawaClient {
         // Without this the renderer's ModelLibrary.get(...) returns null and submit()
         // short-circuits — entity exists and is interactable but renders as nothing.
         event.addListener(
-                Identifier.fromNamespaceAndPath(Chiikawa.MODID, "anim_loader"),
+                ResourceLocation.fromNamespaceAndPath(Chiikawa.MODID, "anim_loader"),
                 new BedrockResourceLoader());
     }
 }
-
 
