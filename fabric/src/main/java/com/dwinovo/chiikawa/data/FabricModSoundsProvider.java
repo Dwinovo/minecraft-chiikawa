@@ -8,14 +8,14 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import net.fabricmc.fabric.api.client.datagen.v1.builder.SoundTypeBuilder;
 import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricSoundsProvider;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.Identifier;
 
 public class FabricModSoundsProvider extends FabricSoundsProvider {
     private final Map<String, List<Identifier>> variants;
 
-    public FabricModSoundsProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
+    public FabricModSoundsProvider(FabricPackOutput output, CompletableFuture<HolderLookup.Provider> registriesFuture) {
         super(output, registriesFuture);
         this.variants = SoundData.collectVariants(output);
     }
@@ -30,7 +30,7 @@ public class FabricModSoundsProvider extends FabricSoundsProvider {
             SoundTypeBuilder builder = SoundTypeBuilder.of();
             sounds.stream()
                 .sorted(Comparator.comparing(Identifier::toString))
-                .map(SoundTypeBuilder.EntryBuilder::ofFile)
+                .map(SoundTypeBuilder.RegistrationBuilder::ofFile)
                 .forEach(builder::sound);
             exporter.add(entry.holder().get(), builder);
         }

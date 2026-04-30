@@ -13,7 +13,6 @@ import com.dwinovo.chiikawa.init.InitSensor;
 import com.dwinovo.chiikawa.item.PetDollData;
 import com.dwinovo.chiikawa.sound.PetSoundSet;
 import com.dwinovo.chiikawa.utils.Utils;
-import com.mojang.serialization.Dynamic;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -21,9 +20,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
-import net.minecraft.world.ContainerListener;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
@@ -97,20 +94,22 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitSensor.PET_CONTAINER_SENSOR.get(),
         InitSensor.PET_ITEM_ENTITY_SENSOR.get()
     );
+    private static final Brain.Provider<AbstractPet> BRAIN_PROVIDER =
+        Brain.<AbstractPet>provider(MEMORY_TYPES, SENSOR_TYPES, pet -> java.util.List.of());
     /** Lazily allocated on first client-side read; server instances pay nothing. */
     private PetAnimator petAnimator;
     /** Last {@link #ANIM_TRIGGER} sequence number this client handled. Server copy is unused. */
     private int lastSeenTriggerSeq;
-    private final SimpleContainer backpack = new SimpleContainer(BACKPACK_SIZE);
+    private final SimpleContainer backpack = new SimpleContainer(BACKPACK_SIZE) {
+        @Override
+        public void setChanged() {
+            super.setChanged();
+            AbstractPet.this.refreshJobFromMainhand();
+        }
+    };
 
     protected AbstractPet(EntityType<? extends TamableAnimal> entityType, Level level) {
         super(entityType, level);
-        backpack.addListener(new ContainerListener() {
-            @Override
-            public void containerChanged(Container container) {
-                refreshJobFromMainhand();
-            }
-        });
     }
 
     public SimpleContainer getBackpack() {
@@ -167,21 +166,16 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     private void refreshBrain(ServerLevel serverLevelIn) {
         Brain<AbstractPet> brain = this.getBrain();
         brain.stopAll(serverLevelIn, this);
-        // Copy the brain without behaviors.
-        Brain<AbstractPet> newBrain = brain.copyWithoutBehaviors();
+        // Preserve memories while rebuilding behaviors for the current pet job.
+        Brain<AbstractPet> newBrain = BRAIN_PROVIDER.makeBrain(this, brain.pack());
         this.brain = newBrain;
         // Initialize job behaviors.
         InitRegistry.getJobFromId(getPetJobId()).initBrain(this, newBrain);
     }
 
     @Override
-    protected Brain.Provider<AbstractPet> brainProvider() {
-        return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
-    }
-
-    @Override
-    protected Brain<?> makeBrain(Dynamic<?> dynamic) {
-        Brain<AbstractPet> brain = (Brain<AbstractPet>) brainProvider().makeBrain(dynamic);
+    protected Brain<AbstractPet> makeBrain(Brain.Packed packedBrain) {
+        Brain<AbstractPet> brain = BRAIN_PROVIDER.makeBrain(this, packedBrain);
         InitRegistry.getJobFromId(getPetJobId()).initBrain(this, brain);
         return brain;
     }
@@ -275,7 +269,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     @Override
     public String getMainAnimationName(float walkSpeed) {
         if (getPetMode() == PetMode.SIT) return "sit";
-        // Threshold matches GeckoLib's AnimationState.isMoving (0.15) — the
+        // Threshold keeps the old moving cutoff (0.15) — the
         // smoothed walkAnimation.speed decays exponentially toward 0, so
         // a `> 0` check would latch the run state forever.
         if (walkSpeed > 0.15f) return "run";
@@ -293,9 +287,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     /**
      * Bumps the synced trigger so all client watchers fire {@code name} once
      * on the pet's animator. Server-only; calling on the client is a no-op
-     * (the value would not propagate). Replaces GeckoLib's
-     * {@code triggerAnim("main", name)} for AI behaviors. Unknown animation
-     * names are silently ignored.
+     * (the value would not propagate). Unknown animation names are silently ignored.
      */
     public void triggerAnim(String name) {
         if (level().isClientSide()) return;

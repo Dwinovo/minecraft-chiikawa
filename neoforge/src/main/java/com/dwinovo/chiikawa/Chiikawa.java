@@ -19,6 +19,7 @@ import com.dwinovo.chiikawa.platform.Services;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
@@ -46,9 +47,16 @@ public class Chiikawa {
         Services.ENTITY.registerToEventBus(modEventBus);
         NeoForge.EVENT_BUS.addListener(Chiikawa::onRightClickBlock);
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> PetReviveRitualManager.tickServer(event.getServer()));
+        modEventBus.addListener(Chiikawa::buildCreativeTabContents);
 
         InitCapabilities.register(modEventBus);
 
+    }
+
+    private static void buildCreativeTabContents(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey().equals(InitTabs.MAIN_KEY)) {
+            InitTabs.addMainItems(event::accept);
+        }
     }
 
     private static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {

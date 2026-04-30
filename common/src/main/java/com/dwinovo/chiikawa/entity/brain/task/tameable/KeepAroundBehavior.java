@@ -90,9 +90,9 @@ public class KeepAroundBehavior<E extends AbstractPet> extends Behavior<E> {
     private void tryTeleportToOwner(ServerLevel level, E pet, LivingEntity owner) {
         BlockPos base = owner.blockPosition();
         for (int i = 0; i < 10; i++) {
-            int dx = Mth.nextInt(level.random, -3, 3);
-            int dz = Mth.nextInt(level.random, -3, 3);
-            int dy = Mth.nextInt(level.random, -1, 1);
+            int dx = Mth.nextInt(level.getRandom(), -3, 3);
+            int dz = Mth.nextInt(level.getRandom(), -3, 3);
+            int dy = Mth.nextInt(level.getRandom(), -1, 1);
             BlockPos target = base.offset(dx, dy, dz);
             if (tryRandomTeleport(level, pet, target.getX() + 0.5, target.getY(), target.getZ() + 0.5)) {
                 break;
@@ -134,4 +134,3 @@ public class KeepAroundBehavior<E extends AbstractPet> extends Behavior<E> {
         return false;
     }
 }
-

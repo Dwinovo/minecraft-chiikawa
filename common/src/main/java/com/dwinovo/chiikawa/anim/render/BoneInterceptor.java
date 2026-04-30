@@ -8,10 +8,8 @@ import com.dwinovo.chiikawa.anim.molang.MolangContext;
  * {@link com.dwinovo.chiikawa.anim.runtime.PoseSampler} and <em>before</em>
  * {@link ModelRenderer}, mutating the pose buffer in place.
  *
- * <p>This is the new-pipeline analogue of GeckoLib's
- * {@code GeoEntityRenderer.adjustModelBonesForRender}: the place where the
- * renderer overrides specific bones with values derived from live entity
- * state (head look-at, ear sway, tail wag) rather than from the animation
+ * <p>This hook is where the renderer overrides specific bones with values
+ * derived from live entity state (head look-at, ear sway, tail wag) rather than from the animation
  * file. Working on the flat {@code float[]} pose buffer instead of the
  * {@code PoseStack} avoids redundant matrix push/pop pairs and keeps the
  * data layout JNI-friendly for a future Rust port.

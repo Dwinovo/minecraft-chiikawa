@@ -15,6 +15,7 @@ import com.dwinovo.chiikawa.item.PetDollItem;
 import com.dwinovo.chiikawa.item.PetReviveRitualManager;
 import com.dwinovo.chiikawa.data.FabricBiomeModifications;
 import com.dwinovo.chiikawa.platform.Services;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.world.InteractionResult;
@@ -33,6 +34,7 @@ public class ChiikawaFabricMod implements ModInitializer {
         InitEntity.init();
         InitItems.init();
         InitTabs.init();
+        CreativeModeTabEvents.modifyOutputEvent(InitTabs.MAIN_KEY).register(output -> InitTabs.addMainItems(output::accept));
         FabricBiomeModifications.init();
         Services.ENTITY.registerAttributes();
         Services.ENTITY.registerSpawnPlacements();

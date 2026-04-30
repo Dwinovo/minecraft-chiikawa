@@ -18,11 +18,9 @@ import net.minecraft.util.Mth;
  *   <li>{@code tail} — gentle Y-axis wag</li>
  * </ul>
  *
- * The legacy code wrote into GeckoLib's {@code GeoBone} additive rotation
- * fields, which compose with the bone's rest pose exactly the same way our
- * pose buffer does. Values port over 1:1 — no extra X-mirror needed because
- * both pipelines apply the same bake-time mirror to the rest pose, and the
- * procedural deltas are already authored in that mirrored frame.
+ * Procedural values compose with the bone's rest pose through the pose buffer.
+ * Values port over 1:1 — no extra X-mirror needed because the baker already
+ * converted coordinate conventions.
  */
 public final class PetBoneInterceptor implements BoneInterceptor {
 

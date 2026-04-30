@@ -51,8 +51,7 @@ public final class ArcherJobHandler {
     }
     public static void addFencerTasks(Brain<AbstractPet> brain){
         Pair<Integer, BehaviorControl<? super AbstractPet>> hurtRangedAttackTarget = Pair.of(4, new HurtRangedAttackTargetTask());
-        brain.addActivity(Activity.WORK, ImmutableList.of(hurtRangedAttackTarget));
+        BrainUtils.addActivity(brain, Activity.WORK, ImmutableList.of(hurtRangedAttackTarget));
 
     }
 }
-

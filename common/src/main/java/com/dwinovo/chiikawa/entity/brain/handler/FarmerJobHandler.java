@@ -78,22 +78,21 @@ public final class FarmerJobHandler {
     }
     
     private static void addFarmHarvestActivity(Brain<AbstractPet> brain) {
-        brain.addActivity(InitActivity.FARMER_HARVEST.get(), ImmutableList.of(
+        BrainUtils.addActivity(brain, InitActivity.FARMER_HARVEST.get(), ImmutableList.of(
             Pair.of(3, new HarvestCropBehavior()),
             Pair.of(4, new WalkToHarvestCropBehavior(0.8F))
         ));
     }
     private static void addFarmPlantActivity(Brain<AbstractPet> brain) {
-        brain.addActivity(InitActivity.FARMER_PLANT.get(), ImmutableList.of(
+        BrainUtils.addActivity(brain, InitActivity.FARMER_PLANT.get(), ImmutableList.of(
             Pair.of(3, new PlantCropBehavior()),
             Pair.of(4, new WalkToPlantCropBehavior(0.8F))
         ));
     }
     private static void addDeliverActivity(Brain<AbstractPet> brain,AbstractPet pet) {
-        brain.addActivity(InitActivity.DELEVER.get(), ImmutableList.of(
+        BrainUtils.addActivity(brain, InitActivity.DELEVER.get(), ImmutableList.of(
             Pair.of(3, new DeliverCropBehavior()),
             Pair.of(4, new WalkToContainerBehavior(0.8F))
         ));
     }
 }
-

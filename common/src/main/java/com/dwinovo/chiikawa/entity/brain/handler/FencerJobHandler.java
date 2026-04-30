@@ -45,7 +45,6 @@ public final class FencerJobHandler {
         // Attack behaviors.
         Pair<Integer, BehaviorControl<? super AbstractPet>> walkToAttackTarget = Pair.of(5, SetWalkTargetFromAttackTargetIfTargetOutOfReach.create(0.9F));
         Pair<Integer, BehaviorControl<? super AbstractPet>> meleeAttack = Pair.of(4, MeleeAttackWithAnim.create(20));
-        brain.addActivity(Activity.WORK, ImmutableList.of(walkToAttackTarget, meleeAttack));
+        BrainUtils.addActivity(brain, Activity.WORK, ImmutableList.of(walkToAttackTarget, meleeAttack));
     }
 }
-

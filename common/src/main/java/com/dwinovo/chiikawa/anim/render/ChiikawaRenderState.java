@@ -33,12 +33,11 @@ public class ChiikawaRenderState extends LivingEntityRenderState {
      * Head yaw relative to body, in degrees, captured at extract time.
      *
      * <p>Stored here rather than recomputed from {@link #yRot} − {@link #bodyRot}
-     * at submit time because {@link net.minecraft.client.gui.screens.inventory.InventoryScreen#renderEntityInInventoryFollowsMouse}
+     * at submit time because {@link net.minecraft.client.gui.screens.inventory.InventoryScreen#extractEntityInInventoryFollowsMouse}
      * <em>overwrites</em> {@code bodyRot} / {@code yRot} after extract finishes
      * (it sets {@code yRot = f * 20}, {@code bodyRot = 180 + f * 20}, giving a
      * −180 difference that has nothing to do with the entity's real head turn).
-     * Mirrors GeckoLib's strategy of stashing the value in a DataTicket during
-     * extract.
+     * Snapshot this value during extract so submit uses the live entity state.
      */
     public float netHeadYaw;
     /** Head pitch (entity X rotation) in degrees, captured at extract time for the same reason. */

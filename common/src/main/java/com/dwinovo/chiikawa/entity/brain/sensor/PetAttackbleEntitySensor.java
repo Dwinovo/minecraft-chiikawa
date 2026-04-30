@@ -56,7 +56,7 @@ public class PetAttackbleEntitySensor extends Sensor<AbstractPet> {
 
         AABB searchBox = pet.getBoundingBox().inflate(15.0);
         List<Entity> nearbyEntities = level.getEntities(pet, searchBox, e ->
-            e.getType().is(InitTag.ENTITY_HOSTILE_ENTITY) && e.isAlive());
+            e.typeHolder().is(InitTag.ENTITY_HOSTILE_ENTITY) && e.isAlive());
         Optional<Entity> closestTarget = nearbyEntities.stream()
             .min((e1, e2) -> Double.compare(e1.distanceToSqr(pet), e2.distanceToSqr(pet)));
         closestTarget.ifPresentOrElse(
@@ -65,4 +65,3 @@ public class PetAttackbleEntitySensor extends Sensor<AbstractPet> {
         );
     }
 }
-

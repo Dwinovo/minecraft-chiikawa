@@ -4,7 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -23,7 +23,7 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     }
 
     @Override
-    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         // Draw background.
         graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, this.leftPos, this.topPos, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256);
         // Draw pet preview.
@@ -32,7 +32,7 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
             int centerX = this.leftPos + 51;
             int centerY = this.topPos + 50;
             int halfSize = 30;
-            InventoryScreen.renderEntityInInventoryFollowsMouse(
+            InventoryScreen.extractEntityInInventoryFollowsMouse(
                     graphics,
                     centerX - halfSize,
                     centerY - halfSize,
@@ -47,5 +47,4 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     }
     
 }
-
 

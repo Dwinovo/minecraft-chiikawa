@@ -69,7 +69,7 @@ public final class ModelBaker {
             }
             int cubeCount = cubeList.size() - cubeStart;
 
-            // Bake-time X flip — mirrors GeckoLib's BakedModelFactory.constructBone.
+            // Bake-time X flip into the renderer's coordinate frame.
             // Blockbench exports with display +X stored as JSON -X, so a bone whose
             // visual position is on the modeler's RIGHT (chiikawa's left, JSON +X)
             // must render on the player's LEFT-of-chiikawa side. We negate JSON X
@@ -162,7 +162,7 @@ public final class ModelBaker {
         float sy = pickF(cube.size, 1, 0);
         float sz = pickF(cube.size, 2, 0);
 
-        // Bake-time X flip (matches GeckoLib's GeoCube.fromJson). JSON's [origin.x,
+        // Bake-time X flip into the renderer's coordinate frame. JSON's [origin.x,
         // origin.x + size.x] becomes [-(origin.x + size.x), -origin.x]. The cube
         // keeps the same width but lives on the negated X side of the bone frame.
         float minX = -(ox + sx), minY = oy, minZ = oz;
@@ -209,8 +209,7 @@ public final class ModelBaker {
         // edge on the cube's visual right. {@code mirror=true} cubes (the
         // deliberately-flipped mate of a symmetric pair, e.g. LeftEar paired with
         // RightEar) skip the U swap so the texture stays mirrored — exactly the
-        // effect needed for the pair to look symmetric on screen. Mirrors
-        // GeckoLib's GeoQuad.build behavior for non-mirror vs mirror cubes.
+        // effect needed for the pair to look symmetric on screen.
         boolean uFlip = !cube.mirror;
 
         if (cube.uv.isJsonArray()) {
@@ -284,7 +283,7 @@ public final class ModelBaker {
      * order in {@link com.dwinovo.chiikawa.anim.render.ModelRenderer}). When
      * {@code uFlip} is true, the U coordinates are mirrored — the rectangle's
      * right edge ends up on the geometric TL/BL vertices and the left edge on
-     * TR/BR. This matches GeckoLib's per-quad U swap for non-mirrored cubes.
+     * TR/BR. This compensates for the baked X mirror on non-mirrored cubes.
      */
     private static void setFaceQuadUV(float[][] dst, float u0, float v0, float u1, float v1, boolean uFlip) {
         if (uFlip) {

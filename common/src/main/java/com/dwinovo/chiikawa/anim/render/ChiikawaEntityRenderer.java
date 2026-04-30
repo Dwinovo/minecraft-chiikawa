@@ -16,7 +16,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -91,9 +91,8 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             state.headPitch  = pitch;
 
             // Stash the live mainhand stack — we resolve it into a fresh
-            // ItemStackRenderState at submit time, matching GeckoLib's call
-            // pattern exactly (per-frame fresh state, updateForTopItem, level
-            // pulled from Minecraft, owner = null).
+            // ItemStackRenderState at submit time using a per-frame fresh
+            // state, updateForTopItem, level pulled from Minecraft, owner = null.
             state.heldItemStack = living.getMainHandItem();
         }
 
@@ -164,14 +163,13 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         }
         // Procedural overrides (head look-at, ear sway, tail wag). Run after
         // sampling so they cleanly replace the animation's contribution to
-        // the affected bones — same semantics as GeckoLib's
-        // adjustModelBonesForRender hook.
+        // the affected bones.
         for (BoneInterceptor interceptor : interceptors) {
             interceptor.apply(model, state, molangCtx, poseBuf);
         }
 
         poseStack.pushPose();
-        // Bedrock entity rendering — matches Blockbench display and GeckoLib output.
+        // Bedrock entity rendering — matches Blockbench display orientation.
         //  - Model forward = -Z (Bedrock convention). bodyRot=0 = entity faces +Z
         //    (south), so rotateY(180 - bodyRot) aligns the model with world facing.
         //  - The X mirror needed to undo Blockbench's display→JSON X negation is
@@ -183,7 +181,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         poseStack.last().rotate(rotBuf);
         poseStack.scale(PIXEL_SCALE, PIXEL_SCALE, PIXEL_SCALE);
 
-        RenderType type = RenderTypes.entityCutoutNoCull(state.texture);
+        RenderType type = RenderTypes.entityCutout(state.texture);
         int packedLight = state.lightCoords;
         int packedOverlay = net.minecraft.client.renderer.entity.LivingEntityRenderer.getOverlayCoords(state, 0.0f);
         collector.submitCustomGeometry(poseStack, type, (drawPose, vc) -> {

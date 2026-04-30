@@ -19,7 +19,7 @@ public class FabricRegistryHelper implements IRegistryHelper {
     @Override
     public <T> Registry<T> createRegistry(ResourceKey<Registry<T>> key, Identifier defaultId, boolean sync) {
         var builder = defaultId == null
-            ? FabricRegistryBuilder.createSimple(key)
+            ? FabricRegistryBuilder.create(key)
             : FabricRegistryBuilder.createDefaulted(key, defaultId);
         if (sync) {
             builder.attribute(RegistryAttribute.SYNCED);

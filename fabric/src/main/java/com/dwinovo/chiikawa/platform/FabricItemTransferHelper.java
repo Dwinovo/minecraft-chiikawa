@@ -1,8 +1,8 @@
 package com.dwinovo.chiikawa.platform;
 
 import com.dwinovo.chiikawa.platform.services.IItemTransferHelper;
+import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
-import net.fabricmc.fabric.api.transfer.v1.item.InventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
@@ -53,10 +53,10 @@ public class FabricItemTransferHelper implements IItemTransferHelper {
 
     private static Storage<ItemVariant> findEntityStorage(Entity entity) {
         if (entity instanceof AbstractPet pet) {
-            return InventoryStorage.of(pet.getBackpack(), null);
+            return ContainerStorage.of(pet.getBackpack(), null);
         }
         if (entity instanceof Container container) {
-            return InventoryStorage.of(container, null);
+            return ContainerStorage.of(container, null);
         }
         return null;
     }

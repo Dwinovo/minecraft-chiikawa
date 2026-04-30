@@ -4,8 +4,8 @@ package com.dwinovo.chiikawa.anim.molang;
  * Compiled Molang expression. Each node is a tiny pure-function: given a
  * {@link MolangContext}, return a double. The AST is built once at resource
  * load by {@link com.dwinovo.chiikawa.anim.compile.MolangCompiler} and shared
- * between all entities playing the animation — this matches GeckoLib's
- * caching of parsed expressions but with a far smaller surface area.
+ * between all entities playing the animation so parsed expressions stay
+ * cached with a small surface area.
  *
  * <h2>Scope</h2>
  * Only the operators / functions / variables actually used in the chiikawa

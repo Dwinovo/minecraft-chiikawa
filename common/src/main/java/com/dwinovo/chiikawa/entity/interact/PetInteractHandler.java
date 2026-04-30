@@ -87,7 +87,7 @@ public final class PetInteractHandler {
                 pet.getBrain().eraseMemory(MemoryModuleType.HOME);
             }
             if (pet.getOwner() instanceof Player owner) {
-                owner.displayClientMessage(next.getMessage(pet), true);
+                owner.sendOverlayMessage(next.getMessage(pet));
             }
         }
         return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
@@ -103,4 +103,3 @@ public final class PetInteractHandler {
         return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
     }
 }
-
