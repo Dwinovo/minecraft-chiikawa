@@ -305,8 +305,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     @Override
     public String getMainAnimationName(float walkSpeed) {
         if (getPetMode() == PetMode.SIT) return "sit";
-        // Threshold matches GeckoLib's AnimationState.isMoving (0.15) — the
-        // smoothed walkAnimation.speed decays exponentially toward 0, so
+        // Small movement threshold: the smoothed walkAnimation.speed decays
+        // exponentially toward 0, so
         // a `> 0` check would latch the run state forever.
         if (walkSpeed > 0.15f) return "run";
         return "idle";
@@ -323,9 +323,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     /**
      * Bumps the synced trigger so all client watchers fire {@code name} once
      * on the pet's animator. Server-only; calling on the client is a no-op
-     * (the value would not propagate). Replaces GeckoLib's
-     * {@code triggerAnim("main", name)} for AI behaviors. Unknown animation
-     * names are silently ignored.
+     * because the value would not propagate. Unknown animation names are
+     * silently ignored.
      */
     public void triggerAnim(String name) {
         if (level().isClientSide()) return;
