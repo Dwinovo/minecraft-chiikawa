@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.anim.api;
 
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,18 +16,18 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class ModelLibrary {
 
-    private static volatile Map<Identifier, BakedModel> models = Map.of();
+    private static volatile Map<ResourceLocation, BakedModel> models = Map.of();
 
     private ModelLibrary() {}
 
-    public static BakedModel get(Identifier id) {
+    public static BakedModel get(ResourceLocation id) {
         return models.get(id);
     }
 
     /** Replaces the registry contents. Called by the resource loader. */
-    public static void replaceAll(Map<Identifier, BakedModel> next) {
+    public static void replaceAll(Map<ResourceLocation, BakedModel> next) {
         // Defensive copy into a concurrent map so iteration is safe; assignment is atomic.
-        Map<Identifier, BakedModel> snapshot = new ConcurrentHashMap<>(next);
+        Map<ResourceLocation, BakedModel> snapshot = new ConcurrentHashMap<>(next);
         models = snapshot;
     }
 }

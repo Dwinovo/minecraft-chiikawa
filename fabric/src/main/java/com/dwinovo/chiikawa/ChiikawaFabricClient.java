@@ -17,7 +17,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
 
@@ -36,11 +36,11 @@ public class ChiikawaFabricClient implements ClientModInitializer {
         MenuScreens.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);
 
         BedrockResourceLoader loader = new BedrockResourceLoader();
-        Identifier loaderId = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "anim_loader");
+        ResourceLocation loaderId = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "anim_loader");
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES)
                 .registerReloadListener(new SimpleSynchronousResourceReloadListener() {
                     @Override
-                    public Identifier getFabricId() {
+                    public ResourceLocation getFabricId() {
                         return loaderId;
                     }
 
