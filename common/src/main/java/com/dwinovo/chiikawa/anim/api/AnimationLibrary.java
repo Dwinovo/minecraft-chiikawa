@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.anim.api;
 
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,16 +17,16 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class AnimationLibrary {
 
-    private static volatile Map<Identifier, BakedAnimation> animations = Map.of();
+    private static volatile Map<ResourceLocation, BakedAnimation> animations = Map.of();
 
     private AnimationLibrary() {}
 
-    public static BakedAnimation get(Identifier id) {
+    public static BakedAnimation get(ResourceLocation id) {
         return animations.get(id);
     }
 
     /** Replaces the registry contents. Called by the resource loader. */
-    public static void replaceAll(Map<Identifier, BakedAnimation> next) {
+    public static void replaceAll(Map<ResourceLocation, BakedAnimation> next) {
         animations = new ConcurrentHashMap<>(next);
     }
 }
