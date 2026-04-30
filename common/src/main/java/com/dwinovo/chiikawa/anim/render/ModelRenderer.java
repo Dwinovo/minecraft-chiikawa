@@ -61,13 +61,11 @@ public final class ModelRenderer {
 
     /**
      * Renders the entire model with the supplied {@code poseBuf} (laid out per
-     * {@link PoseSampler}). The caller's {@code initial} pose should already
-     * include the entity transform, body rotation, and pixel→block scale.
+     * {@link PoseSampler}). The caller's {@code stack} should already include
+     * the entity transform, body rotation, and pixel→block scale.
      */
-    public void render(BakedModel model, PoseStack.Pose initial, VertexConsumer vc,
+    public void render(BakedModel model, PoseStack stack, VertexConsumer vc,
                        int packedLight, int packedOverlay, float[] poseBuf) {
-        PoseStack stack = new PoseStack();
-        stack.last().set(initial);
         for (int rootIdx : model.rootBones) {
             renderBone(model, rootIdx, stack, vc, packedLight, packedOverlay, poseBuf);
         }

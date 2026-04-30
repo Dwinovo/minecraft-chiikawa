@@ -5,7 +5,7 @@ import com.dwinovo.chiikawa.anim.baked.BakedModel;
 import com.dwinovo.chiikawa.anim.runtime.PoseSampler;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -28,7 +28,7 @@ import org.joml.Quaternionf;
  * use raw pixel values so {@code translate(pivotX)} works directly. Items
  * however render in <b>block</b> units (their {@code BakedQuad} verts are
  * 0..1, display transforms specify block-sized translations). Without a
- * compensating {@code scale(16)} the submitted item ends up at 1/16 of its
+ * compensating {@code scale(16)} the rendered item ends up at 1/16 of its
  * intended size. Vanilla {@code LivingEntityRenderer} dodges this by keeping
  * the {@code PoseStack} in block units and pushing the 1/16 factor into
  * {@code ModelPart} vertex emission instead — we apply the inverse only
@@ -41,18 +41,18 @@ public final class BoneAttachmentLayer {
     private int[] chainBuf = new int[8];
 
     /**
-     * Walks the chain root → {@code targetBoneName} and submits {@code stack}
+     * Walks the chain root → {@code targetBoneName} and renders {@code stack}
      * at the resulting pivot. No-ops when the stack is empty or the bone is
      * absent from the model.
      */
-    public void submit(BakedModel model, float[] poseBuf, String targetBoneName,
-                       PoseStack poseStack, SubmitNodeCollector collector,
+    public void render(BakedModel model, float[] poseBuf, String targetBoneName,
+                       PoseStack poseStack, MultiBufferSource bufferSource,
                        ItemStack stack, int packedLight) {
         if (stack.isEmpty()) return;
         Integer targetIdx = model.boneIndex.get(targetBoneName);
         if (targetIdx == null) return;
 
-        // Resolve the item model fresh per submit. The state is small and
+        // Resolve the item model fresh per render. The state is small and
         // short-lived, so the allocation is cheaper than the bookkeeping of a
         // cached instance.
         Minecraft mc = Minecraft.getInstance();
@@ -74,7 +74,7 @@ public final class BoneAttachmentLayer {
         }
         // Cancel the entity-level scale(1/16): items expect block-unit space.
         poseStack.scale(16f, 16f, 16f);
-        itemRenderState.submit(poseStack, collector, packedLight, OverlayTexture.NO_OVERLAY, 0);
+        itemRenderState.render(poseStack, bufferSource, packedLight, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }
 
