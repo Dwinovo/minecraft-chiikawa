@@ -94,7 +94,7 @@ ChiikawaEntityRenderer.extractRenderState
     └─ 调 ChiikawaAnimated.getMainAnimationName(walkSpeed) → setMain(idle/run/sit, looping=true)
     │
     ▼
-ChiikawaEntityRenderer.submit
+ChiikawaEntityRenderer.render
     │
     ├─ 分配 poseBuf = float[boneCount * 9]
     ├─ PoseSampler.resetIdentity(poseBuf)
@@ -104,8 +104,8 @@ ChiikawaEntityRenderer.submit
     ├─ for each interceptor: interceptor.apply(model, state, ctx, poseBuf)  [程序化覆写]
     │
     ├─ poseStack.rotateY(180 - bodyRot) + scale(1/16)
-    ├─ collector.submitCustomGeometry(deferred ModelRenderer.render call)
-    └─ heldItemLayer.submit(model, poseBuf, "RightHandLocator", ...)
+    ├─ ModelRenderer.render(model, poseStack, bufferSource.getBuffer(type), ...)
+    └─ heldItemLayer.render(model, poseBuf, "RightHandLocator", ...)
 ```
 
 ## 关键不变量
@@ -169,7 +169,7 @@ Trigger channel 的 `looping=false`，`PoseSampler` 在 `t >= duration` 时 clam
 | slot | 来源 |
 |---|---|
 | `query.anim_time` / `q.anim_time` | `PoseSampler.sample` 每个 channel 采样前填，等于该 channel 的本地时间 |
-| `query.ground_speed` | `ChiikawaEntityRenderer.submit` 每帧从 `walkAnimation.speed` 填 |
+| `query.ground_speed` | `ChiikawaEntityRenderer.render` 每帧从 `walkAnimation.speed` 填 |
 
 **故意不暴露的**：
 
@@ -185,11 +185,11 @@ Trigger channel 的 `looping=false`，`PoseSampler` 在 `t >= duration` 时 clam
 ### 单位约定
 
 PoseStack 在我们的渲染流水线里始终处于 **1/16-scaled pixel 空间**：
-- `scale(1/16)` 已在 `submit` 阶段应用
+- `scale(1/16)` 已在 `render` 阶段应用
 - 骨骼 pivot 用原始 pixel 数值，可直接 `translate(pivotX)`
 - ModelRenderer 顶点也直接用原始 pixel 数值
 
-但 **物品** 在 Mojang 的 API 里使用块单位（BakedQuad vertex 是 0..1 块，display transform 也是块为单位）。所以 `BoneAttachmentLayer.submit` 在 chain walk 终点会 `scale(16, 16, 16)` 抵消我们的 1/16，恢复块单位 → 物品才能以正常尺寸渲染。
+但 **物品** 在 Mojang 的 API 里使用块单位（BakedQuad vertex 是 0..1 块，display transform 也是块为单位）。所以 `BoneAttachmentLayer.render` 在 chain walk 终点会 `scale(16, 16, 16)` 抵消我们的 1/16，恢复块单位 → 物品才能以正常尺寸渲染。
 
 vanilla 不踩这个坑是因为 `LivingEntityRenderer` 把 1/16 因子放在 `ModelPart` 顶点生成里，PoseStack 始终块单位。我们的约定相反，要在物品边界处显式抵消。
 
@@ -261,7 +261,7 @@ common/src/main/resources/assets/<namespace>/
 
 1. `MolangContext.java` 加 `SLOT_FOO = N`，`SLOT_COUNT++`
 2. `MolangContext.resolveSlot` 的 switch 加 case
-3. 在 `ChiikawaEntityRenderer.submit` 或 `PoseSampler.sample` 适当位置填 `ctx.vars[SLOT_FOO] = ...`
+3. 在 `ChiikawaEntityRenderer.render` 或 `PoseSampler.sample` 适当位置填 `ctx.vars[SLOT_FOO] = ...`
 
 ### 添加新触发动画
 
@@ -292,9 +292,9 @@ common/src/main/resources/assets/<namespace>/
 1. `renderer.createRenderState(entity, partialTick)` —— 我们的 extract 跑完
 2. **直接覆写** `state.bodyRot = 180 + f*20`、`state.yRot = f*20`、`state.xRot = -g*20`（鼠标驱动）
 
-这意味着 `state.yRot - state.bodyRot = -180`（永远）。任何在 submit 阶段从 state 字段反推 entity 真实状态的代码都会拿到错值。
+这意味着 `state.yRot - state.bodyRot = -180`（永远）。任何在 render 阶段从 state 字段反推 entity 真实状态的代码都会拿到错值。
 
-**修法**：所有派生量在 extract 阶段就 snapshot 到 state 自己的字段（如 `state.netHeadYaw`、`state.headPitch`），submit 阶段读 snapshot。
+**修法**：所有派生量在 extract 阶段就 snapshot 到 state 自己的字段（如 `state.netHeadYaw`、`state.headPitch`），render 阶段读 snapshot。
 
 ### `ysm.head_yaw` / `ysm.head_pitch` 是 vestigial
 
@@ -304,9 +304,9 @@ common/src/main/resources/assets/<namespace>/
 
 **修法**：`MolangContext` 里**不要**给 ysm.* 加 slot。让 `MolangCompiler` 软失败成 `Const(0)`。头/耳/尾交给 `PetBoneInterceptor`。
 
-### 物品在 1/16-scaled PoseStack 里直接 submit 会变 5cm 小
+### 物品在 1/16-scaled PoseStack 里直接 render 会变 5cm 小
 
-我们的 PoseStack 是 1/16 scale 空间（pixel 单位），但 `ItemStackRenderState.submit` 内部 vertex 是 0..1 块单位。直接 submit 物品会被额外乘 1/16 → 0.85 块的剑变成 5cm。
+我们的 PoseStack 是 1/16 scale 空间（pixel 单位），但 `ItemStackRenderState.render` 内部 vertex 是 0..1 块单位。直接 render 物品会被额外乘 1/16 → 0.85 块的剑变成 5cm。
 
 **修法**：`BoneAttachmentLayer` 在 chain walk 终点 `scale(16, 16, 16)` 抵消。
 
@@ -316,11 +316,11 @@ common/src/main/resources/assets/<namespace>/
 
 目前 Blockbench 导出的常量值都是规整的 `0` 或 `1`，没问题。
 
-### 多实体共享 renderer 实例 + deferred submitCustomGeometry lambda
+### 多实体共享 renderer 实例 + 每帧 pose buffer
 
-`submitCustomGeometry` 的 lambda 不在 submit 调用时执行，而是延迟到 batch 渲染。如果多个 entity 共享 renderer 实例，把 pose buffer 缓存在 renderer 上会被后一个 entity 的 submit 覆写，前一个 lambda 跑时拿到错的数据。
+多个 entity 共享 renderer 实例，把 pose buffer 缓存在 renderer 上会被后一个 entity 的 render 覆写，前一个实体的绘制就可能拿到错的数据。1.21.8 走即时 `MultiBufferSource` 渲染，没有 deferred lambda，但这个原则仍然成立。
 
-**修法**：每次 submit **新分配** pose buffer。代价是 ~864 字节/调用 × 几千次/秒 ≈ 几 MB/秒 GC 压力，可接受。
+**修法**：每次 render **新分配** pose buffer。代价是 ~864 字节/调用 × 几千次/秒 ≈ 几 MB/秒 GC 压力，可接受。
 
 ## 性能现状
 
