@@ -6,7 +6,7 @@ import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
  * A single playing animation slot on an entity. Immutable — to start a new
  * animation, replace the whole record rather than mutating fields.
  *
- * <p>This immutability is the core fix for GeckoLib issue #848: there is no
+ * <p>This immutability is the core fix for double-sampling bugs: there is no
  * "lastAnimatableAge" field that gets advanced on every render-state extract.
  * The current pose is always derived as a pure function of {@code (animation,
  * startTimeNs, nowNs)}, so calling {@link com.dwinovo.chiikawa.anim.runtime.PoseSampler}

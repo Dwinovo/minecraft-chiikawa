@@ -90,10 +90,9 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             state.netHeadYaw = net.minecraft.util.Mth.wrapDegrees(headRot - bodyRot);
             state.headPitch  = pitch;
 
-            // Stash the live mainhand stack — we resolve it into a fresh
-            // ItemStackRenderState at submit time, matching GeckoLib's call
-            // pattern exactly (per-frame fresh state, updateForTopItem, level
-            // pulled from Minecraft, owner = null).
+            // Stash the live mainhand stack. We resolve it into a fresh
+            // ItemStackRenderState at submit time, matching vanilla's
+            // per-frame item render state pattern.
             state.heldItemStack = living.getMainHandItem();
         }
 
@@ -164,14 +163,13 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         }
         // Procedural overrides (head look-at, ear sway, tail wag). Run after
         // sampling so they cleanly replace the animation's contribution to
-        // the affected bones — same semantics as GeckoLib's
-        // adjustModelBonesForRender hook.
+        // the affected bones.
         for (BoneInterceptor interceptor : interceptors) {
             interceptor.apply(model, state, molangCtx, poseBuf);
         }
 
         poseStack.pushPose();
-        // Bedrock entity rendering — matches Blockbench display and GeckoLib output.
+        // Bedrock entity rendering, aligned to the Blockbench display.
         //  - Model forward = -Z (Bedrock convention). bodyRot=0 = entity faces +Z
         //    (south), so rotateY(180 - bodyRot) aligns the model with world facing.
         //  - The X mirror needed to undo Blockbench's display→JSON X negation is

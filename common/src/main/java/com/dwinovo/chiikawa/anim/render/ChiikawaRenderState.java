@@ -37,8 +37,8 @@ public class ChiikawaRenderState extends LivingEntityRenderState {
      * <em>overwrites</em> {@code bodyRot} / {@code yRot} after extract finishes
      * (it sets {@code yRot = f * 20}, {@code bodyRot = 180 + f * 20}, giving a
      * −180 difference that has nothing to do with the entity's real head turn).
-     * Mirrors GeckoLib's strategy of stashing the value in a DataTicket during
-     * extract.
+     * Snapshot during extract so submit never has to infer it from display
+     * rotations.
      */
     public float netHeadYaw;
     /** Head pitch (entity X rotation) in degrees, captured at extract time for the same reason. */
