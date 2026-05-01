@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.item;
 
+import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -144,6 +145,7 @@ public final class PetReviveRitualManager {
         }
 
         pet.playTameSound();
+        pet.triggerReaction(PetReaction.REVIVE);
         sendRitualParticles(level, revive.spawnPos);
         return true;
     }
