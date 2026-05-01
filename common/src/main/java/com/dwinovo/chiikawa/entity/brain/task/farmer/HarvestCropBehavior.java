@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.task.farmer;
 
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.entity.PetMode;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
@@ -92,7 +93,7 @@ public class HarvestCropBehavior extends Behavior<AbstractPet>{
         if (!world.isClientSide()) {
             ItemStack tool = pet.getMainHandItem();
             if (Utils.canHarvesr(world, cropPos)) {
-                pet.triggerAnim("use_mainhand");
+                pet.triggerAction(PetAction.HARVEST);
                 world.destroyBlock(cropPos, true, pet);
                 tool.hurtAndBreak(1, pet, EquipmentSlot.MAINHAND);
             }
@@ -102,6 +103,5 @@ public class HarvestCropBehavior extends Behavior<AbstractPet>{
 }
     
     
-
 
 
