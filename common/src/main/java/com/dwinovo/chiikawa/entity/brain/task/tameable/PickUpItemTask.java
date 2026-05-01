@@ -8,6 +8,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import java.util.Map;
 import net.minecraft.server.level.ServerLevel;
+import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetMode;
 import com.dwinovo.chiikawa.init.InitMemory;
@@ -88,6 +89,7 @@ public class PickUpItemTask extends Behavior<AbstractPet> {
         if (pickedCount <= 0) {
             return;
         }
+        entity.triggerAction(PetAction.PICKUP);
         entity.take(target, pickedCount);
         if (stack.getCount() - pickedCount <= 0) {
             target.discard();

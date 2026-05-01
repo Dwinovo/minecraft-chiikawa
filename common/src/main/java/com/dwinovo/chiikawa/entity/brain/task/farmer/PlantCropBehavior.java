@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.task.farmer;
 
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.entity.PetMode;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
@@ -102,7 +103,7 @@ public class PlantCropBehavior extends Behavior<AbstractPet>{
         ItemStack seed = Utils.getSeed(pet);
         Optional<BlockState> cropState = getPlantBlockState(seed);
         if (cropState.isPresent() && Utils.isCanPlantFarmland(world, farmlandPos)) {
-            pet.triggerAnim("use_mainhand");
+            pet.triggerAction(PetAction.PLANT);
             world.setBlock(farmlandPos.above(), cropState.get(), 2);
             seed.shrink(1);
         }
@@ -120,4 +121,3 @@ public class PlantCropBehavior extends Behavior<AbstractPet>{
         return Optional.empty();
     }
 }
-
