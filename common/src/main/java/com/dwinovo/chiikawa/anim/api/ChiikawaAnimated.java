@@ -1,6 +1,8 @@
 package com.dwinovo.chiikawa.anim.api;
 
 import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
+import com.dwinovo.chiikawa.anim.state.PetAnimContext;
+import com.dwinovo.chiikawa.anim.state.PetAnimationResolver;
 
 /**
  * Marker interface for entities driven by the Bedrock animation pipeline.
@@ -14,14 +16,28 @@ public interface ChiikawaAnimated {
     PetAnimator getPetAnimator();
 
     /**
-     * Returns the short name of the animation that should loop on the main
-     * channel right now (e.g. {@code "idle"}, {@code "run"}, {@code "sit"}).
-     * The renderer prefixes this with the model key to find the
-     * {@link AnimationLibrary} entry, falls back to {@code "idle"} if missing,
-     * and calls {@link PetAnimator#setMain} (idempotent).
+     * Returns the gameplay snapshot that the animation resolver uses to pick
+     * channel animations. The renderer prefixes resolver output with the model
+     * key to find {@link AnimationLibrary} entries.
      *
      * @param walkSpeed normalized walk speed sampled from the entity, used to
      *                  distinguish stationary vs moving states
+     * @return gameplay state snapshot for animation resolution
      */
-    String getMainAnimationName(float walkSpeed);
+    PetAnimContext getAnimContext(float walkSpeed);
+
+    /**
+     * Legacy helper for callers that still want a single base-loop name.
+     *
+     * @param walkSpeed normalized walk speed sampled from the entity
+     * @return first base-loop candidate selected by the resolver
+     */
+    @Deprecated(forRemoval = false)
+    default String getMainAnimationName(float walkSpeed) {
+        return PetAnimationResolver.resolve(getAnimContext(walkSpeed))
+                .baseLoopCandidates()
+                .stream()
+                .findFirst()
+                .orElse("idle");
+    }
 }

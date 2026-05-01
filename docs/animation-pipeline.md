@@ -10,10 +10,10 @@
 
 ## 架构
 
-七层，依赖箭头从左到右：
+八层，依赖箭头从左到右：
 
 ```
-format → compile → baked → runtime → render → api
+format → compile → baked → runtime → state → render → api
  POJO    bake-time  immut    per-      MC       外部
                   shared   entity   integration  接口
 ```
@@ -50,7 +50,14 @@ common/src/main/java/com/dwinovo/chiikawa/anim/
 │   ├── AnimationChannel.java     #   record(BakedAnimation, startTimeNs, looping) — 不可变
 │   └── PoseSampler.java          #   纯函数：(channel, nowNs, ctx) → poseBuf
 │
-├── render/                       # 第 6 层：Minecraft 集成
+├── state/                        # 第 6 层：游戏状态 → 动画计划
+│   ├── PetAnimContext.java       #   每帧状态快照
+│   ├── PetAnimationResolver.java #   纯函数 resolver
+│   ├── PetAnimPlan.java          #   分层候选动画名
+│   ├── PetAction.java            #   行为动作事件
+│   └── PetReaction.java          #   情绪反应事件
+│
+├── render/                       # 第 7 层：Minecraft 集成
 │   ├── ChiikawaEntityRenderer.java # extends EntityRenderer<T, ChiikawaRenderState>
 │   ├── ChiikawaRenderState.java    # 携带 modelKey/texture/channel snapshot/heldItem
 │   ├── ModelRenderer.java          # 骨骼 DAG 遍历 + cube quad 发射
@@ -59,10 +66,10 @@ common/src/main/java/com/dwinovo/chiikawa/anim/
 │   ├── BoneAttachmentLayer.java    # 物品挂载到 RightHandLocator
 │   └── impl/                       # 7 个 trivial 子类（ChiikawaRenderer 等）
 │
-└── api/                          # 第 7 层：业务接口
+└── api/                          # 第 8 层：业务接口
     ├── ModelLibrary.java         #   namespace:path → BakedModel 注册表
     ├── AnimationLibrary.java     #   namespace:path/anim → BakedAnimation 注册表
-    └── ChiikawaAnimated.java     #   实体侧接口：getPetAnimator() + getMainAnimationName()
+    └── ChiikawaAnimated.java     #   实体侧接口：getPetAnimator() + getAnimContext()
 ```
 
 ## 核心数据流
@@ -91,7 +98,8 @@ ChiikawaEntityRenderer.extractRenderState
     │
     ├─ 从 LivingEntity 读 bodyRot / yRot / xRot / walkSpeed / mainHandItem
     ├─ 把 head_yaw / head_pitch snapshot 到 state（避开 InventoryScreen 后续覆写）
-    └─ 调 ChiikawaAnimated.getMainAnimationName(walkSpeed) → setMain(idle/run/sit, looping=true)
+    ├─ 调 ChiikawaAnimated.getAnimContext(walkSpeed)
+    └─ 调 PetAnimationResolver.resolve(context) → setMain(first available base loop)
     │
     ▼
 ChiikawaEntityRenderer.submit
@@ -152,15 +160,18 @@ InventoryScreen 在同一帧调两次 extract，两次拿到几乎相同的 `nan
 
 ### Channel 层级
 
-`PetAnimator.CHANNEL_COUNT = 4`，但当前仅用：
+`PetAnimator.CHANNEL_COUNT = 4`：
 
 | layer | 用途 |
 |---|---|
-| 0 | main loop（idle / run / sit），`setMain` 维护，幂等 |
-| 1 | trigger 一次性动画（use_mainhand、sword_attack），`trigger()` 写入 |
-| 2-3 | 保留（多层加性混合的扩展点，未实现）|
+| 0 | base loop（idle / run / sit / work idle），`setMain` 维护，幂等，切换时通用 crossfade |
+| 1 | action 一次性动画（harvest、plant、slash 等），`trigger()` 写入 |
+| 2 | overlay 预留层（未来上半身 / 道具叠加） |
+| 3 | reaction 一次性动画（happy、hurt、scratch_head 等），`trigger()` 写入 |
 
-Trigger channel 的 `looping=false`，`PoseSampler` 在 `t >= duration` 时 clamp 到末尾值（不会自动清除，但视觉上停在末尾 pose；下一次 `trigger()` 替换整个 record，等于重新开始）。
+Base channel 切换时不区分具体状态，任何 A -> B 都创建一个 `AnimationTransition(fromChannel, startTime, duration)`。submit 阶段分别采样 from/to pose，再由 `PoseMixer` 用 smoothstep alpha 混合。这个设计对应 Geckolib `transitionTickTime` 的轻量版本，但保持我们自己的纯采样模型。
+
+Trigger channel 的 `looping=false`，`PoseSampler` 在 `t >= duration` 时 clamp 到末尾值；renderer 每次 extract 前会调用 `PetAnimator.clearFinished(nowNs)` 清掉结束的一次性上层 channel，避免动作卡在最后一帧。
 
 ### MolangContext 范围
 
@@ -228,17 +239,25 @@ common/src/main/resources/assets/<namespace>/
 
 ### 必须存在的动画名
 
-[`AbstractPet.getMainAnimationName`](../common/src/main/java/com/dwinovo/chiikawa/entity/AbstractPet.java) 按状态选：
+[`PetAnimationResolver`](../common/src/main/java/com/dwinovo/chiikawa/anim/state/PetAnimationResolver.java) 按状态产出候选动画名。最小资源集：
 
 | 动画名 | 何时播放 |
 |---|---|
-| `idle` | 默认状态（也是 fallback） |
+| `idle` | 默认状态，也是最终 fallback |
 | `run` | walkSpeed > 0.15 |
 | `sit` | PetMode == SIT |
-| `use_mainhand` | trigger（farmer / fencer 攻击）|
-| `sword_attack` | trigger（archer 攻击） |
+| `use_mainhand` | 旧通用主手动作 fallback |
+| `sword_attack` | 旧通用攻击动作 fallback |
 
-缺动画时 `setMain` 会跳过（没有 fallback 到 idle 的话主循环就停在上一个动画）。
+推荐新增语义动画名：
+
+| 类型 | 动画名 |
+|---|---|
+| 工作待机 | `work_idle_farmer`, `work_idle_fencer`, `work_idle_archer` |
+| 行为动作 | `pickup`, `harvest`, `plant`, `deposit`, `slash`, `bow_draw`, `bow_release` |
+| 情绪反应 | `happy`, `hurt`, `scratch_head`, `confused`, `revive` |
+
+详见 [`pet-state-machine-design.md`](./pet-state-machine-design.md) 的命名契约。
 
 ## 如何扩展
 
@@ -265,10 +284,10 @@ common/src/main/resources/assets/<namespace>/
 
 ### 添加新触发动画
 
-1. 在 `AbstractPet.java` 加 `TRIGGER_FOO = N` 常量（占低 8 位，0 是保留）
-2. `animIdFor` / `animNameFor` 两个 switch 各加 case，name 必须与动画文件中的名字一致
-3. server 端逻辑里调 `pet.triggerAnim("foo")`
-4. 重新打包后客户端会自动响应（`onSyncedDataUpdated` 已经处理了）
+1. 在 [`PetAction`](../common/src/main/java/com/dwinovo/chiikawa/anim/state/PetAction.java) 或 [`PetReaction`](../common/src/main/java/com/dwinovo/chiikawa/anim/state/PetReaction.java) 中新增语义事件和 network id（低 8 位，0 是保留）。
+2. 给事件配置有序动画候选名，例如 `"play_guitar", "use_mainhand"`。
+3. server 端逻辑里调 `pet.triggerAction(PetAction.X)` 或 `pet.triggerReaction(PetReaction.X)`。
+4. 重新打包后客户端会自动响应（`onSyncedDataUpdated` 已经处理 action/reaction 两条触发器）。
 
 ### 添加新 BoneInterceptor
 
@@ -280,7 +299,7 @@ common/src/main/resources/assets/<namespace>/
 
 ### 修改 main loop 状态机
 
-[`AbstractPet.getMainAnimationName(walkSpeed)`](../common/src/main/java/com/dwinovo/chiikawa/entity/AbstractPet.java) — 直接改这个方法。返回的字符串就是动画名。renderer 每帧调一次，配合 `PetAnimator.setMain` 的幂等性自动切换。
+基础循环由 [`AbstractPet.getAnimContext(walkSpeed)`](../common/src/main/java/com/dwinovo/chiikawa/entity/AbstractPet.java) 产出状态快照，再由 [`PetAnimationResolver.resolve`](../common/src/main/java/com/dwinovo/chiikawa/anim/state/PetAnimationResolver.java) 选择候选动画名。通常只改 resolver，不在 renderer 里写业务判断。
 
 ## 常见坑
 
