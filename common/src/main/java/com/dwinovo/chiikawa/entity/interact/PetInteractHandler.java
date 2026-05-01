@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.entity.interact;
 
+import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetMode;
 import com.dwinovo.chiikawa.init.InitTag;
@@ -55,9 +56,11 @@ public final class PetInteractHandler {
             if (level.getRandom().nextFloat() < TAME_CHANCE) {
                 pet.tame(player);
                 pet.playTameSound();
+                pet.triggerReaction(PetReaction.HAPPY);
                 level.broadcastEntityEvent(pet, (byte) 7);
             }
             else {
+                pet.triggerReaction(PetReaction.CONFUSED);
                 level.broadcastEntityEvent(pet, (byte) 6);
             }
         }
@@ -71,6 +74,7 @@ public final class PetInteractHandler {
             }
             if (pet.getHealth() < pet.getMaxHealth()) {
                 pet.heal(FEED_HEAL);
+                pet.triggerReaction(PetReaction.HAPPY);
             }
         }
         return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;

@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.task.farmer;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.entity.PetMode;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
@@ -90,7 +91,7 @@ public class DeliverCropBehavior extends Behavior<AbstractPet> {
                 this.openContainerPos = containerPos;
                 BlockEntity blockEntity = world.getBlockEntity(containerPos);
                 if (blockEntity instanceof ChestBlockEntity) {
-                    pet.triggerAnim("use_mainhand");
+                    pet.triggerAction(PetAction.DEPOSIT);
                     world.playSound(null, containerPos.getX(), containerPos.getY(), containerPos.getZ(),
                         SoundEvents.CHEST_OPEN, SoundSource.BLOCKS, 1.0F, 1.0F);
                     world.blockEvent(containerPos, world.getBlockState(containerPos).getBlock(), 1, 1);
@@ -298,4 +299,3 @@ public class DeliverCropBehavior extends Behavior<AbstractPet> {
         this.openContainerPos = null;
     }
 }
-
