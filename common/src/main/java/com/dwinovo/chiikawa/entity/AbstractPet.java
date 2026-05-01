@@ -5,6 +5,9 @@ import com.dwinovo.chiikawa.anim.api.AnimationLibrary;
 import com.dwinovo.chiikawa.anim.api.ChiikawaAnimated;
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
 import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
+import com.dwinovo.chiikawa.anim.state.PetAction;
+import com.dwinovo.chiikawa.anim.state.PetAnimContext;
+import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
 import com.dwinovo.chiikawa.entity.job.api.IPetJob;
 import com.dwinovo.chiikawa.init.InitMemory;
@@ -23,9 +26,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
-import net.minecraft.world.ContainerListener;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
@@ -68,14 +69,16 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * every client watcher, which in turn calls {@link PetAnimator#trigger}.
      */
     private static final EntityDataAccessor<Integer> ANIM_TRIGGER = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> REACTION_TRIGGER = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.INT);
 
-    /** Animation-id namespace for {@link #ANIM_TRIGGER}'s low byte. */
+    /** Legacy animation-id namespace for {@link #ANIM_TRIGGER}'s low byte. */
     public static final int TRIGGER_NONE         = 0;
     public static final int TRIGGER_USE_MAINHAND = 1;
     public static final int TRIGGER_SWORD_ATTACK = 2;
 
     /** Layer used by triggered one-shots; main loop owns layer 0. */
-    private static final int TRIGGER_LAYER = 1;
+    private static final int TRIGGER_LAYER = PetAnimator.LAYER_ACTION;
+    private static final int REACTION_LAYER = PetAnimator.LAYER_REACTION;
     private static final java.util.List<MemoryModuleType<?>> MEMORY_TYPES = java.util.List.of(
         MemoryModuleType.PATH,
         MemoryModuleType.DOORS_TO_CLOSE,
@@ -105,7 +108,15 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     private PetAnimator petAnimator;
     /** Last {@link #ANIM_TRIGGER} sequence number this client handled. Server copy is unused. */
     private int lastSeenTriggerSeq;
-    private final SimpleContainer backpack = new SimpleContainer(BACKPACK_SIZE);
+    /** Last {@link #REACTION_TRIGGER} sequence number this client handled. Server copy is unused. */
+    private int lastSeenReactionSeq;
+    private final SimpleContainer backpack = new SimpleContainer(BACKPACK_SIZE) {
+        @Override
+        public void setChanged() {
+            super.setChanged();
+            AbstractPet.this.refreshJobFromMainhand();
+        }
+    };
 
     /**
      * Creates a new pet instance tied to its entity type and level.
@@ -115,12 +126,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      */
     protected AbstractPet(EntityType<? extends TamableAnimal> entityType, Level level) {
         super(entityType, level);
-        backpack.addListener(new ContainerListener() {
-            @Override
-            public void containerChanged(Container container) {
-                refreshJobFromMainhand();
-            }
-        });
     }
 
     /**
@@ -307,13 +312,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     }
 
     @Override
-    public String getMainAnimationName(float walkSpeed) {
-        if (getPetMode() == PetMode.SIT) return "sit";
-        // Small movement threshold: the smoothed walkAnimation.speed decays
-        // exponentially toward 0, so
-        // a `> 0` check would latch the run state forever.
-        if (walkSpeed > 0.15f) return "run";
-        return "idle";
+    public PetAnimContext getAnimContext(float walkSpeed) {
+        return PetAnimContext.base(getPetMode(), getPetJobId(), walkSpeed);
     }
 
     @Override
@@ -322,59 +322,114 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         builder.define(PET_MODE, (byte) PetMode.FOLLOW.ordinal());
         builder.define(PET_JOB, InitRegistry.NONE_ID);
         builder.define(ANIM_TRIGGER, 0);
+        builder.define(REACTION_TRIGGER, 0);
     }
 
     /**
      * Bumps the synced trigger so all client watchers fire {@code name} once
      * on the pet's animator. Server-only; calling on the client is a no-op
-     * because the value would not propagate. Unknown animation names are
-     * silently ignored.
+     * (the value would not propagate). Unknown animation names are silently ignored.
+     *
+     * @param name legacy animation name
      */
+    @Deprecated(forRemoval = false)
     public void triggerAnim(String name) {
+        triggerAction(PetAction.fromLegacyAnimationName(name));
+    }
+
+    /**
+     * Bumps the synced action trigger so clients can choose the best available
+     * animation candidate for the semantic action.
+     *
+     * @param action semantic action event
+     */
+    public void triggerAction(PetAction action) {
         if (level().isClientSide()) return;
-        int id = animIdFor(name);
-        if (id == TRIGGER_NONE) return;
-        int packed = entityData.get(ANIM_TRIGGER);
+        if (action == null || action == PetAction.NONE) return;
+        bumpTrigger(ANIM_TRIGGER, action.networkId());
+    }
+
+    /**
+     * Bumps the synced reaction trigger so clients can play short emotional
+     * feedback on its own layer.
+     *
+     * @param reaction semantic reaction event
+     */
+    public void triggerReaction(PetReaction reaction) {
+        if (level().isClientSide()) return;
+        if (reaction == null || reaction == PetReaction.NONE) return;
+        bumpTrigger(REACTION_TRIGGER, reaction.networkId());
+    }
+
+    private void bumpTrigger(EntityDataAccessor<Integer> accessor, int id) {
+        int packed = entityData.get(accessor);
         int seq = ((packed >>> 8) + 1) & 0xFFFFFF;
         // Avoid the wrap-to-zero ambiguity (seq 0 = "never triggered").
         if (seq == 0) seq = 1;
-        entityData.set(ANIM_TRIGGER, (seq << 8) | (id & 0xFF));
+        entityData.set(accessor, (seq << 8) | (id & 0xFF));
     }
 
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
-        if (!level().isClientSide() || !ANIM_TRIGGER.equals(key)) return;
+        if (!level().isClientSide()) return;
+        if (ANIM_TRIGGER.equals(key)) {
+            handleActionTrigger();
+        } else if (REACTION_TRIGGER.equals(key)) {
+            handleReactionTrigger();
+        }
+    }
+
+    private void handleActionTrigger() {
         int packed = entityData.get(ANIM_TRIGGER);
         int seq = packed >>> 8;
         if (seq == 0 || seq == lastSeenTriggerSeq) return;
         lastSeenTriggerSeq = seq;
-        String name = animNameFor(packed & 0xFF);
-        if (name == null) return;
+        PetAction action = PetAction.fromNetworkId(packed & 0xFF);
+        if (action == PetAction.NONE) return;
         ResourceLocation typeId = BuiltInRegistries.ENTITY_TYPE.getKey(getType());
-        BakedAnimation anim = AnimationLibrary.get(
-                ResourceLocation.fromNamespaceAndPath(typeId.getNamespace(), typeId.getPath() + "/" + name));
+        BakedAnimation anim = firstAvailableActionAnimation(typeId, action);
         if (anim != null) {
             getPetAnimator().trigger(TRIGGER_LAYER, anim);
         } else {
-            Constants.LOG.warn("[chiikawa-anim] no baked animation for trigger '{}' on {}", name, typeId);
+            Constants.LOG.warn("[chiikawa-anim] no baked animation for action '{}' on {}", action, typeId);
         }
     }
 
-    private static int animIdFor(String name) {
-        return switch (name) {
-            case "use_mainhand" -> TRIGGER_USE_MAINHAND;
-            case "sword_attack" -> TRIGGER_SWORD_ATTACK;
-            default -> TRIGGER_NONE;
-        };
+    private void handleReactionTrigger() {
+        int packed = entityData.get(REACTION_TRIGGER);
+        int seq = packed >>> 8;
+        if (seq == 0 || seq == lastSeenReactionSeq) return;
+        lastSeenReactionSeq = seq;
+        PetReaction reaction = PetReaction.fromNetworkId(packed & 0xFF);
+        if (reaction == PetReaction.NONE) return;
+        ResourceLocation typeId = BuiltInRegistries.ENTITY_TYPE.getKey(getType());
+        BakedAnimation anim = firstAvailableReactionAnimation(typeId, reaction);
+        if (anim != null) {
+            getPetAnimator().trigger(REACTION_LAYER, anim);
+        }
     }
 
-    private static String animNameFor(int id) {
-        return switch (id) {
-            case TRIGGER_USE_MAINHAND -> "use_mainhand";
-            case TRIGGER_SWORD_ATTACK -> "sword_attack";
-            default -> null;
-        };
+    private BakedAnimation firstAvailableActionAnimation(ResourceLocation typeId, PetAction action) {
+        for (String name : action.animationCandidates()) {
+            BakedAnimation anim = AnimationLibrary.get(
+                    ResourceLocation.fromNamespaceAndPath(typeId.getNamespace(), typeId.getPath() + "/" + name));
+            if (anim != null) {
+                return anim;
+            }
+        }
+        return null;
+    }
+
+    private BakedAnimation firstAvailableReactionAnimation(ResourceLocation typeId, PetReaction reaction) {
+        for (String name : reaction.animationCandidates()) {
+            BakedAnimation anim = AnimationLibrary.get(
+                    ResourceLocation.fromNamespaceAndPath(typeId.getNamespace(), typeId.getPath() + "/" + name));
+            if (anim != null) {
+                return anim;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -461,6 +516,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
+        if (!level().isClientSide()) {
+            triggerReaction(PetReaction.HURT);
+        }
         SoundEvent sound = getSoundSet().getHurtSound();
         return sound != null ? sound : super.getHurtSound(source);
     }
