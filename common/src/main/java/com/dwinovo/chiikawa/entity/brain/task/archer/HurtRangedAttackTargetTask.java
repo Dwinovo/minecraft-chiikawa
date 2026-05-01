@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.task.archer;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
+import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetMode;
 import com.dwinovo.chiikawa.init.InitRegistry;
@@ -39,7 +40,7 @@ public class HurtRangedAttackTargetTask extends Behavior<AbstractPet>{
         if (pet.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).isPresent())
         {
             LivingEntity target = pet.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get();
-            pet.triggerAnim("sword_attack");
+            pet.triggerAction(PetAction.BOW_DRAW);
             pet.startUsingItem(InteractionHand.MAIN_HAND);
             pet.getLookControl().setLookAt(target, 30.0f, 30.0f);
         }
@@ -79,4 +80,3 @@ public class HurtRangedAttackTargetTask extends Behavior<AbstractPet>{
 
 
 }
-

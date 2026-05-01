@@ -9,7 +9,10 @@ import com.dwinovo.chiikawa.anim.baked.BakedModel;
 import com.dwinovo.chiikawa.anim.molang.MolangContext;
 import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
 import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
+import com.dwinovo.chiikawa.anim.runtime.PoseMixer;
 import com.dwinovo.chiikawa.anim.runtime.PoseSampler;
+import com.dwinovo.chiikawa.anim.state.PetAnimPlan;
+import com.dwinovo.chiikawa.anim.state.PetAnimationResolver;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -89,13 +92,14 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
 
         if (entity instanceof ChiikawaAnimated animated) {
             PetAnimator animator = animated.getPetAnimator();
+            animator.clearFinished(System.nanoTime());
             // Pick the desired main loop based on entity state. setMain is
             // idempotent — switches only when the wanted animation actually
             // changes, so a second extractRenderState in the same frame
             // (InventoryScreen.renderEntityInInventoryFollowsMouse) does not
             // restart the timer.
-            String wantedName = animated.getMainAnimationName(state.walkSpeed);
-            BakedAnimation wanted = AnimationLibrary.get(animKey(wantedName));
+            PetAnimPlan plan = PetAnimationResolver.resolve(animated.getAnimContext(state.walkSpeed));
+            BakedAnimation wanted = firstAvailable(plan.baseLoopCandidates());
             if (wanted == null) wanted = AnimationLibrary.get(defaultLoopKey);
             if (wanted != null) {
                 animator.setMain(wanted, true);
@@ -118,6 +122,16 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     private ResourceLocation animKey(String name) {
         return new ResourceLocation(modelKey.getNamespace(),
                 modelKey.getPath() + "/" + name);
+    }
+
+    private BakedAnimation firstAvailable(Iterable<String> names) {
+        for (String name : names) {
+            BakedAnimation animation = AnimationLibrary.get(animKey(name));
+            if (animation != null) {
+                return animation;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -154,9 +168,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         molangCtx.vars[MolangContext.SLOT_GROUND_SPEED] = state.walkSpeed;
 
         long nowNs = System.nanoTime();
-        if (state.mainChannel != null) {
-            PoseSampler.sample(state.mainChannel, nowNs, molangCtx, poseBuf);
-        }
+        sampleMainChannel(state.mainChannel, nowNs, molangCtx, poseBuf, boneCount);
         if (state.subChannels != null) {
             for (AnimationChannel sub : state.subChannels) {
                 if (sub != null) PoseSampler.sample(sub, nowNs, molangCtx, poseBuf);
@@ -193,5 +205,25 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
                 state.heldItemStack, packedLight);
 
         poseStack.popPose();
+    }
+
+    private void sampleMainChannel(AnimationChannel channel, long nowNs,
+                                   MolangContext ctx, float[] poseBuf, int boneCount) {
+        if (channel == null) {
+            return;
+        }
+        if (channel.transition() == null) {
+            PoseSampler.sample(channel, nowNs, ctx, poseBuf);
+            return;
+        }
+
+        float[] fromPose = new float[boneCount * PoseSampler.FLOATS_PER_BONE];
+        float[] toPose = new float[boneCount * PoseSampler.FLOATS_PER_BONE];
+        PoseSampler.resetIdentity(fromPose, boneCount);
+        PoseSampler.resetIdentity(toPose, boneCount);
+
+        PoseSampler.sample(channel.transition().fromChannel(), nowNs, ctx, fromPose);
+        PoseSampler.sample(channel.withoutTransition(), nowNs, ctx, toPose);
+        PoseMixer.blend(fromPose, toPose, PoseMixer.transitionAlpha(channel.transition(), nowNs), poseBuf, boneCount);
     }
 }
