@@ -16,6 +16,22 @@ import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
  * @param animation   the baked animation being played
  * @param startTimeNs {@code System.nanoTime()} captured at trigger
  * @param looping     whether to wrap {@code (now - start) % duration}
+ * @param transition  optional transition blended into this channel
  */
-public record AnimationChannel(BakedAnimation animation, long startTimeNs, boolean looping) {
+public record AnimationChannel(
+        BakedAnimation animation,
+        long startTimeNs,
+        boolean looping,
+        AnimationTransition transition
+) {
+    public AnimationChannel(BakedAnimation animation, long startTimeNs, boolean looping) {
+        this(animation, startTimeNs, looping, null);
+    }
+
+    public AnimationChannel withoutTransition() {
+        if (transition == null) {
+            return this;
+        }
+        return new AnimationChannel(animation, startTimeNs, looping);
+    }
 }

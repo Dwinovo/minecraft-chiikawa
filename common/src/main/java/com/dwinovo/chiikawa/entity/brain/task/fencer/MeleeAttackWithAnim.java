@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.task.fencer;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.anim.state.PetAction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -34,7 +35,7 @@ public final class MeleeAttackWithAnim {
                             return false;
                         }
                         lookTarget.set(new EntityTracker(target, true));
-                        pet.triggerAnim("use_mainhand");
+                        pet.triggerAction(PetAction.SLASH);
                         pet.swing(InteractionHand.MAIN_HAND);
                         pet.doHurtTarget(level, target);
                         pet.playAttackSound();
@@ -52,4 +53,3 @@ public final class MeleeAttackWithAnim {
         });
     }
 }
-
