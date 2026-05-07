@@ -104,15 +104,16 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             if (wanted != null) {
                 animator.setMain(wanted, true);
             }
-            state.mainChannel = animator.get(0);
-            // Snapshot any non-main channels populated by trigger(). The
+            state.mainChannel = animator.get(PetAnimator.Slot.BASE);
+            // Snapshot any non-BASE channels populated by trigger(). The
             // AnimationChannel records are immutable so this is a safe shallow
             // copy.
             AnimationChannel[] subs = null;
-            for (int i = 1; i < PetAnimator.CHANNEL_COUNT; i++) {
-                AnimationChannel sub = animator.get(i);
+            PetAnimator.Slot[] slots = PetAnimator.Slot.VALUES;
+            for (int i = 1; i < slots.length; i++) {
+                AnimationChannel sub = animator.get(slots[i]);
                 if (sub == null) continue;
-                if (subs == null) subs = new AnimationChannel[PetAnimator.CHANNEL_COUNT - 1];
+                if (subs == null) subs = new AnimationChannel[slots.length - 1];
                 subs[i - 1] = sub;
             }
             state.subChannels = subs;
