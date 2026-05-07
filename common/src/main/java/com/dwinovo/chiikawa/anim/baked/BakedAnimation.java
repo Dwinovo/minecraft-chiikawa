@@ -13,6 +13,12 @@ package com.dwinovo.chiikawa.anim.baked;
  * animation only references bone names that exist in the model — channels for
  * unknown names are dropped at bake time (with a warning).
  *
+ * <p>{@link #loopMode} preserves the Bedrock {@code loop} field's three-state
+ * semantic ({@code false} / {@code true} / {@code "hold_on_last_frame"}) all
+ * the way to the runtime, so the sampler and the animator's
+ * {@code isFinished} check both make the right decision without losing the
+ * animator's authoring intent.
+ *
  * <p>{@link #bakeStamp} matches the stamp on the {@link BakedModel} this
  * animation was baked against. After a resource reload the stamp on
  * {@link BakeStamp} is bumped and fresh objects are produced; any cached
@@ -24,23 +30,36 @@ public final class BakedAnimation {
     public final String name;
     /** Total animation length in seconds. */
     public final float durationSec;
-    public final boolean looping;
+    /** Bedrock {@code loop}-field semantic preserved as a typed enum. */
+    public final LoopMode loopMode;
 
     public final BakedBoneChannel[] channels;
 
     /** {@link BakeStamp} value at the moment this animation was baked. */
     public final long bakeStamp;
 
-    /** Test-only: defaults {@link #bakeStamp} to {@code 0} (unset). */
+    /** Test-only convenience: maps {@code looping=true} → LOOP, {@code false} → PLAY_ONCE. */
     public BakedAnimation(String name, float durationSec, boolean looping, BakedBoneChannel[] channels) {
-        this(name, durationSec, looping, channels, 0L);
+        this(name, durationSec, looping ? LoopMode.LOOP : LoopMode.PLAY_ONCE, channels, 0L);
     }
 
+    /** Test-only convenience with bake stamp. */
     public BakedAnimation(String name, float durationSec, boolean looping,
+                          BakedBoneChannel[] channels, long bakeStamp) {
+        this(name, durationSec, looping ? LoopMode.LOOP : LoopMode.PLAY_ONCE, channels, bakeStamp);
+    }
+
+    /** Stamp-less LoopMode ctor for non-resource paths. */
+    public BakedAnimation(String name, float durationSec, LoopMode loopMode, BakedBoneChannel[] channels) {
+        this(name, durationSec, loopMode, channels, 0L);
+    }
+
+    /** Canonical ctor — used by the bake pipeline. */
+    public BakedAnimation(String name, float durationSec, LoopMode loopMode,
                           BakedBoneChannel[] channels, long bakeStamp) {
         this.name = name;
         this.durationSec = durationSec;
-        this.looping = looping;
+        this.loopMode = loopMode == null ? LoopMode.PLAY_ONCE : loopMode;
         this.channels = channels;
         this.bakeStamp = bakeStamp;
     }
