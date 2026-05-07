@@ -7,6 +7,9 @@ import com.dwinovo.chiikawa.anim.api.ModelLibrary;
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
 import com.dwinovo.chiikawa.anim.molang.MolangContext;
+import com.dwinovo.chiikawa.anim.render.layer.HeldItemLayer;
+import com.dwinovo.chiikawa.anim.render.layer.RenderLayer;
+import com.dwinovo.chiikawa.anim.render.layer.RenderLayerContext;
 import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
 import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
 import com.dwinovo.chiikawa.anim.runtime.PoseMixer;
@@ -23,8 +26,10 @@ import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
 import org.joml.Quaternionf;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Base entity renderer for Bedrock-format pets. Handles model lookup, the
@@ -47,14 +52,16 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     protected final Identifier textureLocation;
     protected final Identifier defaultLoopKey;
 
-    /** Bone name on every pet model where the mainhand item attaches. */
-    private static final String HELD_ITEM_BONE = "RightHandLocator";
-
     private final ModelRenderer mesh = new ModelRenderer();
     private final Quaternionf rotBuf = new Quaternionf();
     private final MolangContext molangCtx = new MolangContext();
     private final BoneInterceptor[] interceptors = { new PetBoneInterceptor() };
-    private final BoneAttachmentLayer heldItemLayer = new BoneAttachmentLayer();
+    /**
+     * Visual layers that run after the main mesh submits, in registration order.
+     * Subclasses register additional layers (props, emissive overlays, capes...)
+     * via {@link #addRenderLayer(RenderLayer)} from their constructor.
+     */
+    private final List<RenderLayer> renderLayers = new ArrayList<>();
 
     protected ChiikawaEntityRenderer(EntityRendererProvider.Context ctx, String name) {
         super(ctx);
@@ -63,6 +70,13 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
                 "textures/entities/" + name + ".png");
         this.defaultLoopKey = Identifier.fromNamespaceAndPath(Constants.MOD_ID,
                 name + "/" + DEFAULT_LOOP_NAME);
+        // Default layers shared by all pets. Subclasses can append more.
+        addRenderLayer(new HeldItemLayer());
+    }
+
+    /** Register an additional {@link RenderLayer}; runs after the main mesh in registration order. */
+    protected final void addRenderLayer(RenderLayer layer) {
+        renderLayers.add(layer);
     }
 
     @Override
@@ -201,8 +215,13 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             mesh.render(model, drawPose, vc, packedLight, packedOverlay, poseBuf);
         });
 
-        heldItemLayer.submit(model, poseBuf, HELD_ITEM_BONE, poseStack, collector,
-                state.heldItemStack, packedLight);
+        if (!renderLayers.isEmpty()) {
+            RenderLayerContext layerCtx = new RenderLayerContext(
+                    model, poseBuf, state, poseStack, collector, packedLight, packedOverlay);
+            for (RenderLayer layer : renderLayers) {
+                layer.submit(layerCtx);
+            }
+        }
 
         poseStack.popPose();
     }

@@ -63,7 +63,11 @@ common/src/main/java/com/dwinovo/chiikawa/anim/
 │   ├── ModelRenderer.java          # 骨骼 DAG 遍历 + cube quad 发射
 │   ├── BoneInterceptor.java        # 骨骼程序化覆写接口
 │   ├── PetBoneInterceptor.java     # 默认实现（头/耳/尾）
-│   ├── BoneAttachmentLayer.java    # 物品挂载到 RightHandLocator
+│   ├── layer/                       # RenderLayer 注册表
+│   │   ├── RenderLayer.java         # 视觉层接口
+│   │   ├── RenderLayerContext.java  # per-submit 数据包
+│   │   ├── BoneTransformWalker.java # 骨骼父链 PoseStack 推进工具
+│   │   └── HeldItemLayer.java       # 物品挂载到 RightHandLocator
 │   └── impl/                       # 7 个 trivial 子类（ChiikawaRenderer 等）
 │
 └── api/                          # 第 8 层：业务接口
@@ -200,7 +204,7 @@ PoseStack 在我们的渲染流水线里始终处于 **1/16-scaled pixel 空间*
 - 骨骼 pivot 用原始 pixel 数值，可直接 `translate(pivotX)`
 - ModelRenderer 顶点也直接用原始 pixel 数值
 
-但 **物品** 在 Mojang 的 API 里使用块单位（BakedQuad vertex 是 0..1 块，display transform 也是块为单位）。所以 `BoneAttachmentLayer.submit` 在 chain walk 终点会 `scale(16, 16, 16)` 抵消我们的 1/16，恢复块单位 → 物品才能以正常尺寸渲染。
+但 **物品** 在 Mojang 的 API 里使用块单位（BakedQuad vertex 是 0..1 块，display transform 也是块为单位）。所以 `HeldItemLayer.submit` 在 chain walk 终点会 `scale(16, 16, 16)` 抵消我们的 1/16，恢复块单位 → 物品才能以正常尺寸渲染。
 
 vanilla 不踩这个坑是因为 `LivingEntityRenderer` 把 1/16 因子放在 `ModelPart` 顶点生成里，PoseStack 始终块单位。我们的约定相反，要在物品边界处显式抵消。
 
@@ -327,7 +331,7 @@ common/src/main/resources/assets/<namespace>/
 
 我们的 PoseStack 是 1/16 scale 空间（pixel 单位），但 `ItemStackRenderState.submit` 内部 vertex 是 0..1 块单位。直接 submit 物品会被额外乘 1/16 → 0.85 块的剑变成 5cm。
 
-**修法**：`BoneAttachmentLayer` 在 chain walk 终点 `scale(16, 16, 16)` 抵消。
+**修法**：`HeldItemLayer` 在 chain walk 终点 `scale(16, 16, 16)` 抵消。
 
 ### 浮点 identity 比较用 `== 0f`
 
@@ -347,7 +351,7 @@ common/src/main/resources/assets/<namespace>/
 
 1. **AnimationBaker bake 时丢弃 identity 通道**（all-zero rotation/position、all-one scale、所有 keyframe 都是 identity 的）
 2. **ModelRenderer 跳过 identity 骨骼的 push/pop + pivot 三明治**（24 骨骼里大概 18 个是组织性的）
-3. **BoneAttachmentLayer chain walk 应用同样的 fast path**
+3. **BoneTransformWalker 链式遍历应用同样的 fast path**
 
 热路径主要时间花在 Mojang 的 `BufferBuilder.addVertex`，我们的 Java 计算占整体 5-10%。Rust JNI 化 sampling 实测**会更慢**（boundary overhead 远超优化收益），所以不做。
 
