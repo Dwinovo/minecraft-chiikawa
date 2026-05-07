@@ -147,7 +147,7 @@ PoseSampler.resetIdentity
     -> BoneAttachmentLayer.submit
 ```
 
-后采样的 channel 会覆盖或叠加前面的骨骼 slot。目前采样器是直接写入模式，后续如果需要真正的 additive blend，可以在 `PetAnimator.LAYER_OVERLAY` 上扩展混合策略。
+后采样的 channel 会覆盖或叠加前面的骨骼 slot。目前采样器是直接写入模式，后续如果需要真正的 additive blend，可以在 `PetAnimator.Slot.OVERLAY` 上扩展混合策略。
 
 ## 纯函数采样
 
@@ -174,18 +174,20 @@ record AnimationChannel(BakedAnimation animation, long startTimeNs, boolean loop
 
 ## Animator 层级
 
-`PetAnimator` 当前固定四层：
+`PetAnimator` 当前以 `Slot` 枚举划分：
 
-| layer | 常量 | 用途 |
-|---|---|---|
-| 0 | `LAYER_BASE` | 基础循环动画，例如 `idle`、`run`、`sit` |
-| 1 | `LAYER_ACTION` | 行为动作，例如 `harvest`、`plant`、`slash` |
-| 2 | `LAYER_OVERLAY` | 预留给上半身或道具 overlay |
-| 3 | `LAYER_REACTION` | 情绪反应，例如 `happy`、`hurt`、`scratch_head` |
+| slot | 用途 |
+|---|---|
+| `BASE` | 基础循环动画，例如 `idle`、`run`、`sit` |
+| `ACTION` | 行为动作，例如 `harvest`、`plant`、`slash` |
+| `OVERLAY` | 预留给上半身或道具 overlay |
+| `REACTION` | 情绪反应，例如 `happy`、`hurt`、`scratch_head` |
 
-基础层通过 `setMain(animation, true)` 驱动。它只在目标动画对象或 loop 属性变化时替换 channel。
+新增 slot 仅需在枚举末尾追加一个常量，调用方按符号引用、不依赖序号。
 
-一次性层通过 `trigger(layer, animation)` 驱动。非循环 channel 播放结束后由 `clearFinished(nowNs)` 清掉，避免动作停留在最后一帧。
+基础 slot 通过 `setMain(animation, true)` 驱动。它只在目标动画对象或 loop 属性变化时替换 channel。
+
+一次性 slot 通过 `trigger(Slot, animation)` 驱动。非循环 channel 播放结束后由 `clearFinished(nowNs)` 清掉，避免动作停留在最后一帧。
 
 ## 渲染流程
 
