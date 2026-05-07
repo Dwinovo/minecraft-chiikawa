@@ -144,6 +144,14 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         if (entity instanceof ChiikawaAnimated animated) {
             PetAnimator animator = animated.getPetAnimator();
             animator.ensureParallelPhase(entity.getUUID().getLeastSignificantBits());
+            // Drop any slot still pointing at a pre-reload BakedAnimation.
+            // Base + parallel re-resolve themselves below; sub slots are
+            // populated by trigger() and would otherwise carry stale bone
+            // indices into the sampler after F3+T.
+            BakedModel currentModel = ModelLibrary.get(modelKey);
+            if (currentModel != null) {
+                animator.clearStale(currentModel.bakeStamp);
+            }
             animator.clearFinished(System.nanoTime());
             // Pick the desired main loop based on entity state. setMain is
             // idempotent — switches only when the wanted animation actually
