@@ -17,6 +17,13 @@ import java.util.Map;
  * (resolved against {@link com.dwinovo.chiikawa.anim.api.AnimationLibrary} per
  * frame, same way as the base loop). Empty when the pet has no parallel
  * declaration.
+ *
+ * <h2>Bake stamp</h2>
+ * {@link #bakeStamp} is the {@link BakeStamp} value at the moment the model
+ * was baked. After a resource reload all baked objects are tagged with a
+ * fresh stamp; channels still referencing the old generation can be detected
+ * by comparing stamps and dropped before their stale bone indices reach the
+ * sampler.
  */
 public final class BakedModel {
 
@@ -36,10 +43,22 @@ public final class BakedModel {
      */
     public final List<String> parallelTracks;
 
+    /** {@link BakeStamp} value at the moment this model was baked. */
+    public final long bakeStamp;
+
+    /** Test-only: defaults {@link #bakeStamp} to {@code 0} (unset). */
     public BakedModel(BakedBone[] bones, BakedCube[] cubes, int[] rootBones,
                       Map<String, Integer> boneIndex,
                       int textureWidth, int textureHeight,
                       List<String> parallelTracks) {
+        this(bones, cubes, rootBones, boneIndex, textureWidth, textureHeight, parallelTracks, 0L);
+    }
+
+    public BakedModel(BakedBone[] bones, BakedCube[] cubes, int[] rootBones,
+                      Map<String, Integer> boneIndex,
+                      int textureWidth, int textureHeight,
+                      List<String> parallelTracks,
+                      long bakeStamp) {
         this.bones = bones;
         this.cubes = cubes;
         this.rootBones = rootBones;
@@ -47,5 +66,6 @@ public final class BakedModel {
         this.textureWidth = textureWidth;
         this.textureHeight = textureHeight;
         this.parallelTracks = parallelTracks == null ? List.of() : List.copyOf(parallelTracks);
+        this.bakeStamp = bakeStamp;
     }
 }

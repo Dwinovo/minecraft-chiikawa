@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.anim.compile;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.anim.api.AnimationLibrary;
 import com.dwinovo.chiikawa.anim.api.ModelLibrary;
+import com.dwinovo.chiikawa.anim.baked.BakeStamp;
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
 import com.dwinovo.chiikawa.anim.format.BedrockGeoFile;
@@ -45,18 +46,23 @@ public final class BedrockResourceLoader implements ResourceManagerReloadListene
 
     @Override
     public void onResourceManagerReload(ResourceManager manager) {
+        // Bump the bake stamp so any baked object that survives across the reload
+        // is detectably stale via stamp comparison.
+        long stamp = BakeStamp.next();
+
         Map<ResourceLocation, List<String>> parallelByModel = loadParallelTracks(manager);
-        Map<ResourceLocation, BakedModel> bakedModels = loadModels(manager, parallelByModel);
+        Map<ResourceLocation, BakedModel> bakedModels = loadModels(manager, parallelByModel, stamp);
         ModelLibrary.replaceAll(bakedModels);
-        Constants.LOG.info("[chiikawa-anim] loaded {} baked models", bakedModels.size());
+        Constants.LOG.info("[chiikawa-anim] loaded {} baked models (stamp {})", bakedModels.size(), stamp);
 
         Map<ResourceLocation, BakedAnimation> bakedAnims = loadAnimations(manager, bakedModels);
         AnimationLibrary.replaceAll(bakedAnims);
-        Constants.LOG.info("[chiikawa-anim] loaded {} baked animations", bakedAnims.size());
+        Constants.LOG.info("[chiikawa-anim] loaded {} baked animations (stamp {})", bakedAnims.size(), stamp);
     }
 
     private static Map<ResourceLocation, BakedModel> loadModels(ResourceManager manager,
-                                                               Map<ResourceLocation, List<String>> parallelByModel) {
+                                                               Map<ResourceLocation, List<String>> parallelByModel,
+                                                               long stamp) {
         Map<ResourceLocation, BakedModel> baked = new HashMap<>();
         Map<ResourceLocation, Resource> resources = manager.listResources(MODEL_PATH_PREFIX,
                 id -> id.getPath().endsWith(JSON_EXTENSION));
@@ -66,7 +72,7 @@ public final class BedrockResourceLoader implements ResourceManagerReloadListene
             try (BufferedReader reader = e.getValue().openAsReader()) {
                 BedrockGeoFile file = GSON.fromJson(reader, BedrockGeoFile.class);
                 List<String> parallelTracks = parallelByModel.getOrDefault(modelKey, List.of());
-                BakedModel model = ModelBaker.bake(file, parallelTracks);
+                BakedModel model = ModelBaker.bake(file, parallelTracks, stamp);
                 baked.put(modelKey, model);
             } catch (Exception ex) {
                 Constants.LOG.error("[chiikawa-anim] failed to load geo {}: {}", rid, ex.toString());
