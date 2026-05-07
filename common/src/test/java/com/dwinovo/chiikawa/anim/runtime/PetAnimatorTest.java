@@ -39,24 +39,26 @@ class PetAnimatorTest {
         animator.trigger(PetAnimator.Slot.REACTION, instant);
         animator.clearFinished(System.nanoTime());
 
-        assertSame(base, animator.get(PetAnimator.Slot.BASE).animation());
-        assertNull(animator.get(PetAnimator.Slot.ACTION));
-        assertNull(animator.get(PetAnimator.Slot.REACTION));
+        assertSame(base, animator.get(PetAnimator.Slot.BASE).current().animation());
+        assertTrue(animator.get(PetAnimator.Slot.ACTION).isEmpty());
+        assertTrue(animator.get(PetAnimator.Slot.REACTION).isEmpty());
     }
 
     @Test
-    void firstMainAnimationDoesNotCreateTransition() {
+    void firstMainAnimationDoesNotCreateFade() {
         BakedAnimation idle = new BakedAnimation("idle", 1.0f, true, new BakedBoneChannel[0]);
         PetAnimator animator = new PetAnimator();
 
         animator.setMain(idle, true);
 
-        assertSame(idle, animator.get(PetAnimator.Slot.BASE).animation());
-        assertNull(animator.get(PetAnimator.Slot.BASE).transition());
+        SlotState slot = animator.get(PetAnimator.Slot.BASE);
+        assertSame(idle, slot.current().animation());
+        assertNull(slot.previous());
+        assertFalse(slot.hasFade());
     }
 
     @Test
-    void switchingMainAnimationCreatesGenericTransition() {
+    void switchingMainAnimationCreatesFade() {
         BakedAnimation idle = new BakedAnimation("idle", 1.0f, true, new BakedBoneChannel[0]);
         BakedAnimation run = new BakedAnimation("run", 1.0f, true, new BakedBoneChannel[0]);
         PetAnimator animator = new PetAnimator();
@@ -64,20 +66,23 @@ class PetAnimatorTest {
         animator.setMain(idle, true);
         animator.setMain(run, true, 0.25f);
 
-        AnimationChannel channel = animator.get(PetAnimator.Slot.BASE);
-        assertSame(run, channel.animation());
-        assertSame(idle, channel.transition().fromChannel().animation());
-        assertSame(channel.transition().fromChannel(), channel.transition().fromChannel().withoutTransition());
+        SlotState slot = animator.get(PetAnimator.Slot.BASE);
+        assertSame(run, slot.current().animation());
+        assertSame(idle, slot.previous().animation());
+        assertTrue(slot.hasFade());
     }
 
     @Test
-    void transitionFinishesAtConfiguredDuration() {
+    void fadeFinishesAtConfiguredDuration() {
         BakedAnimation idle = new BakedAnimation("idle", 1.0f, true, new BakedBoneChannel[0]);
+        BakedAnimation run = new BakedAnimation("run", 1.0f, true, new BakedBoneChannel[0]);
         long startNs = 1_000_000_000L;
-        AnimationChannel from = new AnimationChannel(idle, startNs, true);
-        AnimationTransition transition = new AnimationTransition(from, startNs, 0.1f);
+        SlotState slot = SlotState.withFade(
+                new AnimationChannel(run, startNs, true),
+                new AnimationChannel(idle, startNs, true),
+                startNs, 0.1f);
 
-        assertFalse(PetAnimator.isTransitionFinished(transition, 1_099_999_999L));
-        assertTrue(PetAnimator.isTransitionFinished(transition, 1_100_000_000L));
+        assertFalse(PetAnimator.isFadeFinished(slot, 1_099_999_999L));
+        assertTrue(PetAnimator.isFadeFinished(slot, 1_100_000_000L));
     }
 }

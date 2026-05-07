@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.anim.render;
 
 import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
+import com.dwinovo.chiikawa.anim.runtime.SlotState;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.ResourceLocation;
 
@@ -28,10 +29,10 @@ public class ChiikawaRenderState extends LivingEntityRenderState {
     public ResourceLocation modelKey;
     /** Texture path. */
     public ResourceLocation texture;
-    /** Snapshot of the BASE-slot (main) animation channel. {@code null} if nothing is playing. */
-    public AnimationChannel mainChannel;
-    /** Snapshots of any non-BASE triggered channels. {@code null} entries are skipped. */
-    public AnimationChannel[] subChannels;
+    /** Snapshot of the BASE slot's state (current channel + optional fade-from). */
+    public SlotState mainSlot;
+    /** Snapshots of any non-BASE slots. {@code null} entries are skipped. */
+    public SlotState[] subSlots;
     /** {@code walkAnimation.speed(partialTick)} — feeds Molang {@code query.ground_speed}. */
     public float walkSpeed;
     /**

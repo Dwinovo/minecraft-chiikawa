@@ -13,12 +13,21 @@ public final class PoseMixer {
     private PoseMixer() {
     }
 
-    public static float transitionAlpha(AnimationTransition transition, long nowNs) {
-        if (transition == null || transition.durationSec() <= 0f) {
+    /**
+     * Computes the smoothstep alpha for a slot crossfade.
+     *
+     * <p>Decoupled from any specific record so it works for {@link SlotState}
+     * fades and any future per-effect crossfade timing — all the caller needs
+     * is the start nanos and duration in seconds.
+     *
+     * @return {@code 0..1} ratio of how far along the fade is, smoothed
+     */
+    public static float fadeAlpha(long fadeStartNs, float fadeDurationSec, long nowNs) {
+        if (fadeDurationSec <= 0f) {
             return 1f;
         }
-        float elapsed = (float) ((nowNs - transition.startTimeNs()) / 1.0e9);
-        float t = clamp01(elapsed / transition.durationSec());
+        float elapsed = (float) ((nowNs - fadeStartNs) / 1.0e9);
+        float t = clamp01(elapsed / fadeDurationSec);
         return smoothstep(t);
     }
 
