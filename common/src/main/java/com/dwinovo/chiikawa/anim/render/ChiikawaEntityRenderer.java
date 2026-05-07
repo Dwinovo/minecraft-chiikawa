@@ -28,6 +28,7 @@ import net.minecraft.world.entity.LivingEntity;
 import org.joml.Quaternionf;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 
 /**
@@ -54,7 +55,14 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     private final ModelRenderer mesh = new ModelRenderer();
     private final Quaternionf rotBuf = new Quaternionf();
     private final MolangContext molangCtx = new MolangContext();
-    private final BoneInterceptor[] interceptors = { new PetBoneInterceptor() };
+    /**
+     * Procedural pose-buffer overrides organised by stage. Stages run in
+     * {@link BoneInterceptor.Stage} declaration order; within a stage,
+     * interceptors run in registration order. Subclasses register additional
+     * interceptors from their constructor via {@link #addInterceptor}.
+     */
+    private final EnumMap<BoneInterceptor.Stage, List<BoneInterceptor>> interceptors =
+            new EnumMap<>(BoneInterceptor.Stage.class);
     /**
      * Visual layers that run after the main mesh submits, in registration order.
      * Subclasses register additional layers (props, emissive overlays, capes...)
@@ -69,8 +77,19 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
                 "textures/entities/" + name + ".png");
         this.defaultLoopKey = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,
                 name + "/" + DEFAULT_LOOP_NAME);
-        // Default layers shared by all pets. Subclasses can append more.
+        // Default interceptors shared by all pets. Subclasses can append more.
+        addInterceptor(BoneInterceptor.Stage.LOOK_AT, new HeadLookInterceptor());
+        addInterceptor(BoneInterceptor.Stage.PHYSICS_SECONDARY, new IdleSwayInterceptor());
+        // Default layers shared by all pets.
         addRenderLayer(new HeldItemLayer());
+    }
+
+    /**
+     * Register an additional {@link BoneInterceptor} into the named stage.
+     * Stages run in {@link BoneInterceptor.Stage} declaration order.
+     */
+    protected final void addInterceptor(BoneInterceptor.Stage stage, BoneInterceptor interceptor) {
+        interceptors.computeIfAbsent(stage, k -> new ArrayList<>()).add(interceptor);
     }
 
     /** Register an additional {@link RenderLayer}; runs after the main mesh in registration order. */
@@ -185,11 +204,16 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
                 if (sub != null) PoseSampler.sample(sub, nowNs, molangCtx, poseBuf);
             }
         }
-        // Procedural overrides (head look-at, ear sway, tail wag). Run after
-        // sampling so they cleanly replace the animation's contribution to
-        // the affected bones.
-        for (BoneInterceptor interceptor : interceptors) {
-            interceptor.apply(model, state, molangCtx, poseBuf);
+        // Procedural overrides (head look-at, ear sway, tail wag, future
+        // SpringBone). Run after sampling so they cleanly replace the
+        // animation's contribution to the affected bones; stage order ensures
+        // physics-secondary interceptors see the look-at result.
+        for (BoneInterceptor.Stage stage : BoneInterceptor.Stage.VALUES) {
+            List<BoneInterceptor> stageList = interceptors.get(stage);
+            if (stageList == null) continue;
+            for (BoneInterceptor interceptor : stageList) {
+                interceptor.apply(model, state, molangCtx, poseBuf);
+            }
         }
 
         poseStack.pushPose();
