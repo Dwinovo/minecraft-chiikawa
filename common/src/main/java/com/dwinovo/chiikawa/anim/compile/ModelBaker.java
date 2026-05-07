@@ -21,12 +21,17 @@ public final class ModelBaker {
 
     private ModelBaker() {}
 
-    /** Convenience overload for callers that have no parallel-track sidecar (tests, callers without resources). */
+    /** Test-only convenience overload (no parallel sidecar, no bake stamp). */
     public static BakedModel bake(BedrockGeoFile file) {
-        return bake(file, List.of());
+        return bake(file, List.of(), 0L);
     }
 
+    /** Convenience overload for callers without a stamp. */
     public static BakedModel bake(BedrockGeoFile file, List<String> parallelTracks) {
+        return bake(file, parallelTracks, 0L);
+    }
+
+    public static BakedModel bake(BedrockGeoFile file, List<String> parallelTracks, long bakeStamp) {
         if (file.geometry == null || file.geometry.isEmpty()) {
             throw new IllegalArgumentException("geo file has no geometry entries");
         }
@@ -106,7 +111,8 @@ public final class ModelBaker {
                 roots,
                 nameToIdx,
                 texW, texH,
-                parallelTracks);
+                parallelTracks,
+                bakeStamp);
     }
 
     /** Returns indices into the source list in BFS order (roots first). */
