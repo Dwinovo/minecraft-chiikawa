@@ -7,12 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class PoseMixerTest {
 
     @Test
-    void transitionAlphaUsesSmoothstep() {
-        AnimationTransition transition = new AnimationTransition(null, 1_000_000_000L, 1.0f);
+    void fadeAlphaUsesSmoothstep() {
+        long startNs = 1_000_000_000L;
+        float durationSec = 1.0f;
 
-        assertEquals(0.0f, PoseMixer.transitionAlpha(transition, 1_000_000_000L));
-        assertEquals(0.5f, PoseMixer.transitionAlpha(transition, 1_500_000_000L));
-        assertEquals(1.0f, PoseMixer.transitionAlpha(transition, 2_000_000_000L));
+        assertEquals(0.0f, PoseMixer.fadeAlpha(startNs, durationSec, 1_000_000_000L));
+        assertEquals(0.5f, PoseMixer.fadeAlpha(startNs, durationSec, 1_500_000_000L));
+        assertEquals(1.0f, PoseMixer.fadeAlpha(startNs, durationSec, 2_000_000_000L));
     }
 
     @Test
