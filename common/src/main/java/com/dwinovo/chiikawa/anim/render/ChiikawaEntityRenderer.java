@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.anim.api.ChiikawaAnimated;
 import com.dwinovo.chiikawa.anim.api.ModelLibrary;
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
+import com.dwinovo.chiikawa.anim.baked.ParallelTrack;
 import com.dwinovo.chiikawa.anim.molang.MolangContext;
 import com.dwinovo.chiikawa.anim.render.layer.HeldItemLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayer;
@@ -211,8 +212,8 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         long phaseSeed = animator.getParallelPhaseSeed();
         AnimationChannel[] buf = new AnimationChannel[model.parallelTracks.size()];
         int written = 0;
-        for (String name : model.parallelTracks) {
-            BakedAnimation anim = AnimationLibrary.get(animKey(name));
+        for (ParallelTrack track : model.parallelTracks) {
+            BakedAnimation anim = AnimationLibrary.get(animKey(track.animation()));
             if (anim != null) {
                 buf[written++] = new AnimationChannel(anim, phaseSeed, true);
             }

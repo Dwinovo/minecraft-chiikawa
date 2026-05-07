@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.anim.api.ModelLibrary;
 import com.dwinovo.chiikawa.anim.baked.BakeStamp;
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
+import com.dwinovo.chiikawa.anim.baked.ParallelTrack;
 import com.dwinovo.chiikawa.anim.format.BedrockGeoFile;
 import com.dwinovo.chiikawa.anim.format.ParallelTracksFile;
 import com.google.gson.Gson;
@@ -50,7 +51,7 @@ public final class BedrockResourceLoader implements ResourceManagerReloadListene
         // is detectably stale via stamp comparison.
         long stamp = BakeStamp.next();
 
-        Map<ResourceLocation, List<String>> parallelByModel = loadParallelTracks(manager);
+        Map<ResourceLocation, List<ParallelTrack>> parallelByModel = loadParallelTracks(manager);
         Map<ResourceLocation, BakedModel> bakedModels = loadModels(manager, parallelByModel, stamp);
         ModelLibrary.replaceAll(bakedModels);
         Constants.LOG.info("[chiikawa-anim] loaded {} baked models (stamp {})", bakedModels.size(), stamp);
@@ -61,7 +62,7 @@ public final class BedrockResourceLoader implements ResourceManagerReloadListene
     }
 
     private static Map<ResourceLocation, BakedModel> loadModels(ResourceManager manager,
-                                                               Map<ResourceLocation, List<String>> parallelByModel,
+                                                               Map<ResourceLocation, List<ParallelTrack>> parallelByModel,
                                                                long stamp) {
         Map<ResourceLocation, BakedModel> baked = new HashMap<>();
         Map<ResourceLocation, Resource> resources = manager.listResources(MODEL_PATH_PREFIX,
@@ -71,7 +72,7 @@ public final class BedrockResourceLoader implements ResourceManagerReloadListene
             ResourceLocation modelKey = toModelKey(rid);
             try (BufferedReader reader = e.getValue().openAsReader()) {
                 BedrockGeoFile file = GSON.fromJson(reader, BedrockGeoFile.class);
-                List<String> parallelTracks = parallelByModel.getOrDefault(modelKey, List.of());
+                List<ParallelTrack> parallelTracks = parallelByModel.getOrDefault(modelKey, List.of());
                 BakedModel model = ModelBaker.bake(file, parallelTracks, stamp);
                 baked.put(modelKey, model);
             } catch (Exception ex) {
@@ -112,21 +113,24 @@ public final class BedrockResourceLoader implements ResourceManagerReloadListene
 
     /**
      * Reads every {@code parallel/<file>.json} sidecar into a
-     * {@code modelKey → tracks} map.
+     * {@code modelKey → tracks} map. Each entry is parsed via
+     * {@link ParallelTracksFile#parse} which accepts both string-shorthand
+     * and object-form track declarations.
      */
-    private static Map<ResourceLocation, List<String>> loadParallelTracks(ResourceManager manager) {
-        Map<ResourceLocation, List<String>> result = new HashMap<>();
+    private static Map<ResourceLocation, List<ParallelTrack>> loadParallelTracks(ResourceManager manager) {
+        Map<ResourceLocation, List<ParallelTrack>> result = new HashMap<>();
         Map<ResourceLocation, Resource> resources = manager.listResources(PARALLEL_PATH_PREFIX,
                 id -> id.getPath().endsWith(JSON_EXTENSION));
         for (Map.Entry<ResourceLocation, Resource> e : resources.entrySet()) {
             ResourceLocation rid = e.getKey();
             try (BufferedReader reader = e.getValue().openAsReader()) {
-                ParallelTracksFile file = GSON.fromJson(reader, ParallelTracksFile.class);
-                if (file == null || file.tracks == null || file.tracks.isEmpty()) {
+                JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
+                ParallelTracksFile file = ParallelTracksFile.parse(root);
+                if (file.tracks.isEmpty()) {
                     continue;
                 }
                 ResourceLocation modelKey = toParallelKey(rid);
-                result.put(modelKey, List.copyOf(file.tracks));
+                result.put(modelKey, file.tracks);
             } catch (Exception ex) {
                 Constants.LOG.error("[chiikawa-anim] failed to load parallel sidecar {}: {}",
                         rid, ex.toString());
