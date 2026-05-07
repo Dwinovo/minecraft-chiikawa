@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.anim.render.layer;
 
+import com.dwinovo.chiikawa.anim.render.PetData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -42,8 +43,8 @@ public final class HeldItemLayer implements RenderLayer {
 
     @Override
     public void submit(RenderLayerContext ctx) {
-        ItemStack stack = ctx.state().heldItemStack;
-        if (stack.isEmpty()) return;
+        ItemStack stack = ctx.state().get(PetData.HELD_ITEM_STACK);
+        if (stack == null || stack.isEmpty()) return;
         Integer targetIdx = ctx.model().boneIndex.get(boneName);
         if (targetIdx == null) return;
 
