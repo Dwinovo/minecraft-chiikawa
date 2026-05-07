@@ -109,7 +109,6 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         state.ageInTicks = entity.tickCount + partialTick;
         state.netHeadYaw = 0.0f;
         state.headPitch = 0.0f;
-        state.heldItemStack = ItemStack.EMPTY;
 
         if (entity instanceof LivingEntity living) {
             float bodyRot = Mth.rotLerp(partialTick, living.yBodyRotO, living.yBodyRot);
@@ -120,7 +119,12 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             state.walkSpeed = living.walkAnimation.speed(partialTick);
             state.netHeadYaw = Mth.wrapDegrees(headRot - bodyRot);
             state.headPitch  = pitch;
-            state.heldItemStack = living.getMainHandItem();
+
+            // Stash the live mainhand stack. HeldItemLayer resolves it into
+            // a fresh ItemStackRenderState while rendering. Lives on the typed
+            // extras map so future layers can register their own keys without
+            // adding fields to ChiikawaRenderState.
+            state.put(PetData.HELD_ITEM_STACK, living.getMainHandItem());
         }
 
         if (entity instanceof ChiikawaAnimated animated) {
