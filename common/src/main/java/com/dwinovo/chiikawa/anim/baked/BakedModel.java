@@ -13,9 +13,9 @@ import java.util.Map;
  * <h2>Parallel tracks</h2>
  * Animations declared by the model's sidecar config (e.g.
  * {@code assets/<ns>/parallel/<pet>.json}) play continuously alongside the
- * BASE / sub-slot channels. Stored here as a list of animation short names
- * (resolved against {@link com.dwinovo.chiikawa.anim.api.AnimationLibrary} per
- * frame, same way as the base loop). Empty when the pet has no parallel
+ * BASE / sub-slot channels. Stored here as a list of {@link ParallelTrack}
+ * records (resolved against {@link com.dwinovo.chiikawa.anim.api.AnimationLibrary}
+ * per frame, same way as the base loop). Empty when the pet has no parallel
  * declaration.
  *
  * <h2>Bake stamp</h2>
@@ -38,10 +38,10 @@ public final class BakedModel {
     public final int textureHeight;
 
     /**
-     * Animation short names that should play in parallel with the main slots.
-     * Empty (never {@code null}) when no parallel sidecar is declared.
+     * Parallel tracks declared by the sidecar config. Empty (never {@code null})
+     * when no parallel sidecar is declared.
      */
-    public final List<String> parallelTracks;
+    public final List<ParallelTrack> parallelTracks;
 
     /** {@link BakeStamp} value at the moment this model was baked. */
     public final long bakeStamp;
@@ -50,14 +50,14 @@ public final class BakedModel {
     public BakedModel(BakedBone[] bones, BakedCube[] cubes, int[] rootBones,
                       Map<String, Integer> boneIndex,
                       int textureWidth, int textureHeight,
-                      List<String> parallelTracks) {
+                      List<ParallelTrack> parallelTracks) {
         this(bones, cubes, rootBones, boneIndex, textureWidth, textureHeight, parallelTracks, 0L);
     }
 
     public BakedModel(BakedBone[] bones, BakedCube[] cubes, int[] rootBones,
                       Map<String, Integer> boneIndex,
                       int textureWidth, int textureHeight,
-                      List<String> parallelTracks,
+                      List<ParallelTrack> parallelTracks,
                       long bakeStamp) {
         this.bones = bones;
         this.cubes = cubes;
