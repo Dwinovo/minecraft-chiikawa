@@ -1,82 +1,47 @@
-package com.dwinovo.chiikawa.anim.render;
+package com.dwinovo.chiikawa.anim.render.layer;
 
 import com.dwinovo.chiikawa.anim.baked.BakedBone;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
 import com.dwinovo.chiikawa.anim.runtime.PoseSampler;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.ItemStack;
 import org.joml.Quaternionf;
 
 /**
- * Submits an {@link ItemStack} at a named bone's pivot.
+ * Utility that pushes a frame onto a {@link PoseStack} matching a target
+ * bone's pivot in world space. Reusable across {@link RenderLayer} implementations
+ * that need to attach geometry to a named bone (held item, held prop, emissive
+ * overlay aligned to a body part, etc.).
  *
  * <h2>Chain transform</h2>
  * Walks the bone chain root → target reproducing the same
  * {@code T(pivot + dPos) · R(rest + delta) · S · T(-pivot)} composition that
- * {@link ModelRenderer} applies. For the chain's last bone the trailing
- * {@code T(-pivot)} is omitted so the {@link PoseStack} ends up at the
- * locator's pivot (with parent rotations applied), which is the natural
- * anchor for item display transforms.
+ * {@link com.dwinovo.chiikawa.anim.render.ModelRenderer} applies. For the
+ * chain's last bone the trailing {@code T(-pivot)} is omitted so the
+ * {@link PoseStack} ends up at the locator's pivot (with parent rotations
+ * applied), which is the natural anchor for downstream display transforms.
  *
- * <h2>Unit conversion</h2>
- * The caller's {@code PoseStack} is in 1/16-scaled pixel space — bone pivots
- * use raw pixel values so {@code translate(pivotX)} works directly. Items
- * however render in <b>block</b> units (their {@code BakedQuad} verts are
- * 0..1, display transforms specify block-sized translations). Without a
- * compensating {@code scale(16)} the rendered item ends up at 1/16 of its
- * intended size. Vanilla {@code LivingEntityRenderer} dodges this by keeping
- * the {@code PoseStack} in block units and pushing the 1/16 factor into
- * {@code ModelPart} vertex emission instead — we apply the inverse only
- * here, isolated to the item attachment.
+ * <h2>Lifecycle</h2>
+ * Instances cache a small reusable {@code int[]} chain buffer and a
+ * {@link Quaternionf} — a single instance per {@link RenderLayer} is fine,
+ * but the walker is <b>not</b> thread-safe.
  */
-public final class BoneAttachmentLayer {
+public final class BoneTransformWalker {
 
     private final Quaternionf rotBuf = new Quaternionf();
     /** Reusable buffer for the chain root → target. */
     private int[] chainBuf = new int[8];
 
     /**
-     * Walks the chain root → {@code targetBoneName} and renders {@code stack}
-     * at the resulting pivot. No-ops when the stack is empty or the bone is
-     * absent from the model.
+     * Pushes the chain transform root → {@code targetBoneIdx} onto
+     * {@code poseStack}. Caller is responsible for surrounding
+     * {@code pushPose}/{@code popPose}.
      */
-    public void render(BakedModel model, float[] poseBuf, String targetBoneName,
-                       PoseStack poseStack, MultiBufferSource bufferSource,
-                       ItemStack stack, int packedLight) {
-        if (stack.isEmpty()) return;
-        Integer targetIdx = model.boneIndex.get(targetBoneName);
-        if (targetIdx == null) return;
-
-        // Resolve the item model fresh per render. The state is small and
-        // short-lived, so the allocation is cheaper than the bookkeeping of a
-        // cached instance.
-        Minecraft mc = Minecraft.getInstance();
-        ItemStackRenderState itemRenderState = new ItemStackRenderState();
-        mc.getItemModelResolver().updateForTopItem(
-                itemRenderState,
-                stack,
-                ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,
-                false,
-                mc.level,
-                null,
-                0);
-        if (itemRenderState.isEmpty()) return;
-
-        int chainLen = buildChain(model, targetIdx);
-
-        poseStack.pushPose();
+    public void transformToBone(BakedModel model, float[] poseBuf, int targetBoneIdx,
+                                PoseStack poseStack) {
+        int chainLen = buildChain(model, targetBoneIdx);
         for (int i = 0; i < chainLen; i++) {
             applyBoneTransform(model, poseBuf, chainBuf[i], poseStack, i == chainLen - 1);
         }
-        // Cancel the entity-level scale(1/16): items expect block-unit space.
-        poseStack.scale(16f, 16f, 16f);
-        itemRenderState.render(poseStack, bufferSource, packedLight, OverlayTexture.NO_OVERLAY);
-        poseStack.popPose();
     }
 
     /** Fills {@link #chainBuf} with bone indices root → target. Returns the length. */
@@ -118,10 +83,10 @@ public final class BoneAttachmentLayer {
         boolean hasPos   = dPosX != 0f || dPosY != 0f || dPosZ != 0f;
 
         if (isTarget) {
-            // Target bone is the item anchor — always translate to (pivot+dPos)
-            // so the PoseStack ends at the locator's pivot, with rotation/scale
-            // composed on top. The trailing T(-pivot) is intentionally omitted
-            // so the item attaches at the pivot rather than absolute zero.
+            // Target bone is the anchor — translate to (pivot+dPos) so the
+            // PoseStack ends at the locator's pivot, with rotation/scale composed
+            // on top. The trailing T(-pivot) is intentionally omitted so attached
+            // geometry hangs at the pivot rather than absolute zero.
             poseStack.translate(bone.pivotX + dPosX, bone.pivotY + dPosY, bone.pivotZ + dPosZ);
             if (hasRot) {
                 rotBuf.identity().rotationXYZ(rotX, rotY, rotZ);
