@@ -178,6 +178,30 @@ Base slot 切换时不区分具体状态，任何 A -> B 都把当前 channel �
 
 Trigger channel 的 `looping=false`，`PoseSampler` 在 `t >= duration` 时 clamp 到末尾值；renderer 每次 extract 前会调用 `PetAnimator.clearFinished(nowNs)` 清掉结束的一次性上层 channel，避免动作卡在最后一帧。
 
+### 并行轨道（眨眼、呼吸、尾巴常摆）
+
+模型可以声明一组**永久循环**的并行动画，跑在 BASE / sub slot 之外。配置文件：
+
+```text
+assets/<ns>/parallel/<pet>.json
+```
+
+```json
+{
+  "tracks": ["blink", "breath", "tail_idle"]
+}
+```
+
+约定：
+
+- 每个名字必须在该 pet 的 `<pet>.animation.json` 里有定义。
+- **动画文件本身只 K 关键的 bone**。例如 `blink` 只动 `eyelid`，不要碰 hip / leg。这样 sit/walk/idle 与 blink 自然不冲突——后采样的并行轨道只覆盖 eyelid，其他 bone 保持 base 写入的姿态。这与 YSM "post-parallel 优先级最高 + 加性旋转" 在视觉上等价，但实现上是单纯的覆盖语义。
+- 采样顺序：**BASE → 各 sub slot → 各并行轨道**。最后写入的赢。
+- 起始时间 `startTimeNs` 来自 `PetAnimator.parallelPhaseSeed`：每只宠物根据 UUID 取一个 0–10 秒的相位偏移，**不同实例眨眼/呼吸节奏天然错开**，避免一群宠物同时眨眼的诡异感。
+- 缺失 sidecar、空 `tracks` 列表或动画名查不到都是软失败：直接 no-op。
+
+未来若需要"心情好才摇尾巴"这类条件并行，schema 可以扩展为多态条目（字符串或 `{animation, condition}` 对象），不需要改 runtime 数据流。
+
 ### MolangContext 范围
 
 只有两个 slot 真有值：
@@ -296,6 +320,16 @@ common/src/main/resources/assets/<namespace>/
 2. 给事件配置有序动画候选名，例如 `"play_guitar", "use_mainhand"`。
 3. server 端逻辑里调 `pet.triggerAction(PetAction.X)` 或 `pet.triggerReaction(PetReaction.X)`。
 4. 重新打包后客户端会自动响应（`onSyncedDataUpdated` 已经处理 action/reaction 两条触发器）。
+
+### 添加新并行轨道（眨眼/呼吸/尾巴常摆）
+
+1. 在 `<pet>.animation.json` 里加好 looping 动画，且**只 K 该效果涉及的 bone**（例如 `blink` 只动 `eyelid`）。
+2. 在 `assets/<ns>/parallel/<pet>.json` 加上轨道名：
+   ```json
+   { "tracks": ["blink", "breath"] }
+   ```
+3. 重新加载（`F3+T` 或重启）。pet 出生后自动有相位偏移，不会与同类一起眨眼。
+4. 确认动画**不会触碰其它 bone** —— 否则会覆盖 BASE / action 写入的姿态，看起来像动画错位。
 
 ### 添加新 BoneInterceptor
 
