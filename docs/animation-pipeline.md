@@ -285,7 +285,10 @@ common/src/main/resources/assets/<namespace>/
 
 1. `MolangContext.java` 加 `SLOT_FOO = N`，`SLOT_COUNT++`
 2. `MolangContext.resolveSlot` 的 switch 加 case
-3. 在 `ChiikawaEntityRenderer.submit` 或 `PoseSampler.sample` 适当位置填 `ctx.vars[SLOT_FOO] = ...`
+3. 写一个 `BoneInputProvider`（或扩展现有的 `BasicMolangInputProvider`）在 `fill` 里填 `ctx.vars[SLOT_FOO] = ...`
+4. 在 renderer 子类构造函数里 `addInputProvider(new YourProvider())`（默认提供者已经在基类注册）
+
+不要再直接在 `submit` 里改 `ctx.vars` —— 那会让"哪个变量谁负责"散落各处。
 
 ### 添加新触发动画
 
