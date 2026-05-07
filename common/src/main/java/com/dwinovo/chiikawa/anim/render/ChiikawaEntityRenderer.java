@@ -58,6 +58,12 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     private final Quaternionf rotBuf = new Quaternionf();
     private final MolangContext molangCtx = new MolangContext();
     /**
+     * Pre-sampling MoLang context fillers. Run in registration order before
+     * {@code PoseSampler}, so any MoLang expression evaluated during sampling
+     * sees the values it needs.
+     */
+    private final List<BoneInputProvider> inputProviders = new ArrayList<>();
+    /**
      * Procedural pose-buffer overrides organised by stage. Stages run in
      * {@link BoneInterceptor.Stage} declaration order; within a stage,
      * interceptors run in registration order. Subclasses register additional
@@ -79,11 +85,18 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
                 "textures/entities/" + name + ".png");
         this.defaultLoopKey = new ResourceLocation(Constants.MOD_ID,
                 name + "/" + DEFAULT_LOOP_NAME);
+        // Default MoLang inputs.
+        addInputProvider(new BasicMolangInputProvider());
         // Default interceptors shared by all pets. Subclasses can append more.
         addInterceptor(BoneInterceptor.Stage.LOOK_AT, new HeadLookInterceptor());
         addInterceptor(BoneInterceptor.Stage.PHYSICS_SECONDARY, new IdleSwayInterceptor());
         // Default layers shared by all pets.
         addRenderLayer(new HeldItemLayer());
+    }
+
+    /** Register a {@link BoneInputProvider} that fills MoLang context before sampling. */
+    protected final void addInputProvider(BoneInputProvider provider) {
+        inputProviders.add(provider);
     }
 
     /**
@@ -196,13 +209,14 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         float[] poseBuf = new float[boneCount * PoseSampler.FLOATS_PER_BONE];
         PoseSampler.resetIdentity(poseBuf, boneCount);
 
-        // Frame-level Molang context. query.anim_time is filled per-channel
-        // by PoseSampler; ground_speed feeds the locomotion math. Head /
-        // ear / tail orientation is owned by PetBoneInterceptor — see
-        // MolangContext for why ysm.* and v.L*_P* are deliberately not in
-        // scope.
+        // Frame-level MoLang context. query.anim_time is filled per-channel
+        // by PoseSampler; the input providers fill the rest. Head / ear / tail
+        // orientation is owned by interceptors — see MolangContext for why
+        // ysm.* and v.L*_P* are deliberately not in scope.
         molangCtx.reset();
-        molangCtx.vars[MolangContext.SLOT_GROUND_SPEED] = state.walkSpeed;
+        for (BoneInputProvider provider : inputProviders) {
+            provider.fill(state, molangCtx);
+        }
 
         long nowNs = System.nanoTime();
         sampleSlot(state.mainSlot, nowNs, molangCtx, poseBuf, boneCount);
