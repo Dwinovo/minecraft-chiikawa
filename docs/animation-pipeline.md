@@ -188,9 +188,15 @@ assets/<ns>/parallel/<pet>.json
 
 ```json
 {
-  "tracks": ["blink", "breath", "tail_idle"]
+  "tracks": [
+    "blink",                                                // 字符串简写
+    { "animation": "breath" },                              // 等价对象形式
+    { "animation": "tail_wag", "when": "v.mood > 0.5" }     // 未来扩展字段（解析器宽容地忽略未知字段）
+  ]
 }
 ```
+
+每个轨道是一个 `ParallelTrack` record。当前只暴露 `animation` 字段，但解析器同时接受字符串简写和对象形式——未来加 `condition` / `speed` / `weight` 时不破坏现有 sidecar 文件。
 
 约定：
 
