@@ -84,7 +84,7 @@ public final class AnimationBaker {
         if (duration <= 0f) {
             duration = computeDuration(channels);
         }
-        return new BakedAnimation(name, duration, loop, channels.toArray(new BakedBoneChannel[0]));
+        return new BakedAnimation(name, duration, loop, channels.toArray(new BakedBoneChannel[0]), model.bakeStamp);
     }
 
     private static void addBoneChannels(int boneIdx, JsonObject boneAnim, List<BakedBoneChannel> out) {
