@@ -44,10 +44,44 @@ public final class PetAnimator {
 
     private final SlotState[] slots = new SlotState[Slot.VALUES.length];
 
+    /**
+     * Stable per-entity time offset used as the {@code startTimeNs} for parallel
+     * tracks (blink, breath, tail idle ...). Initialised lazily from the entity's
+     * UUID via {@link #ensureParallelPhase} so two pets created at the same
+     * instant don't blink in lockstep. {@link Long#MIN_VALUE} = unset.
+     */
+    private long parallelPhaseSeed = Long.MIN_VALUE;
+
     public PetAnimator() {
         for (int i = 0; i < slots.length; i++) {
             slots[i] = SlotState.EMPTY;
         }
+    }
+
+    /**
+     * Latches the entity-stable parallel-phase offset on first call. Subsequent
+     * calls are no-ops: the seed must remain stable for the lifetime of the
+     * animator to keep the {@link com.dwinovo.chiikawa.anim.runtime.PoseSampler}
+     * pure (a moving start time would let two extracts in the same frame
+     * produce different animation phases).
+     *
+     * @param uniquenessSeed any per-entity stable long (typically
+     *                       {@code entity.getUUID().getLeastSignificantBits()})
+     */
+    public void ensureParallelPhase(long uniquenessSeed) {
+        if (parallelPhaseSeed != Long.MIN_VALUE) {
+            return;
+        }
+        // Spread blink phase by up to 10 seconds; bigger values would cause
+        // animations to "start" in the future relative to nanoTime() and
+        // PoseSampler would clamp them to t=0 forever.
+        long offsetMs = Math.floorMod(uniquenessSeed, 10_000L);
+        parallelPhaseSeed = System.nanoTime() - offsetMs * 1_000_000L;
+    }
+
+    /** Returns the latched phase seed. Must call {@link #ensureParallelPhase} first. */
+    public long getParallelPhaseSeed() {
+        return parallelPhaseSeed;
     }
 
     /** Returns the slot's state. Never {@code null}; empty slots return {@link SlotState#EMPTY}. */
