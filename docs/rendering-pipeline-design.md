@@ -231,7 +231,12 @@ submit
 
 ## 程序化骨骼干预
 
-`BoneInterceptor` 是动画采样之后的程序化覆写点。当前默认实现是 `PetBoneInterceptor`，用于处理：
+`BoneInterceptor` 是动画采样之后的程序化覆写点，按 `Stage`（`LOOK_AT` / `PHYSICS_SECONDARY` / `OCCLUSION`）分阶段运行。当前默认拆成两个互不干扰的 interceptor：
+
+- `HeadLookInterceptor`（`Stage.LOOK_AT`）—— 头部 yaw/pitch 跟随玩家
+- `IdleSwayInterceptor`（`Stage.PHYSICS_SECONDARY`）—— 耳朵摆动 + 尾巴摇
+
+它们覆盖以下骨骼：
 
 | 骨骼 | 用途 |
 |---|---|
