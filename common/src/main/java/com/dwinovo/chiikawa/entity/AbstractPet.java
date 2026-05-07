@@ -71,9 +71,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     public static final int TRIGGER_USE_MAINHAND = 1;
     public static final int TRIGGER_SWORD_ATTACK = 2;
 
-    /** Layer used by triggered one-shots; main loop owns layer 0. */
-    private static final int TRIGGER_LAYER = PetAnimator.LAYER_ACTION;
-    private static final int REACTION_LAYER = PetAnimator.LAYER_REACTION;
+    /** Slot used by triggered one-shots; main loop owns {@link PetAnimator.Slot#BASE}. */
+    private static final PetAnimator.Slot TRIGGER_SLOT = PetAnimator.Slot.ACTION;
+    private static final PetAnimator.Slot REACTION_SLOT = PetAnimator.Slot.REACTION;
     private static final java.util.List<MemoryModuleType<?>> MEMORY_TYPES = java.util.List.of(
         MemoryModuleType.PATH,
         MemoryModuleType.DOORS_TO_CLOSE,
@@ -352,7 +352,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         Identifier typeId = BuiltInRegistries.ENTITY_TYPE.getKey(getType());
         BakedAnimation anim = firstAvailableActionAnimation(typeId, action);
         if (anim != null) {
-            getPetAnimator().trigger(TRIGGER_LAYER, anim);
+            getPetAnimator().trigger(TRIGGER_SLOT, anim);
         } else {
             Constants.LOG.warn("[chiikawa-anim] no baked animation for action '{}' on {}", action, typeId);
         }
@@ -368,7 +368,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         Identifier typeId = BuiltInRegistries.ENTITY_TYPE.getKey(getType());
         BakedAnimation anim = firstAvailableReactionAnimation(typeId, reaction);
         if (anim != null) {
-            getPetAnimator().trigger(REACTION_LAYER, anim);
+            getPetAnimator().trigger(REACTION_SLOT, anim);
         }
     }
 

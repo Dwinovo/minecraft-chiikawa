@@ -160,14 +160,14 @@ InventoryScreen 在同一帧调两次 extract，两次拿到几乎相同的 `nan
 
 ### Channel 层级
 
-`PetAnimator.CHANNEL_COUNT = 4`：
+`PetAnimator.Slot` 枚举（追加新 slot 向后兼容，无需调数组大小常量）：
 
-| layer | 用途 |
+| slot | 用途 |
 |---|---|
-| 0 | base loop（idle / run / sit / work idle），`setMain` 维护，幂等，切换时通用 crossfade |
-| 1 | action 一次性动画（harvest、plant、slash 等），`trigger()` 写入 |
-| 2 | overlay 预留层（未来上半身 / 道具叠加） |
-| 3 | reaction 一次性动画（happy、hurt、scratch_head 等），`trigger()` 写入 |
+| `BASE` | base loop（idle / run / sit / work idle），`setMain` 维护，幂等，切换时通用 crossfade |
+| `ACTION` | action 一次性动画（harvest、plant、slash 等），`trigger()` 写入 |
+| `OVERLAY` | overlay 预留 slot（未来上半身 / 道具叠加） |
+| `REACTION` | reaction 一次性动画（happy、hurt、scratch_head 等），`trigger()` 写入 |
 
 Base channel 切换时不区分具体状态，任何 A -> B 都创建一个 `AnimationTransition(fromChannel, startTime, duration)`。submit 阶段分别采样 from/to pose，再由 `PoseMixer` 用 smoothstep alpha 混合。这个设计对应 Geckolib `transitionTickTime` 的轻量版本，但保持我们自己的纯采样模型。
 
