@@ -58,12 +58,12 @@ attention = NONE
 
 `PetAnimPlan` 是 resolver 输出：
 
-| 字段 | 目标 layer | 含义 |
+| 字段 | 目标 slot | 含义 |
 |---|---|---|
-| `baseLoopCandidates` | `LAYER_BASE` | 基础循环候选列表 |
-| `actionCandidates` | `LAYER_ACTION` | 动作候选列表 |
-| `overlayCandidates` | `LAYER_OVERLAY` | 预留 overlay 候选列表 |
-| `reactionCandidates` | `LAYER_REACTION` | 反应候选列表 |
+| `baseLoopCandidates` | `Slot.BASE` | 基础循环候选列表 |
+| `actionCandidates` | `Slot.ACTION` | 动作候选列表 |
+| `overlayCandidates` | `Slot.OVERLAY` | 预留 overlay 候选列表 |
+| `reactionCandidates` | `Slot.REACTION` | 反应候选列表 |
 
 候选列表是有序 fallback。renderer 会选择第一个存在于 `AnimationLibrary` 的动画。
 
@@ -197,10 +197,10 @@ low 8 bits   = event id
 
 有两个独立触发器：
 
-| 触发器 | 事件类型 | 目标 layer |
+| 触发器 | 事件类型 | 目标 slot |
 |---|---|---|
-| `ANIM_TRIGGER` | `PetAction` | `PetAnimator.LAYER_ACTION` |
-| `REACTION_TRIGGER` | `PetReaction` | `PetAnimator.LAYER_REACTION` |
+| `ANIM_TRIGGER` | `PetAction` | `PetAnimator.Slot.ACTION` |
+| `REACTION_TRIGGER` | `PetReaction` | `PetAnimator.Slot.REACTION` |
 
 sequence 每触发一次递增。客户端只处理没见过的 sequence，因此同一个动作连续触发也能重新播放。
 
