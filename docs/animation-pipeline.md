@@ -61,8 +61,9 @@ common/src/main/java/com/dwinovo/chiikawa/anim/
 │   ├── ChiikawaEntityRenderer.java # extends EntityRenderer<T, ChiikawaRenderState>
 │   ├── ChiikawaRenderState.java    # 携带 modelKey/texture/channel snapshot/heldItem
 │   ├── ModelRenderer.java          # 骨骼 DAG 遍历 + cube quad 发射
-│   ├── BoneInterceptor.java        # 骨骼程序化覆写接口
-│   ├── PetBoneInterceptor.java     # 默认实现（头/耳/尾）
+│   ├── BoneInterceptor.java        # 骨骼程序化覆写接口（带 Stage 枚举）
+│   ├── HeadLookInterceptor.java    # Stage.LOOK_AT 默认实现（AllHead）
+│   ├── IdleSwayInterceptor.java    # Stage.PHYSICS_SECONDARY 默认实现（耳/尾）
 │   ├── layer/                       # RenderLayer 注册表
 │   │   ├── RenderLayer.java         # 视觉层接口
 │   │   ├── RenderLayerContext.java  # per-submit 数据包
@@ -190,7 +191,7 @@ Trigger channel 的 `looping=false`，`PoseSampler` 在 `t >= duration` 时 clam
 
 | Molang 引用 | 状态 | 替代方案 |
 |---|---|---|
-| `ysm.head_yaw` / `ysm.head_pitch` | 软失败 → `Const(0)` | `PetBoneInterceptor` 程序化控制 AllHead 骨骼 |
+| `ysm.head_yaw` / `ysm.head_pitch` | 软失败 → `Const(0)` | `HeadLookInterceptor` 程序化控制 AllHead 骨骼 |
 | `v.L6_P0` / `v.L4_P0` / `v.L6_P00` | 软失败 → `Const(0)` | 这些是 Blockbench IK 导出残留，没有 SET 站点 |
 
 详见 [`MolangContext`](../common/src/main/java/com/dwinovo/chiikawa/anim/molang/MolangContext.java) 顶部注释。
@@ -230,7 +231,7 @@ common/src/main/resources/assets/<namespace>/
 
 ### 必须存在的骨骼名
 
-[`PetBoneInterceptor`](../common/src/main/java/com/dwinovo/chiikawa/anim/render/PetBoneInterceptor.java) 默认实现按名查找：
+[`HeadLookInterceptor`](../common/src/main/java/com/dwinovo/chiikawa/anim/render/HeadLookInterceptor.java) 与 [`IdleSwayInterceptor`](../common/src/main/java/com/dwinovo/chiikawa/anim/render/IdleSwayInterceptor.java) 默认实现按名查找：
 
 | 骨骼名 | 用途 | 缺失时 |
 |---|---|---|
@@ -295,11 +296,15 @@ common/src/main/resources/assets/<namespace>/
 
 ### 添加新 BoneInterceptor
 
-如果需要新的程序化骨骼覆写（比如尾巴随心情摆动幅度变化）：
+如果需要新的程序化骨骼覆写（比如尾巴随心情摆动幅度变化、SpringBone 二级动画）：
 
 1. 实现 [`BoneInterceptor`](../common/src/main/java/com/dwinovo/chiikawa/anim/render/BoneInterceptor.java) 接口（`@FunctionalInterface`，一个方法）
-2. 在 `ChiikawaEntityRenderer` 的 `interceptors` 数组加进去（按调用顺序排）
-3. 多个 interceptor 顺序执行，**后写覆盖前写**，所以放在数组靠后的优先级更高
+2. 选定阶段：
+   - `Stage.LOOK_AT` — 由外部目标驱动的 IK / 视线类（头、眼）
+   - `Stage.PHYSICS_SECONDARY` — 由时间驱动的二级运动（耳、尾、SpringBone）；可读取 LOOK_AT 阶段写入的结果
+   - `Stage.OCCLUSION` — 可见性 / 隐藏类（emote 期间隐藏某 bone、装备遮挡）
+3. 在 `ChiikawaEntityRenderer` 子类构造函数里 `addInterceptor(stage, new YourInterceptor())`
+4. 同一阶段内按注册顺序运行，**后写覆盖前写**，跨阶段按 `Stage` 枚举声明顺序运行
 
 ### 修改 main loop 状态机
 
@@ -325,7 +330,7 @@ common/src/main/resources/assets/<namespace>/
 
 **如果不小心填了真值**，跑动 + GUI 鼠标就会让 head_yaw 跑到 ±180，配合 `Root.rotZ = 0.4*ysm.head_yaw` 这种动画表达式会让整只宠物侧躺 72°。
 
-**修法**：`MolangContext` 里**不要**给 ysm.* 加 slot。让 `MolangCompiler` 软失败成 `Const(0)`。头/耳/尾交给 `PetBoneInterceptor`。
+**修法**：`MolangContext` 里**不要**给 ysm.* 加 slot。让 `MolangCompiler` 软失败成 `Const(0)`。头交给 `HeadLookInterceptor`，耳/尾交给 `IdleSwayInterceptor`。
 
 ### 物品在 1/16-scaled PoseStack 里直接 submit 会变 5cm 小
 
