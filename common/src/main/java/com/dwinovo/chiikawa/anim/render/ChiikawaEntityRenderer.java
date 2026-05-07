@@ -126,10 +126,11 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             state.netHeadYaw = net.minecraft.util.Mth.wrapDegrees(headRot - bodyRot);
             state.headPitch  = pitch;
 
-            // Stash the live mainhand stack — we resolve it into a fresh
-            // ItemStackRenderState at submit time using a per-frame fresh
-            // state, updateForTopItem, level pulled from Minecraft, owner = null.
-            state.heldItemStack = living.getMainHandItem();
+            // Stash the live mainhand stack — HeldItemLayer resolves it into
+            // a fresh ItemStackRenderState at submit time. Lives on the typed
+            // extras map so future layers can register their own keys without
+            // adding fields to ChiikawaRenderState.
+            state.put(PetData.HELD_ITEM_STACK, living.getMainHandItem());
         }
 
         if (entity instanceof ChiikawaAnimated animated) {
