@@ -216,12 +216,13 @@ base layer 的切换不区分 `idle`、`run`、`sit` 或职业待机。任何 A 
 
 ```text
 PetAnimator.setMain(newAnimation)
-    -> 如果当前 base 动画不同，记录 AnimationTransition(fromChannel, startTime, duration)
-    -> 新 base channel 从 startTime 开始播放
+    -> 如果当前 base 动画不同，将当前 channel 存进新 SlotState.previous
+       并记录 fadeStartNs / fadeDurationSec
+    -> 新 base channel 从 fadeStartNs 开始播放
 
 submit
-    -> sample fromChannel
-    -> sample new channel
+    -> sample previous channel
+    -> sample current channel
     -> PoseMixer.blend(fromPose, toPose, smoothstep(alpha))
 ```
 
