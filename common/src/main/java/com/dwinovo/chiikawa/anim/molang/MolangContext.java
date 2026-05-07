@@ -20,7 +20,8 @@ package com.dwinovo.chiikawa.anim.molang;
  * Blockbench's IK helper variables ({@code v.L6_P0}, {@code v.L4_P0},
  * {@code v.L6_P00}). None of these have a SET site in any tool we use; head /
  * ear / tail orientation has always been driven procedurally by the renderer
- * (see {@link com.dwinovo.chiikawa.anim.render.PetBoneInterceptor}),
+ * (see {@link com.dwinovo.chiikawa.anim.render.HeadLookInterceptor} and
+ * {@link com.dwinovo.chiikawa.anim.render.IdleSwayInterceptor}),
  * not by Molang. Resolving them to a real slot only opens the door to
  * mis-evaluation (e.g. {@code Root.rotZ = 0.4*ysm.head_yaw} flopping the
  * body sideways). They're left to {@link com.dwinovo.chiikawa.anim.compile.MolangCompiler}'s soft-fail path,
