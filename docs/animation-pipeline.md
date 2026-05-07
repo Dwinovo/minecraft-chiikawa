@@ -112,8 +112,8 @@ ChiikawaEntityRenderer.submit
     ├─ 分配 poseBuf = float[boneCount * 9]
     ├─ PoseSampler.resetIdentity(poseBuf)
     ├─ 填 MolangContext.vars (ground_speed)
-    ├─ PoseSampler.sample(mainChannel, nowNs, ctx, poseBuf)
-    ├─ for each subChannel: PoseSampler.sample(...)
+    ├─ sampleSlot(state.mainSlot, ...)  ← 含 BASE 槽 fade 混合
+    ├─ for each non-empty subSlot: PoseSampler.sample(slot.current(), ...)
     ├─ for each interceptor: interceptor.apply(model, state, ctx, poseBuf)  [程序化覆写]
     │
     ├─ poseStack.rotateY(180 - bodyRot) + scale(1/16)
@@ -174,7 +174,7 @@ InventoryScreen 在同一帧调两次 extract，两次拿到几乎相同的 `nan
 | `OVERLAY` | overlay 预留 slot（未来上半身 / 道具叠加） |
 | `REACTION` | reaction 一次性动画（happy、hurt、scratch_head 等），`trigger()` 写入 |
 
-Base channel 切换时不区分具体状态，任何 A -> B 都创建一个 `AnimationTransition(fromChannel, startTime, duration)`。submit 阶段分别采样 from/to pose，再由 `PoseMixer` 用 smoothstep alpha 混合。这个设计对应 Geckolib `transitionTickTime` 的轻量版本，但保持我们自己的纯采样模型。
+Base slot 切换时不区分具体状态，任何 A -> B 都把当前 channel 存进新 `SlotState.previous`，记录 `fadeStartNs / fadeDurationSec`。submit 阶段分别采样 previous / current pose，再由 `PoseMixer` 用 smoothstep alpha 混合。这个设计对应 Geckolib `transitionTickTime` 的轻量版本，但保持我们自己的纯采样模型；fade 状态归 slot 所有，channel 本身保持纯粹的"当前在播什么"语义。
 
 Trigger channel 的 `looping=false`，`PoseSampler` 在 `t >= duration` 时 clamp 到末尾值；renderer 每次 extract 前会调用 `PetAnimator.clearFinished(nowNs)` 清掉结束的一次性上层 channel，避免动作卡在最后一帧。
 
