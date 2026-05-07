@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.anim.render.layer;
 
+import com.dwinovo.chiikawa.anim.render.PetData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -19,7 +20,7 @@ import net.minecraft.world.item.ItemStack;
  *
  * <h2>Unit conversion</h2>
  * The renderer's PoseStack is in 1/16-scaled pixel space (see
- * {@link com.dwinovo.chiikawa.anim.render.ChiikawaEntityRenderer#submit}).
+ * {@link com.dwinovo.chiikawa.anim.render.ChiikawaEntityRenderer#render}).
  * Item models render in <b>block</b> units, so a compensating {@code scale(16)}
  * is applied before rendering. Without it the held item would render at 1/16
  * of its intended size.
@@ -42,8 +43,8 @@ public final class HeldItemLayer implements RenderLayer {
 
     @Override
     public void submit(RenderLayerContext ctx) {
-        ItemStack stack = ctx.state().heldItemStack;
-        if (stack.isEmpty()) return;
+        ItemStack stack = ctx.state().get(PetData.HELD_ITEM_STACK);
+        if (stack == null || stack.isEmpty()) return;
         Integer targetIdx = ctx.model().boneIndex.get(boneName);
         if (targetIdx == null) return;
 
