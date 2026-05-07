@@ -21,7 +21,12 @@ public final class ModelBaker {
 
     private ModelBaker() {}
 
+    /** Convenience overload for callers that have no parallel-track sidecar (tests, callers without resources). */
     public static BakedModel bake(BedrockGeoFile file) {
+        return bake(file, List.of());
+    }
+
+    public static BakedModel bake(BedrockGeoFile file, List<String> parallelTracks) {
         if (file.geometry == null || file.geometry.isEmpty()) {
             throw new IllegalArgumentException("geo file has no geometry entries");
         }
@@ -100,7 +105,8 @@ public final class ModelBaker {
                 cubeList.toArray(new BakedCube[0]),
                 roots,
                 nameToIdx,
-                texW, texH);
+                texW, texH,
+                parallelTracks);
     }
 
     /** Returns indices into the source list in BFS order (roots first). */
