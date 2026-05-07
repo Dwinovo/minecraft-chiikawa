@@ -35,13 +35,13 @@ class PetAnimatorTest {
         PetAnimator animator = new PetAnimator();
 
         animator.setMain(base, true);
-        animator.trigger(PetAnimator.LAYER_ACTION, instant);
-        animator.trigger(PetAnimator.LAYER_REACTION, instant);
+        animator.trigger(PetAnimator.Slot.ACTION, instant);
+        animator.trigger(PetAnimator.Slot.REACTION, instant);
         animator.clearFinished(System.nanoTime());
 
-        assertSame(base, animator.get(PetAnimator.LAYER_BASE).animation());
-        assertNull(animator.get(PetAnimator.LAYER_ACTION));
-        assertNull(animator.get(PetAnimator.LAYER_REACTION));
+        assertSame(base, animator.get(PetAnimator.Slot.BASE).animation());
+        assertNull(animator.get(PetAnimator.Slot.ACTION));
+        assertNull(animator.get(PetAnimator.Slot.REACTION));
     }
 
     @Test
@@ -51,8 +51,8 @@ class PetAnimatorTest {
 
         animator.setMain(idle, true);
 
-        assertSame(idle, animator.get(PetAnimator.LAYER_BASE).animation());
-        assertNull(animator.get(PetAnimator.LAYER_BASE).transition());
+        assertSame(idle, animator.get(PetAnimator.Slot.BASE).animation());
+        assertNull(animator.get(PetAnimator.Slot.BASE).transition());
     }
 
     @Test
@@ -64,7 +64,7 @@ class PetAnimatorTest {
         animator.setMain(idle, true);
         animator.setMain(run, true, 0.25f);
 
-        AnimationChannel channel = animator.get(PetAnimator.LAYER_BASE);
+        AnimationChannel channel = animator.get(PetAnimator.Slot.BASE);
         assertSame(run, channel.animation());
         assertSame(idle, channel.transition().fromChannel().animation());
         assertSame(channel.transition().fromChannel(), channel.transition().fromChannel().withoutTransition());
