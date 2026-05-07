@@ -10,6 +10,7 @@ import com.dwinovo.chiikawa.anim.molang.MolangContext;
 import com.dwinovo.chiikawa.anim.render.layer.HeldItemLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayerContext;
+import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
 import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
 import com.dwinovo.chiikawa.anim.runtime.PoseMixer;
 import com.dwinovo.chiikawa.anim.runtime.PoseSampler;
@@ -147,6 +148,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
 
         if (entity instanceof ChiikawaAnimated animated) {
             PetAnimator animator = animated.getPetAnimator();
+            animator.ensureParallelPhase(entity.getUUID().getLeastSignificantBits());
             animator.clearFinished(System.nanoTime());
             // Pick the desired main loop based on entity state. setMain is
             // idempotent — switches only when the wanted animation actually
@@ -160,6 +162,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
                 animator.setMain(wanted, true);
             }
             state.mainSlot = animator.get(PetAnimator.Slot.BASE);
+            state.parallelChannels = snapshotParallelChannels(animator);
             // Snapshot any non-BASE slots populated by trigger(). SlotState
             // records are immutable so this is a safe shallow copy.
             SlotState[] subs = null;
@@ -187,6 +190,35 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             }
         }
         return null;
+    }
+
+    /**
+     * Resolves the pet's declared parallel tracks against the live
+     * {@link AnimationLibrary}, anchoring each one at the animator's stable
+     * phase seed so different pets blink/breathe out of sync.
+     *
+     * <p>Returns {@code null} when the model declares no parallel tracks or
+     * none could be resolved — submit() short-circuits the iteration on null.
+     */
+    private AnimationChannel[] snapshotParallelChannels(PetAnimator animator) {
+        BakedModel model = ModelLibrary.get(modelKey);
+        if (model == null || model.parallelTracks.isEmpty()) {
+            return null;
+        }
+        long phaseSeed = animator.getParallelPhaseSeed();
+        AnimationChannel[] buf = new AnimationChannel[model.parallelTracks.size()];
+        int written = 0;
+        for (String name : model.parallelTracks) {
+            BakedAnimation anim = AnimationLibrary.get(animKey(name));
+            if (anim != null) {
+                buf[written++] = new AnimationChannel(anim, phaseSeed, true);
+            }
+        }
+        if (written == 0) return null;
+        if (written == buf.length) return buf;
+        AnimationChannel[] trimmed = new AnimationChannel[written];
+        System.arraycopy(buf, 0, trimmed, 0, written);
+        return trimmed;
     }
 
     @Override
@@ -220,6 +252,17 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             for (SlotState sub : state.subSlots) {
                 if (sub == null || sub.isEmpty()) continue;
                 PoseSampler.sample(sub.current(), nowNs, molangCtx, poseBuf);
+            }
+        }
+        if (state.parallelChannels != null) {
+            // Parallel tracks (blink, breath, tail idle ...) sample LAST so
+            // they win on shared bones — matches YSM's post-parallel priority.
+            // Each parallel animation file is expected to keyframe only its
+            // own bones (eyelid for blink, tail for tail_idle), so override
+            // semantics here are equivalent to YSM's additive-rotation blend.
+            for (AnimationChannel parallel : state.parallelChannels) {
+                if (parallel == null) continue;
+                PoseSampler.sample(parallel, nowNs, molangCtx, poseBuf);
             }
         }
         // Procedural overrides (head look-at, ear sway, tail wag, future
