@@ -144,7 +144,7 @@ PoseSampler.resetIdentity
     -> sample action/reaction/overlay channels
     -> apply BoneInterceptor
     -> ModelRenderer.render
-    -> BoneAttachmentLayer.submit
+    -> RenderLayer registry (HeldItemLayer, ...)
 ```
 
 后采样的 channel 会覆盖或叠加前面的骨骼 slot。目前采样器是直接写入模式，后续如果需要真正的 additive blend，可以在 `PetAnimator.Slot.OVERLAY` 上扩展混合策略。
@@ -249,9 +249,11 @@ submit
 RightHandLocator
 ```
 
-`BoneAttachmentLayer` 会沿骨骼父链应用 rest transform 和 pose transform，最终把 item renderer 提交到该 locator。
+`HeldItemLayer`（注册在 `ChiikawaEntityRenderer.renderLayers` 列表里）会调用通用的 `BoneTransformWalker` 沿骨骼父链应用 rest transform 和 pose transform，最终把 item renderer 提交到该 locator。
 
-注意：模型 PoseStack 已经处于 `1/16` pixel 缩放后空间，但 Minecraft item renderer 使用块单位。`BoneAttachmentLayer` 在提交物品前会恢复到块单位，避免物品尺寸异常。
+新增挂件（道具、披风、发光眼睛等）只需实现 `RenderLayer` 接口，由 renderer 子类在构造函数里 `addRenderLayer(...)` 注册，无需改主路径。
+
+注意：模型 PoseStack 已经处于 `1/16` pixel 缩放后空间，但 Minecraft item renderer 使用块单位。`HeldItemLayer` 在提交物品前会恢复到块单位，避免物品尺寸异常。
 
 ## 与状态机的边界
 
