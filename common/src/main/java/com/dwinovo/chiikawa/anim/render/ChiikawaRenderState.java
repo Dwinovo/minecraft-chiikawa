@@ -33,6 +33,17 @@ public class ChiikawaRenderState extends LivingEntityRenderState {
     public SlotState mainSlot;
     /** Snapshots of any non-BASE slots. {@code null} entries are skipped. */
     public SlotState[] subSlots;
+    /**
+     * Snapshot of the model's parallel tracks (blink, breath, ...), each
+     * already resolved against the {@link com.dwinovo.chiikawa.anim.api.AnimationLibrary}
+     * with the entity's stable phase seed as {@code startTimeNs}. Sampled
+     * <em>after</em> {@link #mainSlot} and {@link #subSlots} so they win on
+     * shared bones, matching YSM's post-parallel semantic.
+     *
+     * <p>{@code null} when the model declares no parallel tracks or none could
+     * be resolved.
+     */
+    public AnimationChannel[] parallelChannels;
     /** {@code walkAnimation.speed(partialTick)} — feeds Molang {@code query.ground_speed}. */
     public float walkSpeed;
     /**
