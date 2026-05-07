@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.anim.runtime;
 
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
+import com.dwinovo.chiikawa.anim.baked.BakedModel;
 
 /**
  * Per-entity animator. Owns the small mutable state needed to drive the
@@ -161,5 +162,33 @@ public final class PetAnimator {
     /** Clears the slot — used when a one-shot finishes. */
     public void clear(Slot slot) {
         slots[slot.ordinal()] = SlotState.EMPTY;
+    }
+
+    /**
+     * Drops any slot whose channel was baked against an earlier
+     * {@link com.dwinovo.chiikawa.anim.baked.BakeStamp} generation than the
+     * one currently in {@link BakedModel}. Run at the top of extract so a
+     * stale {@link AnimationChannel} surviving a {@code F3+T} reload cannot
+     * reach the sampler with bone indices that may now be out of bounds.
+     *
+     * <p>Stamp {@code 0} on either side is treated as "unset" — tests that
+     * construct {@link BakedAnimation} with the simple ctor stay unaffected.
+     */
+    public void clearStale(long currentStamp) {
+        if (currentStamp == 0L) return;
+        for (Slot slot : Slot.VALUES) {
+            SlotState state = slots[slot.ordinal()];
+            if (state.isEmpty()) continue;
+            if (isStale(state.current(), currentStamp) || isStale(state.previous(), currentStamp)) {
+                slots[slot.ordinal()] = SlotState.EMPTY;
+            }
+        }
+    }
+
+    private static boolean isStale(AnimationChannel channel, long currentStamp) {
+        if (channel == null) return false;
+        BakedAnimation animation = channel.animation();
+        if (animation == null || animation.bakeStamp == 0L) return false;
+        return animation.bakeStamp != currentStamp;
     }
 }
