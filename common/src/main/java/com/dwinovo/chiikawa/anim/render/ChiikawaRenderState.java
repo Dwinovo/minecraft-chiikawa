@@ -1,6 +1,6 @@
 package com.dwinovo.chiikawa.anim.render;
 
-import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
+import com.dwinovo.chiikawa.anim.runtime.SlotState;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -9,8 +9,8 @@ import net.minecraft.resources.ResourceLocation;
  * just the fields needed by the Bedrock renderer.
  *
  * <p>Animation timing is captured as a snapshot of the entity's
- * {@link AnimationChannel} records ({@link AnimationChannel} is immutable, so
- * this is a safe shallow copy). The actual pose is sampled in
+ * {@link SlotState} records (the contained channels are immutable, so this is a
+ * safe shallow copy). The actual pose is sampled in
  * {@link ChiikawaEntityRenderer#render} via the pure-function
  * {@link com.dwinovo.chiikawa.anim.runtime.PoseSampler} — extract carries no
  * mutable cursor that could double-step on a second extract call.
@@ -26,10 +26,10 @@ public class ChiikawaRenderState {
     public ResourceLocation modelKey;
     /** Texture path. */
     public ResourceLocation texture;
-    /** Snapshot of the BASE-slot (main) animation channel. {@code null} if nothing is playing. */
-    public AnimationChannel mainChannel;
-    /** Snapshots of any non-BASE triggered channels. {@code null} entries are skipped. */
-    public AnimationChannel[] subChannels;
+    /** Snapshot of the BASE slot's state (current channel + optional fade-from). */
+    public SlotState mainSlot;
+    /** Snapshots of any non-BASE slots. {@code null} entries are skipped. */
+    public SlotState[] subSlots;
     /** {@code walkAnimation.speed(partialTick)} — feeds Molang {@code query.ground_speed}. */
     public float walkSpeed;
     /** Body yaw in degrees. */
