@@ -10,10 +10,10 @@ import com.dwinovo.chiikawa.anim.molang.MolangContext;
 import com.dwinovo.chiikawa.anim.render.layer.HeldItemLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayerContext;
-import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
 import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
 import com.dwinovo.chiikawa.anim.runtime.PoseMixer;
 import com.dwinovo.chiikawa.anim.runtime.PoseSampler;
+import com.dwinovo.chiikawa.anim.runtime.SlotState;
 import com.dwinovo.chiikawa.anim.state.PetAnimPlan;
 import com.dwinovo.chiikawa.anim.state.PetAnimationResolver;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -147,19 +147,18 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             if (wanted != null) {
                 animator.setMain(wanted, true);
             }
-            state.mainChannel = animator.get(PetAnimator.Slot.BASE);
-            // Snapshot any non-BASE channels populated by trigger(). The
-            // AnimationChannel records are immutable so this is a safe shallow
-            // copy.
-            AnimationChannel[] subs = null;
-            PetAnimator.Slot[] slots = PetAnimator.Slot.VALUES;
-            for (int i = 1; i < slots.length; i++) {
-                AnimationChannel sub = animator.get(slots[i]);
-                if (sub == null) continue;
-                if (subs == null) subs = new AnimationChannel[slots.length - 1];
+            state.mainSlot = animator.get(PetAnimator.Slot.BASE);
+            // Snapshot any non-BASE slots populated by trigger(). SlotState
+            // records are immutable so this is a safe shallow copy.
+            SlotState[] subs = null;
+            PetAnimator.Slot[] slotKeys = PetAnimator.Slot.VALUES;
+            for (int i = 1; i < slotKeys.length; i++) {
+                SlotState sub = animator.get(slotKeys[i]);
+                if (sub.isEmpty()) continue;
+                if (subs == null) subs = new SlotState[slotKeys.length - 1];
                 subs[i - 1] = sub;
             }
-            state.subChannels = subs;
+            state.subSlots = subs;
         }
     }
 
@@ -202,10 +201,14 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         molangCtx.vars[MolangContext.SLOT_GROUND_SPEED] = state.walkSpeed;
 
         long nowNs = System.nanoTime();
-        sampleMainChannel(state.mainChannel, nowNs, molangCtx, poseBuf, boneCount);
-        if (state.subChannels != null) {
-            for (AnimationChannel sub : state.subChannels) {
-                if (sub != null) PoseSampler.sample(sub, nowNs, molangCtx, poseBuf);
+        sampleSlot(state.mainSlot, nowNs, molangCtx, poseBuf, boneCount);
+        if (state.subSlots != null) {
+            // Sub-slot fades aren't supported yet — the cross-blend would
+            // overwrite bones the slot doesn't actually animate, undoing the
+            // BASE pose for unrelated bones. Sample current channel only.
+            for (SlotState sub : state.subSlots) {
+                if (sub == null || sub.isEmpty()) continue;
+                PoseSampler.sample(sub.current(), nowNs, molangCtx, poseBuf);
             }
         }
         // Procedural overrides (head look-at, ear sway, tail wag, future
@@ -251,13 +254,23 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         poseStack.popPose();
     }
 
-    private void sampleMainChannel(AnimationChannel channel, long nowNs,
-                                   MolangContext ctx, float[] poseBuf, int boneCount) {
-        if (channel == null) {
+    /**
+     * Samples a slot into {@code poseBuf}. When the slot has a fade in
+     * progress the previous channel is sampled into a temp buffer, the
+     * current channel into another, and the two are blended via
+     * {@link PoseMixer#blend}; otherwise the current channel writes directly.
+     *
+     * <p>Per-frame allocation of the temp buffers is intentional — the GUI
+     * preview path may call submit twice in the same frame with different
+     * pose buffers, and a renderer-shared scratch space would race.
+     */
+    private void sampleSlot(SlotState slot, long nowNs,
+                            MolangContext ctx, float[] poseBuf, int boneCount) {
+        if (slot == null || slot.isEmpty()) {
             return;
         }
-        if (channel.transition() == null) {
-            PoseSampler.sample(channel, nowNs, ctx, poseBuf);
+        if (!slot.hasFade()) {
+            PoseSampler.sample(slot.current(), nowNs, ctx, poseBuf);
             return;
         }
 
@@ -266,8 +279,9 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         PoseSampler.resetIdentity(fromPose, boneCount);
         PoseSampler.resetIdentity(toPose, boneCount);
 
-        PoseSampler.sample(channel.transition().fromChannel(), nowNs, ctx, fromPose);
-        PoseSampler.sample(channel.withoutTransition(), nowNs, ctx, toPose);
-        PoseMixer.blend(fromPose, toPose, PoseMixer.transitionAlpha(channel.transition(), nowNs), poseBuf, boneCount);
+        PoseSampler.sample(slot.previous(), nowNs, ctx, fromPose);
+        PoseSampler.sample(slot.current(), nowNs, ctx, toPose);
+        float alpha = PoseMixer.fadeAlpha(slot.fadeStartNs(), slot.fadeDurationSec(), nowNs);
+        PoseMixer.blend(fromPose, toPose, alpha, poseBuf, boneCount);
     }
 }
