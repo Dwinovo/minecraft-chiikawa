@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
 import com.dwinovo.chiikawa.anim.baked.BakedBoneChannel;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
+import com.dwinovo.chiikawa.anim.baked.LoopMode;
 import com.dwinovo.chiikawa.anim.molang.MolangNode;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -67,7 +68,9 @@ public final class AnimationBaker {
     }
 
     private static BakedAnimation bakeOne(String name, JsonObject obj, BakedModel model) {
-        boolean loop = obj.has("loop") && asBoolean(obj.get("loop"));
+        // Bedrock 'loop' is tri-state: false | true | "hold_on_last_frame"
+        // — the typed enum keeps the third value alive through the pipeline.
+        LoopMode loopMode = obj.has("loop") ? LoopMode.fromBedrockJson(obj.get("loop")) : LoopMode.PLAY_ONCE;
         float duration = obj.has("animation_length") ? obj.get("animation_length").getAsFloat() : 0f;
 
         List<BakedBoneChannel> channels = new ArrayList<>();
@@ -84,7 +87,7 @@ public final class AnimationBaker {
         if (duration <= 0f) {
             duration = computeDuration(channels);
         }
-        return new BakedAnimation(name, duration, loop, channels.toArray(new BakedBoneChannel[0]), model.bakeStamp);
+        return new BakedAnimation(name, duration, loopMode, channels.toArray(new BakedBoneChannel[0]), model.bakeStamp);
     }
 
     private static void addBoneChannels(int boneIdx, JsonObject boneAnim, List<BakedBoneChannel> out) {
@@ -342,15 +345,6 @@ public final class AnimationBaker {
             }
         }
         return max;
-    }
-
-    private static boolean asBoolean(JsonElement el) {
-        if (el.isJsonPrimitive()) {
-            JsonPrimitive p = el.getAsJsonPrimitive();
-            if (p.isBoolean()) return p.getAsBoolean();
-            if (p.isString()) return Boolean.parseBoolean(p.getAsString());
-        }
-        return false;
     }
 
     private record TimedKey(float time, JsonElement value) {}

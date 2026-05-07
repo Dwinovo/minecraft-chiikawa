@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.anim.runtime;
 
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
+import com.dwinovo.chiikawa.anim.baked.LoopMode;
 
 /**
  * Per-entity animator. Owns the small mutable state needed to drive the
@@ -131,13 +132,26 @@ public final class PetAnimator {
         }
     }
 
-    /** Returns whether this one-shot channel has reached the end of its baked duration. */
+    /**
+     * Returns whether this one-shot channel has reached the end of its baked
+     * duration <em>and should be cleared</em>. {@link LoopMode#HOLD_ON_LAST_FRAME}
+     * animations never report finished — their pose persists at the last
+     * keyframe until the slot is explicitly cleared (typically by the next
+     * {@code trigger}).
+     */
     public static boolean isFinished(AnimationChannel channel, long nowNs) {
         if (channel == null || channel.looping()) {
             return false;
         }
         BakedAnimation animation = channel.animation();
-        if (animation == null || animation.durationSec <= 0f) {
+        if (animation == null) {
+            return true;
+        }
+        if (animation.loopMode == LoopMode.HOLD_ON_LAST_FRAME) {
+            // Hold mode: pose stays at the last frame; do not auto-clear.
+            return false;
+        }
+        if (animation.durationSec <= 0f) {
             return true;
         }
         long elapsedNs = nowNs - channel.startTimeNs();
