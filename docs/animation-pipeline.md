@@ -1,24 +1,24 @@
 # 自有 Bedrock 动画管线
 
-仓库内自研的渲染/动画管线，处理 7 只 chiikawa 宠物的所有动画播放、骨骼程序化干预、手持物挂载和服务器触发同步。
+自有渲染/动画管线，处理 7 只 chiikawa 宠物的所有动画播放、骨骼程序化干预、手持物挂载和服务器触发同步。架构对齐 GeckoLib 的多 controller 模型，但保留我们自己的纯函数采样器和扁平 pose buffer。
 
 ## 触发原因
 
-旧外部实体动画库在新版渲染状态抽取路径下有系统性双采样问题：控制器的可变累积时间会在每次 `extractRenderState` 调用时前进。`InventoryScreen.renderEntityInInventoryFollowsMouse` 在 GUI 预览实体时每帧多触发一次 extract，结果是动画约 2 倍速 + 移动时抖动。
+旧动画库在 1.21.11 下有系统性双 extract 计时问题：`AnimationController.lastAnimatableAge` 是可变累积时间，每次 `extractRenderState` 调用都会前进。`InventoryScreen.renderEntityInInventoryFollowsMouse` 在 GUI 预览实体时每帧多触发一次 extract，结果是动画约 2 倍速 + 移动时抖动。
 
-主流 mod 里没有“外部实体动画库 + 容器 GUI 实时预览”的稳定先例，所有 workaround 都强耦合旧库内部。所以我们做了自己的管线。
+主流 mod 里没有"旧动画实体 + 容器 GUI 实时预览"的可复用先例，所有 workaround 都强耦合旧库内部。所以我们做了自己的管线。
 
 ## 架构
 
-八层，依赖箭头从左到右：
+九层，依赖箭头从左到右：
 
 ```
-format → compile → baked → runtime → state → render → api
- POJO    bake-time  immut    per-      MC       外部
-                  shared   entity   integration  接口
+format → compile → molang → baked → controller → runtime → state → render → api
+ POJO    bake-time          immut    config       per-      MC       外部
+                            shared                entity   integration  接口
 ```
 
-每层只依赖左侧。`format`/`compile` 仅在资源加载时跑；`baked` 是不可变共享数据；`runtime` 是每实体一份；`render` 是 Minecraft 集成；`api` 是业务代码看到的入口。
+每层只依赖左侧。`format`/`compile` 仅在资源加载时跑；`baked` 是不可变共享数据；`controller` 是配置类型 + 每实体可变状态；`runtime` 持有每实体动画时间线；`render` 是 Minecraft 集成；`api` 是业务代码看到的入口。
 
 ### 文件分布
 
@@ -31,7 +31,7 @@ common/src/main/java/com/dwinovo/chiikawa/anim/
 │   ├── ModelBaker.java           #   .geo.json → BakedModel
 │   ├── AnimationBaker.java       #   .animation.json → BakedAnimation
 │   ├── MolangCompiler.java       #   Molang 字符串 → MolangNode AST
-│   └── BedrockResourceLoader.java#   ResourceManagerReloadListener，挂在两个 client 入口
+│   └── BedrockResourceLoader.java#   ResourceManagerReloadListener，挂在 client 入口
 │
 ├── molang/                       # 第 3 层：Molang 引擎
 │   ├── MolangNode.java           #   sealed AST：Const/Var/Neg/Add/Sub/Mul/Div/FuncCall
@@ -42,28 +42,43 @@ common/src/main/java/com/dwinovo/chiikawa/anim/
 │   ├── BakedModel.java           #   骨骼数组 + cube 数组 + name→idx
 │   ├── BakedBone.java            #   parentIdx, pivot, restRot, cubeRange, children
 │   ├── BakedCube.java            #   minX/maxX/...、pivot、rot、6×4×2 UV
-│   ├── BakedAnimation.java       #   name, duration, loop, channels[]
-│   └── BakedBoneChannel.java     #   boneIdx, type, times[], values[], lerpModes[], molangSlots[]
+│   ├── BakedAnimation.java       #   name, duration, loopMode, channels[]
+│   ├── BakedBoneChannel.java     #   boneIdx, type, times[], values[], lerpModes[], molangSlots[]
+│   ├── LoopMode.java             #   PLAY_ONCE / LOOP / HOLD_ON_LAST_FRAME
+│   └── BakeStamp.java            #   重载代际计数
 │
-├── runtime/                      # 第 5 层：每实体一份的可变状态
-│   ├── PetAnimator.java          #   4 个 channel 槽
-│   ├── AnimationChannel.java     #   record(BakedAnimation, startTimeNs, looping) — 不可变
-│   └── PoseSampler.java          #   纯函数：(channel, nowNs, ctx) → poseBuf
+├── controller/                   # 第 5 层：GeckoLib 风格 controller 模型
+│   ├── BlendMode.java            #   OVERRIDE / ADDITIVE
+│   ├── ControllerHandler.java    #   (state, ctx) -> BakedAnimation? 纯函数
+│   ├── ControllerConfig.java     #   record(name, blendMode, transitionSec, handler)
+│   ├── ControllerInstance.java   #   每实体 mutable 状态（含 playOnce 触发覆盖）
+│   └── ControllerSnapshot.java   #   每帧不可变快照，喂给 submit pass
 │
-├── state/                        # 第 6 层：游戏状态 → 动画计划
-│   ├── PetAnimContext.java       #   每帧状态快照
-│   ├── PetAnimationResolver.java #   纯函数 resolver
-│   ├── PetAnimPlan.java          #   分层候选动画名
-│   ├── PetAction.java            #   行为动作事件
-│   └── PetReaction.java          #   情绪反应事件
+├── runtime/                      # 第 6 层：动画时间线 + 采样
+│   ├── PetAnimator.java          #   List<ControllerInstance> 容器
+│   ├── AnimationChannel.java     #   record(BakedAnimation, startTimeNs, looping)
+│   ├── PoseSampler.java          #   纯函数：(channel, mode, nowNs, ctx, buf) → 写入 buf
+│   └── PoseMixer.java            #   pose 缓冲混合 + smoothstep alpha
 │
-├── render/                       # 第 7 层：Minecraft 集成
+├── state/                        # 第 7 层：游戏状态 → 候选动画名
+│   ├── PetAnimContext.java       #   每帧状态快照（mode/job/locomotion/action/reaction/attention）
+│   ├── PetAnimationResolver.java #   纯函数：context → List<String> 候选名
+│   ├── PetAction.java            #   行为动作事件 + network id
+│   ├── PetReaction.java          #   情绪反应事件 + network id
+│   ├── PetMode.java              #   FOLLOW / SIT / WORK
+│   ├── PetJobRole.java           #   NONE / FARMER / FENCER / ARCHER
+│   ├── PetLocomotion.java        #   IDLE / WALK / RUN
+│   └── PetAttention.java         #   注视目标类型（预留）
+│
+├── render/                       # 第 8 层：Minecraft 集成
 │   ├── ChiikawaEntityRenderer.java # extends EntityRenderer<T, ChiikawaRenderState>
-│   ├── ChiikawaRenderState.java    # 携带 modelKey/texture/channel snapshot/heldItem
+│   ├── ChiikawaRenderState.java    # 携带 modelKey/texture/controllerSnapshots[]/heldItem
 │   ├── ModelRenderer.java          # 骨骼 DAG 遍历 + cube quad 发射
 │   ├── BoneInterceptor.java        # 骨骼程序化覆写接口（带 Stage 枚举）
 │   ├── HeadLookInterceptor.java    # Stage.LOOK_AT 默认实现（AllHead）
 │   ├── IdleSwayInterceptor.java    # Stage.PHYSICS_SECONDARY 默认实现（耳/尾）
+│   ├── BoneInputProvider.java      # MolangContext per-frame filler 接口
+│   ├── BasicMolangInputProvider.java # 默认 ground_speed filler
 │   ├── layer/                       # RenderLayer 注册表
 │   │   ├── RenderLayer.java         # 视觉层接口
 │   │   ├── RenderLayerContext.java  # per-submit 数据包
@@ -71,7 +86,7 @@ common/src/main/java/com/dwinovo/chiikawa/anim/
 │   │   └── HeldItemLayer.java       # 物品挂载到 RightHandLocator
 │   └── impl/                       # 7 个 trivial 子类（ChiikawaRenderer 等）
 │
-└── api/                          # 第 8 层：业务接口
+└── api/                          # 第 9 层：业务接口
     ├── ModelLibrary.java         #   namespace:path → BakedModel 注册表
     ├── AnimationLibrary.java     #   namespace:path/anim → BakedAnimation 注册表
     └── ChiikawaAnimated.java     #   实体侧接口：getPetAnimator() + getAnimContext()
@@ -88,7 +103,7 @@ common/src/main/java/com/dwinovo/chiikawa/anim/
 BedrockGeoFile + 原始 JsonObject
     │
     ▼ ModelBaker / AnimationBaker / MolangCompiler
-BakedModel + BakedAnimation + MolangNode AST
+BakedModel + BakedAnimation + MolangNode AST  （都打上当前 BakeStamp）
     │
     ▼ ModelLibrary.replaceAll / AnimationLibrary.replaceAll
 [共享只读注册表]
@@ -103,22 +118,31 @@ ChiikawaEntityRenderer.extractRenderState
     │
     ├─ 从 LivingEntity 读 bodyRot / yRot / xRot / walkSpeed / mainHandItem
     ├─ 把 head_yaw / head_pitch snapshot 到 state（避开 InventoryScreen 后续覆写）
-    ├─ 调 ChiikawaAnimated.getAnimContext(walkSpeed)
-    └─ 调 PetAnimationResolver.resolve(context) → setMain(first available base loop)
+    ├─ animator.ensureInitialised(controllerConfigs)   ← 首帧懒构建 controller instances
+    ├─ animator.setPhaseSeed(uuid)                     ← 首次锁存相位偏移
+    ├─ animator.clearStale(currentModel.bakeStamp)     ← 资源重载后清失效引用
+    └─ animator.tick(state, ctx, nowNs)
+       └─ for each ControllerInstance:
+            ├─ 若 triggered 还活着：维持 triggered animation
+            ├─ 否则调 handler(state, ctx) → 拿到目标动画
+            └─ 切换时启动 crossfade（按 transitionSec）
     │
-    ▼
+    ▼ state.controllerSnapshots = animator.snapshot()  ← 不可变快照数组
+    │
 ChiikawaEntityRenderer.submit
     │
     ├─ 分配 poseBuf = float[boneCount * 9]
     ├─ PoseSampler.resetIdentity(poseBuf)
     ├─ 填 MolangContext.vars (ground_speed)
-    ├─ sampleSlot(state.mainSlot, ...)  ← 含 BASE 槽 fade 混合
-    ├─ for each non-empty subSlot: PoseSampler.sample(slot.current(), ...)
-    ├─ for each interceptor: interceptor.apply(model, state, ctx, poseBuf)  [程序化覆写]
+    ├─ for each ControllerSnapshot：                   ← 注册序 = 优先级
+    │     按 BlendMode 调 PoseSampler.sample 写入 poseBuf
+    │     OVERRIDE controller 处于 fade 中：双缓冲 sample + PoseMixer.blend
+    ├─ for each interceptor stage（LOOK_AT / PHYSICS_SECONDARY / OCCLUSION）：
+    │     interceptor.apply(model, state, ctx, poseBuf)  [程序化覆写]
     │
     ├─ poseStack.rotateY(180 - bodyRot) + scale(1/16)
     ├─ collector.submitCustomGeometry(deferred ModelRenderer.render call)
-    └─ heldItemLayer.submit(model, poseBuf, "RightHandLocator", ...)
+    └─ 各 RenderLayer.submit（HeldItemLayer 等）
 ```
 
 ## 关键不变量
@@ -153,60 +177,110 @@ Blockbench 导出 `.geo.json` 时把 display +X 翻转成 JSON -X（Bedrock 历�
 
 **渲染器不再做任何 X 镜像**，只做 `rotateY(180 - bodyRot)` 把模型对齐到 Minecraft 实体朝向。
 
-### 采样是纯函数（双采样问题的根本修复）
+### 采样是纯函数（双 extract 时间漂移的根本修复）
 
 ```java
-PoseSampler.sample(channel, nanoTime(), ctx, poseBuf)
+PoseSampler.sample(channel, blendMode, nanoTime(), ctx, poseBuf)
 ```
 
 是引用透明的：相同输入永远相同输出，**没有任何累积时间状态**。`AnimationChannel` 是 `record(BakedAnimation, long startTimeNs, boolean looping)`。每次采样都从 `nowNs - startTimeNs` 重新算，不存"上次走到哪了"。
 
-InventoryScreen 在同一帧调两次 extract，两次拿到几乎相同的 `nanoTime()`，采样输出 bit-identical → 物理性消除 #848。
+InventoryScreen 在同一帧调两次 extract，两次拿到几乎相同的 `nanoTime()`，采样输出 bit-identical → 物理性消除双 extract 漂移。
 
-### Channel 层级
+## Controller 模型（GeckoLib 对齐）
 
-`PetAnimator.Slot` 枚举（追加新 slot 向后兼容，无需调数组大小常量）：
+每只宠物的渲染器在构造函数里注册一个 `ControllerConfig` 列表。每个 config 包含：
 
-| slot | 用途 |
+| 字段 | 含义 |
 |---|---|
-| `BASE` | base loop（idle / run / sit / work idle），`setMain` 维护，幂等，切换时通用 crossfade |
-| `ACTION` | action 一次性动画（harvest、plant、slash 等），`trigger()` 写入 |
-| `OVERLAY` | overlay 预留 slot（未来上半身 / 道具叠加） |
-| `REACTION` | reaction 一次性动画（happy、hurt、scratch_head 等），`trigger()` 写入 |
+| `name` | controller 标识，外部 `playOnce(name, anim)` 用这个寻址 |
+| `blendMode` | `OVERRIDE`（默认）或 `ADDITIVE` |
+| `transitionSec` | handler 切换动画时的 crossfade 长度 |
+| `handler` | `(state, ctx) -> BakedAnimation?` 纯函数；返回 `null` = 该帧无贡献 |
 
-Base slot 切换时不区分具体状态，任何 A -> B 都把当前 channel 存进新 `SlotState.previous`，记录 `fadeStartNs / fadeDurationSec`。submit 阶段分别采样 previous / current pose，再由 `PoseMixer` 用 smoothstep alpha 混合。这个设计对应 Geckolib `transitionTickTime` 的轻量版本，但保持我们自己的纯采样模型；fade 状态归 slot 所有，channel 本身保持纯粹的"当前在播什么"语义。
+**注册序就是优先级**：后注册的 controller 在 sample 时晚一步写 poseBuf，`OVERRIDE` 模式下覆盖前者，`ADDITIVE` 模式下叠加。这是 GeckoLib 的核心思路。
 
-Trigger channel 的 `looping=false`，`PoseSampler` 在 `t >= duration` 时 clamp 到末尾值；renderer 每次 extract 前会调用 `PetAnimator.clearFinished(nowNs)` 清掉结束的一次性上层 channel，避免动作卡在最后一帧。
+### 默认注册的 controllers
 
-### 并行轨道（眨眼、呼吸、尾巴常摆）
+`ChiikawaEntityRenderer` 基类构造函数自动注册三个：
 
-模型可以声明一组**永久循环**的并行动画，跑在 BASE / sub slot 之外。配置文件：
+| name | blendMode | transition | handler 行为 |
+|---|---|---|---|
+| `main` | OVERRIDE | 0.16s | 调 `PetAnimationResolver.resolve(ctx)`，取候选链第一个存在的动画 |
+| `action` | OVERRIDE | 0.15s | `null`（永不主动出力，只响应 `playOnce`） |
+| `reaction` | OVERRIDE | 0.15s | `null`（永不主动出力，只响应 `playOnce`） |
 
-```text
-assets/<ns>/parallel/<pet>.json
-```
+`action` / `reaction` 的 `transitionSec` 不为 0 是**故意的**——`playOnce` 触发的 fade-IN 在代码里硬编码为 `allowFade=false`（gameplay 事件应该立刻可见），但播完后的 fade-OUT 会用这个值，让 harvest/slash 等动作收尾时平滑过渡回 `main` 的 base loop。
 
-```json
-{
-  "tracks": [
-    "blink",                                                // 字符串简写
-    { "animation": "breath" },                              // 等价对象形式
-    { "animation": "tail_wag", "when": "v.mood > 0.5" }     // 未来扩展字段（解析器宽容地忽略未知字段）
-  ]
+子类可以追加装饰性 controllers，例如：
+
+```java
+public ChiikawaRenderer(EntityRendererProvider.Context ctx) {
+    super(ctx, "chiikawa");
+    addLoopingController("blink",  BlendMode.OVERRIDE, "blink");
+    addLoopingController("breath", BlendMode.ADDITIVE, "breath");
 }
 ```
 
-每个轨道是一个 `ParallelTrack` record。当前只暴露 `animation` 字段，但解析器同时接受字符串简写和对象形式——未来加 `condition` / `speed` / `weight` 时不破坏现有 sidecar 文件。
+`addLoopingController` 是 `addController(...)` 的语法糖：注册一个 `transitionSec=0`、handler 永远返回指定循环动画的 controller。
 
-约定：
+### Blend mode 数学（对齐 GeckoLib `AnimationProcessor`）
 
-- 每个名字必须在该 pet 的 `<pet>.animation.json` 里有定义。
-- **动画文件本身只 K 关键的 bone**。例如 `blink` 只动 `eyelid`，不要碰 hip / leg。这样 sit/walk/idle 与 blink 自然不冲突——后采样的并行轨道只覆盖 eyelid，其他 bone 保持 base 写入的姿态。这与 YSM "post-parallel 优先级最高 + 加性旋转" 在视觉上等价，但实现上是单纯的覆盖语义。
-- 采样顺序：**BASE → 各 sub slot → 各并行轨道**。最后写入的赢。
-- 起始时间 `startTimeNs` 来自 `PetAnimator.parallelPhaseSeed`：每只宠物根据 UUID 取一个 0–10 秒的相位偏移，**不同实例眨眼/呼吸节奏天然错开**，避免一群宠物同时眨眼的诡异感。
-- 缺失 sidecar、空 `tracks` 列表或动画名查不到都是软失败：直接 no-op。
+`PoseSampler` 在 ADDITIVE 模式下按 channel 类型分别合成（**这是从 GeckoLib 学到的关键点**）：
 
-未来若需要"心情好才摇尾巴"这类条件并行，schema 可以扩展为多态条目（字符串或 `{animation, condition}` 对象），不需要改 runtime 数据流。
+| 通道 | OVERRIDE | ADDITIVE |
+|---|---|---|
+| rotation | `pose[i] = animValue` | `pose[i] += animValue` |
+| position | `pose[i] = animValue` | `pose[i] += animValue` |
+| scale | `pose[i] = animValue` | `pose[i] *= animValue` ← 注意是乘，不是加 |
+
+scale 必须是乘法因为 identity 是 `1.0`，朴素 `+=` 会导致 `1+1=2` 每帧爆炸。
+
+动画文件**没 keyframe 的通道完全不动 poseBuf**，无论什么 blend mode。这意味着动画师只在他们想贡献的通道上 keyframe，自然就拿到了想要的合成结果——不需要专门的 `ROTATION_ONLY` 之类的细分模式。
+
+### Triggered animation（一次性覆盖）
+
+`ControllerInstance.playOnce(animation, nowNs)` 把外部一次性动画塞进 controller，**优先级高于 handler**：在动画的 baked 时长内，handler 被完全跳过，sample 该 controller 出的就是 triggered animation。时长结束后自动清空，handler 恢复决策。
+
+`LoopMode.HOLD_ON_LAST_FRAME` 触发的动画不会自动清，要靠 `playOnce` 替换或 `clearTrigger()` 显式清掉。
+
+这是 [`AbstractPet`](../common/src/main/java/com/dwinovo/chiikawa/entity/AbstractPet.java) 同步 action/reaction 触发包的接收端：
+
+```
+server task → pet.triggerAction(PetAction.HARVEST)
+           → 同步字段 ANIM_TRIGGER 高 24 位 seq +1，低 8 位写 networkId
+           → 客户端 onSyncedDataUpdated
+           → 解析 networkId 找 BakedAnimation
+           → animator.playOnce("action", anim)
+```
+
+`reaction` 走平行的 `REACTION_TRIGGER` 字段和 `playOnce("reaction", anim)`。
+
+### 过渡机制（两种 fade，全部由代码自动处理）
+
+每个 controller 有一个 `transitionSec`，同时控制两类 fade：
+
+**1. 单 controller 内部切换**（`previous` + `current` 同时存在）
+
+handler 在 idle → sit 之间切换时：
+- `previous` = 旧 idle channel，`current` = 新 sit channel
+- 两个 channel 都从当前 `poseBuf` 状态出发各自采样到 temp 缓冲（这样无关骨头不被搅乱）
+- `PoseMixer.blend` 按 smoothstep alpha 把两个 temp 缓冲合并写回 poseBuf
+- alpha 走完 0→1 后 `previous` 释放，`current` 独占
+
+OVERRIDE 和 ADDITIVE 走同一条路径——ADDITIVE 的"采样"是 `+=`/`*=`，做完后 temp 缓冲里的就是"叠加完的姿态"，再 lerp 也是有效的。
+
+**2. controller 整体停止**（`fadingOut = true`）
+
+handler 返回 `null`、或 `playOnce` 触发的动画播完时，controller 不会立即清空，而是进入 stop-fade：
+- `current` 还指着最后那段动画，继续被采样
+- 但采样写完 poseBuf 后，按 alpha lerp **回到 sample 之前的 poseBuf 状态**
+- alpha 0 = 完整贡献；alpha 1 = 完全消失，下层 controller 写的姿态完整透出
+- fade 结束后 `current` 才真正清空
+
+这就是跨 controller 的自动过渡：`action` controller 的 harvest 播完后，会在 0.15 秒内从 harvest 末态平滑过渡到 `main` 当前的 idle/sit/run，**动画师不用做任何收尾工作**。
+
+**关键 BUG（已修复）**：`fadeStartNs` 必须等于 `nowNs`，绝不能等于新动画的 `startNs`。对循环动画 `startNs = phaseSeed`（启动时锁定的过去时间），如果用错会让 fade alpha 在第一帧就 clamp 到 1.0，所有切换变成硬切。回归测试见 [`ControllerInstanceTest.withinControllerFadeUsesNowNsNotPhaseSeed`](../common/src/test/java/com/dwinovo/chiikawa/anim/controller/ControllerInstanceTest.java)。
 
 ### MolangContext 范围
 
@@ -215,7 +289,7 @@ assets/<ns>/parallel/<pet>.json
 | slot | 来源 |
 |---|---|
 | `query.anim_time` / `q.anim_time` | `PoseSampler.sample` 每个 channel 采样前填，等于该 channel 的本地时间 |
-| `query.ground_speed` | `ChiikawaEntityRenderer.submit` 每帧从 `walkAnimation.speed` 填 |
+| `query.ground_speed` | `BasicMolangInputProvider` 每帧从 `walkAnimation.speed` 填 |
 
 **故意不暴露的**：
 
@@ -291,6 +365,7 @@ common/src/main/resources/assets/<namespace>/
 | 工作待机 | `work_idle_farmer`, `work_idle_fencer`, `work_idle_archer` |
 | 行为动作 | `pickup`, `harvest`, `plant`, `deposit`, `slash`, `bow_draw`, `bow_release` |
 | 情绪反应 | `happy`, `hurt`, `scratch_head`, `confused`, `revive` |
+| 装饰循环 | `blink`, `breath`, `tail_idle`（由 controller 注册启用） |
 
 详见 [`pet-state-machine-design.md`](./pet-state-machine-design.md) 的命名契约。
 
@@ -325,17 +400,36 @@ common/src/main/resources/assets/<namespace>/
 1. 在 [`PetAction`](../common/src/main/java/com/dwinovo/chiikawa/anim/state/PetAction.java) 或 [`PetReaction`](../common/src/main/java/com/dwinovo/chiikawa/anim/state/PetReaction.java) 中新增语义事件和 network id（低 8 位，0 是保留）。
 2. 给事件配置有序动画候选名，例如 `"play_guitar", "use_mainhand"`。
 3. server 端逻辑里调 `pet.triggerAction(PetAction.X)` 或 `pet.triggerReaction(PetReaction.X)`。
-4. 重新打包后客户端会自动响应（`onSyncedDataUpdated` 已经处理 action/reaction 两条触发器）。
+4. 重新打包后客户端会自动响应：`onSyncedDataUpdated` 解码事件，从候选中找第一个存在的动画，调 `animator.playOnce("action", anim)` 或 `playOnce("reaction", anim)`。
 
-### 添加新并行轨道（眨眼/呼吸/尾巴常摆）
+### 添加装饰性 controller（眨眼、呼吸、尾巴常摆）
 
 1. 在 `<pet>.animation.json` 里加好 looping 动画，且**只 K 该效果涉及的 bone**（例如 `blink` 只动 `eyelid`）。
-2. 在 `assets/<ns>/parallel/<pet>.json` 加上轨道名：
-   ```json
-   { "tracks": ["blink", "breath"] }
+2. 在该宠物的 `XxxRenderer` 构造函数里追加 controller：
+   ```java
+   addLoopingController("blink",  BlendMode.OVERRIDE, "blink");
+   addLoopingController("breath", BlendMode.ADDITIVE, "breath");
    ```
-3. 重新加载（`F3+T` 或重启）。pet 出生后自动有相位偏移，不会与同类一起眨眼。
-4. 确认动画**不会触碰其它 bone** —— 否则会覆盖 BASE / action 写入的姿态，看起来像动画错位。
+3. `OVERRIDE` 让 controller 在共享骨骼上完全覆盖前面的 controller；`ADDITIVE` 让其叠加（rot/pos `+=`、scale `*=`）。
+4. 装饰性循环天然按 UUID 错开相位（`PetAnimator.setPhaseSeed`），不会一群宠物同时眨眼。
+5. 重新加载（`F3+T` 或重启）。
+
+### 添加完全自定义 controller
+
+如果默认 main / action / reaction 三个 controller 不够，可以直接 `addController(new ControllerConfig(...))`。Handler 是纯函数，可以读 `state` 任何字段、`ctx` 任何状态：
+
+```java
+addController(new ControllerConfig(
+    "mood_idle",
+    BlendMode.ADDITIVE,
+    0.3f,
+    (state, ctx) -> ctx.attention() == PetAttention.OWNER
+            ? AnimationLibrary.get(animKey("look_at_owner"))
+            : null   // 不出力，让前面 controller 接管
+));
+```
+
+handler 返回 `null` 表示该帧无贡献——poseBuf 保持前序 controllers 写入的状态。
 
 ### 添加新 BoneInterceptor
 
@@ -348,6 +442,8 @@ common/src/main/resources/assets/<namespace>/
    - `Stage.OCCLUSION` — 可见性 / 隐藏类（emote 期间隐藏某 bone、装备遮挡）
 3. 在 `ChiikawaEntityRenderer` 子类构造函数里 `addInterceptor(stage, new YourInterceptor())`
 4. 同一阶段内按注册顺序运行，**后写覆盖前写**，跨阶段按 `Stage` 枚举声明顺序运行
+
+interceptor 在 **所有 controller 之后** 跑，是终极覆盖——head look-at 永远赢，无论动画里头怎么写。
 
 ### 修改 main loop 状态机
 
@@ -381,6 +477,12 @@ common/src/main/resources/assets/<namespace>/
 
 **修法**：`HeldItemLayer` 在 chain walk 终点 `scale(16, 16, 16)` 抵消。
 
+### Additive 控制器不要对 scale 通道用 `+=`
+
+`PoseSampler` 在 ADDITIVE 路径上对 scale 走 `*=`（乘法），其他通道走 `+=`（加法）。修改 sampler 时务必保留这个分叉——朴素全 `+=` 会让两个 ADDITIVE controller 同时贡献 scale 时模型每帧成倍放大。
+
+参见 [`PoseSampler.writeBlended`](../common/src/main/java/com/dwinovo/chiikawa/anim/runtime/PoseSampler.java)。
+
 ### 浮点 identity 比较用 `== 0f`
 
 [`AnimationBaker.isConstantIdentity`](../common/src/main/java/com/dwinovo/chiikawa/anim/compile/AnimationBaker.java) 和 [`ModelRenderer.renderBone`](../common/src/main/java/com/dwinovo/chiikawa/anim/render/ModelRenderer.java) 都用精确等于 `== 0f` / `== 1f` 判断 identity。如果未来出现"动画文件里写的是 `1e-10`，浮点不精确等于 0"导致剪枝失败，可以加个 epsilon（比如 `Math.abs(x) < 1e-6`）。
@@ -392,6 +494,12 @@ common/src/main/resources/assets/<namespace>/
 `submitCustomGeometry` 的 lambda 不在 submit 调用时执行，而是延迟到 batch 渲染。如果多个 entity 共享 renderer 实例，把 pose buffer 缓存在 renderer 上会被后一个 entity 的 submit 覆写，前一个 lambda 跑时拿到错的数据。
 
 **修法**：每次 submit **新分配** pose buffer。代价是 ~864 字节/调用 × 几千次/秒 ≈ 几 MB/秒 GC 压力，可接受。
+
+### `BakeStamp` 必须穿透到 controller 失效淘汰
+
+资源重载会把 `ModelLibrary` / `AnimationLibrary` 替换成新的 `BakedModel` / `BakedAnimation` 对象，但每只宠物的 `ControllerInstance` 持有的引用还是旧代。`extract` 顶部的 `animator.clearStale(currentModel.bakeStamp)` 会扫每个 controller 的 current/previous/triggered，发现旧代直接整 controller 重置。新代由下一帧 handler 重新 pick。
+
+如果跳过这一步，sampler 会拿到一个 boneIdx 已经无效的旧 channel，可能直接越界。
 
 ## 性能现状
 
@@ -409,16 +517,16 @@ common/src/main/resources/assets/<namespace>/
 |---|---|---|
 | 距离 LOD（远处宠物每 N 帧采样一次 + 缓存 pose） | 远观大量 pet 时 N× | 中 |
 | Bake 时折叠 no-op 骨骼（`MAllBody/AllBody/...` 上提到父） | 模型层级压扁，省 push/pop | 中 |
-| Crossfade 动画切换（idle ↔ run 5 tick 淡入） | 视觉连贯（这是功能不是性能，但会增加 sample 成本） | 中 |
 
 不要为了优化而优化 —— 当前没有性能信号触发以上改动。
 
 ## 关键设计原则（事后回看）
 
-1. **采样是纯函数** —— 双采样类问题在新管线物理上不可能发生
+1. **采样是纯函数** —— 双 extract 时间漂移类问题在新管线物理上不可能发生
 2. **数据导向布局**（DOD/SoA） —— Java JIT 也喜欢，不依赖 Rust 化也比传统 OO 风格快 2-3 倍
-3. **分层架构 + 严格依赖方向** —— 未来若要 native 化某层是局部改动
-4. **Molang 是受限子集** —— 6 fn + 5 op + 2 var，软失败而不是抛异常
-5. **触发 = 状态机事件** —— `(seq, id)` packed 同步字段足以，不需要 packet codec
+3. **多 controller + per-controller blend mode** —— 对齐 GeckoLib 的成熟模型，比之前的 4 槽 + YSM-parallel 双系统更统一、扩展更便宜
+4. **分层架构 + 严格依赖方向** —— 未来若要 native 化某层是局部改动
+5. **Molang 是受限子集** —— 6 fn + 5 op + 2 var，软失败而不是抛异常
+6. **触发 = 状态机事件** —— `(seq, id)` packed 同步字段足以，不需要 packet codec
 
-实际工程中 #1 和 #2 是核心收益来源；#3 让重构成本可控；#4 #5 是边界划得清楚的实用主义。
+实际工程中 #1 和 #2 是核心收益来源；#3 让动画师扩展模型不用改 Java；#4 让重构成本可控；#5 #6 是边界划得清楚的实用主义。
