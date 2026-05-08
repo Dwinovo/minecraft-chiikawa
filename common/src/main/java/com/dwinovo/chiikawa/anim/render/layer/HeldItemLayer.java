@@ -47,6 +47,10 @@ public final class HeldItemLayer implements RenderLayer {
         if (stack == null || stack.isEmpty()) return;
         Integer targetIdx = ctx.model().boneIndex.get(boneName);
         if (targetIdx == null) return;
+        // If the target bone — or any ancestor in its chain — is hidden by a
+        // visibility rule, the held item disappears too. Otherwise the prop
+        // would float in space at the unrendered hand's pivot.
+        if (isAnyAncestorHidden(ctx, targetIdx)) return;
 
         // Resolve the item model fresh per submit. The state is small and
         // short-lived so the allocation is cheaper than caching bookkeeping.
@@ -68,5 +72,21 @@ public final class HeldItemLayer implements RenderLayer {
         itemRenderState.render(ctx.poseStack(), ctx.bufferSource(), ctx.packedLight(),
                 OverlayTexture.NO_OVERLAY);
         ctx.poseStack().popPose();
+    }
+
+    /**
+     * Walks up from {@code boneIdx} to a root, returning {@code true} if any
+     * bone in the chain is flagged hidden. Empty/null hidden array short-
+     * circuits to {@code false} (common case: no visibility rules registered).
+     */
+    private static boolean isAnyAncestorHidden(RenderLayerContext ctx, int boneIdx) {
+        boolean[] hidden = ctx.state().hiddenBones;
+        if (hidden == null || hidden.length != ctx.model().bones.length) return false;
+        int idx = boneIdx;
+        while (idx >= 0) {
+            if (hidden[idx]) return true;
+            idx = ctx.model().bones[idx].parentIdx;
+        }
+        return false;
     }
 }
