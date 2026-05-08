@@ -1,208 +1,146 @@
 package com.dwinovo.chiikawa.anim.runtime;
 
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
-import com.dwinovo.chiikawa.anim.baked.BakedModel;
-import com.dwinovo.chiikawa.anim.baked.LoopMode;
+import com.dwinovo.chiikawa.anim.controller.ControllerConfig;
+import com.dwinovo.chiikawa.anim.controller.ControllerInstance;
+import com.dwinovo.chiikawa.anim.controller.ControllerSnapshot;
+import com.dwinovo.chiikawa.anim.render.ChiikawaRenderState;
+import com.dwinovo.chiikawa.anim.state.PetAnimContext;
+import org.jspecify.annotations.Nullable;
+
+import java.util.List;
 
 /**
- * Per-entity animator. Owns the small mutable state needed to drive the
- * pose sampler — a slot table of {@link SlotState} records (main animation +
- * transient triggered animations) and nothing else.
+ * Per-entity animation state. Holds one {@link ControllerInstance} per
+ * {@link ControllerConfig} the renderer registered.
  *
- * <p>Slots are an {@link Slot} enum: {@link Slot#BASE} owns the current
- * looping animation; the upper slots are transient pockets for semantic
- * action, overlay, and reaction events. Adding a new slot is backward-
- * compatible — append to the enum, no array sizing constants to keep in sync.
+ * <h2>Controller iteration</h2>
+ * Controllers run in registration order (the renderer's static config list).
+ * Each controller writes into the shared pose buffer at submit time, so a
+ * controller registered later sees and may override / blend onto values
+ * written by earlier ones — this is the pillar of the GeckoLib-style pipeline
+ * model: the registration order <em>is</em> the priority.
  *
- * <p>State changes go through {@link #setMain(BakedAnimation, boolean)} or
- * {@link #trigger(Slot, BakedAnimation)} — both replace the slot record
- * wholesale rather than mutating, preserving the pure-function sampling
- * contract.
+ * <h2>Why initialisation is lazy</h2>
+ * {@link com.dwinovo.chiikawa.entity.AbstractPet#getPetAnimator()} is called
+ * eagerly on both client and server, but the controller config list lives on
+ * the renderer (client only). The first {@link #ensureInitialised} call from
+ * the renderer materialises the per-entity controller instances; until then
+ * the animator is dormant. Server-side animators stay dormant for their
+ * entire lifetime — they cost only a single empty-array {@code List}.
+ *
+ * <h2>One-shot triggers</h2>
+ * {@link #playOnce} dispatches an externally-driven one-shot animation to the
+ * named controller (typically {@code "action"} or {@code "reaction"}). The
+ * triggered animation overrides the controller's state handler until its
+ * baked duration elapses, then the handler resumes. Mirrors GeckoLib's
+ * {@code triggerAnimation}.
  */
 public final class PetAnimator {
 
+    /** Default crossfade for the main state-driven controller. */
     public static final float DEFAULT_BASE_TRANSITION_SEC = 0.16f;
 
     /**
-     * Stable slot identity.
-     *
-     * <p>Each slot owns one {@link SlotState}. {@link #BASE} is the looping
-     * foundation; non-base slots are transient one-shots reaped by
-     * {@link #clearFinished(long)}.
+     * Stable per-entity offset latched by {@link #setPhaseSeed} and propagated
+     * to controller instances. {@link Long#MIN_VALUE} = unset.
      */
-    public enum Slot {
-        /** Looping foundation animation (idle / walk / run / sit ...). */
-        BASE,
-        /** Semantic gameplay action (use item, harvest, attack ...). */
-        ACTION,
-        /** Reserved upper-body overlay (held-prop emotes, future use). */
-        OVERLAY,
-        /** Short-lived emotional reaction (hurt, happy, scratch_head ...). */
-        REACTION;
-
-        /** Cached values() to avoid per-frame allocation; treat as immutable. */
-        public static final Slot[] VALUES = values();
-    }
-
-    private final SlotState[] slots = new SlotState[Slot.VALUES.length];
-
-    /**
-     * Stable per-entity time offset used as the {@code startTimeNs} for parallel
-     * tracks (blink, breath, tail idle ...). Initialised lazily from the entity's
-     * UUID via {@link #ensureParallelPhase} so two pets created at the same
-     * instant don't blink in lockstep. {@link Long#MIN_VALUE} = unset.
-     */
-    private long parallelPhaseSeed = Long.MIN_VALUE;
+    private long phaseSeed = Long.MIN_VALUE;
+    private List<ControllerInstance> controllers = List.of();
 
     public PetAnimator() {
-        for (int i = 0; i < slots.length; i++) {
-            slots[i] = SlotState.EMPTY;
-        }
     }
 
     /**
-     * Latches the entity-stable parallel-phase offset on first call. Subsequent
-     * calls are no-ops: the seed must remain stable for the lifetime of the
-     * animator to keep the {@link com.dwinovo.chiikawa.anim.runtime.PoseSampler}
-     * pure (a moving start time would let two extracts in the same frame
-     * produce different animation phases).
+     * Latches the entity-stable phase seed used to anchor non-fading
+     * looping animations across two entities (so two pets created at the same
+     * instant don't blink in lockstep). Subsequent calls are no-ops to keep
+     * the seed stable for the lifetime of the animator.
      *
-     * @param uniquenessSeed any per-entity stable long (typically
-     *                       {@code entity.getUUID().getLeastSignificantBits()})
+     * <p>The seed value is {@code System.nanoTime() - uniqueness * 1ms} so
+     * that the elapsed time at frame {@code t} is uniformly distributed
+     * across [0, ~10s] for a 16-bit uniqueness input.
      */
-    public void ensureParallelPhase(long uniquenessSeed) {
-        if (parallelPhaseSeed != Long.MIN_VALUE) {
-            return;
-        }
-        // Spread blink phase by up to 10 seconds; bigger values would cause
-        // animations to "start" in the future relative to nanoTime() and
-        // PoseSampler would clamp them to t=0 forever.
+    public void setPhaseSeed(long uniquenessSeed) {
+        if (phaseSeed != Long.MIN_VALUE) return;
         long offsetMs = Math.floorMod(uniquenessSeed, 10_000L);
-        parallelPhaseSeed = System.nanoTime() - offsetMs * 1_000_000L;
-    }
-
-    /** Returns the latched phase seed. Must call {@link #ensureParallelPhase} first. */
-    public long getParallelPhaseSeed() {
-        return parallelPhaseSeed;
-    }
-
-    /** Returns the slot's state. Never {@code null}; empty slots return {@link SlotState#EMPTY}. */
-    public SlotState get(Slot slot) {
-        return slots[slot.ordinal()];
-    }
-
-    /** Starts a looping main animation if not already playing this exact one. */
-    public void setMain(BakedAnimation animation, boolean looping) {
-        setMain(animation, looping, DEFAULT_BASE_TRANSITION_SEC);
-    }
-
-    /** Starts a main animation, crossfading from the previous main channel when it changes. */
-    public void setMain(BakedAnimation animation, boolean looping, float transitionSec) {
-        SlotState slot = slots[Slot.BASE.ordinal()];
-        AnimationChannel current = slot.current();
-        if (current != null && current.animation() == animation && current.looping() == looping) {
-            return;
-        }
-        long nowNs = System.nanoTime();
-        AnimationChannel next = new AnimationChannel(animation, nowNs, looping);
-        if (current != null && transitionSec > 0f) {
-            slots[Slot.BASE.ordinal()] = SlotState.withFade(next, current, nowNs, transitionSec);
-        } else {
-            slots[Slot.BASE.ordinal()] = SlotState.of(next);
-        }
-    }
-
-    /** Triggers a non-looping animation on {@code slot}. Idempotent at the network level. */
-    public void trigger(Slot slot, BakedAnimation animation) {
-        slots[slot.ordinal()] = SlotState.of(new AnimationChannel(animation, System.nanoTime(), false));
-    }
-
-    /** Clears finished fades and non-looping non-BASE channels. */
-    public void clearFinished(long nowNs) {
-        SlotState base = slots[Slot.BASE.ordinal()];
-        if (base.hasFade() && isFadeFinished(base, nowNs)) {
-            slots[Slot.BASE.ordinal()] = base.withoutFade();
-        }
-        for (Slot slot : Slot.VALUES) {
-            if (slot == Slot.BASE) continue;
-            SlotState state = slots[slot.ordinal()];
-            if (isFinished(state.current(), nowNs)) {
-                slots[slot.ordinal()] = SlotState.EMPTY;
-            }
-        }
+        phaseSeed = System.nanoTime() - offsetMs * 1_000_000L;
+        for (ControllerInstance c : controllers) c.setPhaseSeed(phaseSeed);
     }
 
     /**
-     * Returns whether this one-shot channel has reached the end of its baked
-     * duration <em>and should be cleared</em>. {@link LoopMode#HOLD_ON_LAST_FRAME}
-     * animations never report finished — their pose persists at the last
-     * keyframe until the slot is explicitly cleared (typically by the next
-     * {@code trigger}).
-     */
-    public static boolean isFinished(AnimationChannel channel, long nowNs) {
-        if (channel == null || channel.looping()) {
-            return false;
-        }
-        BakedAnimation animation = channel.animation();
-        if (animation == null) {
-            return true;
-        }
-        if (animation.loopMode == LoopMode.HOLD_ON_LAST_FRAME) {
-            // Hold mode: pose stays at the last frame; do not auto-clear.
-            return false;
-        }
-        if (animation.durationSec <= 0f) {
-            return true;
-        }
-        long elapsedNs = nowNs - channel.startTimeNs();
-        if (elapsedNs < 0L) {
-            return false;
-        }
-        return elapsedNs >= (long) (animation.durationSec * 1_000_000_000L);
-    }
-
-    /** Returns whether the slot's crossfade has reached its configured duration. */
-    public static boolean isFadeFinished(SlotState slot, long nowNs) {
-        if (slot == null || !slot.hasFade()) {
-            return false;
-        }
-        if (slot.fadeDurationSec() <= 0f) {
-            return true;
-        }
-        long elapsedNs = nowNs - slot.fadeStartNs();
-        return elapsedNs >= (long) (slot.fadeDurationSec() * 1_000_000_000L);
-    }
-
-    /** Clears the slot — used when a one-shot finishes. */
-    public void clear(Slot slot) {
-        slots[slot.ordinal()] = SlotState.EMPTY;
-    }
-
-    /**
-     * Drops any slot whose channel was baked against an earlier
-     * {@link com.dwinovo.chiikawa.anim.baked.BakeStamp} generation than the
-     * one currently in {@link BakedModel}. Run at the top of extract so a
-     * stale {@link AnimationChannel} surviving a {@code F3+T} reload cannot
-     * reach the sampler with bone indices that may now be out of bounds.
+     * Materialises one {@link ControllerInstance} per supplied
+     * {@link ControllerConfig}, but only on the first call. Re-invoking with
+     * the same configs (renderer is a singleton, configs are static) is a
+     * no-op.
      *
-     * <p>Stamp {@code 0} on either side is treated as "unset" — tests that
-     * construct {@link BakedAnimation} with the simple ctor stay unaffected.
+     * <p>The renderer calls this before {@link #tick} so the very first
+     * extract on a new entity gets a fully-built controller list.
+     */
+    public void ensureInitialised(List<ControllerConfig> configs) {
+        if (!controllers.isEmpty()) return;
+        if (configs == null || configs.isEmpty()) return;
+        ControllerInstance[] instances = new ControllerInstance[configs.size()];
+        for (int i = 0; i < configs.size(); i++) {
+            instances[i] = new ControllerInstance(configs.get(i));
+            if (phaseSeed != Long.MIN_VALUE) instances[i].setPhaseSeed(phaseSeed);
+        }
+        controllers = List.of(instances);
+    }
+
+    /**
+     * Drops controllers whose held animations belong to a stale bake
+     * generation (post-resource-reload). Bake stamp {@code 0} on either side
+     * is treated as "unset" so simple test ctors stay unaffected.
      */
     public void clearStale(long currentStamp) {
         if (currentStamp == 0L) return;
-        for (Slot slot : Slot.VALUES) {
-            SlotState state = slots[slot.ordinal()];
-            if (state.isEmpty()) continue;
-            if (isStale(state.current(), currentStamp) || isStale(state.previous(), currentStamp)) {
-                slots[slot.ordinal()] = SlotState.EMPTY;
-            }
-        }
+        for (ControllerInstance c : controllers) c.clearStale(currentStamp);
     }
 
-    private static boolean isStale(AnimationChannel channel, long currentStamp) {
-        if (channel == null) return false;
-        BakedAnimation animation = channel.animation();
-        if (animation == null || animation.bakeStamp == 0L) return false;
-        return animation.bakeStamp != currentStamp;
+    /** Advance every controller's state for the upcoming render pass. */
+    public void tick(ChiikawaRenderState state, PetAnimContext ctx, long nowNs) {
+        for (ControllerInstance c : controllers) c.tick(state, ctx, nowNs);
+    }
+
+    /**
+     * Build an immutable snapshot array — one entry per controller, in
+     * registration order. The renderer hands this to its submit pass to
+     * sample the pose buffer.
+     */
+    public ControllerSnapshot[] snapshot() {
+        if (controllers.isEmpty()) return new ControllerSnapshot[0];
+        ControllerSnapshot[] out = new ControllerSnapshot[controllers.size()];
+        for (int i = 0; i < controllers.size(); i++) out[i] = controllers.get(i).snapshot();
+        return out;
+    }
+
+    /**
+     * Trigger a one-shot animation on the named controller. The trigger
+     * overrides the controller's state handler until {@code animation}'s
+     * baked duration elapses (or, for {@code HOLD_ON_LAST_FRAME}, until the
+     * trigger is replaced or cleared).
+     *
+     * <p>Used by {@link com.dwinovo.chiikawa.entity.AbstractPet}'s synced
+     * action / reaction packets: server bumps a sequence, client receives the
+     * packet, looks up the matching {@link BakedAnimation}, and calls this
+     * method on either the {@code "action"} or {@code "reaction"} controller.
+     */
+    public void playOnce(String controllerName, BakedAnimation animation) {
+        ControllerInstance c = byName(controllerName);
+        if (c != null) c.playOnce(animation, System.nanoTime());
+    }
+
+    /** Look up a controller by name. {@code null} for unknown names. */
+    public @Nullable ControllerInstance byName(String name) {
+        for (ControllerInstance c : controllers) {
+            if (c.name().equals(name)) return c;
+        }
+        return null;
+    }
+
+    /** Test-only: read controller list directly (registration order). */
+    public List<ControllerInstance> controllers() {
+        return controllers;
     }
 }
