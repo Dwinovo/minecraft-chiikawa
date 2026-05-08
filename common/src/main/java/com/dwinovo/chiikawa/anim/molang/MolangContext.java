@@ -18,13 +18,14 @@ package com.dwinovo.chiikawa.anim.molang;
  * Bedrock animation files exported via Blockbench / Yes Steve Model often
  * carry references to {@code ysm.head_yaw}, {@code ysm.head_pitch}, and
  * Blockbench's IK helper variables ({@code v.L6_P0}, {@code v.L4_P0},
- * {@code v.L6_P00}). None of these have a SET site in any tool we use; head /
- * ear / tail orientation has always been driven procedurally by the renderer
- * (see {@link com.dwinovo.chiikawa.anim.render.HeadLookInterceptor} and
- * {@link com.dwinovo.chiikawa.anim.render.IdleSwayInterceptor}),
- * not by Molang. Resolving them to a real slot only opens the door to
- * mis-evaluation (e.g. {@code Root.rotZ = 0.4*ysm.head_yaw} flopping the
- * body sideways). They're left to {@link com.dwinovo.chiikawa.anim.compile.MolangCompiler}'s soft-fail path,
+ * {@code v.L6_P00}). None of these have a SET site in any tool we use; head
+ * orientation is driven procedurally by
+ * {@link com.dwinovo.chiikawa.anim.render.HeadLookInterceptor}, and ear /
+ * tail motion is animator-authored in the base loop animation files (idle /
+ * walk / sit / ...). Resolving these legacy variables to a real slot only
+ * opens the door to mis-evaluation (e.g. {@code Root.rotZ = 0.4*ysm.head_yaw}
+ * flopping the body sideways). They're left to
+ * {@link com.dwinovo.chiikawa.anim.compile.MolangCompiler}'s soft-fail path,
  * which warns once at load and emits a {@code Const(0)} stand-in.
  *
  * <p>Add a slot here only when the renderer actually has a value to feed.
