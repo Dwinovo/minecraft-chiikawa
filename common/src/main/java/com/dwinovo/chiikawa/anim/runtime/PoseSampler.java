@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.anim.runtime;
 
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
 import com.dwinovo.chiikawa.anim.baked.BakedBoneChannel;
+import com.dwinovo.chiikawa.anim.controller.BlendMode;
 import com.dwinovo.chiikawa.anim.molang.MolangContext;
 import com.dwinovo.chiikawa.anim.molang.MolangNode;
 
@@ -21,6 +22,22 @@ import com.dwinovo.chiikawa.anim.molang.MolangNode;
  *   [b * 9 + 6..8] scale           (multiplier; identity = 1)
  * </pre>
  * Use {@link #resetIdentity} before each frame to clear stale data.
+ *
+ * <h2>Blend modes</h2>
+ * The {@link BlendMode} parameter selects how this controller's contribution
+ * combines with whatever earlier controllers wrote into the pose buffer:
+ * <ul>
+ *   <li>{@link BlendMode#OVERRIDE} writes the sampled value directly. Later
+ *       controllers fully replace earlier ones on shared (bone × channel-type)
+ *       tuples.</li>
+ *   <li>{@link BlendMode#ADDITIVE} adds rotation/position values to the
+ *       existing buffer entries, and <em>multiplies</em> scale (because
+ *       {@code 1.0} is the scale identity). This mirrors GeckoLib's
+ *       {@code AnimationProcessor} additive math — naive {@code +=} on scale
+ *       compounds {@code 1+1=2} per controller and blows up the model.</li>
+ * </ul>
+ * Channel-types the sampled animation does not keyframe leave the pose buffer
+ * untouched regardless of mode.
  *
  * <h2>Molang slots</h2>
  * Channels carry an optional parallel {@link MolangNode} array. When a slot
@@ -48,11 +65,21 @@ public final class PoseSampler {
     }
 
     /**
-     * Samples one channel into {@code poseBuf}. {@code null} channels are
-     * skipped. Updates {@code ctx.vars[SLOT_ANIM_TIME]} so any Molang nodes
-     * referencing {@code query.anim_time} see this channel's local time.
+     * Default-mode (OVERRIDE) sample, kept for the simple test paths and the
+     * BASE-loop crossfade buffer-blend.
      */
     public static void sample(AnimationChannel channel, long nowNs,
+                              MolangContext ctx, float[] poseBuf) {
+        sample(channel, BlendMode.OVERRIDE, nowNs, ctx, poseBuf);
+    }
+
+    /**
+     * Samples one channel into {@code poseBuf} using the given blend mode.
+     * {@code null} channels are skipped. Updates
+     * {@code ctx.vars[SLOT_ANIM_TIME]} so any Molang nodes referencing
+     * {@code query.anim_time} see this channel's local time.
+     */
+    public static void sample(AnimationChannel channel, BlendMode mode, long nowNs,
                               MolangContext ctx, float[] poseBuf) {
         if (channel == null) return;
         BakedAnimation anim = channel.animation();
@@ -60,7 +87,7 @@ public final class PoseSampler {
         float t = computeAnimTime(channel, nowNs);
         ctx.vars[MolangContext.SLOT_ANIM_TIME] = t;
         for (BakedBoneChannel ch : anim.channels) {
-            applyChannel(ch, t, ctx, poseBuf);
+            applyChannel(ch, mode, t, ctx, poseBuf);
         }
     }
 
@@ -78,15 +105,96 @@ public final class PoseSampler {
         return elapsed;
     }
 
-    private static void applyChannel(BakedBoneChannel ch, float t, MolangContext ctx, float[] poseBuf) {
+    private static void applyChannel(BakedBoneChannel ch, BlendMode mode, float t, MolangContext ctx, float[] poseBuf) {
         int base = ch.boneIdx * FLOATS_PER_BONE + offsetFor(ch.channelType);
+        float vx, vy, vz;
         if (ch.constant) {
-            poseBuf[base]     = readSlot(ch, 0, ctx);
-            poseBuf[base + 1] = readSlot(ch, 1, ctx);
-            poseBuf[base + 2] = readSlot(ch, 2, ctx);
+            vx = readSlot(ch, 0, ctx);
+            vy = readSlot(ch, 1, ctx);
+            vz = readSlot(ch, 2, ctx);
+        } else {
+            float[] times = ch.times;
+            int n = times.length;
+            if (n == 0) return;
+
+            if (t <= times[0]) {
+                vx = readSlot(ch, 0, ctx);
+                vy = readSlot(ch, 1, ctx);
+                vz = readSlot(ch, 2, ctx);
+            } else if (t >= times[n - 1]) {
+                int last = (n - 1) * 6;
+                vx = readSlot(ch, last + 3, ctx);
+                vy = readSlot(ch, last + 4, ctx);
+                vz = readSlot(ch, last + 5, ctx);
+            } else {
+                int i = binarySearchLE(times, t);
+                if (i >= n - 1) i = n - 2;
+                float t0 = times[i];
+                float t1 = times[i + 1];
+                float dt = t1 - t0;
+                float u = dt > 1.0e-6f ? (t - t0) / dt : 0f;
+                if (u < 0f) u = 0f; else if (u > 1f) u = 1f;
+
+                byte lerp = ch.lerpModes[i];
+                int p1Base = i * 6 + 3;        // post[i]
+                int p2Base = (i + 1) * 6;      // pre[i+1]
+
+                if (lerp == BakedBoneChannel.LERP_STEP) {
+                    vx = readSlot(ch, p1Base,     ctx);
+                    vy = readSlot(ch, p1Base + 1, ctx);
+                    vz = readSlot(ch, p1Base + 2, ctx);
+                } else if (lerp == BakedBoneChannel.LERP_CATMULL_ROM) {
+                    int p0Base = i > 0 ? (i - 1) * 6 + 3 : p1Base;
+                    int p3Base = (i + 2 < n) ? (i + 2) * 6 : p2Base;
+                    vx = catmullRom(readSlot(ch, p0Base,     ctx), readSlot(ch, p1Base,     ctx),
+                                     readSlot(ch, p2Base,     ctx), readSlot(ch, p3Base,     ctx), u);
+                    vy = catmullRom(readSlot(ch, p0Base + 1, ctx), readSlot(ch, p1Base + 1, ctx),
+                                     readSlot(ch, p2Base + 1, ctx), readSlot(ch, p3Base + 1, ctx), u);
+                    vz = catmullRom(readSlot(ch, p0Base + 2, ctx), readSlot(ch, p1Base + 2, ctx),
+                                     readSlot(ch, p2Base + 2, ctx), readSlot(ch, p3Base + 2, ctx), u);
+                } else {
+                    float a0 = readSlot(ch, p1Base,     ctx);
+                    float a1 = readSlot(ch, p1Base + 1, ctx);
+                    float a2 = readSlot(ch, p1Base + 2, ctx);
+                    float b0 = readSlot(ch, p2Base,     ctx);
+                    float b1 = readSlot(ch, p2Base + 1, ctx);
+                    float b2 = readSlot(ch, p2Base + 2, ctx);
+                    vx = a0 + (b0 - a0) * u;
+                    vy = a1 + (b1 - a1) * u;
+                    vz = a2 + (b2 - a2) * u;
+                }
+            }
+        }
+        writeBlended(poseBuf, base, ch.channelType, mode, vx, vy, vz);
+    }
+
+    /**
+     * Combines the sampled triplet with the existing pose-buffer values per
+     * the requested {@link BlendMode}.
+     *
+     * <ul>
+     *   <li>OVERRIDE: write directly (the historical behaviour).</li>
+     *   <li>ADDITIVE on rotation / position: {@code +=}.</li>
+     *   <li>ADDITIVE on scale: {@code *=} (since the scale identity is 1, not 0).</li>
+     * </ul>
+     */
+    private static void writeBlended(float[] poseBuf, int base, byte channelType, BlendMode mode,
+                                     float vx, float vy, float vz) {
+        if (mode == BlendMode.OVERRIDE) {
+            poseBuf[base]     = vx;
+            poseBuf[base + 1] = vy;
+            poseBuf[base + 2] = vz;
             return;
         }
-        sampleKeyframed(ch, t, ctx, poseBuf, base);
+        if (channelType == BakedBoneChannel.TYPE_SCALE) {
+            poseBuf[base]     *= vx;
+            poseBuf[base + 1] *= vy;
+            poseBuf[base + 2] *= vz;
+        } else {
+            poseBuf[base]     += vx;
+            poseBuf[base + 1] += vy;
+            poseBuf[base + 2] += vz;
+        }
     }
 
     private static int offsetFor(byte type) {
@@ -105,68 +213,6 @@ public final class PoseSampler {
             return (float) slots[slotIdx].eval(ctx);
         }
         return ch.values[slotIdx];
-    }
-
-    private static void sampleKeyframed(BakedBoneChannel ch, float t, MolangContext ctx,
-                                        float[] poseBuf, int base) {
-        float[] times = ch.times;
-        int n = times.length;
-        if (n == 0) return;
-
-        if (t <= times[0]) {
-            // Before first key — use its pre.
-            poseBuf[base]     = readSlot(ch, 0, ctx);
-            poseBuf[base + 1] = readSlot(ch, 1, ctx);
-            poseBuf[base + 2] = readSlot(ch, 2, ctx);
-            return;
-        }
-        if (t >= times[n - 1]) {
-            int last = (n - 1) * 6;
-            poseBuf[base]     = readSlot(ch, last + 3, ctx);
-            poseBuf[base + 1] = readSlot(ch, last + 4, ctx);
-            poseBuf[base + 2] = readSlot(ch, last + 5, ctx);
-            return;
-        }
-
-        int i = binarySearchLE(times, t);
-        if (i >= n - 1) i = n - 2;
-        float t0 = times[i];
-        float t1 = times[i + 1];
-        float dt = t1 - t0;
-        float u = dt > 1.0e-6f ? (t - t0) / dt : 0f;
-        if (u < 0f) u = 0f; else if (u > 1f) u = 1f;
-
-        byte lerp = ch.lerpModes[i];
-        int p1Base = i * 6 + 3;        // post[i]
-        int p2Base = (i + 1) * 6;      // pre[i+1]
-
-        if (lerp == BakedBoneChannel.LERP_STEP) {
-            poseBuf[base]     = readSlot(ch, p1Base,     ctx);
-            poseBuf[base + 1] = readSlot(ch, p1Base + 1, ctx);
-            poseBuf[base + 2] = readSlot(ch, p1Base + 2, ctx);
-            return;
-        }
-
-        if (lerp == BakedBoneChannel.LERP_CATMULL_ROM) {
-            int p0Base = i > 0 ? (i - 1) * 6 + 3 : p1Base;
-            int p3Base = (i + 2 < n) ? (i + 2) * 6 : p2Base;
-            for (int axis = 0; axis < 3; axis++) {
-                poseBuf[base + axis] = catmullRom(
-                        readSlot(ch, p0Base + axis, ctx),
-                        readSlot(ch, p1Base + axis, ctx),
-                        readSlot(ch, p2Base + axis, ctx),
-                        readSlot(ch, p3Base + axis, ctx),
-                        u);
-            }
-            return;
-        }
-
-        // Linear (default).
-        for (int axis = 0; axis < 3; axis++) {
-            float a = readSlot(ch, p1Base + axis, ctx);
-            float b = readSlot(ch, p2Base + axis, ctx);
-            poseBuf[base + axis] = a + (b - a) * u;
-        }
     }
 
     private static float catmullRom(float p0, float p1, float p2, float p3, float u) {

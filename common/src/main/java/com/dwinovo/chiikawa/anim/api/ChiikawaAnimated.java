@@ -2,43 +2,26 @@ package com.dwinovo.chiikawa.anim.api;
 
 import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
 import com.dwinovo.chiikawa.anim.state.PetAnimContext;
-import com.dwinovo.chiikawa.anim.state.PetAnimationResolver;
 
 /**
- * Marker interface for entities driven by the Bedrock animation pipeline.
+ * Marker interface for entities driven by the chiikawa animation pipeline.
  * Implementing this lets the entity renderer find the per-entity
- * {@link PetAnimator} without going through a third-party entity renderer.
+ * {@link PetAnimator} and pull a {@link PetAnimContext} for the state-driven
+ * controllers.
  *
- * <p>All pets implement this through {@code AbstractPet}, so client renderers
- * can stay on the in-repo animation runtime.
+ * <p>All pet entities implement this through {@code AbstractPet}.
  */
 public interface ChiikawaAnimated {
 
+    /** Per-entity animator. Holds one {@code ControllerInstance} per registered controller. */
     PetAnimator getPetAnimator();
 
     /**
-     * Returns the gameplay snapshot that the animation resolver uses to pick
-     * channel animations. The renderer prefixes resolver output with the model
-     * key to find {@link AnimationLibrary} entries.
+     * Snapshot of gameplay state, consumed by every controller's state
+     * handler. Built per extract from live entity data.
      *
-     * @param walkSpeed normalized walk speed sampled from the entity, used to
-     *                  distinguish stationary vs moving states
-     * @return gameplay state snapshot for animation resolution
+     * @param walkSpeed normalised walk speed sampled from the entity, used
+     *                  by the resolver to bucket idle / walk / run
      */
     PetAnimContext getAnimContext(float walkSpeed);
-
-    /**
-     * Legacy helper for callers that still want a single base-loop name.
-     *
-     * @param walkSpeed normalized walk speed sampled from the entity
-     * @return first base-loop candidate selected by the resolver
-     */
-    @Deprecated(forRemoval = false)
-    default String getMainAnimationName(float walkSpeed) {
-        return PetAnimationResolver.resolve(getAnimContext(walkSpeed))
-                .baseLoopCandidates()
-                .stream()
-                .findFirst()
-                .orElse("idle");
-    }
 }
