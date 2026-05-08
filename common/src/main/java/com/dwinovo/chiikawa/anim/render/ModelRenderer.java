@@ -63,17 +63,31 @@ public final class ModelRenderer {
      * Renders the entire model with the supplied {@code poseBuf} (laid out per
      * {@link PoseSampler}). The caller's {@code stack} should already include
      * the entity transform, body rotation, and pixel→block scale.
+     *
+     * <p>{@code hiddenBones} is an optional per-bone flag array (length must
+     * equal {@code model.bones.length} when non-null and non-empty). Bones
+     * marked hidden — and their entire subtree — are skipped: no matrix push,
+     * no cube emission, no recursion into children. Pass {@code null} or an
+     * empty array when the renderer has no visibility rules registered.
      */
     public void render(BakedModel model, PoseStack stack, VertexConsumer vc,
-                       int packedLight, int packedOverlay, float[] poseBuf) {
+                       int packedLight, int packedOverlay, float[] poseBuf,
+                       boolean[] hiddenBones) {
+        boolean[] hidden = (hiddenBones != null && hiddenBones.length == model.bones.length)
+                ? hiddenBones : null;
         for (int rootIdx : model.rootBones) {
-            renderBone(model, rootIdx, stack, vc, packedLight, packedOverlay, poseBuf);
+            renderBone(model, rootIdx, stack, vc, packedLight, packedOverlay, poseBuf, hidden);
         }
     }
 
     private void renderBone(BakedModel model, int boneIdx, PoseStack stack,
                             VertexConsumer vc, int packedLight, int packedOverlay,
-                            float[] poseBuf) {
+                            float[] poseBuf, boolean[] hiddenBones) {
+        if (hiddenBones != null && hiddenBones[boneIdx]) {
+            // Hide bone + entire subtree. Early return BEFORE push/translate/rotate
+            // so the parent's transform isn't disturbed for sibling subtrees.
+            return;
+        }
         BakedBone bone = model.bones[boneIdx];
         int base = boneIdx * PoseSampler.FLOATS_PER_BONE;
         float dRotX = poseBuf[base];
@@ -119,7 +133,7 @@ public final class ModelRenderer {
             renderCube(model.cubes[c], stack, vc, packedLight, packedOverlay);
         }
         for (int childIdx : bone.children) {
-            renderBone(model, childIdx, stack, vc, packedLight, packedOverlay, poseBuf);
+            renderBone(model, childIdx, stack, vc, packedLight, packedOverlay, poseBuf, hiddenBones);
         }
 
         if (modifiesPose) {

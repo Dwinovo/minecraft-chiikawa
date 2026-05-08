@@ -16,9 +16,9 @@ public final class PoseMixer {
     /**
      * Computes the smoothstep alpha for a slot crossfade.
      *
-     * <p>Decoupled from any specific record so it works for {@link SlotState}
-     * fades and any future per-effect crossfade timing — all the caller needs
-     * is the start nanos and duration in seconds.
+     * <p>Decoupled from any specific record so it works for any controller's
+     * crossfade and any future per-effect crossfade timing — all the caller
+     * needs is the start nanos and duration in seconds.
      *
      * @return {@code 0..1} ratio of how far along the fade is, smoothed
      */

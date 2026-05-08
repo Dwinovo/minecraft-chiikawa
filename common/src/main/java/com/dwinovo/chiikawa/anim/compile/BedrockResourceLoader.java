@@ -6,9 +6,7 @@ import com.dwinovo.chiikawa.anim.api.ModelLibrary;
 import com.dwinovo.chiikawa.anim.baked.BakeStamp;
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
-import com.dwinovo.chiikawa.anim.baked.ParallelTrack;
 import com.dwinovo.chiikawa.anim.format.BedrockGeoFile;
-import com.dwinovo.chiikawa.anim.format.ParallelTracksFile;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -19,7 +17,6 @@ import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
 import java.io.BufferedReader;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,17 +27,14 @@ import java.util.Map;
  * <p>Animations live at {@code assets/<ns>/animations/<file>.json} and are
  * baked against the model with the matching short key. Each animation in the
  * file is registered under {@code <ns>:<file>/<anim_name>} (e.g.
- * {@code chiikawa:chiikawa/idle}).
- *
- * <p>Optional parallel-track sidecars at {@code assets/<ns>/parallel/<file>.json}
- * declare animations that play continuously alongside the main slots
- * (blink, breath, idle ear flick, ...).
+ * {@code chiikawa:chiikawa/idle}). Decorative animations like {@code blink}
+ * and {@code breath} are authored in the same animation file, then wired into
+ * controllers in code via {@code ChiikawaEntityRenderer.addLoopingController}.
  */
 public final class BedrockResourceLoader implements ResourceManagerReloadListener {
 
     public static final String MODEL_PATH_PREFIX = "models/entity";
     public static final String ANIMATION_PATH_PREFIX = "animations";
-    public static final String PARALLEL_PATH_PREFIX = "parallel";
     public static final String JSON_EXTENSION = ".json";
 
     private static final Gson GSON = new Gson();
@@ -51,8 +45,7 @@ public final class BedrockResourceLoader implements ResourceManagerReloadListene
         // is detectably stale via stamp comparison.
         long stamp = BakeStamp.next();
 
-        Map<ResourceLocation, List<ParallelTrack>> parallelByModel = loadParallelTracks(manager);
-        Map<ResourceLocation, BakedModel> bakedModels = loadModels(manager, parallelByModel, stamp);
+        Map<ResourceLocation, BakedModel> bakedModels = loadModels(manager, stamp);
         ModelLibrary.replaceAll(bakedModels);
         Constants.LOG.info("[chiikawa-anim] loaded {} baked models (stamp {})", bakedModels.size(), stamp);
 
@@ -61,9 +54,7 @@ public final class BedrockResourceLoader implements ResourceManagerReloadListene
         Constants.LOG.info("[chiikawa-anim] loaded {} baked animations (stamp {})", bakedAnims.size(), stamp);
     }
 
-    private static Map<ResourceLocation, BakedModel> loadModels(ResourceManager manager,
-                                                               Map<ResourceLocation, List<ParallelTrack>> parallelByModel,
-                                                               long stamp) {
+    private static Map<ResourceLocation, BakedModel> loadModels(ResourceManager manager, long stamp) {
         Map<ResourceLocation, BakedModel> baked = new HashMap<>();
         Map<ResourceLocation, Resource> resources = manager.listResources(MODEL_PATH_PREFIX,
                 id -> id.getPath().endsWith(JSON_EXTENSION));
@@ -72,8 +63,7 @@ public final class BedrockResourceLoader implements ResourceManagerReloadListene
             ResourceLocation modelKey = toModelKey(rid);
             try (BufferedReader reader = e.getValue().openAsReader()) {
                 BedrockGeoFile file = GSON.fromJson(reader, BedrockGeoFile.class);
-                List<ParallelTrack> parallelTracks = parallelByModel.getOrDefault(modelKey, List.of());
-                BakedModel model = ModelBaker.bake(file, parallelTracks, stamp);
+                BakedModel model = ModelBaker.bake(file, stamp);
                 baked.put(modelKey, model);
             } catch (Exception ex) {
                 Constants.LOG.error("[chiikawa-anim] failed to load geo {}: {}", rid, ex.toString());
@@ -111,34 +101,6 @@ public final class BedrockResourceLoader implements ResourceManagerReloadListene
         return baked;
     }
 
-    /**
-     * Reads every {@code parallel/<file>.json} sidecar into a
-     * {@code modelKey → tracks} map. Each entry is parsed via
-     * {@link ParallelTracksFile#parse} which accepts both string-shorthand
-     * and object-form track declarations.
-     */
-    private static Map<ResourceLocation, List<ParallelTrack>> loadParallelTracks(ResourceManager manager) {
-        Map<ResourceLocation, List<ParallelTrack>> result = new HashMap<>();
-        Map<ResourceLocation, Resource> resources = manager.listResources(PARALLEL_PATH_PREFIX,
-                id -> id.getPath().endsWith(JSON_EXTENSION));
-        for (Map.Entry<ResourceLocation, Resource> e : resources.entrySet()) {
-            ResourceLocation rid = e.getKey();
-            try (BufferedReader reader = e.getValue().openAsReader()) {
-                JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
-                ParallelTracksFile file = ParallelTracksFile.parse(root);
-                if (file.tracks.isEmpty()) {
-                    continue;
-                }
-                ResourceLocation modelKey = toParallelKey(rid);
-                result.put(modelKey, file.tracks);
-            } catch (Exception ex) {
-                Constants.LOG.error("[chiikawa-anim] failed to load parallel sidecar {}: {}",
-                        rid, ex.toString());
-            }
-        }
-        return result;
-    }
-
     /** Strips {@value #MODEL_PATH_PREFIX}/ prefix and .json suffix. */
     public static ResourceLocation toModelKey(ResourceLocation resourceId) {
         return stripPrefixAndExt(resourceId, MODEL_PATH_PREFIX);
@@ -147,11 +109,6 @@ public final class BedrockResourceLoader implements ResourceManagerReloadListene
     /** Strips {@value #ANIMATION_PATH_PREFIX}/ prefix and .json suffix. */
     public static ResourceLocation toAnimationFileKey(ResourceLocation resourceId) {
         return stripPrefixAndExt(resourceId, ANIMATION_PATH_PREFIX);
-    }
-
-    /** Strips {@value #PARALLEL_PATH_PREFIX}/ prefix and .json suffix; aligns with the model key. */
-    public static ResourceLocation toParallelKey(ResourceLocation resourceId) {
-        return stripPrefixAndExt(resourceId, PARALLEL_PATH_PREFIX);
     }
 
     private static ResourceLocation stripPrefixAndExt(ResourceLocation resourceId, String prefix) {
