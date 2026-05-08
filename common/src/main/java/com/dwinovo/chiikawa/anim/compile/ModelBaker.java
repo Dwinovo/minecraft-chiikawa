@@ -3,7 +3,6 @@ package com.dwinovo.chiikawa.anim.compile;
 import com.dwinovo.chiikawa.anim.baked.BakedBone;
 import com.dwinovo.chiikawa.anim.baked.BakedCube;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
-import com.dwinovo.chiikawa.anim.baked.ParallelTrack;
 import com.dwinovo.chiikawa.anim.format.BedrockGeoFile;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -22,17 +21,12 @@ public final class ModelBaker {
 
     private ModelBaker() {}
 
-    /** Test-only convenience overload (no parallel sidecar, no bake stamp). */
+    /** Test-only convenience overload (no bake stamp). */
     public static BakedModel bake(BedrockGeoFile file) {
-        return bake(file, List.of(), 0L);
+        return bake(file, 0L);
     }
 
-    /** Convenience overload for callers without a stamp. */
-    public static BakedModel bake(BedrockGeoFile file, List<ParallelTrack> parallelTracks) {
-        return bake(file, parallelTracks, 0L);
-    }
-
-    public static BakedModel bake(BedrockGeoFile file, List<ParallelTrack> parallelTracks, long bakeStamp) {
+    public static BakedModel bake(BedrockGeoFile file, long bakeStamp) {
         if (file.geometry == null || file.geometry.isEmpty()) {
             throw new IllegalArgumentException("geo file has no geometry entries");
         }
@@ -112,7 +106,6 @@ public final class ModelBaker {
                 roots,
                 nameToIdx,
                 texW, texH,
-                parallelTracks,
                 bakeStamp);
     }
 
