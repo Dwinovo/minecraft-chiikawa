@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.anim.api.ChiikawaAnimated;
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
 import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
 import com.dwinovo.chiikawa.anim.state.PetAction;
+import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.anim.state.PetAnimContext;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
@@ -62,19 +63,31 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * server/client boundary. Layout: high 24 bits = monotonic sequence
      * counter, low 8 bits = animation id (see {@code TRIGGER_*}). Bumping the
      * sequence on the server causes {@link #onSyncedDataUpdated} to fire on
-     * every client watcher, which in turn calls {@link PetAnimator#trigger}.
+     * every client watcher, which dispatches a {@link PetAnimator#playOnce}
+     * to the relevant controller.
      */
     private static final EntityDataAccessor<Integer> ANIM_TRIGGER = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> REACTION_TRIGGER = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.INT);
+    /**
+     * Synced byte storing the current {@link PetActivity} the pet is in.
+     * Server-side Brain behaviors set/clear via {@link #setActivity}; the
+     * client-side {@link com.dwinovo.chiikawa.anim.state.PetAnimationResolver}
+     * reads it as the highest-priority animation candidate. This is the
+     * "level state" channel — orthogonal to the edge-event triggers above.
+     * {@link SynchedEntityData}'s delta-on-change suppresses no-op packets,
+     * so server can call {@code setActivity} every tick if convenient.
+     */
+    private static final EntityDataAccessor<Byte> ACTIVITY = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.BYTE);
 
     /** Legacy animation-id namespace for {@link #ANIM_TRIGGER}'s low byte. */
     public static final int TRIGGER_NONE         = 0;
     public static final int TRIGGER_USE_MAINHAND = 1;
     public static final int TRIGGER_SWORD_ATTACK = 2;
 
-    /** Slot used by triggered one-shots; main loop owns {@link PetAnimator.Slot#BASE}. */
-    private static final PetAnimator.Slot TRIGGER_SLOT = PetAnimator.Slot.ACTION;
-    private static final PetAnimator.Slot REACTION_SLOT = PetAnimator.Slot.REACTION;
+    /** Controller name receiving action triggers — must match {@link com.dwinovo.chiikawa.anim.render.ChiikawaEntityRenderer#CONTROLLER_ACTION}. */
+    private static final String ACTION_CONTROLLER = "action";
+    /** Controller name receiving reaction triggers — must match {@link com.dwinovo.chiikawa.anim.render.ChiikawaEntityRenderer#CONTROLLER_REACTION}. */
+    private static final String REACTION_CONTROLLER = "reaction";
     private static final java.util.List<MemoryModuleType<?>> MEMORY_TYPES = java.util.List.of(
         MemoryModuleType.PATH,
         MemoryModuleType.DOORS_TO_CLOSE,
@@ -279,7 +292,27 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     @Override
     public PetAnimContext getAnimContext(float walkSpeed) {
-        return PetAnimContext.base(getPetMode(), getPetJobId(), walkSpeed);
+        return PetAnimContext.base(getPetMode(), getPetJobId(), walkSpeed, getActivity());
+    }
+
+    /** Current code-bounded loop activity (level state). Synced both directions. */
+    public PetActivity getActivity() {
+        return PetActivity.fromNetworkId(this.entityData.get(ACTIVITY));
+    }
+
+    /**
+     * Set the level-state activity. Server-side only — calling on the client
+     * is a no-op (synced data writes from the client are dropped by
+     * {@link SynchedEntityData}). Equality-guarded: re-setting the same value
+     * does not generate a network packet, so callers may invoke this every
+     * tick without traffic concerns.
+     */
+    public void setActivity(PetActivity activity) {
+        if (level().isClientSide()) return;
+        byte id = (byte) activity.networkId();
+        if (this.entityData.get(ACTIVITY) != id) {
+            this.entityData.set(ACTIVITY, id);
+        }
     }
 
     @Override
@@ -289,6 +322,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         builder.define(PET_JOB, InitRegistry.NONE_ID);
         builder.define(ANIM_TRIGGER, 0);
         builder.define(REACTION_TRIGGER, 0);
+        builder.define(ACTIVITY, (byte) PetActivity.NONE.networkId());
     }
 
     /**
@@ -356,7 +390,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         Identifier typeId = BuiltInRegistries.ENTITY_TYPE.getKey(getType());
         BakedAnimation anim = firstAvailableActionAnimation(typeId, action);
         if (anim != null) {
-            getPetAnimator().trigger(TRIGGER_SLOT, anim);
+            getPetAnimator().playOnce(ACTION_CONTROLLER, anim);
         } else {
             Constants.LOG.warn("[chiikawa-anim] no baked animation for action '{}' on {}", action, typeId);
         }
@@ -372,7 +406,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         Identifier typeId = BuiltInRegistries.ENTITY_TYPE.getKey(getType());
         BakedAnimation anim = firstAvailableReactionAnimation(typeId, reaction);
         if (anim != null) {
-            getPetAnimator().trigger(REACTION_SLOT, anim);
+            getPetAnimator().playOnce(REACTION_CONTROLLER, anim);
         }
     }
 

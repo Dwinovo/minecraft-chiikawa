@@ -1,7 +1,6 @@
 package com.dwinovo.chiikawa.anim.render;
 
-import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
-import com.dwinovo.chiikawa.anim.runtime.SlotState;
+import com.dwinovo.chiikawa.anim.controller.ControllerSnapshot;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
 
@@ -11,12 +10,14 @@ import net.minecraft.resources.Identifier;
  * the vanilla extract pipeline) and adds the model / texture identity that
  * the renderer uses to look up baked data and bind a texture.
  *
- * <p>Animation timing is captured as a snapshot of the entity's
- * {@link AnimationChannel} records ({@link AnimationChannel} is immutable, so
- * this is a safe shallow copy). The actual pose is sampled in
- * {@link ChiikawaEntityRenderer#submit} via the pure-function
- * {@link com.dwinovo.chiikawa.anim.runtime.PoseSampler} — extract carries no
- * mutable cursor that could double-step on a second extract call.
+ * <h2>Animation snapshot</h2>
+ * The animator's per-controller state is captured as a
+ * {@link ControllerSnapshot} array in registration order — controllers run
+ * later in the array compose on top of earlier ones via the renderer's submit
+ * loop. Putting an immutable snapshot here (rather than the live animator
+ * reference) keeps the submit pass a pure function of render-state plus baked
+ * data: a second extract for an inventory preview snapshots fresh values
+ * without disturbing the world-render submit.
  *
  * <h2>Extras</h2>
  * Layer- and interceptor-specific data goes through the {@link PetData}
@@ -29,21 +30,23 @@ public class ChiikawaRenderState extends LivingEntityRenderState {
     public Identifier modelKey;
     /** Texture path. */
     public Identifier texture;
-    /** Snapshot of the BASE slot's state (current channel + optional fade-from). */
-    public SlotState mainSlot;
-    /** Snapshots of any non-BASE slots. {@code null} entries are skipped. */
-    public SlotState[] subSlots;
     /**
-     * Snapshot of the model's parallel tracks (blink, breath, ...), each
-     * already resolved against the {@link com.dwinovo.chiikawa.anim.api.AnimationLibrary}
-     * with the entity's stable phase seed as {@code startTimeNs}. Sampled
-     * <em>after</em> {@link #mainSlot} and {@link #subSlots} so they win on
-     * shared bones, matching YSM's post-parallel semantic.
-     *
-     * <p>{@code null} when the model declares no parallel tracks or none could
-     * be resolved.
+     * Per-controller snapshot in registration order. The submit pass iterates
+     * this and samples each controller into the shared pose buffer using its
+     * declared {@link com.dwinovo.chiikawa.anim.controller.BlendMode}.
      */
-    public AnimationChannel[] parallelChannels;
+    public ControllerSnapshot[] controllerSnapshots = EMPTY;
+    /**
+     * Per-bone hidden flag, parallel to the model's bone array
+     * (length {@code = bones.length}, indexed by bone index). Computed at
+     * extract time by evaluating any registered
+     * {@link BoneVisibilityRule}s. {@code true} = the bone (and its entire
+     * subtree) should be skipped during rendering.
+     *
+     * <p>Empty (zero-length) when the renderer has no visibility rules
+     * registered — saves the per-frame allocation in the common case.
+     */
+    public boolean[] hiddenBones = EMPTY_HIDDEN;
     /** {@code walkAnimation.speed(partialTick)} — feeds Molang {@code query.ground_speed}. */
     public float walkSpeed;
     /**
@@ -60,6 +63,9 @@ public class ChiikawaRenderState extends LivingEntityRenderState {
     public float netHeadYaw;
     /** Head pitch (entity X rotation) in degrees, captured at extract time for the same reason. */
     public float headPitch;
+
+    private static final ControllerSnapshot[] EMPTY = new ControllerSnapshot[0];
+    private static final boolean[] EMPTY_HIDDEN = new boolean[0];
 
     private final Object[] extras = new Object[PetData.VALUES.length];
 
