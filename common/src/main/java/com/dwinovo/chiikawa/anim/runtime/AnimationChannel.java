@@ -14,8 +14,9 @@ import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
  * frame produces identical results — GUI preview and world render naturally
  * agree.
  *
- * <p>Fade-in / fade-out timing lives on {@link SlotState} rather than here:
- * the channel knows what's playing, the slot knows what's fading.
+ * <p>Fade-in / fade-out timing lives on
+ * {@link com.dwinovo.chiikawa.anim.controller.ControllerInstance} rather than
+ * here: the channel knows what's playing, the controller knows what's fading.
  *
  * @param animation   the baked animation being played
  * @param startTimeNs {@code System.nanoTime()} captured at trigger
