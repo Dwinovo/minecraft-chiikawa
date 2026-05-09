@@ -5,6 +5,11 @@ import com.dwinovo.chiikawa.entity.brain.handler.NoneJobHandler;
 import com.dwinovo.chiikawa.entity.job.api.IPetJob;
 import net.minecraft.world.entity.ai.Brain;
 
+/**
+ * Fallback pet job — pet is holding nothing recognised. Always assumable,
+ * lowest priority. Owns no specialised activities; just selects
+ * {@link net.minecraft.world.entity.schedule.Activity#IDLE} each tick.
+ */
 public class NoneJob implements IPetJob {
     private final int id;
 
@@ -28,13 +33,7 @@ public class NoneJob implements IPetJob {
     }
 
     @Override
-    public void initBrain(AbstractPet pet, Brain<AbstractPet> brain) {
-        NoneJobHandler.initBrain(pet, brain);
-    }
-
-    @Override
     public void tickBrain(AbstractPet pet, Brain<AbstractPet> brain) {
-        NoneJobHandler.tickBrain(pet,brain);
+        NoneJobHandler.tickBrain(pet, brain);
     }
 }
-

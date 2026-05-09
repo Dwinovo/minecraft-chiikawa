@@ -9,6 +9,11 @@ import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.anim.state.PetAnimContext;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
+import com.dwinovo.chiikawa.entity.brain.handler.ArcherJobHandler;
+import com.dwinovo.chiikawa.entity.brain.handler.FarmerJobHandler;
+import com.dwinovo.chiikawa.entity.brain.handler.FencerJobHandler;
+import com.dwinovo.chiikawa.entity.brain.handler.NoneJobHandler;
+import com.dwinovo.chiikawa.utils.BrainUtils;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
 import com.dwinovo.chiikawa.entity.job.api.IPetJob;
 import com.dwinovo.chiikawa.init.InitMemory;
@@ -37,6 +42,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
@@ -155,6 +161,18 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         refreshJobFromMainhand(false);
     }
 
+    /**
+     * Pick the highest-priority job whose tag matches the pet's mainhand
+     * item, and write the result to {@link #PET_JOB}. The brain is
+     * <em>not</em> rebuilt — every job's activities live on a single
+     * static brain since {@link #makeBrain}, so a job change is just a
+     * synced byte flip; the next {@link #customServerAiStep} picks up the
+     * new job's {@code tickBrain} and selects different activities.
+     *
+     * <p>{@code forceRefresh} is reserved for callers that want to re-emit
+     * the same job id (e.g. to reset an override). It currently has no
+     * side effect since there is no brain rebuild to trigger.
+     */
     private void refreshJobFromMainhand(boolean forceRefresh) {
         if (level().isClientSide()) {
             return;
@@ -178,18 +196,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         int newJobId = best.getId();
         if (newJobId != getPetJobId() || forceRefresh) {
             setPetJobId(newJobId);
-            refreshBrain((ServerLevel) this.level());
         }
-    }
-
-    private void refreshBrain(ServerLevel serverLevelIn) {
-        Brain<AbstractPet> brain = this.getBrain();
-        brain.stopAll(serverLevelIn, this);
-        // Copy the brain without behaviors.
-        Brain<AbstractPet> newBrain = brain.copyWithoutBehaviors();
-        this.brain = newBrain;
-        // Initialize job behaviors.
-        InitRegistry.getJobFromId(getPetJobId()).initBrain(this, newBrain);
     }
 
     @Override
@@ -197,10 +204,42 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         return Brain.provider(MEMORY_TYPES, SENSOR_TYPES);
     }
 
+    /**
+     * Build the entity's brain once, registering <em>all</em> job activities
+     * up front. Activities don't run unless the per-tick activity selector
+     * (see {@link #customServerAiStep}) chooses them, so the unused
+     * activities cost only their flat memory footprint.
+     *
+     * <p>This avoids the prior "rebuild on job change" pattern, which had
+     * three problems: (1) {@code brain.stopAll} interrupted in-flight
+     * behaviors mid-frame causing animation glitches, (2) {@code brain.pack}
+     * preserved memories but not behavior internal state, (3) it diverged
+     * from Mojang's static-registration convention (Villager registers
+     * profession-aware behaviors once and lets activity selection do the
+     * filtering).
+     *
+     * <p>Future jobs (or manual job switching) just append a new
+     * {@code <Job>JobHandler.registerActivities(brain)} call here and a
+     * branch in {@link #customServerAiStep}'s job dispatch — no plumbing
+     * elsewhere needs to touch.
+     */
     @Override
     protected Brain<?> makeBrain(Dynamic<?> dynamic) {
         Brain<AbstractPet> brain = (Brain<AbstractPet>) brainProvider().makeBrain(dynamic);
-        InitRegistry.getJobFromId(getPetJobId()).initBrain(this, brain);
+
+        // Universal tasks present in every brain.
+        BrainUtils.addCoreTasks(brain);
+        BrainUtils.addIdleTasks(brain);
+
+        // Each job's activities — registered once, dormant until that job's
+        // tickBrain selects them.
+        FarmerJobHandler.registerActivities(brain);
+        FencerJobHandler.registerActivities(brain);
+        ArcherJobHandler.registerActivities(brain);
+        NoneJobHandler.registerActivities(brain); // no-op today; placeholder for symmetry
+
+        brain.setCoreActivities(java.util.Set.of(Activity.CORE));
+        brain.setDefaultActivity(Activity.IDLE);
         return brain;
     }
 
