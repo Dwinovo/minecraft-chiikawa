@@ -41,7 +41,6 @@ public final class InitRegistry {
             FARMER_ID,
             10,
             InitTag.ENTITY_FARMER_TOOLS,
-            FarmerJobHandler::initBrain,
             FarmerJobHandler::tickBrain
         )
     );
@@ -52,7 +51,6 @@ public final class InitRegistry {
             FENCER_ID,
             10,
             InitTag.ENTITY_FENCER_TOOLS,
-            FencerJobHandler::initBrain,
             FencerJobHandler::tickBrain
         )
     );
@@ -63,7 +61,6 @@ public final class InitRegistry {
             ARCHER_ID,
             10,
             InitTag.ENTITY_ARCHER_TOOLS,
-            ArcherJobHandler::initBrain,
             ArcherJobHandler::tickBrain
         )
     );
