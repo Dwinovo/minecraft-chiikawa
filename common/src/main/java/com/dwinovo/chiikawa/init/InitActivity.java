@@ -14,6 +14,12 @@ public final class InitActivity {
     // Deliver activity.
     public static final Supplier<Activity> DELEVER =
         Services.PLATFORM_REGISTRY.deleverActivity();
+    // Fencer combat activity.
+    public static final Supplier<Activity> FENCER_FIGHT =
+        Services.PLATFORM_REGISTRY.fencerFightActivity();
+    // Archer ranged-attack activity.
+    public static final Supplier<Activity> ARCHER_SHOOT =
+        Services.PLATFORM_REGISTRY.archerShootActivity();
 
     private InitActivity() {
     }
