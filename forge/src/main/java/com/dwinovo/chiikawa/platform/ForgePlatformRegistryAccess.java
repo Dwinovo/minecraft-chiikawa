@@ -49,6 +49,10 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
         ACTIVITIES.register("farmer_plant", () -> new Activity("farmer_plant"));
     private static final RegistryObject<Activity> DELEVER =
         ACTIVITIES.register("delever", () -> new Activity("delever"));
+    private static final DeferredHolder<Activity, Activity> FENCER_FIGHT =
+        ACTIVITIES.register("fencer_fight", () -> new Activity("fencer_fight"));
+    private static final DeferredHolder<Activity, Activity> ARCHER_SHOOT =
+        ACTIVITIES.register("archer_shoot", () -> new Activity("archer_shoot"));
 
     // Menu registrations
     private static final RegistryObject<MenuType<PetBackpackMenu>> PET_BACKPACK =
@@ -109,6 +113,16 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
     @Override
     public Supplier<Activity> deleverActivity() {
         return DELEVER;
+    }
+
+    @Override
+    public Supplier<Activity> fencerFightActivity() {
+        return FENCER_FIGHT;
+    }
+
+    @Override
+    public Supplier<Activity> archerShootActivity() {
+        return ARCHER_SHOOT;
     }
 
     @Override

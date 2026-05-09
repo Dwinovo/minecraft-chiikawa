@@ -30,13 +30,22 @@ public final class BrainUtils {
         Pair<Integer, BehaviorControl<? super AbstractPet>> walkToTarget = Pair.of(1, new MoveToTargetSink());
         Pair<Integer, BehaviorControl<? super AbstractPet>> look = Pair.of(0, new LookAtTargetSink(45, 45));
         Pair<Integer, BehaviorControl<? super AbstractPet>> pickitem = Pair.of(3, new PickUpItemTask(0.7f));
-        brain.addActivity(Activity.CORE, ImmutableList.of(look, sit, keepAround, walkToTarget,pickitem));
+        addActivity(brain, Activity.CORE, ImmutableList.of(look, sit, keepAround, walkToTarget,pickitem));
     }
 
     public static void addIdleTasks(Brain<AbstractPet> brain) {
         Pair<Integer, BehaviorControl<? super AbstractPet>> randomTask = Pair.of(99, getLookAndRandomWalk());
-        brain.addActivity(Activity.IDLE, ImmutableList.of(randomTask));
+        addActivity(brain, Activity.IDLE, ImmutableList.of(randomTask));
     }
+
+    public static void addActivity(
+        Brain<AbstractPet> brain,
+        Activity activity,
+        ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super AbstractPet>>> behaviorPriorityPairs
+    ) {
+        brain.addActivity(activity, behaviorPriorityPairs);
+    }
+
     private static RunOne<AbstractPet> getLookAndRandomWalk() {
         Pair<BehaviorControl<? super AbstractPet>, Integer> lookToPlayer = Pair.of(SetEntityLookTarget.create(EntityType.PLAYER, 5), 2);
         Pair<BehaviorControl<? super AbstractPet>, Integer> lookToAny = Pair.of(SetEntityLookTarget.create(MobCategory.CREATURE, 5), 2);
@@ -45,4 +54,3 @@ public final class BrainUtils {
         return new RunOne<AbstractPet>(ImmutableList.of(lookToPlayer, lookToAny, walkRandomly, noThing));
     }
 }
-
