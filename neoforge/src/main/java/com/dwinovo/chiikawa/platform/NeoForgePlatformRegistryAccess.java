@@ -43,6 +43,10 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
         ACTIVITIES.register("farmer_plant", () -> new Activity("farmer_plant"));
     private static final DeferredHolder<Activity, Activity> DELEVER =
         ACTIVITIES.register("delever", () -> new Activity("delever"));
+    private static final DeferredHolder<Activity, Activity> FENCER_FIGHT =
+        ACTIVITIES.register("fencer_fight", () -> new Activity("fencer_fight"));
+    private static final DeferredHolder<Activity, Activity> ARCHER_SHOOT =
+        ACTIVITIES.register("archer_shoot", () -> new Activity("archer_shoot"));
 
     private static final DeferredHolder<MenuType<?>, MenuType<PetBackpackMenu>> PET_BACKPACK =
         MENUS.register("pet_backpack", () -> IMenuTypeExtension.create((containerId, inventory, buf) ->
@@ -93,6 +97,16 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
     @Override
     public Supplier<Activity> deleverActivity() {
         return DELEVER;
+    }
+
+    @Override
+    public Supplier<Activity> fencerFightActivity() {
+        return FENCER_FIGHT;
+    }
+
+    @Override
+    public Supplier<Activity> archerShootActivity() {
+        return ARCHER_SHOOT;
     }
 
     @Override
