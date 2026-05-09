@@ -25,6 +25,8 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     private final Supplier<Activity> farmerHarvestActivity;
     private final Supplier<Activity> farmerPlantActivity;
     private final Supplier<Activity> deleverActivity;
+    private final Supplier<Activity> fencerFightActivity;
+    private final Supplier<Activity> archerShootActivity;
     private final Supplier<MenuType<PetBackpackMenu>> petBackpackMenu;
 
     public FabricPlatformRegistryAccess() {
@@ -37,6 +39,8 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
         farmerHarvestActivity = registerActivity("farmer_harvest", new Activity("farmer_harvest"));
         farmerPlantActivity = registerActivity("farmer_plant", new Activity("farmer_plant"));
         deleverActivity = registerActivity("delever", new Activity("delever"));
+        fencerFightActivity = registerActivity("fencer_fight", new Activity("fencer_fight"));
+        archerShootActivity = registerActivity("archer_shoot", new Activity("archer_shoot"));
 
         petBackpackMenu = registerMenu("pet_backpack", new MenuType<>(PetBackpackMenu::new, net.minecraft.world.flag.FeatureFlags.DEFAULT_FLAGS));
     }
@@ -98,6 +102,16 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     @Override
     public Supplier<Activity> deleverActivity() {
         return deleverActivity;
+    }
+
+    @Override
+    public Supplier<Activity> fencerFightActivity() {
+        return fencerFightActivity;
+    }
+
+    @Override
+    public Supplier<Activity> archerShootActivity() {
+        return archerShootActivity;
     }
 
     @Override
