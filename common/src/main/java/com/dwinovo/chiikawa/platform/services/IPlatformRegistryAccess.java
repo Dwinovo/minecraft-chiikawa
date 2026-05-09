@@ -28,5 +28,20 @@ public interface IPlatformRegistryAccess {
 
     Supplier<Activity> deleverActivity();
 
+    /**
+     * Brain {@link Activity} owning the fencer job's combat behaviors
+     * (walk-to-target + melee swing). Replaces fencer's earlier reuse of
+     * vanilla {@link Activity#WORK}, which conflicted with archer when both
+     * jobs' behaviors were registered on the same brain.
+     */
+    Supplier<Activity> fencerFightActivity();
+
+    /**
+     * Brain {@link Activity} owning the archer job's ranged-attack behavior.
+     * Sibling to {@link #fencerFightActivity} — distinct activity per job so
+     * static brain registration doesn't conflate combat styles.
+     */
+    Supplier<Activity> archerShootActivity();
+
     Supplier<MenuType<PetBackpackMenu>> petBackpackMenu();
 }
