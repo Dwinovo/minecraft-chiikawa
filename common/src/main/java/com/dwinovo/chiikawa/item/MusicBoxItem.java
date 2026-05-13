@@ -4,7 +4,7 @@ import com.dwinovo.chiikawa.music.MusicBoxSelection;
 import com.dwinovo.chiikawa.music.ServerMusicSystem;
 import com.dwinovo.chiikawa.network.MusicPayloads.MusicCatalogPayload;
 import com.dwinovo.chiikawa.platform.Services;
-import java.util.function.Consumer;
+import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -14,7 +14,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
 public class MusicBoxItem extends Item {
@@ -38,16 +37,15 @@ public class MusicBoxItem extends Item {
     public void appendHoverText(
         ItemStack stack,
         TooltipContext context,
-        TooltipDisplay tooltipDisplay,
-        Consumer<Component> tooltipAdder,
+        List<Component> tooltipComponents,
         TooltipFlag tooltipFlag
     ) {
-        super.appendHoverText(stack, context, tooltipDisplay, tooltipAdder, tooltipFlag);
+        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
         MusicBoxSelection selection = MusicBoxSelection.get(stack);
         if (selection == null) {
-            tooltipAdder.accept(Component.translatable("tooltip.chiikawa.music_box.empty").withStyle(ChatFormatting.GRAY));
+            tooltipComponents.add(Component.translatable("tooltip.chiikawa.music_box.empty").withStyle(ChatFormatting.GRAY));
         } else {
-            tooltipAdder.accept(Component.translatable("tooltip.chiikawa.music_box.selected", selection.title()).withStyle(ChatFormatting.AQUA));
+            tooltipComponents.add(Component.translatable("tooltip.chiikawa.music_box.selected", selection.title()).withStyle(ChatFormatting.AQUA));
         }
     }
 }
