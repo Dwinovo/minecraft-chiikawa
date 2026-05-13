@@ -9,7 +9,6 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import com.dwinovo.chiikawa.anim.compile.BedrockResourceLoader;
 import com.dwinovo.chiikawa.anim.render.impl.ChiikawaRenderer;
@@ -23,7 +22,6 @@ import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
 import com.dwinovo.chiikawa.client.screen.PetBackpackScreen;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitMenu;
-import com.dwinovo.chiikawa.platform.NeoForgeMusicNetworking;
 import net.neoforged.neoforge.common.NeoForge;
 
 // Client-only mod entry.
@@ -52,11 +50,6 @@ public class ChiikawaClient {
     }
 
     @SubscribeEvent
-    static void registerClientPayloadHandlers(RegisterClientPayloadHandlersEvent event) {
-        NeoForgeMusicNetworking.registerClientPayloads(event);
-    }
-
-    @SubscribeEvent
     static void registerReloadListeners(AddClientReloadListenersEvent event) {
         // Bakes the .geo.json / .animation.json into ModelLibrary + AnimationLibrary.
         // Without this the renderer's ModelLibrary.get(...) returns null and submit()
@@ -66,4 +59,3 @@ public class ChiikawaClient {
                 new BedrockResourceLoader());
     }
 }
-
