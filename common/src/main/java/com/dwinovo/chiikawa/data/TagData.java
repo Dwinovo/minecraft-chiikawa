@@ -32,6 +32,7 @@ public final class TagData {
             Items.WOODEN_SWORD, Items.STONE_SWORD, Items.IRON_SWORD, Items.GOLDEN_SWORD, Items.DIAMOND_SWORD, Items.NETHERITE_SWORD,
             InitItems.USAGI_WEAPON.get(), InitItems.HACHIWARE_WEAPON.get(), InitItems.CHIIKAWA_WEAPON.get());
         tags.add(InitTag.ENTITY_ARCHER_TOOLS, Items.BOW);
+        tags.add(InitTag.ENTITY_MUSICIAN_TOOLS, InitItems.MUSIC_BOX.get());
         tags.add(InitTag.ENTITY_TAME_FOODS,
             Items.APPLE, Items.BAKED_POTATO, Items.BREAD, Items.CARROT, Items.COOKED_BEEF, Items.COOKED_CHICKEN, Items.COOKED_COD,
             Items.COOKED_MUTTON, Items.COOKED_PORKCHOP, Items.COOKED_RABBIT, Items.COOKED_SALMON, Items.COOKIE, Items.GLOW_BERRIES,

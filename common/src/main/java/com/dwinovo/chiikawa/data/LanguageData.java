@@ -13,9 +13,9 @@ public final class LanguageData {
         if ("zh_cn".equals(locale)) {
             addCommonTranslations(adder, "Chiikawa", "背包", "跟随", "坐下", "工作");
             addDollTooltipTranslations(adder, "试着把玩偶放在蛋糕上？");
-            addJobTranslations(adder, "职业", "无", "农夫", "剑士", "弓箭手", "未知");
+            addJobTranslations(adder, "职业", "无", "农夫", "剑士", "弓箭手", "音乐家", "未知");
             addEntityTranslations(adder, "乌萨奇", "小八", "吉伊", "狮萨", "飞鼠", "栗子馒头", "獭师父");
-            addItemTagTranslations(adder, "农夫工具", "剑士工具", "弓箭手工具", "驯服食物", "种植作物", "运送物品", "可拾取物品");
+            addItemTagTranslations(adder, "农夫工具", "剑士工具", "弓箭手工具", "音乐家工具", "驯服食物", "种植作物", "运送物品", "可拾取物品");
             addItemTranslations(
                 adder,
                 "乌萨奇刷怪蛋",
@@ -36,12 +36,14 @@ public final class LanguageData {
                 "小八的讨伐棒",
                 "吉伊的讨伐棒"
             );
+            addMusicBoxTranslations(adder, "八音盒", "未选择歌曲", "歌曲：%s", "选择歌曲", "导入中", "导入失败", "没有可播放的歌曲",
+                "缺少 FFmpeg，歌曲无法导入", "请手动安装后点击刷新", "刷新");
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Work");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
-            addJobTranslations(adder, "Job", "None", "Farmer", "Fencer", "Archer", "Unknown");
+            addJobTranslations(adder, "Job", "None", "Farmer", "Fencer", "Archer", "Musician", "Unknown");
             addEntityTranslations(adder, "Usagi", "Hachiware", "Chiikawa", "Shisa", "Momonga", "Kurimanju", "Rakko");
-            addItemTagTranslations(adder, "Farmer Tools", "Fencer Tools", "Archer Tools", "Tame Foods", "Plant Crops", "Deliver Items", "Pickable Items");
+            addItemTagTranslations(adder, "Farmer Tools", "Fencer Tools", "Archer Tools", "Musician Tools", "Tame Foods", "Plant Crops", "Deliver Items", "Pickable Items");
             addItemTranslations(
                 adder,
                 "Usagi Spawn Egg",
@@ -62,6 +64,8 @@ public final class LanguageData {
                 "Hachiware Weapon",
                 "Chiikawa Weapon"
             );
+            addMusicBoxTranslations(adder, "Music Box", "No song selected", "Song: %s", "Choose Song", "Importing", "Failed", "No playable songs",
+                "FFmpeg is missing, songs cannot be imported", "Install it manually, then reload", "Reload");
         }
     }
 
@@ -77,12 +81,22 @@ public final class LanguageData {
         adder.add("tooltip.chiikawa.doll.place_on_cake", placeOnCakeHint);
     }
 
-    private static void addJobTranslations(Adder adder, String jobLabel, String none, String farmer, String fencer, String archer, String unknown) {
+    private static void addJobTranslations(
+        Adder adder,
+        String jobLabel,
+        String none,
+        String farmer,
+        String fencer,
+        String archer,
+        String musician,
+        String unknown
+    ) {
         adder.add("tooltip.chiikawa.pet_job", jobLabel + ": %s");
         adder.add("tooltip.chiikawa.pet_job.none", none);
         adder.add("tooltip.chiikawa.pet_job.farmer", farmer);
         adder.add("tooltip.chiikawa.pet_job.fencer", fencer);
         adder.add("tooltip.chiikawa.pet_job.archer", archer);
+        adder.add("tooltip.chiikawa.pet_job.musician", musician);
         adder.add("tooltip.chiikawa.pet_job.unknown", unknown);
     }
 
@@ -102,6 +116,7 @@ public final class LanguageData {
         String farmerTools,
         String fencerTools,
         String archerTools,
+        String musicianTools,
         String tameFoods,
         String plantCrops,
         String deliverItems,
@@ -110,6 +125,7 @@ public final class LanguageData {
         adder.add("tag.item.chiikawa.entity_farmer_tools", farmerTools);
         adder.add("tag.item.chiikawa.entity_fencer_tools", fencerTools);
         adder.add("tag.item.chiikawa.entity_archer_tools", archerTools);
+        adder.add("tag.item.chiikawa.entity_musician_tools", musicianTools);
         adder.add("tag.item.chiikawa.entity_tame_foods", tameFoods);
         adder.add("tag.item.chiikawa.entity_plant_crops", plantCrops);
         adder.add("tag.item.chiikawa.entity_deliver_items", deliverItems);
@@ -138,5 +154,30 @@ public final class LanguageData {
         adder.add("item.chiikawa.usagi_weapon", usagiWeapon);
         adder.add("item.chiikawa.hachiware_weapon", hachiwareWeapon);
         adder.add("item.chiikawa.chiikawa_weapon", chiikawaWeapon);
+    }
+
+    private static void addMusicBoxTranslations(
+        Adder adder,
+        String itemName,
+        String emptyTooltip,
+        String selectedTooltip,
+        String title,
+        String importing,
+        String failed,
+        String emptyCatalog,
+        String ffmpegMissing,
+        String ffmpegHint,
+        String reload
+    ) {
+        adder.add("item.chiikawa.music_box", itemName);
+        adder.add("tooltip.chiikawa.music_box.empty", emptyTooltip);
+        adder.add("tooltip.chiikawa.music_box.selected", selectedTooltip);
+        adder.add("screen.chiikawa.music_box.title", title);
+        adder.add("screen.chiikawa.music_box.importing", importing);
+        adder.add("screen.chiikawa.music_box.failed", failed);
+        adder.add("screen.chiikawa.music_box.empty_catalog", emptyCatalog);
+        adder.add("screen.chiikawa.music_box.ffmpeg_missing", ffmpegMissing);
+        adder.add("screen.chiikawa.music_box.ffmpeg_hint", ffmpegHint);
+        adder.add("screen.chiikawa.music_box.reload", reload);
     }
 }

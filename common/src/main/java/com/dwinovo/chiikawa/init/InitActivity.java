@@ -20,6 +20,9 @@ public final class InitActivity {
     // Archer ranged-attack activity.
     public static final Supplier<Activity> ARCHER_SHOOT =
         Services.PLATFORM_REGISTRY.archerShootActivity();
+    // Musician performance activity.
+    public static final Supplier<Activity> MUSICIAN_PLAY =
+        Services.PLATFORM_REGISTRY.musicianPlayActivity();
 
     private InitActivity() {
     }

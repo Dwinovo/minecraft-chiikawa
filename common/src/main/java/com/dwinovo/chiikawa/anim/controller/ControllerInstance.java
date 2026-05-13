@@ -58,7 +58,7 @@ public final class ControllerInstance {
     private long previousStartNs;
     private boolean previousLooping;
 
-    /** Wall-clock nanos when the active fade (switch OR stop-fade) began. */
+    /** Animation-clock nanos when the active fade (switch OR stop-fade) began. */
     private long fadeStartNs;
     /** Length of the active fade in seconds; {@code 0} = no fade in progress. */
     private float fadeDurationSec;
@@ -217,7 +217,7 @@ public final class ControllerInstance {
      * @param looping   whether {@code anim_time} should wrap on duration
      * @param allowFade whether a crossfade should be opened when replacing
      *                  an existing channel
-     * @param nowNs     real wall-clock time used for the fade timer; must be
+     * @param nowNs     animation-clock time used for the fade timer; must be
      *                  the actual current frame time, never the animation's
      *                  start time (those diverge for looping anims)
      */

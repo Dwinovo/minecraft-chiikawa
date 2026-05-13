@@ -71,17 +71,23 @@ public enum PetActivity {
      * (10-19 personality, 20-29 social, 30-39 vital, etc.). Append-only:
      * once a value ships, its network ID is frozen.
      */
-    NONE(0, null);
+    NONE(0, null, 0),
+
+    /** Hachiware-only performance loop; duration is owned by the active music stream session. */
+    PLAY_GUITAR(10, "guitar", 0);
 
     private static final PetActivity[] BY_NETWORK_ID = buildLookup();
 
     private final int networkId;
     /** Resolver-side animation name to play, or {@code null} for {@link #NONE}. */
     private final String animationName;
+    /** Server-side duration for code-bounded activity behaviors, in game ticks. */
+    private final int durationTicks;
 
-    PetActivity(int networkId, String animationName) {
+    PetActivity(int networkId, String animationName, int durationTicks) {
         this.networkId = networkId;
         this.animationName = animationName;
+        this.durationTicks = durationTicks;
     }
 
     public int networkId() {
@@ -91,6 +97,29 @@ public enum PetActivity {
     /** Animation file name to look up for this activity, or {@code null} when no activity is set. */
     public String animationName() {
         return animationName;
+    }
+
+    /**
+     * Server-side activity duration in ticks. Looping animation length still
+     * comes from the baked animation; this value controls when gameplay exits
+     * the activity.
+     */
+    public int durationTicks() {
+        return durationTicks;
+    }
+
+    /**
+     * Legacy hook for entity-bound long {@link net.minecraft.sounds.SoundEvent}
+     * instances. The music box stream owns audio separately, so V1 keeps this
+     * false even while the activity suppresses daily pet noises.
+     */
+    public boolean occupiesLongSoundChannel() {
+        return false;
+    }
+
+    /** True when daily/idle pet noises should stay quiet while this activity is active. */
+    public boolean suppressesDailyPetSounds() {
+        return this == PLAY_GUITAR;
     }
 
     /** Decode a synced byte into a {@link PetActivity}. Unknown ids fall back to {@link #NONE}. */

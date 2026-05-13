@@ -14,6 +14,7 @@ import com.dwinovo.chiikawa.anim.molang.MolangContext;
 import com.dwinovo.chiikawa.anim.render.layer.HeldItemLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayerContext;
+import com.dwinovo.chiikawa.anim.runtime.AnimationClock;
 import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
 import com.dwinovo.chiikawa.anim.runtime.PoseMixer;
 import com.dwinovo.chiikawa.anim.runtime.PoseSampler;
@@ -338,7 +339,9 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         if (entity instanceof ChiikawaAnimated animated) {
             PetAnimator animator = animated.getPetAnimator();
             animator.ensureInitialised(controllerConfigs);
-            animator.setPhaseSeed(entity.getUUID().getLeastSignificantBits());
+            long nowNs = AnimationClock.fromTicks(entity.tickCount, partialTick);
+            state.animationTimeNs = nowNs;
+            animator.setPhaseSeed(entity.getUUID().getLeastSignificantBits(), nowNs);
 
             // Drop any controller still holding a pre-reload BakedAnimation.
             BakedModel currentModel = ModelLibrary.get(modelKey);
@@ -346,7 +349,6 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
                 animator.clearStale(currentModel.bakeStamp);
             }
 
-            long nowNs = System.nanoTime();
             PetAnimContext ctx = animated.getAnimContext(state.walkSpeed);
             animator.tick(state, ctx, nowNs);
             state.controllerSnapshots = animator.snapshot();
@@ -428,7 +430,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             provider.fill(state, molangCtx);
         }
 
-        long nowNs = System.nanoTime();
+        long nowNs = state.animationTimeNs;
         // Iterate controllers in registration order. Each controller writes
         // into the shared pose buffer per its blend mode — later controllers
         // override or blend on top of earlier ones.
