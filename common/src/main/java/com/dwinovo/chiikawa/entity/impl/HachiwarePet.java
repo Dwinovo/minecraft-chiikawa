@@ -13,7 +13,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 
 public class HachiwarePet extends AbstractPet {
-
     public HachiwarePet(EntityType<? extends TamableAnimal> entityType, Level level) {
         super(entityType, level);
     }

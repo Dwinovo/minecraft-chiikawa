@@ -1,69 +1,42 @@
 package com.dwinovo.chiikawa.sound;
 
-import java.util.List;
-
 import com.dwinovo.chiikawa.init.InitSounds;
 
 public final class PetSoundSets {
-    public static final PetSoundSet CHIIKAWA = new PetSoundSet(
-            null,
-            InitSounds.CHIIKAWA_INJURED,
-            null,
-            InitSounds.CHIIKAWA_TAME,
-            List.of()
-    );
+    public static final PetSoundSet CHIIKAWA = PetSoundSet.builder()
+            .hurt(InitSounds.CHIIKAWA_INJURED)
+            .tame(InitSounds.CHIIKAWA_TAME)
+            .build();
 
-    public static final PetSoundSet HACHIWARE = new PetSoundSet(
-            null,
-            InitSounds.HACHIWARE_INJURED,
-            null,
-            InitSounds.HACHIWARE_TAME,
-            List.of()
-    );
+    public static final PetSoundSet HACHIWARE = PetSoundSet.builder()
+            .hurt(InitSounds.HACHIWARE_INJURED)
+            .tame(InitSounds.HACHIWARE_TAME)
+            .build();
 
-    public static final PetSoundSet KURIMANJU = new PetSoundSet(
-            null,
-            null,
-            null,
-            InitSounds.KURIMANJU_TAME,
-            List.of()
-    );
+    public static final PetSoundSet KURIMANJU = PetSoundSet.builder()
+            .tame(InitSounds.KURIMANJU_TAME)
+            .build();
 
-    public static final PetSoundSet MOMONGA = new PetSoundSet(
-            null,
-            InitSounds.MOMONGA_INJURED,
-            null,
-            InitSounds.MOMONGA_TAME,
-            List.of()
-    );
+    public static final PetSoundSet MOMONGA = PetSoundSet.builder()
+            .hurt(InitSounds.MOMONGA_INJURED)
+            .tame(InitSounds.MOMONGA_TAME)
+            .build();
 
-    public static final PetSoundSet RAKKO = new PetSoundSet(
-            null,
-            null,
-            null,
-            InitSounds.RAKKO_TAME,
-            List.of()
-    );
+    public static final PetSoundSet RAKKO = PetSoundSet.builder()
+            .tame(InitSounds.RAKKO_TAME)
+            .build();
 
-    public static final PetSoundSet SHISA = new PetSoundSet(
-            null,
-            null,
-            null,
-            InitSounds.SHISA_TAME,
-            List.of()
-    );
+    public static final PetSoundSet SHISA = PetSoundSet.builder()
+            .tame(InitSounds.SHISA_TAME)
+            .build();
 
-    public static final PetSoundSet USAGI = new PetSoundSet(
-            InitSounds.USAGI_ATTACK,
-            InitSounds.USAGI_INJURED,
-            null,
-            InitSounds.USAGI_TAME,
-            List.of(
-                    InitSounds.USAGI_AMBIENT
-            )
-    );
+    public static final PetSoundSet USAGI = PetSoundSet.builder()
+            .attack(InitSounds.USAGI_ATTACK)
+            .hurt(InitSounds.USAGI_INJURED)
+            .tame(InitSounds.USAGI_TAME)
+            .ambient(PetSoundSet.DEFAULT_AMBIENT_INTERVAL_TICKS, InitSounds.USAGI_AMBIENT)
+            .build();
 
     private PetSoundSets() {
     }
 }
-

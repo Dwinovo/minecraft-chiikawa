@@ -43,5 +43,7 @@ public interface IPlatformRegistryAccess {
      */
     Supplier<Activity> archerShootActivity();
 
+    Supplier<Activity> musicianPlayActivity();
+
     Supplier<MenuType<PetBackpackMenu>> petBackpackMenu();
 }
