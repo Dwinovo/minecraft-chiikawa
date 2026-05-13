@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.music.MusicBoxSelection;
 import com.dwinovo.chiikawa.music.ServerMusicSystem;
 import com.dwinovo.chiikawa.network.MusicPayloads.MusicCatalogPayload;
 import com.dwinovo.chiikawa.platform.Services;
+import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -39,7 +40,7 @@ public class MusicBoxItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, java.util.List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
         MusicBoxSelection selection = MusicBoxSelection.get(stack);
         if (selection == null) {
