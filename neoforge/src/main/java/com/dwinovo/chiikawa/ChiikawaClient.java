@@ -7,7 +7,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import com.dwinovo.chiikawa.anim.compile.BedrockResourceLoader;
@@ -22,7 +21,6 @@ import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
 import com.dwinovo.chiikawa.client.screen.PetBackpackScreen;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitMenu;
-import com.dwinovo.chiikawa.platform.NeoForgeMusicNetworking;
 import net.neoforged.neoforge.common.NeoForge;
 
 // Client-only mod entry.
@@ -48,11 +46,6 @@ public class ChiikawaClient {
     @SubscribeEvent
     static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);
-    }
-
-    @SubscribeEvent
-    static void registerClientPayloadHandlers(RegisterClientPayloadHandlersEvent event) {
-        NeoForgeMusicNetworking.registerClientPayloads(event);
     }
 
     @SubscribeEvent
