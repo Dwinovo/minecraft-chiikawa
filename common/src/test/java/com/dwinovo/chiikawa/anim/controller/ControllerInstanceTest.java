@@ -132,7 +132,7 @@ class ControllerInstanceTest {
         assertSame(sit,  s.current().animation(),  "current is now sit");
         assertSame(idle, s.previous().animation(), "previous is idle (fading out)");
         assertEquals(t0, s.fadeStartNs(),
-                "fadeStartNs MUST be the wall-clock now, not the new animation's startNs");
+                "fadeStartNs MUST be the animation-clock now, not the new animation's startNs");
         assertEquals(0.16f, s.fadeDurationSec(), 1e-6f);
     }
 

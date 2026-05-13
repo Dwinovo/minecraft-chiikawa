@@ -28,5 +28,8 @@ public final class ModItemModelProvider extends ItemModelProvider {
         basicItem(InitItems.MOMONGA_DOLL.get());
         basicItem(InitItems.KURIMANJU_DOLL.get());
         basicItem(InitItems.RAKKO_DOLL.get());
+
+        // Weapons have prebuilt models under resources; no datagen needed.
+        basicItem(InitItems.MUSIC_BOX.get());
     }
 }

@@ -18,6 +18,8 @@ import net.minecraft.world.entity.ai.Brain;
  *   <li>per-tick activity selection ({@link #tickBrain}) — runs only when
  *       this job is the active one, choosing which of its registered
  *       activities should be active this tick.</li>
+ *   <li>cleanup ({@link #onDeactivated}) — optional hook for stopping
+ *       job-owned side effects when an item change switches to another job.</li>
  * </ul>
  *
  * <p>No more {@code initBrain} on jobs — adding a job means: register its
@@ -32,4 +34,7 @@ public interface IPetJob {
     boolean canAssume(AbstractPet pet);
 
     void tickBrain(AbstractPet pet, Brain<AbstractPet> brain);
+
+    default void onDeactivated(AbstractPet pet, Brain<AbstractPet> brain) {
+    }
 }
