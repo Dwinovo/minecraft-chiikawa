@@ -5,7 +5,6 @@ import com.dwinovo.chiikawa.anim.baked.LoopMode;
 import com.dwinovo.chiikawa.anim.render.ChiikawaRenderState;
 import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
 import com.dwinovo.chiikawa.anim.state.PetAnimContext;
-import org.jspecify.annotations.Nullable;
 
 /**
  * Per-entity mutable state for one {@link ControllerConfig}.
@@ -50,11 +49,11 @@ public final class ControllerInstance {
      */
     private long phaseSeed = Long.MIN_VALUE;
 
-    @Nullable private BakedAnimation currentAnim;
+    private BakedAnimation currentAnim;
     private long currentStartNs;
     private boolean currentLooping;
 
-    @Nullable private BakedAnimation previousAnim;
+    private BakedAnimation previousAnim;
     private long previousStartNs;
     private boolean previousLooping;
 
@@ -69,7 +68,7 @@ public final class ControllerInstance {
      */
     private boolean fadingOut;
 
-    @Nullable private BakedAnimation triggeredAnim;
+    private BakedAnimation triggeredAnim;
     private long triggeredStartNs;
 
     public ControllerInstance(ControllerConfig config) {
