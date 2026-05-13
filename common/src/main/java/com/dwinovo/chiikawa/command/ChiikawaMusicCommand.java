@@ -15,11 +15,11 @@ public final class ChiikawaMusicCommand {
         dispatcher.register(Commands.literal("chiikawa")
             .then(Commands.literal("music")
                 .then(Commands.literal("rescan")
-                    .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
+                    .requires(source -> source.hasPermission(Commands.LEVEL_ADMINS))
                     .executes(context -> rescan(context.getSource())))
                 .then(Commands.literal("ffmpeg")
                     .then(Commands.literal("status")
-                        .requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
+                        .requires(source -> source.hasPermission(Commands.LEVEL_ADMINS))
                         .executes(context -> status(context.getSource()))))));
     }
 
