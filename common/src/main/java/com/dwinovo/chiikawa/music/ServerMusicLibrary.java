@@ -54,7 +54,7 @@ public final class ServerMusicLibrary implements AutoCloseable {
 
     public ServerMusicLibrary(MinecraftServer server) {
         this.server = server;
-        this.root = server.getFile("config/chiikawa");
+        this.root = server.getFile("config/chiikawa").toPath();
         this.musicDir = root.resolve("music");
         this.cacheDir = root.resolve("music-cache");
         this.configFile = root.resolve("music.json");
@@ -265,7 +265,7 @@ public final class ServerMusicLibrary implements AutoCloseable {
     }
 
     public String resolveFfmpegCommand() {
-        return FfmpegLocator.resolve(config.ffmpegPath(), server.getFile("tools/ffmpeg/ffmpeg.exe"));
+        return FfmpegLocator.resolve(config.ffmpegPath(), server.getFile("tools/ffmpeg/ffmpeg.exe").toPath());
     }
 
     private static boolean canRunFfmpeg(String command) {
