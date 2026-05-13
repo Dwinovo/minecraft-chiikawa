@@ -4,15 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-import com.dwinovo.chiikawa.Constants;
-import net.minecraft.resources.ResourceLocation;
+import java.util.function.Supplier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.RandomSource;
 import org.junit.jupiter.api.Test;
 
 class PetSoundSetTest {
-    private static final SoundEvent TEST_SOUND = SoundEvent.createVariableRangeEvent(
-            new ResourceLocation(Constants.MOD_ID, "test/cute"));
+    private static final Supplier<SoundEvent> TEST_SOUND = () -> null;
 
     @Test
     void emptySetHasDefaultAmbientIntervalAndNoAmbientCue() {
@@ -23,16 +21,16 @@ class PetSoundSetTest {
     @Test
     void builderStoresSingleCues() {
         PetSoundSet set = PetSoundSet.builder()
-                .attack(() -> TEST_SOUND)
+                .attack(TEST_SOUND)
                 .build();
 
-        assertSame(TEST_SOUND, set.getAttackCue().resolve());
-        assertSame(TEST_SOUND, set.getAttackSound());
+        assertSame(TEST_SOUND, set.getAttackCue().sound());
+        assertNull(set.getAttackSound());
     }
 
     @Test
     void ambientPoolUsesConfiguredIntervalAndCue() {
-        PetSoundCue cue = PetSoundCue.of(() -> TEST_SOUND, 0.7F, 0.9F, 1.1F, 2);
+        PetSoundCue cue = PetSoundCue.of(TEST_SOUND, 0.7F, 0.9F, 1.1F, 2);
         PetSoundSet set = PetSoundSet.builder()
                 .ambient(320, cue)
                 .build();
