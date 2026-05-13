@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PetAnimationResolverTest {
@@ -24,6 +25,22 @@ class PetAnimationResolverTest {
                 PetMode.WORK, /*jobId=*/1, /*walkSpeed=*/0.0f, PetActivity.NONE);
 
         assertEquals(List.of("work_idle_farmer", "idle"), PetAnimationResolver.resolve(context));
+    }
+
+    @Test
+    void musicianWorkUsesMusicianLoopWithIdleFallback() {
+        PetAnimContext context = PetAnimContext.base(
+                PetMode.WORK, /*jobId=*/4, /*walkSpeed=*/0.0f, PetActivity.NONE);
+
+        assertEquals(List.of("work_idle_musician", "idle"), PetAnimationResolver.resolve(context));
+    }
+
+    @Test
+    void activityOverridesModeAndMovement() {
+        PetAnimContext context = PetAnimContext.base(
+                PetMode.WORK, /*jobId=*/1, /*walkSpeed=*/1.0f, PetActivity.PLAY_GUITAR);
+
+        assertEquals(List.of("guitar", "idle"), PetAnimationResolver.resolve(context));
     }
 
     @Test
@@ -48,5 +65,23 @@ class PetAnimationResolverTest {
         }
         assertEquals(PetActivity.NONE, PetActivity.fromNetworkId(255));
         assertEquals(PetActivity.NONE, PetActivity.fromNetworkId(-1));
+    }
+
+    @Test
+    void guitarActivitySuppressesDailySoundsWithoutLegacySoundChannel() {
+        assertFalse(PetActivity.PLAY_GUITAR.occupiesLongSoundChannel());
+        assertTrue(PetActivity.PLAY_GUITAR.suppressesDailyPetSounds());
+    }
+
+    @Test
+    void guitarActivityDurationIsOwnedByMusicSession() {
+        assertEquals(0, PetActivity.PLAY_GUITAR.durationTicks());
+    }
+
+    @Test
+    void noneActivityDoesNotSuppressDailySounds() {
+        assertFalse(PetActivity.NONE.occupiesLongSoundChannel());
+        assertFalse(PetActivity.NONE.suppressesDailyPetSounds());
+        assertEquals(0, PetActivity.NONE.durationTicks());
     }
 }
