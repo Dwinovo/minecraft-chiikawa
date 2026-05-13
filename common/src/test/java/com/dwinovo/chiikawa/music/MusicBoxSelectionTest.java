@@ -14,8 +14,8 @@ class MusicBoxSelectionTest {
 
         MusicBoxSelection decoded = MusicBoxSelection.CODEC.parse(
             JsonOps.INSTANCE,
-            MusicBoxSelection.CODEC.encodeStart(JsonOps.INSTANCE, selection).getOrThrow()
-        ).getOrThrow();
+            MusicBoxSelection.CODEC.encodeStart(JsonOps.INSTANCE, selection).getOrThrow(false, org.junit.jupiter.api.Assertions::fail)
+        ).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
         assertEquals(selection, decoded);
         assertEquals("guitar-1234abcd:7", decoded.signature());

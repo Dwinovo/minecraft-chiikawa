@@ -132,7 +132,8 @@ public final class ServerMusicLibrary implements AutoCloseable {
 
     private ChiikawaMusicConfig loadConfig() throws IOException {
         if (!Files.exists(configFile)) {
-            writeJson(configFile, ChiikawaMusicConfig.CODEC.encodeStart(JsonOps.INSTANCE, ChiikawaMusicConfig.DEFAULT).getOrThrow());
+            writeJson(configFile, ChiikawaMusicConfig.CODEC.encodeStart(JsonOps.INSTANCE, ChiikawaMusicConfig.DEFAULT)
+                .getOrThrow(false, Constants.LOG::error));
             return ChiikawaMusicConfig.DEFAULT;
         }
         try (Reader reader = Files.newBufferedReader(configFile)) {
@@ -254,7 +255,8 @@ public final class ServerMusicLibrary implements AutoCloseable {
         List<MusicTrack> ordered = tracks.values().stream()
             .sorted(Comparator.comparing(MusicTrack::title, String.CASE_INSENSITIVE_ORDER))
             .toList();
-        writeJson(tracksFile, MusicTrack.LIST_CODEC.encodeStart(JsonOps.INSTANCE, ordered).getOrThrow());
+        writeJson(tracksFile, MusicTrack.LIST_CODEC.encodeStart(JsonOps.INSTANCE, ordered)
+            .getOrThrow(false, Constants.LOG::error));
     }
 
     private static void writeJson(Path path, JsonElement json) throws IOException {
