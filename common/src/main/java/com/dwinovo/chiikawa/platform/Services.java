@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.platform.services.IRegistryHelper;
 import com.dwinovo.chiikawa.platform.services.IEntityHelper;
 import com.dwinovo.chiikawa.platform.services.ICapabilityHelper;
 import com.dwinovo.chiikawa.platform.services.IPlatformRegistryAccess;
+import com.dwinovo.chiikawa.platform.services.INetworkHelper;
 import java.util.ServiceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ public class Services {
     public static final IEntityHelper ENTITY = load(IEntityHelper.class);
     public static final ICapabilityHelper CAPABILITY = load(ICapabilityHelper.class);
     public static final IPlatformRegistryAccess PLATFORM_REGISTRY = load(IPlatformRegistryAccess.class);
+    public static final INetworkHelper NETWORK = load(INetworkHelper.class);
 
     private static <T> T load(Class<T> clazz) {
         var loadedService = ServiceLoader.load(clazz)

@@ -23,6 +23,7 @@ public final class ModItemModelProvider extends ModelProvider {
         itemModels.declareCustomModelItem(InitItems.USAGI_WEAPON.get());
         itemModels.declareCustomModelItem(InitItems.HACHIWARE_WEAPON.get());
         itemModels.declareCustomModelItem(InitItems.CHIIKAWA_WEAPON.get());
+        itemModels.generateFlatItem(InitItems.MUSIC_BOX.get(), ModelTemplates.FLAT_ITEM);
     }
 
     private static void generateSpawnEggs(ItemModelGenerators itemModels) {

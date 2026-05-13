@@ -8,11 +8,14 @@ import com.dwinovo.chiikawa.anim.render.impl.MomongaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.RakkoRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.ShisaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.UsagiRenderer;
+import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
 import com.dwinovo.chiikawa.client.screen.PetBackpackScreen;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitMenu;
+import com.dwinovo.chiikawa.platform.FabricMusicNetworking;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
@@ -34,6 +37,8 @@ public class ChiikawaFabricClient implements ClientModInitializer {
         EntityRendererRegistry.register(InitEntity.RAKKO_PET.get(), RakkoRenderer::new);
 
         MenuScreens.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);
+        FabricMusicNetworking.registerClient();
+        ClientTickEvents.END_CLIENT_TICK.register(client -> ClientMusicStreamManager.tick());
 
         BedrockResourceLoader loader = new BedrockResourceLoader();
         ResourceLocation loaderId = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "anim_loader");

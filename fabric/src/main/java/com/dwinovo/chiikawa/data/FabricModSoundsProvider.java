@@ -37,6 +37,7 @@ public class FabricModSoundsProvider implements DataProvider {
                 .forEach(sound -> {
                     JsonObject soundEntry = new JsonObject();
                     soundEntry.addProperty("name", sound.toString());
+                    addSoundMetadata(soundEntry, entry);
                     soundList.add(soundEntry);
                 });
             JsonObject definition = new JsonObject();
@@ -46,6 +47,18 @@ public class FabricModSoundsProvider implements DataProvider {
         PackOutput.PathProvider pathProvider = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "");
         return DataProvider.saveStable(cache, root,
             pathProvider.json(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "sounds")));
+    }
+
+    private static void addSoundMetadata(JsonObject soundEntry, InitSounds.SoundEntry entry) {
+        if (entry.stream()) {
+            soundEntry.addProperty("stream", true);
+        }
+        if (entry.preload()) {
+            soundEntry.addProperty("preload", true);
+        }
+        if (entry.attenuationDistance() != InitSounds.DEFAULT_ATTENUATION_DISTANCE) {
+            soundEntry.addProperty("attenuation_distance", entry.attenuationDistance());
+        }
     }
 
     @Override
