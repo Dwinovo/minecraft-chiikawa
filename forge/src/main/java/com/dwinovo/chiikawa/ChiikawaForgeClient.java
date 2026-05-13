@@ -1,12 +1,5 @@
 package com.dwinovo.chiikawa;
 
-import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraft.client.renderer.entity.EntityRenderers;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import com.dwinovo.chiikawa.anim.compile.BedrockResourceLoader;
 import com.dwinovo.chiikawa.anim.render.impl.ChiikawaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.HachiwareRenderer;
@@ -15,17 +8,25 @@ import com.dwinovo.chiikawa.anim.render.impl.MomongaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.RakkoRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.ShisaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.UsagiRenderer;
+import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
 import com.dwinovo.chiikawa.client.screen.PetBackpackScreen;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitMenu;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 @Mod.EventBusSubscriber(modid = ChiikawaForge.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ChiikawaForgeClient {
-    
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            // All 7 pets on the Bedrock pipeline. Mirrors the Fabric setup.
             EntityRenderers.register(InitEntity.USAGI_PET.get(), UsagiRenderer::new);
             EntityRenderers.register(InitEntity.HACHIWARE_PET.get(), HachiwareRenderer::new);
             EntityRenderers.register(InitEntity.CHIIKAWA_PET.get(), ChiikawaRenderer::new);
@@ -33,16 +34,19 @@ public class ChiikawaForgeClient {
             EntityRenderers.register(InitEntity.MOMONGA_PET.get(), MomongaRenderer::new);
             EntityRenderers.register(InitEntity.KURIMANJU_PET.get(), KurimanjuRenderer::new);
             EntityRenderers.register(InitEntity.RAKKO_PET.get(), RakkoRenderer::new);
-
             MenuScreens.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);
         });
+        MinecraftForge.EVENT_BUS.addListener(ChiikawaForgeClient::onClientTick);
+    }
+
+    private static void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
+            ClientMusicStreamManager.tick();
+        }
     }
 
     @SubscribeEvent
     static void registerReloadListeners(RegisterClientReloadListenersEvent event) {
-        // Bakes the .geo.json / .animation.json into ModelLibrary + AnimationLibrary.
-        // Without this the renderer's ModelLibrary.get(...) returns null and submit()
-        // short-circuits — entity exists and is interactable but renders as nothing.
         event.registerReloadListener(new BedrockResourceLoader());
     }
 }
