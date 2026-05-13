@@ -36,7 +36,9 @@ public class MusicBoxItem extends Item {
                 true
             ));
         }
-        return level.isClientSide() ? InteractionResultHolder.success(stack) : InteractionResultHolder.consume(stack);
+        return level.isClientSide()
+            ? InteractionResultHolder.success(stack)
+            : InteractionResultHolder.consume(stack);
     }
 
     @Override
