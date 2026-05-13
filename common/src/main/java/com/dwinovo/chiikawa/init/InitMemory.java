@@ -43,21 +43,21 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<PetCommand>> REQUESTED_COMMAND =
         Services.REGISTRY.<MemoryModuleType<PetCommand>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "requested_command"),
+            new ResourceLocation(Constants.MOD_ID, "requested_command"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
     public static final Supplier<MemoryModuleType<String>> REQUESTED_MUSIC_TRACK =
         Services.REGISTRY.<MemoryModuleType<String>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "requested_music_track"),
+            new ResourceLocation(Constants.MOD_ID, "requested_music_track"),
             () -> new MemoryModuleType<>(Optional.of(Codec.STRING))
         );
 
     public static final Supplier<MemoryModuleType<String>> MUSICIAN_LAST_MUSIC_SIGNATURE =
         Services.REGISTRY.<MemoryModuleType<String>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "musician_last_music_signature"),
+            new ResourceLocation(Constants.MOD_ID, "musician_last_music_signature"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 

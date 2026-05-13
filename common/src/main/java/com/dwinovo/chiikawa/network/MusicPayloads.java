@@ -153,6 +153,6 @@ public final class MusicPayloads {
     }
 
     private static <T extends CustomPacketPayload> CustomPacketPayload.Type<T> payloadType(String path) {
-        return new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path));
+        return new CustomPacketPayload.Type<>(new ResourceLocation(Constants.MOD_ID, path));
     }
 }

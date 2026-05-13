@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 class PetSoundSetTest {
     private static final SoundEvent TEST_SOUND = SoundEvent.createVariableRangeEvent(
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "test/cute"));
+            new ResourceLocation(Constants.MOD_ID, "test/cute"));
 
     @Test
     void emptySetHasDefaultAmbientIntervalAndNoAmbientCue() {

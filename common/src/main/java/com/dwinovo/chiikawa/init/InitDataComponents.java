@@ -12,7 +12,7 @@ public final class InitDataComponents {
     public static final Supplier<DataComponentType<MusicBoxSelection>> MUSIC_BOX_SELECTION =
         Services.REGISTRY.register(
             BuiltInRegistries.DATA_COMPONENT_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "music_box_selection"),
+            new ResourceLocation(Constants.MOD_ID, "music_box_selection"),
             () -> DataComponentType.<MusicBoxSelection>builder()
                 .persistent(MusicBoxSelection.CODEC)
                 .networkSynchronized(MusicBoxSelection.STREAM_CODEC)

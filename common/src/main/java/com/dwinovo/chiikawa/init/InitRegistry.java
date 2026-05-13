@@ -69,7 +69,7 @@ public final class InitRegistry {
     );
     public static final Supplier<IPetJob> MUSICIAN = Services.REGISTRY.register(
         PET_JOB_REGISTRY,
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "musician"),
+        new ResourceLocation(Constants.MOD_ID, "musician"),
         () -> new MusicianJob(
             MUSICIAN_ID,
             10,

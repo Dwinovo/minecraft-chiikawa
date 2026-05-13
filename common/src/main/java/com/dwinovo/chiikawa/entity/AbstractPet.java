@@ -492,7 +492,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     private BakedAnimation firstAvailableActionAnimation(ResourceLocation typeId, PetAction action) {
         for (String name : action.animationCandidates()) {
             BakedAnimation anim = AnimationLibrary.get(
-                    ResourceLocation.fromNamespaceAndPath(typeId.getNamespace(), typeId.getPath() + "/" + name));
+                    new ResourceLocation(typeId.getNamespace(), typeId.getPath() + "/" + name));
             if (anim != null) {
                 return anim;
             }
@@ -503,7 +503,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     private BakedAnimation firstAvailableReactionAnimation(ResourceLocation typeId, PetReaction reaction) {
         for (String name : reaction.animationCandidates()) {
             BakedAnimation anim = AnimationLibrary.get(
-                    ResourceLocation.fromNamespaceAndPath(typeId.getNamespace(), typeId.getPath() + "/" + name));
+                    new ResourceLocation(typeId.getNamespace(), typeId.getPath() + "/" + name));
             if (anim != null) {
                 return anim;
             }

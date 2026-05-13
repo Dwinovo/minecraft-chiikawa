@@ -23,8 +23,8 @@ class SoundDataTest {
         createSound("hachiware/cute_4");
 
         assertEquals(List.of(
-                ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "hachiware/cute_1"),
-                ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "hachiware/cute_2")
+                new ResourceLocation(Constants.MOD_ID, "hachiware/cute_1"),
+                new ResourceLocation(Constants.MOD_ID, "hachiware/cute_2")
         ), SoundData.findVariants("hachiware/cute", tempDir));
     }
 
@@ -33,7 +33,7 @@ class SoundDataTest {
         createSound("hachiware/cute");
 
         assertEquals(List.of(
-                ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "hachiware/cute")
+                new ResourceLocation(Constants.MOD_ID, "hachiware/cute")
         ), SoundData.findVariants("hachiware/cute", tempDir));
     }
 
