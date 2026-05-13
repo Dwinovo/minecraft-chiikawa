@@ -20,7 +20,6 @@ import com.dwinovo.chiikawa.music.ServerMusicSystem;
 import com.dwinovo.chiikawa.platform.FabricMusicNetworking;
 import com.dwinovo.chiikawa.platform.Services;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -41,7 +40,6 @@ public class ChiikawaFabricMod implements ModInitializer {
         InitEntity.init();
         InitItems.init();
         InitTabs.init();
-        CreativeModeTabEvents.modifyOutputEvent(InitTabs.MAIN_KEY).register(output -> InitTabs.addMainItems(output::accept));
         FabricBiomeModifications.init();
         Services.ENTITY.registerAttributes();
         Services.ENTITY.registerSpawnPlacements();

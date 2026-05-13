@@ -23,7 +23,6 @@ import com.dwinovo.chiikawa.platform.Services;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -58,16 +57,9 @@ public class Chiikawa {
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> ServerMusicSystem.tickServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener((ServerStoppingEvent event) -> ServerMusicSystem.stopServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener(Chiikawa::registerCommands);
-        modEventBus.addListener(Chiikawa::buildCreativeTabContents);
 
         InitCapabilities.register(modEventBus);
 
-    }
-
-    private static void buildCreativeTabContents(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey().equals(InitTabs.MAIN_KEY)) {
-            InitTabs.addMainItems(event::accept);
-        }
     }
 
     private static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {

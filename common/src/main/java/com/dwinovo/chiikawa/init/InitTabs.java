@@ -25,6 +25,7 @@ public final class InitTabs {
             () -> CreativeModeTab.builder(CreativeModeTab.Row.TOP, 0)
                 .title(Component.translatable("itemGroup.chiikawa"))
                 .icon(() -> new ItemStack(InitItems.USAGI_SPAWN_EGG.get()))
+                .displayItems((parameters, output) -> addMainItems(output::accept))
                 .build()
         );
 

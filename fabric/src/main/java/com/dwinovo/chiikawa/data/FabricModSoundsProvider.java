@@ -36,8 +36,8 @@ public class FabricModSoundsProvider extends FabricSoundsProvider {
         }
     }
 
-    private static SoundTypeBuilder.RegistrationBuilder sound(Identifier sound, InitSounds.SoundEntry entry) {
-        SoundTypeBuilder.RegistrationBuilder builder = SoundTypeBuilder.RegistrationBuilder.ofFile(sound);
+    private static SoundTypeBuilder.EntryBuilder sound(Identifier sound, InitSounds.SoundEntry entry) {
+        SoundTypeBuilder.EntryBuilder builder = SoundTypeBuilder.EntryBuilder.ofFile(sound);
         if (entry.stream()) {
             builder.stream(true);
         }
