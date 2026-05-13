@@ -6,7 +6,6 @@ import com.dwinovo.chiikawa.anim.controller.ControllerInstance;
 import com.dwinovo.chiikawa.anim.controller.ControllerSnapshot;
 import com.dwinovo.chiikawa.anim.render.ChiikawaRenderState;
 import com.dwinovo.chiikawa.anim.state.PetAnimContext;
-import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -132,7 +131,7 @@ public final class PetAnimator {
     }
 
     /** Look up a controller by name. {@code null} for unknown names. */
-    public @Nullable ControllerInstance byName(String name) {
+    public ControllerInstance byName(String name) {
         for (ControllerInstance c : controllers) {
             if (c.name().equals(name)) return c;
         }
