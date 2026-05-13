@@ -5,10 +5,12 @@ import com.dwinovo.chiikawa.entity.impl.HachiwarePet;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 
 /**
- * Hachiware's renderer adds one model-specific concern: the {@code guitar}
- * bone (a child of {@code Root}, 22 cubes) is hidden by default and only
- * appears when some controller is currently sampling the {@code guitar}
- * animation — a static "holding guitar" pose authored by the modeler.
+ * Hachiware's renderer adds model-specific conditional bones. The
+ * {@code guitar} prop and {@code Mouth3} expression bone are hidden by
+ * default and only appear when some controller is currently sampling the
+ * {@code guitar} animation. The main-hand locator does the inverse so the
+ * music box item disappears during the performance instead of clipping
+ * through the authored guitar prop.
  *
  * <p>The animator originally shipped a companion {@code noguitar} animation
  * whose only keyframe is {@code guitar.scale = 0} — a hand-rolled "hide
@@ -26,9 +28,15 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
  * the model needs.
  */
 public class HachiwareRenderer extends ChiikawaEntityRenderer<HachiwarePet> {
+    private static final String GUITAR_ANIMATION = "guitar";
+
     public HachiwareRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, "hachiware");
         addBoneVisibilityRule("guitar",
-                (state, animCtx) -> isAnyControllerPlaying(state, "guitar"));
+                (state, animCtx) -> isAnyControllerPlaying(state, GUITAR_ANIMATION));
+        addBoneVisibilityRule("Mouth3",
+                (state, animCtx) -> isAnyControllerPlaying(state, GUITAR_ANIMATION));
+        addBoneVisibilityRule("RightHandLocator",
+                (state, animCtx) -> !isAnyControllerPlaying(state, GUITAR_ANIMATION));
     }
 }
