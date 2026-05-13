@@ -37,7 +37,7 @@ public class ChiikawaRenderState extends LivingEntityRenderState {
      */
     public ControllerSnapshot[] controllerSnapshots = EMPTY;
     /**
-     * Pause-aware animation time captured during extract. The submit pass must
+     * Pause-aware animation time captured during extract. The render pass must
      * reuse this value so controller state and pose sampling agree exactly for
      * the render-state snapshot.
      */
