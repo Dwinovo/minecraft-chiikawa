@@ -144,7 +144,7 @@ public final class ClientMusicStreamManager {
         private void updateVolume() {
             Minecraft minecraft = Minecraft.getInstance();
             AL10.alSourcef(source, AL10.AL_GAIN,
-                minecraft.options.getFinalSoundSourceVolume(MUSIC_BOX_SOUND_SOURCE));
+                minecraft.options.getSoundSourceVolume(MUSIC_BOX_SOUND_SOURCE));
         }
 
         private void releaseProcessedBuffers() {
