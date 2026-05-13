@@ -177,8 +177,10 @@ record AnimationChannel(BakedAnimation animation, long startTimeNs, boolean loop
 
 1. `extractRenderState` 可以被同一帧调用多次。
 2. controller 的 handler 被设计成幂等的（同一个 `BakedAnimation` 不重启计时）。
-3. 采样时间来自 `System.nanoTime()` 和 channel 起点。
+3. 采样时间来自 `AnimationClock.fromTicks(tickCount, partialTick)` 和 channel 起点。
 4. 重复 extract 不会让动画多走一遍。
+
+这条时间线是游戏时间而不是真实时间：单机 ESC 真暂停时 vanilla 会冻结 `tickCount + partialTick`，所以宠物动画、crossfade 和一次性动作都会停在暂停瞬间；多人暂停菜单不暂停世界，tick 继续推进，动画也继续推进。
 
 ## Controller 模型
 
@@ -249,7 +251,7 @@ server task
     -> entityData.set(packed)            ← seq +1，networkId 写低 8 位
     -> 客户端 onSyncedDataUpdated
     -> 解析 networkId 找候选动画
-    -> animator.playOnce("action", anim)
+    -> animator.playOnce("action", anim, nowNs)
 ```
 
 `reaction` 走平行的 `REACTION_TRIGGER` 字段和 `playOnce("reaction", anim)`。
@@ -262,7 +264,7 @@ server task
 2. 把 head_yaw / head_pitch snapshot 到 state 自己的字段（避开 InventoryScreen 后续覆写）。
 3. 保存主手物品 `ItemStack`。
 4. `animator.ensureInitialised(controllerConfigs)` 首次构建每实体的 `ControllerInstance` 列表。
-5. `animator.setPhaseSeed(uuid)` 第一帧锁存相位偏移（让多只宠物的装饰循环错开）。
+5. `animator.setPhaseSeed(uuid, nowNs)` 第一帧锁存相位偏移（让多只宠物的装饰循环错开）。
 6. `animator.clearStale(currentModel.bakeStamp)` 清掉资源重载残留的旧代引用。
 7. `animator.tick(state, ctx, nowNs)` —— 每个 controller 自行决策当前动画。
 8. `state.controllerSnapshots = animator.snapshot()` 把每个 controller 的当前状态打成不可变快照数组。

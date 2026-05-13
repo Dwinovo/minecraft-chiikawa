@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.anim.api.AnimationLibrary;
 import com.dwinovo.chiikawa.anim.api.ChiikawaAnimated;
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
+import com.dwinovo.chiikawa.anim.runtime.AnimationClock;
 import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
 import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
@@ -12,6 +13,7 @@ import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.brain.handler.ArcherJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.FarmerJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.FencerJobHandler;
+import com.dwinovo.chiikawa.entity.brain.handler.MusicianJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.NoneJobHandler;
 import com.dwinovo.chiikawa.utils.BrainUtils;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
@@ -20,6 +22,8 @@ import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.init.InitSensor;
 import com.dwinovo.chiikawa.item.PetDollData;
+import com.dwinovo.chiikawa.sound.PetSoundCue;
+import com.dwinovo.chiikawa.sound.PetSoundKind;
 import com.dwinovo.chiikawa.sound.PetSoundSet;
 import com.dwinovo.chiikawa.utils.Utils;
 import com.mojang.serialization.Dynamic;
@@ -108,7 +112,10 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitMemory.HARVEST_POS.get(),
         InitMemory.PLANT_POS.get(),
         InitMemory.CONTAINER_POS.get(),
-        InitMemory.PICKABLE_ITEM.get()
+        InitMemory.PICKABLE_ITEM.get(),
+        InitMemory.REQUESTED_COMMAND.get(),
+        InitMemory.REQUESTED_MUSIC_TRACK.get(),
+        InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get()
     );
     private static final java.util.List<net.minecraft.world.entity.ai.sensing.SensorType<? extends net.minecraft.world.entity.ai.sensing.Sensor<? super AbstractPet>>> SENSOR_TYPES = java.util.List.of(
         net.minecraft.world.entity.ai.sensing.SensorType.HURT_BY,
@@ -195,6 +202,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         }
         int newJobId = best.getId();
         if (newJobId != getPetJobId() || forceRefresh) {
+            if (newJobId != getPetJobId()) {
+                InitRegistry.getJobFromId(getPetJobId()).onDeactivated(this, getBrain());
+            }
             setPetJobId(newJobId);
         }
     }
@@ -236,6 +246,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         FarmerJobHandler.registerActivities(brain);
         FencerJobHandler.registerActivities(brain);
         ArcherJobHandler.registerActivities(brain);
+        MusicianJobHandler.registerActivities(brain);
         NoneJobHandler.registerActivities(brain); // no-op today; placeholder for symmetry
 
         brain.setCoreActivities(java.util.Set.of(Activity.CORE));
@@ -429,7 +440,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         ResourceLocation typeId = BuiltInRegistries.ENTITY_TYPE.getKey(getType());
         BakedAnimation anim = firstAvailableActionAnimation(typeId, action);
         if (anim != null) {
-            getPetAnimator().playOnce(ACTION_CONTROLLER, anim);
+            getPetAnimator().playOnce(ACTION_CONTROLLER, anim, AnimationClock.fromTicks(tickCount, 0f));
         } else {
             Constants.LOG.warn("[chiikawa-anim] no baked animation for action '{}' on {}", action, typeId);
         }
@@ -445,7 +456,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         ResourceLocation typeId = BuiltInRegistries.ENTITY_TYPE.getKey(getType());
         BakedAnimation anim = firstAvailableReactionAnimation(typeId, reaction);
         if (anim != null) {
-            getPetAnimator().playOnce(REACTION_CONTROLLER, anim);
+            getPetAnimator().playOnce(REACTION_CONTROLLER, anim, AnimationClock.fromTicks(tickCount, 0f));
         }
     }
 
@@ -525,21 +536,39 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     }
 
     public void playAttackSound() {
-        if (!level().isClientSide()) {
-            SoundEvent sound = getSoundSet().getAttackSound();
-            if (sound != null) {
-                playSound(sound, 1.0F, 1.0F);
-            }
-        }
+        playPetSound(PetSoundKind.ATTACK, getSoundSet().getAttackCue());
     }
 
     public void playTameSound() {
-        if (!level().isClientSide()) {
-            SoundEvent sound = getSoundSet().getTameSound();
-            if (sound != null) {
-                playSound(sound, 1.0F, 1.0F);
-            }
+        playPetSound(PetSoundKind.TAME, getSoundSet().getTameCue());
+    }
+
+    protected boolean playPetSound(PetSoundKind kind, PetSoundCue cue) {
+        if (level().isClientSide() || cue == null || isPetSoundSuppressed(kind)) {
+            return false;
         }
+
+        SoundEvent sound = cue.resolve();
+        if (sound == null) {
+            return false;
+        }
+
+        playSound(sound, cue.volume(), cue.samplePitch(getRandom()));
+        return true;
+    }
+
+    protected boolean isPetSoundSuppressed(PetSoundKind kind) {
+        return kind.isDaily() && getActivity().suppressesDailyPetSounds();
+    }
+
+    @Override
+    public int getAmbientSoundInterval() {
+        return getSoundSet().getAmbientSoundInterval();
+    }
+
+    @Override
+    public void playAmbientSound() {
+        playPetSound(PetSoundKind.AMBIENT, getSoundSet().pickAmbientCue(getRandom()));
     }
 
     @Override

@@ -119,7 +119,7 @@ ChiikawaEntityRenderer.extractRenderState
     ├─ 从 LivingEntity 读 bodyRot / yRot / xRot / walkSpeed / mainHandItem
     ├─ 把 head_yaw / head_pitch snapshot 到 state（避开 InventoryScreen 后续覆写）
     ├─ animator.ensureInitialised(controllerConfigs)   ← 首帧懒构建 controller instances
-    ├─ animator.setPhaseSeed(uuid)                     ← 首次锁存相位偏移
+    ├─ animator.setPhaseSeed(uuid, nowNs)              ← 首次锁存相位偏移
     ├─ animator.clearStale(currentModel.bakeStamp)     ← 资源重载后清失效引用
     └─ animator.tick(state, ctx, nowNs)
        └─ for each ControllerInstance:
@@ -180,12 +180,12 @@ Blockbench 导出 `.geo.json` 时把 display +X 翻转成 JSON -X（Bedrock 历�
 ### 采样是纯函数（双 extract 时间漂移的根本修复）
 
 ```java
-PoseSampler.sample(channel, blendMode, nanoTime(), ctx, poseBuf)
+PoseSampler.sample(channel, blendMode, animationTimeNs, ctx, poseBuf)
 ```
 
 是引用透明的：相同输入永远相同输出，**没有任何累积时间状态**。`AnimationChannel` 是 `record(BakedAnimation, long startTimeNs, boolean looping)`。每次采样都从 `nowNs - startTimeNs` 重新算，不存"上次走到哪了"。
 
-InventoryScreen 在同一帧调两次 extract，两次拿到几乎相同的 `nanoTime()`，采样输出 bit-identical → 物理性消除双 extract 漂移。
+`animationTimeNs` 来自 `tickCount + partialTick` 经 `AnimationClock` 转换后的游戏时间，而不是系统真实时间。这样 InventoryScreen 在同一帧调两次 extract 时会拿到同一份时间快照，采样输出 bit-identical → 物理性消除双 extract 漂移；单机 ESC 真暂停时 vanilla 会冻结 partial tick，动画也随之冻结。
 
 ## Controller 模型（GeckoLib 对齐）
 
@@ -251,10 +251,10 @@ server task → pet.triggerAction(PetAction.HARVEST)
            → 同步字段 ANIM_TRIGGER 高 24 位 seq +1，低 8 位写 networkId
            → 客户端 onSyncedDataUpdated
            → 解析 networkId 找 BakedAnimation
-           → animator.playOnce("action", anim)
+           → animator.playOnce("action", anim, AnimationClock.fromTicks(tickCount, 0))
 ```
 
-`reaction` 走平行的 `REACTION_TRIGGER` 字段和 `playOnce("reaction", anim)`。
+`reaction` 走平行的 `REACTION_TRIGGER` 字段和 `playOnce("reaction", anim, nowNs)`。
 
 ### 过渡机制（两种 fade，全部由代码自动处理）
 
@@ -400,7 +400,7 @@ common/src/main/resources/assets/<namespace>/
 1. 在 [`PetAction`](../common/src/main/java/com/dwinovo/chiikawa/anim/state/PetAction.java) 或 [`PetReaction`](../common/src/main/java/com/dwinovo/chiikawa/anim/state/PetReaction.java) 中新增语义事件和 network id（低 8 位，0 是保留）。
 2. 给事件配置有序动画候选名，例如 `"play_guitar", "use_mainhand"`。
 3. server 端逻辑里调 `pet.triggerAction(PetAction.X)` 或 `pet.triggerReaction(PetReaction.X)`。
-4. 重新打包后客户端会自动响应：`onSyncedDataUpdated` 解码事件，从候选中找第一个存在的动画，调 `animator.playOnce("action", anim)` 或 `playOnce("reaction", anim)`。
+4. 重新打包后客户端会自动响应：`onSyncedDataUpdated` 解码事件，从候选中找第一个存在的动画，调 `animator.playOnce("action", anim, nowNs)` 或 `playOnce("reaction", anim, nowNs)`。
 
 ### 添加装饰性 controller（眨眼、呼吸、尾巴常摆）
 
