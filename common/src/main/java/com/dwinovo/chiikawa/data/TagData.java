@@ -35,6 +35,8 @@ public final class TagData {
             .add(InitItems.CHIIKAWA_WEAPON.get());
         tags.tag(InitTag.ENTITY_ARCHER_TOOLS)
             .add(Items.BOW);
+        tags.tag(InitTag.ENTITY_MUSICIAN_TOOLS)
+            .add(InitItems.MUSIC_BOX.get());
         tags.tag(InitTag.ENTITY_TAME_FOODS)
             .add(Items.APPLE)
             .add(Items.BAKED_POTATO)

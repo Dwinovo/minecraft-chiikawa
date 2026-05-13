@@ -117,7 +117,7 @@ attention = NONE
 
 ### 动作：`PetAction`
 
-动作是短时、一次性、偏"正在做事"的事件。它们通过 `AbstractPet.triggerAction` 从服务器同步到客户端，最终落到 `animator.playOnce("action", anim)`。
+动作是短时、一次性、偏"正在做事"的事件。它们通过 `AbstractPet.triggerAction` 从服务器同步到客户端，最终落到 `animator.playOnce("action", anim, nowNs)`。
 
 | 枚举 | network id | 候选动画 |
 |---|---:|---|
@@ -135,7 +135,7 @@ attention = NONE
 
 ### 反应：`PetReaction`
 
-反应是短时、一次性、偏"情绪反馈"的事件。它们通过 `AbstractPet.triggerReaction` 同步到客户端，落到 `animator.playOnce("reaction", anim)`。
+反应是短时、一次性、偏"情绪反馈"的事件。它们通过 `AbstractPet.triggerReaction` 同步到客户端，落到 `animator.playOnce("reaction", anim, nowNs)`。
 
 | 枚举 | network id | 候选动画 | 当前触发点 |
 |---|---:|---|---|
@@ -195,8 +195,8 @@ low 8 bits   = event id
 
 | 触发器 | 事件类型 | 客户端落点 |
 |---|---|---|
-| `ANIM_TRIGGER` | `PetAction` | `animator.playOnce("action", anim)` |
-| `REACTION_TRIGGER` | `PetReaction` | `animator.playOnce("reaction", anim)` |
+| `ANIM_TRIGGER` | `PetAction` | `animator.playOnce("action", anim, nowNs)` |
+| `REACTION_TRIGGER` | `PetReaction` | `animator.playOnce("reaction", anim, nowNs)` |
 
 sequence 每触发一次递增。客户端只处理没见过的 sequence，因此同一个动作连续触发也能重新播放。
 
@@ -210,7 +210,7 @@ server task / interact code
     -> PetAction.fromNetworkId / PetReaction.fromNetworkId
     -> 候选动画名链，挨个查 AnimationLibrary
     -> 第一个找到的 BakedAnimation
-    -> animator.playOnce(controllerName, anim)
+    -> animator.playOnce(controllerName, anim, nowNs)
 ```
 
 `controllerName` 即字符串 `"action"` 或 `"reaction"`，对应 `ChiikawaEntityRenderer` 在基类构造函数里默认注册的两个 controller。`playOnce` 把动画塞进该 controller 的 triggered 槽，覆盖其 handler 直到动画结束（或 `HOLD_ON_LAST_FRAME` 直到下次替换）。

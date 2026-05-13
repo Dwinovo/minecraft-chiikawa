@@ -4,8 +4,10 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.handler.ArcherJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.FarmerJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.FencerJobHandler;
+import com.dwinovo.chiikawa.entity.brain.handler.MusicianJobHandler;
 import com.dwinovo.chiikawa.entity.job.api.IPetJob;
 import com.dwinovo.chiikawa.entity.job.impl.BasicJob;
+import com.dwinovo.chiikawa.entity.job.impl.MusicianJob;
 import com.dwinovo.chiikawa.entity.job.impl.NoneJob;
 import com.dwinovo.chiikawa.platform.Services;
 import java.util.function.Supplier;
@@ -18,6 +20,7 @@ public final class InitRegistry {
     public static final int FARMER_ID = 1;
     public static final int FENCER_ID = 2;
     public static final int ARCHER_ID = 3;
+    public static final int MUSICIAN_ID = 4;
 
     public static final ResourceKey<Registry<IPetJob>> PET_JOB_KEY = ResourceKey.createRegistryKey(
         Identifier.fromNamespaceAndPath(Constants.MOD_ID, "pet_jobs")
@@ -64,6 +67,16 @@ public final class InitRegistry {
             ArcherJobHandler::tickBrain
         )
     );
+    public static final Supplier<IPetJob> MUSICIAN = Services.REGISTRY.register(
+        PET_JOB_REGISTRY,
+        Identifier.fromNamespaceAndPath(Constants.MOD_ID, "musician"),
+        () -> new MusicianJob(
+            MUSICIAN_ID,
+            10,
+            InitTag.ENTITY_MUSICIAN_TOOLS,
+            MusicianJobHandler::tickBrain
+        )
+    );
 
     private InitRegistry() {
     }
@@ -81,6 +94,9 @@ public final class InitRegistry {
         }
         if (id == ARCHER_ID) {
             return ARCHER.get();
+        }
+        if (id == MUSICIAN_ID) {
+            return MUSICIAN.get();
         }
         return NONE.get();
     }

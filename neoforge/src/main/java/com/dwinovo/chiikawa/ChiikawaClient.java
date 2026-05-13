@@ -8,6 +8,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import com.dwinovo.chiikawa.anim.compile.BedrockResourceLoader;
 import com.dwinovo.chiikawa.anim.render.impl.ChiikawaRenderer;
@@ -17,9 +19,12 @@ import com.dwinovo.chiikawa.anim.render.impl.MomongaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.RakkoRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.ShisaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.UsagiRenderer;
+import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
 import com.dwinovo.chiikawa.client.screen.PetBackpackScreen;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitMenu;
+import com.dwinovo.chiikawa.platform.NeoForgeMusicNetworking;
+import net.neoforged.neoforge.common.NeoForge;
 
 // Client-only mod entry.
 @Mod(value = Chiikawa.MODID, dist = Dist.CLIENT)
@@ -37,12 +42,18 @@ public class ChiikawaClient {
             EntityRenderers.register(InitEntity.MOMONGA_PET.get(), MomongaRenderer::new);
             EntityRenderers.register(InitEntity.KURIMANJU_PET.get(), KurimanjuRenderer::new);
             EntityRenderers.register(InitEntity.RAKKO_PET.get(), RakkoRenderer::new);
+            NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post tick) -> ClientMusicStreamManager.tick());
         });
     }
 
     @SubscribeEvent
     static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);
+    }
+
+    @SubscribeEvent
+    static void registerClientPayloadHandlers(RegisterClientPayloadHandlersEvent event) {
+        NeoForgeMusicNetworking.registerClientPayloads(event);
     }
 
     @SubscribeEvent
@@ -55,5 +66,4 @@ public class ChiikawaClient {
                 new BedrockResourceLoader());
     }
 }
-
 
