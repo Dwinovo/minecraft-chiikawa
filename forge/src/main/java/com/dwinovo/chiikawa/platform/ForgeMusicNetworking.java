@@ -6,24 +6,20 @@ import com.dwinovo.chiikawa.network.MusicPayloads;
 import com.dwinovo.chiikawa.network.MusicServerPacketHandler;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.event.network.CustomPayloadEvent;
+import net.minecraftforge.network.ChannelBuilder;
 import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.network.SimpleChannel;
 
 public final class ForgeMusicNetworking {
-    private static final String PROTOCOL_VERSION = "1";
-    private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-        new ResourceLocation(Constants.MOD_ID, "music"),
-        () -> PROTOCOL_VERSION,
-        PROTOCOL_VERSION::equals,
-        PROTOCOL_VERSION::equals
-    );
+    private static final int PROTOCOL_VERSION = 1;
+    private static final SimpleChannel CHANNEL = ChannelBuilder.named(new ResourceLocation(Constants.MOD_ID, "music"))
+        .networkProtocolVersion(PROTOCOL_VERSION)
+        .simpleChannel();
     private static int packetId;
 
     private ForgeMusicNetworking() {
@@ -55,17 +51,17 @@ public final class ForgeMusicNetworking {
     }
 
     public static void sendToClient(ServerPlayer player, MusicPayloads.Payload payload) {
-        CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), payload);
+        CHANNEL.send(payload, PacketDistributor.PLAYER.with(player));
     }
 
     public static void sendToServer(MusicPayloads.Payload payload) {
-        CHANNEL.sendToServer(payload);
+        CHANNEL.send(payload, PacketDistributor.SERVER.noArg());
     }
 
     private static <T extends MusicPayloads.Payload> void clientbound(
         Class<T> type,
         Function<FriendlyByteBuf, T> decoder,
-        BiConsumer<T, NetworkEvent.Context> handler
+        BiConsumer<T, CustomPayloadEvent.Context> handler
     ) {
         message(type, decoder, handler, NetworkDirection.PLAY_TO_CLIENT);
     }
@@ -73,7 +69,7 @@ public final class ForgeMusicNetworking {
     private static <T extends MusicPayloads.Payload> void serverbound(
         Class<T> type,
         Function<FriendlyByteBuf, T> decoder,
-        BiConsumer<T, NetworkEvent.Context> handler
+        BiConsumer<T, CustomPayloadEvent.Context> handler
     ) {
         message(type, decoder, handler, NetworkDirection.PLAY_TO_SERVER);
     }
@@ -81,14 +77,13 @@ public final class ForgeMusicNetworking {
     private static <T extends MusicPayloads.Payload> void message(
         Class<T> type,
         Function<FriendlyByteBuf, T> decoder,
-        BiConsumer<T, NetworkEvent.Context> handler,
+        BiConsumer<T, CustomPayloadEvent.Context> handler,
         NetworkDirection direction
     ) {
         CHANNEL.messageBuilder(type, packetId++, direction)
             .encoder(MusicPayloads.Payload::write)
             .decoder(decoder)
-            .consumerMainThread((payload, contextSupplier) -> {
-                NetworkEvent.Context context = contextSupplier.get();
+            .consumerMainThread((payload, context) -> {
                 handler.accept(payload, context);
                 context.setPacketHandled(true);
             })
