@@ -60,6 +60,7 @@ public final class HeldItemLayer implements RenderLayer {
                 itemRenderState,
                 stack,
                 ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,
+                false,
                 mc.level,
                 null,
                 0);
