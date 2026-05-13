@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa;
 
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
+import com.dwinovo.chiikawa.command.ChiikawaMusicCommand;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitMenu;
@@ -12,8 +13,11 @@ import com.dwinovo.chiikawa.init.InitCapabilities;
 import com.dwinovo.chiikawa.init.InitSounds;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTabs;
+import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.item.PetDollItem;
 import com.dwinovo.chiikawa.item.PetReviveRitualManager;
+import com.dwinovo.chiikawa.music.ServerMusicSystem;
+import com.dwinovo.chiikawa.platform.NeoForgeMusicNetworking;
 import com.dwinovo.chiikawa.platform.NeoForgePlatformRegistryAccess;
 import com.dwinovo.chiikawa.platform.Services;
 import net.minecraft.world.InteractionResult;
@@ -21,6 +25,8 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 // Must match the mod id in META-INF/neoforge.mods.toml.
@@ -39,14 +45,19 @@ public class Chiikawa {
         InitActivity.init();
         InitSounds.init();
         InitMenu.init();
+        InitDataComponents.init();
         InitEntity.init();
         InitItems.init();
         InitTabs.init();
         InitCapabilities.init();
         Services.REGISTRY.registerToEventBus(modEventBus);
         Services.ENTITY.registerToEventBus(modEventBus);
+        modEventBus.addListener(NeoForgeMusicNetworking::registerPayloads);
         NeoForge.EVENT_BUS.addListener(Chiikawa::onRightClickBlock);
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> PetReviveRitualManager.tickServer(event.getServer()));
+        NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> ServerMusicSystem.tickServer(event.getServer()));
+        NeoForge.EVENT_BUS.addListener((ServerStoppingEvent event) -> ServerMusicSystem.stopServer(event.getServer()));
+        NeoForge.EVENT_BUS.addListener(Chiikawa::registerCommands);
         modEventBus.addListener(Chiikawa::buildCreativeTabContents);
 
         InitCapabilities.register(modEventBus);
@@ -75,6 +86,10 @@ public class Chiikawa {
             event.setCanceled(true);
             event.setCancellationResult(result);
         }
+    }
+
+    private static void registerCommands(RegisterCommandsEvent event) {
+        ChiikawaMusicCommand.register(event.getDispatcher());
     }
 
 

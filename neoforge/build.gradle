@@ -50,6 +50,8 @@ configurations {
 }
 
 dependencies {
+    implementation 'io.github.jaredmdobson:concentus:1.0.2'
+    jarJar 'io.github.jaredmdobson:concentus:1.0.2'
 }
 
 // Implement mcgradleconventions loader attribute

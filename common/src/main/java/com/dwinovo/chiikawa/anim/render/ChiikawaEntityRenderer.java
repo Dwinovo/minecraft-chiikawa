@@ -14,6 +14,7 @@ import com.dwinovo.chiikawa.anim.molang.MolangContext;
 import com.dwinovo.chiikawa.anim.render.layer.HeldItemLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayerContext;
+import com.dwinovo.chiikawa.anim.runtime.AnimationClock;
 import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
 import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
 import com.dwinovo.chiikawa.anim.runtime.PoseMixer;
@@ -81,6 +82,8 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
      * no per-pet code needed.
      */
     public static final String CONTROLLER_BLINK = "blink";
+    /** Pets are 0.6 blocks wide; this matches vanilla small-mob shadow sizing. */
+    private static final float DEFAULT_SHADOW_RADIUS = 0.4f;
     /**
      * Stop-fade duration applied to action / reaction controllers when their
      * triggered animation finishes. Lets the bones the trigger animated blend
@@ -136,6 +139,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
 
     protected ChiikawaEntityRenderer(EntityRendererProvider.Context ctx, String name) {
         super(ctx);
+        this.shadowRadius = DEFAULT_SHADOW_RADIUS;
         this.modelKey = Identifier.fromNamespaceAndPath(Constants.MOD_ID, name);
         this.textureLocation = Identifier.fromNamespaceAndPath(Constants.MOD_ID,
                 "textures/entities/" + name + ".png");
@@ -327,6 +331,8 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             state.scale = living.getScale();
             state.ageInTicks = living.tickCount + partialTick;
             state.walkSpeed = living.walkAnimation.speed(partialTick);
+            state.hasRedOverlay = living.hurtTime > 0 || living.deathTime > 0;
+            state.deathTime = living.deathTime > 0 ? living.deathTime + partialTick : 0.0f;
             // Capture the head-look snapshot here so it survives the post-extract
             // bodyRot/yRot stomp performed by InventoryScreen.renderEntityInInventoryFollowsMouse.
             state.netHeadYaw = net.minecraft.util.Mth.wrapDegrees(headRot - bodyRot);
@@ -342,7 +348,9 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         if (entity instanceof ChiikawaAnimated animated) {
             PetAnimator animator = animated.getPetAnimator();
             animator.ensureInitialised(controllerConfigs);
-            animator.setPhaseSeed(entity.getUUID().getLeastSignificantBits());
+            long nowNs = AnimationClock.fromTicks(entity.tickCount, partialTick);
+            state.animationTimeNs = nowNs;
+            animator.setPhaseSeed(entity.getUUID().getLeastSignificantBits(), nowNs);
 
             // Drop any controller still holding a pre-reload BakedAnimation.
             BakedModel currentModel = ModelLibrary.get(modelKey);
@@ -350,12 +358,16 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
                 animator.clearStale(currentModel.bakeStamp);
             }
 
-            long nowNs = System.nanoTime();
             PetAnimContext ctx = animated.getAnimContext(state.walkSpeed);
             animator.tick(state, ctx, nowNs);
             state.controllerSnapshots = animator.snapshot();
             evaluateVisibilityRules(state, ctx, currentModel);
         }
+    }
+
+    @Override
+    protected float getShadowRadius(ChiikawaRenderState state) {
+        return super.getShadowRadius(state) * state.scale;
     }
 
     /**
@@ -420,7 +432,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             provider.fill(state, molangCtx);
         }
 
-        long nowNs = System.nanoTime();
+        long nowNs = state.animationTimeNs;
         // Iterate controllers in registration order. Each controller writes
         // into the shared pose buffer per its blend mode — later controllers
         // override or blend on top of earlier ones.

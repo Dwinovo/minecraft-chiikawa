@@ -8,11 +8,12 @@ import com.dwinovo.chiikawa.anim.molang.MolangNode;
 
 /**
  * Pure-function pose sampler. The core of solving double-extract timing drift:
- * given an animation, a per-channel start time, and {@code System.nanoTime()},
- * produces the exact pose for that instant. Calling this twice in the same
- * frame returns identical output — no mutable {@code lastAnimatableAge}
- * counter to advance, so {@code InventoryScreen}'s second
- * {@code extractRenderState} call cannot accidentally double-step animation.
+ * given an animation, a per-channel start time, and the current pause-aware
+ * animation-clock time, produces the exact pose for that instant. Calling
+ * this twice in the same frame returns identical output — no mutable
+ * {@code lastAnimatableAge} counter to advance, so {@code InventoryScreen}'s
+ * second {@code extractRenderState} call cannot accidentally double-step
+ * animation.
  *
  * <h2>Pose buffer layout</h2>
  * Caller-owned, reused across frames. Per bone:

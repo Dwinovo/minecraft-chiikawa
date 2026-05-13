@@ -26,6 +26,7 @@ public class FabricModItemModelProvider extends FabricModelProvider {
         itemModelGenerator.declareCustomModelItem(InitItems.USAGI_WEAPON.get());
         itemModelGenerator.declareCustomModelItem(InitItems.HACHIWARE_WEAPON.get());
         itemModelGenerator.declareCustomModelItem(InitItems.CHIIKAWA_WEAPON.get());
+        itemModelGenerator.generateFlatItem(InitItems.MUSIC_BOX.get(), ModelTemplates.FLAT_ITEM);
     }
 
     private static void generateSpawnEggs(ItemModelGenerators itemModelGenerator) {

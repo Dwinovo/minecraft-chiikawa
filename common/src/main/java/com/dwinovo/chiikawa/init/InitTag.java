@@ -12,6 +12,7 @@ public final class InitTag {
     public static final TagKey<Item> ENTITY_FARMER_TOOLS = tag("entity_farmer_tools");
     public static final TagKey<Item> ENTITY_FENCER_TOOLS = tag("entity_fencer_tools");
     public static final TagKey<Item> ENTITY_ARCHER_TOOLS = tag("entity_archer_tools");
+    public static final TagKey<Item> ENTITY_MUSICIAN_TOOLS = tag("entity_musician_tools");
     public static final TagKey<Item> ENTITY_TAME_FOODS = tag("entity_tame_foods");
     public static final TagKey<Item> ENTITY_PLANT_CROPS = tag("entity_plant_crops");
     public static final TagKey<Item> ENTITY_DELIVER_ITEMS = tag("entity_deliver_items");

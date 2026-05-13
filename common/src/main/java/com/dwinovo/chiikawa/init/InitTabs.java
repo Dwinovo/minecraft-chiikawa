@@ -45,7 +45,8 @@ public final class InitTabs {
         InitItems.RAKKO_DOLL,
         InitItems.USAGI_WEAPON,
         InitItems.HACHIWARE_WEAPON,
-        InitItems.CHIIKAWA_WEAPON
+        InitItems.CHIIKAWA_WEAPON,
+        InitItems.MUSIC_BOX
     );
 
     private InitTabs() {

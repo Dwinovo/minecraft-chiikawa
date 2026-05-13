@@ -57,14 +57,14 @@ public final class PetAnimator {
      * instant don't blink in lockstep). Subsequent calls are no-ops to keep
      * the seed stable for the lifetime of the animator.
      *
-     * <p>The seed value is {@code System.nanoTime() - uniqueness * 1ms} so
+     * <p>The seed value is {@code nowNs - uniqueness * 1ms} so
      * that the elapsed time at frame {@code t} is uniformly distributed
      * across [0, ~10s] for a 16-bit uniqueness input.
      */
-    public void setPhaseSeed(long uniquenessSeed) {
+    public void setPhaseSeed(long uniquenessSeed, long nowNs) {
         if (phaseSeed != Long.MIN_VALUE) return;
         long offsetMs = Math.floorMod(uniquenessSeed, 10_000L);
-        phaseSeed = System.nanoTime() - offsetMs * 1_000_000L;
+        phaseSeed = nowNs - offsetMs * 1_000_000L;
         for (ControllerInstance c : controllers) c.setPhaseSeed(phaseSeed);
     }
 
@@ -126,9 +126,9 @@ public final class PetAnimator {
      * packet, looks up the matching {@link BakedAnimation}, and calls this
      * method on either the {@code "action"} or {@code "reaction"} controller.
      */
-    public void playOnce(String controllerName, BakedAnimation animation) {
+    public void playOnce(String controllerName, BakedAnimation animation, long nowNs) {
         ControllerInstance c = byName(controllerName);
-        if (c != null) c.playOnce(animation, System.nanoTime());
+        if (c != null) c.playOnce(animation, nowNs);
     }
 
     /** Look up a controller by name. {@code null} for unknown names. */
