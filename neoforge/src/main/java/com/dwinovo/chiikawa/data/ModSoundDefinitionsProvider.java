@@ -30,11 +30,23 @@ public final class ModSoundDefinitionsProvider extends SoundDefinitionsProvider 
             }
             SoundDefinition.Sound[] soundEntries = sounds.stream()
                     .sorted(Comparator.comparing(ResourceLocation::toString))
-                    .map(SoundDefinitionsProvider::sound)
+                    .map(sound -> sound(sound, entry))
                     .toArray(SoundDefinition.Sound[]::new);
             add(entry.holder().get(), SoundDefinition.definition().with(soundEntries));
         }
     }
+
+    private static SoundDefinition.Sound sound(ResourceLocation sound, InitSounds.SoundEntry entry) {
+        SoundDefinition.Sound definition = SoundDefinitionsProvider.sound(sound);
+        if (entry.stream()) {
+            definition.stream();
+        }
+        if (entry.preload()) {
+            definition.preload();
+        }
+        if (entry.attenuationDistance() != InitSounds.DEFAULT_ATTENUATION_DISTANCE) {
+            definition.attenuationDistance(entry.attenuationDistance());
+        }
+        return definition;
+    }
 }
-
-

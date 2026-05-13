@@ -30,10 +30,24 @@ public class FabricModSoundsProvider extends FabricSoundsProvider {
             SoundTypeBuilder builder = SoundTypeBuilder.of();
             sounds.stream()
                 .sorted(Comparator.comparing(ResourceLocation::toString))
-                .map(SoundTypeBuilder.EntryBuilder::ofFile)
+                .map(sound -> sound(sound, entry))
                 .forEach(builder::sound);
             exporter.add(entry.holder().get(), builder);
         }
+    }
+
+    private static SoundTypeBuilder.EntryBuilder sound(ResourceLocation sound, InitSounds.SoundEntry entry) {
+        SoundTypeBuilder.EntryBuilder builder = SoundTypeBuilder.EntryBuilder.ofFile(sound);
+        if (entry.stream()) {
+            builder.stream(true);
+        }
+        if (entry.preload()) {
+            builder.preload(true);
+        }
+        if (entry.attenuationDistance() != InitSounds.DEFAULT_ATTENUATION_DISTANCE) {
+            builder.attenuationDistance(entry.attenuationDistance());
+        }
+        return builder;
     }
 
     @Override

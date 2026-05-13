@@ -38,7 +38,7 @@ import org.jspecify.annotations.Nullable;
  *                         contributing nothing this frame
  * @param previous         channel being faded out from during a within-controller
  *                         switch, or {@code null} when no switch is in progress
- * @param fadeStartNs      {@code System.nanoTime()} when the active fade began
+ * @param fadeStartNs      animation-clock time when the active fade began
  * @param fadeDurationSec  fade length in seconds; {@code 0} = no fade
  * @param fadingOut        {@code true} when the controller is fading toward
  *                         "no contribution" (will go idle when the fade ends)
