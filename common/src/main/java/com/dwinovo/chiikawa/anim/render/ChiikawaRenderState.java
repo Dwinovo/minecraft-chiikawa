@@ -59,7 +59,7 @@ public class ChiikawaRenderState extends LivingEntityRenderState {
      * Head yaw relative to body, in degrees, captured at extract time.
      *
      * <p>Stored here rather than recomputed from {@link #yRot} − {@link #bodyRot}
-     * at submit time because {@link net.minecraft.client.gui.screens.inventory.InventoryScreen#extractEntityInInventoryFollowsMouse}
+     * at submit time because {@link net.minecraft.client.gui.screens.inventory.InventoryScreen#renderEntityInInventoryFollowsMouse}
      * <em>overwrites</em> {@code bodyRot} / {@code yRot} after extract finishes
      * (it sets {@code yRot = f * 20}, {@code bodyRot = 180 + f * 20}, giving a
      * −180 difference that has nothing to do with the entity's real head turn).
