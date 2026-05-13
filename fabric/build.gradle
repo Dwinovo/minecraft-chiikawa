@@ -39,3 +39,13 @@ loom {
         }
     }
 }
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+tasks.named('processResources', ProcessResources) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.withType(Jar).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

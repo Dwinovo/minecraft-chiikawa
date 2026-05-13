@@ -2,7 +2,6 @@ package com.dwinovo.chiikawa.anim.render.layer;
 
 import com.dwinovo.chiikawa.anim.render.PetData;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -52,26 +51,21 @@ public final class HeldItemLayer implements RenderLayer {
         // would float in space at the unrendered hand's pivot.
         if (isAnyAncestorHidden(ctx, targetIdx)) return;
 
-        // Resolve the item model fresh per submit. The state is small and
-        // short-lived so the allocation is cheaper than caching bookkeeping.
         Minecraft mc = Minecraft.getInstance();
-        ItemStackRenderState itemRenderState = new ItemStackRenderState();
-        mc.getItemModelResolver().updateForTopItem(
-                itemRenderState,
-                stack,
-                ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,
-                false,
-                mc.level,
-                null,
-                0);
-        if (itemRenderState.isEmpty()) return;
 
         ctx.poseStack().pushPose();
         walker.transformToBone(ctx.model(), ctx.poseBuf(), targetIdx, ctx.poseStack());
         // Cancel the entity-level scale(1/16): items expect block-unit space.
         ctx.poseStack().scale(16f, 16f, 16f);
-        itemRenderState.render(ctx.poseStack(), ctx.bufferSource(), ctx.packedLight(),
-                OverlayTexture.NO_OVERLAY);
+        mc.getItemRenderer().renderStatic(
+                stack,
+                ItemDisplayContext.THIRD_PERSON_RIGHT_HAND,
+                ctx.packedLight(),
+                OverlayTexture.NO_OVERLAY,
+                ctx.poseStack(),
+                ctx.bufferSource(),
+                mc.level,
+                0);
         ctx.poseStack().popPose();
     }
 
