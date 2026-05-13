@@ -7,7 +7,8 @@ import com.dwinovo.chiikawa.network.MusicPayloads.MusicBoxSelectTrackPayload;
 import com.dwinovo.chiikawa.platform.Services;
 import java.util.List;
 import java.util.Locale;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -106,33 +107,40 @@ public class MusicBoxScreen extends Screen {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         int left = (width - PANEL_WIDTH) / 2;
         int top = Math.max(28, (height - 220) / 2);
         graphics.fill(left - 12, top - 12, left + PANEL_WIDTH + 12, top + 238, PANEL_BACKGROUND);
-        graphics.outline(left - 12, top - 12, PANEL_WIDTH + 24, 250, PANEL_BORDER);
+        drawOutline(graphics, left - 12, top - 12, PANEL_WIDTH + 24, 250, PANEL_BORDER);
         graphics.fill(left - 6, top + 20, left + PANEL_WIDTH + 6, top + 203, PANEL_INNER_BACKGROUND);
         graphics.fill(left - 12, top + 18, left + PANEL_WIDTH + 12, top + 19, PANEL_SEPARATOR);
         graphics.fill(left - 12, top + 205, left + PANEL_WIDTH + 12, top + 206, PANEL_SEPARATOR);
-        graphics.centeredText(font, title, width / 2, top, 0xFFE8E1D2);
+        graphics.drawCenteredString(font, title, width / 2, top, 0xFFE8E1D2);
         if (tracks.isEmpty()) {
-            graphics.centeredText(font, Component.translatable("screen.chiikawa.music_box.empty_catalog"),
+            graphics.drawCenteredString(font, Component.translatable("screen.chiikawa.music_box.empty_catalog"),
                     width / 2, top + 70, 0xFFA8A8A8);
         }
         int pages = Math.max(1, (tracks.size() + ROWS - 1) / ROWS);
         if (hasFfmpegFailure()) {
-            graphics.centeredText(font, Component.translatable("screen.chiikawa.music_box.ffmpeg_missing"),
+            graphics.drawCenteredString(font, Component.translatable("screen.chiikawa.music_box.ffmpeg_missing"),
                     width / 2, top + 188, 0xFFFFB36B);
-            graphics.centeredText(font, Component.translatable("screen.chiikawa.music_box.ffmpeg_hint"),
+            graphics.drawCenteredString(font, Component.translatable("screen.chiikawa.music_box.ffmpeg_hint"),
                     width / 2, top + 198, 0xFFA8A8A8);
         }
-        graphics.centeredText(font, Component.literal((page + 1) + " / " + pages),
+        graphics.drawCenteredString(font, Component.literal((page + 1) + " / " + pages),
                 width / 2, top + 234, 0xFFA8A8A8);
-        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
+        super.render(graphics, mouseX, mouseY, partialTick);
     }
 
     private static Button musicButton(Component message, Button.OnPress onPress, int x, int y, int width, int height) {
         return new MusicBoxButton(x, y, width, height, message, onPress);
+    }
+
+    private static void drawOutline(GuiGraphics graphics, int x, int y, int width, int height, int color) {
+        graphics.fill(x, y, x + width, y + 1, color);
+        graphics.fill(x, y + height - 1, x + width, y + height, color);
+        graphics.fill(x, y, x + 1, y + height, color);
+        graphics.fill(x + width - 1, y, x + width, y + height, color);
     }
 
     private void requestCatalog(boolean rescan) {
@@ -169,7 +177,7 @@ public class MusicBoxScreen extends Screen {
         }
 
         @Override
-        protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             int x = getX();
             int y = getY();
             int width = getWidth();
@@ -178,11 +186,11 @@ public class MusicBoxScreen extends Screen {
             int background = active ? hovered ? BACKGROUND_HOVERED : BACKGROUND : BACKGROUND_DISABLED;
             int border = active ? hovered ? BORDER_HOVERED : BORDER : BORDER_DISABLED;
             graphics.fill(x, y, x + width, y + height, background);
-            graphics.outline(x, y, width, height, border);
+            drawOutline(graphics, x, y, width, height, border);
             if (hovered) {
                 graphics.fill(x + 1, y + 1, x + width - 1, y + 2, HIGHLIGHT);
             }
-            extractDefaultLabel(graphics.textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE));
+            renderString(graphics, Minecraft.getInstance().font, active ? 0xFFE8E1D2 : 0xFF777777);
         }
     }
 }

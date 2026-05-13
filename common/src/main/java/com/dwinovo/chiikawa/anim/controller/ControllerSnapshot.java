@@ -1,7 +1,6 @@
 package com.dwinovo.chiikawa.anim.controller;
 
 import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
-import org.jspecify.annotations.Nullable;
 
 /**
  * Immutable per-frame snapshot of a {@link ControllerInstance}, captured at
@@ -46,8 +45,8 @@ import org.jspecify.annotations.Nullable;
 public record ControllerSnapshot(
         String name,
         BlendMode blendMode,
-        @Nullable AnimationChannel current,
-        @Nullable AnimationChannel previous,
+        AnimationChannel current,
+        AnimationChannel previous,
         long fadeStartNs,
         float fadeDurationSec,
         boolean fadingOut

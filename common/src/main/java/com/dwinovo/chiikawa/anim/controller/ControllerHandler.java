@@ -3,7 +3,6 @@ package com.dwinovo.chiikawa.anim.controller;
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
 import com.dwinovo.chiikawa.anim.render.ChiikawaRenderState;
 import com.dwinovo.chiikawa.anim.state.PetAnimContext;
-import org.jspecify.annotations.Nullable;
 
 /**
  * Pure function from gameplay state to "what should this controller play
@@ -27,7 +26,7 @@ public interface ControllerHandler {
      * @param ctx   gameplay state snapshot (mode / locomotion / job ...)
      * @return animation to play, or {@code null} for "no contribution"
      */
-    @Nullable BakedAnimation handle(ChiikawaRenderState state, PetAnimContext ctx);
+    BakedAnimation handle(ChiikawaRenderState state, PetAnimContext ctx);
 
     /**
      * Handler for controllers that only run on external triggers — the state
@@ -35,7 +34,7 @@ public interface ControllerHandler {
      * and {@code "reaction"} controllers, which receive their animations via
      * {@link com.dwinovo.chiikawa.anim.runtime.PetAnimator#playOnce}.
      */
-    static @Nullable BakedAnimation neverPlay(ChiikawaRenderState state, PetAnimContext ctx) {
+    static BakedAnimation neverPlay(ChiikawaRenderState state, PetAnimContext ctx) {
         return null;
     }
 }
