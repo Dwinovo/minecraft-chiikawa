@@ -68,7 +68,7 @@ public final class InitRegistry {
         )
     );
     public static final Supplier<IPetJob> MUSICIAN = Services.REGISTRY.register(
-        PET_JOB_REGISTRY,
+        PET_JOB_KEY,
         new ResourceLocation(Constants.MOD_ID, "musician"),
         () -> new MusicianJob(
             MUSICIAN_ID,
