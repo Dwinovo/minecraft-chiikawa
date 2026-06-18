@@ -27,14 +27,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 public final class ServerMusicLibrary implements AutoCloseable {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final Set<String> SUPPORTED_EXTENSIONS = Set.of("mp3", "m4a", "wav", "flac", "ogg", "opus");
+    private static final Set<String> SUPPORTED_EXTENSIONS = Set.of("mp3", "wav");
 
     private final MinecraftServer server;
     private final Path root;
@@ -82,11 +81,6 @@ public final class ServerMusicLibrary implements AutoCloseable {
         return config;
     }
 
-    public FfmpegStatus ffmpegStatus() {
-        String command = resolveFfmpegCommand();
-        return new FfmpegStatus(command, canRunFfmpeg(command));
-    }
-
     public boolean rescan() {
         try {
             config = loadConfig();
@@ -125,7 +119,14 @@ public final class ServerMusicLibrary implements AutoCloseable {
                 }
             }));
         } catch (IllegalStateException ex) {
-            Constants.LOG.warn("[chiikawa-music] Failed to read cached track {}", trackId, ex);
+            // Corrupt/truncated cache: mark the track failed so we don't retry the bad file
+            // on every play attempt (which previously could loop forever).
+            Constants.LOG.warn("[chiikawa-music] Failed to read cached track {}; marking it failed", trackId, ex);
+            loadedTracks.remove(trackId);
+            MusicTrack failed = tracks.get(trackId);
+            if (failed != null) {
+                tracks.put(trackId, failed.failed("corrupt cache: " + ex.getMessage()));
+            }
             return Optional.empty();
         }
     }
@@ -189,14 +190,12 @@ public final class ServerMusicLibrary implements AutoCloseable {
         if (imports.containsKey(track.trackId())) {
             return;
         }
-        String ffmpeg = resolveFfmpegCommand();
         CompletableFuture<ImportOutcome> future = CompletableFuture.supplyAsync(() -> {
             try {
                 MusicImporter.ImportResult result = MusicImporter.importTrack(
                     musicDir.resolve(track.sourceFile()),
                     cacheDir.resolve(track.cacheFile()),
-                    config,
-                    ffmpeg
+                    config
                 );
                 return ImportOutcome.success(track.trackId(), result);
             } catch (Exception ex) {
@@ -264,24 +263,6 @@ public final class ServerMusicLibrary implements AutoCloseable {
         }
     }
 
-    public String resolveFfmpegCommand() {
-        return FfmpegLocator.resolve(config.ffmpegPath(), server.getFile("tools/ffmpeg/ffmpeg.exe").toPath());
-    }
-
-    private static boolean canRunFfmpeg(String command) {
-        try {
-            Process process = new ProcessBuilder(command, "-version").start();
-            boolean finished = process.waitFor(5, TimeUnit.SECONDS);
-            if (!finished) {
-                process.destroyForcibly();
-                return false;
-            }
-            return process.exitValue() == 0;
-        } catch (Exception ignored) {
-            return false;
-        }
-    }
-
     private static boolean isSupported(Path source) {
         String name = source.getFileName().toString();
         int dot = name.lastIndexOf('.');
@@ -325,8 +306,5 @@ public final class ServerMusicLibrary implements AutoCloseable {
         static ImportOutcome failure(String trackId, String error) {
             return new ImportOutcome(trackId, null, error == null ? "unknown error" : error);
         }
-    }
-
-    public record FfmpegStatus(String command, boolean available) {
     }
 }
