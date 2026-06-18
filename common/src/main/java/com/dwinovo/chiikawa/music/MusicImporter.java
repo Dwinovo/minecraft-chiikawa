@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import io.github.jaredmdobson.concentus.OpusApplication;
 import io.github.jaredmdobson.concentus.OpusEncoder;
 
@@ -19,44 +18,20 @@ public final class MusicImporter {
     private MusicImporter() {
     }
 
-    public static ImportResult importTrack(Path source, Path cacheFile, ChiikawaMusicConfig config, String ffmpegCommand)
+    public static ImportResult importTrack(Path source, Path cacheFile, ChiikawaMusicConfig config)
         throws Exception {
+        String extension = JvmAudioDecoder.extensionOf(source);
+        if (!JvmAudioDecoder.supports(extension)) {
+            throw new IOException("Unsupported audio format '" + extension + "' — please use MP3");
+        }
         Files.createDirectories(cacheFile.getParent());
-        List<String> command = List.of(
-            ffmpegCommand,
-            "-hide_banner",
-            "-loglevel", "error",
-            "-i", source.toAbsolutePath().toString(),
-            "-t", Integer.toString(config.maxTrackSeconds()),
-            "-ac", Integer.toString(config.channels()),
-            "-ar", Integer.toString(config.sampleRate()),
-            "-f", "s16le",
-            "-acodec", "pcm_s16le",
-            "pipe:1"
-        );
-
-        Process process = new ProcessBuilder(command).start();
-        AtomicReference<String> stderr = new AtomicReference<>("");
-        Thread errorReader = new Thread(() -> {
-            try (InputStream error = process.getErrorStream()) {
-                stderr.set(new String(error.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8));
-            } catch (IOException ignored) {
-                stderr.set("");
-            }
-        }, "chiikawa-music-ffmpeg-error");
-        errorReader.setDaemon(true);
-        errorReader.start();
-
-        CachedOpusTrack track = encodePcmStream(process.getInputStream(), config);
-        int exitCode = process.waitFor();
-        errorReader.join(1000L);
-        if (exitCode != 0) {
-            throw new IOException("ffmpeg exited with code " + exitCode + ": " + stderr.get().trim());
+        CachedOpusTrack track;
+        try (InputStream pcm = JvmAudioDecoder.decodeToPcm(source, config)) {
+            track = encodePcmStream(pcm, config);
         }
         if (track.frameCount() == 0) {
-            throw new IOException("ffmpeg produced no audio frames");
+            throw new IOException("No audio frames produced for " + source.getFileName());
         }
-
         CmsTrackFile.write(cacheFile, track);
         return new ImportResult(track.durationTicks(), track.frameCount());
     }

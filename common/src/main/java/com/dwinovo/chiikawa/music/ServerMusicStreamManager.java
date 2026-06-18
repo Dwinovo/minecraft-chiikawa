@@ -69,8 +69,12 @@ public final class ServerMusicStreamManager {
             return;
         }
 
+        session.advanceClock(System.nanoTime());
+        int frameCount = session.cachedTrack().frameCount();
         int currentFrame = session.currentFrame();
-        if (currentFrame >= session.cachedTrack().frameCount()) {
+        // currentFrame is the wall-clock playback head. Stop only once playback time has
+        // elapsed, so the client has time to drain frames we already buffered ahead.
+        if (currentFrame >= frameCount) {
             stopSession(session, MusicStopReason.FINISHED);
             if (source.getActivity() == PetActivity.PLAY_GUITAR) {
                 source.setActivity(PetActivity.NONE);
@@ -79,19 +83,27 @@ public final class ServerMusicStreamManager {
         }
 
         updateListeners(session, level, currentFrame);
-        if (session.listeners().isEmpty() || currentFrame < session.nextFrameToSend()) {
+        if (session.listeners().isEmpty()) {
             return;
         }
 
-        List<byte[]> frames = List.copyOf(session.cachedTrack().slice(currentFrame, library.config().framesPerChunk()));
-        if (frames.isEmpty()) {
-            return;
+        // Sliding-window pre-send: keep listeners buffered up to `leadFrames` ahead of the
+        // playback head. nextFrameToSend only advances, so a server lag spike never skips
+        // (drops) frames the way slicing from the wall-clock head did.
+        int perChunk = library.config().framesPerChunk();
+        int target = Math.min(frameCount, currentFrame + library.config().leadFrames());
+        while (session.nextFrameToSend() < target) {
+            int from = session.nextFrameToSend();
+            List<byte[]> frames = List.copyOf(session.cachedTrack().slice(from, perChunk));
+            if (frames.isEmpty()) {
+                break;
+            }
+            MusicStreamChunkPayload payload = new MusicStreamChunkPayload(session.sessionId(), from, frames);
+            for (ServerPlayer listener : List.copyOf(session.listeners())) {
+                Services.NETWORK.sendToClient(listener, payload);
+            }
+            session.setNextFrameToSend(from + frames.size());
         }
-        MusicStreamChunkPayload payload = new MusicStreamChunkPayload(session.sessionId(), currentFrame, frames);
-        for (ServerPlayer listener : List.copyOf(session.listeners())) {
-            Services.NETWORK.sendToClient(listener, payload);
-        }
-        session.setNextFrameToSend(currentFrame + frames.size());
     }
 
     private void updateListeners(MusicStreamSession session, ServerLevel level, int currentFrame) {
@@ -103,6 +115,9 @@ public final class ServerMusicStreamManager {
             }
             if (session.listeners().add(player)) {
                 sendStart(session, player, currentFrame);
+                // Catch the newcomer up to the window already broadcast to existing listeners,
+                // so they start in sync instead of jumping to the far-ahead send head.
+                sendWindow(session, player, currentFrame, session.nextFrameToSend());
             }
         }
 
@@ -132,6 +147,21 @@ public final class ServerMusicStreamManager {
             library.config().jitterBufferChunks(),
             library.config().streamRadius()
         ));
+    }
+
+    /** Sends already-buffered frames in [fromFrame, toFrame) to a single (newly joined) listener. */
+    private void sendWindow(MusicStreamSession session, ServerPlayer player, int fromFrame, int toFrame) {
+        int perChunk = library.config().framesPerChunk();
+        int from = Math.max(0, fromFrame);
+        while (from < toFrame) {
+            int count = Math.min(perChunk, toFrame - from);
+            List<byte[]> frames = List.copyOf(session.cachedTrack().slice(from, count));
+            if (frames.isEmpty()) {
+                break;
+            }
+            Services.NETWORK.sendToClient(player, new MusicStreamChunkPayload(session.sessionId(), from, frames));
+            from += frames.size();
+        }
     }
 
     private void stopSession(MusicStreamSession session, MusicStopReason reason) {
