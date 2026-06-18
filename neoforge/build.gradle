@@ -52,6 +52,14 @@ configurations {
 dependencies {
     implementation 'io.github.jaredmdobson:concentus:1.0.2'
     jarJar 'io.github.jaredmdobson:concentus:1.0.2'
+
+    // Pure-Java MP3 decoding (mp3spi -> JLayer); WAV is handled by the JDK. Bundled via
+    // jar-in-jar so MP3/WAV import needs no external ffmpeg. mp3spi pulls jlayer +
+    // tritonus-share transitively for dev; list all three for jarJar so they ship in the jar.
+    implementation 'com.googlecode.soundlibs:mp3spi:1.9.5.4'
+    jarJar 'com.googlecode.soundlibs:mp3spi:1.9.5.4'
+    jarJar 'com.googlecode.soundlibs:jlayer:1.0.1.4'
+    jarJar 'com.googlecode.soundlibs:tritonus-share:0.3.7.4'
 }
 
 // Implement mcgradleconventions loader attribute
