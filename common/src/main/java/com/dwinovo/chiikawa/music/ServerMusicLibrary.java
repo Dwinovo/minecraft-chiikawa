@@ -199,8 +199,12 @@ public final class ServerMusicLibrary implements AutoCloseable {
                     config
                 );
                 return ImportOutcome.success(track.trackId(), result);
-            } catch (Exception ex) {
-                return ImportOutcome.failure(track.trackId(), ex.getMessage());
+            } catch (Throwable ex) {
+                // Throwable, not Exception: a missing decoder library surfaces as
+                // NoClassDefFoundError (an Error). It must become a failed import, never an
+                // uncaught throwable that the server tick loop rethrows from future.join().
+                String message = ex.getMessage() != null ? ex.getMessage() : ex.toString();
+                return ImportOutcome.failure(track.trackId(), message);
             }
         }, importExecutor);
         imports.put(track.trackId(), future);
