@@ -73,8 +73,9 @@ dependencies {
     jarJar 'com.googlecode.soundlibs:tritonus-share:0.3.7.4'
 
     // In a dev run the jar-in-jar libraries aren't nested into the mod, so the mod module
-    // can't load their classes (NoClassDefFoundError). Put them on the dev runtime classpath
-    // explicitly so MP3 decode is testable in :neoforge:runClient too.
+    // can't load their classes (NoClassDefFoundError) on this NeoForge version. Put every
+    // bundled library on the dev runtime classpath so import works in :neoforge:runClient too.
+    additionalRuntimeClasspath 'io.github.jaredmdobson:concentus:1.0.2'
     additionalRuntimeClasspath 'com.googlecode.soundlibs:mp3spi:1.9.5.4'
     additionalRuntimeClasspath 'com.googlecode.soundlibs:jlayer:1.0.1.4'
     additionalRuntimeClasspath 'com.googlecode.soundlibs:tritonus-share:0.3.7.4'
