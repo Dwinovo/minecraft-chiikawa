@@ -11,7 +11,7 @@ public record ChiikawaMusicConfig(
     int opusBitrate,
     int framesPerChunk,
     int jitterBufferChunks,
-    String ffmpegPath
+    int leadSeconds
 ) {
     public static final ChiikawaMusicConfig DEFAULT = new ChiikawaMusicConfig(
         true,
@@ -21,7 +21,7 @@ public record ChiikawaMusicConfig(
         48000,
         5,
         3,
-        ""
+        2
     );
 
     public static final Codec<ChiikawaMusicConfig> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -32,11 +32,16 @@ public record ChiikawaMusicConfig(
         Codec.INT.optionalFieldOf("opus_bitrate", DEFAULT.opusBitrate).forGetter(ChiikawaMusicConfig::opusBitrate),
         Codec.INT.optionalFieldOf("frames_per_chunk", DEFAULT.framesPerChunk).forGetter(ChiikawaMusicConfig::framesPerChunk),
         Codec.INT.optionalFieldOf("jitter_buffer_chunks", DEFAULT.jitterBufferChunks).forGetter(ChiikawaMusicConfig::jitterBufferChunks),
-        Codec.STRING.optionalFieldOf("ffmpeg_path", DEFAULT.ffmpegPath).forGetter(ChiikawaMusicConfig::ffmpegPath)
+        Codec.INT.optionalFieldOf("lead_seconds", DEFAULT.leadSeconds).forGetter(ChiikawaMusicConfig::leadSeconds)
     ).apply(instance, ChiikawaMusicConfig::new));
 
     public int frameSamples() {
         return 960;
+    }
+
+    /** Lookahead window in Opus frames (each frame is 20ms, so 50 frames per second). */
+    public int leadFrames() {
+        return Math.max(framesPerChunk, leadSeconds * 50);
     }
 
     public int sampleRate() {
