@@ -37,7 +37,7 @@ public final class LanguageData {
                 "吉伊的讨伐棒"
             );
             addMusicBoxTranslations(adder, "八音盒", "未选择歌曲", "歌曲：%s", "选择歌曲", "导入中", "导入失败", "没有可播放的歌曲",
-                "缺少 FFmpeg，歌曲无法导入", "请手动安装后点击刷新", "刷新");
+                "把 MP3 / WAV 文件放入文件夹后点击刷新", "部分歌曲导入失败", "请使用 MP3 格式的音频", "打开文件夹", "刷新");
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Work");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
@@ -65,7 +65,7 @@ public final class LanguageData {
                 "Chiikawa Weapon"
             );
             addMusicBoxTranslations(adder, "Music Box", "No song selected", "Song: %s", "Choose Song", "Importing", "Failed", "No playable songs",
-                "FFmpeg is missing, songs cannot be imported", "Install it manually, then reload", "Reload");
+                "Put MP3 / WAV files in the folder, then reload", "Some songs failed to import", "Please use MP3 audio files", "Open Folder", "Reload");
         }
     }
 
@@ -165,8 +165,10 @@ public final class LanguageData {
         String importing,
         String failed,
         String emptyCatalog,
-        String ffmpegMissing,
-        String ffmpegHint,
+        String emptyHint,
+        String importFailed,
+        String formatHint,
+        String openFolder,
         String reload
     ) {
         adder.add("item.chiikawa.music_box", itemName);
@@ -176,8 +178,10 @@ public final class LanguageData {
         adder.add("screen.chiikawa.music_box.importing", importing);
         adder.add("screen.chiikawa.music_box.failed", failed);
         adder.add("screen.chiikawa.music_box.empty_catalog", emptyCatalog);
-        adder.add("screen.chiikawa.music_box.ffmpeg_missing", ffmpegMissing);
-        adder.add("screen.chiikawa.music_box.ffmpeg_hint", ffmpegHint);
+        adder.add("screen.chiikawa.music_box.empty_hint", emptyHint);
+        adder.add("screen.chiikawa.music_box.import_failed", importFailed);
+        adder.add("screen.chiikawa.music_box.format_hint", formatHint);
+        adder.add("screen.chiikawa.music_box.open_folder", openFolder);
         adder.add("screen.chiikawa.music_box.reload", reload);
     }
 }
