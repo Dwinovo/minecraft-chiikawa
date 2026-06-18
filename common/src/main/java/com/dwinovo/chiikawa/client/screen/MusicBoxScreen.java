@@ -1,13 +1,17 @@
 package com.dwinovo.chiikawa.client.screen;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.music.MusicTrackStatus;
 import com.dwinovo.chiikawa.music.MusicTrackView;
 import com.dwinovo.chiikawa.network.MusicPayloads.MusicCatalogRequestPayload;
 import com.dwinovo.chiikawa.network.MusicPayloads.MusicBoxSelectTrackPayload;
 import com.dwinovo.chiikawa.platform.Services;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
-import java.util.Locale;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.util.Util;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -80,9 +84,24 @@ public class MusicBoxScreen extends Screen {
         next.active = page + 1 < pages;
         addRenderableWidget(next);
 
-        addRenderableWidget(musicButton(Component.translatable("screen.chiikawa.music_box.reload"), ignored -> {
-            requestCatalog(true);
-        }, left + (PANEL_WIDTH - 72) / 2, top + 210, 72, 20));
+        // Center an "open folder" + "reload" pair between the page arrows.
+        int groupWidth = 96 + 6 + 72;
+        int groupLeft = left + (PANEL_WIDTH - groupWidth) / 2;
+        addRenderableWidget(musicButton(Component.translatable("screen.chiikawa.music_box.open_folder"),
+            ignored -> openMusicFolder(), groupLeft, top + 210, 96, 20));
+        addRenderableWidget(musicButton(Component.translatable("screen.chiikawa.music_box.reload"),
+            ignored -> requestCatalog(true), groupLeft + 96 + 6, top + 210, 72, 20));
+    }
+
+    /** Opens the local music folder (config/chiikawa/music) in the system file manager. */
+    private void openMusicFolder() {
+        try {
+            Path folder = Minecraft.getInstance().gameDirectory.toPath().resolve("config/chiikawa/music");
+            Files.createDirectories(folder);
+            Util.getPlatform().openPath(folder);
+        } catch (Exception ex) {
+            Constants.LOG.warn("[chiikawa-music] Failed to open music folder", ex);
+        }
     }
 
     private Component rowTitle(MusicTrackView track) {
@@ -118,12 +137,14 @@ public class MusicBoxScreen extends Screen {
         if (tracks.isEmpty()) {
             graphics.drawCenteredString(font, Component.translatable("screen.chiikawa.music_box.empty_catalog"),
                     width / 2, top + 70, 0xFFA8A8A8);
+            graphics.drawCenteredString(font, Component.translatable("screen.chiikawa.music_box.empty_hint"),
+                    width / 2, top + 84, 0xFF8A8A8A);
         }
         int pages = Math.max(1, (tracks.size() + ROWS - 1) / ROWS);
-        if (hasFfmpegFailure()) {
-            graphics.drawCenteredString(font, Component.translatable("screen.chiikawa.music_box.ffmpeg_missing"),
+        if (hasFailedTracks()) {
+            graphics.drawCenteredString(font, Component.translatable("screen.chiikawa.music_box.import_failed"),
                     width / 2, top + 188, 0xFFFFB36B);
-            graphics.drawCenteredString(font, Component.translatable("screen.chiikawa.music_box.ffmpeg_hint"),
+            graphics.drawCenteredString(font, Component.translatable("screen.chiikawa.music_box.format_hint"),
                     width / 2, top + 198, 0xFFA8A8A8);
         }
         graphics.drawCenteredString(font, Component.literal((page + 1) + " / " + pages),
@@ -144,10 +165,8 @@ public class MusicBoxScreen extends Screen {
         page = Math.max(0, Math.min(page, pages - 1));
     }
 
-    private boolean hasFfmpegFailure() {
-        return tracks.stream()
-            .anyMatch(track -> track.status() == MusicTrackStatus.FAILED
-                && track.error().toLowerCase(Locale.ROOT).contains("ffmpeg"));
+    private boolean hasFailedTracks() {
+        return tracks.stream().anyMatch(track -> track.status() == MusicTrackStatus.FAILED);
     }
 
     @Override
