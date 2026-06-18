@@ -20,7 +20,7 @@ import org.lwjgl.openal.AL10;
 
 public final class ClientMusicStreamManager {
     private static final Map<Integer, ClientSession> SESSIONS = new HashMap<>();
-    private static final int MAX_QUEUED_BUFFERS = 24;
+    private static final int MAX_QUEUED_BUFFERS = 64;
     private static final int MISSING_ENTITY_GRACE_TICKS = 100;
     private static final SoundSource MUSIC_BOX_SOUND_SOURCE = SoundSource.RECORDS;
 
@@ -29,18 +29,28 @@ public final class ClientMusicStreamManager {
 
     public static void start(MusicStreamStartPayload payload) {
         stop(payload.sessionId(), MusicStopReason.REPLACED);
+        // Catch Throwable, not just Exception: LWJGL/OpenAL native calls can throw Error
+        // (e.g. device/driver failures), and an uncaught Error here would hard-crash the
+        // client — the root cause of "the world won't load until I delete the music files".
         try {
             ClientSession session = new ClientSession(payload);
             SESSIONS.put(payload.sessionId(), session);
-        } catch (Exception ex) {
-            Constants.LOG.warn("[chiikawa-music] Failed to start client stream {}", payload.sessionId(), ex);
+        } catch (Throwable ex) {
+            Constants.LOG.warn("[chiikawa-music] Failed to start client stream {} (music disabled for this session)",
+                payload.sessionId(), ex);
         }
     }
 
     public static void acceptChunk(MusicStreamChunkPayload payload) {
         ClientSession session = SESSIONS.get(payload.sessionId());
-        if (session != null) {
+        if (session == null) {
+            return;
+        }
+        try {
             session.accept(payload.frameStart(), payload.frames());
+        } catch (Throwable ex) {
+            Constants.LOG.warn("[chiikawa-music] Dropping client stream {} after chunk error", payload.sessionId(), ex);
+            dropSession(session);
         }
     }
 
@@ -53,11 +63,21 @@ public final class ClientMusicStreamManager {
 
     public static void tick() {
         for (ClientSession session : List.copyOf(SESSIONS.values())) {
-            if (!session.tick()) {
-                SESSIONS.remove(session.sessionId);
-                session.close();
+            try {
+                if (!session.tick()) {
+                    dropSession(session);
+                }
+            } catch (Throwable ex) {
+                Constants.LOG.warn("[chiikawa-music] Dropping client stream {} after tick error", session.sessionId, ex);
+                dropSession(session);
             }
         }
+    }
+
+    /** Removes and safely closes a session; never throws. */
+    private static void dropSession(ClientSession session) {
+        SESSIONS.remove(session.sessionId);
+        session.close();
     }
 
     private static final class ClientSession {
@@ -69,7 +89,7 @@ public final class ClientMusicStreamManager {
         private final int channels;
         private final int frameSamples;
         private final int framesPerChunk;
-        private final int jitterBufferFrames;
+        private final int startupFrames;
         private final TreeMap<Integer, List<byte[]>> pendingChunks = new TreeMap<>();
         private int nextDecodeFrame;
         private int queuedBuffers;
@@ -83,7 +103,9 @@ public final class ClientMusicStreamManager {
             this.channels = payload.channels();
             this.frameSamples = payload.frameSamples();
             this.framesPerChunk = payload.framesPerChunk();
-            this.jitterBufferFrames = Math.max(1, payload.jitterBufferChunks()) * Math.max(1, framesPerChunk);
+            // Small startup prebuffer (~one chunk) for a snappy start; the deep steady-state
+            // buffer is maintained by the server's lookahead pre-send, not by waiting here.
+            this.startupFrames = Math.max(1, payload.framesPerChunk());
             this.nextDecodeFrame = Math.max(0, payload.startFrame());
             this.decoder = new OpusDecoder(sampleRate, channels);
             this.source = AL10.alGenSources();
@@ -114,17 +136,29 @@ public final class ClientMusicStreamManager {
             }
 
             updateVolume();
+
+            // We drive a raw OpenAL source, so Minecraft's sound engine can't pause it for us.
+            // Pause it directly on game pause instead of letting the buffered audio drain out.
+            if (Minecraft.getInstance().isPaused()) {
+                if (AL10.alGetSourcei(source, AL10.AL_SOURCE_STATE) == AL10.AL_PLAYING) {
+                    AL10.alSourcePause(source);
+                }
+                return true;
+            }
+
             releaseProcessedBuffers();
             queueAvailableFrames();
 
             int state = AL10.alGetSourcei(source, AL10.AL_SOURCE_STATE);
             int queued = AL10.alGetSourcei(source, AL10.AL_BUFFERS_QUEUED);
+            // queued counts OpenAL buffers, and we queue exactly one buffer per Opus frame.
             if (!started) {
-                if (queued >= Math.max(1, jitterBufferFrames / Math.max(1, framesPerChunk))) {
+                if (queued >= startupFrames) {
                     AL10.alSourcePlay(source);
                     started = true;
                 }
             } else if (queued > 0 && state != AL10.AL_PLAYING) {
+                // Resumes after either a buffer underrun or an ESC pause (state == AL_PAUSED).
                 AL10.alSourcePlay(source);
             }
             return true;
@@ -208,17 +242,24 @@ public final class ClientMusicStreamManager {
         }
 
         void close() {
-            AL10.alSourceStop(source);
-            int queued = AL10.alGetSourcei(source, AL10.AL_BUFFERS_QUEUED);
-            while (queued-- > 0) {
-                int buffer = AL10.alSourceUnqueueBuffers(source);
-                if (buffer != 0) {
-                    AL10.alDeleteBuffers(buffer);
+            // Defensive: close() runs on the error/cleanup paths, so it must never throw —
+            // a failed OpenAL call (or already-freed source) here would otherwise propagate.
+            try {
+                AL10.alSourceStop(source);
+                int queued = AL10.alGetSourcei(source, AL10.AL_BUFFERS_QUEUED);
+                while (queued-- > 0) {
+                    int buffer = AL10.alSourceUnqueueBuffers(source);
+                    if (buffer != 0) {
+                        AL10.alDeleteBuffers(buffer);
+                    }
                 }
+                AL10.alDeleteSources(source);
+            } catch (Throwable ex) {
+                Constants.LOG.warn("[chiikawa-music] Error while closing client stream {}", sessionId, ex);
+            } finally {
+                pendingChunks.clear();
+                queuedBuffers = 0;
             }
-            AL10.alDeleteSources(source);
-            pendingChunks.clear();
-            queuedBuffers = 0;
         }
     }
 }
