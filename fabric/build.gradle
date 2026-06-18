@@ -12,6 +12,14 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
     implementation 'io.github.jaredmdobson:concentus:1.0.2'
     include 'io.github.jaredmdobson:concentus:1.0.2'
+
+    // Pure-Java MP3 decoding (mp3spi -> JLayer); WAV is handled by the JDK. Bundled via
+    // Fabric's jar-in-jar (include) so MP3/WAV import needs no external ffmpeg. List all
+    // three explicitly so each is nested in the jar.
+    implementation 'com.googlecode.soundlibs:mp3spi:1.9.5.4'
+    include 'com.googlecode.soundlibs:mp3spi:1.9.5.4'
+    include 'com.googlecode.soundlibs:jlayer:1.0.1.4'
+    include 'com.googlecode.soundlibs:tritonus-share:0.3.7.4'
 }
 
 loom {
