@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.music;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -10,16 +11,20 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
+import javazoom.spi.mpeg.sampled.convert.MpegFormatConversionProvider;
+import javazoom.spi.mpeg.sampled.file.MpegAudioFileReader;
 
 /**
  * Pure-Java decoder for the common audio formats, producing 16-bit signed little-endian
  * <em>mono</em> PCM at the configured sample rate — the same byte layout FFmpeg used to emit,
  * so the Opus encoding path is unchanged.
  *
- * <p>MP3 decoding is provided at runtime by the bundled mp3spi/JLayer service providers; WAV is
- * handled by the JDK itself. Nothing here references those libraries directly — we only use the
- * JDK {@code javax.sound.sampled} API and let the {@link AudioSystem} SPI discover the MP3
- * provider. This removes the external FFmpeg dependency for the formats that cover ~95% of use.
+ * <p>MP3 is decoded by instantiating the mp3spi/JLayer providers <em>directly</em> rather than via
+ * {@link AudioSystem}'s ServiceLoader lookup: under NeoForge the bundled library sits on the module
+ * path, where {@code META-INF/services} SPI registration is ignored (Fabric puts it on the
+ * classpath, which is why discovery worked there). WAV is handled by the JDK's own readers, which
+ * live in the boot module layer and are found on every loader. This removes the external FFmpeg
+ * dependency for the formats that cover ~95% of use.
  */
 public final class JvmAudioDecoder {
     private JvmAudioDecoder() {
@@ -36,19 +41,34 @@ public final class JvmAudioDecoder {
      */
     public static InputStream decodeToPcm(Path source, ChiikawaMusicConfig config)
             throws IOException, UnsupportedAudioFileException {
-        // AudioSystem discovers format providers via ServiceLoader using the thread's context
-        // classloader. Under Fabric/NeoForge that isn't guaranteed to see our bundled mp3spi,
-        // so pin it to this class's loader for the duration of the call.
-        ClassLoader previous = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(JvmAudioDecoder.class.getClassLoader());
-            return decode(source, config);
-        } finally {
-            Thread.currentThread().setContextClassLoader(previous);
+        String extension = extensionOf(source);
+        if (extension.equals("mp3")) {
+            return decodeMp3(source, config);
+        }
+        return decodeWithAudioSystem(source, config);
+    }
+
+    /** MP3 via mp3spi providers instantiated directly (no ServiceLoader / module-path lookup). */
+    private static InputStream decodeMp3(Path source, ChiikawaMusicConfig config)
+            throws IOException, UnsupportedAudioFileException {
+        File file = source.toFile();
+        AudioInputStream rawIn = new MpegAudioFileReader().getAudioInputStream(file);
+        try (rawIn) {
+            AudioFormat base = rawIn.getFormat();
+            float sourceRate = base.getSampleRate();
+            int channels = Math.max(1, base.getChannels());
+            if (sourceRate <= 0) {
+                throw new IOException("Unknown source sample rate for " + source.getFileName());
+            }
+            AudioFormat pcmFormat = pcmFormat(sourceRate, channels);
+            try (AudioInputStream pcmIn = new MpegFormatConversionProvider().getAudioInputStream(pcmFormat, rawIn)) {
+                return toMonoStream(pcmIn, config, sourceRate, channels);
+            }
         }
     }
 
-    private static InputStream decode(Path source, ChiikawaMusicConfig config)
+    /** WAV (and anything else the JDK natively reads) via the platform AudioSystem. */
+    private static InputStream decodeWithAudioSystem(Path source, ChiikawaMusicConfig config)
             throws IOException, UnsupportedAudioFileException {
         try (AudioInputStream rawIn = AudioSystem.getAudioInputStream(source.toFile())) {
             AudioFormat base = rawIn.getFormat();
@@ -57,27 +77,26 @@ public final class JvmAudioDecoder {
             if (sourceRate <= 0) {
                 throw new IOException("Unknown source sample rate for " + source.getFileName());
             }
-
-            // Decode the source encoding (e.g. MP3) to signed 16-bit PCM at the SAME sample
-            // rate — that conversion is what mp3spi provides. We resample to the target rate
-            // ourselves so we don't depend on a SampleRateConversionProvider being present.
-            AudioFormat pcmFormat = new AudioFormat(
-                AudioFormat.Encoding.PCM_SIGNED,
-                sourceRate,
-                16,
-                channels,
-                channels * 2,
-                sourceRate,
-                false /* little-endian */);
-
+            AudioFormat pcmFormat = pcmFormat(sourceRate, channels);
             try (AudioInputStream pcmIn = AudioSystem.getAudioInputStream(pcmFormat, rawIn)) {
-                long maxBytes = (long) (sourceRate * config.maxTrackSeconds()) * channels * 2L;
-                byte[] pcm = readCapped(pcmIn, maxBytes);
-                short[] mono = downmixToMono(pcm, channels);
-                short[] resampled = resampleLinear(mono, sourceRate, config.sampleRate());
-                return new ByteArrayInputStream(toLittleEndian(resampled));
+                return toMonoStream(pcmIn, config, sourceRate, channels);
             }
         }
+    }
+
+    private static AudioFormat pcmFormat(float sampleRate, int channels) {
+        // Signed 16-bit little-endian PCM at the source rate; we resample to the target rate
+        // ourselves so we don't depend on a SampleRateConversionProvider being present.
+        return new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, sampleRate, 16, channels, channels * 2, sampleRate, false);
+    }
+
+    private static InputStream toMonoStream(AudioInputStream pcmIn, ChiikawaMusicConfig config, float sourceRate, int channels)
+            throws IOException {
+        long maxBytes = (long) (sourceRate * config.maxTrackSeconds()) * channels * 2L;
+        byte[] pcm = readCapped(pcmIn, maxBytes);
+        short[] mono = downmixToMono(pcm, channels);
+        short[] resampled = resampleLinear(mono, sourceRate, config.sampleRate());
+        return new ByteArrayInputStream(toLittleEndian(resampled));
     }
 
     private static byte[] readCapped(InputStream in, long maxBytes) throws IOException {
