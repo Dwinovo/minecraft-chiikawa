@@ -22,6 +22,9 @@ dependencies {
     compileOnly group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
     annotationProcessor group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
     api 'io.github.jaredmdobson:concentus:1.0.2'
+    // Compile-only: MP3 decoding via mp3spi/JLayer. The actual jars are bundled (jar-in-jar)
+    // by each loader; we reference the providers directly to avoid module-path SPI lookup.
+    compileOnly 'com.googlecode.soundlibs:mp3spi:1.9.5.4'
 
     testImplementation platform('org.junit:junit-bom:5.11.4')
     testImplementation 'org.junit.jupiter:junit-jupiter'
