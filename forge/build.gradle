@@ -11,6 +11,16 @@ group = project.group
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
+// Carries the exploded audio-lib classes into the mod's own MOD_CLASSES for dev runs (see
+// extractDevAudioLibs below). Declared before the minecraft{} block so the runs can reference it.
+sourceSets {
+    devlibs
+}
+
+configurations {
+    devAudioLibs
+}
+
 minecraft {
     mappings channel: 'official', version: minecraft_version
     copyIdeResources = true
@@ -26,6 +36,7 @@ minecraft {
             mods {
                 "${mod_id}" {
                     source sourceSets.main
+                    source sourceSets.devlibs
                 }
             }
         }
@@ -71,21 +82,46 @@ dependencies {
 
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
 
-    // Pure-Java audio decode libraries. `implementation` puts them on the compile + dev
-    // runtime classpath (common references concentus/mp3spi directly); `jarJar` nests them
-    // into the published Forge jar so MP3/WAV import works without an external ffmpeg.
-    implementation 'io.github.jaredmdobson:concentus:1.0.2'
-    implementation 'com.googlecode.soundlibs:mp3spi:1.9.5.4'
-    implementation 'com.googlecode.soundlibs:jlayer:1.0.1.4'
-    implementation 'com.googlecode.soundlibs:tritonus-share:0.3.7.4'
+    // Audio decode libs. compileOnly: common references concentus/mp3spi classes directly (needed
+    // to compile) but we must NOT put them on the dev runtime classpath as jars — Forge 48's dev
+    // ModuleClassLoader would treat them as separate modules the mod can't read. Instead they go
+    // into the mod's own classes via the devlibs sourceSet (extractDevAudioLibs). Production uses
+    // jarJar, which Forge's JarInJar loads into the mod's layer.
+    compileOnly 'io.github.jaredmdobson:concentus:1.0.2'
+    compileOnly 'com.googlecode.soundlibs:mp3spi:1.9.5.4'
+    compileOnly 'com.googlecode.soundlibs:jlayer:1.0.1.4'
+    compileOnly 'com.googlecode.soundlibs:tritonus-share:0.3.7.4'
 
-    // transitive = false: we nest exactly these four artifacts and nothing else (otherwise
-    // soundlibs drag in a test-scoped junit 3.8.2 that would get bundled into the mod jar).
+    // Same artifacts, resolved so they can be exploded into the dev MOD_CLASSES.
+    devAudioLibs 'io.github.jaredmdobson:concentus:1.0.2'
+    devAudioLibs('com.googlecode.soundlibs:mp3spi:1.9.5.4') { transitive = false }
+    devAudioLibs('com.googlecode.soundlibs:jlayer:1.0.1.4') { transitive = false }
+    devAudioLibs('com.googlecode.soundlibs:tritonus-share:0.3.7.4') { transitive = false }
+
+    // transitive = false: nest exactly these four artifacts (otherwise soundlibs drag in a
+    // test-scoped junit 3.8.2 that would get bundled into the mod jar).
     jarJar(group: 'io.github.jaredmdobson', name: 'concentus', version: '[1.0.2,2.0)') { transitive = false }
     jarJar(group: 'com.googlecode.soundlibs', name: 'mp3spi', version: '[1.9.5.4,2.0)') { transitive = false }
     jarJar(group: 'com.googlecode.soundlibs', name: 'jlayer', version: '[1.0.1.4,2.0)') { transitive = false }
     jarJar(group: 'com.googlecode.soundlibs', name: 'tritonus-share', version: '[0.3.7.4,1.0)') { transitive = false }
 }
+
+// Explode the audio libs INTO the devlibs sourceSet's own classes/resources dir, so they become
+// part of the mod's MOD_CLASSES for dev runs (devlibs is registered via `source sourceSets.devlibs`
+// above). FG6 reads a sourceSet's classes/resources dirs for MOD_CLASSES (NOT extra output.dir()
+// entries), so the libs must land in that exact dir. The mod's SecureModuleClassLoader then loads
+// them like its own classes. Production is unaffected (jar uses main; libs ship via jarJar).
+def devlibsClassesDir = layout.buildDirectory.dir('sourcesSets/devlibs')
+def extractDevAudioLibs = tasks.register('extractDevAudioLibs', Copy) {
+    // Run after the (source-less, no-op) devlibs compile/resources tasks so they don't clobber us.
+    dependsOn tasks.named('compileDevlibsJava'), tasks.named('processDevlibsResources')
+    from { configurations.devAudioLibs.collect { zipTree(it) } }
+    into devlibsClassesDir
+    exclude 'META-INF/*.SF', 'META-INF/*.RSA', 'META-INF/*.DSA', 'META-INF/*.EC', 'module-info.class'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+// Make building the devlibs classes (which dev runs depend on) trigger the extraction.
+tasks.named('devlibsClasses') { dependsOn extractDevAudioLibs }
 
 jar {
     finalizedBy('reobfJar')
