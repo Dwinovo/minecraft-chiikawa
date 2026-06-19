@@ -203,6 +203,7 @@ public final class ServerMusicLibrary implements AutoCloseable {
                 // Throwable, not Exception: a missing decoder library surfaces as
                 // NoClassDefFoundError (an Error). It must become a failed import, never an
                 // uncaught throwable that the server tick loop rethrows from future.join().
+                Constants.LOG.warn("[chiikawa-music] Import of {} failed", track.sourceFile(), ex);
                 String message = ex.getMessage() != null ? ex.getMessage() : ex.toString();
                 return ImportOutcome.failure(track.trackId(), message);
             }
