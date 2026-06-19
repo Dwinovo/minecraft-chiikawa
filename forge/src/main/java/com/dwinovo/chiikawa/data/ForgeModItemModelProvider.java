@@ -17,6 +17,7 @@ public class ForgeModItemModelProvider extends ItemModelProvider {
     protected void registerModels() {
         generateSpawnEggs();
         generateDolls();
+        generatedItem(InitItems.MUSIC_BOX.get());
         // Weapons have prebuilt models under resources; no datagen needed.
     }
 
