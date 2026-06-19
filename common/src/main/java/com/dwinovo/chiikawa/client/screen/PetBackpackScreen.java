@@ -22,6 +22,14 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     }
 
     @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.render(graphics, mouseX, mouseY, partialTick);
+        // On 1.20.x the base AbstractContainerScreen.render() doesn't draw the hovered-slot
+        // item tooltip (newer versions do), so add it back explicitly.
+        this.renderTooltip(graphics, mouseX, mouseY);
+    }
+
+    @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         // Draw background.
         graphics.blit(TEXTURE, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
