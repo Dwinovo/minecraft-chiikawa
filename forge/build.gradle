@@ -64,10 +64,27 @@ repositories {
     }
 }
 
+jarJar.enable()
+
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
+
+    // Pure-Java audio decode libraries. `implementation` puts them on the compile + dev
+    // runtime classpath (common references concentus/mp3spi directly); `jarJar` nests them
+    // into the published Forge jar so MP3/WAV import works without an external ffmpeg.
+    implementation 'io.github.jaredmdobson:concentus:1.0.2'
+    implementation 'com.googlecode.soundlibs:mp3spi:1.9.5.4'
+    implementation 'com.googlecode.soundlibs:jlayer:1.0.1.4'
+    implementation 'com.googlecode.soundlibs:tritonus-share:0.3.7.4'
+
+    // transitive = false: we nest exactly these four artifacts and nothing else (otherwise
+    // soundlibs drag in a test-scoped junit 3.8.2 that would get bundled into the mod jar).
+    jarJar(group: 'io.github.jaredmdobson', name: 'concentus', version: '[1.0.2,2.0)') { transitive = false }
+    jarJar(group: 'com.googlecode.soundlibs', name: 'mp3spi', version: '[1.9.5.4,2.0)') { transitive = false }
+    jarJar(group: 'com.googlecode.soundlibs', name: 'jlayer', version: '[1.0.1.4,2.0)') { transitive = false }
+    jarJar(group: 'com.googlecode.soundlibs', name: 'tritonus-share', version: '[0.3.7.4,1.0)') { transitive = false }
 }
 
 jar {
