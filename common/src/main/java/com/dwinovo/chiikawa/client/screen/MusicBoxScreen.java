@@ -98,7 +98,7 @@ public class MusicBoxScreen extends Screen {
         try {
             Path folder = Minecraft.getInstance().gameDirectory.toPath().resolve("config/chiikawa/music");
             Files.createDirectories(folder);
-            Util.getPlatform().openPath(folder);
+            Util.getPlatform().openUri(folder.toUri());
         } catch (Exception ex) {
             Constants.LOG.warn("[chiikawa-music] Failed to open music folder", ex);
         }
