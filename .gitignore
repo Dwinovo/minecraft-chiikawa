@@ -27,4 +27,3 @@ common/logs/
 repo
 .vscode
 **/generated/
-.vfox/
