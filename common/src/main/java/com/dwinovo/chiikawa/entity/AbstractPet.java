@@ -143,6 +143,10 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     protected AbstractPet(EntityType<? extends TamableAnimal> entityType, Level level) {
         super(entityType, level);
+        // Match vanilla FloatGoal's constructor: make pathfinding float-aware so the
+        // brain-side FloatBehavior bobs the pet to the surface smoothly instead of
+        // sink-fighting the jump (which caused the repeated bouncing). One-time setup.
+        this.getNavigation().setCanFloat(true);
     }
 
     public SimpleContainer getBackpack() {
