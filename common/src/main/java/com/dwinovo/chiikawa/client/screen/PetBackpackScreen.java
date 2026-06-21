@@ -57,11 +57,16 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
 
         LivingEntity pet = this.menu.getPet(Minecraft.getInstance().level);
         if (pet != null) {
+            // 1.20.1 only offers the point-based renderEntityInInventoryFollowsMouse
+            // (graphics, x, y, scale, rotX, rotY, entity) — no rectangle-clipping variant.
+            // Anchor the entity at the display-window center with its feet near the bottom.
+            int centerX = this.leftPos + (DISPLAY_X1 + DISPLAY_X2) / 2;
+            int baseY = this.topPos + DISPLAY_Y2 - 5;
             InventoryScreen.renderEntityInInventoryFollowsMouse(
-                    graphics,
-                    this.leftPos + DISPLAY_X1, this.topPos + DISPLAY_Y1,
-                    this.leftPos + DISPLAY_X2, this.topPos + DISPLAY_Y2,
-                    DISPLAY_SCALE, DISPLAY_Y_OFFSET, mouseX, mouseY, pet);
+                    graphics, centerX, baseY, DISPLAY_SCALE,
+                    (float) (centerX - mouseX),
+                    (float) (baseY - mouseY - pet.getEyeHeight() * DISPLAY_SCALE),
+                    pet);
         }
     }
 
