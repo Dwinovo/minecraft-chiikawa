@@ -15,6 +15,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -136,16 +138,25 @@ public class MusicBoxScreen extends Screen {
 
         super.render(graphics, mouseX, mouseY, partialTick);
 
-        // DIAGNOSTIC v2: immediate tooltip render (bypasses the deferred renderDeferredElements path).
-        Component dbg = Component.literal("TIP mx=" + mouseX + " my=" + mouseY);
-        graphics.renderTooltip(font,
-                java.util.List.of(net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent.create(dbg.getVisualOrderText())),
-                mouseX, mouseY,
-                net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner.INSTANCE, null);
+        // Tooltips for the baked control icons. Rendered immediately — the deferred
+        // setTooltipForNextFrame / renderDeferredElements path does not flush for this screen.
+        int cy = topPos + CTRL_Y;
+        if (within(mouseX, mouseY, leftPos + FOLDER_X, cy, ICON_BTN, ICON_BTN)) {
+            tooltip(graphics, Component.translatable("screen.chiikawa.music_box.open_folder"), mouseX, mouseY);
+        } else if (within(mouseX, mouseY, leftPos + RELOAD_X, cy, ICON_BTN, ICON_BTN)) {
+            tooltip(graphics, Component.translatable("screen.chiikawa.music_box.reload"), mouseX, mouseY);
+        }
     }
 
     private static boolean within(int mx, int my, int x, int y, int w, int h) {
         return mx >= x && my >= y && mx < x + w && my < y + h;
+    }
+
+    /** Immediate tooltip render — the deferred setTooltipForNextFrame path does not flush for this Screen. */
+    private void tooltip(GuiGraphics graphics, Component text, int mouseX, int mouseY) {
+        graphics.renderTooltip(font,
+                List.of(ClientTooltipComponent.create(text.getVisualOrderText())),
+                mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null);
     }
 
     /** Centered text without the default drop shadow — shadows look muddy on the cream panel. */
