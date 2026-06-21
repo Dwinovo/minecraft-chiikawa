@@ -15,7 +15,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -123,7 +122,7 @@ public class MusicBoxScreen extends Screen {
         // already stayed sharp, which is why only the panel looked fuzzy before.)
         super.renderBackground(graphics, mouseX, mouseY, partialTick);
         graphics.fill(0, 0, this.width, this.height, 0x55000000);
-        graphics.blit(RenderType::guiTextured, TEXTURE, leftPos, topPos,
+        graphics.blit(TEXTURE, leftPos, topPos,
                 (float) PANEL_U, (float) PANEL_V, PANEL_W, PANEL_H, ATLAS_W, ATLAS_H);
     }
 
@@ -224,7 +223,7 @@ public class MusicBoxScreen extends Screen {
         @Override
         protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             int v = (active && isHoveredOrFocused()) ? ROWSEL_V : ROW_V;
-            graphics.blit(RenderType::guiTextured, TEXTURE, getX(), getY(),
+            graphics.blit(TEXTURE, getX(), getY(),
                     (float) ROW_U, (float) v, ROW_W, ROW_H, ATLAS_W, ATLAS_H);
             graphics.drawString(font, rowTitle(track), getX() + ROW_TEXT_X, getY() + ROW_TEXT_Y,
                     active ? TEXT : TEXT_DIM, false);
