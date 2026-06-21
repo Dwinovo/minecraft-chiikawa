@@ -215,7 +215,7 @@ public class MusicBoxScreen extends Screen {
         }
 
         @Override
-        protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             int v = (active && isHoveredOrFocused()) ? ROWSEL_V : ROW_V;
             graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, getX(), getY(),
                     (float) ROW_U, (float) v, ROW_W, ROW_H, ATLAS_W, ATLAS_H);
@@ -234,7 +234,7 @@ public class MusicBoxScreen extends Screen {
         }
 
         @Override
-        protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             if (!active) {
                 graphics.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), DISABLED_TINT);
             } else if (isHoveredOrFocused()) {
