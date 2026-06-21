@@ -28,3 +28,6 @@ repo
 .vscode
 **/generated/
 .vfox/
+
+# local MCP server config (machine-specific paths / not for VCS)
+.mcp.json
