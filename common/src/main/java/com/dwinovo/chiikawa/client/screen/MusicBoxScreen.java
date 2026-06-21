@@ -116,10 +116,20 @@ public class MusicBoxScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        // 1.21.5's Screen.render() runs renderBackground() — which blurs the whole framebuffer
+        // via GameRenderer.processBlurEffect() — at its START. Draw the panel HERE, right after
+        // that blur, so the panel isn't smeared. (Widgets render later in super.render() and
+        // already stayed sharp, which is why only the panel looked fuzzy before.)
+        super.renderBackground(graphics, mouseX, mouseY, partialTick);
         graphics.fill(0, 0, this.width, this.height, 0x55000000);
         graphics.blit(RenderType::guiTextured, TEXTURE, leftPos, topPos,
                 (float) PANEL_U, (float) PANEL_V, PANEL_W, PANEL_H, ATLAS_W, ATLAS_H);
+    }
+
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.render(graphics, mouseX, mouseY, partialTick); // renderBackground (blur + panel) + widgets
 
         Component decoratedTitle = Component.literal("♪ ").append(title).append(Component.literal(" ♪"));
         centered(graphics, decoratedTitle, leftPos + PANEL_W / 2, topPos + TITLE_Y, TEXT);
@@ -137,10 +147,8 @@ public class MusicBoxScreen extends Screen {
                     leftPos + PANEL_W / 2, topPos + 208, TEXT_FAIL);
         }
 
-        super.render(graphics, mouseX, mouseY, partialTick);
-
         // Control-icon tooltips. 1.21.5 has no deferred tooltip API (setTooltipForNextFrame),
-        // so draw immediately after super.render() using the single-component renderTooltip.
+        // so draw immediately using the single-component renderTooltip.
         if (folderButton != null && folderButton.isHovered()) {
             graphics.renderTooltip(font, Component.translatable("screen.chiikawa.music_box.open_folder"), mouseX, mouseY);
         } else if (reloadButton != null && reloadButton.isHovered()) {
