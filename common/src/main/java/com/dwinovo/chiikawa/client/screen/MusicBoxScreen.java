@@ -136,15 +136,8 @@ public class MusicBoxScreen extends Screen {
 
         super.render(graphics, mouseX, mouseY, partialTick);
 
-        // Tooltips for the baked control icons. Set here — exactly like vanilla container
-        // screens do for slots — so renderDeferredElements() draws them. The per-widget
-        // WidgetTooltipHolder path does not fire reliably inside a custom Screen.
-        int cy = topPos + CTRL_Y;
-        if (within(mouseX, mouseY, leftPos + FOLDER_X, cy, ICON_BTN, ICON_BTN)) {
-            graphics.setTooltipForNextFrame(font, Component.translatable("screen.chiikawa.music_box.open_folder"), mouseX, mouseY);
-        } else if (within(mouseX, mouseY, leftPos + RELOAD_X, cy, ICON_BTN, ICON_BTN)) {
-            graphics.setTooltipForNextFrame(font, Component.translatable("screen.chiikawa.music_box.reload"), mouseX, mouseY);
-        }
+        // DIAGNOSTIC (temporary): always queue a tooltip to verify the deferred mechanism fires.
+        graphics.setTooltipForNextFrame(font, Component.literal("TIP mx=" + mouseX + " my=" + mouseY), mouseX, mouseY);
     }
 
     private static boolean within(int mx, int my, int x, int y, int w, int h) {
