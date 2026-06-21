@@ -15,8 +15,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -58,6 +56,7 @@ public class MusicBoxScreen extends Screen {
     private List<MusicTrackView> tracks;
     private int page;
     private int leftPos, topPos;
+    private IconButton folderButton, reloadButton;
 
     public MusicBoxScreen(int handIndex, List<MusicTrackView> tracks) {
         super(Component.translatable("screen.chiikawa.music_box.title"));
@@ -108,10 +107,12 @@ public class MusicBoxScreen extends Screen {
         next.active = page + 1 < pages;
         addRenderableWidget(next);
 
-        addRenderableWidget(new IconButton(leftPos + FOLDER_X, topPos + CTRL_Y, ICON_BTN, ICON_BTN,
-                ignored -> openMusicFolder(), Component.translatable("screen.chiikawa.music_box.open_folder")));
-        addRenderableWidget(new IconButton(leftPos + RELOAD_X, topPos + CTRL_Y, ICON_BTN, ICON_BTN,
-                ignored -> requestCatalog(true), Component.translatable("screen.chiikawa.music_box.reload")));
+        folderButton = new IconButton(leftPos + FOLDER_X, topPos + CTRL_Y, ICON_BTN, ICON_BTN,
+                ignored -> openMusicFolder(), Component.translatable("screen.chiikawa.music_box.open_folder"));
+        addRenderableWidget(folderButton);
+        reloadButton = new IconButton(leftPos + RELOAD_X, topPos + CTRL_Y, ICON_BTN, ICON_BTN,
+                ignored -> requestCatalog(true), Component.translatable("screen.chiikawa.music_box.reload"));
+        addRenderableWidget(reloadButton);
     }
 
     @Override
@@ -138,25 +139,14 @@ public class MusicBoxScreen extends Screen {
 
         super.render(graphics, mouseX, mouseY, partialTick);
 
-        // Tooltips for the baked control icons. Rendered immediately — the deferred
-        // setTooltipForNextFrame / renderDeferredElements path does not flush for this screen.
-        int cy = topPos + CTRL_Y;
-        if (within(mouseX, mouseY, leftPos + FOLDER_X, cy, ICON_BTN, ICON_BTN)) {
-            tooltip(graphics, Component.translatable("screen.chiikawa.music_box.open_folder"), mouseX, mouseY);
-        } else if (within(mouseX, mouseY, leftPos + RELOAD_X, cy, ICON_BTN, ICON_BTN)) {
-            tooltip(graphics, Component.translatable("screen.chiikawa.music_box.reload"), mouseX, mouseY);
+        // Control-icon tooltips, queued through the deferred path exactly like vanilla
+        // container slots (AbstractContainerScreen.renderTooltip -> setTooltipForNextFrame).
+        // Screen.renderWithTooltipAndSubtitles flushes it via renderDeferredElements().
+        if (folderButton != null && folderButton.isHovered()) {
+            graphics.setTooltipForNextFrame(font, Component.translatable("screen.chiikawa.music_box.open_folder"), mouseX, mouseY);
+        } else if (reloadButton != null && reloadButton.isHovered()) {
+            graphics.setTooltipForNextFrame(font, Component.translatable("screen.chiikawa.music_box.reload"), mouseX, mouseY);
         }
-    }
-
-    private static boolean within(int mx, int my, int x, int y, int w, int h) {
-        return mx >= x && my >= y && mx < x + w && my < y + h;
-    }
-
-    /** Immediate tooltip render — the deferred setTooltipForNextFrame path does not flush for this Screen. */
-    private void tooltip(GuiGraphics graphics, Component text, int mouseX, int mouseY) {
-        graphics.renderTooltip(font,
-                List.of(ClientTooltipComponent.create(text.getVisualOrderText())),
-                mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null);
     }
 
     /** Centered text without the default drop shadow — shadows look muddy on the cream panel. */

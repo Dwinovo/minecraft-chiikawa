@@ -45,6 +45,14 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     }
 
     @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        // In 1.21.11 AbstractContainerScreen.render() no longer draws the item tooltip itself;
+        // every vanilla container screen overrides render() and calls renderTooltip() explicitly.
+        super.render(graphics, mouseX, mouseY, partialTick);
+        this.renderTooltip(graphics, mouseX, mouseY);
+    }
+
+    @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, this.leftPos, this.topPos, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256);
 
