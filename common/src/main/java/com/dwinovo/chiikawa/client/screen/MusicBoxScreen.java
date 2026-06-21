@@ -135,6 +135,20 @@ public class MusicBoxScreen extends Screen {
         }
 
         super.render(graphics, mouseX, mouseY, partialTick);
+
+        // Tooltips for the baked control icons. Set here — exactly like vanilla container
+        // screens do for slots — so renderDeferredElements() draws them. The per-widget
+        // WidgetTooltipHolder path does not fire reliably inside a custom Screen.
+        int cy = topPos + CTRL_Y;
+        if (within(mouseX, mouseY, leftPos + FOLDER_X, cy, ICON_BTN, ICON_BTN)) {
+            graphics.setTooltipForNextFrame(font, Component.translatable("screen.chiikawa.music_box.open_folder"), mouseX, mouseY);
+        } else if (within(mouseX, mouseY, leftPos + RELOAD_X, cy, ICON_BTN, ICON_BTN)) {
+            graphics.setTooltipForNextFrame(font, Component.translatable("screen.chiikawa.music_box.reload"), mouseX, mouseY);
+        }
+    }
+
+    private static boolean within(int mx, int my, int x, int y, int w, int h) {
+        return mx >= x && my >= y && mx < x + w && my < y + h;
     }
 
     /** Centered text without the default drop shadow — shadows look muddy on the cream panel. */
@@ -212,15 +226,12 @@ public class MusicBoxScreen extends Screen {
         }
     }
 
-    /** Click + tooltip hit area over a control button whose frame/icon is baked into the panel. */
+    /** Click hit area over a control button whose frame/icon is baked into the panel. */
     private final class IconButton extends Button {
-        private final Component tip;
-
         private IconButton(int x, int y, int w, int h, Button.OnPress onPress, Component tooltip) {
             super(x, y, w, h, Component.empty(), onPress, supplier -> supplier.get());
-            this.tip = tooltip;
             if (tooltip != null) {
-                setTooltip(Tooltip.create(tooltip)); // keeps narration; visual is drawn below
+                setTooltip(Tooltip.create(tooltip)); // narration only; the visual tooltip is drawn in render()
             }
         }
 
@@ -230,11 +241,6 @@ public class MusicBoxScreen extends Screen {
                 graphics.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), DISABLED_TINT);
             } else if (isHoveredOrFocused()) {
                 graphics.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), HOVER_TINT);
-                // Draw the tooltip directly — the WidgetTooltipHolder path doesn't fire reliably
-                // for buttons inside a custom Screen, so queue it here while hovered.
-                if (tip != null) {
-                    graphics.setTooltipForNextFrame(font, tip, mouseX, mouseY);
-                }
             }
         }
     }
