@@ -27,3 +27,6 @@ common/logs/
 repo
 .vscode
 **/generated/
+
+# local MCP server config (machine-specific, holds local paths)
+.mcp.json
