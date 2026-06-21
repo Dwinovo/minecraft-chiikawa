@@ -27,7 +27,7 @@ import net.minecraft.resources.ResourceLocation;
  * needs new art. Slice coordinates mirror {@code art/ui-kit/music_box.aseprite}.
  */
 public class MusicBoxScreen extends Screen {
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/music_box.png");
+    private static final ResourceLocation TEXTURE = new ResourceLocation(Constants.MOD_ID, "textures/gui/music_box.png");
     private static final int ATLAS_W = 256, ATLAS_H = 320;
 
     private static final int PANEL_W = 240, PANEL_H = 248;
