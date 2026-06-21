@@ -300,6 +300,17 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         return (Brain<AbstractPet>) super.getBrain();
     }
 
+    /**
+     * Widen vanilla's protected {@code getFluidJumpThreshold} to public so the
+     * brain-side {@link com.dwinovo.chiikawa.entity.brain.task.tameable.FloatBehavior}
+     * — which lives in a different package — can read it to decide when to bob
+     * up to the water surface. Behavior is unchanged; this only relaxes access.
+     */
+    @Override
+    public double getFluidJumpThreshold() {
+        return super.getFluidJumpThreshold();
+    }
+
     @Override
     public void performRangedAttack(LivingEntity target, float distanceFactor) {
         if (!(level() instanceof ServerLevel serverLevel)) {
