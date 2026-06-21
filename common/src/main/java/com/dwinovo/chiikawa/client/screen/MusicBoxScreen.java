@@ -136,8 +136,12 @@ public class MusicBoxScreen extends Screen {
 
         super.render(graphics, mouseX, mouseY, partialTick);
 
-        // DIAGNOSTIC (temporary): always queue a tooltip to verify the deferred mechanism fires.
-        graphics.setTooltipForNextFrame(font, Component.literal("TIP mx=" + mouseX + " my=" + mouseY), mouseX, mouseY);
+        // DIAGNOSTIC v2: immediate tooltip render (bypasses the deferred renderDeferredElements path).
+        Component dbg = Component.literal("TIP mx=" + mouseX + " my=" + mouseY);
+        graphics.renderTooltip(font,
+                java.util.List.of(net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent.create(dbg.getVisualOrderText())),
+                mouseX, mouseY,
+                net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner.INSTANCE, null);
     }
 
     private static boolean within(int mx, int my, int x, int y, int w, int h) {
