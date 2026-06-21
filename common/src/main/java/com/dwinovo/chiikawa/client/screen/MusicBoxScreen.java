@@ -15,7 +15,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -118,7 +118,7 @@ public class MusicBoxScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         graphics.fill(0, 0, this.width, this.height, 0x55000000);
-        graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, leftPos, topPos,
+        graphics.blit(RenderType::guiTextured, TEXTURE, leftPos, topPos,
                 (float) PANEL_U, (float) PANEL_V, PANEL_W, PANEL_H, ATLAS_W, ATLAS_H);
 
         Component decoratedTitle = Component.literal("♪ ").append(title).append(Component.literal(" ♪"));
@@ -139,13 +139,12 @@ public class MusicBoxScreen extends Screen {
 
         super.render(graphics, mouseX, mouseY, partialTick);
 
-        // Control-icon tooltips, queued through the deferred path exactly like vanilla
-        // container slots (AbstractContainerScreen.renderTooltip -> setTooltipForNextFrame).
-        // Screen.renderWithTooltipAndSubtitles flushes it via renderDeferredElements().
+        // Control-icon tooltips. 1.21.5 has no deferred tooltip API (setTooltipForNextFrame),
+        // so draw immediately after super.render() using the single-component renderTooltip.
         if (folderButton != null && folderButton.isHovered()) {
-            graphics.setTooltipForNextFrame(font, Component.translatable("screen.chiikawa.music_box.open_folder"), mouseX, mouseY);
+            graphics.renderTooltip(font, Component.translatable("screen.chiikawa.music_box.open_folder"), mouseX, mouseY);
         } else if (reloadButton != null && reloadButton.isHovered()) {
-            graphics.setTooltipForNextFrame(font, Component.translatable("screen.chiikawa.music_box.reload"), mouseX, mouseY);
+            graphics.renderTooltip(font, Component.translatable("screen.chiikawa.music_box.reload"), mouseX, mouseY);
         }
     }
 
@@ -217,7 +216,7 @@ public class MusicBoxScreen extends Screen {
         @Override
         protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             int v = (active && isHoveredOrFocused()) ? ROWSEL_V : ROW_V;
-            graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, getX(), getY(),
+            graphics.blit(RenderType::guiTextured, TEXTURE, getX(), getY(),
                     (float) ROW_U, (float) v, ROW_W, ROW_H, ATLAS_W, ATLAS_H);
             graphics.drawString(font, rowTitle(track), getX() + ROW_TEXT_X, getY() + ROW_TEXT_Y,
                     active ? TEXT : TEXT_DIM, false);
