@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.utils;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.task.tameable.FloatBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.KeepAroundBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.PickUpItemTask;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.RandomWalkTask;
@@ -28,12 +29,13 @@ public final class BrainUtils {
     }
 
     public static void addCoreTasks(Brain<AbstractPet> brain) {
+        Pair<Integer, BehaviorControl<? super AbstractPet>> floatInWater = Pair.of(0, new FloatBehavior<>());
         Pair<Integer, BehaviorControl<? super AbstractPet>> sit = Pair.of(0, new SitBehavior<>());
         Pair<Integer, BehaviorControl<? super AbstractPet>> keepAround = Pair.of(2, new KeepAroundBehavior<>(7, 13, 20));
         Pair<Integer, BehaviorControl<? super AbstractPet>> walkToTarget = Pair.of(1, new MoveToTargetSink());
         Pair<Integer, BehaviorControl<? super AbstractPet>> look = Pair.of(0, new LookAtTargetSink(45, 45));
         Pair<Integer, BehaviorControl<? super AbstractPet>> pickitem = Pair.of(3, new PickUpItemTask(0.7f));
-        addActivity(brain, Activity.CORE, ImmutableList.of(look, sit, keepAround, walkToTarget,pickitem));
+        addActivity(brain, Activity.CORE, ImmutableList.of(floatInWater, look, sit, keepAround, walkToTarget,pickitem));
     }
 
     public static void addIdleTasks(Brain<AbstractPet> brain) {
