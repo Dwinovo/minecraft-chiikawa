@@ -14,9 +14,15 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.SimpleContainer;
 
 public class PetBackpackMenu extends AbstractContainerMenu {
-    private static final int PLAYER_INV_X = 8;
-    private static final int PLAYER_INV_Y = 84;
-    private static final int HOTBAR_Y = 142;
+    // Slot positions match the pet_gui texture (item top-left = visual cell + 1px inset).
+    private static final int SLOT_PITCH = 17;          // 18px cell, overlapping 1px
+    private static final int MAINHAND_X = 77;
+    private static final int MAINHAND_Y = 38;
+    private static final int PET_GRID_X = 101;
+    private static final int PET_GRID_Y = 20;
+    private static final int PLAYER_INV_X = 24;
+    private static final int PLAYER_INV_Y = 97;
+    private static final int HOTBAR_Y = 151;
 
     private final AbstractPet pet;
     private final int petSlotCount;
@@ -36,23 +42,23 @@ public class PetBackpackMenu extends AbstractContainerMenu {
         this.petSlotCount = handler.getContainerSize();
         // Avoid SimpleContainer.startOpen to keep cross-loader bytecode free of ContainerUser.
         if (petSlotCount > 0) {
-            this.addSlot(new Slot(handler, 0, 8, 18));
+            this.addSlot(new Slot(handler, 0, MAINHAND_X, MAINHAND_Y));
             int slot = 1;
             for (int row = 0; row < 3 && slot < petSlotCount; row++) {
                 for (int col = 0; col < 5 && slot < petSlotCount; col++) {
-                    this.addSlot(new Slot(handler, slot++, 80 + col * 18, 18 + row * 18));
+                    this.addSlot(new Slot(handler, slot++, PET_GRID_X + col * SLOT_PITCH, PET_GRID_Y + row * SLOT_PITCH));
                 }
             }
         }
 
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, PLAYER_INV_X + col * 18, PLAYER_INV_Y + row * 18));
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, PLAYER_INV_X + col * SLOT_PITCH, PLAYER_INV_Y + row * SLOT_PITCH));
             }
         }
 
         for (int col = 0; col < 9; col++) {
-            this.addSlot(new Slot(playerInventory, col, PLAYER_INV_X + col * 18, HOTBAR_Y));
+            this.addSlot(new Slot(playerInventory, col, PLAYER_INV_X + col * SLOT_PITCH, HOTBAR_Y));
         }
     }
 
