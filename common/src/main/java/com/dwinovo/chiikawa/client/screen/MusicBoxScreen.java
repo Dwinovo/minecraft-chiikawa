@@ -214,10 +214,13 @@ public class MusicBoxScreen extends Screen {
 
     /** Click + tooltip hit area over a control button whose frame/icon is baked into the panel. */
     private final class IconButton extends Button {
+        private final Component tip;
+
         private IconButton(int x, int y, int w, int h, Button.OnPress onPress, Component tooltip) {
             super(x, y, w, h, Component.empty(), onPress, supplier -> supplier.get());
+            this.tip = tooltip;
             if (tooltip != null) {
-                setTooltip(Tooltip.create(tooltip));
+                setTooltip(Tooltip.create(tooltip)); // keeps narration; visual is drawn below
             }
         }
 
@@ -227,6 +230,11 @@ public class MusicBoxScreen extends Screen {
                 graphics.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), DISABLED_TINT);
             } else if (isHoveredOrFocused()) {
                 graphics.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), HOVER_TINT);
+                // Draw the tooltip directly — the WidgetTooltipHolder path doesn't fire reliably
+                // for buttons inside a custom Screen, so queue it here while hovered.
+                if (tip != null) {
+                    graphics.setTooltipForNextFrame(font, tip, mouseX, mouseY);
+                }
             }
         }
     }
