@@ -1,56 +1,46 @@
 package com.dwinovo.chiikawa.utils;
 
-import com.dwinovo.chiikawa.entity.AbstractPet;
-import java.util.Optional;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 
 // Spiral search helpers.
 public final class BlockSearch {
     /**
-     * Predicate for checking a position during search.
+     * Visitor invoked per position during a spiral traversal.
      */
     @FunctionalInterface
-    public interface BlockCheckPredicate {
+    public interface BlockVisitor {
         /**
-         * Tests whether a position matches the search condition.
-         * @param level the server level
-         * @param pos the position
-         * @param pet the pet entity
-         * @return whether the position matches
+         * Visits a position.
+         * @param pos the position (nearest-first spiral order)
+         * @return true to stop the traversal early
          */
-        boolean test(ServerLevel level, BlockPos pos, AbstractPet pet);
+        boolean visit(BlockPos pos);
     }
 
     private BlockSearch() {
     }
 
     /**
-     * Searches around the pet in a spiral for a matching position.
-     * @param level the server level
-     * @param pet the pet entity
+     * Visits positions around {@code center} in outward spiral order (nearest
+     * first), stopping as soon as the visitor returns true. Unlike a predicate
+     * search this lets one pass collect several different targets at once.
+     * @param center the search center
      * @param maxRadius max horizontal radius
      * @param verticalRange vertical range to scan
-     * @param predicate test for a valid position
-     * @return the first matching position, if any
+     * @param visitor per-position callback; returns true to stop
      */
-    public static Optional<BlockPos> spiralBlockSearch(ServerLevel level, AbstractPet pet,
-                                                       int maxRadius, int verticalRange,
-                                                       BlockCheckPredicate predicate) {
-        BlockPos center = pet.blockPosition();
+    public static void spiralVisit(BlockPos center, int maxRadius, int verticalRange, BlockVisitor visitor) {
         for (int radius = 0; radius <= maxRadius; radius++) {
             for (int quadrant = 0; quadrant < 4; quadrant++) {
                 for (int i = -radius; i <= radius; i++) {
                     for (int y = -verticalRange; y <= verticalRange; y++) {
-                        BlockPos pos = calculateSpiralPos(center, radius, quadrant, i, y);
-                        if (predicate.test(level, pos, pet)) {
-                            return Optional.of(pos);
+                        if (visitor.visit(calculateSpiralPos(center, radius, quadrant, i, y))) {
+                            return;
                         }
                     }
                 }
             }
         }
-        return Optional.empty();
     }
 
     /**
