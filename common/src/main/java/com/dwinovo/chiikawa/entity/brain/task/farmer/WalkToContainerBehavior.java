@@ -9,6 +9,7 @@ import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.init.InitTag;
 import com.dwinovo.chiikawa.platform.Services;
+import com.dwinovo.chiikawa.utils.Utils;
 
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
@@ -59,6 +60,13 @@ public class WalkToContainerBehavior extends Behavior<AbstractPet>{
             return false;
         }
         if (!canInsertContainer(world, target, pet)) {
+            pet.getBrain().eraseMemory(InitMemory.CONTAINER_POS.get());
+            return false;
+        }
+        // Single reachability pathfind for the chosen container; blacklist on failure
+        // (the sensor no longer pre-checks reach).
+        if (!Utils.canReach(pet, target)) {
+            pet.blacklistUnreachable(target);
             pet.getBrain().eraseMemory(InitMemory.CONTAINER_POS.get());
             return false;
         }
