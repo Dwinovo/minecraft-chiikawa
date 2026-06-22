@@ -5,13 +5,24 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Path;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.task.farmer.crop.CropHandler;
 import com.dwinovo.chiikawa.entity.brain.task.farmer.crop.FarmRegistry;
 
 // Utility helpers. Farming methods dispatch through FarmRegistry to the matching
 // CropHandler (DefaultCropHandler for standard crops); the actual logic lives there.
 public class Utils {
+
+    /**
+     * Distance² at which a pet is "close enough" to act on a farm work target
+     * (plant/harvest). Must comfortably cover where navigation actually stops:
+     * diagonally adjacent is ~2.0, and on soul sand the entity sinks a little
+     * which nudges it further — so a tight 1.0 left pets frozen next to a crop
+     * until nudged. 3.0 (≈1.73 blocks) clears all adjacent standing positions.
+     */
+    public static final double WORK_REACH_SQR = 3.0D;
 
     /**
      * Returns true if the crop at the position can be harvested.
@@ -113,11 +124,34 @@ public class Utils {
      * @return whether the pet's seed can be planted here
      */
     public static boolean isPlantableBase(ServerLevel world, AbstractPet pet, BlockPos basePos) {
-        ItemStack seed = getSeed(pet);
-        if (seed.isEmpty() || !world.getBlockState(basePos.above()).isAir()) {
-            return false;
+        return !getSeedForBase(world, pet, basePos).isEmpty();
+    }
+
+    /**
+     * Picks a backpack seed that can be planted on the block at {@code basePos}.
+     * Considers <em>every</em> held seed (not just the first), so e.g. nether wart
+     * still gets planted on nearby soul sand even when the pet also carries crop
+     * seeds and all farmland is full. Requires the space above to be air.
+     * @param world the server world
+     * @param pet the pet
+     * @param basePos the candidate soil block
+     * @return the matching seed stack (a live backpack reference), or empty if none fits
+     */
+    public static ItemStack getSeedForBase(ServerLevel world, AbstractPet pet, BlockPos basePos) {
+        if (!world.getBlockState(basePos.above()).isAir()) {
+            return ItemStack.EMPTY;
         }
-        return FarmRegistry.forSeed(seed.getItem())
-            .canPlantOn(world, basePos, world.getBlockState(basePos), seed);
+        BlockState baseState = world.getBlockState(basePos);
+        for (int i = 0; i < pet.getBackpack().getContainerSize(); i++) {
+            ItemStack stack = pet.getBackpack().getItem(i);
+            if (stack.isEmpty()) {
+                continue;
+            }
+            CropHandler handler = FarmRegistry.forSeed(stack.getItem());
+            if (handler.isSeed(stack) && handler.canPlantOn(world, basePos, baseState, stack)) {
+                return stack;
+            }
+        }
+        return ItemStack.EMPTY;
     }
 }

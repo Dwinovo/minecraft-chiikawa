@@ -51,7 +51,7 @@ public class PlantCropBehavior extends Behavior<AbstractPet>{
         {
             BlockPos farmlandPos = pet.getBrain().getMemory(InitMemory.PLANT_POS.get()).get();
             if( 
-                pet.distanceToSqr(Vec3.atCenterOf(farmlandPos)) <= 2.0D
+                pet.distanceToSqr(Vec3.atCenterOf(farmlandPos)) <= Utils.WORK_REACH_SQR
                 && Utils.isPlantableBase(world, pet, farmlandPos)
             ){
                 return true;
@@ -76,7 +76,7 @@ public class PlantCropBehavior extends Behavior<AbstractPet>{
         }
         BlockPos farmlandPos = farmlandPosOpt.get();
         return Utils.isPlantableBase(world, pet, farmlandPos)
-            && pet.distanceToSqr(Vec3.atCenterOf(farmlandPos)) <= 2.0D
+            && pet.distanceToSqr(Vec3.atCenterOf(farmlandPos)) <= Utils.WORK_REACH_SQR
             && !Utils.getSeed(pet).isEmpty();
     }
     /**
@@ -97,8 +97,11 @@ public class PlantCropBehavior extends Behavior<AbstractPet>{
         Optional<BlockPos> farmlandPosOpt = brain.getMemory(InitMemory.PLANT_POS.get());
         if(farmlandPosOpt.isEmpty()) return;
         BlockPos farmlandPos = farmlandPosOpt.get();
-        ItemStack seed = Utils.getSeed(pet);
-        if (!seed.isEmpty() && Utils.isPlantableBase(world, pet, farmlandPos)) {
+        // Pick the seed that actually fits this soil (not just the first one held),
+        // so e.g. nether wart is planted on soul sand even when crop seeds are also
+        // in the backpack.
+        ItemStack seed = Utils.getSeedForBase(world, pet, farmlandPos);
+        if (!seed.isEmpty()) {
             // Native placement: runs the seed's own BlockItem.place, so the crop's
             // placement rules/state apply and the seed stack is consumed on success.
             if (Utils.plantSeed(world, pet, farmlandPos, seed)) {
