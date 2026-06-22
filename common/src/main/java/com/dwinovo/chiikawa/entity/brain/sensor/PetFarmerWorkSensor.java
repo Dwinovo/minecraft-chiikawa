@@ -43,7 +43,9 @@ public class PetFarmerWorkSensor extends Sensor<AbstractPet> {
     private static final int VERTICAL_RANGE = 1;
     /** Backoff cap: each consecutive empty search adds this many ticks, up to MAX_EMPTY_STREAK steps. */
     private static final int BACKOFF_STEP_TICKS = 30;
-    private static final int MAX_EMPTY_STREAK = 5;
+    // Caps idle search interval at ~3*30 = 90t (~4.5s) so a standing-still pet still
+    // notices freshly-placed work reasonably fast.
+    private static final int MAX_EMPTY_STREAK = 3;
 
     // (6) Adaptive backoff state (per-pet: each brain owns its own sensor instance).
     private long nextSearchTime = 0L;
