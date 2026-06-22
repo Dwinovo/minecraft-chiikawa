@@ -140,3 +140,55 @@ public void render(GuiGraphics g, int mx, int my, float pt) {
 - **1.21.10 → 1.21.11**：`ResourceLocation`→`Identifier`、`net.minecraft.Util`→`net.minecraft.util.Util`、`renderWidget`→`renderContents`。
 - **1.21.1 → 1.20.6**：`fromNamespaceAndPath`→`new ResourceLocation`、neoforge→forge、JDK 21→17。
 - **1.20.2 → 1.20.1**：`renderBackground` 单参无 blur、实体预览退化为点式 7 参。
+
+---
+
+## 4. 方块交互 / 农夫职业 API（farming）
+
+农夫职业（种植/收割）用到的 vanilla 方块交互 API，移植时注意以下几点。多数是**跨版本稳定**的原版方法，只有少量在 26.1.2 自定义 mappings 下与 Forge 习惯不同。
+
+### 4.1 ⚠ `BlockPlaceContext`「无玩家」构造器在 vanilla 是 protected
+
+要让宠物像玩家一样原生放置方块（`BlockItem.place`），需要一个 player 为 null 的 `BlockPlaceContext`。**Forge 把 5 参构造器开放成了 public**（所以 TLM 能直接 `new BlockPlaceContext(level, null, hand, stack, hit)`），但 **vanilla / 26.1.2 该构造器是 `protected`**，直接 new 报错。解法是匿名子类绕过：
+
+```java
+BlockHitResult hit = new BlockHitResult(hitVec, Direction.UP, basePos, false);
+// 匿名子类即可访问 protected 构造器；无玩家放置
+BlockPlaceContext ctx = new BlockPlaceContext(level, null, InteractionHand.MAIN_HAND, seed, hit) {};
+boolean placed = ((BlockItem) seed.getItem()).place(ctx).consumesAction();
+```
+
+`place()` 成功时会自动 `shrink` 种子堆，不用手动扣。
+
+### 4.2 26.1.2 类/方法重命名
+
+| 标准（1.21.x / Forge 习惯） | 26.1.2 |
+|---|---|
+| `FarmBlock` | **`FarmlandBlock`**（`fallOn` / `turnToDirt` 仍在） |
+| `Block.getDrops(..., ItemStack tool)` | 末参类型是 **`ItemInstance`**（`ItemStack implements ItemInstance`，直接传 stack 即可） |
+| `ItemNameBlockItem`（小麦种子等的类） | **已移除**——种子物品现在就是普通 `BlockItem`。判定种子用 `item instanceof BlockItem && getBlock() instanceof CropBlock/StemBlock`，**不要**引用 `ItemNameBlockItem` |
+
+### 4.3 防踩耕地：本 mod 无需处理
+
+TLM 用 Forge `FarmlandTrampleEvent` 取消女仆踩踏。本 mod **不需要任何代码**：`FarmlandBlock.fallOn` 的踩踏条件是 `getBbWidth()² × getBbHeight() > 0.512F`，而宠物体型 `0.6 × 0.8` → `0.6²×0.8 = 0.288 < 0.512`，**天然不会踩坏耕地**。若将来把宠物体型放大到超过阈值，才需要 mixin 进 `FarmlandBlock.fallOn`（本 mod 目前无 mixin 基建，两个加载器都要新配）跳过 `AbstractPet`。
+
+### 4.4 收割 = 原生掉落进背包，不撒地上
+
+`AbstractPet.dropResourcesToPetInv` 用 `Block.getDrops(state, serverLevel, pos, be, pet, tool)` 带工具算掉落（Fortune 生效），`SimpleContainer.addItem` 返回的余量再 `Block.popResource` 落地，最后 `state.spawnAfterBreak(...)`。成熟 `CropBlock` 收割后 `setBlock(crop.defaultBlockState())` 即 age 归零原地补种（**省去 TLM 那个读 `AGE` 属性的 mixin**）。以上方法全是原版、跨版本稳定。
+
+### 4.5 农夫可扩展架构（对标 TLM `IFarmTask`/`ISpecialCropHandler`）
+
+`entity/brain/task/farmer/crop/` 下：`CropHandler` 接口 + `DefaultCropHandler`（标准作物）+ `FarmRegistry`（`Map<Item/Block, CropHandler>`，未注册回落默认）。加异类作物 = 写一个 `extends DefaultCropHandler` 只改差异点，再 `FarmRegistry.register(seed, crop, handler)`（见 `NetherWartCropHandler`）。注册在**两个加载器入口各调一次** `FarmRegistry.init()`（neoforge 入口不走 `CommonClass.init()`，别只加一处）。
+
+### 4.6 农夫 sensor 性能模式（移植时照搬）
+
+宠物 AI 找方块**不要**在扫描里逐格寻路——`PathNavigation.createPath` 是单次最贵的操作，一次寻路 ≈ 甚至 >> 整片邻域的 `getBlockState` 平铺扫描。本 mod 的 `PetFarmerWorkSensor` 用四条原则把农夫 AI 从"每秒几十~上百次 A\*"降到"偶尔 1 次 A\*"：
+
+1. **扫描不寻路**：sensor 只用廉价方块判定选候选;可达性那次 A\* 移到 WalkTo 行为里**对最终目标只做一次**。
+2. **拉黑表退避**：WalkTo 发现目标够不到 → `AbstractPet.blacklistUnreachable(pos)`(瞬态、不存档、10s 过期),下次扫描跳过,自然收敛到可达目标。
+3. **合并 + 满足即跳过**：原来 plant/harvest/container 三个 sensor 各扫一遍 → 合成一个 `PetFarmerWorkSensor` 一次螺旋同时收三类;且所有目标都已就位时整个扫描直接 return(连廉价遍历都省)。复验已记忆目标只用 `getBlockState`,**绝不重新寻路**。
+4. **自适应退避**：连续空搜逐级拉长搜索间隔(每级 +30t,上限 5 级 ≈ ~160t),移动到新位置或找到活立即清零恢复快搜。退避状态放 sensor 实例字段即可——**每个实体的 brain 各自持有一份 sensor 实例**(`SensorType` 工厂每 brain 造一个),所以实例字段天然是 per-pet。
+
+⚠ **不要**用 vanilla POI(`PoiManager`)索引箱子等常见方块:POI 适合稀疏稳定的特殊方块,索引常见方块会在全服每个区块产生内存/处理开销,是净负优化。容器的"缓存"用每只宠物的 `CONTAINER_POS` 记忆即可。
+
+`Sensor()` 无参默认 `DEFAULT_SCAN_RATE = 20`(每 20t 一扫,带随机抖动),自定义 sensor 不写构造器就是这个节流频率,别误以为每 tick 都在跑。
