@@ -12,19 +12,21 @@
 
 把每个 MC 版本归到一个"代际"。同代之间 cherry-pick 通常**零冲突、零改动**。
 
-| 轴 \ 版本 | 26.1.2 | 1.21.11 | 1.21.10 / .8 / .7 / .6 | 1.21.5 / .4 | 1.21.1 | 1.20.6 / .4 / .2 | 1.20.1 |
-|---|---|---|---|---|---|---|---|
-| **加载器** | fabric + neoforge | fabric + neoforge | fabric + neoforge | fabric + neoforge | fabric + neoforge | fabric + **forge** | fabric + **forge** |
-| **资源标识符** | `Identifier` | `Identifier` | `ResourceLocation` | `ResourceLocation` | `ResourceLocation` | `ResourceLocation` | `ResourceLocation` |
-| **标识符构造** | `Identifier.fromNamespaceAndPath` | `…fromNamespaceAndPath` | `ResourceLocation.fromNamespaceAndPath` | `…fromNamespaceAndPath` | `…fromNamespaceAndPath` | `new ResourceLocation(ns,path)` | `new ResourceLocation(ns,path)` |
-| **Util 包** | `net.minecraft.util.Util` | `net.minecraft.util.Util` | `net.minecraft.Util` | `net.minecraft.Util` | `net.minecraft.Util` | `net.minecraft.Util` | `net.minecraft.Util` |
-| **GuiGraphics 类型** | `GuiGraphicsExtractor` ⚠ | `GuiGraphics` | `GuiGraphics` | `GuiGraphics` | `GuiGraphics` | `GuiGraphics` | `GuiGraphics` |
-| **Widget 渲染方法** | `renderContents` | `renderContents` | `renderWidget` | `renderWidget` | `renderWidget` | `renderWidget` | `renderWidget` |
-| **blit 渲染类型首参** | `RenderPipelines.GUI_TEXTURED` | `RenderPipelines.GUI_TEXTURED` | `RenderPipelines.GUI_TEXTURED` | `RenderType::guiTextured` | 无（直接 `blit(TEX,…)`） | 无 | 无 |
-| **Tooltip 机制** | deferred `setTooltipForNextFrame` | deferred | deferred | **立即** `renderTooltip` | 立即 | 立即 | 立即 |
-| **Screen 背景模糊** | （extract 体系） | render() 外部处理，无糊 | render() 外部处理，无糊 | ⚠ `Screen.render()` 内联 blur，会糊面板 | 同左结构（无害） | 同左结构（无害） | ⚠ `renderBackground(GuiGraphics)` 单参、render() 不调、无 blur |
-| **实体预览 API** | `extractEntityInInventoryFollowsMouse`（矩形） | `renderEntityInInventoryFollowsMouse`（矩形 10 参） | 矩形 10 参 | 矩形 10 参 | 矩形 10 参 | 矩形 10 参 | **点式 7 参** |
-| **构建 JDK** | Java 25 | Java 21 | Java 21 | Java 21 | Java 21 | Java 17 / Gradle 8.8 | Java 17 / Gradle 8.8 |
+| 轴 \ 版本 | 26.1.2 | 1.21.11 | 1.21.10 / .8 / .7 / .6 | 1.21.5 / .4 | 1.21.1 | 1.20.6 | 1.20.4 / .2 | 1.20.1 |
+|---|---|---|---|---|---|---|---|---|
+| **加载器** | fabric + neoforge | fabric + neoforge | fabric + neoforge | fabric + neoforge | fabric + neoforge | fabric + neoforge | fabric + **forge** | fabric + **forge** |
+| **资源标识符** | `Identifier` | `Identifier` | `ResourceLocation` | `ResourceLocation` | `ResourceLocation` | `ResourceLocation` | `ResourceLocation` | `ResourceLocation` |
+| **标识符构造** | `Identifier.fromNamespaceAndPath` | `…fromNamespaceAndPath` | `ResourceLocation.fromNamespaceAndPath` | `…fromNamespaceAndPath` | `…fromNamespaceAndPath` | `new ResourceLocation(ns,path)` | `new ResourceLocation(ns,path)` | `new ResourceLocation(ns,path)` |
+| **Util 包** | `net.minecraft.util.Util` | `net.minecraft.util.Util` | `net.minecraft.Util` | `net.minecraft.Util` | `net.minecraft.Util` | `net.minecraft.Util` | `net.minecraft.Util` | `net.minecraft.Util` |
+| **GuiGraphics 类型** | `GuiGraphicsExtractor` ⚠ | `GuiGraphics` | `GuiGraphics` | `GuiGraphics` | `GuiGraphics` | `GuiGraphics` | `GuiGraphics` | `GuiGraphics` |
+| **Widget 渲染方法** | `renderContents` | `renderContents` | `renderWidget` | `renderWidget` | `renderWidget` | `renderWidget` | `renderWidget` | `renderWidget` |
+| **blit 渲染类型首参** | `RenderPipelines.GUI_TEXTURED` | `RenderPipelines.GUI_TEXTURED` | `RenderPipelines.GUI_TEXTURED` | `RenderType::guiTextured` | 无（直接 `blit(TEX,…)`） | 无 | 无 | 无 |
+| **Tooltip 机制** | deferred `setTooltipForNextFrame` | deferred | deferred | **立即** `renderTooltip` | 立即 | 立即 | 立即 | 立即 |
+| **Screen 背景模糊** | （extract 体系） | render() 外部处理，无糊 | render() 外部处理，无糊 | ⚠ `Screen.render()` 内联 blur，会糊面板 | 同左结构（无害） | 同左结构（无害） | 同左结构（无害） | ⚠ `renderBackground(GuiGraphics)` 单参、render() 不调、无 blur |
+| **实体预览 API** | `extractEntityInInventoryFollowsMouse`（矩形） | `renderEntityInInventoryFollowsMouse`（矩形 10 参） | 矩形 10 参 | 矩形 10 参 | 矩形 10 参 | 矩形 10 参 | 矩形 10 参 | **点式 7 参** |
+| **构建 JDK** | Java 25 | Java 21 | Java 21 | Java 21 | Java 21 | Java 21 | Java 17 / Gradle 8.8 | Java 17 / Gradle 8.8 |
+
+> ⚠ **1.20.6 是个坑**：虽属 1.20.x,但它是 **fabric + neoforge + JDK 21**(跟 1.21.x 一样),只有 **1.20.4 / .2 / .1 才是 fabric + forge + JDK 17**。1.20.x 全部用 `new ResourceLocation(ns,path)` 构造器。(经 0.0.7 farmer 移植逐分支 `git show` 实测修正——旧版此表误把 1.20.6 归进 forge 组。)
 
 ⚠ = 该版本独有的特殊点，移植时最容易翻车，见下方详解。
 
@@ -138,7 +140,8 @@ public void render(GuiGraphics g, int mx, int my, float pt) {
 ### 代际边界速记
 - **1.21.5 → 1.21.6**：最大断层。`RenderType::guiTextured`→`RenderPipelines`、新增 deferred tooltip、`Screen.render()` 不再内联 blur。
 - **1.21.10 → 1.21.11**：`ResourceLocation`→`Identifier`、`net.minecraft.Util`→`net.minecraft.util.Util`、`renderWidget`→`renderContents`。
-- **1.21.1 → 1.20.6**：`fromNamespaceAndPath`→`new ResourceLocation`、neoforge→forge、JDK 21→17。
+- **1.21.1 → 1.20.6**：**只**有 `fromNamespaceAndPath`→`new ResourceLocation`(仍 neoforge、仍 JDK21,别按旧表当成 forge)。
+- **1.20.6 → 1.20.4**：neoforge→**forge**、JDK 21→17(这里才是 forge/JDK 断层)。
 - **1.20.2 → 1.20.1**：`renderBackground` 单参无 blur、实体预览退化为点式 7 参。
 
 ---
@@ -179,6 +182,13 @@ TLM 用 Forge `FarmlandTrampleEvent` 取消女仆踩踏。本 mod **不需要任
 ### 4.5 农夫可扩展架构（对标 TLM `IFarmTask`/`ISpecialCropHandler`）
 
 `entity/brain/task/farmer/crop/` 下：`CropHandler` 接口 + `DefaultCropHandler`（标准作物）+ `FarmRegistry`（`Map<Item/Block, CropHandler>`，未注册回落默认）。加异类作物 = 写一个 `extends DefaultCropHandler` 只改差异点，再 `FarmRegistry.register(seed, crop, handler)`（见 `NetherWartCropHandler`）。注册在**两个加载器入口各调一次** `FarmRegistry.init()`（neoforge 入口不走 `CommonClass.init()`，别只加一处）。
+
+**种子识别三层**（`DefaultCropHandler.isSeed`）：① 代码 `instanceof CropBlock/StemBlock`（无需标签，覆盖大多数模组）；② `entity_plant_crops` 标签含的**约定标签**；③ 数据包手动加。其中**约定标签的命名按加载器/代际不同**（实测 Farmer's Delight）：
+- **1.21.x（neoforge）/ 所有 fabric** → `c:seeds`
+- **1.20.4/.2/.1（forge）** → `forge:seeds`
+- **1.20.6（neoforge，但老）** → 两个都加(`c:seeds` + `forge:seeds`),最大覆盖。
+
+老版本(1.21.5 及以下)的 `TagData.TagAppenderProvider` 是 `add(key, values...)` 旧式,**没暴露标签包含**——但 vanilla/Fabric builder 本身支持 `addOptionalTag`,给 provider 加个 `addOptionalTag` 默认方法、item provider 改匿名类 override 即可(见各分支 `feat(...): support c:seeds via datagen tag-include`)。
 
 ### 4.6 农夫 sensor 性能模式（移植时照搬）
 
