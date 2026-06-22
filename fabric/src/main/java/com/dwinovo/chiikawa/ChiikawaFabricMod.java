@@ -13,6 +13,7 @@ import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTabs;
+import com.dwinovo.chiikawa.entity.brain.task.farmer.crop.FarmRegistry;
 import com.dwinovo.chiikawa.item.PetDollItem;
 import com.dwinovo.chiikawa.item.PetReviveRitualManager;
 import com.dwinovo.chiikawa.data.FabricBiomeModifications;
@@ -40,6 +41,7 @@ public class ChiikawaFabricMod implements ModInitializer {
         InitEntity.init();
         InitItems.init();
         InitTabs.init();
+        FarmRegistry.init();
         FabricBiomeModifications.init();
         Services.ENTITY.registerAttributes();
         Services.ENTITY.registerSpawnPlacements();

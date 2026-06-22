@@ -45,8 +45,14 @@ public class WalkToHarvestCropBehavior extends Behavior<AbstractPet>{
             && pet.getBrain().getMemory(InitMemory.HARVEST_POS.get()).isPresent()
         ){
             net.minecraft.core.BlockPos target = pet.getBrain().getMemory(InitMemory.HARVEST_POS.get()).get();
-            if (Utils.canHarvesr(world, target) && Utils.canReach(pet, target)) {
-                return true;
+            if (Utils.canHarvesr(world, target)) {
+                // Single reachability pathfind for the chosen target (the sensor no
+                // longer does this per-candidate). If unreachable, blacklist so the
+                // next scan moves on instead of re-picking it.
+                if (Utils.canReach(pet, target)) {
+                    return true;
+                }
+                pet.blacklistUnreachable(target);
             }
             pet.getBrain().eraseMemory(InitMemory.HARVEST_POS.get());
         }
