@@ -58,8 +58,12 @@ import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
@@ -125,9 +129,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         net.minecraft.world.entity.ai.sensing.SensorType.HURT_BY,
         net.minecraft.world.entity.ai.sensing.SensorType.NEAREST_LIVING_ENTITIES,
         InitSensor.PET_ATTACKBLE_ENTITY_SENSOR.get(),
-        InitSensor.PET_HARVEST_CROP_SENSOR.get(),
-        InitSensor.PET_PLANT_CROP_SENSOR.get(),
-        InitSensor.PET_CONTAINER_SENSOR.get(),
+        InitSensor.PET_FARMER_WORK_SENSOR.get(),
         InitSensor.PET_ITEM_ENTITY_SENSOR.get()
     );
     /** Lazily allocated on first client-side read; server instances pay nothing. */
@@ -165,6 +167,65 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      */
     public SimpleContainer getBackpack() {
         return backpack;
+    }
+
+    /**
+     * Computes a block's loot-table drops (using {@code tool} as the breaking
+     * tool, so enchantments like Fortune apply) and inserts them straight into
+     * this pet's backpack. Anything that doesn't fit pops onto the ground at
+     * {@code pos}. Mirrors the vanilla block-break drop path so harvested
+     * produce never has to be picked up off the floor.
+     *
+     * @param state the block being broken
+     * @param level the server level
+     * @param pos the block position
+     * @param blockEntity the block's block entity, or {@code null}
+     * @param tool the tool used (affects loot); may be empty
+     */
+    public void dropResourcesToPetInv(BlockState state, ServerLevel level, BlockPos pos, BlockEntity blockEntity, ItemStack tool) {
+        for (ItemStack drop : Block.getDrops(state, level, pos, blockEntity, this, tool)) {
+            ItemStack remainder = backpack.addItem(drop);
+            if (!remainder.isEmpty()) {
+                Block.popResource(level, pos, remainder);
+            }
+        }
+        state.spawnAfterBreak(level, pos, tool, true);
+    }
+
+    /** How long a work target stays blacklisted after being found unreachable. */
+    private static final long REACH_BLACKLIST_TICKS = 200L;
+    /** Transient (not saved): work-target positions recently found unreachable → expiry game-time. */
+    private final java.util.Map<Long, Long> reachBlacklist = new java.util.HashMap<>();
+
+    /**
+     * Marks a work-target position as currently unreachable so the farmer sensor
+     * stops re-selecting it for a while. This keeps the (expensive) reachability
+     * pathfind out of the per-candidate scan: the sensor picks targets by cheap
+     * checks, the walk-to behavior does the single pathfind, and a failure lands
+     * the position here so the next scan moves on.
+     * @param pos the unreachable position
+     */
+    public void blacklistUnreachable(BlockPos pos) {
+        if (reachBlacklist.size() > 64) {
+            reachBlacklist.clear();
+        }
+        reachBlacklist.put(pos.asLong(), level().getGameTime() + REACH_BLACKLIST_TICKS);
+    }
+
+    /**
+     * @param pos a candidate position
+     * @return whether it's currently blacklisted as unreachable (expired entries are pruned)
+     */
+    public boolean isReachBlacklisted(BlockPos pos) {
+        Long expiry = reachBlacklist.get(pos.asLong());
+        if (expiry == null) {
+            return false;
+        }
+        if (level().getGameTime() >= expiry) {
+            reachBlacklist.remove(pos.asLong());
+            return false;
+        }
+        return true;
     }
 
     /**

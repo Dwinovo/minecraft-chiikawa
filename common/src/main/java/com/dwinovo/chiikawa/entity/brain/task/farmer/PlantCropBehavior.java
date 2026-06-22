@@ -20,9 +20,6 @@ import net.minecraft.server.level.ServerLevel;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 // Plants a crop at the remembered position.
 public class PlantCropBehavior extends Behavior<AbstractPet>{
@@ -55,7 +52,7 @@ public class PlantCropBehavior extends Behavior<AbstractPet>{
             BlockPos farmlandPos = pet.getBrain().getMemory(InitMemory.PLANT_POS.get()).get();
             if( 
                 pet.distanceToSqr(Vec3.atCenterOf(farmlandPos)) <= 2.0D
-                && Utils.isCanPlantFarmland(world, farmlandPos)
+                && Utils.isPlantableBase(world, pet, farmlandPos)
             ){
                 return true;
             }
@@ -78,7 +75,7 @@ public class PlantCropBehavior extends Behavior<AbstractPet>{
             return false;
         }
         BlockPos farmlandPos = farmlandPosOpt.get();
-        return Utils.isCanPlantFarmland(world, farmlandPos)
+        return Utils.isPlantableBase(world, pet, farmlandPos)
             && pet.distanceToSqr(Vec3.atCenterOf(farmlandPos)) <= 2.0D
             && !Utils.getSeed(pet).isEmpty();
     }
@@ -101,23 +98,13 @@ public class PlantCropBehavior extends Behavior<AbstractPet>{
         if(farmlandPosOpt.isEmpty()) return;
         BlockPos farmlandPos = farmlandPosOpt.get();
         ItemStack seed = Utils.getSeed(pet);
-        Optional<BlockState> cropState = getPlantBlockState(seed);
-        if (cropState.isPresent() && Utils.isCanPlantFarmland(world, farmlandPos)) {
-            pet.triggerAction(PetAction.PLANT);
-            world.setBlock(farmlandPos.above(), cropState.get(), 2);
-            seed.shrink(1);
+        if (!seed.isEmpty() && Utils.isPlantableBase(world, pet, farmlandPos)) {
+            // Native placement: runs the seed's own BlockItem.place, so the crop's
+            // placement rules/state apply and the seed stack is consumed on success.
+            if (Utils.plantSeed(world, pet, farmlandPos, seed)) {
+                pet.triggerAction(PetAction.PLANT);
+            }
         }
         pet.getBrain().eraseMemory(InitMemory.PLANT_POS.get());
-    }
-
-    private static Optional<BlockState> getPlantBlockState(ItemStack seed) {
-        if (seed.isEmpty()) {
-            return Optional.empty();
-        }
-        Item item = seed.getItem();
-        if (item instanceof BlockItem blockItem) {
-            return Optional.of(blockItem.getBlock().defaultBlockState());
-        }
-        return Optional.empty();
     }
 }
