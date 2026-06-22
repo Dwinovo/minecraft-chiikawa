@@ -94,7 +94,9 @@ public class HarvestCropBehavior extends Behavior<AbstractPet>{
             ItemStack tool = pet.getMainHandItem();
             if (Utils.canHarvesr(world, cropPos)) {
                 pet.triggerAction(PetAction.HARVEST);
-                world.destroyBlock(cropPos, true, pet);
+                // Native harvest: drops go straight to the backpack (with the held tool
+                // applied to the loot), and mature crops are replanted in place.
+                Utils.harvestCrop(world, pet, cropPos);
                 tool.hurtAndBreak(1, pet, EquipmentSlot.MAINHAND);
             }
         }
