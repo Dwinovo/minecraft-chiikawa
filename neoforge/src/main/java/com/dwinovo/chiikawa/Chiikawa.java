@@ -14,6 +14,7 @@ import com.dwinovo.chiikawa.init.InitSounds;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTabs;
 import com.dwinovo.chiikawa.init.InitDataComponents;
+import com.dwinovo.chiikawa.entity.brain.task.farmer.crop.FarmRegistry;
 import com.dwinovo.chiikawa.item.PetDollItem;
 import com.dwinovo.chiikawa.item.PetReviveRitualManager;
 import com.dwinovo.chiikawa.music.ServerMusicSystem;
@@ -49,6 +50,7 @@ public class Chiikawa {
         InitItems.init();
         InitTabs.init();
         InitCapabilities.init();
+        FarmRegistry.init();
         Services.REGISTRY.registerToEventBus(modEventBus);
         Services.ENTITY.registerToEventBus(modEventBus);
         modEventBus.addListener(NeoForgeMusicNetworking::registerPayloads);
