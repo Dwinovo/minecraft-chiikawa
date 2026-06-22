@@ -4,7 +4,7 @@ import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.tags.TagAppender;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -21,7 +21,7 @@ public final class TagData {
     // way are recognised with no per-mod work. Optional so datagen never fails if
     // nothing populates it.
     private static final TagKey<Item> C_SEEDS =
-        TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "seeds"));
+        TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "seeds"));
 
     public interface TagAppenderProvider<T> {
         TagAppender<T, T> tag(TagKey<T> key);
