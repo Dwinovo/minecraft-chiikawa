@@ -50,7 +50,7 @@ public class HarvestCropBehavior extends Behavior<AbstractPet>{
             BlockPos cropPos = brain.getMemory(InitMemory.HARVEST_POS.get()).get();
             return Utils.canHarvesr(world, cropPos) 
             && pet.getPetMode() == PetMode.WORK
-            && pet.distanceToSqr(Vec3.atCenterOf(cropPos)) <= 1.0D;
+            && pet.distanceToSqr(Vec3.atCenterOf(cropPos)) <= Utils.WORK_REACH_SQR;
         }
         return false;
 
@@ -72,7 +72,7 @@ public class HarvestCropBehavior extends Behavior<AbstractPet>{
         }
         BlockPos cropPos = cropPosOpt.get();
         return Utils.canHarvesr(world, cropPos)
-            && pet.distanceToSqr(Vec3.atCenterOf(cropPos)) <= 1.0D
+            && pet.distanceToSqr(Vec3.atCenterOf(cropPos)) <= Utils.WORK_REACH_SQR
             && pet.getPetMode() == PetMode.WORK
             && pet.getPetJobId() == InitRegistry.FARMER_ID;
     }
