@@ -2,10 +2,8 @@ package com.dwinovo.chiikawa.platform;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
-import com.dwinovo.chiikawa.entity.brain.sensor.PetContainerSensor;
-import com.dwinovo.chiikawa.entity.brain.sensor.PetHarvestCropSensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetFarmerWorkSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
-import com.dwinovo.chiikawa.entity.brain.sensor.PetPlantCropSensor;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.platform.services.IPlatformRegistryAccess;
 import java.util.function.Supplier;
@@ -18,9 +16,7 @@ import net.minecraft.world.inventory.MenuType;
 
 public final class FabricPlatformRegistryAccess implements IPlatformRegistryAccess {
     private final Supplier<SensorType<PetAttackbleEntitySensor>> petAttackbleEntitySensor;
-    private final Supplier<SensorType<PetHarvestCropSensor>> petHarvestCropSensor;
-    private final Supplier<SensorType<PetPlantCropSensor>> petPlantCropSensor;
-    private final Supplier<SensorType<PetContainerSensor>> petContainerSensor;
+    private final Supplier<SensorType<PetFarmerWorkSensor>> petFarmerWorkSensor;
     private final Supplier<SensorType<PetPickableItemSensor>> petItemEntitySensor;
     private final Supplier<Activity> farmerHarvestActivity;
     private final Supplier<Activity> farmerPlantActivity;
@@ -32,9 +28,7 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
 
     public FabricPlatformRegistryAccess() {
         petAttackbleEntitySensor = registerSensor("pet_attackble_entity_sensor", new SensorType<>(PetAttackbleEntitySensor::new));
-        petHarvestCropSensor = registerSensor("pet_harvest_crop_sensor", new SensorType<>(PetHarvestCropSensor::new));
-        petPlantCropSensor = registerSensor("pet_plant_crop_sensor", new SensorType<>(PetPlantCropSensor::new));
-        petContainerSensor = registerSensor("pet_container_sensor", new SensorType<>(PetContainerSensor::new));
+        petFarmerWorkSensor = registerSensor("pet_farmer_work_sensor", new SensorType<>(PetFarmerWorkSensor::new));
         petItemEntitySensor = registerSensor("pet_item_entity_sensor", new SensorType<>(PetPickableItemSensor::new));
 
         farmerHarvestActivity = registerActivity("farmer_harvest", new Activity("farmer_harvest"));
@@ -72,18 +66,8 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     }
 
     @Override
-    public Supplier<SensorType<PetHarvestCropSensor>> petHarvestCropSensor() {
-        return petHarvestCropSensor;
-    }
-
-    @Override
-    public Supplier<SensorType<PetPlantCropSensor>> petPlantCropSensor() {
-        return petPlantCropSensor;
-    }
-
-    @Override
-    public Supplier<SensorType<PetContainerSensor>> petContainerSensor() {
-        return petContainerSensor;
+    public Supplier<SensorType<PetFarmerWorkSensor>> petFarmerWorkSensor() {
+        return petFarmerWorkSensor;
     }
 
     @Override
