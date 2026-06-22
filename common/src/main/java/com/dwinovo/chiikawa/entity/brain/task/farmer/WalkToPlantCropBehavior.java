@@ -50,8 +50,12 @@ public class WalkToPlantCropBehavior extends Behavior<AbstractPet>{
             pet.getBrain().getMemory(InitMemory.PLANT_POS.get()).isPresent()
         ){
             net.minecraft.core.BlockPos target = pet.getBrain().getMemory(InitMemory.PLANT_POS.get()).get();
-            if (Utils.isCanPlantFarmland(world, target) && Utils.canReach(pet, target)) {
-                return true;
+            if (Utils.isPlantableBase(world, pet, target)) {
+                // Single reachability pathfind for the chosen target; blacklist on failure.
+                if (Utils.canReach(pet, target)) {
+                    return true;
+                }
+                pet.blacklistUnreachable(target);
             }
             pet.getBrain().eraseMemory(InitMemory.PLANT_POS.get());
         }

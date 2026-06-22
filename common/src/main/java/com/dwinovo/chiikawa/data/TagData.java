@@ -2,7 +2,9 @@ package com.dwinovo.chiikawa.data;
 
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.tags.TagAppender;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -13,6 +15,13 @@ import net.minecraft.world.level.block.Blocks;
 public final class TagData {
     private TagData() {
     }
+
+    // Cross-loader "seeds" convention tag (Fabric/NeoForge common tags). Pulling it
+    // into our plant-crops tag means farming mods that tag their seeds the standard
+    // way are recognised with no per-mod work. Optional so datagen never fails if
+    // nothing populates it.
+    private static final TagKey<Item> C_SEEDS =
+        TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "seeds"));
 
     public interface TagAppenderProvider<T> {
         TagAppender<T, T> tag(TagKey<T> key);
@@ -67,7 +76,8 @@ public final class TagData {
             .add(Items.WHEAT_SEEDS)
             .add(Items.BEETROOT_SEEDS)
             .add(Items.POTATO)
-            .add(Items.CARROT);
+            .add(Items.CARROT)
+            .addOptionalTag(C_SEEDS);
         tags.tag(InitTag.ENTITY_DELIVER_ITEMS)
             .add(Items.WHEAT)
             .add(Items.BEETROOT)

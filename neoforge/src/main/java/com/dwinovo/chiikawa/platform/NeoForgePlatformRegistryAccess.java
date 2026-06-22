@@ -2,10 +2,8 @@ package com.dwinovo.chiikawa.platform;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
-import com.dwinovo.chiikawa.entity.brain.sensor.PetContainerSensor;
-import com.dwinovo.chiikawa.entity.brain.sensor.PetHarvestCropSensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetFarmerWorkSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
-import com.dwinovo.chiikawa.entity.brain.sensor.PetPlantCropSensor;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.platform.services.IPlatformRegistryAccess;
 import java.util.function.Supplier;
@@ -28,12 +26,8 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
 
     private static final DeferredHolder<SensorType<?>, SensorType<PetAttackbleEntitySensor>> PET_ATTACKBLE_ENTITY_SENSOR =
         SENSOR_TYPES.register("pet_attackble_entity_sensor", () -> new SensorType<>(PetAttackbleEntitySensor::new));
-    private static final DeferredHolder<SensorType<?>, SensorType<PetHarvestCropSensor>> PET_HARVEST_CROP_SENSOR =
-        SENSOR_TYPES.register("pet_harvest_crop_sensor", () -> new SensorType<>(PetHarvestCropSensor::new));
-    private static final DeferredHolder<SensorType<?>, SensorType<PetPlantCropSensor>> PET_PLANT_CROP_SENSOR =
-        SENSOR_TYPES.register("pet_plant_crop_sensor", () -> new SensorType<>(PetPlantCropSensor::new));
-    private static final DeferredHolder<SensorType<?>, SensorType<PetContainerSensor>> PET_CONTAINER_SENSOR =
-        SENSOR_TYPES.register("pet_container_sensor", () -> new SensorType<>(PetContainerSensor::new));
+    private static final DeferredHolder<SensorType<?>, SensorType<PetFarmerWorkSensor>> PET_FARMER_WORK_SENSOR =
+        SENSOR_TYPES.register("pet_farmer_work_sensor", () -> new SensorType<>(PetFarmerWorkSensor::new));
     private static final DeferredHolder<SensorType<?>, SensorType<PetPickableItemSensor>> PET_ITEM_ENTITY_SENSOR =
         SENSOR_TYPES.register("pet_item_entity_sensor", () -> new SensorType<>(PetPickableItemSensor::new));
 
@@ -67,18 +61,8 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
     }
 
     @Override
-    public Supplier<SensorType<PetHarvestCropSensor>> petHarvestCropSensor() {
-        return PET_HARVEST_CROP_SENSOR;
-    }
-
-    @Override
-    public Supplier<SensorType<PetPlantCropSensor>> petPlantCropSensor() {
-        return PET_PLANT_CROP_SENSOR;
-    }
-
-    @Override
-    public Supplier<SensorType<PetContainerSensor>> petContainerSensor() {
-        return PET_CONTAINER_SENSOR;
+    public Supplier<SensorType<PetFarmerWorkSensor>> petFarmerWorkSensor() {
+        return PET_FARMER_WORK_SENSOR;
     }
 
     @Override
