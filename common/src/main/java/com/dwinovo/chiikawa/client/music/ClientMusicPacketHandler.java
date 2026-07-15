@@ -13,10 +13,10 @@ public final class ClientMusicPacketHandler {
 
     public static void handleCatalog(MusicCatalogPayload payload) {
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.screen instanceof MusicBoxScreen screen && screen.handIndex() == payload.handIndex()) {
+        if (minecraft.gui.screen() instanceof MusicBoxScreen screen && screen.handIndex() == payload.handIndex()) {
             screen.replaceTracks(payload.tracks());
         } else if (payload.openScreen()) {
-            minecraft.setScreen(new MusicBoxScreen(payload.handIndex(), payload.tracks()));
+            minecraft.setScreenAndShow(new MusicBoxScreen(payload.handIndex(), payload.tracks()));
         }
     }
 

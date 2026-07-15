@@ -23,31 +23,31 @@ public final class ModRecipeProvider extends RecipeProvider {
     public void buildRecipes() {
         HolderGetter<Item> itemLookup = this.registries.lookupOrThrow(Registries.ITEM);
         ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.COMBAT, InitItems.USAGI_WEAPON.get())
-            .define('Y', Items.YELLOW_WOOL)
+            .define('Y', Items.WOOL.yellow())
             .define('F', Items.FLINT)
             .define('S', Items.STICK)
             .pattern("  Y")
             .pattern("FSF")
             .pattern("Y  ")
-            .unlockedBy(getHasName(Items.YELLOW_WOOL), has(Items.YELLOW_WOOL))
+            .unlockedBy(getHasName(Items.WOOL.yellow()), has(Items.WOOL.yellow()))
             .save(this.output, ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(Constants.MOD_ID, "usagi_weapon")));
 
         ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.COMBAT, InitItems.HACHIWARE_WEAPON.get())
-            .define('B', Items.BLUE_WOOL)
+            .define('B', Items.WOOL.blue())
             .define('S', Items.STICK)
             .pattern(" B ")
             .pattern(" SB")
             .pattern("S  ")
-            .unlockedBy(getHasName(Items.BLUE_WOOL), has(Items.BLUE_WOOL))
+            .unlockedBy(getHasName(Items.WOOL.blue()), has(Items.WOOL.blue()))
             .save(this.output, ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(Constants.MOD_ID, "hachiware_weapon")));
 
         ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.COMBAT, InitItems.CHIIKAWA_WEAPON.get())
-            .define('P', Items.PINK_WOOL)
+            .define('P', Items.WOOL.pink())
             .define('S', Items.STICK)
             .pattern(" P ")
             .pattern(" SP")
             .pattern("S  ")
-            .unlockedBy(getHasName(Items.PINK_WOOL), has(Items.PINK_WOOL))
+            .unlockedBy(getHasName(Items.WOOL.pink()), has(Items.WOOL.pink()))
             .save(this.output, ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(Constants.MOD_ID, "chiikawa_weapon")));
     }
 }

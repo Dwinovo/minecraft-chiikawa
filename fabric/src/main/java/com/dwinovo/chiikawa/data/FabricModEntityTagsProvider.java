@@ -13,6 +13,6 @@ public class FabricModEntityTagsProvider extends FabricTagsProvider.EntityTypeTa
 
     @Override
     protected void addTags(HolderLookup.Provider provider) {
-        TagData.addEntityTags(this::valueLookupBuilder);
+        TagData.addEntityTags(this::tag);
     }
 }

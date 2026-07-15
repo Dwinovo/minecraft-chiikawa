@@ -10,7 +10,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
@@ -57,7 +57,7 @@ public final class BrainUtils {
     }
 
     private static RunOne<AbstractPet> getLookAndRandomWalk() {
-        Pair<BehaviorControl<? super AbstractPet>, Integer> lookToPlayer = Pair.of(SetEntityLookTarget.create(EntityType.PLAYER, 5), 2);
+        Pair<BehaviorControl<? super AbstractPet>, Integer> lookToPlayer = Pair.of(SetEntityLookTarget.create(EntityTypes.PLAYER, 5), 2);
         Pair<BehaviorControl<? super AbstractPet>, Integer> lookToAny = Pair.of(SetEntityLookTarget.create(MobCategory.CREATURE, 5), 2);
         Pair<BehaviorControl<? super AbstractPet>, Integer> walkRandomly = Pair.of(new RandomWalkTask(), 2);
         Pair<BehaviorControl<? super AbstractPet>, Integer> noThing = Pair.of(new DoNothing(30, 60), 1);
