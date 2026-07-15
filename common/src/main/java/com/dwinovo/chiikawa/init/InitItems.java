@@ -30,6 +30,8 @@ public final class InitItems {
         registerSpawnEgg("kurimanju_spawn_egg", InitEntity.KURIMANJU_PET, 0xdac24e, 0xda8b4e);
     public static final Supplier<SpawnEggItem> RAKKO_SPAWN_EGG =
         registerSpawnEgg("rakko_spawn_egg", InitEntity.RAKKO_PET, 0xeaffd0, 0xeaeaea);
+    public static final Supplier<SpawnEggItem> FURUHONYA_SPAWN_EGG =
+        registerSpawnEgg("furuhonya_spawn_egg", InitEntity.FURUHONYA_PET, 0x6b4423, 0xc8a165);
     public static final Supplier<Item> USAGI_WEAPON =
         registerItem("usagi_weapon", UsagiWeapon::new);
     public static final Supplier<Item> HACHIWARE_WEAPON =
@@ -52,6 +54,8 @@ public final class InitItems {
         registerItem("kurimanju_doll", () -> new PetDollItem(new Item.Properties(), InitEntity.KURIMANJU_PET));
     public static final Supplier<Item> RAKKO_DOLL =
         registerItem("rakko_doll", () -> new PetDollItem(new Item.Properties(), InitEntity.RAKKO_PET));
+    public static final Supplier<Item> FURUHONYA_DOLL =
+        registerItem("furuhonya_doll", () -> new PetDollItem(new Item.Properties(), InitEntity.FURUHONYA_PET));
 
     private InitItems() {
     }
