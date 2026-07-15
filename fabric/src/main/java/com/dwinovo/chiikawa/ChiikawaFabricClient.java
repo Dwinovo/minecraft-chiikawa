@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa;
 
 import com.dwinovo.chiikawa.anim.compile.BedrockResourceLoader;
 import com.dwinovo.chiikawa.anim.render.impl.ChiikawaRenderer;
+import com.dwinovo.chiikawa.anim.render.impl.FuruhonyaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.HachiwareRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.KurimanjuRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.MomongaRenderer;
@@ -35,6 +36,7 @@ public class ChiikawaFabricClient implements ClientModInitializer {
         EntityRendererRegistry.register(InitEntity.MOMONGA_PET.get(), MomongaRenderer::new);
         EntityRendererRegistry.register(InitEntity.KURIMANJU_PET.get(), KurimanjuRenderer::new);
         EntityRendererRegistry.register(InitEntity.RAKKO_PET.get(), RakkoRenderer::new);
+        EntityRendererRegistry.register(InitEntity.FURUHONYA_PET.get(), FuruhonyaRenderer::new);
 
         MenuScreens.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);
         FabricMusicNetworking.registerClient();

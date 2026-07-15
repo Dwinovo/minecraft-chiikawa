@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa;
 
 import com.dwinovo.chiikawa.anim.compile.BedrockResourceLoader;
 import com.dwinovo.chiikawa.anim.render.impl.ChiikawaRenderer;
+import com.dwinovo.chiikawa.anim.render.impl.FuruhonyaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.HachiwareRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.KurimanjuRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.MomongaRenderer;
@@ -34,6 +35,7 @@ public class ChiikawaForgeClient {
             EntityRenderers.register(InitEntity.MOMONGA_PET.get(), MomongaRenderer::new);
             EntityRenderers.register(InitEntity.KURIMANJU_PET.get(), KurimanjuRenderer::new);
             EntityRenderers.register(InitEntity.RAKKO_PET.get(), RakkoRenderer::new);
+            EntityRenderers.register(InitEntity.FURUHONYA_PET.get(), FuruhonyaRenderer::new);
             MenuScreens.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);
         });
         MinecraftForge.EVENT_BUS.addListener(ChiikawaForgeClient::onClientTick);

@@ -14,7 +14,8 @@ class LanguageDataDollTranslationTest {
         "item.chiikawa.shisa_doll",
         "item.chiikawa.momonga_doll",
         "item.chiikawa.kurimanju_doll",
-        "item.chiikawa.rakko_doll"
+        "item.chiikawa.rakko_doll",
+        "item.chiikawa.furuhonya_doll"
     };
 
     @Test

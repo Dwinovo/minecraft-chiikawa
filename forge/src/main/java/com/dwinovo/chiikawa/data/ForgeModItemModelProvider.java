@@ -29,6 +29,7 @@ public class ForgeModItemModelProvider extends ItemModelProvider {
         generatedItem(InitItems.MOMONGA_SPAWN_EGG.get());
         generatedItem(InitItems.KURIMANJU_SPAWN_EGG.get());
         generatedItem(InitItems.RAKKO_SPAWN_EGG.get());
+        generatedItem(InitItems.FURUHONYA_SPAWN_EGG.get());
     }
 
     private void generateDolls() {
@@ -39,6 +40,7 @@ public class ForgeModItemModelProvider extends ItemModelProvider {
         generatedItem(InitItems.MOMONGA_DOLL.get());
         generatedItem(InitItems.KURIMANJU_DOLL.get());
         generatedItem(InitItems.RAKKO_DOLL.get());
+        generatedItem(InitItems.FURUHONYA_DOLL.get());
     }
 
     private void generatedItem(net.minecraft.world.item.Item item) {
