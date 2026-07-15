@@ -27,7 +27,8 @@ public final class BiomeSpawnData {
         new SpawnEntry(entityKey("shisa"), MobCategory.CREATURE, 20, 1, 1),
         new SpawnEntry(entityKey("momonga"), MobCategory.CREATURE, 20, 1, 1),
         new SpawnEntry(entityKey("kurimanju"), MobCategory.CREATURE, 20, 1, 1),
-        new SpawnEntry(entityKey("rakko"), MobCategory.CREATURE, 20, 1, 1)
+        new SpawnEntry(entityKey("rakko"), MobCategory.CREATURE, 20, 1, 1),
+        new SpawnEntry(entityKey("furuhonya"), MobCategory.CREATURE, 20, 1, 1)
     );
 
     private BiomeSpawnData() {
