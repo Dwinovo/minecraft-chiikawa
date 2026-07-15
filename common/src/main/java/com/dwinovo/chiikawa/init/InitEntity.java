@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.init;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.impl.ChiikawaPet;
+import com.dwinovo.chiikawa.entity.impl.FuruhonyaPet;
 import com.dwinovo.chiikawa.entity.impl.HachiwarePet;
 import com.dwinovo.chiikawa.entity.impl.KurimanjuPet;
 import com.dwinovo.chiikawa.entity.impl.MomongaPet;
@@ -24,6 +25,7 @@ public final class InitEntity {
     public static final Supplier<EntityType<MomongaPet>> MOMONGA_PET = registerPet("momonga", MomongaPet::new);
     public static final Supplier<EntityType<KurimanjuPet>> KURIMANJU_PET = registerPet("kurimanju", KurimanjuPet::new);
     public static final Supplier<EntityType<RakkoPet>> RAKKO_PET = registerPet("rakko", RakkoPet::new);
+    public static final Supplier<EntityType<FuruhonyaPet>> FURUHONYA_PET = registerPet("furuhonya", FuruhonyaPet::new);
 
     private InitEntity() {
     }
