@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.platform;
 
 import com.dwinovo.chiikawa.entity.impl.ChiikawaPet;
+import com.dwinovo.chiikawa.entity.impl.FuruhonyaPet;
 import com.dwinovo.chiikawa.entity.impl.HachiwarePet;
 import com.dwinovo.chiikawa.entity.impl.KurimanjuPet;
 import com.dwinovo.chiikawa.entity.impl.MomongaPet;
@@ -29,6 +30,7 @@ public class FabricEntityHelper implements IEntityHelper {
         FabricDefaultAttributeRegistry.register(InitEntity.MOMONGA_PET.get(), MomongaPet.createAttributes().build());
         FabricDefaultAttributeRegistry.register(InitEntity.KURIMANJU_PET.get(), KurimanjuPet.createAttributes().build());
         FabricDefaultAttributeRegistry.register(InitEntity.RAKKO_PET.get(), RakkoPet.createAttributes().build());
+        FabricDefaultAttributeRegistry.register(InitEntity.FURUHONYA_PET.get(), FuruhonyaPet.createAttributes().build());
     }
 
     @Override
@@ -40,6 +42,7 @@ public class FabricEntityHelper implements IEntityHelper {
         registerSpawnPlacement(InitEntity.MOMONGA_PET.get());
         registerSpawnPlacement(InitEntity.KURIMANJU_PET.get());
         registerSpawnPlacement(InitEntity.RAKKO_PET.get());
+        registerSpawnPlacement(InitEntity.FURUHONYA_PET.get());
     }
 
     private static <T extends Animal> void registerSpawnPlacement(net.minecraft.world.entity.EntityType<T> type) {

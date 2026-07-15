@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.platform;
 
 import com.dwinovo.chiikawa.entity.impl.ChiikawaPet;
+import com.dwinovo.chiikawa.entity.impl.FuruhonyaPet;
 import com.dwinovo.chiikawa.entity.impl.HachiwarePet;
 import com.dwinovo.chiikawa.entity.impl.KurimanjuPet;
 import com.dwinovo.chiikawa.entity.impl.MomongaPet;
@@ -43,6 +44,7 @@ public class ForgeEntityHelper implements IEntityHelper {
         event.put(InitEntity.MOMONGA_PET.get(), MomongaPet.createAttributes().build());
         event.put(InitEntity.KURIMANJU_PET.get(), KurimanjuPet.createAttributes().build());
         event.put(InitEntity.RAKKO_PET.get(), RakkoPet.createAttributes().build());
+        event.put(InitEntity.FURUHONYA_PET.get(), FuruhonyaPet.createAttributes().build());
     }
 
     private void onSpawnPlacementRegister(SpawnPlacementRegisterEvent event) {
@@ -53,6 +55,7 @@ public class ForgeEntityHelper implements IEntityHelper {
         registerSpawnPlacement(event, InitEntity.MOMONGA_PET.get());
         registerSpawnPlacement(event, InitEntity.KURIMANJU_PET.get());
         registerSpawnPlacement(event, InitEntity.RAKKO_PET.get());
+        registerSpawnPlacement(event, InitEntity.FURUHONYA_PET.get());
     }
 
     private static <T extends Animal> void registerSpawnPlacement(SpawnPlacementRegisterEvent event, EntityType<T> entity) {
