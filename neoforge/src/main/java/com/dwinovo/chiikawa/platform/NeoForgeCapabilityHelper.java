@@ -23,6 +23,7 @@ public class NeoForgeCapabilityHelper implements ICapabilityHelper {
         registerPet(event, InitEntity.MOMONGA_PET.get());
         registerPet(event, InitEntity.KURIMANJU_PET.get());
         registerPet(event, InitEntity.RAKKO_PET.get());
+        registerPet(event, InitEntity.FURUHONYA_PET.get());
     }
 
     private static <T extends AbstractPet> void registerPet(RegisterCapabilitiesEvent event, EntityType<T> type) {

@@ -20,6 +20,7 @@ public final class ModItemModelProvider extends ItemModelProvider {
         basicItem(InitItems.MOMONGA_SPAWN_EGG.get());
         basicItem(InitItems.KURIMANJU_SPAWN_EGG.get());
         basicItem(InitItems.RAKKO_SPAWN_EGG.get());
+        basicItem(InitItems.FURUHONYA_SPAWN_EGG.get());
 
         basicItem(InitItems.USAGI_DOLL.get());
         basicItem(InitItems.HACHIWARE_DOLL.get());
@@ -28,6 +29,7 @@ public final class ModItemModelProvider extends ItemModelProvider {
         basicItem(InitItems.MOMONGA_DOLL.get());
         basicItem(InitItems.KURIMANJU_DOLL.get());
         basicItem(InitItems.RAKKO_DOLL.get());
+        basicItem(InitItems.FURUHONYA_DOLL.get());
 
         // Weapons have prebuilt models under resources; no datagen needed.
         basicItem(InitItems.MUSIC_BOX.get());
