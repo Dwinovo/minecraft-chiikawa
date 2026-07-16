@@ -165,7 +165,7 @@ jobs:
         id: publish_fabric
         continue-on-error: true
         if: ${{ steps.meta.outputs.fabric_file != '' }}
-        uses: Kira-NT/mc-publish@v3.3.0
+        uses: Kira-NT/mc-publish@v3.3.1
         with:
           files: ${{ steps.meta.outputs.fabric_file }}
           loaders: fabric
@@ -186,7 +186,7 @@ jobs:
 
       - name: Publish Secondary Loader to Modrinth and CurseForge
         if: ${{ steps.meta.outputs.secondary_file != '' && steps.meta.outputs.secondary_loader != '' }}
-        uses: Kira-NT/mc-publish@v3.3.0
+        uses: Kira-NT/mc-publish@v3.3.1
         with:
           files: ${{ steps.meta.outputs.secondary_file }}
           loaders: ${{ steps.meta.outputs.secondary_loader }}
