@@ -3,6 +3,8 @@ package com.dwinovo.chiikawa.sound;
 import com.dwinovo.chiikawa.init.InitSounds;
 
 public final class PetSoundSets {
+    private static final float USAGI_ATTACK_VOLUME = 0.35F;
+
     public static final PetSoundSet CHIIKAWA = PetSoundSet.builder()
             .hurt(InitSounds.CHIIKAWA_INJURED)
             .tame(InitSounds.CHIIKAWA_TAME)
@@ -30,11 +32,16 @@ public final class PetSoundSets {
             .tame(InitSounds.SHISA_TAME)
             .build();
 
+    /**
+     * Usagi's clips are mastered much hotter than the other characters'. The
+     * ambient voice is left out on purpose ({@code usagi/ambient} stays
+     * registered for later use) and the attack cue is played quieter.
+     */
     public static final PetSoundSet USAGI = PetSoundSet.builder()
-            .attack(InitSounds.USAGI_ATTACK)
+            .attack(PetSoundCue.of(InitSounds.USAGI_ATTACK, USAGI_ATTACK_VOLUME,
+                    PetSoundCue.DEFAULT_PITCH, PetSoundCue.DEFAULT_PITCH, PetSoundCue.DEFAULT_WEIGHT))
             .hurt(InitSounds.USAGI_INJURED)
             .tame(InitSounds.USAGI_TAME)
-            .ambient(PetSoundSet.DEFAULT_AMBIENT_INTERVAL_TICKS, InitSounds.USAGI_AMBIENT)
             .build();
 
     private PetSoundSets() {
