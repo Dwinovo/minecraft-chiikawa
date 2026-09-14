@@ -20,6 +20,8 @@ public final class InitSounds {
     public static final Supplier<SoundEvent> HACHIWARE_INJURED = register("hachiware/injured");
     public static final Supplier<SoundEvent> HACHIWARE_TAME = register("hachiware/tame");
 
+    public static final Supplier<SoundEvent> KURIMANJU_DEATH = register("kurimanju/death");
+    public static final Supplier<SoundEvent> KURIMANJU_INJURED = register("kurimanju/injured");
     public static final Supplier<SoundEvent> KURIMANJU_TAME = register("kurimanju/tame");
 
     public static final Supplier<SoundEvent> MOMONGA_INJURED = register("momonga/injured");
@@ -27,6 +29,8 @@ public final class InitSounds {
 
     public static final Supplier<SoundEvent> RAKKO_TAME = register("rakko/tame");
 
+    public static final Supplier<SoundEvent> SHISA_DEATH = register("shisa/death");
+    public static final Supplier<SoundEvent> SHISA_INJURED = register("shisa/injured");
     public static final Supplier<SoundEvent> SHISA_TAME = register("shisa/tame");
 
     public static final Supplier<SoundEvent> USAGI_AMBIENT = register("usagi/ambient");
