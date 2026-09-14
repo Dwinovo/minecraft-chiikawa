@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/Dwinovo/minecraft-chiikawa/main/common/src/main/resources/logo.png" alt="Chiikawa Mod" width="320" />
+<img src="https://raw.githubusercontent.com/Dwinovo/minecraft-chiikawa/1.21.1/common/src/main/resources/logo.png" alt="Chiikawa Mod" width="320" />
 
 # Chiikawa Mod
 
@@ -18,6 +18,10 @@
 </div>
 
 ---
+
+> [!IMPORTANT]
+> ⭐ **喜欢这个模组?[点个 Star](https://github.com/Dwinovo/minecraft-chiikawa)** —— 只要一下,是最直接的支持。
+> 🐛 **遇到 Bug 或有想法?[来提 Issue](https://github.com/Dwinovo/minecraft-chiikawa/issues/new/choose)** —— 请用 GitHub Issues,不要发在 Modrinth / CurseForge 评论区,这样才不会被淹没。
 
 > ちいかわ、八割、兔兔……这些治愈又有点搞笑的小家伙,现在会住进你的世界。
 > 驯服它们、给它们一把工具,它们就会替你种田、战斗、甚至**抱着音乐盒为你弹一首你最爱的歌**。
@@ -118,30 +122,6 @@
 仅维护 Minecraft 1.20.1 及更新版本。
 
 > 更新的快照版本(如最新发布的 26.x)会在加载器生态稳定后陆续跟进 —— 请稍候。
-
-## 🔧 从源码构建
-
-本仓库是 [MultiLoader](https://github.com/jaredlll08/MultiLoader-Template) 风格的多加载器项目:共享代码在 `common`,各加载器直接编译它。**每个 Minecraft 版本各自一条 git 分支。**
-
-```bash
-git checkout 1.21.1                                   # 切到目标版本分支
-
-./gradlew :fabric:runClient                           # 启动开发客户端
-./gradlew :neoforge:runClient                         # (1.20.1–1.20.4 用 :forge:runClient)
-
-./gradlew :fabric:runDatagen :neoforge:runData        # 重新生成数据
-./gradlew build                                        # 构建所有 jar
-```
-
-产物在 `fabric/build/libs/` 和 `neoforge/build/libs/`(或 `forge/build/libs/`)。Windows 用 `gradlew.bat`。JDK 版本:1.20.x 用 17,1.21.x 用 21,26.1.2 用 25。
-
-## 🐛 反馈与建议
-
-**Bug 反馈和想法请提到 [GitHub Issues](https://github.com/Dwinovo/minecraft-chiikawa/issues),不要发在 Modrinth / CurseForge 的评论区。** 评论容易被淹没、也没法追踪;issue 会得到正式回复,并一直保持打开直到真正修好。
-
-- 🐞 [报告 Bug](https://github.com/Dwinovo/minecraft-chiikawa/issues/new?template=bug_report.yml) —— 表单会要求填写 Minecraft 版本、加载器和模组版本,没有这些我无法复现。
-- 💡 [提出建议](https://github.com/Dwinovo/minecraft-chiikawa/issues/new?template=feature_request.yml) —— 新角色、新机制、改进点都欢迎。
-- ⭐ 喜欢这个模组?**给仓库点个 Star** 是最简单的支持方式,也能让更多人发现它。
 
 ## 🤝 参与贡献
 

@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/Dwinovo/minecraft-chiikawa/main/common/src/main/resources/logo.png" alt="Chiikawa Mod" width="320" />
+<img src="https://raw.githubusercontent.com/Dwinovo/minecraft-chiikawa/1.21.1/common/src/main/resources/logo.png" alt="Chiikawa Mod" width="320" />
 
 # Chiikawa Mod
 
@@ -18,6 +18,10 @@
 </div>
 
 ---
+
+> [!IMPORTANT]
+> ⭐ **Enjoying the mod? [Give it a Star](https://github.com/Dwinovo/minecraft-chiikawa)** — it takes one click and is the best way to show support.
+> 🐛 **Found a bug or have an idea? [Open an issue](https://github.com/Dwinovo/minecraft-chiikawa/issues/new/choose)** — please use GitHub Issues rather than the Modrinth / CurseForge comments, so nothing gets lost.
 
 > Chiikawa, Hachiware, Usagi… these healing, slightly goofy little ones now move into your world.
 > Tame them, hand them a tool, and they'll farm, fight, and even **pick up a music box and play your favorite song** for you.
@@ -119,30 +123,6 @@ Audio is decoded in **pure Java** (mp3spi / JLayer for MP3, the JDK for WAV), en
 Only Minecraft 1.20.1 and newer are maintained.
 
 > Newer snapshot releases (such as the latest 26.x) will be supported once the loader ecosystem stabilizes — please hang tight.
-
-## 🔧 Building from Source
-
-The repo is a [MultiLoader](https://github.com/jaredlll08/MultiLoader-Template)-style project: shared code lives in `common`, and each loader compiles it directly. **Each Minecraft version lives on its own git branch.**
-
-```bash
-git checkout 1.21.1                                   # pick your version branch
-
-./gradlew :fabric:runClient                           # run a dev client
-./gradlew :neoforge:runClient                         # (:forge:runClient on 1.20.1–1.20.4)
-
-./gradlew :fabric:runDatagen :neoforge:runData        # regenerate data
-./gradlew build                                        # build all jars
-```
-
-Built jars land in `fabric/build/libs/` and `neoforge/build/libs/` (or `forge/build/libs/`). On Windows, use `gradlew.bat`. Use JDK 17 for 1.20.x, JDK 21 for 1.21.x, and JDK 25 for 26.1.2.
-
-## 🐛 Bugs & Ideas
-
-**Please report bugs and suggest ideas on [GitHub Issues](https://github.com/Dwinovo/minecraft-chiikawa/issues), not in the Modrinth / CurseForge comments.** Comments are easy to miss and impossible to track; an issue gets a proper answer and stays open until it's actually fixed.
-
-- 🐞 [Report a bug](https://github.com/Dwinovo/minecraft-chiikawa/issues/new?template=bug_report.yml) — the form asks for your Minecraft version, loader, and mod version, which I need to reproduce anything.
-- 💡 [Suggest a feature](https://github.com/Dwinovo/minecraft-chiikawa/issues/new?template=feature_request.yml) — new characters, mechanics, improvements.
-- ⭐ Like the mod? **Starring the repo** is the easiest way to say so, and it helps others find it.
 
 ## 🤝 Contributing
 
