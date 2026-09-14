@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.task.fencer;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.anim.state.PetAction;
+import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -29,7 +30,8 @@ public final class MeleeAttackWithAnim {
                     brain,
                     (lookTarget, attackTarget, cooldown, visibleTargets) -> (ServerLevel level, AbstractPet pet, long time) -> {
                         LivingEntity target = brain.get(attackTarget);
-                        if (isHoldingUsableProjectileWeapon(pet)
+                        if (!PetTargeting.canTarget(pet, target)
+                            || isHoldingUsableProjectileWeapon(pet)
                             || !pet.isWithinMeleeAttackRange(target)
                             || !brain.<NearestVisibleLivingEntities>get(visibleTargets).contains(target)) {
                             return false;
