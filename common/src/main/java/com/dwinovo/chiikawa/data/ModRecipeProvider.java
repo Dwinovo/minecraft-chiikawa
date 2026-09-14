@@ -11,6 +11,7 @@ import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
@@ -49,5 +50,15 @@ public final class ModRecipeProvider extends RecipeProvider {
             .pattern("S  ")
             .unlockedBy(getHasName(Items.PINK_WOOL), has(Items.PINK_WOOL))
             .save(this.output, ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(Constants.MOD_ID, "chiikawa_weapon")));
+
+        ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.MISC, InitItems.MUSIC_BOX.get())
+            .define('P', ItemTags.PLANKS)
+            .define('N', Items.NOTE_BLOCK)
+            .define('G', Items.GOLD_INGOT)
+            .pattern(" P ")
+            .pattern("PNP")
+            .pattern(" G ")
+            .unlockedBy(getHasName(Items.NOTE_BLOCK), has(Items.NOTE_BLOCK))
+            .save(this.output, ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(Constants.MOD_ID, "music_box")));
     }
 }
