@@ -1,0 +1,22 @@
+name: Feature request
+description: A character, mechanic, or improvement you'd like to see.
+title: "[Idea] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like?
+      description: Describe the character, feature, or change.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why would it make the mod better?
+      description: How it fits the Chiikawa world, or what problem it solves for you.
+  - type: textarea
+    id: details
+    attributes:
+      label: Anything else?
+      description: Sketches, references, or how you imagine it working in-game.
