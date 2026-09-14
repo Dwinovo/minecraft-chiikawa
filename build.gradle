@@ -14,8 +14,8 @@ tasks.register('datagenAll') {
     group = 'build'
     description = '跑本分支两个 loader 的数据生成(语言文件、标签、物品模型)'
     dependsOn ':fabric:runDatagen'
-    // NeoForge 是 moddev 的 runData,Forge 是 ForgeGradle 的 Data
-    dependsOn ":${secondLoader}:${secondLoader == 'neoforge' ? 'runData' : 'Data'}"
+    // moddev 与 ForgeGradle 6 的数据生成任务都叫 runData(本仓库的 Forge run 没有另设 taskName)
+    dependsOn ":${secondLoader}:runData"
 }
 
 /**
