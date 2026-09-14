@@ -16,6 +16,8 @@ public final class PetSoundSets {
             .build();
 
     public static final PetSoundSet KURIMANJU = PetSoundSet.builder()
+            .hurt(InitSounds.KURIMANJU_INJURED)
+            .death(InitSounds.KURIMANJU_DEATH)
             .tame(InitSounds.KURIMANJU_TAME)
             .build();
 
@@ -29,6 +31,8 @@ public final class PetSoundSets {
             .build();
 
     public static final PetSoundSet SHISA = PetSoundSet.builder()
+            .hurt(InitSounds.SHISA_INJURED)
+            .death(InitSounds.SHISA_DEATH)
             .tame(InitSounds.SHISA_TAME)
             .build();
 
