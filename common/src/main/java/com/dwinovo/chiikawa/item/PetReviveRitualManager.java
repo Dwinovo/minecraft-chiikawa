@@ -20,7 +20,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.block.CakeBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -137,6 +136,8 @@ public final class PetReviveRitualManager {
         }
 
         pet.snapTo(revive.spawnPos.x, revive.spawnPos.y, revive.spawnPos.z, revive.yRot, revive.xRot);
+        // Independent of save-key names: also cleans dolls created before this fix.
+        pet.resetFallDistance();
         pet.setHealth(pet.getMaxHealth());
 
         if (!level.noCollision(pet)) {
