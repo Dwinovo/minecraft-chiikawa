@@ -1,12 +1,11 @@
 package com.dwinovo.chiikawa.entity;
 
+import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.EntityReference;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.entity.EntityAccess;
 
 /**
@@ -51,8 +50,7 @@ public final class PetUnloadFollow {
                 || pet.isLeashed() || pet.isPassenger()) {
             return null;
         }
-        EntityReference<LivingEntity> ownerRef = pet.getOwnerReference();
-        UUID ownerId = ownerRef == null ? null : ownerRef.getUUID();
+        UUID ownerId = PetTargeting.ownerId(pet);
         MinecraftServer server = level.getServer();
         if (ownerId == null || server == null) {
             return null;
