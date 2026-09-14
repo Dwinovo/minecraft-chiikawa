@@ -38,6 +38,17 @@ class SoundDataTest {
     }
 
     @Test
+    void kurimanjuAndShisaHurtAndDeathClipsResolveInModResources() {
+        // Locates common/src/main/resources from the working directory; the PackOutput is unused.
+        Path resources = SoundData.resolveResourceRoot(null);
+        for (String event : List.of("kurimanju/injured", "kurimanju/death", "shisa/injured", "shisa/death")) {
+            assertEquals(List.of(
+                    new ResourceLocation(Constants.MOD_ID, event + "_1")
+            ), SoundData.findVariants(event, resources), event);
+        }
+    }
+
+    @Test
     void missingSoundReturnsEmptyList() {
         assertTrue(SoundData.findVariants("hachiware/missing", tempDir).isEmpty());
     }
