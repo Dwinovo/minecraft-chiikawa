@@ -29,6 +29,19 @@ class PetSoundSetTest {
     }
 
     @Test
+    void builderKeepsCueVolumeForAttack() {
+        PetSoundCue cue = PetSoundCue.of(TEST_SOUND, 0.35F,
+                PetSoundCue.DEFAULT_PITCH, PetSoundCue.DEFAULT_PITCH, PetSoundCue.DEFAULT_WEIGHT);
+        PetSoundSet set = PetSoundSet.builder()
+                .attack(cue)
+                .build();
+
+        assertSame(cue, set.getAttackCue());
+        assertEquals(0.35F, set.getAttackCue().volume());
+        assertEquals(PetSoundCue.DEFAULT_PITCH, set.getAttackCue().samplePitch(RandomSource.create(1L)));
+    }
+
+    @Test
     void ambientPoolUsesConfiguredIntervalAndCue() {
         PetSoundCue cue = PetSoundCue.of(TEST_SOUND, 0.7F, 0.9F, 1.1F, 2);
         PetSoundSet set = PetSoundSet.builder()
