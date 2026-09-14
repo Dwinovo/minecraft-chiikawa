@@ -1,32 +1,160 @@
-# MultiLoader Template
+<div align="center">
 
-This project provides a Gradle project template that can compile Minecraft mods for multiple modloaders using a common project for the sources. This project does not require any third party libraries or dependencies. If you have any questions or want to discuss the project, please join our [Discord](https://discord.myceliummod.network).
+<img src="https://raw.githubusercontent.com/Dwinovo/minecraft-chiikawa/main/common/src/main/resources/logo.png" alt="Chiikawa Mod" width="320" />
 
-## Getting Started
+# Chiikawa Mod
 
-### IntelliJ IDEA
-This guide will show how to import the MultiLoader Template into IntelliJ IDEA. The setup process is roughly equivalent to setting up the modloaders independently and should be very familiar to anyone who has worked with their MDKs.
+**Bring the world of *Chiikawa* into Minecraft — tameable little friends, a job system that lets them work on their own, and a music box that plays your very own songs.**
 
-1. Clone or download this repository to your computer.
-2. Configure the project by setting the properties in the `gradle.properties` file. You will also need to change the `rootProject.name`  property in `settings.gradle`, this should match the folder name of your project, or else IDEA may complain.
-3. Open the template's root folder as a new project in IDEA. This is the folder that contains this README.md file and the gradlew executable.
-4. If your default JVM/JDK is not Java 21 you will encounter an error when opening the project. This error is fixed by going to `File > Settings > Build, Execution, Deployment > Build Tools > Gradle > Gradle JVM` and changing the value to a valid Java 21 JVM. You will also need to set the Project SDK to Java 21. This can be done by going to `File > Project Structure > Project SDK`. Once both have been set open the Gradle tab in IDEA and click the refresh button to reload the project.
-5. Open your Run/Debug Configurations. Under the `Application` category there should now be options to run Fabric and NeoForge projects. Select one of the client options and try to run it.
-6. Assuming you were able to run the game in step 5 your workspace should now be set up.
+**English** · [简体中文](README_ZH.md)
 
-### Eclipse
-While it is possible to use this template in Eclipse it is not recommended. During the development of this template multiple critical bugs and quirks related to Eclipse were found at nearly every level of the required build tools. While we continue to work with these tools to report and resolve issues support for projects like these are not there yet. For now Eclipse is considered unsupported by this project. The development cycle for build tools is notoriously slow so there are no ETAs available.
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1%20–%2026.1.2-62B47A?logo=minecraft&logoColor=white)](#supported-versions)
+[![Loaders](https://img.shields.io/badge/Loaders-Fabric%20%7C%20NeoForge%20%7C%20Forge-blue)](#supported-versions)
+[![Modrinth](https://img.shields.io/badge/Download-Modrinth-00AF5C?logo=modrinth&logoColor=white)](https://modrinth.com/mod/pT971QUb)
+[![CurseForge](https://img.shields.io/badge/Download-CurseForge-F16436?logo=curseforge&logoColor=white)](https://www.curseforge.com/minecraft/mc-mods/chiikawa)
+[![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-lightgrey)](LICENSE)
+[![GitHub Stars](https://img.shields.io/github/stars/Dwinovo/minecraft-chiikawa?style=flat&logo=github&label=Star)](https://github.com/Dwinovo/minecraft-chiikawa)
 
-## Development Guide
-When using this template the majority of your mod should be developed in the `common` project. The `common` project is compiled against the vanilla game and is used to hold code that is shared between the different loader-specific versions of your mod. The `common` project has no knowledge or access to ModLoader specific code, apis, or concepts. Code that requires something from a specific loader must be done through the project that is specific to that loader, such as the `fabric` or `neoforge` projects.
+</div>
 
-Loader specific projects such as the `fabric` and `neoforge` project are used to load the `common` project into the game. These projects also define code that is specific to that loader. Loader specific projects can access all the code in the `common` project. It is important to remember that the `common` project can not access code from loader specific projects.
+---
 
-## Removing Platforms and Loaders
-While this template has support for many modloaders, new loaders may appear in the future, and existing loaders may become less relevant.
+> Chiikawa, Hachiware, Usagi… these healing, slightly goofy little ones now move into your world.
+> Tame them, hand them a tool, and they'll farm, fight, and even **pick up a music box and play your favorite song** for you.
+> They'll be adorable, they'll get hurt, they'll let out their signature squeaks — and when they fall, all it takes is a slice of cake to bring them back. 🎂
 
-Removing loader specific projects is as easy as deleting the folder, and removing the `include("projectname")` line from the `settings.gradle` file.
-For example if you wanted to remove support for `forge` you would follow the following steps:
+<!--
+  📸 Gallery placeholder — strongly recommend dropping 2–4 screenshots / GIFs here.
+  This is what decides whether people click download:
+  - a pack of little ones following the player (shows models + animation)
+  - a Farmer planting and harvesting in a field
+  - Hachiware holding the music box and playing (with a "♪ Now Playing" subtitle)
+  - the moment a doll is placed on a cake to revive
+  Example:
+  <div align="center">
+    <img src="docs/img/farming.gif"  width="45%" />
+    <img src="docs/img/music.gif"    width="45%" />
+  </div>
+-->
 
-1. Delete the subproject folder. For example, delete `MultiLoader-Template/forge`.
-2. Remove the project from `settings.gradle`. For example, remove `include("forge")`. 
+## ✨ Why you'll want it
+
+- 🐾 **Seven characters from the original**, all tameable — Chiikawa, Hachiware, Usagi, Shisa, Momonga, Kurimanju, and Rakko, each with its own model, textures, and personality.
+- 🧰 **A job system that works on its own** — drop a tool into a pet's backpack, flip it to **Work** mode, and it gets busy for you: the **Farmer** plants and harvests, the **Fencer** fights up close, the **Archer** picks off enemies at range, and the **Musician** plays for you.
+- 🎵 **A music box that plays your own songs** — drop `.mp3` / `.wav` files into a folder and hear them in-game. Pure-Java decoding, **no external ffmpeg required**; on a multiplayer server, everyone nearby hears the same track.
+- 🔊 **Per-character sounds** — Usagi's signature squeaks, plus tame/hurt voices for the cast, to make them feel alive.
+- 🎒 **Pet backpack** — right-click a pet with an empty hand to open its inventory and manage its tools and gear.
+- 🪆 **Dolls & spawn eggs** — a doll for every character (try placing one on a cake 🎂), and spawn eggs in Creative.
+- ⚔️ **Character weapons** — craftable signature "discipline sticks" for Chiikawa, Hachiware, and Usagi.
+
+## 📥 Download
+
+| Platform | Link |
+| --- | --- |
+| **Modrinth** | https://modrinth.com/mod/pT971QUb |
+| **CurseForge** | https://www.curseforge.com/minecraft/mc-mods/chiikawa |
+
+> **Fabric** players also need the [Fabric API](https://modrinth.com/mod/fabric-api).
+
+## 🎮 How to Play
+
+New here? This section is all you need — most "it's not working" reports come from skipping one of these steps.
+
+### 🍖 Taming
+Hold **almost any food** (apple, bread, cookie, carrot, potato, cooked meat, melon slice, sweet berries, golden apple…) and **right-click the pet**.
+
+> ⚠️ **Taming is chance-based.** Each feed has a chance to succeed, so keep feeding! **Hearts** = tamed. A **puff of smoke / confused reaction** = not yet, try again. Flowers no longer work — use food.
+
+### 🧭 Three modes — Follow / Sit / Work
+Once it's yours, **Sneak (Shift) + right-click with an empty hand** to cycle through:
+
+- **Follow** — the pet follows you.
+- **Sit** — the pet stays put.
+- **Work** — the pet performs its job around the spot where you set it.
+
+### 💼 Jobs
+A pet's job is decided by the **tool it holds**. Open its backpack (right-click with an empty hand), place a tool inside, then set it to **Work**:
+
+| Job | Give it… | What it does |
+| --- | --- | --- |
+| **Farmer** | a Hoe | plants and harvests nearby crops (modded seeds supported) |
+| **Fencer** | a Sword (or a character's discipline stick) | attacks hostile mobs in melee |
+| **Archer** | a Bow (keep arrows in the backpack) | attacks hostile mobs at range |
+| **Musician** | a Music Box | plays your imported music |
+
+> Pets only fight/work while in **Work** mode — in Follow mode they stay peaceful and won't pick fights.
+>
+> 🎵 **Note: only Hachiware can currently take the Musician job** — other characters won't play even while holding a music box.
+
+### ❤️ Other interactions
+- **Heal** a hurt pet by right-clicking it with food.
+- **Open its backpack** by right-clicking with an empty hand (no sneak).
+
+### 🌍 Where they spawn
+Pets appear naturally in **Plains, Sunflower Plains, Savanna, Savanna Plateau, Desert, Swamp, and Snowy Plains**. In Creative, use the spawn eggs.
+
+### 🎁 Getting items
+- **Weapons** (discipline sticks) are **craftable** — check the recipe book (wool + stick + flint).
+- The **Music Box**, **dolls**, and **spawn eggs** are in the Creative inventory. A pet also **drops its doll when it dies**, preserving its backpack and data.
+
+## 🎵 Music Box: play your own songs
+
+1. Open the **Music Box** screen and click **Open Folder** to jump to `config/chiikawa/music`.
+2. Drop your `.mp3` / `.wav` files in, hit **Reload**, and pick a track.
+3. Give the Music Box to **Hachiware** and set it to the **Musician** job — it'll hold the box and play for you.
+
+Audio is decoded in **pure Java** (mp3spi / JLayer for MP3, the JDK for WAV), encoded with Opus, and streamed from the server to nearby clients — **no external tools needed**.
+
+> Admins can run `/chiikawa music rescan` to force a rescan of the music folder.
+
+## 🗂️ Supported Versions
+
+| Minecraft | Loaders |
+| --- | --- |
+| 26.1.2 | Fabric · NeoForge |
+| 1.21.11 / 1.21.10 / 1.21.8 / 1.21.7 / 1.21.6 / 1.21.5 / 1.21.4 / 1.21.1 | Fabric · NeoForge |
+| 1.20.6 | Fabric · NeoForge |
+| 1.20.4 / 1.20.2 / 1.20.1 | Fabric · Forge |
+
+Only Minecraft 1.20.1 and newer are maintained.
+
+> Newer snapshot releases (such as the latest 26.x) will be supported once the loader ecosystem stabilizes — please hang tight.
+
+## 🔧 Building from Source
+
+The repo is a [MultiLoader](https://github.com/jaredlll08/MultiLoader-Template)-style project: shared code lives in `common`, and each loader compiles it directly. **Each Minecraft version lives on its own git branch.**
+
+```bash
+git checkout 1.21.1                                   # pick your version branch
+
+./gradlew :fabric:runClient                           # run a dev client
+./gradlew :neoforge:runClient                         # (:forge:runClient on 1.20.1–1.20.4)
+
+./gradlew :fabric:runDatagen :neoforge:runData        # regenerate data
+./gradlew build                                        # build all jars
+```
+
+Built jars land in `fabric/build/libs/` and `neoforge/build/libs/` (or `forge/build/libs/`). On Windows, use `gradlew.bat`. Use JDK 17 for 1.20.x, JDK 21 for 1.21.x, and JDK 25 for 26.1.2.
+
+## 🐛 Bugs & Ideas
+
+**Please report bugs and suggest ideas on [GitHub Issues](https://github.com/Dwinovo/minecraft-chiikawa/issues), not in the Modrinth / CurseForge comments.** Comments are easy to miss and impossible to track; an issue gets a proper answer and stays open until it's actually fixed.
+
+- 🐞 [Report a bug](https://github.com/Dwinovo/minecraft-chiikawa/issues/new?template=bug_report.yml) — the form asks for your Minecraft version, loader, and mod version, which I need to reproduce anything.
+- 💡 [Suggest a feature](https://github.com/Dwinovo/minecraft-chiikawa/issues/new?template=feature_request.yml) — new characters, mechanics, improvements.
+- ⭐ Like the mod? **Starring the repo** is the easiest way to say so, and it helps others find it.
+
+## 🤝 Contributing
+
+Issues and pull requests are welcome.
+
+- Put shared logic in `common`; only loader-specific glue belongs in `fabric` / `neoforge` / `forge`.
+- Run `./gradlew :common:test` before opening a PR.
+- Generated resources under `**/generated/` are git-ignored and recreated by datagen — don't commit them.
+- Each Minecraft version is a separate branch; target the branch your change applies to.
+
+## 📜 License & Credits
+
+- Licensed under [**CC-BY-NC-SA-4.0**](LICENSE).
+- Art support by **zoe_1000**.
+- *Chiikawa* and its characters are the property of **Nagano**. This is a non-commercial fan project, not affiliated with or endorsed by the rights holders.
