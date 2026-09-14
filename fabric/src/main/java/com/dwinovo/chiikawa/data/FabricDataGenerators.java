@@ -2,9 +2,6 @@ package com.dwinovo.chiikawa.data;
 
 import net.fabricmc.fabric.api.datagen.v1.DataGeneratorEntrypoint;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
-import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.core.HolderLookup;
 
 public class FabricDataGenerators implements DataGeneratorEntrypoint {
     @Override
@@ -17,16 +14,6 @@ public class FabricDataGenerators implements DataGeneratorEntrypoint {
         pack.addProvider(FabricModItemTagsProvider::new);
         pack.addProvider(FabricModEntityTagsProvider::new);
         pack.addProvider((net.minecraft.data.DataProvider.Factory<FabricModSoundsProvider>) FabricModSoundsProvider::new);
-        pack.addProvider((output, registries) -> new RecipeProvider.Runner(output, registries) {
-            @Override
-            public String getName() {
-                return "Chiikawa Recipes";
-            }
-
-            @Override
-            protected RecipeProvider createRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
-                return new ModRecipeProvider(registries, output);
-            }
-        });
+        pack.addProvider(ModRecipeProvider.Runner::new);
     }
 }
