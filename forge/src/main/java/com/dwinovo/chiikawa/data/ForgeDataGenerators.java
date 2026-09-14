@@ -35,7 +35,7 @@ public class ForgeDataGenerators {
         generator.addProvider(event.includeServer(), new ForgeModEntityTagsProvider(output, lookupProvider, existingFileHelper));
         
         // Recipe provider
-        generator.addProvider(event.includeServer(), new ForgeModRecipeProvider(output));
+        generator.addProvider(event.includeServer(), new ModRecipeProvider(output));
         
         // Sound provider
         generator.addProvider(event.includeClient(), new ForgeModSoundsProvider(output));
