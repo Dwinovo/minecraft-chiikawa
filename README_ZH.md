@@ -13,6 +13,7 @@
 [![Modrinth](https://img.shields.io/badge/Download-Modrinth-00AF5C?logo=modrinth&logoColor=white)](https://modrinth.com/mod/pT971QUb)
 [![CurseForge](https://img.shields.io/badge/Download-CurseForge-F16436?logo=curseforge&logoColor=white)](https://www.curseforge.com/minecraft/mc-mods/chiikawa)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-lightgrey)](LICENSE)
+[![GitHub Stars](https://img.shields.io/github/stars/Dwinovo/minecraft-chiikawa?style=flat&logo=github&label=Star)](https://github.com/Dwinovo/minecraft-chiikawa)
 
 </div>
 
@@ -133,6 +134,14 @@ git checkout 1.21.1                                   # 切到目标版本分支
 ```
 
 产物在 `fabric/build/libs/` 和 `neoforge/build/libs/`(或 `forge/build/libs/`)。Windows 用 `gradlew.bat`。JDK 版本:1.20.x 用 17,1.21.x 用 21,26.1.2 用 25。
+
+## 🐛 反馈与建议
+
+**Bug 反馈和想法请提到 [GitHub Issues](https://github.com/Dwinovo/minecraft-chiikawa/issues),不要发在 Modrinth / CurseForge 的评论区。** 评论容易被淹没、也没法追踪;issue 会得到正式回复,并一直保持打开直到真正修好。
+
+- 🐞 [报告 Bug](https://github.com/Dwinovo/minecraft-chiikawa/issues/new?template=bug_report.yml) —— 表单会要求填写 Minecraft 版本、加载器和模组版本,没有这些我无法复现。
+- 💡 [提出建议](https://github.com/Dwinovo/minecraft-chiikawa/issues/new?template=feature_request.yml) —— 新角色、新机制、改进点都欢迎。
+- ⭐ 喜欢这个模组?**给仓库点个 Star** 是最简单的支持方式,也能让更多人发现它。
 
 ## 🤝 参与贡献
 

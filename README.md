@@ -13,6 +13,7 @@
 [![Modrinth](https://img.shields.io/badge/Download-Modrinth-00AF5C?logo=modrinth&logoColor=white)](https://modrinth.com/mod/pT971QUb)
 [![CurseForge](https://img.shields.io/badge/Download-CurseForge-F16436?logo=curseforge&logoColor=white)](https://www.curseforge.com/minecraft/mc-mods/chiikawa)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-lightgrey)](LICENSE)
+[![GitHub Stars](https://img.shields.io/github/stars/Dwinovo/minecraft-chiikawa?style=flat&logo=github&label=Star)](https://github.com/Dwinovo/minecraft-chiikawa)
 
 </div>
 
@@ -134,6 +135,14 @@ git checkout 1.21.1                                   # pick your version branch
 ```
 
 Built jars land in `fabric/build/libs/` and `neoforge/build/libs/` (or `forge/build/libs/`). On Windows, use `gradlew.bat`. Use JDK 17 for 1.20.x, JDK 21 for 1.21.x, and JDK 25 for 26.1.2.
+
+## 🐛 Bugs & Ideas
+
+**Please report bugs and suggest ideas on [GitHub Issues](https://github.com/Dwinovo/minecraft-chiikawa/issues), not in the Modrinth / CurseForge comments.** Comments are easy to miss and impossible to track; an issue gets a proper answer and stays open until it's actually fixed.
+
+- 🐞 [Report a bug](https://github.com/Dwinovo/minecraft-chiikawa/issues/new?template=bug_report.yml) — the form asks for your Minecraft version, loader, and mod version, which I need to reproduce anything.
+- 💡 [Suggest a feature](https://github.com/Dwinovo/minecraft-chiikawa/issues/new?template=feature_request.yml) — new characters, mechanics, improvements.
+- ⭐ Like the mod? **Starring the repo** is the easiest way to say so, and it helps others find it.
 
 ## 🤝 Contributing
 
