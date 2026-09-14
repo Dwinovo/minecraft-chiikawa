@@ -19,6 +19,7 @@ import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -98,6 +99,23 @@ public class ModRecipeProvider extends RecipeProvider {
                 " P ",
                 " SP",
                 "S  "
+        );
+
+        saveEnchantedShaped(
+                recipeOutput,
+                RecipeCategory.MISC,
+                new ItemStack(InitItems.MUSIC_BOX.get()),
+                ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "music_box"),
+                getHasName(Items.NOTE_BLOCK),
+                has(Items.NOTE_BLOCK),
+                Map.of(
+                        'P', Ingredient.of(ItemTags.PLANKS),
+                        'N', Ingredient.of(Items.NOTE_BLOCK),
+                        'G', Ingredient.of(Items.GOLD_INGOT)
+                ),
+                " P ",
+                "PNP",
+                " G "
         );
     }
 
