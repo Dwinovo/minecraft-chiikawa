@@ -52,6 +52,11 @@ jobs:
       - name: Run data generation
         run: ./gradlew datagenAll --no-daemon -x javadoc
 
+      # 发版流水线靠 releaseJars 收成品;它那道"生成资源在不在"的检查每次推送都先在这里过一遍,
+      # 生成目录和检查对不上时当场红,不留到发版那天。
+      - name: Collect release jars
+        run: ./gradlew releaseJars --no-daemon -x javadoc
+
       # 纯 JVM 测试,不起游戏。
       - name: Run JVM tests
         run: ./gradlew test --no-daemon -x javadoc
