@@ -99,7 +99,8 @@ Pets appear naturally in **Plains, Sunflower Plains, Savanna, Savanna Plateau, D
 
 ### 🎁 Getting items
 - **Weapons** (discipline sticks) are **craftable** — check the recipe book (wool + stick + flint).
-- The **Music Box**, **dolls**, and **spawn eggs** are in the Creative inventory. A pet also **drops its doll when it dies**, preserving its backpack and data.
+- The **Music Box** is **craftable** too (note block + planks + gold ingot).
+- **Dolls** and **spawn eggs** are in the Creative inventory. A pet also **drops its doll when it dies**, preserving its backpack and data.
 
 ## 🎵 Music Box: play your own songs
 
