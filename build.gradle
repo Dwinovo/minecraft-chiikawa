@@ -2,3 +2,54 @@ plugins {
     id 'fabric-loom' version '1.6-SNAPSHOT' apply(false)
     id 'net.neoforged.moddev' version '2.0.140' apply(false)
 }
+
+// 本分支的第二个 loader:1.20.6+ 是 neoforge,1.20.1–1.20.4 是 forge。由 settings.gradle 决定,这里只是读出来。
+def secondLoader = findProject(':neoforge') != null ? 'neoforge' : 'forge'
+def loaders = ['fabric', secondLoader]
+
+/** 数据生成的统一入口:本分支两个 loader 各跑一遍。CI 与发版都只调它,不点名 loader。 */
+tasks.register('datagenAll') {
+    group = 'build'
+    description = '跑本分支两个 loader 的数据生成(语言文件、标签、物品模型)'
+    dependsOn ':fabric:runDatagen'
+    // moddev 与 ForgeGradle 6 的数据生成任务都叫 runData(本仓库的 Forge run 没有另设 taskName)
+    dependsOn ":${secondLoader}:runData"
+}
+
+/**
+ * 发给玩家的 jar,一个 loader 一个,收进 build/release/<loader>/。发版流水线只从这里拿:
+ * build/libs 里还躺着 sources、javadoc,哪个是成品只有构建知道,不让 CI 去猜。
+ *
+ * <p><b>先 {@code ./gradlew datagenAll},再 {@code ./gradlew releaseJars},分两次调用。</b>
+ * 生成资源要起一遍游戏才有,而起游戏本身要先有 processResources 的产物——同一次调用里
+ * 没法让 processResources 在生成之后再跑一遍。下面那道检查把"忘了跑"从静默坏包
+ * (进游戏全是翻译键、标签为空)变成当场失败;发版流水线每次都重新生成。
+ */
+tasks.register('releaseJars', Sync) {
+    group = 'build'
+    description = '把本分支每个 loader 发给玩家的那个 jar 收进 build/release/<loader>/'
+    into layout.buildDirectory.dir('release')
+    doFirst {
+        loaders.each { loader ->
+            def dir = project(":${loader}").file('src/generated/resources')
+            def generated = dir.isDirectory() ? fileTree(dir) { exclude '.cache/**' }.files : []
+            if (generated.isEmpty()) {
+                throw new GradleException("${loader} 没有生成资源(${dir}):成品会缺语言文件/标签。" +
+                        "先跑 ./gradlew datagenAll,再跑 releaseJars")
+            }
+        }
+    }
+    // 成品出自哪个任务:Loom 要重映射时是 remapJar(26.1+ 原生 Mojang 名,没有这一步,就是 jar);
+    // moddev 把 jarJar 的内嵌库直接打进 jar;ForgeGradle 的 jarJar 另出一个 -all,内嵌了音频库的是它。
+    def shipped = [
+        fabric  : { p -> p.tasks.findByName('remapJar') ?: p.tasks.getByName('jar') },
+        neoforge: { p -> p.tasks.getByName('jar') },
+        forge   : { p -> p.tasks.getByName('jarJar') },
+    ]
+    loaders.each { loader ->
+        from({ shipped[loader](project(":${loader}")) }) { into loader }
+    }
+    // Forge 的成品还要过一道 reobf(official 名换成 SRG 名),它原地改写 jarJar 的产物,由 build 挂上、
+    // 不是 jarJar 自己的一步。只依赖 jarJar 的话拷走的是改写前的开发 jar,线上一调 MC 的方法就 NoSuchMethodError。
+    if (secondLoader == 'forge') dependsOn ':forge:reobfJarJar'
+}

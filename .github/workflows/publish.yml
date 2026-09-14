@@ -1,206 +1,230 @@
-name: Publish Mod
+name: Publish
 
+# 发版:Actions → Publish → Run workflow,选分支(就是 MC 版本)和渠道。命令行等价于
+#   gh workflow run publish.yml --ref 1.21.1 -f channel=beta
+#
+# 发什么全由那条分支自己说了算,这里不做任何探测:
+#   版本号  gradle.properties 的 version——游戏里显示的也是它
+#   loader  ./gradlew releaseJars 产出的 build/release/<loader>/,一个 loader 一个 jar
+#
+# 三段:
+#   build    构建一次 → 打 tag v<版本>-<MC>[-<渠道>],把这个版本钉在这个提交上
+#   upload   每个 loader 一路,传 Modrinth 与 CurseForge
+#   release  所有 loader 都上架之后,建 GitHub Release
+# 三段用的是同一次构建的产物。
+#
+# 中途失败了,在这次运行的页面点 "Re-run failed jobs"——只重跑失败的那几路,发出去的不会重发。
+# 别重新点 Run workflow:tag 已经打上,会被当成"这个版本发过了"拒掉。
 on:
-  push:
-    tags:
-      - "v*"
   workflow_dispatch:
+    inputs:
+      channel:
+        description: 渠道
+        type: choice
+        options: [beta, release]
+        default: beta
 
 permissions:
-  contents: write
+  contents: write # 打 tag、建 GitHub Release
+  actions: read # 查这个提交的 Build 是不是绿的
+
+# 同一条分支同一时刻只跑一次发版;不同分支互不相干。
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.facts.outputs.version }}
+      mc: ${{ steps.facts.outputs.mc }}
+      tag: ${{ steps.facts.outputs.tag }}
+      loaders: ${{ steps.jars.outputs.loaders }}
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 要看全部 tag:判重,以及找上一个版本写更新日志
 
-      - name: Setup Java 21
+      - name: Read what this branch releases
+        id: facts
+        shell: bash
+        env:
+          CHANNEL: ${{ inputs.channel }}
+        run: |
+          set -euo pipefail
+          prop() { grep -E "^$1=" gradle.properties | head -n1 | cut -d= -f2-; }
+          version="$(prop version)"
+          mc="$(prop minecraft_version)"
+          # 分支就是 MC 版本。在别的分支或 tag 上点了 Run workflow,到这里为止。
+          if [ "$GITHUB_REF" != "refs/heads/$mc" ]; then
+            echo "::error::发版要在 MC 版本分支上跑:这里是 $GITHUB_REF,本分支的 minecraft_version 是 $mc"
+            exit 1
+          fi
+          # 一个版本号在一个 MC 上只发一次,不分渠道。
+          released="$(git tag -l "v${version}-${mc}" "v${version}-${mc}-*")"
+          if [ -n "$released" ]; then
+            echo "::error::${version} 已经在 MC ${mc} 上发过(${released})。发新版先改 gradle.properties 的 version;上次中途失败的话,去那次运行点 Re-run failed jobs"
+            exit 1
+          fi
+          tag="v${version}-${mc}"
+          [ "$CHANNEL" = release ] || tag="${tag}-${CHANNEL}"
+          {
+            echo "version=$version"
+            echo "mc=$mc"
+            echo "tag=$tag"
+            echo "java=$(prop java_version)"
+          } >> "$GITHUB_OUTPUT"
+
+      # 能不能发,判据是 Build 工作流对这个提交的结论。这里不再跑一遍测试。
+      - name: Require a green Build on this commit
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          state="$(gh run list --workflow build.yml --commit "$GITHUB_SHA" --limit 1 \
+            --json status,conclusion --jq 'if length == 0 then "没有运行记录" else .[0] | "\(.status) \(.conclusion)" end')"
+          if [ "$state" != "completed success" ]; then
+            echo "::error::这个提交的 Build 不是绿的($state),修绿了再发"
+            exit 1
+          fi
+
+      - name: Setup Java ${{ steps.facts.outputs.java }}
         uses: actions/setup-java@v4
         with:
-          java-version: "21"
-          distribution: "temurin"
+          java-version: ${{ steps.facts.outputs.java }}
+          distribution: temurin
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Make Gradle wrapper executable
-        run: chmod +x ./gradlew
-
-      - name: Detect secondary loader module
-        id: loader
-        shell: bash
-        run: |
-          set -euo pipefail
-          if grep -E "include\\(['\"]neoforge['\"]\\)" settings.gradle >/dev/null; then
-            echo "module=neoforge" >> "$GITHUB_OUTPUT"
-            echo "loader=neoforge" >> "$GITHUB_OUTPUT"
-          elif grep -E "include\\(['\"]forge['\"]\\)" settings.gradle >/dev/null; then
-            echo "module=forge" >> "$GITHUB_OUTPUT"
-            echo "loader=forge" >> "$GITHUB_OUTPUT"
-          else
-            echo "module=" >> "$GITHUB_OUTPUT"
-            echo "loader=" >> "$GITHUB_OUTPUT"
-          fi
-
+      # 语言文件、标签、物品模型是生成出来的,不跑就打出一个没有翻译的包。
       - name: Run data generation
+        run: ./gradlew datagenAll --no-daemon
+
+      - name: Build release jars
+        run: ./gradlew releaseJars --no-daemon
+
+      - name: List loaders
+        id: jars
+        shell: bash
+        run: echo "loaders=$(ls build/release | jq -R . | jq -cs .)" >> "$GITHUB_OUTPUT"
+
+      # 更新日志:上一个版本以来的 feat 与 fix 提交。publish/release/ci/build 这几个 scope
+      # 改的是发版机制本身,玩家用不上,不收。
+      - name: Write changelog
+        shell: bash
         env:
-          SECONDARY_MODULE: ${{ steps.loader.outputs.module }}
+          MC: ${{ steps.facts.outputs.mc }}
         run: |
           set -euo pipefail
-          if [ -n "${SECONDARY_MODULE}" ]; then
-            ./gradlew :fabric:runDatagen :${SECONDARY_MODULE}:runData --no-daemon
-          else
-            ./gradlew :fabric:runDatagen --no-daemon
+          prev="$(git describe --tags --abbrev=0 --match "v*-${MC}" --match "v*-${MC}-*" HEAD 2>/dev/null || true)"
+          if [ -z "$prev" ]; then
+            echo "First Chiikawa release for Minecraft ${MC}." > build/changelog.md
+            exit 0
           fi
+          section() {
+            local lines
+            lines="$(git log --no-merges --format=%s "${prev}..HEAD" \
+              | grep -E "^$1(\([^)]*\))?!?: " \
+              | grep -vE "^$1\((publish|release|ci|build)\)" \
+              | sed -E "s/^$1(\([^)]*\))?!?: /- /" \
+              | awk '!seen[$0]++' || true)"
+            [ -z "$lines" ] || printf '### %s\n\n%s\n\n' "$2" "$lines"
+          }
+          { section feat "New features"; section fix "Fixes"; } > build/changelog.md
+          [ -s build/changelog.md ] || echo "Maintenance release." > build/changelog.md
+          cat build/changelog.md
 
-      - name: Build with Gradle
+      - name: Keep the jars and changelog for the next jobs
+        uses: actions/upload-artifact@v4
+        with:
+          name: release
+          path: |
+            build/release/
+            build/changelog.md
+          if-no-files-found: error
+          overwrite: true
+
+      # tag 放在最后:它表示"这个版本钉在这个提交上,构建产物已经存好"。
+      - name: Tag the release commit
+        shell: bash
         env:
-          SECONDARY_MODULE: ${{ steps.loader.outputs.module }}
+          TAG: ${{ steps.facts.outputs.tag }}
         run: |
           set -euo pipefail
-          if [ -n "${SECONDARY_MODULE}" ]; then
-            ./gradlew :fabric:build :${SECONDARY_MODULE}:build --no-daemon
-          else
-            ./gradlew :fabric:build --no-daemon
-          fi
+          git tag "$TAG" "$GITHUB_SHA"
+          git push -q origin "$TAG"
 
-      - name: Prepare publish metadata
+  upload:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # 一个 loader 没传上,不该把另一个也叫停
+      matrix:
+        loader: ${{ fromJSON(needs.build.outputs.loaders) }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: release
+          path: build
+
+      # Modrinth 的 version_number 上限 32 字符;超了就截断,挂 6 位哈希保证唯一。
+      - name: Name this version
         id: meta
         shell: bash
         env:
-          SECONDARY_MODULE: ${{ steps.loader.outputs.module }}
-          SECONDARY_LOADER: ${{ steps.loader.outputs.loader }}
+          BASE: ${{ needs.build.outputs.version }}-${{ inputs.channel }}-${{ matrix.loader }}-${{ needs.build.outputs.mc }}
         run: |
           set -euo pipefail
-          read_prop() {
-            local key="$1"
-            grep -E "^${key}=" gradle.properties | head -n1 | cut -d= -f2-
-          }
-
-          mod_id="$(read_prop mod_id)"
-          mod_version="$(read_prop version)"
-          minecraft_version="$(read_prop minecraft_version)"
-
-          if [ -z "${mod_id}" ] || [ -z "${mod_version}" ] || [ -z "${minecraft_version}" ]; then
-            echo "Failed to read required properties from gradle.properties"
-            exit 1
+          number="$BASE"
+          if [ "${#number}" -gt 32 ]; then
+            number="${BASE:0:25}-$(printf '%s' "$BASE" | sha1sum | cut -c1-6)"
           fi
+          echo "number=$number" >> "$GITHUB_OUTPUT"
 
-          channel="release"
-          if [[ "${GITHUB_REF_NAME}" == *"-alpha"* ]]; then
-            channel="alpha"
-          elif [[ "${GITHUB_REF_NAME}" == *"-beta"* ]]; then
-            channel="beta"
-          fi
-
-          prerelease="false"
-          if [ "${channel}" != "release" ]; then
-            prerelease="true"
-          fi
-
-          find_loader_jar() {
-            local module="$1"
-            if [ -z "${module}" ] || [ ! -d "${module}/build/libs" ]; then
-              return 0
-            fi
-            find "${module}/build/libs" -maxdepth 1 -type f -name '*.jar' \
-              ! -name '*-sources.jar' ! -name '*-javadoc.jar' ! -name '*-dev.jar' \
-              | LC_ALL=C sort | head -n1
-          }
-
-          fabric_file="$(find_loader_jar fabric)"
-          secondary_file="$(find_loader_jar "${SECONDARY_MODULE:-}")"
-
-          if [ -z "${fabric_file}" ] && [ -z "${secondary_file}" ]; then
-            echo "No publishable loader jars found"
-            exit 1
-          fi
-
-          fabric_name="${mod_id}-${mod_version}-${channel}-fabric-${minecraft_version}"
-          secondary_name=""
-          fabric_version_base="${mod_version}-${channel}-fabric-${minecraft_version}"
-          secondary_version_base=""
-
-          if [ -n "${secondary_file}" ] && [ -n "${SECONDARY_LOADER:-}" ]; then
-            secondary_name="${mod_id}-${mod_version}-${channel}-${SECONDARY_LOADER}-${minecraft_version}"
-            secondary_version_base="${mod_version}-${channel}-${SECONDARY_LOADER}-${minecraft_version}"
-          fi
-
-          # Modrinth version_number has a strict length limit; keep deterministic uniqueness if truncated.
-          make_version_number() {
-            local base="$1"
-            local max_len=32
-            if [ "${#base}" -le "${max_len}" ]; then
-              echo "${base}"
-              return 0
-            fi
-            local hash
-            hash="$(printf '%s' "${base}" | sha1sum | cut -c1-6)"
-            local keep_len=$((max_len - 1 - ${#hash}))
-            echo "${base:0:${keep_len}}-${hash}"
-          }
-
-          fabric_version="$(make_version_number "${fabric_version_base}")"
-          secondary_version=""
-          if [ -n "${secondary_version_base}" ]; then
-            secondary_version="$(make_version_number "${secondary_version_base}")"
-          fi
-
-          {
-            echo "version_type=${channel}"
-            echo "github_prerelease=${prerelease}"
-            echo "minecraft_version=${minecraft_version}"
-            echo "fabric_file=${fabric_file}"
-            echo "secondary_file=${secondary_file}"
-            echo "secondary_loader=${SECONDARY_LOADER:-}"
-            echo "fabric_name=${fabric_name}"
-            echo "secondary_name=${secondary_name}"
-            echo "fabric_version=${fabric_version}"
-            echo "secondary_version=${secondary_version}"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Publish Fabric to Modrinth and CurseForge
-        id: publish_fabric
-        continue-on-error: true
-        if: ${{ steps.meta.outputs.fabric_file != '' }}
+      - name: Publish to Modrinth and CurseForge
         uses: Kira-NT/mc-publish@v3.3.1
         with:
-          files: ${{ steps.meta.outputs.fabric_file }}
-          loaders: fabric
-          name: ${{ steps.meta.outputs.fabric_name }}
-          version: ${{ steps.meta.outputs.fabric_version }}
-          game-versions: ${{ steps.meta.outputs.minecraft_version }}
+          files: build/release/${{ matrix.loader }}/*.jar
+          loaders: ${{ matrix.loader }}
+          name: chiikawa-${{ needs.build.outputs.version }}-${{ inputs.channel }}-${{ matrix.loader }}-${{ needs.build.outputs.mc }}
+          version: ${{ steps.meta.outputs.number }}
+          game-versions: ${{ needs.build.outputs.mc }}
           game-version-filter: none
-          version-type: ${{ steps.meta.outputs.version_type }}
-          github-prerelease: ${{ steps.meta.outputs.github_prerelease }}
-
+          version-type: ${{ inputs.channel }}
+          changelog-file: build/changelog.md
+          # CurseForge 要求每个版本勾选环境组(errorCode 1021);NeoForge/Forge 的 toml 里没有这个字段。
+          environment: client|server
+          modrinth-id: pT971QUb
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           curseforge-id: 1106419
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
 
-          modrinth-id: pT971QUb
-          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
-
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish Secondary Loader to Modrinth and CurseForge
-        if: ${{ steps.meta.outputs.secondary_file != '' && steps.meta.outputs.secondary_loader != '' }}
-        uses: Kira-NT/mc-publish@v3.3.1
+  release:
+    needs: [build, upload]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
         with:
-          files: ${{ steps.meta.outputs.secondary_file }}
-          loaders: ${{ steps.meta.outputs.secondary_loader }}
-          name: ${{ steps.meta.outputs.secondary_name }}
-          version: ${{ steps.meta.outputs.secondary_version }}
-          game-versions: ${{ steps.meta.outputs.minecraft_version }}
-          game-version-filter: none
-          version-type: ${{ steps.meta.outputs.version_type }}
-          github-prerelease: ${{ steps.meta.outputs.github_prerelease }}
+          name: release
+          path: build
 
-          curseforge-id: 1106419
-          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-
-          modrinth-id: pT971QUb
-          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
-
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.build.outputs.tag }}
+          VERSION: ${{ needs.build.outputs.version }}
+          MC: ${{ needs.build.outputs.mc }}
+          CHANNEL: ${{ inputs.channel }}
+        run: |
+          set -euo pipefail
+          flags=()
+          [ "$CHANNEL" = release ] || flags+=(--prerelease)
+          gh release create "$TAG" build/release/*/*.jar \
+            --repo "$GITHUB_REPOSITORY" --verify-tag \
+            --title "Chiikawa ${VERSION}-${CHANNEL} (MC ${MC})" \
+            --notes-file build/changelog.md "${flags[@]}"
