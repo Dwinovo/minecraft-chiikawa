@@ -77,8 +77,6 @@ loom.remapConfigurations.configureEach {
     }
 }
 
-sourceSets.main.resources { srcDir 'src/generated/resources' }
-
 tasks.named('processResources', ProcessResources) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
