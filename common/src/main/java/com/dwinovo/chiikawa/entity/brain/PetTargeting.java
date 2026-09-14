@@ -45,9 +45,10 @@ public final class PetTargeting {
     }
 
     /**
+     * @param ownable a pet or any other ownable entity
      * @return the owner's UUID, or {@code null} if the entity has no owner
      */
-    private static @Nullable UUID ownerId(OwnableEntity ownable) {
+    public static @Nullable UUID ownerId(OwnableEntity ownable) {
         EntityReference<LivingEntity> owner = ownable.getOwnerReference();
         return owner == null ? null : owner.getUUID();
     }
