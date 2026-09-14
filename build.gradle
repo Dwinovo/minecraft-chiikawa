@@ -33,10 +33,17 @@ tasks.register('releaseJars', Sync) {
     into layout.buildDirectory.dir('release')
     doFirst {
         loaders.each { loader ->
-            def dir = project(":${loader}").file('src/generated/resources')
-            def generated = dir.isDirectory() ? fileTree(dir) { exclude '.cache/**' }.files : []
+            // 生成资源落在哪由 loader 自己的配置说了算,这里不写死:Loom 的 fabricApi.configureDataGeneration
+            // 把输出目录(默认 src/main/generated)挂进 main 资源,moddev/ForgeGradle 是 build.gradle 里显式 srcDir。
+            // 所以只认 main 资源目录里、相对 loader 工程路径带 generated 的那些。
+            def loaderProject = project(":${loader}")
+            def dirs = loaderProject.sourceSets.main.resources.srcDirs
+                    .findAll { loaderProject.relativePath(it).contains('generated') }
+            def generated = dirs.findAll { it.isDirectory() }
+                    .collectMany { dir -> fileTree(dir) { exclude '.cache/**' }.files as List }
             if (generated.isEmpty()) {
-                throw new GradleException("${loader} 没有生成资源(${dir}):成品会缺语言文件/标签。" +
+                def checked = dirs.collect { rootProject.relativePath(it) }
+                throw new GradleException("${loader} 没有生成资源(查了 ${checked}):成品会缺语言文件/标签。" +
                         "先跑 ./gradlew datagenAll,再跑 releaseJars")
             }
         }
