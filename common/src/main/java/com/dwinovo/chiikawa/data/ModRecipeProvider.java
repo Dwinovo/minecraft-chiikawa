@@ -8,6 +8,7 @@ import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 
 public class ModRecipeProvider extends RecipeProvider {
@@ -48,5 +49,16 @@ public class ModRecipeProvider extends RecipeProvider {
                 .define('S', Items.STICK)
                 .unlockedBy(getHasName(Items.PINK_WOOL), has(Items.PINK_WOOL))
                 .save(recipeOutput, new ResourceLocation(Constants.MOD_ID, "chiikawa_weapon"));
+
+        // Music Box recipe
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, InitItems.MUSIC_BOX.get())
+                .pattern(" P ")
+                .pattern("PNP")
+                .pattern(" G ")
+                .define('P', ItemTags.PLANKS)
+                .define('N', Items.NOTE_BLOCK)
+                .define('G', Items.GOLD_INGOT)
+                .unlockedBy(getHasName(Items.NOTE_BLOCK), has(Items.NOTE_BLOCK))
+                .save(recipeOutput, new ResourceLocation(Constants.MOD_ID, "music_box"));
     }
 }
