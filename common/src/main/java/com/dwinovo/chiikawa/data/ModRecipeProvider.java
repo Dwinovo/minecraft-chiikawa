@@ -2,9 +2,11 @@ package com.dwinovo.chiikawa.data;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.init.InitItems;
+import java.util.concurrent.CompletableFuture;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
@@ -18,6 +20,23 @@ import net.minecraft.world.item.Items;
 public final class ModRecipeProvider extends RecipeProvider {
     public ModRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
         super(registries, output);
+    }
+
+    /** The data provider that runs {@link ModRecipeProvider}; registered by both loaders' data generators. */
+    public static final class Runner extends RecipeProvider.Runner {
+        public Runner(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
+            super(output, registries);
+        }
+
+        @Override
+        protected RecipeProvider createRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
+            return new ModRecipeProvider(registries, output);
+        }
+
+        @Override
+        public String getName() {
+            return "Chiikawa Recipes";
+        }
     }
 
     @Override
