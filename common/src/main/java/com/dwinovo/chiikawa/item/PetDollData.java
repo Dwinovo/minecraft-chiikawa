@@ -47,7 +47,12 @@ public final class PetDollData {
         petData.remove("Pos");
         petData.remove("Motion");
         petData.remove("Rotation");
+        // Fall distance: "FallDistance" up to 1.21.4, "fall_distance" from 1.21.5. Keeping the
+        // lethal value makes the revived pet die again on its first tiny landing. Both keys are
+        // stripped so dolls carried across a Minecraft upgrade are cleaned too.
         petData.remove("FallDistance");
+        petData.remove("fall_distance");
+        petData.remove("FallFlying");
         petData.remove("OnGround");
         petData.remove("Air");
         petData.remove("Fire");
@@ -55,7 +60,14 @@ public final class PetDollData {
         petData.remove("DeathTime");
         petData.remove("HurtTime");
         petData.remove("HurtByTimestamp");
+        // Leash: "Leash" up to 1.20.4, "leash" from 1.20.5. A pet that died on a lead must not
+        // come back leashed (and duplicate the lead).
         petData.remove("Leash");
+        petData.remove("leash");
+        // Effects: "ActiveEffects" up to 1.20.4, "active_effects" from 1.20.5. A pet killed by
+        // Wither or Poison would otherwise come back with the effect that killed it.
+        petData.remove("ActiveEffects");
+        petData.remove("active_effects");
         petData.remove("Health");
         petData.remove("AbsorptionAmount");
     }

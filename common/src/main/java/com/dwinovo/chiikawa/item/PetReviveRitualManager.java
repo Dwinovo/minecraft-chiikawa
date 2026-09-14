@@ -135,6 +135,8 @@ public final class PetReviveRitualManager {
         }
 
         pet.teleportTo(revive.spawnPos.x, revive.spawnPos.y, revive.spawnPos.z);
+        // Independent of save-key names: also cleans dolls created before this fix.
+        pet.resetFallDistance();
         pet.setYRot(revive.yRot);
         pet.setXRot(revive.xRot);
         pet.setHealth(pet.getMaxHealth());
