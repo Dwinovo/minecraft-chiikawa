@@ -55,7 +55,6 @@ public class MusicBoxScreen extends Screen {
     private List<MusicTrackView> tracks;
     private int page;
     private int leftPos, topPos;
-    private IconButton folderButton, reloadButton;
 
     public MusicBoxScreen(int handIndex, List<MusicTrackView> tracks) {
         super(Component.translatable("screen.chiikawa.music_box.title"));
@@ -106,12 +105,10 @@ public class MusicBoxScreen extends Screen {
         next.active = page + 1 < pages;
         addRenderableWidget(next);
 
-        folderButton = new IconButton(leftPos + FOLDER_X, topPos + CTRL_Y, ICON_BTN, ICON_BTN,
-                ignored -> openMusicFolder(), Component.translatable("screen.chiikawa.music_box.open_folder"));
-        addRenderableWidget(folderButton);
-        reloadButton = new IconButton(leftPos + RELOAD_X, topPos + CTRL_Y, ICON_BTN, ICON_BTN,
-                ignored -> requestCatalog(true), Component.translatable("screen.chiikawa.music_box.reload"));
-        addRenderableWidget(reloadButton);
+        addRenderableWidget(new IconButton(leftPos + FOLDER_X, topPos + CTRL_Y, ICON_BTN, ICON_BTN,
+                ignored -> openMusicFolder(), Component.translatable("screen.chiikawa.music_box.open_folder")));
+        addRenderableWidget(new IconButton(leftPos + RELOAD_X, topPos + CTRL_Y, ICON_BTN, ICON_BTN,
+                ignored -> requestCatalog(true), Component.translatable("screen.chiikawa.music_box.reload")));
     }
 
     @Override
@@ -139,14 +136,6 @@ public class MusicBoxScreen extends Screen {
         }
 
         super.render(graphics, mouseX, mouseY, partialTick); // renders the list-row widgets
-
-        // Control-icon tooltips. 1.20.1 has no deferred tooltip API (setTooltipForNextFrame),
-        // so draw immediately using the single-component renderTooltip.
-        if (folderButton != null && folderButton.isHovered()) {
-            graphics.renderTooltip(font, Component.translatable("screen.chiikawa.music_box.open_folder"), mouseX, mouseY);
-        } else if (reloadButton != null && reloadButton.isHovered()) {
-            graphics.renderTooltip(font, Component.translatable("screen.chiikawa.music_box.reload"), mouseX, mouseY);
-        }
     }
 
     /** Centered text without the default drop shadow — shadows look muddy on the cream panel. */
@@ -224,12 +213,13 @@ public class MusicBoxScreen extends Screen {
         }
     }
 
-    /** Click hit area over a control button whose frame/icon is baked into the panel. */
+    /** Click + tooltip hit area over a control button whose frame/icon is baked into the panel. */
     private final class IconButton extends Button {
         private IconButton(int x, int y, int w, int h, Button.OnPress onPress, Component tooltip) {
             super(x, y, w, h, Component.empty(), onPress, supplier -> supplier.get());
             if (tooltip != null) {
-                setTooltip(Tooltip.create(tooltip)); // narration only; the visual tooltip is drawn in render()
+                // The widget tooltip is the only tooltip source: vanilla draws it on hover and narrates it.
+                setTooltip(Tooltip.create(tooltip));
             }
         }
 
