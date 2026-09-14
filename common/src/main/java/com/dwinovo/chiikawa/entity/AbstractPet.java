@@ -60,12 +60,17 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public class AbstractPet extends TamableAnimal implements RangedAttackMob, ChiikawaAnimated {
@@ -211,6 +216,93 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
             return false;
         }
         return true;
+    }
+
+    /** Random landing spots tried per {@link #teleportToOwner} call before giving up. */
+    private static final int TELEPORT_ATTEMPTS = 10;
+
+    /**
+     * Teleports this pet to a random safe spot within a few blocks of {@code owner}.
+     * Shared by the in-AI follow behavior and the pre-chunk-unload hook, so callers
+     * are responsible for deciding whether the pet should follow at all.
+     *
+     * <p>A spot is only used when its block column is loaded, it stands on solid
+     * ground that isn't harmful, the pet's box there has no collision, no liquid
+     * and no harmful blocks, and it isn't right on top of the owner. When no spot
+     * qualifies the pet stays where it is.
+     *
+     * @param level the pet's (and owner's) server level
+     * @param owner the entity to teleport next to
+     * @return whether the pet was moved
+     */
+    public boolean teleportToOwner(ServerLevel level, LivingEntity owner) {
+        BlockPos base = owner.blockPosition();
+        for (int i = 0; i < TELEPORT_ATTEMPTS; i++) {
+            int dx = Mth.nextInt(getRandom(), -3, 3);
+            int dy = Mth.nextInt(getRandom(), -1, 1);
+            int dz = Mth.nextInt(getRandom(), -3, 3);
+            if (tryTeleportNear(level, owner, base.offset(dx, dy, dz))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean tryTeleportNear(ServerLevel level, LivingEntity owner, BlockPos start) {
+        double x = start.getX() + 0.5;
+        double z = start.getZ() + 0.5;
+        // Don't land on the owner's head/feet.
+        if (Math.abs(x - owner.getX()) < 2.0 && Math.abs(z - owner.getZ()) < 2.0) {
+            return false;
+        }
+        if (!level.isLoaded(start)) {
+            return false;
+        }
+        // Drop down onto the first solid block below the candidate.
+        BlockPos feet = start;
+        BlockState ground;
+        while (true) {
+            if (feet.getY() <= level.getMinY()) {
+                return false;
+            }
+            BlockPos below = feet.below();
+            ground = level.getBlockState(below);
+            if (ground.isSolidRender()) {
+                break;
+            }
+            feet = below;
+        }
+        if (isHarmfulTeleportBlock(ground)) {
+            return false;
+        }
+        double y = feet.getY();
+        AABB box = getBoundingBox().move(x - getX(), y - getY(), z - getZ());
+        if (!level.noCollision(this, box)
+                || level.containsAnyLiquid(box)
+                || level.getBlockStatesIfLoaded(box).anyMatch(AbstractPet::isHarmfulTeleportBlock)) {
+            return false;
+        }
+        teleportTo(x, y, z);
+        resetFallDistance();
+        getNavigation().stop();
+        // Forget where we were heading so the pet doesn't try to walk back.
+        Brain<AbstractPet> brain = getBrain();
+        brain.eraseMemory(MemoryModuleType.WALK_TARGET);
+        brain.eraseMemory(MemoryModuleType.LOOK_TARGET);
+        brain.eraseMemory(MemoryModuleType.ATTACK_TARGET);
+        brain.eraseMemory(MemoryModuleType.PATH);
+        return true;
+    }
+
+    private static boolean isHarmfulTeleportBlock(BlockState state) {
+        return state.is(Blocks.MAGMA_BLOCK)
+            || state.is(BlockTags.FIRE)
+            || state.is(BlockTags.CAMPFIRES)
+            || state.is(Blocks.CACTUS)
+            || state.is(Blocks.SWEET_BERRY_BUSH)
+            || state.is(Blocks.POWDER_SNOW)
+            || state.is(Blocks.LAVA_CAULDRON)
+            || state.getFluidState().is(FluidTags.LAVA);
     }
 
     public PetMode getPetMode() {
