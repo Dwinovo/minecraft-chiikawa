@@ -1,0 +1,71 @@
+name: Bug report
+description: Something is broken or behaves strangely.
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this! The version fields below are what let me reproduce it, so please fill them in.
+  - type: input
+    id: mc-version
+    attributes:
+      label: Minecraft version
+      placeholder: "e.g. 1.21.1"
+    validations:
+      required: true
+  - type: dropdown
+    id: loader
+    attributes:
+      label: Mod loader
+      options:
+        - Fabric
+        - NeoForge
+        - Forge
+    validations:
+      required: true
+  - type: input
+    id: mod-version
+    attributes:
+      label: Chiikawa mod version
+      description: Shown in the file name, e.g. chiikawa-fabric-1.21.1-0.0.8.jar
+      placeholder: "e.g. 0.0.8"
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Where does it happen?
+      options:
+        - Singleplayer
+        - Multiplayer server (everyone has the same mod version)
+        - Multiplayer server (not sure versions match)
+        - LAN world
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Tame a Usagi
+        2. Give it a sword and set Work mode
+        3. ...
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / crash report
+      description: Paste the relevant part of latest.log or a crash report, or link to it (mclo.gs works well). For "Failed to decode packet" errors the **server** log is the useful one.
+      render: text
+  - type: textarea
+    id: other-mods
+    attributes:
+      label: Other mods installed
+      description: A mod list, or "only Chiikawa + Fabric API". Does it still happen with only this mod installed?
