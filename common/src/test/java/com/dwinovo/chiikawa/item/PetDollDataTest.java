@@ -30,6 +30,13 @@ class PetDollDataTest {
         petData.put("Pos", new ListTag());
         petData.put("Motion", new ListTag());
         petData.put("Rotation", new ListTag());
+        petData.putFloat("FallDistance", 23.0F);
+        petData.putDouble("fall_distance", 23.0D);
+        petData.putBoolean("FallFlying", true);
+        petData.put("Leash", new CompoundTag());
+        petData.put("leash", new CompoundTag());
+        petData.put("ActiveEffects", new ListTag());
+        petData.put("active_effects", new ListTag());
         petData.putString("CustomName", "\"remember me\"");
 
         PetDollData.sanitizeForRevive(petData);
@@ -39,6 +46,13 @@ class PetDollDataTest {
         assertFalse(petData.contains("Pos"));
         assertFalse(petData.contains("Motion"));
         assertFalse(petData.contains("Rotation"));
+        assertFalse(petData.contains("FallDistance"));
+        assertFalse(petData.contains("fall_distance"));
+        assertFalse(petData.contains("FallFlying"));
+        assertFalse(petData.contains("Leash"));
+        assertFalse(petData.contains("leash"));
+        assertFalse(petData.contains("ActiveEffects"));
+        assertFalse(petData.contains("active_effects"));
         assertTrue(petData.contains("CustomName"));
     }
 }
