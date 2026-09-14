@@ -2,31 +2,52 @@
 
 <img src="https://raw.githubusercontent.com/Dwinovo/minecraft-chiikawa/main/common/src/main/resources/logo.png" alt="Chiikawa Mod" width="320" />
 
-# Chiikawa
+# Chiikawa Mod
 
-**Bring Chiikawa, Hachiware, Usagi and friends into Minecraft — tameable pets with their own jobs, animations, and a working music box that plays your own songs.**
+**Bring the world of *Chiikawa* into Minecraft — tameable little friends, a job system that lets them work on their own, and a music box that plays your very own songs.**
+
+**English** · [简体中文](README_ZH.md)
 
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1%20–%2026.1.2-62B47A?logo=minecraft&logoColor=white)](#supported-versions)
 [![Loaders](https://img.shields.io/badge/Loaders-Fabric%20%7C%20NeoForge%20%7C%20Forge-blue)](#supported-versions)
 [![Modrinth](https://img.shields.io/badge/Download-Modrinth-00AF5C?logo=modrinth&logoColor=white)](https://modrinth.com/mod/pT971QUb)
 [![CurseForge](https://img.shields.io/badge/Download-CurseForge-F16436?logo=curseforge&logoColor=white)](https://www.curseforge.com/minecraft/mc-mods/chiikawa)
 [![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-lightgrey)](LICENSE)
+[![GitHub Stars](https://img.shields.io/github/stars/Dwinovo/minecraft-chiikawa?style=flat&logo=github&label=Star)](https://github.com/Dwinovo/minecraft-chiikawa)
 
 </div>
 
 ---
 
-## Features
+> Chiikawa, Hachiware, Usagi… these healing, slightly goofy little ones now move into your world.
+> Tame them, hand them a tool, and they'll farm, fight, and even **pick up a music box and play your favorite song** for you.
+> They'll be adorable, they'll get hurt, they'll let out their signature squeaks — and when they fall, all it takes is a slice of cake to bring them back. 🎂
 
-- 🐾 **Seven tameable pets** from the Chiikawa universe, each with its own model, textures, and personality.
-- 🧰 **Jobs & modes** — set a pet to **Follow**, **Sit**, or **Work**, and give it a job: **Farmer**, **Fencer**, **Archer**, or **Musician**. Working pets act on their own.
-- 🎬 **In-house animation engine** — a Bedrock model/animation pipeline built for this mod, inspired by [GeckoLib](https://github.com/bernie-g/geckolib) but with no GeckoLib runtime dependency, driven by a semantic state machine for smooth idle, walk, run, work, and reaction poses.
-- 🎒 **Pet backpack** — right-click a pet to open its inventory and manage its gear and tools.
-- 🎵 **Music box** — drop your own `.mp3` / `.wav` files into a folder and stream them in-game. Pure-Java decoding, **no external ffmpeg required**, with an in-screen "Open Folder" button.
-- 🪆 **Pet dolls & spawn eggs** — a doll for every character (try placing one on a cake 🎂).
+<!--
+  📸 Gallery placeholder — strongly recommend dropping 2–4 screenshots / GIFs here.
+  This is what decides whether people click download:
+  - a pack of little ones following the player (shows models + animation)
+  - a Farmer planting and harvesting in a field
+  - Hachiware holding the music box and playing (with a "♪ Now Playing" subtitle)
+  - the moment a doll is placed on a cake to revive
+  Example:
+  <div align="center">
+    <img src="docs/img/farming.gif"  width="45%" />
+    <img src="docs/img/music.gif"    width="45%" />
+  </div>
+-->
+
+## ✨ Why you'll want it
+
+- 🐾 **Seven characters from the original**, all tameable — Chiikawa, Hachiware, Usagi, Shisa, Momonga, Kurimanju, and Rakko, each with its own model, textures, and personality.
+- 🧰 **A job system that works on its own** — drop a tool into a pet's backpack, flip it to **Work** mode, and it gets busy for you: the **Farmer** plants and harvests, the **Fencer** fights up close, the **Archer** picks off enemies at range, and the **Musician** plays for you.
+- 🎵 **A music box that plays your own songs** — drop `.mp3` / `.wav` files into a folder and hear them in-game. Pure-Java decoding, **no external ffmpeg required**; on a multiplayer server, everyone nearby hears the same track.
+- 🔊 **Per-character sounds** — Usagi's signature squeaks, plus tame/hurt voices for the cast, to make them feel alive.
+- 🎒 **Pet backpack** — right-click a pet with an empty hand to open its inventory and manage its tools and gear.
+- 🪆 **Dolls & spawn eggs** — a doll for every character (try placing one on a cake 🎂), and spawn eggs in Creative.
 - ⚔️ **Character weapons** — craftable signature "discipline sticks" for Chiikawa, Hachiware, and Usagi.
 
-## Download
+## 📥 Download
 
 | Platform | Link |
 | --- | --- |
@@ -35,33 +56,35 @@
 
 > **Fabric** players also need the [Fabric API](https://modrinth.com/mod/fabric-api).
 
-## How to Play
+## 🎮 How to Play
 
-New here? This is everything you need — most "it's not working" reports come from missing one of these steps.
+New here? This section is all you need — most "it's not working" reports come from skipping one of these steps.
 
 ### 🍖 Taming
 Hold **almost any food** (apple, bread, cookie, carrot, potato, cooked meat, melon slice, sweet berries, golden apple…) and **right-click the pet**.
 
 > ⚠️ **Taming is chance-based.** Each feed has a chance to succeed, so keep feeding! **Hearts** = tamed. A **puff of smoke / confused reaction** = not yet, try again. Flowers no longer work — use food.
 
-### 🧭 Modes — Follow / Sit / Work
+### 🧭 Three modes — Follow / Sit / Work
 Once it's yours, **Sneak (Shift) + right-click with an empty hand** to cycle through:
 
-- **Follow** – the pet follows you.
-- **Sit** – the pet stays put.
-- **Work** – the pet performs its job around the spot where you set it.
+- **Follow** — the pet follows you.
+- **Sit** — the pet stays put.
+- **Work** — the pet performs its job around the spot where you set it.
 
 ### 💼 Jobs
 A pet's job is decided by the **tool it holds**. Open its backpack (right-click with an empty hand), place a tool inside, then set it to **Work**:
 
 | Job | Give it… | What it does |
 | --- | --- | --- |
-| **Farmer** | a Hoe | plants and harvests nearby crops |
+| **Farmer** | a Hoe | plants and harvests nearby crops (modded seeds supported) |
 | **Fencer** | a Sword (or a character's discipline stick) | attacks hostile mobs in melee |
-| **Archer** | a Bow | attacks hostile mobs at range |
+| **Archer** | a Bow (keep arrows in the backpack) | attacks hostile mobs at range |
 | **Musician** | a Music Box | plays your imported music |
 
-> Pets only fight/work while in **Work** mode — in Follow mode they stay peaceful.
+> Pets only fight/work while in **Work** mode — in Follow mode they stay peaceful and won't pick fights.
+>
+> 🎵 **Note: only Hachiware can currently take the Musician job** — other characters won't play even while holding a music box.
 
 ### ❤️ Other interactions
 - **Heal** a hurt pet by right-clicking it with food.
@@ -74,15 +97,17 @@ Pets appear naturally in **Plains, Sunflower Plains, Savanna, Savanna Plateau, D
 - **Weapons** (discipline sticks) are **craftable** — check the recipe book (wool + stick + flint).
 - The **Music Box**, **dolls**, and **spawn eggs** are in the Creative inventory. A pet also **drops its doll when it dies**, preserving its backpack and data.
 
-## Music Box
+## 🎵 Music Box: play your own songs
 
 1. Open the **Music Box** screen and click **Open Folder** to jump to `config/chiikawa/music`.
-2. Drop your `.mp3` or `.wav` files in, hit **Reload**, and pick a track.
-3. Give the Music Box to a pet and set it to the **Musician** job to have it play for you.
+2. Drop your `.mp3` / `.wav` files in, hit **Reload**, and pick a track.
+3. Give the Music Box to **Hachiware** and set it to the **Musician** job — it'll hold the box and play for you.
 
-Audio is decoded in pure Java (mp3spi / JLayer for MP3, the JDK for WAV), encoded with Opus, and streamed from the server to nearby clients — no external tools needed.
+Audio is decoded in **pure Java** (mp3spi / JLayer for MP3, the JDK for WAV), encoded with Opus, and streamed from the server to nearby clients — **no external tools needed**.
 
-## Supported Versions
+> Admins can run `/chiikawa music rescan` to force a rescan of the music folder.
+
+## 🗂️ Supported Versions
 
 | Minecraft | Loaders |
 | --- | --- |
@@ -93,9 +118,11 @@ Audio is decoded in pure Java (mp3spi / JLayer for MP3, the JDK for WAV), encode
 
 Only Minecraft 1.20.1 and newer are maintained.
 
-## Building from Source
+> Newer snapshot releases (such as the latest 26.x) will be supported once the loader ecosystem stabilizes — please hang tight.
 
-The repo is a [MultiLoader](https://github.com/jaredlll08/MultiLoader-Template)-style project: shared code lives in `common`, and each loader compiles it directly. Each Minecraft version lives on its own git branch.
+## 🔧 Building from Source
+
+The repo is a [MultiLoader](https://github.com/jaredlll08/MultiLoader-Template)-style project: shared code lives in `common`, and each loader compiles it directly. **Each Minecraft version lives on its own git branch.**
 
 ```bash
 git checkout 1.21.1                                   # pick your version branch
@@ -109,7 +136,15 @@ git checkout 1.21.1                                   # pick your version branch
 
 Built jars land in `fabric/build/libs/` and `neoforge/build/libs/` (or `forge/build/libs/`). On Windows, use `gradlew.bat`. Use JDK 17 for 1.20.x, JDK 21 for 1.21.x, and JDK 25 for 26.1.2.
 
-## Contributing
+## 🐛 Bugs & Ideas
+
+**Please report bugs and suggest ideas on [GitHub Issues](https://github.com/Dwinovo/minecraft-chiikawa/issues), not in the Modrinth / CurseForge comments.** Comments are easy to miss and impossible to track; an issue gets a proper answer and stays open until it's actually fixed.
+
+- 🐞 [Report a bug](https://github.com/Dwinovo/minecraft-chiikawa/issues/new?template=bug_report.yml) — the form asks for your Minecraft version, loader, and mod version, which I need to reproduce anything.
+- 💡 [Suggest a feature](https://github.com/Dwinovo/minecraft-chiikawa/issues/new?template=feature_request.yml) — new characters, mechanics, improvements.
+- ⭐ Like the mod? **Starring the repo** is the easiest way to say so, and it helps others find it.
+
+## 🤝 Contributing
 
 Issues and pull requests are welcome.
 
@@ -118,9 +153,7 @@ Issues and pull requests are welcome.
 - Generated resources under `**/generated/` are git-ignored and recreated by datagen — don't commit them.
 - Each Minecraft version is a separate branch; target the branch your change applies to.
 
-See [`AGENTS.md`](AGENTS.md) and [`docs/`](docs/) for design notes on the rendering pipeline and pet state machine.
-
-## License & Credits
+## 📜 License & Credits
 
 - Licensed under [**CC-BY-NC-SA-4.0**](LICENSE).
 - Art support by **zoe_1000**.
