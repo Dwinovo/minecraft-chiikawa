@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Download (Modrinth)
+    url: https://modrinth.com/mod/pT971QUb
+    about: Latest releases for every supported Minecraft version.
+  - name: Download (CurseForge)
+    url: https://www.curseforge.com/minecraft/mc-mods/chiikawa
+    about: Same releases, mirrored on CurseForge.
