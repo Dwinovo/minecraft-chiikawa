@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.utils.Utils;
 
@@ -32,6 +33,7 @@ public class HurtRangedAttackTargetTask extends Behavior<AbstractPet>{
         && pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)
         && pet.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get().isAlive()
         && pet.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get().distanceTo(pet) <= 15.0F
+        && PetTargeting.canTarget(pet, pet.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get())
         && !pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_COOLING_DOWN)
         && !Utils.getArrow(pet).isEmpty();
     }
@@ -65,14 +67,14 @@ public class HurtRangedAttackTargetTask extends Behavior<AbstractPet>{
             return false;
         }
         LivingEntity target = pEntity.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get();
-        return target.isAlive() && target.distanceTo(pEntity) <= 15.0F;
+        return target.isAlive() && target.distanceTo(pEntity) <= 15.0F && PetTargeting.canTarget(pEntity, target);
     }
     @Override
     protected void stop(ServerLevel pLevel, AbstractPet pEntity, long pGameTime) {
-        if (pEntity.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).isPresent()) {
-            pEntity.performRangedAttack(pEntity.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get(), 1.0f);
-            
-        }
+        // Only release the arrow at a target we're still allowed to shoot.
+        pEntity.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET)
+            .filter(target -> PetTargeting.canTarget(pEntity, target))
+            .ifPresent(target -> pEntity.performRangedAttack(target, 1.0f));
         pEntity.getBrain().setMemoryWithExpiry(MemoryModuleType.ATTACK_COOLING_DOWN, true, 20);
         pEntity.stopUsingItem();
         actionTime = 20;
