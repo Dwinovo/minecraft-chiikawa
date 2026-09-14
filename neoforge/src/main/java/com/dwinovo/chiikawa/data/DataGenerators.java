@@ -6,8 +6,6 @@ import com.dwinovo.chiikawa.Chiikawa;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.data.recipes.RecipeProvider;
 import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -40,17 +38,7 @@ public final class DataGenerators {
         event.getGenerator().addProvider(true,
                 new ModItemTagsProvider(output, lookupProvider));
         event.getGenerator().addProvider(true,
-                new RecipeProvider.Runner(output, lookupProvider) {
-                    @Override
-                    public String getName() {
-                        return "Chiikawa Recipes";
-                    }
-
-                    @Override
-                    protected RecipeProvider createRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
-                        return new ModRecipeProvider(registries, output);
-                    }
-                });
+                new ModRecipeProvider.Runner(output, lookupProvider));
         // Entity tags.
         event.getGenerator().addProvider(true, 
             new ModEntityTagsProvider(
