@@ -137,6 +137,8 @@ public final class PetReviveRitualManager {
         }
 
         pet.snapTo(revive.spawnPos.x, revive.spawnPos.y, revive.spawnPos.z, revive.yRot, revive.xRot);
+        // Independent of save-key names: also cleans dolls created before this fix.
+        pet.resetFallDistance();
         pet.setHealth(pet.getMaxHealth());
 
         if (!level.noCollision(pet)) {
