@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.handler;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import com.dwinovo.chiikawa.entity.brain.task.archer.HurtRangedAttackTargetTask;
 import com.dwinovo.chiikawa.init.InitActivity;
 import com.dwinovo.chiikawa.utils.BrainUtils;
@@ -45,6 +46,8 @@ public final class ArcherJobHandler {
             brain.setActiveActivityToFirstValid(ImmutableList.of(Activity.IDLE));
             return;
         }
+        // Never aim at the owner, a player, or a same-owner pet.
+        PetTargeting.clearInvalidAttackTarget(pet, brain);
         ImmutableList.Builder<Activity> activities = ImmutableList.builder();
         // Engage when a target exists, ammo is available, and we aren't on cooldown.
         if (brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET)

@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.handler;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import com.dwinovo.chiikawa.entity.brain.task.fencer.MeleeAttackWithAnim;
 import com.dwinovo.chiikawa.init.InitActivity;
 import com.dwinovo.chiikawa.utils.BrainUtils;
@@ -39,6 +40,8 @@ public final class FencerJobHandler {
     }
 
     public static void tickBrain(AbstractPet pet, Brain<AbstractPet> brain) {
+        // Never chase or swing at the owner, a player, or a same-owner pet.
+        PetTargeting.clearInvalidAttackTarget(pet, brain);
         ImmutableList.Builder<Activity> activities = ImmutableList.builder();
         // Engage when a target exists and we aren't on attack cooldown.
         if (brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET)

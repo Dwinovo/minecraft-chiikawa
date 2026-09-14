@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.sensor;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.init.InitTag;
 import com.google.common.collect.ImmutableSet;
@@ -41,14 +42,20 @@ public class PetAttackbleEntitySensor extends Sensor<AbstractPet> {
             return;
         }
 
+        // Retaliate against whoever hurt us, unless it's on our side (owner,
+        // any player, or a pet of the same owner) — e.g. the owner's sword sweep.
         pet.getBrain().getMemory(MemoryModuleType.HURT_BY_ENTITY).ifPresent(hurtByEntity -> {
-            pet.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, hurtByEntity);
+            if (PetTargeting.canTarget(pet, hurtByEntity)) {
+                pet.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, hurtByEntity);
+            } else {
+                pet.getBrain().eraseMemory(MemoryModuleType.HURT_BY_ENTITY);
+            }
         });
 
         Optional<LivingEntity> currentTarget = pet.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET);
         if (currentTarget.isPresent()) {
             LivingEntity target = currentTarget.get();
-            if (target.isAlive() && target.distanceTo(pet) <= 15.0F) {
+            if (target.isAlive() && target.distanceTo(pet) <= 15.0F && PetTargeting.canTarget(pet, target)) {
                 return;
             }
             pet.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
@@ -56,7 +63,8 @@ public class PetAttackbleEntitySensor extends Sensor<AbstractPet> {
 
         AABB searchBox = pet.getBoundingBox().inflate(15.0);
         List<Entity> nearbyEntities = level.getEntities(pet, searchBox, e ->
-            e.getType().is(InitTag.ENTITY_HOSTILE_ENTITY) && e.isAlive());
+            e.getType().is(InitTag.ENTITY_HOSTILE_ENTITY) && e.isAlive()
+                && e instanceof LivingEntity living && PetTargeting.canTarget(pet, living));
         Optional<Entity> closestTarget = nearbyEntities.stream()
             .min((e1, e2) -> Double.compare(e1.distanceToSqr(pet), e2.distanceToSqr(pet)));
         closestTarget.ifPresentOrElse(
