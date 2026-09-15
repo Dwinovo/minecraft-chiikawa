@@ -47,6 +47,10 @@ public final class TagData {
             .add(key(Blocks.WHEAT), key(Blocks.POTATOES), key(Blocks.CARROTS), key(Blocks.BEETROOTS), key(Blocks.PUMPKIN), key(Blocks.MELON));
         tags.tag(InitTag.ENTITY_DELEVER_CONTAINER)
             .add(key(Blocks.CHEST), key(Blocks.TRAPPED_CHEST), key(Blocks.BARREL), key(Blocks.HOPPER));
+        tags.tag(InitTag.ENTITY_WEEDS)
+            .add(key(Blocks.SHORT_GRASS), key(Blocks.TALL_GRASS), key(Blocks.FERN), key(Blocks.LARGE_FERN));
+        tags.tag(InitTag.ENTITY_MUSHROOMS)
+            .add(key(Blocks.RED_MUSHROOM), key(Blocks.BROWN_MUSHROOM));
     }
 
     public static void addItemTags(TagAppenderProvider<Item> tags) {
