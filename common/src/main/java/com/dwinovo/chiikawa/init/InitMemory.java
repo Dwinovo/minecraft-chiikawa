@@ -34,6 +34,20 @@ public final class InitMemory {
             () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC))
         );
 
+    public static final Supplier<MemoryModuleType<BlockPos>> WEED_POS =
+        Services.REGISTRY.<MemoryModuleType<BlockPos>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "weed_pos"),
+            () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC))
+        );
+
+    public static final Supplier<MemoryModuleType<BlockPos>> MUSHROOM_POS =
+        Services.REGISTRY.<MemoryModuleType<BlockPos>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "mushroom_pos"),
+            () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC))
+        );
+
     public static final Supplier<MemoryModuleType<net.minecraft.world.entity.item.ItemEntity>> PICKABLE_ITEM =
         Services.REGISTRY.<MemoryModuleType<net.minecraft.world.entity.item.ItemEntity>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
