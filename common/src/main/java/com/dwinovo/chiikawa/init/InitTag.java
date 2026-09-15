@@ -25,6 +25,10 @@ public final class InitTag {
 
     public static final TagKey<Block> ENTITY_DELEVER_CONTAINER = tagBlock("entity_delever_container");
 
+    // Wild plants a farmer pulls up, and mushrooms it picks.
+    public static final TagKey<Block> ENTITY_WEEDS = tagBlock("entity_weeds");
+    public static final TagKey<Block> ENTITY_MUSHROOMS = tagBlock("entity_mushrooms");
+
     private InitTag() {
     }
 

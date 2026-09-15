@@ -21,6 +21,7 @@ import net.minecraft.world.level.Level;
  *
  * @param petPos the pet's block position
  * @param phase the part of the day in the pet's level
+ * @param ownership who the pet belongs to
  * @param personality how the pet's kind leans
  * @param anchor where the pet may act
  * @param targets what the sensors remember
@@ -32,6 +33,7 @@ import net.minecraft.world.level.Level;
 public record IntentContext(
     GlobalPos petPos,
     DayPhase phase,
+    PetOwnership ownership,
     Personality personality,
     PetAnchor anchor,
     PerceivedTargets targets,
@@ -46,6 +48,7 @@ public record IntentContext(
             GlobalPos.of(level.dimension(), pet.blockPosition()),
             // A level without a day cycle, like the Nether, stays at its fixed time of day.
             DayPhase.of(level.dimensionType().fixedTime().orElse(level.getDayTime())),
+            ownership,
             PetPersonalities.of(pet.getType()),
             PetConstraints.anchorOf(pet, ownership),
             PerceivedTargets.capture(pet),
