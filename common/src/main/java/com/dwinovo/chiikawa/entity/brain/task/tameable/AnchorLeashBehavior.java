@@ -18,11 +18,11 @@ import net.minecraft.world.entity.ai.memory.WalkTarget;
  * Hard bound on how far a pet strays from its {@link PetAnchor}. Always active in
  * CORE and reads only the anchor, whatever the pet is doing.
  *
- * <p>Past the teleport distance (only while following the owner) the pet is
- * teleported to the owner. Past the leash, a pet that is not already walking
- * somewhere walks back to the anchor center; intents that steer the pet themselves
- * end on their own once their target leaves the leash. Anchors of pets that cannot
- * move, or are leashed or riding, never pull.
+ * <p>A pet that falls too far behind the owner its anchor follows is teleported to
+ * the owner. Past the leash, a pet that is not already walking somewhere walks back
+ * to the anchor center; intents that steer the pet themselves end on their own once
+ * their target leaves the leash. Anchors of pets that cannot move, or are leashed or
+ * riding, never pull.
  */
 public class AnchorLeashBehavior extends Behavior<AbstractPet> {
     private static final Map<MemoryModuleType<?>, MemoryStatus> REQUIRED_MEMORIES = ImmutableMap.of(

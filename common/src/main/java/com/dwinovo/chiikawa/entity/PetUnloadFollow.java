@@ -43,14 +43,13 @@ public final class PetUnloadFollow {
     /**
      * A pet follows its owner out of the chunk exactly when its anchor follows the
      * owner: tamed, told to follow, not leashed or riding, and the owner online,
-     * alive, not spectating and in the same level. Only such anchors have a teleport
-     * distance.
+     * alive, not spectating and in the same level.
      *
      * @return the owner this pet should follow out of an unloading chunk, or
      *         {@code null} if the pet should stay (and unload) where it is
      */
     private static LivingEntity findFollowedOwner(AbstractPet pet) {
-        if (!pet.isAlive() || PetConstraints.anchorOf(pet, PetOwnership.of(pet)).teleport().isEmpty()) {
+        if (!pet.isAlive() || !PetConstraints.anchorOf(pet, PetOwnership.of(pet)).followsOwner()) {
             return null;
         }
         return pet.getOwner();
