@@ -43,6 +43,12 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
         ACTIVITIES.register("archer_shoot", () -> new Activity("archer_shoot"));
     private static final DeferredHolder<Activity, Activity> MUSICIAN_PLAY =
         ACTIVITIES.register("musician_play", () -> new Activity("musician_play"));
+    private static final DeferredHolder<Activity, Activity> FOLLOW_OWNER =
+        ACTIVITIES.register("follow_owner", () -> new Activity("follow_owner"));
+    private static final DeferredHolder<Activity, Activity> STAY =
+        ACTIVITIES.register("stay", () -> new Activity("stay"));
+    private static final DeferredHolder<Activity, Activity> PICK_UP =
+        ACTIVITIES.register("pick_up", () -> new Activity("pick_up"));
 
     private static final DeferredHolder<MenuType<?>, MenuType<PetBackpackMenu>> PET_BACKPACK =
         MENUS.register("pet_backpack", () -> IMenuTypeExtension.create((containerId, inventory, buf) ->
@@ -98,6 +104,21 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
     @Override
     public Supplier<Activity> musicianPlayActivity() {
         return MUSICIAN_PLAY;
+    }
+
+    @Override
+    public Supplier<Activity> followOwnerActivity() {
+        return FOLLOW_OWNER;
+    }
+
+    @Override
+    public Supplier<Activity> stayActivity() {
+        return STAY;
+    }
+
+    @Override
+    public Supplier<Activity> pickUpActivity() {
+        return PICK_UP;
     }
 
     @Override

@@ -11,7 +11,7 @@ import net.minecraft.world.level.entity.EntityAccess;
 /**
  * Rescues following pets whose chunk is about to unload.
  *
- * <p>{@link com.dwinovo.chiikawa.entity.brain.task.tameable.KeepAroundBehavior} only
+ * <p>{@link com.dwinovo.chiikawa.entity.brain.task.tameable.AnchorLeashBehavior} only
  * teleports a pet from its own AI, so an owner who jumps far away (commands, ender
  * pearls, fast elytra flight, respawning) can leave the pet's chunk to stop ticking
  * and unload before that check runs. The entity manager mixin calls

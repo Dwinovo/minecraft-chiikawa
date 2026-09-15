@@ -1,14 +1,16 @@
 package com.dwinovo.chiikawa.init;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.entity.brain.PetCommand;
+import com.dwinovo.chiikawa.entity.brain.intent.IntentSwitchLog;
+import com.dwinovo.chiikawa.entity.brain.intent.RunningIntent;
 import com.dwinovo.chiikawa.platform.Services;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import com.mojang.serialization.Codec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Unit;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
 public final class InitMemory {
@@ -40,24 +42,43 @@ public final class InitMemory {
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
-    public static final Supplier<MemoryModuleType<PetCommand>> REQUESTED_COMMAND =
-        Services.REGISTRY.<MemoryModuleType<PetCommand>>register(
-            BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "requested_command"),
-            () -> new MemoryModuleType<>(Optional.empty())
-        );
-
-    public static final Supplier<MemoryModuleType<String>> REQUESTED_MUSIC_TRACK =
-        Services.REGISTRY.<MemoryModuleType<String>>register(
-            BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "requested_music_track"),
-            () -> new MemoryModuleType<>(Optional.of(Codec.STRING))
-        );
-
+    /** Signature of the music box selection the musician last started, so each selection plays once. */
     public static final Supplier<MemoryModuleType<String>> MUSICIAN_LAST_MUSIC_SIGNATURE =
         Services.REGISTRY.<MemoryModuleType<String>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
             ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "musician_last_music_signature"),
+            () -> new MemoryModuleType<>(Optional.empty())
+        );
+
+    /** The intent the selector last chose. */
+    public static final Supplier<MemoryModuleType<RunningIntent>> CURRENT_INTENT =
+        Services.REGISTRY.<MemoryModuleType<RunningIntent>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "current_intent"),
+            () -> new MemoryModuleType<>(Optional.empty())
+        );
+
+    /** Intent id to the game time its cooldown ends. */
+    public static final Supplier<MemoryModuleType<Map<ResourceLocation, Long>>> INTENT_COOLDOWNS =
+        Services.REGISTRY.<MemoryModuleType<Map<ResourceLocation, Long>>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "intent_cooldowns"),
+            () -> new MemoryModuleType<>(Optional.empty())
+        );
+
+    /** Present when the selector should evaluate on the next tick instead of waiting for its interval. */
+    public static final Supplier<MemoryModuleType<Unit>> INTENT_REEVALUATE =
+        Services.REGISTRY.<MemoryModuleType<Unit>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "intent_reevaluate"),
+            () -> new MemoryModuleType<>(Optional.empty())
+        );
+
+    /** Recent intent switches; present only while logging is turned on by the debug command. */
+    public static final Supplier<MemoryModuleType<IntentSwitchLog>> INTENT_SWITCH_LOG =
+        Services.REGISTRY.<MemoryModuleType<IntentSwitchLog>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "intent_switch_log"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
