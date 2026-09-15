@@ -4,7 +4,6 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSwitchLog;
 import com.dwinovo.chiikawa.entity.brain.intent.RunningIntent;
 import com.dwinovo.chiikawa.platform.Services;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
@@ -55,14 +54,6 @@ public final class InitMemory {
         Services.REGISTRY.<MemoryModuleType<RunningIntent>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
             ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "current_intent"),
-            () -> new MemoryModuleType<>(Optional.empty())
-        );
-
-    /** Intent id to the game time its cooldown ends. */
-    public static final Supplier<MemoryModuleType<Map<ResourceLocation, Long>>> INTENT_COOLDOWNS =
-        Services.REGISTRY.<MemoryModuleType<Map<ResourceLocation, Long>>>register(
-            BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "intent_cooldowns"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
