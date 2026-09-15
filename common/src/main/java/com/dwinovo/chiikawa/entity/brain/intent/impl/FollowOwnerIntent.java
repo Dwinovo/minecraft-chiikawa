@@ -11,10 +11,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.schedule.Activity;
 
 /**
- * Walks back to the owner. Only permitted while following, where the anchor is
- * centered on the owner whenever the pet can actually follow (owner online,
- * pet not leashed); otherwise the anchor has no teleport distance and this intent
- * never starts.
+ * Walks back to the owner. Only permitted while following, and only runs while the
+ * anchor follows the owner (owner online, pet not leashed); otherwise the pet just
+ * wanders.
  *
  * <p>Starts at {@link AnchorDistances#FOLLOW_START} and keeps going until the pet
  * has arrived, like 0.0.9. The score grows with distance, so the further the owner
@@ -41,7 +40,7 @@ public final class FollowOwnerIntent implements PetIntent {
 
     @Override
     public IntentCheck canRun(IntentContext ctx) {
-        if (ctx.anchor().teleport().isEmpty()) {
+        if (!ctx.anchor().followsOwner()) {
             return IntentCheck.fail("owner_unavailable");
         }
         return distanceToOwner(ctx) >= AnchorDistances.FOLLOW_START ? IntentCheck.OK : IntentCheck.fail("owner_nearby");
@@ -49,7 +48,7 @@ public final class FollowOwnerIntent implements PetIntent {
 
     @Override
     public IntentCheck canContinue(IntentContext ctx) {
-        if (ctx.anchor().teleport().isEmpty()) {
+        if (!ctx.anchor().followsOwner()) {
             return IntentCheck.fail("owner_unavailable");
         }
         return ctx.petPos().pos().distManhattan(ctx.anchor().center().pos()) > AnchorDistances.FOLLOW_ARRIVE
