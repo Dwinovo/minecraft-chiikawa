@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.Candidate;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.Decision;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.EndReason;
-import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.Running;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.SelectorParams;
 import java.util.List;
 import net.minecraft.resources.ResourceLocation;
@@ -39,8 +38,8 @@ class IntentSelectorTest {
     void skipsCandidatesTheDirectiveForbidsOrWhoseConditionFails() {
         Decision decision = choose(List.of(
             ok(WANDER, 0.05F),
-            new Candidate(FIGHT, false, 0L, IntentCheck.OK, 0.8F),
-            new Candidate(HARVEST, true, 0L, IntentCheck.fail("no_crop"), 0.6F)
+            new Candidate(FIGHT, false, IntentCheck.OK, 0.8F),
+            new Candidate(HARVEST, true, IntentCheck.fail("no_crop"), 0.6F)
         ), null, PLAIN);
 
         assertEquals(WANDER, decision.next());
@@ -48,16 +47,8 @@ class IntentSelectorTest {
     }
 
     @Test
-    void skipsCandidatesOnCooldownUntilItEnds() {
-        List<Candidate> candidates = List.of(ok(WANDER, 0.05F), new Candidate(HARVEST, true, NOW + 1, IntentCheck.OK, 0.6F));
-
-        assertEquals(WANDER, choose(candidates, null, PLAIN).next());
-        assertEquals(HARVEST, choose(candidates, null, new SelectorParams(NOW + 1, 0.0F, 0.0F, 40)).next());
-    }
-
-    @Test
     void returnsNothingWhenNoCandidateCanRun() {
-        Decision decision = choose(List.of(new Candidate(FIGHT, false, 0L, IntentCheck.OK, 0.8F)), null, PLAIN);
+        Decision decision = choose(List.of(new Candidate(FIGHT, false, IntentCheck.OK, 0.8F)), null, PLAIN);
 
         assertNull(decision.next());
         assertTrue(decision.keeps(null));
@@ -84,7 +75,7 @@ class IntentSelectorTest {
     @Test
     void holdBonusKeepsTheRunningIntentAgainstASlightlyBetterOne() {
         SelectorParams hold = new SelectorParams(NOW, 0.1F, 0.0F, 40);
-        Running plant = running(PLANT, NOW - 100);
+        RunningIntent plant = new RunningIntent(PLANT, NOW - 100);
 
         assertTrue(choose(List.of(ok(PLANT, 0.55F), ok(HARVEST, 0.6F)), plant, hold).keeps(plant));
         assertEquals(HARVEST, choose(List.of(ok(PLANT, 0.55F), ok(HARVEST, 0.7F)), plant, hold).next());
@@ -93,14 +84,13 @@ class IntentSelectorTest {
     @Test
     void minimumDwellOnlyLetsAHigherBaseScoreTakeOver() {
         SelectorParams noisy = new SelectorParams(NOW, 0.0F, 0.1F, 40);
-        // The running intent draws the most negative noise, the challenger the most positive.
-        FixedRandom favoursChallenger = new FixedRandom(0.0F, 1.0F);
         List<Candidate> sameBase = List.of(ok(WANDER, 0.5F), ok(PLANT, 0.5F));
 
-        Running fresh = running(WANDER, NOW - 39);
-        assertTrue(choose(sameBase, fresh, noisy, favoursChallenger).keeps(fresh));
+        // The running intent draws the most negative noise, the challenger the most positive.
+        RunningIntent fresh = new RunningIntent(WANDER, NOW - 39);
+        assertTrue(choose(sameBase, fresh, noisy, new FixedRandom(0.0F, 1.0F)).keeps(fresh));
 
-        Running settled = running(WANDER, NOW - 40);
+        RunningIntent settled = new RunningIntent(WANDER, NOW - 40);
         assertEquals(PLANT, choose(sameBase, settled, noisy, new FixedRandom(0.0F, 1.0F)).next());
 
         assertEquals(HARVEST, choose(List.of(ok(WANDER, 0.5F), ok(HARVEST, 0.6F)), fresh, noisy, new FixedRandom(0.5F)).next());
@@ -110,19 +100,19 @@ class IntentSelectorTest {
 
     @Test
     void endsTheRunningIntentWhenItsConditionFails() {
-        Running harvest = running(HARVEST, NOW - 5);
+        RunningIntent harvest = new RunningIntent(HARVEST, NOW - 5);
         Decision decision = choose(List.of(ok(WANDER, 0.05F),
-            new Candidate(HARVEST, true, 0L, IntentCheck.fail("no_crop"), 0.6F)), harvest, PLAIN);
+            new Candidate(HARVEST, true, IntentCheck.fail("no_crop"), 0.6F)), harvest, PLAIN);
 
         assertEquals(EndReason.CONDITION_FAILED, decision.ended());
         assertEquals(WANDER, decision.next());
     }
 
     @Test
-    void endsTheRunningIntentWhenTheDirectiveNoLongerPermitsIt() {
-        Running fight = new Running(FIGHT, NOW - 5, new TestStep(false, 0), NOW - 5, false);
+    void endsTheRunningIntentWhenTheDirectiveNoLongerPermitsItEvenDuringDwell() {
+        RunningIntent fight = new RunningIntent(FIGHT, NOW - 5);
         Decision decision = choose(List.of(ok(WANDER, 0.05F),
-            new Candidate(FIGHT, false, 0L, IntentCheck.OK, 0.8F)), fight, PLAIN);
+            new Candidate(FIGHT, false, IntentCheck.OK, 0.8F)), fight, PLAIN);
 
         assertEquals(EndReason.NOT_ALLOWED, decision.ended());
         assertEquals(WANDER, decision.next());
@@ -130,7 +120,7 @@ class IntentSelectorTest {
 
     @Test
     void endsTheRunningIntentWhenItIsNoLongerOffered() {
-        Running fight = running(FIGHT, NOW - 5);
+        RunningIntent fight = new RunningIntent(FIGHT, NOW - 5);
         Decision decision = choose(List.of(ok(WANDER, 0.05F)), fight, PLAIN);
 
         assertEquals(EndReason.NOT_OFFERED, decision.ended());
@@ -138,65 +128,30 @@ class IntentSelectorTest {
     }
 
     @Test
-    void endsAnIntentWhoseLastStepIsDone() {
-        Running done = new Running(HARVEST, NOW - 5, null, NOW - 1, true);
-        Decision decision = choose(List.of(ok(WANDER, 0.05F), ok(HARVEST, 0.6F)), done, PLAIN);
+    void anEndedIntentDoesNotCompeteInTheSameEvaluation() {
+        RunningIntent harvest = new RunningIntent(HARVEST, NOW - 5);
+        Decision decision = choose(List.of(new Candidate(HARVEST, false, IntentCheck.OK, 0.6F)), harvest, PLAIN);
 
-        assertEquals(EndReason.COMPLETED, decision.ended());
-        assertEquals(WANDER, decision.next());
-    }
-
-    @Test
-    void uninterruptibleStepIsKeptEvenAgainstABetterCandidate() {
-        Running claiming = new Running(PLANT, NOW - 100, new TestStep(false, 20), NOW - 10, false);
-        Decision decision = choose(List.of(ok(PLANT, 0.3F), ok(FIGHT, 0.9F)), claiming, PLAIN);
-
-        assertTrue(decision.keeps(claiming));
-    }
-
-    @Test
-    void timedOutStepEndsTheIntentAndLetsAnotherRun() {
-        Running claiming = new Running(PLANT, NOW - 100, new TestStep(false, 20), NOW - 20, false);
-        Decision decision = choose(List.of(ok(PLANT, 0.9F), ok(WANDER, 0.05F)), claiming, PLAIN);
-
-        assertEquals(EndReason.STEP_TIMEOUT, decision.ended());
-        assertEquals(WANDER, decision.next());
-    }
-
-    @Test
-    void stepWithoutTimeoutNeverTimesOut() {
-        Running walking = new Running(PLANT, NOW - 100000, new TestStep(true, 0), NOW - 100000, false);
-
-        assertTrue(choose(List.of(ok(PLANT, 0.5F), ok(WANDER, 0.05F)), walking, PLAIN).keeps(walking));
+        assertEquals(EndReason.NOT_ALLOWED, decision.ended());
+        assertNull(decision.next());
     }
 
     // ---- helpers ---------------------------------------------------------------
 
-    private static Decision choose(List<Candidate> candidates, Running current, SelectorParams params) {
+    private static Decision choose(List<Candidate> candidates, RunningIntent current, SelectorParams params) {
         return choose(candidates, current, params, new FixedRandom(0.5F));
     }
 
-    private static Decision choose(List<Candidate> candidates, Running current, SelectorParams params, RandomSource random) {
+    private static Decision choose(List<Candidate> candidates, RunningIntent current, SelectorParams params, RandomSource random) {
         return IntentSelector.choose(candidates, current, params, random);
     }
 
     private static Candidate ok(ResourceLocation id, float score) {
-        return new Candidate(id, true, 0L, IntentCheck.OK, score);
-    }
-
-    private static Running running(ResourceLocation id, long startTick) {
-        return new Running(id, startTick, null, startTick, false);
+        return new Candidate(id, true, IntentCheck.OK, score);
     }
 
     private static ResourceLocation id(String path) {
         return new ResourceLocation("chiikawa", path);
-    }
-
-    private record TestStep(boolean interruptible, int timeoutTicks) implements IntentStep {
-        @Override
-        public String id() {
-            return "test";
-        }
     }
 
     /** Returns the given floats in turn, repeating the last one. */
