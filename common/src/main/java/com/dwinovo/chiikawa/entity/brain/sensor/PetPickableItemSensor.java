@@ -8,7 +8,7 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitTag;
-import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.utils.Utils;
 import net.minecraft.world.phys.AABB;
 import java.util.Comparator;
@@ -40,7 +40,7 @@ public class PetPickableItemSensor extends Sensor<AbstractPet>{
     @SuppressWarnings("null")
     @Override
     protected void doTick(ServerLevel level, AbstractPet entity) {
-        if (entity.isTame() && entity.getPetMode() == PetMode.WORK) {
+        if (entity.isTame() && entity.getPetDirective() == PetDirective.FREE) {
             AABB aabb = entity.getBoundingBox().inflate(VERTICAL_SEARCH_RANGE, VERTICAL_SEARCH_RANGE, VERTICAL_SEARCH_RANGE);
             ItemEntity target = level.getEntitiesOfClass(ItemEntity.class, aabb, ItemEntity::isAlive).stream()
                     .filter(e -> !e.hasPickUpDelay())

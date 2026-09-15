@@ -5,7 +5,7 @@ import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.PetDirective;
 
 import net.minecraft.server.level.ServerLevel;
 
@@ -41,7 +41,7 @@ public class WalkToHarvestCropBehavior extends Behavior<AbstractPet>{
      */
     @Override
     protected boolean checkExtraStartConditions(ServerLevel world, AbstractPet pet) {
-        if (pet.getPetMode() == PetMode.WORK && pet.getPetJobId() == InitRegistry.FARMER_ID 
+        if (pet.getPetDirective() == PetDirective.FREE && pet.getPetJobId() == InitRegistry.FARMER_ID 
             && pet.getBrain().getMemory(InitMemory.HARVEST_POS.get()).isPresent()
         ){
             net.minecraft.core.BlockPos target = pet.getBrain().getMemory(InitMemory.HARVEST_POS.get()).get();

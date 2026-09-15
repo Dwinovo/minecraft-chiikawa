@@ -10,7 +10,7 @@ import com.dwinovo.chiikawa.anim.controller.BlendMode;
 import com.dwinovo.chiikawa.anim.controller.ControllerSnapshot;
 import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
 import com.dwinovo.chiikawa.anim.state.PetAnimContext;
-import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.PetDirective;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -65,7 +65,7 @@ class BoneVisibilityTest {
     }
 
     private static PetAnimContext ctx() {
-        return PetAnimContext.base(PetMode.FOLLOW, 0, 0f);
+        return PetAnimContext.base(PetDirective.FOLLOW, 0, 0f);
     }
 
     @Test

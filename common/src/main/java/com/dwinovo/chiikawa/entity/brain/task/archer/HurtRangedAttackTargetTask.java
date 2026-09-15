@@ -5,7 +5,7 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.utils.Utils;
@@ -28,7 +28,7 @@ public class HurtRangedAttackTargetTask extends Behavior<AbstractPet>{
     @Override
     protected boolean checkExtraStartConditions(ServerLevel pLevel, AbstractPet pet) {
         // Require work mode, archer job, valid target, and no cooldown.
-        return pet.getPetMode() == PetMode.WORK 
+        return pet.getPetDirective() == PetDirective.FREE 
         && pet.getPetJobId() == InitRegistry.ARCHER_ID
         && pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)
         && pet.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get().isAlive()
