@@ -15,8 +15,8 @@ import net.minecraft.network.chat.Component;
  */
 public enum PetDirective {
     FOLLOW("message.chiikawa.pet_follow"),
-    STAY("message.chiikawa.pet_sit"),
-    FREE("message.chiikawa.pet_work");
+    STAY("message.chiikawa.pet_stay"),
+    FREE("message.chiikawa.pet_free");
 
     private final String messageKey;
 
