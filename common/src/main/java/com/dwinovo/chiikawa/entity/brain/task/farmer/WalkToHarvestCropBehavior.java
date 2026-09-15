@@ -5,12 +5,10 @@ import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.PetDirective;
 
 import net.minecraft.server.level.ServerLevel;
 
 import com.dwinovo.chiikawa.init.InitMemory;
-import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.utils.Utils;
 
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -41,9 +39,7 @@ public class WalkToHarvestCropBehavior extends Behavior<AbstractPet>{
      */
     @Override
     protected boolean checkExtraStartConditions(ServerLevel world, AbstractPet pet) {
-        if (pet.getPetDirective() == PetDirective.FREE && pet.getPetJobId() == InitRegistry.FARMER_ID 
-            && pet.getBrain().getMemory(InitMemory.HARVEST_POS.get()).isPresent()
-        ){
+        if (pet.getBrain().getMemory(InitMemory.HARVEST_POS.get()).isPresent()) {
             net.minecraft.core.BlockPos target = pet.getBrain().getMemory(InitMemory.HARVEST_POS.get()).get();
             if (Utils.canHarvesr(world, target)) {
                 // Single reachability pathfind for the chosen target (the sensor no

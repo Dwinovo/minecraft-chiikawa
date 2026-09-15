@@ -3,9 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.task.farmer;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.anim.state.PetAction;
-import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitMemory;
-import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.utils.Utils;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
@@ -42,13 +40,7 @@ public class PlantCropBehavior extends Behavior<AbstractPet>{
      */ 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel world, AbstractPet pet) {
-        if(
-            pet.getPetDirective() == PetDirective.FREE && 
-            pet.getPetJobId() == InitRegistry.FARMER_ID && 
-            !pet.getBrain().getMemory(InitMemory.HARVEST_POS.get()).isPresent() && 
-            pet.getBrain().getMemory(InitMemory.PLANT_POS.get()).isPresent() 
-        )
-        {
+        if (pet.getBrain().getMemory(InitMemory.PLANT_POS.get()).isPresent()) {
             BlockPos farmlandPos = pet.getBrain().getMemory(InitMemory.PLANT_POS.get()).get();
             if( 
                 pet.distanceToSqr(Vec3.atCenterOf(farmlandPos)) <= Utils.WORK_REACH_SQR
@@ -62,12 +54,6 @@ public class PlantCropBehavior extends Behavior<AbstractPet>{
     @Override
     protected boolean canStillUse(ServerLevel world, AbstractPet pet, long time) {
         if (!super.canStillUse(world, pet, time)) {
-            return false;
-        }
-        if (pet.getPetDirective() != PetDirective.FREE || pet.getPetJobId() != InitRegistry.FARMER_ID) {
-            return false;
-        }
-        if (pet.getBrain().getMemory(InitMemory.HARVEST_POS.get()).isPresent()) {
             return false;
         }
         Optional<BlockPos> farmlandPosOpt = pet.getBrain().getMemory(InitMemory.PLANT_POS.get());

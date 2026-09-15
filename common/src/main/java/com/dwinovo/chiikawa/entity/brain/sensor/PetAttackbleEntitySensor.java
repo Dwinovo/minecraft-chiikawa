@@ -1,7 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain.sensor;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.init.InitTag;
@@ -32,11 +31,8 @@ public class PetAttackbleEntitySensor extends Sensor<AbstractPet> {
 
     @Override
     protected void doTick(ServerLevel level, AbstractPet pet) {
-        // Only work mode fencers/archers track valid targets within range.
-        if (pet.getPetDirective() != PetDirective.FREE) {
-            pet.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
-            return;
-        }
+        // Only fencers and archers ever act on attack targets, so skip the scan for
+        // other jobs. Whether a pet may fight right now is up to its intents.
         int jobId = pet.getPetJobId();
         if (jobId != InitRegistry.FENCER_ID && jobId != InitRegistry.ARCHER_ID) {
             return;
