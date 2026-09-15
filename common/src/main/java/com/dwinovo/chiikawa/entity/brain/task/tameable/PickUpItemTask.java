@@ -10,7 +10,7 @@ import java.util.Map;
 import net.minecraft.server.level.ServerLevel;
 import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitTag;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -42,13 +42,13 @@ public class PickUpItemTask extends Behavior<AbstractPet> {
     @SuppressWarnings("null")
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, AbstractPet entity) {
-        return entity.isTame() && entity.getPetMode() == PetMode.WORK;
+        return entity.isTame() && entity.getPetDirective() == PetDirective.FREE;
     }
 
     @Override
     protected boolean canStillUse(ServerLevel level, AbstractPet entity, long time) {
         return entity.isTame()
-            && entity.getPetMode() == PetMode.WORK
+            && entity.getPetDirective() == PetDirective.FREE
             && entity.getBrain().getMemory(InitMemory.PICKABLE_ITEM.get()).isPresent();
     }
     /**

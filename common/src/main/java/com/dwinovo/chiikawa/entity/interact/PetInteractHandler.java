@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.entity.interact;
 
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitTag;
 
 import net.minecraft.server.level.ServerPlayer;
@@ -39,7 +39,7 @@ public final class PetInteractHandler {
             return handleFeed(level, pet, player, hand);
         }
         if (isTame && isOwner && isSneaking) {
-            return handleModeChange(level, pet);
+            return handleDirectiveChange(level, pet);
         }
         if (isTame && isOwner && !isSneaking && !isFood) {
             return handleOpenMenu(level, pet, player);
@@ -80,18 +80,18 @@ public final class PetInteractHandler {
         return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
     }
 
-    private static InteractionResult handleModeChange(Level level, AbstractPet pet) {
+    private static InteractionResult handleDirectiveChange(Level level, AbstractPet pet) {
         if (!level.isClientSide()) {
-            PetMode next = pet.getPetMode().next();
-            pet.setPetMode(next);
-            if (next == PetMode.WORK) {
+            PetDirective next = pet.getPetDirective().next();
+            pet.setPetDirective(next);
+            if (next == PetDirective.FREE) {
                 pet.getBrain().setMemory(MemoryModuleType.HOME, GlobalPos.of(level.dimension(), pet.blockPosition()));
             }
-            else if (next == PetMode.FOLLOW) {
+            else if (next == PetDirective.FOLLOW) {
                 pet.getBrain().eraseMemory(MemoryModuleType.HOME);
             }
             if (pet.getOwner() instanceof Player owner) {
-                owner.displayClientMessage(next.getMessage(pet), true);
+                owner.displayClientMessage(next.message(pet), true);
             }
         }
         return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;

@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.task.tameable;
 
 import com.google.common.collect.ImmutableMap;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.PetDirective;
 import java.util.Map;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -29,7 +29,7 @@ public class SitBehavior<E extends AbstractPet> extends Behavior<E> {
      */
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, E entity) {
-        return entity.getPetMode() == PetMode.SIT;
+        return entity.getPetDirective() == PetDirective.STAY;
     }
     @Override
     protected void tick(ServerLevel level, E entity, long gameTime) {
@@ -46,7 +46,7 @@ public class SitBehavior<E extends AbstractPet> extends Behavior<E> {
      */
     @Override
     protected boolean canStillUse(ServerLevel level, E entity, long gameTime) {
-        return entity.getPetMode() == PetMode.SIT;
+        return entity.getPetDirective() == PetDirective.STAY;
     }
 
     

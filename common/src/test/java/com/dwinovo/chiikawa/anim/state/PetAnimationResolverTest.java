@@ -1,6 +1,6 @@
 package com.dwinovo.chiikawa.anim.state;
 
-import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.PetDirective;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -14,7 +14,7 @@ class PetAnimationResolverTest {
     @Test
     void sitOverridesMovement() {
         PetAnimContext context = PetAnimContext.base(
-                PetMode.SIT, /*jobId=*/2, /*walkSpeed=*/1.0f, PetActivity.NONE);
+                PetDirective.STAY, /*jobId=*/2, /*walkSpeed=*/1.0f, PetActivity.NONE);
 
         assertEquals(List.of("sit", "idle"), PetAnimationResolver.resolve(context));
     }
@@ -22,7 +22,7 @@ class PetAnimationResolverTest {
     @Test
     void idleWorkUsesJobSpecificLoopWithIdleFallback() {
         PetAnimContext context = PetAnimContext.base(
-                PetMode.WORK, /*jobId=*/1, /*walkSpeed=*/0.0f, PetActivity.NONE);
+                PetDirective.FREE, /*jobId=*/1, /*walkSpeed=*/0.0f, PetActivity.NONE);
 
         assertEquals(List.of("work_idle_farmer", "idle"), PetAnimationResolver.resolve(context));
     }
@@ -30,7 +30,7 @@ class PetAnimationResolverTest {
     @Test
     void musicianWorkUsesMusicianLoopWithIdleFallback() {
         PetAnimContext context = PetAnimContext.base(
-                PetMode.WORK, /*jobId=*/4, /*walkSpeed=*/0.0f, PetActivity.NONE);
+                PetDirective.FREE, /*jobId=*/4, /*walkSpeed=*/0.0f, PetActivity.NONE);
 
         assertEquals(List.of("work_idle_musician", "idle"), PetAnimationResolver.resolve(context));
     }
@@ -38,7 +38,7 @@ class PetAnimationResolverTest {
     @Test
     void activityOverridesModeAndMovement() {
         PetAnimContext context = PetAnimContext.base(
-                PetMode.WORK, /*jobId=*/1, /*walkSpeed=*/1.0f, PetActivity.PLAY_GUITAR);
+                PetDirective.FREE, /*jobId=*/1, /*walkSpeed=*/1.0f, PetActivity.PLAY_GUITAR);
 
         assertEquals(List.of("guitar", "idle"), PetAnimationResolver.resolve(context));
     }

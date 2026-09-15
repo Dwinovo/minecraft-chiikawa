@@ -6,7 +6,7 @@ package com.dwinovo.chiikawa.entity.brain.task.farmer;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.utils.Utils;
@@ -43,7 +43,7 @@ public class WalkToPlantCropBehavior extends Behavior<AbstractPet>{
     @Override
     protected boolean checkExtraStartConditions(ServerLevel world, AbstractPet pet) {
         if(
-            pet.getPetMode() == PetMode.WORK && 
+            pet.getPetDirective() == PetDirective.FREE && 
             pet.getPetJobId() == InitRegistry.FARMER_ID && 
             !pet.getBrain().getMemory(InitMemory.HARVEST_POS.get()).isPresent() && 
             !Utils.getSeed(pet).isEmpty() && 
