@@ -23,6 +23,15 @@ public final class InitActivity {
     // Musician performance activity.
     public static final Supplier<Activity> MUSICIAN_PLAY =
         Services.PLATFORM_REGISTRY.musicianPlayActivity();
+    // Walking back to the owner.
+    public static final Supplier<Activity> FOLLOW_OWNER =
+        Services.PLATFORM_REGISTRY.followOwnerActivity();
+    // Sitting still.
+    public static final Supplier<Activity> STAY =
+        Services.PLATFORM_REGISTRY.stayActivity();
+    // Picking up a nearby item.
+    public static final Supplier<Activity> PICK_UP =
+        Services.PLATFORM_REGISTRY.pickUpActivity();
 
     private InitActivity() {
     }
