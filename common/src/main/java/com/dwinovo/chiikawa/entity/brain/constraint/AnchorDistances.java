@@ -2,7 +2,8 @@ package com.dwinovo.chiikawa.entity.brain.constraint;
 
 /**
  * Tunable anchor distances in blocks. Follow and free values keep the 0.0.9 feel
- * (start following at 7, teleport at 20).
+ * (start following at 7, teleport at 20); wild pets roam wider around where they
+ * spawned.
  */
 public final class AnchorDistances {
     /** A following pet this far from its owner starts walking back. */
@@ -14,6 +15,8 @@ public final class AnchorDistances {
     public static final double FOLLOW_TELEPORT = 20.0;
     public static final double FREE_REACH = 13.0;
     public static final double FREE_LEASH = 20.0;
+    public static final double WILD_REACH = 24.0;
+    public static final double WILD_LEASH = 32.0;
 
     private AnchorDistances() {
     }
