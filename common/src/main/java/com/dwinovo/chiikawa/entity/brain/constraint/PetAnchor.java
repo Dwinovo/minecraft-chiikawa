@@ -1,6 +1,5 @@
 package com.dwinovo.chiikawa.entity.brain.constraint;
 
-import java.util.OptionalDouble;
 import net.minecraft.core.GlobalPos;
 
 /**
@@ -16,11 +15,11 @@ import net.minecraft.core.GlobalPos;
  * @param reach radius in which intents may pick targets
  * @param leash radius past which the pet is walked back to {@code center};
  *              {@link Double#POSITIVE_INFINITY} when nothing pulls it back
- * @param teleport distance past which the pet is teleported instead; only present
- *                 while the anchor follows the owner
+ * @param followsOwner whether {@code center} is the owner the pet follows; only then
+ *                     is a pet that falls too far behind teleported
  * @param canMove whether the pet may move at all
  */
-public record PetAnchor(GlobalPos center, double reach, double leash, OptionalDouble teleport, boolean canMove) {
+public record PetAnchor(GlobalPos center, double reach, double leash, boolean followsOwner, boolean canMove) {
     public static final double UNLEASHED = Double.POSITIVE_INFINITY;
 
     public boolean withinReach(GlobalPos pos) {
@@ -33,10 +32,11 @@ public record PetAnchor(GlobalPos center, double reach, double leash, OptionalDo
 
     /**
      * @param pos the pet's position
-     * @return whether the pet is far enough from the owner-following center to be teleported
+     * @return whether the pet has fallen {@link AnchorDistances#FOLLOW_TELEPORT} behind
+     *         the owner it follows
      */
     public boolean beyondTeleport(GlobalPos pos) {
-        return teleport.isPresent() && !within(pos, teleport.getAsDouble());
+        return followsOwner && !within(pos, AnchorDistances.FOLLOW_TELEPORT);
     }
 
     private boolean within(GlobalPos pos, double radius) {
