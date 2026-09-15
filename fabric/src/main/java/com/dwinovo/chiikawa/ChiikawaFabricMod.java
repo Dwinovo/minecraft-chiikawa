@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa;
 
 import net.fabricmc.api.ModInitializer;
+import com.dwinovo.chiikawa.command.ChiikawaDebugCommand;
 import com.dwinovo.chiikawa.command.ChiikawaMusicCommand;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
@@ -48,8 +49,10 @@ public class ChiikawaFabricMod implements ModInitializer {
         Services.ENTITY.registerAttributes();
         Services.ENTITY.registerSpawnPlacements();
         FabricMusicNetworking.registerServer();
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
-            ChiikawaMusicCommand.register(dispatcher));
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+            ChiikawaMusicCommand.register(dispatcher);
+            ChiikawaDebugCommand.register(dispatcher);
+        });
         UseBlockCallback.EVENT.register((player, level, hand, hitResult) -> {
             ItemStack stack = player.getItemInHand(hand);
             if (!(stack.getItem() instanceof PetDollItem dollItem)) {

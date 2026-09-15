@@ -14,10 +14,10 @@ import com.dwinovo.chiikawa.entity.brain.handler.ArcherJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.FarmerJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.FencerJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.MusicianJobHandler;
-import com.dwinovo.chiikawa.entity.brain.handler.NoneJobHandler;
+import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
 import com.dwinovo.chiikawa.utils.BrainUtils;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
-import com.dwinovo.chiikawa.entity.job.api.IPetJob;
+import com.dwinovo.chiikawa.entity.job.api.PetCapability;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.init.InitSensor;
@@ -122,9 +122,11 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitMemory.PLANT_POS.get(),
         InitMemory.CONTAINER_POS.get(),
         InitMemory.PICKABLE_ITEM.get(),
-        InitMemory.REQUESTED_COMMAND.get(),
-        InitMemory.REQUESTED_MUSIC_TRACK.get(),
-        InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get()
+        InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get(),
+        InitMemory.CURRENT_INTENT.get(),
+        InitMemory.INTENT_COOLDOWNS.get(),
+        InitMemory.INTENT_REEVALUATE.get(),
+        InitMemory.INTENT_SWITCH_LOG.get()
     );
     private static final java.util.List<net.minecraft.world.entity.ai.sensing.SensorType<? extends net.minecraft.world.entity.ai.sensing.Sensor<? super AbstractPet>>> SENSOR_TYPES = java.util.List.of(
         net.minecraft.world.entity.ai.sensing.SensorType.HURT_BY,
@@ -331,56 +333,38 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         this.entityData.set(PET_JOB, jobId);
     }
 
-    public void refreshJobFromMainhand() {
-        refreshJobFromMainhand(false);
-    }
-
     /**
-     * Pick the highest-priority job whose tag matches the pet's mainhand
-     * item, and write the result to {@link #PET_JOB}. The brain is
-     * <em>not</em> rebuilt — every job's activities live on a single
-     * static brain since {@link #makeBrain}, so a job change is just a
-     * synced byte flip; the next {@link #customServerAiStep} picks up the
-     * new job's {@code tickBrain} and selects different activities.
-     *
-     * <p>{@code forceRefresh} is reserved for callers that want to re-emit
-     * the same job id (e.g. to reset an override). It currently has no
-     * side effect since there is no brain rebuild to trigger.
+     * Pick the highest-priority capability whose tool the pet holds in its
+     * mainhand, and write its id to {@link #PET_JOB}. The brain is <em>not</em>
+     * rebuilt — every job's activities live on a single static brain since
+     * {@link #makeBrain}, so a job change is just a synced value flip plus a
+     * request for the intent selector to re-pick right away.
      */
-    private void refreshJobFromMainhand(boolean forceRefresh) {
+    public void refreshJobFromMainhand() {
         if (level().isClientSide()) {
             return;
         }
 
-        IPetJob best = null;
-        int bestPriority = Integer.MIN_VALUE;
-        for (IPetJob job : InitRegistry.PET_JOB_REGISTRY) {
-            if (!job.canAssume(this)) {
-                continue;
-            }
-            int priority = job.getPriority();
-            if (best == null || priority > bestPriority) {
-                best = job;
-                bestPriority = priority;
+        PetCapability best = null;
+        for (PetCapability capability : InitRegistry.PET_JOB_REGISTRY) {
+            if (capability.canAssume(this) && (best == null || capability.priority() > best.priority())) {
+                best = capability;
             }
         }
         if (best == null) {
             best = InitRegistry.NONE.get();
         }
-        int newJobId = best.getId();
-        if (newJobId != getPetJobId() || forceRefresh) {
-            if (newJobId != getPetJobId()) {
-                InitRegistry.getJobFromId(getPetJobId()).onDeactivated(this, getBrain());
-            }
-            setPetJobId(newJobId);
+        if (best.id() != getPetJobId()) {
+            setPetJobId(best.id());
+            IntentSelector.requestReevaluate(this);
         }
     }
 
     /**
-     * Build the entity's brain once, registering <em>all</em> job activities
-     * up front. Activities don't run unless the per-tick activity selector
-     * (see {@link #customServerAiStep}) chooses them, so the unused
-     * activities cost only their flat memory footprint.
+     * Build the entity's brain once, registering <em>all</em> activities up
+     * front. Activities don't run unless the intent selector (see
+     * {@link #customServerAiStep}) chooses them, so the unused activities cost
+     * only their flat memory footprint.
      *
      * <p>This avoids the prior "rebuild on job change" pattern, which had
      * three problems: (1) {@code brain.stopAll} interrupted in-flight
@@ -390,26 +374,27 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * profession-aware behaviors once and lets activity selection do the
      * filtering).
      *
-     * <p>Future jobs (or manual job switching) just append a new
-     * {@code <Job>JobHandler.registerActivities(brain)} call here and a
-     * branch in {@link #customServerAiStep}'s job dispatch — no plumbing
-     * elsewhere needs to touch.
+     * <p>Future jobs just append a new
+     * {@code <Job>JobHandler.registerActivities(brain)} call here and list
+     * their intents on the capability — no plumbing elsewhere needs to touch.
      */
     @Override
     protected Brain<AbstractPet> makeBrain(Brain.Packed packedBrain) {
         Brain<AbstractPet> brain = BRAIN_PROVIDER.makeBrain(this, packedBrain);
 
-        // Universal tasks present in every brain.
+        // Universal activities present in every brain.
         BrainUtils.addCoreTasks(brain);
+        BrainUtils.addFollowOwnerTasks(brain);
+        BrainUtils.addStayTasks(brain);
         BrainUtils.addIdleTasks(brain);
+        BrainUtils.addPickUpTasks(brain);
 
-        // Each job's activities — registered once, dormant until that job's
-        // tickBrain selects them.
+        // Each job's activities — registered once, dormant until the intent
+        // selector picks one of that job's intents.
         FarmerJobHandler.registerActivities(brain);
         FencerJobHandler.registerActivities(brain);
         ArcherJobHandler.registerActivities(brain);
         MusicianJobHandler.registerActivities(brain);
-        NoneJobHandler.registerActivities(brain); // no-op today; placeholder for symmetry
 
         brain.setCoreActivities(java.util.Set.of(Activity.CORE));
         brain.setDefaultActivity(Activity.IDLE);
@@ -418,9 +403,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     @Override
     protected void customServerAiStep(ServerLevel level) {
-        InitRegistry.getJobFromId(getPetJobId()).tickBrain(this, this.getBrain());
-        Brain<AbstractPet> brain = (Brain<AbstractPet>) getBrain();
-        brain.tick(level, this);
+        IntentSelector.tick(this, level);
+        getBrain().tick(level, this);
         super.customServerAiStep(level);
     }
 
@@ -674,7 +658,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         input.child("Backpack").ifPresent(backpackInput -> ContainerHelper.loadAllItems(backpackInput, backpack.getItems()));
         input.getInt("PetJob").ifPresent(this::setPetJobId);
         this.entityData.set(PET_MODE, input.getByteOr("PetMode", this.entityData.get(PET_MODE)));
-        refreshJobFromMainhand(true);
+        refreshJobFromMainhand();
     }
 
     @Override
