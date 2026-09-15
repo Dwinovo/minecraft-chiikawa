@@ -11,7 +11,7 @@ public final class LanguageData {
 
     public static void addTranslations(String locale, Adder adder) {
         if ("zh_cn".equals(locale)) {
-            addCommonTranslations(adder, "Chiikawa", "背包", "跟随", "坐下", "工作");
+            addCommonTranslations(adder, "Chiikawa", "背包", "跟随", "坐下", "自由活动");
             addDollTooltipTranslations(adder, "试着把玩偶放在蛋糕上？");
             addJobTranslations(adder, "职业", "无", "农夫", "剑士", "弓箭手", "音乐家", "未知");
             addEntityTranslations(adder, "乌萨奇", "小八", "吉伊", "狮萨", "飞鼠", "栗子馒头", "獭师父", "古本屋");
@@ -44,7 +44,7 @@ public final class LanguageData {
                 "目标离开了活动范围", "附近没有可拾取的物品", "没有可收割的作物", "没有可种植的耕地", "没有可存放的容器",
                 "没有攻击目标", "攻击冷却中", "没有箭", "没有新的曲子可演奏", "曲子演奏完了");
         } else {
-            addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Work");
+            addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
             addJobTranslations(adder, "Job", "None", "Farmer", "Fencer", "Archer", "Musician", "Unknown");
             addEntityTranslations(adder, "Usagi", "Hachiware", "Chiikawa", "Shisa", "Momonga", "Kurimanju", "Rakko", "Furuhonya");
@@ -79,12 +79,12 @@ public final class LanguageData {
         }
     }
 
-    private static void addCommonTranslations(Adder adder, String tabName, String backpackMenu, String follow, String sit, String work) {
+    private static void addCommonTranslations(Adder adder, String tabName, String backpackMenu, String follow, String stay, String free) {
         adder.add("itemGroup.chiikawa", tabName);
         adder.add("menu.chiikawa.pet_backpack", backpackMenu);
         adder.add("message.chiikawa.pet_follow", follow + ": %s");
-        adder.add("message.chiikawa.pet_sit", sit + ": %s");
-        adder.add("message.chiikawa.pet_work", work + ": %s");
+        adder.add("message.chiikawa.pet_stay", stay + ": %s");
+        adder.add("message.chiikawa.pet_free", free + ": %s");
     }
 
     private static void addIntentFailureTranslations(

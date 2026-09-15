@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.entity.interact;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
+import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
 import com.dwinovo.chiikawa.init.InitTag;
 
 import net.minecraft.server.level.ServerPlayer;
@@ -90,6 +91,7 @@ public final class PetInteractHandler {
             else if (next == PetDirective.FOLLOW) {
                 pet.getBrain().eraseMemory(MemoryModuleType.HOME);
             }
+            IntentSelector.requestReevaluate(pet);
             if (pet.getOwner() instanceof Player owner) {
                 owner.displayClientMessage(next.message(pet), true);
             }
