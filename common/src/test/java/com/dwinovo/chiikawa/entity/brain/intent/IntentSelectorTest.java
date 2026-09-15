@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.entity.brain.constraint.AnchorDistances;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
+import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.Candidate;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.Decision;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.EndReason;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;
@@ -207,11 +209,12 @@ class IntentSelectorTest {
         ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
         ResourceLocation.withDefaultNamespace("overworld"));
     private static final GlobalPos PET = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
+    private static final PetOwnership OWNED = new PetOwnership.Owned(UUID.fromString("00000000-0000-0000-0000-000000000001"));
 
     /** Wander, harvest, plant and deliver, as a free farmer sees them. */
     private static List<Candidate> farmCandidates(Personality personality, DayPhase phase, PerceivedTargets targets,
             ResourceLocation running) {
-        IntentContext ctx = new IntentContext(PET, phase, personality,
+        IntentContext ctx = new IntentContext(PET, phase, OWNED, personality,
             new PetAnchor(PET, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, false, true),
             targets, false, false, false, false);
         List<PetIntent> offered = List.of(PetIntents.get(PetIntents.WANDER), PetIntents.get(PetIntents.HARVEST),
@@ -220,7 +223,8 @@ class IntentSelectorTest {
     }
 
     private static PerceivedTargets targets(boolean crop, boolean farmland, boolean container) {
-        return new PerceivedTargets(Optional.empty(), near(crop, 1), near(farmland, 2), near(container, 3), Optional.empty());
+        return new PerceivedTargets(Optional.empty(), near(crop, 1), near(farmland, 2), near(container, 3),
+            Optional.empty(), Optional.empty(), Optional.empty());
     }
 
     private static Optional<GlobalPos> near(boolean present, int blocksEast) {
