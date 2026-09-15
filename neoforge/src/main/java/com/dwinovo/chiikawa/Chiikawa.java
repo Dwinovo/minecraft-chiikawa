@@ -15,6 +15,7 @@ import com.dwinovo.chiikawa.init.InitSounds;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTabs;
 import com.dwinovo.chiikawa.init.InitDataComponents;
+import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalityLoader;
 import com.dwinovo.chiikawa.entity.brain.task.farmer.crop.FarmRegistry;
 import com.dwinovo.chiikawa.item.PetDollItem;
 import com.dwinovo.chiikawa.item.PetReviveRitualManager;
@@ -25,6 +26,7 @@ import com.dwinovo.chiikawa.platform.Services;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -60,6 +62,7 @@ public class Chiikawa {
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> ServerMusicSystem.tickServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener((ServerStoppingEvent event) -> ServerMusicSystem.stopServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener(Chiikawa::registerCommands);
+        NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> event.addListener(new PetPersonalityLoader()));
 
         InitCapabilities.register(modEventBus);
 

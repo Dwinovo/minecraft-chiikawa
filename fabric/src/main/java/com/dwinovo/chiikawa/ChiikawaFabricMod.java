@@ -14,6 +14,8 @@ import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTabs;
+import com.dwinovo.chiikawa.init.InitCapabilities;
+import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalityLoader;
 import com.dwinovo.chiikawa.entity.brain.task.farmer.crop.FarmRegistry;
 import com.dwinovo.chiikawa.item.PetDollItem;
 import com.dwinovo.chiikawa.item.PetReviveRitualManager;
@@ -25,6 +27,15 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 
@@ -57,6 +68,19 @@ public class ChiikawaFabricMod implements ModInitializer {
                 return InteractionResult.PASS;
             }
             return dollItem.tryStartCakeRitual(level, player, stack, hitResult.getBlockPos());
+        });
+        PetPersonalityLoader personalityLoader = new PetPersonalityLoader();
+        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new IdentifiableResourceReloadListener() {
+            @Override
+            public ResourceLocation getFabricId() {
+                return PetPersonalityLoader.ID;
+            }
+
+            @Override
+            public CompletableFuture<Void> reload(PreparableReloadListener.PreparationBarrier barrier, ResourceManager manager,
+                    ProfilerFiller prepareProfiler, ProfilerFiller applyProfiler, Executor backgroundExecutor, Executor gameExecutor) {
+                return personalityLoader.reload(barrier, manager, prepareProfiler, applyProfiler, backgroundExecutor, gameExecutor);
+            }
         });
         ServerTickEvents.END_SERVER_TICK.register(PetReviveRitualManager::tickServer);
         ServerTickEvents.END_SERVER_TICK.register(ServerMusicSystem::tickServer);
