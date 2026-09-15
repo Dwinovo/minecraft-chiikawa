@@ -10,6 +10,7 @@ import com.dwinovo.chiikawa.utils.Utils;
 import com.google.common.collect.ImmutableSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
@@ -21,7 +22,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
  * Single farmer work sensor — replaces the former plant / harvest / container
- * sensors. Three perf properties matter here:
+ * sensors, and also finds weeds and mushrooms. Three perf properties matter here:
  *
  * <ol>
  *   <li><b>No pathfinding in the scan.</b> Candidates are chosen by cheap block
@@ -35,9 +36,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  * </ol>
  *
  * Priority is harvest &gt; plant &gt; container, matching the order in which the
- * {@code harvest}, {@code plant} and {@code deliver} intents yield. The sensor only
- * perceives: it keeps scanning whatever the owner's directive, and the intents
- * decide whether a target is used.
+ * {@code harvest}, {@code plant} and {@code deliver} intents yield; weeds and
+ * mushrooms are found independently. The sensor only perceives: it keeps scanning
+ * whatever the owner's directive, the pet's ownership or the time of day, and the
+ * intents decide whether a target is used.
  */
 public class PetFarmerWorkSensor extends Sensor<AbstractPet> {
     private static final int MAX_RADIUS = 5;
@@ -67,7 +69,9 @@ public class PetFarmerWorkSensor extends Sensor<AbstractPet> {
         return ImmutableSet.of(
             InitMemory.HARVEST_POS.get(),
             InitMemory.PLANT_POS.get(),
-            InitMemory.CONTAINER_POS.get()
+            InitMemory.CONTAINER_POS.get(),
+            InitMemory.WEED_POS.get(),
+            InitMemory.MUSHROOM_POS.get()
         );
     }
 
@@ -79,6 +83,8 @@ public class PetFarmerWorkSensor extends Sensor<AbstractPet> {
             brain.eraseMemory(InitMemory.HARVEST_POS.get());
             brain.eraseMemory(InitMemory.PLANT_POS.get());
             brain.eraseMemory(InitMemory.CONTAINER_POS.get());
+            brain.eraseMemory(InitMemory.WEED_POS.get());
+            brain.eraseMemory(InitMemory.MUSHROOM_POS.get());
             return;
         }
 
@@ -86,8 +92,10 @@ public class PetFarmerWorkSensor extends Sensor<AbstractPet> {
         boolean hasDeliverItem = hasDeliverItem(pet.getBackpack());
 
         // (2) Re-validate existing targets cheaply — block checks only, no pathfinding.
-        revalidateHarvest(level, pet);
+        revalidateBlock(level, pet, InitMemory.HARVEST_POS.get(), Utils::canHarvesr);
         revalidatePlant(level, pet);
+        revalidateBlock(level, pet, InitMemory.WEED_POS.get(), Utils::isWeed);
+        revalidateBlock(level, pet, InitMemory.MUSHROOM_POS.get(), Utils::isMushroom);
 
         boolean hasHarvest = brain.getMemory(InitMemory.HARVEST_POS.get()).isPresent();
         boolean hasPlant = brain.getMemory(InitMemory.PLANT_POS.get()).isPresent();
@@ -104,7 +112,9 @@ public class PetFarmerWorkSensor extends Sensor<AbstractPet> {
         boolean needHarvest = !hasHarvest;
         boolean needPlant = hasSeed && !hasHarvest && !hasPlant;
         boolean needContainer = hasDeliverItem && !hasHarvest && !hasPlant && !hasContainer;
-        if (!needHarvest && !needPlant && !needContainer) {
+        boolean needWeed = brain.getMemory(InitMemory.WEED_POS.get()).isEmpty();
+        boolean needMushroom = brain.getMemory(InitMemory.MUSHROOM_POS.get()).isEmpty();
+        if (!needHarvest && !needPlant && !needContainer && !needWeed && !needMushroom) {
             return; // everything satisfied — skip the scan entirely
         }
 
@@ -121,7 +131,7 @@ public class PetFarmerWorkSensor extends Sensor<AbstractPet> {
         }
 
         // (1)(3) One spiral pass, cheap predicates only, skipping blacklisted positions.
-        BlockPos[] found = new BlockPos[3]; // 0 = harvest, 1 = plant, 2 = container
+        BlockPos[] found = new BlockPos[5]; // 0 = harvest, 1 = plant, 2 = container, 3 = weed, 4 = mushroom
         BlockSearch.spiralVisit(pet.blockPosition(), MAX_RADIUS, VERTICAL_RANGE, pos -> {
             if (pet.isReachBlacklisted(pos)) {
                 return false;
@@ -136,9 +146,17 @@ public class PetFarmerWorkSensor extends Sensor<AbstractPet> {
                 && isDeliverContainer(level, pos) && canInsertContainer(level, pos, pet)) {
                 found[2] = pos.immutable();
             }
+            if (needWeed && found[3] == null && Utils.isWeed(level, pos)) {
+                found[3] = pos.immutable();
+            }
+            if (needMushroom && found[4] == null && Utils.isMushroom(level, pos)) {
+                found[4] = pos.immutable();
+            }
             return (!needHarvest || found[0] != null)
                 && (!needPlant || found[1] != null)
-                && (!needContainer || found[2] != null);
+                && (!needContainer || found[2] != null)
+                && (!needWeed || found[3] != null)
+                && (!needMushroom || found[4] != null);
         });
 
         if (needHarvest && found[0] != null) {
@@ -150,11 +168,19 @@ public class PetFarmerWorkSensor extends Sensor<AbstractPet> {
         if (needContainer && found[2] != null) {
             brain.setMemory(InitMemory.CONTAINER_POS.get(), found[2]);
         }
+        if (needWeed && found[3] != null) {
+            brain.setMemory(InitMemory.WEED_POS.get(), found[3]);
+        }
+        if (needMushroom && found[4] != null) {
+            brain.setMemory(InitMemory.MUSHROOM_POS.get(), found[4]);
+        }
 
         // Found work → search eagerly again; found nothing → back off a step.
         boolean foundAny = (needHarvest && found[0] != null)
             || (needPlant && found[1] != null)
-            || (needContainer && found[2] != null);
+            || (needContainer && found[2] != null)
+            || (needWeed && found[3] != null)
+            || (needMushroom && found[4] != null);
         if (foundAny) {
             emptySearchStreak = 0;
             nextSearchTime = 0L;
@@ -164,12 +190,13 @@ public class PetFarmerWorkSensor extends Sensor<AbstractPet> {
         }
     }
 
-    private static void revalidateHarvest(ServerLevel level, AbstractPet pet) {
-        Optional<BlockPos> opt = pet.getBrain().getMemory(InitMemory.HARVEST_POS.get());
+    private static void revalidateBlock(ServerLevel level, AbstractPet pet, MemoryModuleType<BlockPos> memory,
+            BiPredicate<ServerLevel, BlockPos> qualifies) {
+        Optional<BlockPos> opt = pet.getBrain().getMemory(memory);
         if (opt.isPresent()) {
             BlockPos pos = opt.get();
-            if (isStale(pet, pos) || !Utils.canHarvesr(level, pos)) {
-                pet.getBrain().eraseMemory(InitMemory.HARVEST_POS.get());
+            if (isStale(pet, pos) || !qualifies.test(level, pos)) {
+                pet.getBrain().eraseMemory(memory);
             }
         }
     }

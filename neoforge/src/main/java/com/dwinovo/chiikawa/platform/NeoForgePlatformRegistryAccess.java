@@ -37,6 +37,10 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
         ACTIVITIES.register("farmer_plant", () -> new Activity("farmer_plant"));
     private static final DeferredHolder<Activity, Activity> DELEVER =
         ACTIVITIES.register("delever", () -> new Activity("delever"));
+    private static final DeferredHolder<Activity, Activity> WEED =
+        ACTIVITIES.register("weed", () -> new Activity("weed"));
+    private static final DeferredHolder<Activity, Activity> PICK_MUSHROOM =
+        ACTIVITIES.register("pick_mushroom", () -> new Activity("pick_mushroom"));
     private static final DeferredHolder<Activity, Activity> FENCER_FIGHT =
         ACTIVITIES.register("fencer_fight", () -> new Activity("fencer_fight"));
     private static final DeferredHolder<Activity, Activity> ARCHER_SHOOT =
@@ -89,6 +93,16 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
     @Override
     public Supplier<Activity> deleverActivity() {
         return DELEVER;
+    }
+
+    @Override
+    public Supplier<Activity> weedActivity() {
+        return WEED;
+    }
+
+    @Override
+    public Supplier<Activity> pickMushroomActivity() {
+        return PICK_MUSHROOM;
     }
 
     @Override
