@@ -8,7 +8,6 @@ import com.dwinovo.chiikawa.entity.brain.constraint.AnchorDistances;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentContext;
 import com.dwinovo.chiikawa.entity.brain.intent.PerceivedTargets;
-import java.util.OptionalDouble;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;
@@ -22,7 +21,7 @@ class FollowOwnerIntentTest {
         ResourceLocation.withDefaultNamespace("overworld"));
     private static final GlobalPos OWNER = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     private static final PetAnchor FOLLOWING = new PetAnchor(OWNER, AnchorDistances.FOLLOW_REACH,
-        AnchorDistances.FOLLOW_LEASH, OptionalDouble.of(AnchorDistances.FOLLOW_TELEPORT), true);
+        AnchorDistances.FOLLOW_LEASH, true, true);
 
     private final FollowOwnerIntent intent = new FollowOwnerIntent();
 
@@ -60,7 +59,7 @@ class FollowOwnerIntentTest {
     @Test
     void neverStartsWithoutAnAnchorThatFollowsTheOwner() {
         GlobalPos far = GlobalPos.of(OVERWORLD, new BlockPos(30, 64, 0));
-        PetAnchor offline = new PetAnchor(far, 0.0, PetAnchor.UNLEASHED, OptionalDouble.empty(), true);
+        PetAnchor offline = new PetAnchor(far, 0.0, PetAnchor.UNLEASHED, false, true);
         IntentContext ctx = new IntentContext(far, offline, PerceivedTargets.NONE, false, false, false, false);
 
         assertEquals("intent.chiikawa.fail.owner_unavailable", intent.canRun(ctx).reasonKey());
