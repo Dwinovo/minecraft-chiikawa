@@ -91,11 +91,29 @@ class PetConstraintsTest {
     }
 
     @Test
-    void wildPetOnlyWandersWhateverItsDirective() {
-        PetAnchor expected = new PetAnchor(PET, 0.0, PetAnchor.UNLEASHED, false, true);
+    void wildPetRoamsAroundItsSpawnHomeWhateverItsDirective() {
+        PetAnchor expected = new PetAnchor(HOME, AnchorDistances.WILD_REACH, AnchorDistances.WILD_LEASH, false, true);
         for (PetDirective directive : PetDirective.values()) {
             assertEquals(expected, anchor(directive, PetOwnership.WILD, Optional.empty(), Optional.of(HOME), false));
         }
+    }
+
+    @Test
+    void wildPetWithoutUsableHomeRoamsAroundItself() {
+        PetAnchor noHome = anchor(PetDirective.FOLLOW, PetOwnership.WILD, Optional.empty(), Optional.empty(), false);
+        PetAnchor homeElsewhere = anchor(PetDirective.FREE, PetOwnership.WILD, Optional.empty(),
+            Optional.of(GlobalPos.of(NETHER, HOME.pos())), false);
+
+        PetAnchor expected = new PetAnchor(PET, AnchorDistances.WILD_REACH, AnchorDistances.WILD_LEASH, false, true);
+        assertEquals(expected, noHome);
+        assertEquals(expected, homeElsewhere);
+    }
+
+    @Test
+    void leashedWildPetKeepsItsReachButIsNotPulledHome() {
+        PetAnchor anchor = anchor(PetDirective.FREE, PetOwnership.WILD, Optional.empty(), Optional.of(HOME), true);
+
+        assertEquals(new PetAnchor(HOME, AnchorDistances.WILD_REACH, PetAnchor.UNLEASHED, false, true), anchor);
     }
 
     // ---- permission table ------------------------------------------------------
