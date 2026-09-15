@@ -14,6 +14,12 @@ public final class InitActivity {
     // Deliver activity.
     public static final Supplier<Activity> DELEVER =
         Services.PLATFORM_REGISTRY.deleverActivity();
+    // Pulling up weeds.
+    public static final Supplier<Activity> WEED =
+        Services.PLATFORM_REGISTRY.weedActivity();
+    // Picking mushrooms.
+    public static final Supplier<Activity> PICK_MUSHROOM =
+        Services.PLATFORM_REGISTRY.pickMushroomActivity();
     // Fencer combat activity.
     public static final Supplier<Activity> FENCER_FIGHT =
         Services.PLATFORM_REGISTRY.fencerFightActivity();
