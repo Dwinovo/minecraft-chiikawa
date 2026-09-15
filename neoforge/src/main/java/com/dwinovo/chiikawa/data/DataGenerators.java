@@ -39,6 +39,7 @@ public final class DataGenerators {
                 new ModItemTagsProvider(output, lookupProvider));
         event.getGenerator().addProvider(true,
                 new ModRecipeProvider.Runner(output, lookupProvider));
+        event.getGenerator().addProvider(true, new PetPersonalityProvider(output));
         // Entity tags.
         event.getGenerator().addProvider(true, 
             new ModEntityTagsProvider(
