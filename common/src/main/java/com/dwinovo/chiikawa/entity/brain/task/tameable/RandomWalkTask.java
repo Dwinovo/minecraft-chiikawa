@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.task.tameable;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.PetDirective;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -29,7 +29,7 @@ public class RandomWalkTask extends Behavior<AbstractPet> {
     @SuppressWarnings("null")
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, AbstractPet entity) {
-        return entity.getPetMode() != PetMode.SIT;
+        return entity.getPetDirective() != PetDirective.STAY;
     }
     /**
      * Start wandering.
