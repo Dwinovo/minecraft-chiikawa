@@ -23,8 +23,8 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * {@code /chiikawa debug intent} inspects the intent selector of the pet under the
- * player's crosshair: every candidate with its permission, cooldown, condition and
- * score, and, once {@code log on} is set for that pet, its recent intent switches.
+ * player's crosshair: every candidate with its permission, condition and score,
+ * and, once {@code log on} is set for that pet, its recent intent switches.
  */
 public final class ChiikawaDebugCommand {
     private static final double TARGET_RANGE = 16.0;
@@ -51,17 +51,14 @@ public final class ChiikawaDebugCommand {
         IntentSelector.Snapshot snapshot = IntentSelector.describe(pet);
         MutableComponent header = Component.literal("[chiikawa-intent] ").append(pet.getDisplayName()).append(" running: ");
         header.append(snapshot.running()
-            .map(running -> Component.literal(running.id() + " step " + running.step()
-                + ", " + (snapshot.gameTime() - running.startTick()) + "t"))
+            .map(running -> Component.literal(running.id() + " for " + (snapshot.gameTime() - running.startTick()) + "t"))
             .orElse(Component.literal("none")));
         source.sendSuccess(() -> header, false);
         for (IntentSelector.CandidateView view : snapshot.candidates()) {
             MutableComponent line = Component.literal(" " + view.intent().id() + " ")
-                .append(flag("allowed", view.allowed()));
-            if (view.cooldownRemaining() > 0) {
-                line.append(Component.literal(" cooldown " + view.cooldownRemaining() + "t").withStyle(ChatFormatting.GOLD));
-            }
-            line.append(" ").append(flag("check", view.check().ok()));
+                .append(flag("allowed", view.allowed()))
+                .append(" ")
+                .append(flag("check", view.check().ok()));
             if (view.check().reasonKey() != null) {
                 line.append(Component.literal(" (").append(Component.translatable(view.check().reasonKey())).append(")"));
             }
