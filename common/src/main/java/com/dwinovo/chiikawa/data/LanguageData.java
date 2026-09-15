@@ -42,7 +42,7 @@ public final class LanguageData {
                 "把 MP3 / WAV 文件放入文件夹后点击刷新", "部分歌曲导入失败", "请使用 MP3 格式的音频", "打开文件夹", "刷新");
             addIntentFailureTranslations(adder, "无法跟随主人", "主人就在附近", "已经回到主人身边", "目标不在范围内",
                 "目标离开了活动范围", "附近没有可拾取的物品", "没有可收割的作物", "没有可种植的耕地", "没有可存放的容器",
-                "没有攻击目标", "攻击冷却中", "没有箭", "没有新的曲子可演奏", "曲子演奏完了");
+                "没有攻击目标", "攻击冷却中", "没有箭", "没有新的曲子可演奏", "曲子演奏完了", "先做更要紧的活");
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
@@ -75,7 +75,8 @@ public final class LanguageData {
                 "Put MP3 / WAV files in the folder, then reload", "Some songs failed to import", "Please use MP3 audio files", "Open Folder", "Reload");
             addIntentFailureTranslations(adder, "Can't follow the owner", "Owner is close by", "Back with the owner", "Target is out of range",
                 "Target left the allowed area", "No item to pick up", "No crop to harvest", "No farmland to plant", "No container to deliver to",
-                "No target to attack", "Attack is cooling down", "No arrows", "No new song to play", "The song is over");
+                "No target to attack", "Attack is cooling down", "No arrows", "No new song to play", "The song is over",
+                "Something more urgent comes first");
         }
     }
 
@@ -102,7 +103,8 @@ public final class LanguageData {
         String attackCoolingDown,
         String noArrows,
         String noNewSong,
-        String songOver
+        String songOver,
+        String higherPriority
     ) {
         adder.add("intent.chiikawa.fail.owner_unavailable", ownerUnavailable);
         adder.add("intent.chiikawa.fail.owner_nearby", ownerNearby);
@@ -118,6 +120,7 @@ public final class LanguageData {
         adder.add("intent.chiikawa.fail.no_arrows", noArrows);
         adder.add("intent.chiikawa.fail.no_new_song", noNewSong);
         adder.add("intent.chiikawa.fail.song_over", songOver);
+        adder.add("intent.chiikawa.fail.higher_priority", higherPriority);
     }
 
     private static void addDollTooltipTranslations(Adder adder, String placeOnCakeHint) {
