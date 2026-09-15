@@ -81,6 +81,7 @@ import net.minecraft.world.phys.Vec3;
 public class AbstractPet extends TamableAnimal implements RangedAttackMob, ChiikawaAnimated {
     /** Number of slots available in the pet's backpack inventory. */
     public static final int BACKPACK_SIZE = 16;
+    /** Synced {@link PetDirective} ordinal; same slot and {@code PetMode} save key as 0.0.9. */
     private static final EntityDataAccessor<Byte> PET_MODE = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Integer> PET_JOB = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.INT);
     /**
@@ -323,19 +324,19 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     }
 
     /**
-     * @return current {@link PetMode} stored in the entity data
+     * @return current {@link PetDirective} stored in the entity data
      */
-    public PetMode getPetMode() {
-        return PetMode.fromId(this.entityData.get(PET_MODE));
+    public PetDirective getPetDirective() {
+        return PetDirective.fromId(this.entityData.get(PET_MODE));
     }
 
     /**
-     * Updates the mode displayed by the pet.
+     * Updates the owner's directive for this pet.
      *
-     * @param mode new mode to persist
+     * @param directive new directive to persist
      */
-    public void setPetMode(PetMode mode) {
-        this.entityData.set(PET_MODE, (byte) mode.ordinal());
+    public void setPetDirective(PetDirective directive) {
+        this.entityData.set(PET_MODE, (byte) directive.ordinal());
     }
 
     /**
@@ -541,7 +542,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     @Override
     public PetAnimContext getAnimContext(float walkSpeed) {
-        return PetAnimContext.base(getPetMode(), getPetJobId(), walkSpeed, getActivity());
+        return PetAnimContext.base(getPetDirective(), getPetJobId(), walkSpeed, getActivity());
     }
 
     /** Current code-bounded loop activity (level state). Synced both directions. */
@@ -567,7 +568,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(PET_MODE, (byte) PetMode.FOLLOW.ordinal());
+        this.entityData.define(PET_MODE, (byte) PetDirective.FOLLOW.ordinal());
         this.entityData.define(PET_JOB, InitRegistry.NONE_ID);
         this.entityData.define(ANIM_TRIGGER, 0);
         this.entityData.define(REACTION_TRIGGER, 0);

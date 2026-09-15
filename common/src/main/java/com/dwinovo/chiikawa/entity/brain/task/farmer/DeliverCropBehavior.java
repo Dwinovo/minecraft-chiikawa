@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.task.farmer;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.anim.state.PetAction;
-import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.init.InitTag;
@@ -50,7 +50,7 @@ public class DeliverCropBehavior extends Behavior<AbstractPet> {
     @SuppressWarnings("null")
     @Override
     protected boolean checkExtraStartConditions(ServerLevel world, AbstractPet pet) {
-        if (pet.getPetMode() != PetMode.WORK || pet.getPetJobId() != InitRegistry.FARMER_ID) {
+        if (pet.getPetDirective() != PetDirective.FREE || pet.getPetJobId() != InitRegistry.FARMER_ID) {
             return false;
         }
         if (pet.getBrain().getMemory(InitMemory.PLANT_POS.get()).isPresent()
@@ -114,7 +114,7 @@ public class DeliverCropBehavior extends Behavior<AbstractPet> {
     @SuppressWarnings("null")
     @Override
     protected boolean canStillUse(ServerLevel world, AbstractPet pet, long time) {
-        if (pet.getPetMode() != PetMode.WORK || pet.getPetJobId() != InitRegistry.FARMER_ID) {
+        if (pet.getPetDirective() != PetDirective.FREE || pet.getPetJobId() != InitRegistry.FARMER_ID) {
             return false;
         }
         if (pet.getBrain().getMemory(InitMemory.PLANT_POS.get()).isPresent()
