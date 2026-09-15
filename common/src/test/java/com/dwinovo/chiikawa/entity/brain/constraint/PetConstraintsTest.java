@@ -129,15 +129,16 @@ class PetConstraintsTest {
     }
 
     @Test
-    void freePermitsWanderingWorkFightsAndPickingUp() {
+    void freePermitsWanderingWorkForagingFightsAndPickingUp() {
         assertPermits(PetDirective.FREE, OWNED, EnumSet.of(
-            IntentCategory.WANDER, IntentCategory.WORK, IntentCategory.COMBAT, IntentCategory.PICK_UP));
+            IntentCategory.WANDER, IntentCategory.WORK, IntentCategory.FORAGE, IntentCategory.COMBAT, IntentCategory.PICK_UP));
     }
 
     @Test
-    void wildPermitsWanderingAndFightsWhateverItsDirective() {
+    void wildPermitsWanderingForagingAndFightsWhateverItsDirective() {
         for (PetDirective directive : PetDirective.values()) {
-            assertPermits(directive, PetOwnership.WILD, EnumSet.of(IntentCategory.WANDER, IntentCategory.COMBAT));
+            assertPermits(directive, PetOwnership.WILD,
+                EnumSet.of(IntentCategory.WANDER, IntentCategory.FORAGE, IntentCategory.COMBAT));
         }
     }
 

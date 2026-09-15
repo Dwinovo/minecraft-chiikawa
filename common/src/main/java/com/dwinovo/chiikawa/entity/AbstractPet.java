@@ -135,6 +135,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitMemory.HARVEST_POS.get(),
         InitMemory.PLANT_POS.get(),
         InitMemory.CONTAINER_POS.get(),
+        InitMemory.WEED_POS.get(),
+        InitMemory.MUSHROOM_POS.get(),
         InitMemory.PICKABLE_ITEM.get(),
         InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get(),
         InitMemory.CURRENT_INTENT.get(),
