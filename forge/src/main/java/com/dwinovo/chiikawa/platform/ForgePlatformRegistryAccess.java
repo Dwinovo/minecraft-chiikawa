@@ -49,6 +49,12 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
         ACTIVITIES.register("archer_shoot", () -> new Activity("archer_shoot"));
     private static final RegistryObject<Activity> MUSICIAN_PLAY =
         ACTIVITIES.register("musician_play", () -> new Activity("musician_play"));
+    private static final RegistryObject<Activity> FOLLOW_OWNER =
+        ACTIVITIES.register("follow_owner", () -> new Activity("follow_owner"));
+    private static final RegistryObject<Activity> STAY =
+        ACTIVITIES.register("stay", () -> new Activity("stay"));
+    private static final RegistryObject<Activity> PICK_UP =
+        ACTIVITIES.register("pick_up", () -> new Activity("pick_up"));
 
     // Menu registrations
     private static final RegistryObject<MenuType<PetBackpackMenu>> PET_BACKPACK =
@@ -114,6 +120,21 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
     @Override
     public Supplier<Activity> musicianPlayActivity() {
         return MUSICIAN_PLAY;
+    }
+
+    @Override
+    public Supplier<Activity> followOwnerActivity() {
+        return FOLLOW_OWNER;
+    }
+
+    @Override
+    public Supplier<Activity> stayActivity() {
+        return STAY;
+    }
+
+    @Override
+    public Supplier<Activity> pickUpActivity() {
+        return PICK_UP;
     }
 
     @Override
