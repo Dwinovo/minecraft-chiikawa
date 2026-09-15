@@ -3,7 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.task.farmer;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.anim.state.PetAction;
-import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
 
@@ -41,7 +41,7 @@ public class HarvestCropBehavior extends Behavior<AbstractPet>{
     @Override
     protected boolean checkExtraStartConditions(ServerLevel world, AbstractPet pet) {
         if(
-            pet.getPetMode() == PetMode.WORK && 
+            pet.getPetDirective() == PetDirective.FREE && 
             pet.getPetJobId() == InitRegistry.FARMER_ID && 
             pet.getBrain().getMemory(InitMemory.HARVEST_POS.get()).isPresent() 
         )
@@ -49,7 +49,7 @@ public class HarvestCropBehavior extends Behavior<AbstractPet>{
             Brain<AbstractPet> brain = pet.getBrain();
             BlockPos cropPos = brain.getMemory(InitMemory.HARVEST_POS.get()).get();
             return Utils.canHarvesr(world, cropPos) 
-            && pet.getPetMode() == PetMode.WORK
+            && pet.getPetDirective() == PetDirective.FREE
             && pet.distanceToSqr(Vec3.atCenterOf(cropPos)) <= Utils.WORK_REACH_SQR;
         }
         return false;
@@ -73,7 +73,7 @@ public class HarvestCropBehavior extends Behavior<AbstractPet>{
         BlockPos cropPos = cropPosOpt.get();
         return Utils.canHarvesr(world, cropPos)
             && pet.distanceToSqr(Vec3.atCenterOf(cropPos)) <= Utils.WORK_REACH_SQR
-            && pet.getPetMode() == PetMode.WORK
+            && pet.getPetDirective() == PetDirective.FREE
             && pet.getPetJobId() == InitRegistry.FARMER_ID;
     }
     

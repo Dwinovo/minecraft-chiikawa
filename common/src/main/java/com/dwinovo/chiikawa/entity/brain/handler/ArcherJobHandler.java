@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.handler;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import com.dwinovo.chiikawa.entity.brain.task.archer.HurtRangedAttackTargetTask;
 import com.dwinovo.chiikawa.init.InitActivity;
@@ -40,7 +40,7 @@ public final class ArcherJobHandler {
         // Outside WORK mode the archer shouldn't engage — clear stale combat
         // memories from prior engagements so the bow doesn't auto-fire while
         // the player is just walking around with the pet.
-        if (pet.getPetMode() != PetMode.WORK) {
+        if (pet.getPetDirective() != PetDirective.FREE) {
             brain.eraseMemory(MemoryModuleType.ATTACK_TARGET);
             brain.eraseMemory(MemoryModuleType.ATTACK_COOLING_DOWN);
             brain.setActiveActivityToFirstValid(ImmutableList.of(Activity.IDLE));
