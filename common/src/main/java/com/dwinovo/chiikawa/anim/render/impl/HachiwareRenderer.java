@@ -19,13 +19,12 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
  * truth, the {@code noguitar} animation is dead data and can be deleted from
  * the json file.
  *
- * <p>Wiring a controller to actually <em>play</em> {@code guitar} (so the
- * bone appears) is a separate concern handled by gameplay code — e.g.
- * extending {@code PetMode} with a {@code PLAYING_GUITAR} value and having
- * {@link com.dwinovo.chiikawa.anim.state.PetAnimationResolver} return
- * {@code "guitar"} in that mode. Until then, hachiware never enters the
- * mode and the guitar stays hidden — exactly the "屏蔽 guitar 展示" default
- * the model needs.
+ * <p>Actually <em>playing</em> {@code guitar} (so the bone appears) is a
+ * separate concern handled by gameplay code: the musician's performance sets
+ * {@link com.dwinovo.chiikawa.anim.state.PetActivity#PLAY_GUITAR}, for which
+ * {@link com.dwinovo.chiikawa.anim.state.PetAnimationResolver} returns
+ * {@code "guitar"}. Outside a performance the guitar stays hidden — exactly
+ * the "屏蔽 guitar 展示" default the model needs.
  */
 public class HachiwareRenderer extends ChiikawaEntityRenderer<HachiwarePet> {
     private static final String GUITAR_ANIMATION = "guitar";
