@@ -6,8 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.entity.brain.constraint.AnchorDistances;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
+import com.dwinovo.chiikawa.entity.brain.intent.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentContext;
 import com.dwinovo.chiikawa.entity.brain.intent.PerceivedTargets;
+import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;
@@ -60,7 +62,8 @@ class FollowOwnerIntentTest {
     void neverStartsWithoutAnAnchorThatFollowsTheOwner() {
         GlobalPos far = GlobalPos.of(OVERWORLD, new BlockPos(30, 64, 0));
         PetAnchor offline = new PetAnchor(far, 0.0, PetAnchor.UNLEASHED, false, true);
-        IntentContext ctx = new IntentContext(far, offline, PerceivedTargets.NONE, false, false, false, false);
+        IntentContext ctx = new IntentContext(far, DayPhase.DAY, Personality.DEFAULT, offline, PerceivedTargets.NONE,
+            false, false, false, false);
 
         assertEquals("intent.chiikawa.fail.owner_unavailable", intent.canRun(ctx).reasonKey());
         assertFalse(intent.canContinue(ctx).ok());
@@ -68,6 +71,6 @@ class FollowOwnerIntentTest {
 
     private static IntentContext petAt(int blocksEast, PetAnchor anchor) {
         GlobalPos pet = GlobalPos.of(OVERWORLD, OWNER.pos().east(blocksEast));
-        return new IntentContext(pet, anchor, PerceivedTargets.NONE, false, false, false, false);
+        return new IntentContext(pet, DayPhase.DAY, Personality.DEFAULT, anchor, PerceivedTargets.NONE, false, false, false, false);
     }
 }

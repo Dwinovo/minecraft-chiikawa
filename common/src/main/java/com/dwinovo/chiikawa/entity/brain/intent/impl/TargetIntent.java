@@ -3,8 +3,10 @@ package com.dwinovo.chiikawa.entity.brain.intent.impl;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCategory;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCheck;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentContext;
+import com.dwinovo.chiikawa.entity.brain.intent.IntentRequirement;
 import com.dwinovo.chiikawa.entity.brain.intent.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntent;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -14,7 +16,8 @@ import net.minecraft.world.entity.schedule.Activity;
 
 /**
  * Acts on one sensed target, such as a crop to harvest or an item to pick up. Runs
- * while the sensor remembers a target within the anchor's reach.
+ * while its requirements hold and the sensor remembers a target within the anchor's
+ * reach.
  */
 public final class TargetIntent implements PetIntent {
     private final ResourceLocation id;
@@ -23,19 +26,23 @@ public final class TargetIntent implements PetIntent {
     private final Function<PerceivedTargets, Optional<GlobalPos>> target;
     private final float score;
     private final String missingReason;
+    private final List<IntentRequirement> requirements;
 
     /**
      * @param target which remembered target this intent acts on
      * @param missingReason failure reason when there is no such target
+     * @param requirements further conditions, checked in order before the target
      */
     public TargetIntent(ResourceLocation id, IntentCategory category, Supplier<Activity> activity,
-            Function<PerceivedTargets, Optional<GlobalPos>> target, float score, String missingReason) {
+            Function<PerceivedTargets, Optional<GlobalPos>> target, float score, String missingReason,
+            List<IntentRequirement> requirements) {
         this.id = id;
         this.category = category;
         this.activity = activity;
         this.target = target;
         this.score = score;
         this.missingReason = missingReason;
+        this.requirements = List.copyOf(requirements);
     }
 
     @Override
@@ -55,6 +62,12 @@ public final class TargetIntent implements PetIntent {
 
     @Override
     public IntentCheck canRun(IntentContext ctx) {
+        for (IntentRequirement requirement : requirements) {
+            IntentCheck check = requirement.check(ctx);
+            if (!check.ok()) {
+                return check;
+            }
+        }
         return target.apply(ctx.targets())
             .map(pos -> ctx.anchor().withinReach(pos) ? IntentCheck.OK : IntentCheck.fail("out_of_reach"))
             .orElseGet(() -> IntentCheck.fail(missingReason));

@@ -53,6 +53,7 @@ public final class ChiikawaDebugCommand {
         header.append(snapshot.running()
             .map(running -> Component.literal(running.id() + " for " + (snapshot.gameTime() - running.startTick()) + "t"))
             .orElse(Component.literal("none")));
+        header.append(Component.literal(" (" + snapshot.phase().getSerializedName() + ")"));
         source.sendSuccess(() -> header, false);
         for (IntentSelector.CandidateView view : snapshot.candidates()) {
             MutableComponent line = Component.literal(" " + view.intent().id() + " ")
