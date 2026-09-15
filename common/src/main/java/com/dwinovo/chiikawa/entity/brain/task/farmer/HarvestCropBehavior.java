@@ -3,9 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.task.farmer;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.anim.state.PetAction;
-import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitMemory;
-import com.dwinovo.chiikawa.init.InitRegistry;
 
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -40,19 +38,14 @@ public class HarvestCropBehavior extends Behavior<AbstractPet>{
      */
     @Override
     protected boolean checkExtraStartConditions(ServerLevel world, AbstractPet pet) {
-        if(
-            pet.getPetDirective() == PetDirective.FREE && 
-            pet.getPetJobId() == InitRegistry.FARMER_ID && 
-            pet.getBrain().getMemory(InitMemory.HARVEST_POS.get()).isPresent() 
-        )
-        {
-            Brain<AbstractPet> brain = pet.getBrain();
-            BlockPos cropPos = brain.getMemory(InitMemory.HARVEST_POS.get()).get();
-            return Utils.canHarvesr(world, cropPos) 
-            && pet.getPetDirective() == PetDirective.FREE
-            && pet.distanceToSqr(Vec3.atCenterOf(cropPos)) <= Utils.WORK_REACH_SQR;
+        Brain<AbstractPet> brain = pet.getBrain();
+        Optional<BlockPos> cropPosOpt = brain.getMemory(InitMemory.HARVEST_POS.get());
+        if (cropPosOpt.isEmpty()) {
+            return false;
         }
-        return false;
+        BlockPos cropPos = cropPosOpt.get();
+        return Utils.canHarvesr(world, cropPos)
+            && pet.distanceToSqr(Vec3.atCenterOf(cropPos)) <= Utils.WORK_REACH_SQR;
 
     }
     /**
@@ -72,9 +65,7 @@ public class HarvestCropBehavior extends Behavior<AbstractPet>{
         }
         BlockPos cropPos = cropPosOpt.get();
         return Utils.canHarvesr(world, cropPos)
-            && pet.distanceToSqr(Vec3.atCenterOf(cropPos)) <= Utils.WORK_REACH_SQR
-            && pet.getPetDirective() == PetDirective.FREE
-            && pet.getPetJobId() == InitRegistry.FARMER_ID;
+            && pet.distanceToSqr(Vec3.atCenterOf(cropPos)) <= Utils.WORK_REACH_SQR;
     }
     
     /**

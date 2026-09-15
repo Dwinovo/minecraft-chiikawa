@@ -1,11 +1,10 @@
 package com.dwinovo.chiikawa.entity;
 
-import com.dwinovo.chiikawa.entity.brain.PetTargeting;
+import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
+import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import java.util.List;
-import java.util.UUID;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.entity.EntityAccess;
 
 /**
@@ -33,7 +32,7 @@ public final class PetUnloadFollow {
     public static void onChunkPreUnload(List<? extends EntityAccess> entities) {
         for (EntityAccess entity : entities) {
             if (entity instanceof AbstractPet pet && pet.level() instanceof ServerLevel level) {
-                ServerPlayer owner = findFollowedOwner(pet, level);
+                LivingEntity owner = findFollowedOwner(pet);
                 if (owner != null) {
                     pet.teleportToOwner(level, owner);
                 }
@@ -42,24 +41,18 @@ public final class PetUnloadFollow {
     }
 
     /**
-     * @return the online owner this pet should follow out of an unloading chunk, or
+     * A pet follows its owner out of the chunk exactly when its anchor follows the
+     * owner: tamed, told to follow, not leashed or riding, and the owner online,
+     * alive, not spectating and in the same level. Only such anchors have a teleport
+     * distance.
+     *
+     * @return the owner this pet should follow out of an unloading chunk, or
      *         {@code null} if the pet should stay (and unload) where it is
      */
-    private static ServerPlayer findFollowedOwner(AbstractPet pet, ServerLevel level) {
-        if (!pet.isAlive() || !pet.isTame() || pet.getPetDirective() != PetDirective.FOLLOW
-                || pet.isLeashed() || pet.isPassenger()) {
+    private static LivingEntity findFollowedOwner(AbstractPet pet) {
+        if (!pet.isAlive() || PetConstraints.anchorOf(pet, PetOwnership.of(pet)).teleport().isEmpty()) {
             return null;
         }
-        UUID ownerId = PetTargeting.ownerId(pet);
-        MinecraftServer server = level.getServer();
-        if (ownerId == null || server == null) {
-            return null;
-        }
-        ServerPlayer owner = server.getPlayerList().getPlayer(ownerId);
-        if (owner == null || !owner.isAlive() || owner.isSpectator()) {
-            return null;
-        }
-        // No cross-dimension following.
-        return owner.level() == level ? owner : null;
+        return pet.getOwner();
     }
 }
