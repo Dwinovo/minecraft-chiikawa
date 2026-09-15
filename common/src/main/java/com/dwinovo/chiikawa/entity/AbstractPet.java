@@ -15,6 +15,7 @@ import com.dwinovo.chiikawa.entity.brain.handler.FarmerJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.FencerJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.MusicianJobHandler;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
+import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
 import com.dwinovo.chiikawa.utils.BrainUtils;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
 import com.dwinovo.chiikawa.entity.job.api.PetCapability;
@@ -38,6 +39,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -45,6 +47,8 @@ import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -61,17 +65,20 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Base implementation of a tamable pet with job, inventory, and ranged attack support.
@@ -330,12 +337,19 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     }
 
     /**
-     * Updates the owner's directive for this pet.
+     * Gives the pet a new directive. A free pet makes where it stands its home, the
+     * center it roams around; a following pet has no home.
      *
      * @param directive new directive to persist
      */
     public void setPetDirective(PetDirective directive) {
         this.entityData.set(PET_MODE, (byte) directive.ordinal());
+        if (directive == PetDirective.FREE) {
+            getBrain().setMemory(MemoryModuleType.HOME, GlobalPos.of(level().dimension(), blockPosition()));
+        } else if (directive == PetDirective.FOLLOW) {
+            getBrain().eraseMemory(MemoryModuleType.HOME);
+        }
+        IntentSelector.requestReevaluate(this);
     }
 
     /**
@@ -691,6 +705,27 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
             this.entityData.set(PET_MODE, tag.getByte("PetMode"));
         }
         refreshJobFromMainhand();
+    }
+
+    /**
+     * A pet spawning in the wild picks up a tool its personality leans towards, which
+     * decides its job, and roams freely around where it spawned.
+     */
+    @Override
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType,
+            @Nullable SpawnGroupData spawnGroupData) {
+        if (spawnType == MobSpawnType.NATURAL || spawnType == MobSpawnType.CHUNK_GENERATION) {
+            setItemSlot(EquipmentSlot.MAINHAND, PetPersonalities.of(getType()).drawWildTool(level.getRandom()));
+            setPetDirective(PetDirective.FREE);
+        }
+        return super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
+    }
+
+    /** A newly tamed pet follows its owner, keeping everything it carries. */
+    @Override
+    public void tame(Player player) {
+        super.tame(player);
+        setPetDirective(PetDirective.FOLLOW);
     }
 
     @Override

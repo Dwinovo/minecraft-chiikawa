@@ -41,7 +41,8 @@ public final class PetConstraints {
      *
      * <p>A leashed or riding pet is moved by something else, so its anchor never
      * follows the owner or pulls it (0.0.9 skipped following and returning home in that
-     * case too). Wild pets only wander for now, so they get an anchor with no reach.
+     * case too). Wild pets ignore the directive and roam around {@code HOME}, where they
+     * spawned.
      *
      * @param directive the owner's directive
      * @param ownership the pet's ownership
@@ -55,7 +56,7 @@ public final class PetConstraints {
     static PetAnchor anchorOf(PetDirective directive, PetOwnership ownership, GlobalPos petPos,
             Optional<GlobalPos> ownerPos, Optional<GlobalPos> home, boolean tethered) {
         if (ownership instanceof PetOwnership.Wild) {
-            return new PetAnchor(petPos, 0.0, PetAnchor.UNLEASHED, false, true);
+            return homeAnchor(petPos, home, AnchorDistances.WILD_REACH, AnchorDistances.WILD_LEASH, tethered);
         }
         return switch (directive) {
             case FOLLOW -> ownerPos
@@ -63,14 +64,18 @@ public final class PetConstraints {
                 .map(owner -> new PetAnchor(owner, AnchorDistances.FOLLOW_REACH, AnchorDistances.FOLLOW_LEASH, true, true))
                 .orElseGet(() -> new PetAnchor(petPos, 0.0, PetAnchor.UNLEASHED, false, true));
             case STAY -> new PetAnchor(petPos, 0.0, PetAnchor.UNLEASHED, false, false);
-            case FREE -> new PetAnchor(
-                home.filter(pos -> pos.dimension().equals(petPos.dimension())).orElse(petPos),
-                AnchorDistances.FREE_REACH,
-                tethered ? PetAnchor.UNLEASHED : AnchorDistances.FREE_LEASH,
-                false,
-                true
-            );
+            case FREE -> homeAnchor(petPos, home, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, tethered);
         };
+    }
+
+    /**
+     * Roaming around {@code HOME}, or around the pet itself when it has no home in its
+     * level.
+     */
+    private static PetAnchor homeAnchor(GlobalPos petPos, Optional<GlobalPos> home, double reach, double leash,
+            boolean tethered) {
+        GlobalPos center = home.filter(pos -> pos.dimension().equals(petPos.dimension())).orElse(petPos);
+        return new PetAnchor(center, reach, tethered ? PetAnchor.UNLEASHED : leash, false, true);
     }
 
     /**
