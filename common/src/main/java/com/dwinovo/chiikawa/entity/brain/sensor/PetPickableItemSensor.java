@@ -8,7 +8,6 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitTag;
-import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.utils.Utils;
 import net.minecraft.world.phys.AABB;
 import java.util.Comparator;
@@ -40,19 +39,18 @@ public class PetPickableItemSensor extends Sensor<AbstractPet>{
     @SuppressWarnings("null")
     @Override
     protected void doTick(ServerLevel level, AbstractPet entity) {
-        if (entity.isTame() && entity.getPetDirective() == PetDirective.FREE) {
-            AABB aabb = entity.getBoundingBox().inflate(VERTICAL_SEARCH_RANGE, VERTICAL_SEARCH_RANGE, VERTICAL_SEARCH_RANGE);
-            ItemEntity target = level.getEntitiesOfClass(ItemEntity.class, aabb, ItemEntity::isAlive).stream()
-                    .filter(e -> !e.hasPickUpDelay())
-                    .filter(e -> e.getItem().is(InitTag.ENTITY_PICKABLE_ITEMS))
-                    .filter(e -> Utils.canReach(entity, e.blockPosition()))
-                    .min(Comparator.comparingDouble(entity::distanceToSqr))
-                    .orElse(null);
-            if (target != null) {
-                entity.getBrain().setMemory(InitMemory.PICKABLE_ITEM.get(), target);
-            } else {
-                entity.getBrain().eraseMemory(InitMemory.PICKABLE_ITEM.get());
-            }
+        AABB aabb = entity.getBoundingBox().inflate(VERTICAL_SEARCH_RANGE, VERTICAL_SEARCH_RANGE, VERTICAL_SEARCH_RANGE);
+        // Nearest reachable item. Sorting before the reachability check means the
+        // pathfind usually runs for the nearest candidate only.
+        ItemEntity target = level.getEntitiesOfClass(ItemEntity.class, aabb, ItemEntity::isAlive).stream()
+                .filter(e -> !e.hasPickUpDelay())
+                .filter(e -> e.getItem().is(InitTag.ENTITY_PICKABLE_ITEMS))
+                .sorted(Comparator.comparingDouble(entity::distanceToSqr))
+                .filter(e -> Utils.canReach(entity, e.blockPosition()))
+                .findFirst()
+                .orElse(null);
+        if (target != null) {
+            entity.getBrain().setMemory(InitMemory.PICKABLE_ITEM.get(), target);
         } else {
             entity.getBrain().eraseMemory(InitMemory.PICKABLE_ITEM.get());
         }
