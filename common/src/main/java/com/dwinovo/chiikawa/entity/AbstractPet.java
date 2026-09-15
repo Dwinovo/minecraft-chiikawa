@@ -325,19 +325,29 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     }
 
     /**
-     * Gives the pet a new directive. A free pet makes where it stands its home, the
-     * center it roams around; a following pet has no home.
+     * Gives the pet a new directive and the home that goes with it, see {@link #settleHome}.
      *
      * @param directive new directive to persist
      */
     public void setPetDirective(PetDirective directive) {
         this.entityData.set(PET_MODE, (byte) directive.ordinal());
-        if (directive == PetDirective.FREE) {
-            getBrain().setMemory(MemoryModuleType.HOME, GlobalPos.of(level().dimension(), blockPosition()));
-        } else if (directive == PetDirective.FOLLOW) {
-            getBrain().eraseMemory(MemoryModuleType.HOME);
-        }
+        settleHome();
         IntentSelector.requestReevaluate(this);
+    }
+
+    /**
+     * Gives the pet the home its directive calls for, where it stands now. A free pet
+     * (as is every wild pet with a home) makes this spot its home, the center it roams
+     * around; a following pet has no home; a staying pet keeps the home it had. Called
+     * whenever the directive is given and when a pet comes back to life somewhere else.
+     */
+    public void settleHome() {
+        switch (getPetDirective()) {
+            case FREE -> getBrain().setMemory(MemoryModuleType.HOME, GlobalPos.of(level().dimension(), blockPosition()));
+            case FOLLOW -> getBrain().eraseMemory(MemoryModuleType.HOME);
+            case STAY -> {
+            }
+        }
     }
 
     public int getPetJobId() {
@@ -706,10 +716,14 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         return super.mobInteract(player, hand);
     }
 
+    /**
+     * Nothing a pet carries falls out when it dies; it all stays in the doll. Vanilla's
+     * {@link net.minecraft.world.entity.Mob#dropCustomDeathLoot} would otherwise drop each
+     * equipment slot by chance, including the main hand tool, which is the first backpack
+     * slot, and that equipment drop is all it adds to the empty default, so it is not called.
+     */
     @Override
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
-        super.dropCustomDeathLoot(level, source, recentlyHit);
-
         Item dollItem = getReviveDollItem();
         if (dollItem == null) {
             return;
