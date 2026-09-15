@@ -36,6 +36,7 @@ public class ForgeDataGenerators {
         
         // Recipe provider
         generator.addProvider(event.includeServer(), new ModRecipeProvider(output));
+        generator.addProvider(event.includeServer(), new PetPersonalityProvider(output));
         
         // Sound provider
         generator.addProvider(event.includeClient(), new ForgeModSoundsProvider(output));
