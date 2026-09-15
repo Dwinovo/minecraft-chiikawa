@@ -1,7 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain.sensor;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.init.InitTag;
@@ -35,8 +34,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  *       the whole scan is skipped when every needed target is already set.</li>
  * </ol>
  *
- * Priority is harvest &gt; plant &gt; container, matching
- * {@code FarmerJobHandler.tickBrain}.
+ * Priority is harvest &gt; plant &gt; container, matching the scores of the
+ * {@code harvest}, {@code plant} and {@code deliver} intents. The sensor only
+ * perceives: it keeps scanning whatever the owner's directive, and the intents
+ * decide whether a target is used.
  */
 public class PetFarmerWorkSensor extends Sensor<AbstractPet> {
     private static final int MAX_RADIUS = 5;
@@ -46,6 +47,12 @@ public class PetFarmerWorkSensor extends Sensor<AbstractPet> {
     // Caps idle search interval at ~3*30 = 90t (~4.5s) so a standing-still pet still
     // notices freshly-placed work reasonably fast.
     private static final int MAX_EMPTY_STREAK = 3;
+    /**
+     * A remembered target this far from the pet is forgotten. Intents ignore targets
+     * outside their anchor's reach, and a kept target blocks the scan for another one,
+     * so a pet that wandered off must not stay stuck on a target it no longer uses.
+     */
+    private static final double FORGET_DISTANCE = MAX_RADIUS * 2.0;
 
     // (6) Adaptive backoff state (per-pet: each brain owns its own sensor instance).
     private long nextSearchTime = 0L;
@@ -67,7 +74,8 @@ public class PetFarmerWorkSensor extends Sensor<AbstractPet> {
     @Override
     protected void doTick(ServerLevel level, AbstractPet pet) {
         Brain<AbstractPet> brain = pet.getBrain();
-        if (pet.getPetDirective() != PetDirective.FREE || pet.getPetJobId() != InitRegistry.FARMER_ID) {
+        // Only farmers use these targets; skip the scan for other jobs.
+        if (pet.getPetJobId() != InitRegistry.FARMER_ID) {
             brain.eraseMemory(InitMemory.HARVEST_POS.get());
             brain.eraseMemory(InitMemory.PLANT_POS.get());
             brain.eraseMemory(InitMemory.CONTAINER_POS.get());
@@ -160,7 +168,7 @@ public class PetFarmerWorkSensor extends Sensor<AbstractPet> {
         Optional<BlockPos> opt = pet.getBrain().getMemory(InitMemory.HARVEST_POS.get());
         if (opt.isPresent()) {
             BlockPos pos = opt.get();
-            if (pet.isReachBlacklisted(pos) || !Utils.canHarvesr(level, pos)) {
+            if (isStale(pet, pos) || !Utils.canHarvesr(level, pos)) {
                 pet.getBrain().eraseMemory(InitMemory.HARVEST_POS.get());
             }
         }
@@ -170,7 +178,7 @@ public class PetFarmerWorkSensor extends Sensor<AbstractPet> {
         Optional<BlockPos> opt = pet.getBrain().getMemory(InitMemory.PLANT_POS.get());
         if (opt.isPresent()) {
             BlockPos pos = opt.get();
-            if (pet.isReachBlacklisted(pos) || !Utils.isPlantableBase(level, pet, pos)) {
+            if (isStale(pet, pos) || !Utils.isPlantableBase(level, pet, pos)) {
                 pet.getBrain().eraseMemory(InitMemory.PLANT_POS.get());
             }
         }
@@ -180,12 +188,16 @@ public class PetFarmerWorkSensor extends Sensor<AbstractPet> {
         Optional<BlockPos> opt = pet.getBrain().getMemory(InitMemory.CONTAINER_POS.get());
         if (opt.isPresent()) {
             BlockPos pos = opt.get();
-            if (pet.isReachBlacklisted(pos)
+            if (isStale(pet, pos)
                 || !isDeliverContainer(level, pos)
                 || !canInsertContainer(level, pos, pet)) {
                 pet.getBrain().eraseMemory(InitMemory.CONTAINER_POS.get());
             }
         }
+    }
+
+    private static boolean isStale(AbstractPet pet, BlockPos pos) {
+        return pet.isReachBlacklisted(pos) || !pos.closerThan(pet.blockPosition(), FORGET_DISTANCE);
     }
 
     private static boolean isDeliverContainer(ServerLevel level, BlockPos pos) {
