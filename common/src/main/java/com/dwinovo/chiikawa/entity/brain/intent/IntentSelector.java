@@ -9,9 +9,7 @@ import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
@@ -29,9 +27,9 @@ import org.jetbrains.annotations.Nullable;
  *
  * <p>Runs before the brain ticks. Every {@link #EVAL_INTERVAL} ticks (staggered by
  * entity id), right after {@link #requestReevaluate}, or whenever no intent runs, it
- * ends the running intent if it is no longer offered, permitted, able to continue or
- * within its step time, then scores the generic intents plus those of the pet's
- * capability and switches to the best one.
+ * ends the running intent if it is no longer offered, permitted or able to continue,
+ * then scores the generic intents plus those of the pet's capability and switches to
+ * the best one.
  */
 public final class IntentSelector {
     public static final int EVAL_INTERVAL = 10;
@@ -53,27 +51,6 @@ public final class IntentSelector {
         pet.getBrain().setMemory(InitMemory.INTENT_REEVALUATE.get(), Unit.INSTANCE);
     }
 
-    /**
-     * Moves the running intent to its next step; completing the last step ends the
-     * intent and starts its success cooldown.
-     */
-    public static void advanceStep(AbstractPet pet) {
-        Brain<AbstractPet> brain = pet.getBrain();
-        brain.getMemory(InitMemory.CURRENT_INTENT.get()).ifPresent(running -> {
-            PetIntent intent = PetIntents.get(running.id());
-            if (intent == null || running.step() >= intent.steps().size()) {
-                return;
-            }
-            long now = pet.level().getGameTime();
-            RunningIntent next = running.nextStep(now);
-            brain.setMemory(InitMemory.CURRENT_INTENT.get(), next);
-            if (next.step() == intent.steps().size()) {
-                startCooldown(brain, intent.id(), now, intent.successCooldown());
-                requestReevaluate(pet);
-            }
-        });
-    }
-
     public static void tick(AbstractPet pet, ServerLevel level) {
         Brain<AbstractPet> brain = pet.getBrain();
         long now = level.getGameTime();
@@ -91,17 +68,15 @@ public final class IntentSelector {
         brain.eraseMemory(InitMemory.INTENT_REEVALUATE.get());
         PetTargeting.clearInvalidAttackTarget(pet, brain);
 
-        Evaluation evaluation = evaluate(pet, now);
+        Evaluation evaluation = evaluate(pet);
         forgetUnavailable(brain, evaluation.candidates());
-        Decision decision = choose(evaluation.candidates(), evaluation.current(),
+        RunningIntent current = running.orElse(null);
+        Decision decision = choose(evaluation.candidates(), current,
             new SelectorParams(now, HOLD_BONUS, JITTER, MIN_DWELL_TICKS), pet.getRandom());
-        if (decision.keeps(evaluation.current())) {
+        if (decision.keeps(current)) {
             return;
         }
-        PetIntent previous = running.map(r -> PetIntents.get(r.id())).orElse(null);
-        if (previous != null && decision.ended() != null && decision.ended() != EndReason.COMPLETED) {
-            startCooldown(brain, previous.id(), now, previous.failureCooldown());
-        }
+        PetIntent previous = current == null ? null : PetIntents.get(current.id());
         PetIntent next = decision.next() == null ? null : PetIntents.get(decision.next());
         String cause = decision.ended() != null ? decision.ended().name() : trigger.name();
         switchIntent(pet, level, previous, next, now, cause, decision.ranking());
@@ -111,29 +86,26 @@ public final class IntentSelector {
      * Snapshot of every candidate for the debug command.
      */
     public static Snapshot describe(AbstractPet pet) {
-        long now = pet.level().getGameTime();
-        Evaluation evaluation = evaluate(pet, now);
+        Evaluation evaluation = evaluate(pet);
         List<CandidateView> views = new ArrayList<>();
         for (int i = 0; i < evaluation.candidates().size(); i++) {
             Candidate candidate = evaluation.candidates().get(i);
-            views.add(new CandidateView(evaluation.intents().get(i), candidate.allowed(),
-                Math.max(0L, candidate.cooldownUntil() - now), candidate.check(), candidate.score()));
+            views.add(new CandidateView(evaluation.intents().get(i), candidate.allowed(), candidate.check(), candidate.score()));
         }
-        return new Snapshot(pet.getBrain().getMemory(InitMemory.CURRENT_INTENT.get()), now, views);
+        return new Snapshot(pet.getBrain().getMemory(InitMemory.CURRENT_INTENT.get()), pet.level().getGameTime(), views);
     }
 
     /**
      * Pure selection core.
      *
      * <ol>
-     *   <li>The running intent ends if it is no longer offered or permitted, its last
-     *       step is done, its condition fails, or its step timed out.</li>
-     *   <li>A running intent in an uninterruptible step is kept.</li>
-     *   <li>Otherwise every permitted, off-cooldown candidate whose condition holds is
-     *       scored: base score plus noise, plus the hold bonus for the running intent.
-     *       During the minimum dwell only candidates with a higher base score than the
-     *       running intent compete, so noise cannot make a pet hop between intents
-     *       while a genuinely more important one still takes over at once.</li>
+     *   <li>The running intent ends if it is no longer offered or permitted, or its
+     *       continue condition fails.</li>
+     *   <li>Every permitted candidate whose condition holds is scored: base score plus
+     *       noise, plus the hold bonus for the running intent. During the minimum dwell
+     *       only candidates with a higher base score than the running intent compete,
+     *       so noise cannot make a pet hop between intents while a genuinely more
+     *       important one still takes over at once.</li>
      * </ol>
      *
      * @param candidates offered intents in a stable order; for the running intent the
@@ -143,23 +115,20 @@ public final class IntentSelector {
      * @param random noise source, consumed once per scored candidate in list order
      * @return the decision
      */
-    static Decision choose(List<Candidate> candidates, @Nullable Running current, SelectorParams params, RandomSource random) {
-        long now = params.gameTime();
+    static Decision choose(List<Candidate> candidates, @Nullable RunningIntent current, SelectorParams params, RandomSource random) {
         Candidate held = null;
         EndReason ended = null;
         if (current != null) {
             held = candidates.stream().filter(c -> c.id().equals(current.id())).findFirst().orElse(null);
-            ended = endReason(current, held, now);
-            if (ended == null && current.step() != null && !current.step().interruptible()) {
-                return new Decision(current.id(), null, List.of());
-            }
+            ended = endReason(held);
         }
-        boolean dwelling = held != null && ended == null && now - current.startTick() < params.minDwellTicks();
+        boolean dwelling = held != null && ended == null
+            && params.gameTime() - current.startTick() < params.minDwellTicks();
 
         List<Scored> ranking = new ArrayList<>();
         for (Candidate candidate : candidates) {
             boolean isHeld = candidate == held;
-            if (isHeld ? ended != null : !candidate.eligibleAt(now)) {
+            if (isHeld ? ended != null : !candidate.eligible()) {
                 continue;
             }
             if (dwelling && !isHeld && candidate.score() <= held.score()) {
@@ -176,32 +145,24 @@ public final class IntentSelector {
         return new Decision(ranking.isEmpty() ? null : ranking.get(0).id(), ended, List.copyOf(ranking));
     }
 
-    private static @Nullable EndReason endReason(Running current, @Nullable Candidate held, long now) {
+    private static @Nullable EndReason endReason(@Nullable Candidate held) {
         if (held == null) {
             return EndReason.NOT_OFFERED;
         }
         if (!held.allowed()) {
             return EndReason.NOT_ALLOWED;
         }
-        if (current.completed()) {
-            return EndReason.COMPLETED;
-        }
         if (!held.check().ok()) {
             return EndReason.CONDITION_FAILED;
-        }
-        IntentStep step = current.step();
-        if (step != null && step.timeoutTicks() > 0 && now - current.stepStartTick() >= step.timeoutTicks()) {
-            return EndReason.STEP_TIMEOUT;
         }
         return null;
     }
 
-    private static Evaluation evaluate(AbstractPet pet, long now) {
+    private static Evaluation evaluate(AbstractPet pet) {
         Brain<AbstractPet> brain = pet.getBrain();
         PetOwnership ownership = PetOwnership.of(pet);
         IntentContext ctx = IntentContext.capture(pet, ownership);
         Optional<RunningIntent> running = brain.getMemory(InitMemory.CURRENT_INTENT.get());
-        Map<ResourceLocation, Long> cooldowns = brain.getMemory(InitMemory.INTENT_COOLDOWNS.get()).orElse(Map.of());
 
         List<PetIntent> offered = new ArrayList<>(PetIntents.GENERIC);
         for (ResourceLocation id : InitRegistry.getCapabilityFromId(pet.getPetJobId()).intents()) {
@@ -213,23 +174,11 @@ public final class IntentSelector {
             candidates.add(new Candidate(
                 intent.id(),
                 PetConstraints.allows(pet, ownership, intent.category()),
-                cooldowns.getOrDefault(intent.id(), 0L),
                 isRunning ? intent.canContinue(ctx) : intent.canRun(ctx),
                 intent.score(ctx)
             ));
         }
-        Running current = running.map(r -> toRunning(r, PetIntents.get(r.id()))).orElse(null);
-        return new Evaluation(offered, candidates, current);
-    }
-
-    private static @Nullable Running toRunning(RunningIntent running, @Nullable PetIntent intent) {
-        if (intent == null) {
-            return null;
-        }
-        List<IntentStep> steps = intent.steps();
-        IntentStep step = running.step() < steps.size() ? steps.get(running.step()) : null;
-        return new Running(running.id(), running.startTick(), step, running.stepStartTick(),
-            !steps.isEmpty() && running.step() >= steps.size());
+        return new Evaluation(offered, candidates);
     }
 
     /** Erases the progress memories of intents the pet can currently not pursue. */
@@ -276,30 +225,12 @@ public final class IntentSelector {
         brain.eraseMemory(MemoryModuleType.PATH);
         brain.eraseMemory(MemoryModuleType.LOOK_TARGET);
         if (next != null) {
-            brain.setMemory(InitMemory.CURRENT_INTENT.get(), RunningIntent.start(next.id(), now));
+            brain.setMemory(InitMemory.CURRENT_INTENT.get(), new RunningIntent(next.id(), now));
         } else {
             brain.eraseMemory(InitMemory.CURRENT_INTENT.get());
         }
         brain.getMemory(InitMemory.INTENT_SWITCH_LOG.get()).ifPresent(log -> log.record(
             now, previous == null ? null : previous.id(), next == null ? null : next.id(), cause, ranking));
-    }
-
-    private static void startCooldown(Brain<AbstractPet> brain, ResourceLocation id, long now, int ticks) {
-        Map<ResourceLocation, Long> cooldowns = new HashMap<>();
-        brain.getMemory(InitMemory.INTENT_COOLDOWNS.get()).ifPresent(existing ->
-            existing.forEach((key, until) -> {
-                if (until > now) {
-                    cooldowns.put(key, until);
-                }
-            }));
-        if (ticks > 0) {
-            cooldowns.put(id, now + ticks);
-        }
-        if (cooldowns.isEmpty()) {
-            brain.eraseMemory(InitMemory.INTENT_COOLDOWNS.get());
-        } else {
-            brain.setMemory(InitMemory.INTENT_COOLDOWNS.get(), Map.copyOf(cooldowns));
-        }
     }
 
     private enum Trigger {
@@ -311,27 +242,17 @@ public final class IntentSelector {
     enum EndReason {
         NOT_OFFERED,
         NOT_ALLOWED,
-        COMPLETED,
-        CONDITION_FAILED,
-        STEP_TIMEOUT
+        CONDITION_FAILED
     }
 
     /**
      * @param allowed whether the directive permits the intent's category
-     * @param cooldownUntil game time the intent's cooldown ends
      * @param check start condition, or continue condition for the running intent
      */
-    record Candidate(ResourceLocation id, boolean allowed, long cooldownUntil, IntentCheck check, float score) {
-        boolean eligibleAt(long gameTime) {
-            return allowed && cooldownUntil <= gameTime && check.ok();
+    record Candidate(ResourceLocation id, boolean allowed, IntentCheck check, float score) {
+        boolean eligible() {
+            return allowed && check.ok();
         }
-    }
-
-    /**
-     * @param step the current step, {@code null} for step-less intents or once all steps are done
-     * @param completed whether the intent finished its last step
-     */
-    record Running(ResourceLocation id, long startTick, @Nullable IntentStep step, long stepStartTick, boolean completed) {
     }
 
     record SelectorParams(long gameTime, float holdBonus, float jitter, int minDwellTicks) {
@@ -346,15 +267,15 @@ public final class IntentSelector {
      * @param ranking scored candidates, best first
      */
     record Decision(@Nullable ResourceLocation next, @Nullable EndReason ended, List<Scored> ranking) {
-        boolean keeps(@Nullable Running current) {
+        boolean keeps(@Nullable RunningIntent current) {
             return ended == null && Objects.equals(current == null ? null : current.id(), next);
         }
     }
 
-    private record Evaluation(List<PetIntent> intents, List<Candidate> candidates, @Nullable Running current) {
+    private record Evaluation(List<PetIntent> intents, List<Candidate> candidates) {
     }
 
-    public record CandidateView(PetIntent intent, boolean allowed, long cooldownRemaining, IntentCheck check, float score) {
+    public record CandidateView(PetIntent intent, boolean allowed, IntentCheck check, float score) {
     }
 
     public record Snapshot(Optional<RunningIntent> running, long gameTime, List<CandidateView> candidates) {
