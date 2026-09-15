@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.sensor;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.init.InitTag;
@@ -67,7 +67,7 @@ public class PetFarmerWorkSensor extends Sensor<AbstractPet> {
     @Override
     protected void doTick(ServerLevel level, AbstractPet pet) {
         Brain<AbstractPet> brain = pet.getBrain();
-        if (pet.getPetMode() != PetMode.WORK || pet.getPetJobId() != InitRegistry.FARMER_ID) {
+        if (pet.getPetDirective() != PetDirective.FREE || pet.getPetJobId() != InitRegistry.FARMER_ID) {
             brain.eraseMemory(InitMemory.HARVEST_POS.get());
             brain.eraseMemory(InitMemory.PLANT_POS.get());
             brain.eraseMemory(InitMemory.CONTAINER_POS.get());
