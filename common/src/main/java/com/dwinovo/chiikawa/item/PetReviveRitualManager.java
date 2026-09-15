@@ -134,6 +134,8 @@ public final class PetReviveRitualManager {
         }
 
         pet.teleportTo(revive.spawnPos.x, revive.spawnPos.y, revive.spawnPos.z);
+        // The doll remembers where the pet lived; a free pet makes the cake its new home.
+        pet.settleHome();
         // Independent of save-key names: also cleans dolls created before this fix.
         pet.resetFallDistance();
         pet.setYRot(revive.yRot);
