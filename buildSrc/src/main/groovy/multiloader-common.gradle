@@ -84,6 +84,9 @@ jar {
 }
 
 processResources {
+    // Datagen leaves a hash cache (.cache/) next to its output. It is build bookkeeping, not a mod resource.
+    exclude '.cache', '.cache/**'
+
     var expandProps = [
             'version'                      : version,
             'group'                        : project.group, //Else we target the task's group.
