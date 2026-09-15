@@ -44,7 +44,7 @@
 ## ✨ Why you'll want it
 
 - 🐾 **Seven characters from the original**, all tameable — Chiikawa, Hachiware, Usagi, Shisa, Momonga, Kurimanju, and Rakko, each with its own model, textures, and personality.
-- 🧰 **A job system that works on its own** — drop a tool into a pet's backpack, flip it to **Work** mode, and it gets busy for you: the **Farmer** plants and harvests, the **Fencer** fights up close, the **Archer** picks off enemies at range, and the **Musician** plays for you.
+- 🧰 **A job system that works on its own** — drop a tool into a pet's backpack, switch it to **Free Roam**, and it gets busy for you: the **Farmer** plants and harvests, the **Fencer** fights up close, the **Archer** picks off enemies at range, and the **Musician** plays for you.
 - 🎵 **A music box that plays your own songs** — drop `.mp3` / `.wav` files into a folder and hear them in-game. Pure-Java decoding, **no external ffmpeg required**; on a multiplayer server, everyone nearby hears the same track.
 - 🔊 **Per-character sounds** — Usagi's signature squeaks, plus tame/hurt voices for the cast, to make them feel alive.
 - 🎒 **Pet backpack** — right-click a pet with an empty hand to open its inventory and manage its tools and gear.
@@ -69,15 +69,15 @@ Hold **almost any food** (apple, bread, cookie, carrot, potato, cooked meat, mel
 
 > ⚠️ **Taming is chance-based.** Each feed has a chance to succeed, so keep feeding! **Hearts** = tamed. A **puff of smoke / confused reaction** = not yet, try again. Flowers no longer work — use food.
 
-### 🧭 Three modes — Follow / Sit / Work
+### 🧭 Three modes — Follow / Sit / Free Roam
 Once it's yours, **Sneak (Shift) + right-click with an empty hand** to cycle through:
 
 - **Follow** — the pet follows you.
 - **Sit** — the pet stays put.
-- **Work** — the pet performs its job around the spot where you set it.
+- **Free Roam** — the pet performs its job around the spot where you set it.
 
 ### 💼 Jobs
-A pet's job is decided by the **tool it holds**. Open its backpack (right-click with an empty hand), place a tool inside, then set it to **Work**:
+A pet's job is decided by the **tool it holds**. Open its backpack (right-click with an empty hand), place a tool inside, then set it to **Free Roam**:
 
 | Job | Give it… | What it does |
 | --- | --- | --- |
@@ -86,7 +86,7 @@ A pet's job is decided by the **tool it holds**. Open its backpack (right-click 
 | **Archer** | a Bow (keep arrows in the backpack) | attacks hostile mobs at range |
 | **Musician** | a Music Box | plays your imported music |
 
-> Pets only fight/work while in **Work** mode — in Follow mode they stay peaceful and won't pick fights.
+> Pets only fight/work while in **Free Roam** — in Follow and Sit they stay peaceful and won't pick fights.
 >
 > 🎵 **Note: only Hachiware can currently take the Musician job** — other characters won't play even while holding a music box.
 
