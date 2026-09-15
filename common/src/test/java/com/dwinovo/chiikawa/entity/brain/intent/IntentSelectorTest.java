@@ -4,13 +4,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.entity.brain.constraint.AnchorDistances;
+import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.Candidate;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.Decision;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.EndReason;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.SelectorParams;
+import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.PositionalRandomFactory;
 import org.junit.jupiter.api.Test;
 
@@ -20,8 +30,8 @@ class IntentSelectorTest {
     private static final ResourceLocation PLANT = id("plant");
     private static final ResourceLocation FIGHT = id("fight");
     private static final long NOW = 1000L;
-    /** No noise and no hold bonus unless a test asks for them. */
-    private static final SelectorParams PLAIN = new SelectorParams(NOW, 0.0F, 0.0F, 40);
+    /** No noise and no hold margin unless a test asks for them. */
+    private static final SelectorParams PLAIN = new SelectorParams(0.0F, 0.0F);
 
     // ---- filtering and scoring -------------------------------------------------
 
@@ -31,7 +41,6 @@ class IntentSelectorTest {
 
         assertEquals(HARVEST, decision.next());
         assertNull(decision.ended());
-        assertEquals(List.of(HARVEST, PLANT, WANDER), decision.ranking().stream().map(IntentSelector.Scored::id).toList());
     }
 
     @Test
@@ -55,45 +64,60 @@ class IntentSelectorTest {
     }
 
     @Test
-    void addsInjectedNoiseToEachScoredCandidate() {
-        // nextFloat() == 1.0 gives the full +jitter, 0.0 the full -jitter.
-        SelectorParams noisy = new SelectorParams(NOW, 0.0F, 0.1F, 40);
-        List<Candidate> close = List.of(ok(PLANT, 0.55F), ok(HARVEST, 0.6F));
+    void noiseOnlyRanksCandidatesWithinTheToleranceOfTheBest() {
+        // Tolerance 0.12: plant and harvest are acceptable, wandering is not.
+        // nextFloat() == 1.0 gives the full +randomness, 0.0 the full -randomness.
+        SelectorParams random = new SelectorParams(0.02F, 0.1F);
+        List<Candidate> candidates = List.of(ok(WANDER, 0.05F), ok(PLANT, 0.55F), ok(HARVEST, 0.6F));
 
-        Decision raised = choose(close, null, noisy, new FixedRandom(1.0F));
-        assertEquals(HARVEST, raised.next());
-        assertEquals(0.7F, raised.ranking().get(0).score(), 1.0E-6F);
+        Decision plantLucky = choose(candidates, null, random, new FixedRandom(1.0F, 0.0F));
+        assertEquals(PLANT, plantLucky.next());
+        assertEquals(List.of(PLANT, HARVEST), plantLucky.ranking().stream().map(IntentSelector.Scored::id).toList());
+        assertEquals(0.65F, plantLucky.ranking().get(0).score(), 1.0E-6F);
+        assertEquals(0.5F, plantLucky.ranking().get(1).score(), 1.0E-6F);
 
-        Decision alternating = choose(close, null, noisy, new FixedRandom(1.0F, 0.0F));
-        assertEquals(PLANT, alternating.next());
-        assertEquals(0.65F, alternating.ranking().get(0).score(), 1.0E-6F);
-        assertEquals(0.5F, alternating.ranking().get(1).score(), 1.0E-6F);
+        assertEquals(HARVEST, choose(candidates, null, random, new FixedRandom(0.0F, 1.0F)).next());
     }
 
     // ---- keeping the running intent --------------------------------------------
 
     @Test
-    void holdBonusKeepsTheRunningIntentAgainstASlightlyBetterOne() {
-        SelectorParams hold = new SelectorParams(NOW, 0.1F, 0.0F, 40);
+    void keepsTheRunningIntentUntilAnotherBeatsItByMoreThanTheTolerance() {
+        SelectorParams random = new SelectorParams(0.02F, 0.1F);
         RunningIntent plant = new RunningIntent(PLANT, NOW - 100);
 
-        assertTrue(choose(List.of(ok(PLANT, 0.55F), ok(HARVEST, 0.6F)), plant, hold).keeps(plant));
-        assertEquals(HARVEST, choose(List.of(ok(PLANT, 0.55F), ok(HARVEST, 0.7F)), plant, hold).next());
+        assertTrue(choose(List.of(ok(PLANT, 0.55F), ok(HARVEST, 0.66F)), plant, random).keeps(plant));
+        assertEquals(HARVEST, choose(List.of(ok(PLANT, 0.55F), ok(HARVEST, 0.68F)), plant, random).next());
     }
 
     @Test
-    void minimumDwellOnlyLetsAHigherBaseScoreTakeOver() {
-        SelectorParams noisy = new SelectorParams(NOW, 0.0F, 0.1F, 40);
-        List<Candidate> sameBase = List.of(ok(WANDER, 0.5F), ok(PLANT, 0.5F));
+    void aClearlyMoreImportantIntentTakesOverAtOnceWhateverTheNoise() {
+        SelectorParams veryRandom = new SelectorParams(0.02F, 0.3F);
+        RunningIntent wander = new RunningIntent(WANDER, NOW - 1);
 
-        // The running intent draws the most negative noise, the challenger the most positive.
-        RunningIntent fresh = new RunningIntent(WANDER, NOW - 39);
-        assertTrue(choose(sameBase, fresh, noisy, new FixedRandom(0.0F, 1.0F)).keeps(fresh));
+        // Wandering draws the most positive noise, the fight the most negative.
+        Decision decision = choose(List.of(ok(WANDER, 0.05F), ok(FIGHT, 0.8F)), wander, veryRandom, new FixedRandom(1.0F, 0.0F));
 
-        RunningIntent settled = new RunningIntent(WANDER, NOW - 40);
-        assertEquals(PLANT, choose(sameBase, settled, noisy, new FixedRandom(0.0F, 1.0F)).next());
+        assertEquals(FIGHT, decision.next());
+    }
 
-        assertEquals(HARVEST, choose(List.of(ok(WANDER, 0.5F), ok(HARVEST, 0.6F)), fresh, noisy, new FixedRandom(0.5F)).next());
+    @Test
+    void aRandomPetDoesNotFlipBetweenEquallyGoodIntents() {
+        SelectorParams veryRandom = new SelectorParams(0.02F, 0.3F);
+        List<Candidate> equal = List.of(ok(WANDER, 0.5F), ok(PLANT, 0.5F));
+        RunningIntent current = null;
+        int switches = 0;
+        for (int evaluation = 0; evaluation < 50; evaluation++) {
+            // Alternate which one the noise favours on every evaluation.
+            RandomSource random = evaluation % 2 == 0 ? new FixedRandom(1.0F, 0.0F) : new FixedRandom(0.0F, 1.0F);
+            Decision decision = choose(equal, current, veryRandom, random);
+            if (!decision.keeps(current)) {
+                current = new RunningIntent(decision.next(), NOW + evaluation);
+                switches++;
+            }
+        }
+
+        assertEquals(1, switches);
     }
 
     // ---- ending the running intent ---------------------------------------------
@@ -109,7 +133,7 @@ class IntentSelectorTest {
     }
 
     @Test
-    void endsTheRunningIntentWhenTheDirectiveNoLongerPermitsItEvenDuringDwell() {
+    void endsTheRunningIntentWhenTheDirectiveNoLongerPermitsIt() {
         RunningIntent fight = new RunningIntent(FIGHT, NOW - 5);
         Decision decision = choose(List.of(ok(WANDER, 0.05F),
             new Candidate(FIGHT, false, IntentCheck.OK, 0.8F)), fight, PLAIN);
@@ -136,7 +160,72 @@ class IntentSelectorTest {
         assertNull(decision.next());
     }
 
+    // ---- personality -----------------------------------------------------------
+
+    @Test
+    void scoresAreWeightedByPersonalityAndTimeOfDay() {
+        Personality personality = new Personality(Map.of(PetIntents.WANDER, 2.0F),
+            Map.of(DayPhase.NIGHT, Map.of(PetIntents.WANDER, 3.0F)), 0.0F, List.of());
+
+        List<Candidate> day = farmCandidates(personality, DayPhase.DAY, targets(false, false, false), null);
+        List<Candidate> night = farmCandidates(personality, DayPhase.NIGHT, targets(false, false, false), null);
+
+        assertEquals(0.1F, day.get(0).score(), 1.0E-6F);
+        assertEquals(0.3F, night.get(0).score(), 1.0E-6F);
+    }
+
+    @Test
+    void farmerOrderHoldsWhateverThePersonality() {
+        // Multipliers that would put deliver over plant over harvest, and as much noise as a
+        // personality may have.
+        Personality inverted = new Personality(
+            Map.of(PetIntents.HARVEST, 0.1F, PetIntents.PLANT, 5.0F, PetIntents.DELIVER, 10.0F),
+            Map.of(DayPhase.DAY, Map.of(PetIntents.PLANT, 2.0F)), 1.0F, List.of());
+        SelectorParams params = new SelectorParams(IntentSelector.HOLD_MARGIN, inverted.randomness());
+
+        for (float noise = 0.0F; noise <= 1.0F; noise += 0.125F) {
+            Decision everything = IntentSelector.choose(
+                farmCandidates(inverted, DayPhase.DAY, targets(true, true, true), null), null, params,
+                new FixedRandom(noise, 1.0F - noise));
+            assertTrue(Set.of(PetIntents.WANDER, PetIntents.HARVEST).contains(everything.next()), everything::toString);
+        }
+
+        RunningIntent planting = new RunningIntent(PetIntents.PLANT, NOW - 5);
+        Decision cropRipened = IntentSelector.choose(
+            farmCandidates(inverted, DayPhase.DAY, targets(true, true, true), PetIntents.PLANT), planting, params,
+            new FixedRandom(0.5F));
+        assertEquals(EndReason.CONDITION_FAILED, cropRipened.ended());
+
+        List<Candidate> plantAndDeliver = farmCandidates(inverted, DayPhase.DAY, targets(false, true, true), null);
+        assertTrue(plantAndDeliver.get(2).eligible());
+        assertEquals("intent.chiikawa.fail.higher_priority", plantAndDeliver.get(3).check().reasonKey());
+    }
+
     // ---- helpers ---------------------------------------------------------------
+
+    private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
+        ResourceKey.createRegistryKey(new ResourceLocation("dimension")),
+        new ResourceLocation("overworld"));
+    private static final GlobalPos PET = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
+
+    /** Wander, harvest, plant and deliver, as a free farmer sees them. */
+    private static List<Candidate> farmCandidates(Personality personality, DayPhase phase, PerceivedTargets targets,
+            ResourceLocation running) {
+        IntentContext ctx = new IntentContext(PET, phase, personality,
+            new PetAnchor(PET, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, false, true),
+            targets, false, false, false, false);
+        List<PetIntent> offered = List.of(PetIntents.get(PetIntents.WANDER), PetIntents.get(PetIntents.HARVEST),
+            PetIntents.get(PetIntents.PLANT), PetIntents.get(PetIntents.DELIVER));
+        return IntentSelector.candidates(offered, ctx, running, category -> true);
+    }
+
+    private static PerceivedTargets targets(boolean crop, boolean farmland, boolean container) {
+        return new PerceivedTargets(Optional.empty(), near(crop, 1), near(farmland, 2), near(container, 3), Optional.empty());
+    }
+
+    private static Optional<GlobalPos> near(boolean present, int blocksEast) {
+        return present ? Optional.of(GlobalPos.of(OVERWORLD, PET.pos().east(blocksEast))) : Optional.empty();
+    }
 
     private static Decision choose(List<Candidate> candidates, RunningIntent current, SelectorParams params) {
         return choose(candidates, current, params, new FixedRandom(0.5F));

@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -28,20 +29,17 @@ import org.jetbrains.annotations.Nullable;
  * <p>Runs before the brain ticks. Every {@link #EVAL_INTERVAL} ticks (staggered by
  * entity id), right after {@link #requestReevaluate}, or whenever no intent runs, it
  * ends the running intent if it is no longer offered, permitted or able to continue,
- * then scores the generic intents plus those of the pet's capability and switches to
- * the best one.
+ * then scores the generic intents plus those of the pet's capability, weighted by the
+ * pet's personality and the time of day, and switches to the best one.
  */
 public final class IntentSelector {
     public static final int EVAL_INTERVAL = 10;
-    public static final int MIN_DWELL_TICKS = 40;
     /**
-     * Bonus for keeping the running intent, and the most that random noise adds or
-     * removes. {@code HOLD_BONUS + 2 * JITTER} stays below 0.05, the smallest gap
-     * between base scores that encodes a strict priority (harvest over plant over
-     * deliver), so neither can reorder those.
+     * How much better than the running intent another candidate must score before the
+     * pet's randomness is added, so a score that drifts (following grows with distance)
+     * does not flip the pet back and forth at a crossover.
      */
-    static final float HOLD_BONUS = 0.02F;
-    static final float JITTER = 0.01F;
+    static final float HOLD_MARGIN = 0.02F;
 
     private IntentSelector() {
     }
@@ -72,7 +70,7 @@ public final class IntentSelector {
         forgetUnavailable(brain, evaluation.candidates());
         RunningIntent current = running.orElse(null);
         Decision decision = choose(evaluation.candidates(), current,
-            new SelectorParams(now, HOLD_BONUS, JITTER, MIN_DWELL_TICKS), pet.getRandom());
+            new SelectorParams(HOLD_MARGIN, evaluation.context().personality().randomness()), pet.getRandom());
         if (decision.keeps(current)) {
             return;
         }
@@ -92,7 +90,8 @@ public final class IntentSelector {
             Candidate candidate = evaluation.candidates().get(i);
             views.add(new CandidateView(evaluation.intents().get(i), candidate.allowed(), candidate.check(), candidate.score()));
         }
-        return new Snapshot(pet.getBrain().getMemory(InitMemory.CURRENT_INTENT.get()), pet.level().getGameTime(), views);
+        return new Snapshot(pet.getBrain().getMemory(InitMemory.CURRENT_INTENT.get()), pet.level().getGameTime(),
+            evaluation.context().phase(), views);
     }
 
     /**
@@ -101,18 +100,25 @@ public final class IntentSelector {
      * <ol>
      *   <li>The running intent ends if it is no longer offered or permitted, or its
      *       continue condition fails.</li>
-     *   <li>Every permitted candidate whose condition holds is scored: base score plus
-     *       noise, plus the hold bonus for the running intent. During the minimum dwell
-     *       only candidates with a higher base score than the running intent compete,
-     *       so noise cannot make a pet hop between intents while a genuinely more
-     *       important one still takes over at once.</li>
+     *   <li>Among the permitted candidates whose condition holds, those scoring within
+     *       the tolerance ({@code holdMargin + randomness}) of the best are acceptable.</li>
+     *   <li>A running intent that is still acceptable keeps running. Otherwise the
+     *       acceptable candidates are ranked by score plus noise of up to
+     *       {@code randomness}, and the best one runs.</li>
      * </ol>
      *
-     * @param candidates offered intents in a stable order; for the running intent the
-     *                   check is its continue condition
+     * <p>So randomness only decides between options the pet finds about as good, and
+     * never makes it drop what it is doing: to take over, a candidate must beat the
+     * running intent by more than the tolerance, and the running intent can then not
+     * take over back. However random the personality, a pet cannot flip between two
+     * intents, while one that is clearly more important still takes over at once.
+     *
+     * @param candidates offered intents in a stable order, scores already weighted by
+     *                   personality; for the running intent the check is its continue
+     *                   condition
      * @param current the running intent, or {@code null}
-     * @param params tuning and the current game time
-     * @param random noise source, consumed once per scored candidate in list order
+     * @param params tolerance and noise
+     * @param random noise source, consumed once per ranked candidate in list order
      * @return the decision
      */
     static Decision choose(List<Candidate> candidates, @Nullable RunningIntent current, SelectorParams params, RandomSource random) {
@@ -122,27 +128,51 @@ public final class IntentSelector {
             held = candidates.stream().filter(c -> c.id().equals(current.id())).findFirst().orElse(null);
             ended = endReason(held);
         }
-        boolean dwelling = held != null && ended == null
-            && params.gameTime() - current.startTick() < params.minDwellTicks();
+        float best = Float.NEGATIVE_INFINITY;
+        for (Candidate candidate : candidates) {
+            if (candidate.eligible()) {
+                best = Math.max(best, candidate.score());
+            }
+        }
+        float acceptable = best - (params.holdMargin() + params.randomness());
+        if (held != null && ended == null && held.score() >= acceptable) {
+            return new Decision(held.id(), null, List.of());
+        }
 
         List<Scored> ranking = new ArrayList<>();
         for (Candidate candidate : candidates) {
-            boolean isHeld = candidate == held;
-            if (isHeld ? ended != null : !candidate.eligible()) {
-                continue;
+            if (candidate.eligible() && candidate.score() >= acceptable) {
+                float noise = params.randomness() * (random.nextFloat() * 2.0F - 1.0F);
+                ranking.add(new Scored(candidate.id(), candidate.score() + noise));
             }
-            if (dwelling && !isHeld && candidate.score() <= held.score()) {
-                continue;
-            }
-            float score = candidate.score() + params.jitter() * (random.nextFloat() * 2.0F - 1.0F);
-            if (isHeld) {
-                score += params.holdBonus();
-            }
-            ranking.add(new Scored(candidate.id(), score));
         }
         // Stable sort: on equal scores the earlier candidate wins.
         ranking.sort(Comparator.comparingDouble((Scored scored) -> scored.score()).reversed());
         return new Decision(ranking.isEmpty() ? null : ranking.get(0).id(), ended, List.copyOf(ranking));
+    }
+
+    /**
+     * Candidates as the selector scores them: whether the directive permits each intent,
+     * its start condition (continue condition for the running one), and its base score
+     * weighted by the personality for the current part of the day.
+     *
+     * @param offered intents in a stable order
+     * @param ctx the evaluation snapshot
+     * @param running id of the running intent, or {@code null}
+     * @param allows the directive's permission table
+     */
+    static List<Candidate> candidates(List<PetIntent> offered, IntentContext ctx, @Nullable ResourceLocation running,
+            Predicate<IntentCategory> allows) {
+        List<Candidate> candidates = new ArrayList<>(offered.size());
+        for (PetIntent intent : offered) {
+            candidates.add(new Candidate(
+                intent.id(),
+                allows.test(intent.category()),
+                intent.id().equals(running) ? intent.canContinue(ctx) : intent.canRun(ctx),
+                intent.score(ctx) * ctx.personality().multiplier(intent.id(), ctx.phase())
+            ));
+        }
+        return candidates;
     }
 
     private static @Nullable EndReason endReason(@Nullable Candidate held) {
@@ -159,26 +189,15 @@ public final class IntentSelector {
     }
 
     private static Evaluation evaluate(AbstractPet pet) {
-        Brain<AbstractPet> brain = pet.getBrain();
         PetOwnership ownership = PetOwnership.of(pet);
         IntentContext ctx = IntentContext.capture(pet, ownership);
-        Optional<RunningIntent> running = brain.getMemory(InitMemory.CURRENT_INTENT.get());
-
         List<PetIntent> offered = new ArrayList<>(PetIntents.GENERIC);
         for (ResourceLocation id : InitRegistry.getCapabilityFromId(pet.getPetJobId()).intents()) {
             offered.add(PetIntents.get(id));
         }
-        List<Candidate> candidates = new ArrayList<>(offered.size());
-        for (PetIntent intent : offered) {
-            boolean isRunning = running.filter(r -> r.id().equals(intent.id())).isPresent();
-            candidates.add(new Candidate(
-                intent.id(),
-                PetConstraints.allows(pet, ownership, intent.category()),
-                isRunning ? intent.canContinue(ctx) : intent.canRun(ctx),
-                intent.score(ctx)
-            ));
-        }
-        return new Evaluation(offered, candidates);
+        ResourceLocation running = pet.getBrain().getMemory(InitMemory.CURRENT_INTENT.get()).map(RunningIntent::id).orElse(null);
+        return new Evaluation(ctx, offered,
+            candidates(offered, ctx, running, category -> PetConstraints.allows(pet, ownership, category)));
     }
 
     /** Erases the progress memories of intents the pet can currently not pursue. */
@@ -248,6 +267,7 @@ public final class IntentSelector {
     /**
      * @param allowed whether the directive permits the intent's category
      * @param check start condition, or continue condition for the running intent
+     * @param score base score weighted by personality
      */
     record Candidate(ResourceLocation id, boolean allowed, IntentCheck check, float score) {
         boolean eligible() {
@@ -255,7 +275,11 @@ public final class IntentSelector {
         }
     }
 
-    record SelectorParams(long gameTime, float holdBonus, float jitter, int minDwellTicks) {
+    /**
+     * @param holdMargin {@link #HOLD_MARGIN}
+     * @param randomness the pet's personality randomness
+     */
+    record SelectorParams(float holdMargin, float randomness) {
     }
 
     public record Scored(ResourceLocation id, float score) {
@@ -264,7 +288,8 @@ public final class IntentSelector {
     /**
      * @param next the intent to run, {@code null} if none can
      * @param ended why the running intent ended, {@code null} if it did not
-     * @param ranking scored candidates, best first
+     * @param ranking acceptable candidates with their noisy scores, best first; empty
+     *                when the running intent is kept
      */
     record Decision(@Nullable ResourceLocation next, @Nullable EndReason ended, List<Scored> ranking) {
         boolean keeps(@Nullable RunningIntent current) {
@@ -272,12 +297,15 @@ public final class IntentSelector {
         }
     }
 
-    private record Evaluation(List<PetIntent> intents, List<Candidate> candidates) {
+    private record Evaluation(IntentContext context, List<PetIntent> intents, List<Candidate> candidates) {
     }
 
+    /**
+     * @param score base score weighted by personality
+     */
     public record CandidateView(PetIntent intent, boolean allowed, IntentCheck check, float score) {
     }
 
-    public record Snapshot(Optional<RunningIntent> running, long gameTime, List<CandidateView> candidates) {
+    public record Snapshot(Optional<RunningIntent> running, long gameTime, DayPhase phase, List<CandidateView> candidates) {
     }
 }
