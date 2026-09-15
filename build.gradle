@@ -62,4 +62,15 @@ tasks.register('releaseJars', Sync) {
     // Forge 的成品还要过一道 reobf(official 名换成 SRG 名),它原地改写 jarJar 的产物,由 build 挂上、
     // 不是 jarJar 自己的一步。只依赖 jarJar 的话拷走的是改写前的开发 jar,线上一调 MC 的方法就 NoSuchMethodError。
     if (secondLoader == 'forge') dependsOn ':forge:reobfJarJar'
+    // 数据生成的哈希缓存(.cache/)由 processResources 排除;这里对收进来的成品再查一遍,防止回归。
+    doLast {
+        fileTree(destinationDir) { include '**/*.jar' }.each { jar ->
+            def leaked = new java.util.zip.ZipFile(jar).withCloseable { zip ->
+                zip.entries().collect { it.name }.findAll { it.startsWith('.cache/') || it == '.cache' }
+            }
+            if (!leaked.isEmpty()) {
+                throw new GradleException("${jar.name} 带进了数据生成缓存 ${leaked}")
+            }
+        }
+    }
 }
