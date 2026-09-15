@@ -128,7 +128,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitMemory.PICKABLE_ITEM.get(),
         InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get(),
         InitMemory.CURRENT_INTENT.get(),
-        InitMemory.INTENT_COOLDOWNS.get(),
         InitMemory.INTENT_REEVALUATE.get(),
         InitMemory.INTENT_SWITCH_LOG.get()
     );
