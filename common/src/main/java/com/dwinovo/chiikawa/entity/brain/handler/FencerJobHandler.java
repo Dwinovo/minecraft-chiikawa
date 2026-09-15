@@ -1,12 +1,12 @@
 package com.dwinovo.chiikawa.entity.brain.handler;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.brain.PetTargeting;
+import com.dwinovo.chiikawa.entity.brain.PetActivities;
 import com.dwinovo.chiikawa.entity.brain.task.fencer.MeleeAttackWithAnim;
 import com.dwinovo.chiikawa.init.InitActivity;
-import com.dwinovo.chiikawa.utils.BrainUtils;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
+import java.util.Set;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromAttackTargetIfTargetOutOfReach;
@@ -17,7 +17,8 @@ import net.minecraft.world.entity.schedule.Activity;
  * Brain wiring for the {@code FENCER} pet job — melee combat. Registered
  * statically alongside every other job's activities in
  * {@link com.dwinovo.chiikawa.entity.AbstractPet#makeBrain}; brain is never
- * rebuilt on job change.
+ * rebuilt on job change, and the {@code melee} intent decides when the
+ * activity runs. Leaving the activity drops the attack target.
  *
  * <h2>Why a dedicated FENCER_FIGHT activity</h2>
  * Earlier code reused vanilla {@link Activity#WORK} for combat behaviors,
@@ -35,20 +36,7 @@ public final class FencerJobHandler {
             Pair.of(5, SetWalkTargetFromAttackTargetIfTargetOutOfReach.create(0.9F));
         Pair<Integer, BehaviorControl<? super AbstractPet>> meleeAttack =
             Pair.of(4, MeleeAttackWithAnim.create(20));
-        BrainUtils.addActivity(brain, InitActivity.FENCER_FIGHT.get(),
-            ImmutableList.of(walkToAttackTarget, meleeAttack));
-    }
-
-    public static void tickBrain(AbstractPet pet, Brain<AbstractPet> brain) {
-        // Never chase or swing at the owner, a player, or a same-owner pet.
-        PetTargeting.clearInvalidAttackTarget(pet, brain);
-        ImmutableList.Builder<Activity> activities = ImmutableList.builder();
-        // Engage when a target exists and we aren't on attack cooldown.
-        if (brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET)
-            && !brain.hasMemoryValue(MemoryModuleType.ATTACK_COOLING_DOWN)) {
-            activities.add(InitActivity.FENCER_FIGHT.get());
-        }
-        activities.add(Activity.IDLE);
-        brain.setActiveActivityToFirstValid(activities.build());
+        PetActivities.register(brain, InitActivity.FENCER_FIGHT.get(),
+            ImmutableList.of(walkToAttackTarget, meleeAttack), Set.of(MemoryModuleType.ATTACK_TARGET));
     }
 }

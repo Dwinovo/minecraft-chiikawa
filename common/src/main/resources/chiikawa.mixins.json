@@ -4,6 +4,7 @@
   "package": "com.dwinovo.chiikawa.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "BrainAccessor",
     "PersistentEntitySectionManagerMixin"
   ],
   "client": [],
