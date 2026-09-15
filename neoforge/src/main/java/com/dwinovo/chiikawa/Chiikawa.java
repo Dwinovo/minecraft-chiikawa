@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa;
 
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
+import com.dwinovo.chiikawa.command.ChiikawaDebugCommand;
 import com.dwinovo.chiikawa.command.ChiikawaMusicCommand;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitMemory;
@@ -84,6 +85,7 @@ public class Chiikawa {
 
     private static void registerCommands(RegisterCommandsEvent event) {
         ChiikawaMusicCommand.register(event.getDispatcher());
+        ChiikawaDebugCommand.register(event.getDispatcher());
     }
 
 

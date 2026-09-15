@@ -1,15 +1,13 @@
 package com.dwinovo.chiikawa.init;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.entity.brain.handler.ArcherJobHandler;
-import com.dwinovo.chiikawa.entity.brain.handler.FarmerJobHandler;
-import com.dwinovo.chiikawa.entity.brain.handler.FencerJobHandler;
-import com.dwinovo.chiikawa.entity.brain.handler.MusicianJobHandler;
-import com.dwinovo.chiikawa.entity.job.api.IPetJob;
+import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
+import com.dwinovo.chiikawa.entity.job.api.PetCapability;
 import com.dwinovo.chiikawa.entity.job.impl.BasicJob;
 import com.dwinovo.chiikawa.entity.job.impl.MusicianJob;
 import com.dwinovo.chiikawa.entity.job.impl.NoneJob;
 import com.dwinovo.chiikawa.platform.Services;
+import java.util.List;
 import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -22,59 +20,59 @@ public final class InitRegistry {
     public static final int ARCHER_ID = 3;
     public static final int MUSICIAN_ID = 4;
 
-    public static final ResourceKey<Registry<IPetJob>> PET_JOB_KEY = ResourceKey.createRegistryKey(
+    public static final ResourceKey<Registry<PetCapability>> PET_JOB_KEY = ResourceKey.createRegistryKey(
         ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "pet_jobs")
     );
 
-    public static final Registry<IPetJob> PET_JOB_REGISTRY = Services.REGISTRY.createRegistry(
+    public static final Registry<PetCapability> PET_JOB_REGISTRY = Services.REGISTRY.createRegistry(
         PET_JOB_KEY,
         ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "none"),
         true
     );
 
-    public static final Supplier<IPetJob> NONE = Services.REGISTRY.register(
+    public static final Supplier<PetCapability> NONE = Services.REGISTRY.register(
         PET_JOB_REGISTRY,
         ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "none"),
         () -> new NoneJob(NONE_ID)
     );
-    public static final Supplier<IPetJob> FARMER = Services.REGISTRY.register(
+    public static final Supplier<PetCapability> FARMER = Services.REGISTRY.register(
         PET_JOB_REGISTRY,
         ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "farmer"),
         () -> new BasicJob(
             FARMER_ID,
             10,
             InitTag.ENTITY_FARMER_TOOLS,
-            FarmerJobHandler::tickBrain
+            List.of(PetIntents.HARVEST, PetIntents.PLANT, PetIntents.DELIVER)
         )
     );
-    public static final Supplier<IPetJob> FENCER = Services.REGISTRY.register(
+    public static final Supplier<PetCapability> FENCER = Services.REGISTRY.register(
         PET_JOB_REGISTRY,
         ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "fencer"),
         () -> new BasicJob(
             FENCER_ID,
             10,
             InitTag.ENTITY_FENCER_TOOLS,
-            FencerJobHandler::tickBrain
+            List.of(PetIntents.MELEE)
         )
     );
-    public static final Supplier<IPetJob> ARCHER = Services.REGISTRY.register(
+    public static final Supplier<PetCapability> ARCHER = Services.REGISTRY.register(
         PET_JOB_REGISTRY,
         ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "archer"),
         () -> new BasicJob(
             ARCHER_ID,
             10,
             InitTag.ENTITY_ARCHER_TOOLS,
-            ArcherJobHandler::tickBrain
+            List.of(PetIntents.RANGED)
         )
     );
-    public static final Supplier<IPetJob> MUSICIAN = Services.REGISTRY.register(
+    public static final Supplier<PetCapability> MUSICIAN = Services.REGISTRY.register(
         PET_JOB_REGISTRY,
         ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "musician"),
         () -> new MusicianJob(
             MUSICIAN_ID,
             10,
             InitTag.ENTITY_MUSICIAN_TOOLS,
-            MusicianJobHandler::tickBrain
+            List.of(PetIntents.PLAY_MUSIC)
         )
     );
 
@@ -85,7 +83,7 @@ public final class InitRegistry {
         // Force class loading before platform event bus registration.
     }
 
-    public static IPetJob getJobFromId(int id) {
+    public static PetCapability getCapabilityFromId(int id) {
         if (id == FARMER_ID) {
             return FARMER.get();
         }
@@ -99,12 +97,5 @@ public final class InitRegistry {
             return MUSICIAN.get();
         }
         return NONE.get();
-    }
-
-    public static int getIdFromJob(IPetJob job) {
-        if (job == null) {
-            return NONE_ID;
-        }
-        return job.getId();
     }
 }

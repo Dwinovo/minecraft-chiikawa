@@ -40,6 +40,9 @@ public final class LanguageData {
             );
             addMusicBoxTranslations(adder, "八音盒", "未选择歌曲", "歌曲：%s", "选择歌曲", "导入中", "导入失败", "没有可播放的歌曲",
                 "把 MP3 / WAV 文件放入文件夹后点击刷新", "部分歌曲导入失败", "请使用 MP3 格式的音频", "打开文件夹", "刷新");
+            addIntentFailureTranslations(adder, "无法跟随主人", "主人就在附近", "已经回到主人身边", "目标不在范围内",
+                "目标离开了活动范围", "附近没有可拾取的物品", "没有可收割的作物", "没有可种植的耕地", "没有可存放的容器",
+                "没有攻击目标", "攻击冷却中", "没有箭", "没有新的曲子可演奏", "曲子演奏完了");
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Work");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
@@ -70,6 +73,9 @@ public final class LanguageData {
             );
             addMusicBoxTranslations(adder, "Music Box", "No song selected", "Song: %s", "Choose Song", "Importing", "Failed", "No playable songs",
                 "Put MP3 / WAV files in the folder, then reload", "Some songs failed to import", "Please use MP3 audio files", "Open Folder", "Reload");
+            addIntentFailureTranslations(adder, "Can't follow the owner", "Owner is close by", "Back with the owner", "Target is out of range",
+                "Target left the allowed area", "No item to pick up", "No crop to harvest", "No farmland to plant", "No container to deliver to",
+                "No target to attack", "Attack is cooling down", "No arrows", "No new song to play", "The song is over");
         }
     }
 
@@ -79,6 +85,39 @@ public final class LanguageData {
         adder.add("message.chiikawa.pet_follow", follow + ": %s");
         adder.add("message.chiikawa.pet_sit", sit + ": %s");
         adder.add("message.chiikawa.pet_work", work + ": %s");
+    }
+
+    private static void addIntentFailureTranslations(
+        Adder adder,
+        String ownerUnavailable,
+        String ownerNearby,
+        String ownerReached,
+        String outOfReach,
+        String outOfLeash,
+        String noItem,
+        String noCrop,
+        String noFarmland,
+        String noContainer,
+        String noAttackTarget,
+        String attackCoolingDown,
+        String noArrows,
+        String noNewSong,
+        String songOver
+    ) {
+        adder.add("intent.chiikawa.fail.owner_unavailable", ownerUnavailable);
+        adder.add("intent.chiikawa.fail.owner_nearby", ownerNearby);
+        adder.add("intent.chiikawa.fail.owner_reached", ownerReached);
+        adder.add("intent.chiikawa.fail.out_of_reach", outOfReach);
+        adder.add("intent.chiikawa.fail.out_of_leash", outOfLeash);
+        adder.add("intent.chiikawa.fail.no_item", noItem);
+        adder.add("intent.chiikawa.fail.no_crop", noCrop);
+        adder.add("intent.chiikawa.fail.no_farmland", noFarmland);
+        adder.add("intent.chiikawa.fail.no_container", noContainer);
+        adder.add("intent.chiikawa.fail.no_attack_target", noAttackTarget);
+        adder.add("intent.chiikawa.fail.attack_cooling_down", attackCoolingDown);
+        adder.add("intent.chiikawa.fail.no_arrows", noArrows);
+        adder.add("intent.chiikawa.fail.no_new_song", noNewSong);
+        adder.add("intent.chiikawa.fail.song_over", songOver);
     }
 
     private static void addDollTooltipTranslations(Adder adder, String placeOnCakeHint) {
