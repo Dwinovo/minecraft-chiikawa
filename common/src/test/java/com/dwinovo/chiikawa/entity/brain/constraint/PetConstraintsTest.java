@@ -8,7 +8,6 @@ import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCategory;
 import java.util.EnumSet;
 import java.util.Optional;
-import java.util.OptionalDouble;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -38,8 +37,7 @@ class PetConstraintsTest {
     void followingAnOnlineOwnerAnchorsOnTheOwner() {
         PetAnchor anchor = anchor(PetDirective.FOLLOW, OWNED, Optional.of(OWNER), Optional.empty(), false);
 
-        assertEquals(new PetAnchor(OWNER, AnchorDistances.FOLLOW_REACH, AnchorDistances.FOLLOW_LEASH,
-            OptionalDouble.of(AnchorDistances.FOLLOW_TELEPORT), true), anchor);
+        assertEquals(new PetAnchor(OWNER, AnchorDistances.FOLLOW_REACH, AnchorDistances.FOLLOW_LEASH, true, true), anchor);
     }
 
     @Test
@@ -48,7 +46,7 @@ class PetConstraintsTest {
         PetAnchor otherDimension = anchor(PetDirective.FOLLOW, OWNED,
             Optional.of(GlobalPos.of(NETHER, OWNER.pos())), Optional.empty(), false);
 
-        PetAnchor expected = new PetAnchor(PET, 0.0, PetAnchor.UNLEASHED, OptionalDouble.empty(), true);
+        PetAnchor expected = new PetAnchor(PET, 0.0, PetAnchor.UNLEASHED, false, true);
         assertEquals(expected, offline);
         assertEquals(expected, otherDimension);
     }
@@ -57,21 +55,21 @@ class PetConstraintsTest {
     void leashedOrRidingPetDoesNotFollowItsOwner() {
         PetAnchor anchor = anchor(PetDirective.FOLLOW, OWNED, Optional.of(OWNER), Optional.empty(), true);
 
-        assertEquals(new PetAnchor(PET, 0.0, PetAnchor.UNLEASHED, OptionalDouble.empty(), true), anchor);
+        assertEquals(new PetAnchor(PET, 0.0, PetAnchor.UNLEASHED, false, true), anchor);
     }
 
     @Test
     void stayingPetCannotMove() {
         PetAnchor anchor = anchor(PetDirective.STAY, OWNED, Optional.of(OWNER), Optional.of(HOME), false);
 
-        assertEquals(new PetAnchor(PET, 0.0, PetAnchor.UNLEASHED, OptionalDouble.empty(), false), anchor);
+        assertEquals(new PetAnchor(PET, 0.0, PetAnchor.UNLEASHED, false, false), anchor);
     }
 
     @Test
     void freePetAnchorsOnItsHome() {
         PetAnchor anchor = anchor(PetDirective.FREE, OWNED, Optional.of(OWNER), Optional.of(HOME), false);
 
-        assertEquals(new PetAnchor(HOME, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, OptionalDouble.empty(), true), anchor);
+        assertEquals(new PetAnchor(HOME, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, false, true), anchor);
     }
 
     @Test
@@ -80,7 +78,7 @@ class PetConstraintsTest {
         PetAnchor homeElsewhere = anchor(PetDirective.FREE, OWNED, Optional.empty(),
             Optional.of(GlobalPos.of(NETHER, HOME.pos())), false);
 
-        PetAnchor expected = new PetAnchor(PET, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, OptionalDouble.empty(), true);
+        PetAnchor expected = new PetAnchor(PET, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, false, true);
         assertEquals(expected, noHome);
         assertEquals(expected, homeElsewhere);
     }
@@ -89,12 +87,12 @@ class PetConstraintsTest {
     void leashedFreePetKeepsItsReachButIsNotPulledHome() {
         PetAnchor anchor = anchor(PetDirective.FREE, OWNED, Optional.empty(), Optional.of(HOME), true);
 
-        assertEquals(new PetAnchor(HOME, AnchorDistances.FREE_REACH, PetAnchor.UNLEASHED, OptionalDouble.empty(), true), anchor);
+        assertEquals(new PetAnchor(HOME, AnchorDistances.FREE_REACH, PetAnchor.UNLEASHED, false, true), anchor);
     }
 
     @Test
     void wildPetOnlyWandersWhateverItsDirective() {
-        PetAnchor expected = new PetAnchor(PET, 0.0, PetAnchor.UNLEASHED, OptionalDouble.empty(), true);
+        PetAnchor expected = new PetAnchor(PET, 0.0, PetAnchor.UNLEASHED, false, true);
         for (PetDirective directive : PetDirective.values()) {
             assertEquals(expected, anchor(directive, PetOwnership.WILD, Optional.empty(), Optional.of(HOME), false));
         }
@@ -129,7 +127,7 @@ class PetConstraintsTest {
 
     @Test
     void anchorMeasuresReachLeashAndTeleportWithinItsDimension() {
-        PetAnchor anchor = new PetAnchor(PET, 12.0, 16.0, OptionalDouble.of(20.0), true);
+        PetAnchor anchor = new PetAnchor(PET, 12.0, 16.0, true, true);
 
         assertTrue(anchor.withinReach(GlobalPos.of(OVERWORLD, new BlockPos(11, 64, 0))));
         assertFalse(anchor.withinReach(GlobalPos.of(OVERWORLD, new BlockPos(12, 64, 0))));
@@ -141,8 +139,15 @@ class PetConstraintsTest {
     }
 
     @Test
+    void onlyAnAnchorThatFollowsTheOwnerTeleports() {
+        PetAnchor home = new PetAnchor(PET, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, false, true);
+
+        assertFalse(home.beyondTeleport(GlobalPos.of(OVERWORLD, new BlockPos(100, 64, 0))));
+    }
+
+    @Test
     void unleashedAnchorNeverPullsAndZeroReachNeverStarts() {
-        PetAnchor anchor = new PetAnchor(PET, 0.0, PetAnchor.UNLEASHED, OptionalDouble.empty(), true);
+        PetAnchor anchor = new PetAnchor(PET, 0.0, PetAnchor.UNLEASHED, false, true);
 
         assertFalse(anchor.withinReach(PET));
         assertTrue(anchor.withinLeash(GlobalPos.of(OVERWORLD, new BlockPos(100000, 64, 0))));
