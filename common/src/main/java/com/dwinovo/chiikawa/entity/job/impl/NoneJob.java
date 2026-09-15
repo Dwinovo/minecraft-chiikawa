@@ -1,16 +1,15 @@
 package com.dwinovo.chiikawa.entity.job.impl;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.brain.handler.NoneJobHandler;
-import com.dwinovo.chiikawa.entity.job.api.IPetJob;
-import net.minecraft.world.entity.ai.Brain;
+import com.dwinovo.chiikawa.entity.job.api.PetCapability;
+import java.util.List;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Fallback pet job — pet is holding nothing recognised. Always assumable,
- * lowest priority. Owns no specialised activities; just selects
- * {@link net.minecraft.world.entity.schedule.Activity#IDLE} each tick.
+ * lowest priority, and offers no intents beyond the generic ones.
  */
-public class NoneJob implements IPetJob {
+public class NoneJob implements PetCapability {
     private final int id;
 
     public NoneJob(int id) {
@@ -18,12 +17,12 @@ public class NoneJob implements IPetJob {
     }
 
     @Override
-    public int getId() {
+    public int id() {
         return id;
     }
 
     @Override
-    public int getPriority() {
+    public int priority() {
         return 0;
     }
 
@@ -33,7 +32,7 @@ public class NoneJob implements IPetJob {
     }
 
     @Override
-    public void tickBrain(AbstractPet pet, Brain<AbstractPet> brain) {
-        NoneJobHandler.tickBrain(pet, brain);
+    public List<ResourceLocation> intents() {
+        return List.of();
     }
 }
