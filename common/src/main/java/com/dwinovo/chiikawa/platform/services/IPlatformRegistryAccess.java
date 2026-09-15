@@ -22,6 +22,10 @@ public interface IPlatformRegistryAccess {
 
     Supplier<Activity> deleverActivity();
 
+    Supplier<Activity> weedActivity();
+
+    Supplier<Activity> pickMushroomActivity();
+
     /**
      * Brain {@link Activity} owning the fencer job's combat behaviors
      * (walk-to-target + melee swing). Replaces fencer's earlier reuse of
