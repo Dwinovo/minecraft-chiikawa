@@ -18,9 +18,11 @@ public record PerceivedTargets(
     Optional<GlobalPos> harvest,
     Optional<GlobalPos> plant,
     Optional<GlobalPos> container,
+    Optional<GlobalPos> weed,
+    Optional<GlobalPos> mushroom,
     Optional<GlobalPos> pickableItem
 ) {
-    public static final PerceivedTargets NONE = new PerceivedTargets(
+    public static final PerceivedTargets NONE = new PerceivedTargets(Optional.empty(), Optional.empty(),
         Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
 
     static PerceivedTargets capture(AbstractPet pet) {
@@ -32,6 +34,8 @@ public record PerceivedTargets(
             brain.getMemory(InitMemory.HARVEST_POS.get()).map(pos -> GlobalPos.of(dimension, pos)),
             brain.getMemory(InitMemory.PLANT_POS.get()).map(pos -> GlobalPos.of(dimension, pos)),
             brain.getMemory(InitMemory.CONTAINER_POS.get()).map(pos -> GlobalPos.of(dimension, pos)),
+            brain.getMemory(InitMemory.WEED_POS.get()).map(pos -> GlobalPos.of(dimension, pos)),
+            brain.getMemory(InitMemory.MUSHROOM_POS.get()).map(pos -> GlobalPos.of(dimension, pos)),
             brain.getMemory(InitMemory.PICKABLE_ITEM.get()).map(item -> GlobalPos.of(dimension, item.blockPosition()))
         );
     }

@@ -42,7 +42,7 @@ public final class InitRegistry {
             FARMER_ID,
             10,
             InitTag.ENTITY_FARMER_TOOLS,
-            List.of(PetIntents.HARVEST, PetIntents.PLANT, PetIntents.DELIVER)
+            List.of(PetIntents.HARVEST, PetIntents.PLANT, PetIntents.DELIVER, PetIntents.WEED, PetIntents.PICK_MUSHROOM)
         )
     );
     public static final Supplier<PetCapability> FENCER = Services.REGISTRY.register(

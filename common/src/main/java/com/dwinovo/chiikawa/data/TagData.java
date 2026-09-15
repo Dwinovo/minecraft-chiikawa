@@ -32,6 +32,10 @@ public final class TagData {
             .add(Blocks.WHEAT, Blocks.POTATOES, Blocks.CARROTS, Blocks.BEETROOTS, Blocks.PUMPKIN, Blocks.MELON);
         tags.tag(InitTag.ENTITY_DELEVER_CONTAINER)
             .add(Blocks.CHEST, Blocks.TRAPPED_CHEST, Blocks.BARREL, Blocks.HOPPER);
+        tags.tag(InitTag.ENTITY_WEEDS)
+            .add(Blocks.SHORT_GRASS, Blocks.TALL_GRASS, Blocks.FERN, Blocks.LARGE_FERN);
+        tags.tag(InitTag.ENTITY_MUSHROOMS)
+            .add(Blocks.RED_MUSHROOM, Blocks.BROWN_MUSHROOM);
     }
 
     public static void addItemTags(TagAppenderProvider<Item> tags) {

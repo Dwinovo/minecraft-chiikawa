@@ -24,7 +24,8 @@ import net.minecraft.world.level.ItemLike;
  * items, so a wandering pet still reacts to those whatever its randomness.
  */
 public final class PersonalityData {
-    private static final List<ResourceLocation> FARMING = List.of(PetIntents.HARVEST, PetIntents.PLANT, PetIntents.DELIVER);
+    private static final List<ResourceLocation> FARMING = List.of(PetIntents.HARVEST, PetIntents.PLANT, PetIntents.DELIVER,
+        PetIntents.WEED, PetIntents.PICK_MUSHROOM);
     private static final List<ResourceLocation> FIGHTING = List.of(PetIntents.MELEE, PetIntents.RANGED);
 
     private PersonalityData() {
