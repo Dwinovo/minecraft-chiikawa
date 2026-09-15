@@ -12,6 +12,7 @@ import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.Decision;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.EndReason;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.SelectorParams;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
+import com.dwinovo.chiikawa.testing.FixedRandom;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,7 +24,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.levelgen.PositionalRandomFactory;
 import org.junit.jupiter.api.Test;
 
 class IntentSelectorTest {
@@ -72,13 +72,13 @@ class IntentSelectorTest {
         SelectorParams random = new SelectorParams(0.02F, 0.1F);
         List<Candidate> candidates = List.of(ok(WANDER, 0.05F), ok(PLANT, 0.55F), ok(HARVEST, 0.6F));
 
-        Decision plantLucky = choose(candidates, null, random, new FixedRandom(1.0F, 0.0F));
+        Decision plantLucky = choose(candidates, null, random, FixedRandom.floats(1.0F, 0.0F));
         assertEquals(PLANT, plantLucky.next());
         assertEquals(List.of(PLANT, HARVEST), plantLucky.ranking().stream().map(IntentSelector.Scored::id).toList());
         assertEquals(0.65F, plantLucky.ranking().get(0).score(), 1.0E-6F);
         assertEquals(0.5F, plantLucky.ranking().get(1).score(), 1.0E-6F);
 
-        assertEquals(HARVEST, choose(candidates, null, random, new FixedRandom(0.0F, 1.0F)).next());
+        assertEquals(HARVEST, choose(candidates, null, random, FixedRandom.floats(0.0F, 1.0F)).next());
     }
 
     // ---- keeping the running intent --------------------------------------------
@@ -98,7 +98,7 @@ class IntentSelectorTest {
         RunningIntent wander = new RunningIntent(WANDER, NOW - 1);
 
         // Wandering draws the most positive noise, the fight the most negative.
-        Decision decision = choose(List.of(ok(WANDER, 0.05F), ok(FIGHT, 0.8F)), wander, veryRandom, new FixedRandom(1.0F, 0.0F));
+        Decision decision = choose(List.of(ok(WANDER, 0.05F), ok(FIGHT, 0.8F)), wander, veryRandom, FixedRandom.floats(1.0F, 0.0F));
 
         assertEquals(FIGHT, decision.next());
     }
@@ -111,7 +111,7 @@ class IntentSelectorTest {
         int switches = 0;
         for (int evaluation = 0; evaluation < 50; evaluation++) {
             // Alternate which one the noise favours on every evaluation.
-            RandomSource random = evaluation % 2 == 0 ? new FixedRandom(1.0F, 0.0F) : new FixedRandom(0.0F, 1.0F);
+            RandomSource random = evaluation % 2 == 0 ? FixedRandom.floats(1.0F, 0.0F) : FixedRandom.floats(0.0F, 1.0F);
             Decision decision = choose(equal, current, veryRandom, random);
             if (!decision.keeps(current)) {
                 current = new RunningIntent(decision.next(), NOW + evaluation);
@@ -188,14 +188,14 @@ class IntentSelectorTest {
         for (float noise = 0.0F; noise <= 1.0F; noise += 0.125F) {
             Decision everything = IntentSelector.choose(
                 farmCandidates(inverted, DayPhase.DAY, targets(true, true, true), null), null, params,
-                new FixedRandom(noise, 1.0F - noise));
+                FixedRandom.floats(noise, 1.0F - noise));
             assertTrue(Set.of(PetIntents.WANDER, PetIntents.HARVEST).contains(everything.next()), everything::toString);
         }
 
         RunningIntent planting = new RunningIntent(PetIntents.PLANT, NOW - 5);
         Decision cropRipened = IntentSelector.choose(
             farmCandidates(inverted, DayPhase.DAY, targets(true, true, true), PetIntents.PLANT), planting, params,
-            new FixedRandom(0.5F));
+            FixedRandom.floats(0.5F));
         assertEquals(EndReason.CONDITION_FAILED, cropRipened.ended());
 
         List<Candidate> plantAndDeliver = farmCandidates(inverted, DayPhase.DAY, targets(false, true, true), null);
@@ -232,7 +232,7 @@ class IntentSelectorTest {
     }
 
     private static Decision choose(List<Candidate> candidates, RunningIntent current, SelectorParams params) {
-        return choose(candidates, current, params, new FixedRandom(0.5F));
+        return choose(candidates, current, params, FixedRandom.floats(0.5F));
     }
 
     private static Decision choose(List<Candidate> candidates, RunningIntent current, SelectorParams params, RandomSource random) {
@@ -245,67 +245,5 @@ class IntentSelectorTest {
 
     private static ResourceLocation id(String path) {
         return new ResourceLocation("chiikawa", path);
-    }
-
-    /** Returns the given floats in turn, repeating the last one. */
-    private static final class FixedRandom implements RandomSource {
-        private final float[] values;
-        private int next;
-
-        FixedRandom(float... values) {
-            this.values = values;
-        }
-
-        @Override
-        public float nextFloat() {
-            float value = values[Math.min(next, values.length - 1)];
-            next++;
-            return value;
-        }
-
-        @Override
-        public RandomSource fork() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public PositionalRandomFactory forkPositional() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void setSeed(long seed) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public int nextInt() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public int nextInt(int bound) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public long nextLong() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean nextBoolean() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public double nextDouble() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public double nextGaussian() {
-            throw new UnsupportedOperationException();
-        }
     }
 }
