@@ -4,9 +4,7 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitMemory;
-import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.init.InitTag;
 import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.utils.Utils;
@@ -41,13 +39,6 @@ public class WalkToContainerBehavior extends Behavior<AbstractPet>{
     @SuppressWarnings("null")
     @Override
     protected boolean checkExtraStartConditions(ServerLevel world, AbstractPet pet) {
-        if (pet.getPetDirective() != PetDirective.FREE || pet.getPetJobId() != InitRegistry.FARMER_ID) {
-            return false;
-        }
-        if (pet.getBrain().getMemory(InitMemory.PLANT_POS.get()).isPresent()
-            || pet.getBrain().getMemory(InitMemory.HARVEST_POS.get()).isPresent()) {
-            return false;
-        }
         if (!pet.getBrain().getMemory(InitMemory.CONTAINER_POS.get()).isPresent()) {
             return false;
         }
