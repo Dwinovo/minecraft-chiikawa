@@ -19,9 +19,12 @@ import org.jetbrains.annotations.Nullable;
  * Registry of every pet intent. Generic intents are open to every pet; the others
  * are offered by capabilities through {@code PetCapability#intents()}.
  *
- * <p>Priorities that 0.0.9 hard-coded as if-chains are expressed by base scores:
- * harvest (0.6) over plant (0.55) over deliver (0.5), all work and fights over
- * picking up items (0.4), everything over wandering (0.05).
+ * <p>Preferences are base scores: fights (0.8) over work (0.6) over picking up items
+ * (0.4), everything over wandering (0.05). A pet's personality weighs them. The farmer's
+ * strict order that 0.0.9 hard-coded as an if-chain, harvest before plant before
+ * deliver, is not a preference, so it is expressed by
+ * {@link IntentRequirement#yieldsTo} instead of score gaps that a personality could
+ * close.
  */
 public final class PetIntents {
     public static final ResourceLocation FOLLOW_OWNER = id("follow_owner");
@@ -43,16 +46,17 @@ public final class PetIntents {
         register(new ConstantIntent(STAY, IntentCategory.STAY, () -> InitActivity.STAY.get(), 1.0F)),
         register(new ConstantIntent(WANDER, IntentCategory.WANDER, () -> Activity.IDLE, 0.05F)),
         register(new TargetIntent(PICK_UP_ITEM, IntentCategory.PICK_UP, () -> InitActivity.PICK_UP.get(),
-            PerceivedTargets::pickableItem, 0.4F, "no_item"))
+            PerceivedTargets::pickableItem, 0.4F, "no_item", List.of()))
     );
 
     static {
-        register(new TargetIntent(HARVEST, IntentCategory.WORK, () -> InitActivity.FARMER_HARVEST.get(),
-            PerceivedTargets::harvest, 0.6F, "no_crop"));
-        register(new TargetIntent(PLANT, IntentCategory.WORK, () -> InitActivity.FARMER_PLANT.get(),
-            PerceivedTargets::plant, 0.55F, "no_farmland"));
+        PetIntent harvest = register(new TargetIntent(HARVEST, IntentCategory.WORK, () -> InitActivity.FARMER_HARVEST.get(),
+            PerceivedTargets::harvest, 0.6F, "no_crop", List.of()));
+        PetIntent plant = register(new TargetIntent(PLANT, IntentCategory.WORK, () -> InitActivity.FARMER_PLANT.get(),
+            PerceivedTargets::plant, 0.6F, "no_farmland", List.of(IntentRequirement.yieldsTo(harvest))));
         register(new TargetIntent(DELIVER, IntentCategory.WORK, () -> InitActivity.DELEVER.get(),
-            PerceivedTargets::container, 0.5F, "no_container"));
+            PerceivedTargets::container, 0.6F, "no_container",
+            List.of(IntentRequirement.yieldsTo(harvest), IntentRequirement.yieldsTo(plant))));
         register(new CombatIntent(MELEE, () -> InitActivity.FENCER_FIGHT.get(), false));
         register(new CombatIntent(RANGED, () -> InitActivity.ARCHER_SHOOT.get(), true));
         register(new PlayMusicIntent());
