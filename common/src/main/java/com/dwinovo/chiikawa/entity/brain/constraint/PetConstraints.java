@@ -98,7 +98,7 @@ public final class PetConstraints {
             case STAY -> !wild && directive == PetDirective.STAY;
             case WANDER -> wild || directive != PetDirective.STAY;
             case WORK, PICK_UP -> !wild && directive == PetDirective.FREE;
-            case COMBAT -> wild || directive == PetDirective.FREE;
+            case FORAGE, COMBAT -> wild || directive == PetDirective.FREE;
         };
     }
 
