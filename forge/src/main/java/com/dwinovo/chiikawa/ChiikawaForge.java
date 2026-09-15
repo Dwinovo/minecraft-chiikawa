@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa;
 
+import com.dwinovo.chiikawa.command.ChiikawaDebugCommand;
 import com.dwinovo.chiikawa.command.ChiikawaMusicCommand;
 import com.dwinovo.chiikawa.init.InitActivity;
 import com.dwinovo.chiikawa.init.InitCapabilities;
@@ -97,5 +98,6 @@ public class ChiikawaForge {
 
     private static void registerCommands(RegisterCommandsEvent event) {
         ChiikawaMusicCommand.register(event.getDispatcher());
+        ChiikawaDebugCommand.register(event.getDispatcher());
     }
 }

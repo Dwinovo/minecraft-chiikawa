@@ -2,18 +2,14 @@ package com.dwinovo.chiikawa.entity.brain.task.musician;
 
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.PetDirective;
-import com.dwinovo.chiikawa.entity.brain.PetCommand;
-import com.dwinovo.chiikawa.entity.impl.HachiwarePet;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMemory;
-import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.music.ChiikawaMusicConfig;
 import com.dwinovo.chiikawa.music.MusicBoxSelection;
-import com.dwinovo.chiikawa.music.MusicStopReason;
 import com.dwinovo.chiikawa.music.ServerMusicSystem;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
+import java.util.Optional;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
@@ -23,14 +19,17 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.item.ItemStack;
 
-/** Runs Hachiware's guitar animation while the musician job owns a music stream session. */
+/**
+ * Starts a music stream for a music box selection the pet has not played yet and
+ * runs Hachiware's guitar animation while the stream lasts. The stream itself is
+ * ended by the stream manager when the song finishes, by a newer song replacing it,
+ * or by the {@code play_music} intent when the pet stops performing.
+ */
 public class PlayMusicBehavior extends Behavior<AbstractPet> {
     private static final int MAX_DURATION_TICKS = ChiikawaMusicConfig.DEFAULT.maxTrackSeconds() * 20 + 40;
     private static final int NOTE_PARTICLE_INTERVAL_TICKS = 50;
     private static final Map<MemoryModuleType<?>, MemoryStatus> REQUIRED_MEMORIES = ImmutableMap.of(
-        InitMemory.REQUESTED_COMMAND.get(), MemoryStatus.VALUE_PRESENT,
-        InitMemory.REQUESTED_MUSIC_TRACK.get(), MemoryStatus.VALUE_PRESENT,
-        MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_ABSENT,
+        InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get(), MemoryStatus.REGISTERED,
         MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED,
         MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED
     );
@@ -41,28 +40,32 @@ public class PlayMusicBehavior extends Behavior<AbstractPet> {
         super(REQUIRED_MEMORIES, MAX_DURATION_TICKS);
     }
 
+    /**
+     * @param pet the pet
+     * @return the held music box selection, if the pet has not started it yet
+     */
+    public static Optional<MusicBoxSelection> unplayedSelection(AbstractPet pet) {
+        Optional<String> lastPlayed = pet.getBrain().getMemory(InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get());
+        return selection(pet).filter(selection -> lastPlayed.filter(selection.signature()::equals).isEmpty());
+    }
+
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, AbstractPet pet) {
-        return pet instanceof HachiwarePet
-            && pet.isTame()
-            && pet.getPetDirective() == PetDirective.FREE
-            && pet.getPetJobId() == InitRegistry.MUSICIAN_ID
-            && pet.getBrain().getMemory(InitMemory.REQUESTED_COMMAND.get()).orElse(null) == PetCommand.PLAY_MUSIC
-            && requestedTrack(pet).filter(trackId -> selectedTrack(pet).filter(trackId::equals).isPresent()).isPresent();
+        return unplayedSelection(pet).isPresent();
     }
 
     @Override
     protected void start(ServerLevel level, AbstractPet pet, long gameTime) {
-        activeTrackId = requestedTrack(pet).orElse("");
-        pet.getBrain().eraseMemory(InitMemory.REQUESTED_COMMAND.get());
+        MusicBoxSelection selection = unplayedSelection(pet).orElseThrow();
+        // Remembered even if the stream cannot start, so a failing song is not retried.
+        pet.getBrain().setMemory(InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get(), selection.signature());
+        activeTrackId = selection.trackId();
         pet.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
         pet.getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
         pet.getNavigation().stop();
         lookAtOwner(pet);
 
-        if (activeTrackId.isBlank()
-                || ServerMusicSystem.streams(level.getServer()).start(pet, activeTrackId).isEmpty()) {
-            clearRequest(pet);
+        if (ServerMusicSystem.streams(level.getServer()).start(pet, activeTrackId).isEmpty()) {
             activeTrackId = "";
             pet.setActivity(PetActivity.NONE);
             return;
@@ -80,46 +83,29 @@ public class PlayMusicBehavior extends Behavior<AbstractPet> {
 
     @Override
     protected boolean canStillUse(ServerLevel level, AbstractPet pet, long gameTime) {
-        return pet instanceof HachiwarePet
-            && pet.getActivity() == PetActivity.PLAY_GUITAR
-            && pet.getPetDirective() == PetDirective.FREE
-            && pet.getPetJobId() == InitRegistry.MUSICIAN_ID
-            && !pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)
-            && selectedTrack(pet).filter(activeTrackId::equals).isPresent()
+        return pet.getActivity() == PetActivity.PLAY_GUITAR
+            && selection(pet).filter(selection -> selection.trackId().equals(activeTrackId)).isPresent()
             && ServerMusicSystem.streams(level.getServer()).isPlaying(pet, activeTrackId);
     }
 
     @Override
     protected void stop(ServerLevel level, AbstractPet pet, long gameTime) {
-        clearRequest(pet);
-        if (!activeTrackId.isBlank()) {
-            ServerMusicSystem.streams(level.getServer()).stop(pet, MusicStopReason.INTERRUPTED);
-        }
         activeTrackId = "";
         if (pet.getActivity() == PetActivity.PLAY_GUITAR) {
             pet.setActivity(PetActivity.NONE);
         }
     }
 
-    private static java.util.Optional<String> requestedTrack(AbstractPet pet) {
-        return pet.getBrain().getMemory(InitMemory.REQUESTED_MUSIC_TRACK.get()).filter(trackId -> !trackId.isBlank());
-    }
-
-    private static java.util.Optional<String> selectedTrack(AbstractPet pet) {
+    private static Optional<MusicBoxSelection> selection(AbstractPet pet) {
         ItemStack stack = pet.getMainHandItem();
         if (!stack.is(InitItems.MUSIC_BOX.get())) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
         MusicBoxSelection selection = MusicBoxSelection.get(stack);
         if (selection == null || selection.trackId().isBlank()) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
-        return java.util.Optional.of(selection.trackId());
-    }
-
-    private static void clearRequest(AbstractPet pet) {
-        pet.getBrain().eraseMemory(InitMemory.REQUESTED_COMMAND.get());
-        pet.getBrain().eraseMemory(InitMemory.REQUESTED_MUSIC_TRACK.get());
+        return Optional.of(selection);
     }
 
     private static void lookAtOwner(AbstractPet pet) {
