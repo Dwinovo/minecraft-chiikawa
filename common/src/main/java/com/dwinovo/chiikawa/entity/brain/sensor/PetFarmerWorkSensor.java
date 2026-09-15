@@ -34,8 +34,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  *       the whole scan is skipped when every needed target is already set.</li>
  * </ol>
  *
- * Priority is harvest &gt; plant &gt; container, matching the scores of the
- * {@code harvest}, {@code plant} and {@code deliver} intents. The sensor only
+ * Priority is harvest &gt; plant &gt; container, matching the order in which the
+ * {@code harvest}, {@code plant} and {@code deliver} intents yield. The sensor only
  * perceives: it keeps scanning whatever the owner's directive, and the intents
  * decide whether a target is used.
  */
