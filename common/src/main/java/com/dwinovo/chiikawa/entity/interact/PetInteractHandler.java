@@ -3,7 +3,6 @@ package com.dwinovo.chiikawa.entity.interact;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
-import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
 import com.dwinovo.chiikawa.init.InitTag;
 
 import net.minecraft.server.level.ServerPlayer;
@@ -15,8 +14,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.network.chat.Component;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
-import net.minecraft.core.GlobalPos;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
 public final class PetInteractHandler {
     private static final float TAME_CHANCE = 0.3F;
@@ -85,13 +82,6 @@ public final class PetInteractHandler {
         if (!level.isClientSide()) {
             PetDirective next = pet.getPetDirective().next();
             pet.setPetDirective(next);
-            if (next == PetDirective.FREE) {
-                pet.getBrain().setMemory(MemoryModuleType.HOME, GlobalPos.of(level.dimension(), pet.blockPosition()));
-            }
-            else if (next == PetDirective.FOLLOW) {
-                pet.getBrain().eraseMemory(MemoryModuleType.HOME);
-            }
-            IntentSelector.requestReevaluate(pet);
             if (pet.getOwner() instanceof Player owner) {
                 owner.sendOverlayMessage(next.message(pet));
             }
