@@ -9,6 +9,8 @@ public enum IntentCategory {
     STAY,
     WANDER,
     WORK,
+    /** Gathering what grows in the wild, such as weeds and mushrooms. */
+    FORAGE,
     COMBAT,
     PICK_UP
 }
