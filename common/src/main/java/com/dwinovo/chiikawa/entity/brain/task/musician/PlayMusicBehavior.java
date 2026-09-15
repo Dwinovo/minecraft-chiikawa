@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.task.musician;
 
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.PetCommand;
 import com.dwinovo.chiikawa.entity.impl.HachiwarePet;
 import com.dwinovo.chiikawa.init.InitItems;
@@ -45,7 +45,7 @@ public class PlayMusicBehavior extends Behavior<AbstractPet> {
     protected boolean checkExtraStartConditions(ServerLevel level, AbstractPet pet) {
         return pet instanceof HachiwarePet
             && pet.isTame()
-            && pet.getPetMode() == PetMode.WORK
+            && pet.getPetDirective() == PetDirective.FREE
             && pet.getPetJobId() == InitRegistry.MUSICIAN_ID
             && pet.getBrain().getMemory(InitMemory.REQUESTED_COMMAND.get()).orElse(null) == PetCommand.PLAY_MUSIC
             && requestedTrack(pet).filter(trackId -> selectedTrack(pet).filter(trackId::equals).isPresent()).isPresent();
@@ -82,7 +82,7 @@ public class PlayMusicBehavior extends Behavior<AbstractPet> {
     protected boolean canStillUse(ServerLevel level, AbstractPet pet, long gameTime) {
         return pet instanceof HachiwarePet
             && pet.getActivity() == PetActivity.PLAY_GUITAR
-            && pet.getPetMode() == PetMode.WORK
+            && pet.getPetDirective() == PetDirective.FREE
             && pet.getPetJobId() == InitRegistry.MUSICIAN_ID
             && !pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)
             && selectedTrack(pet).filter(activeTrackId::equals).isPresent()
