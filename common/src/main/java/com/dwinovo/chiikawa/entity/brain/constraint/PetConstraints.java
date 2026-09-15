@@ -4,7 +4,6 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCategory;
 import java.util.Optional;
-import java.util.OptionalDouble;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -41,7 +40,7 @@ public final class PetConstraints {
      * Pure anchor table.
      *
      * <p>A leashed or riding pet is moved by something else, so its anchor never
-     * pulls or teleports it (0.0.9 skipped following and returning home in that
+     * follows the owner or pulls it (0.0.9 skipped following and returning home in that
      * case too). Wild pets only wander for now, so they get an anchor with no reach.
      *
      * @param directive the owner's directive
@@ -56,20 +55,19 @@ public final class PetConstraints {
     static PetAnchor anchorOf(PetDirective directive, PetOwnership ownership, GlobalPos petPos,
             Optional<GlobalPos> ownerPos, Optional<GlobalPos> home, boolean tethered) {
         if (ownership instanceof PetOwnership.Wild) {
-            return new PetAnchor(petPos, 0.0, PetAnchor.UNLEASHED, OptionalDouble.empty(), true);
+            return new PetAnchor(petPos, 0.0, PetAnchor.UNLEASHED, false, true);
         }
         return switch (directive) {
             case FOLLOW -> ownerPos
                 .filter(owner -> !tethered && owner.dimension().equals(petPos.dimension()))
-                .map(owner -> new PetAnchor(owner, AnchorDistances.FOLLOW_REACH, AnchorDistances.FOLLOW_LEASH,
-                    OptionalDouble.of(AnchorDistances.FOLLOW_TELEPORT), true))
-                .orElseGet(() -> new PetAnchor(petPos, 0.0, PetAnchor.UNLEASHED, OptionalDouble.empty(), true));
-            case STAY -> new PetAnchor(petPos, 0.0, PetAnchor.UNLEASHED, OptionalDouble.empty(), false);
+                .map(owner -> new PetAnchor(owner, AnchorDistances.FOLLOW_REACH, AnchorDistances.FOLLOW_LEASH, true, true))
+                .orElseGet(() -> new PetAnchor(petPos, 0.0, PetAnchor.UNLEASHED, false, true));
+            case STAY -> new PetAnchor(petPos, 0.0, PetAnchor.UNLEASHED, false, false);
             case FREE -> new PetAnchor(
                 home.filter(pos -> pos.dimension().equals(petPos.dimension())).orElse(petPos),
                 AnchorDistances.FREE_REACH,
                 tethered ? PetAnchor.UNLEASHED : AnchorDistances.FREE_LEASH,
-                OptionalDouble.empty(),
+                false,
                 true
             );
         };
