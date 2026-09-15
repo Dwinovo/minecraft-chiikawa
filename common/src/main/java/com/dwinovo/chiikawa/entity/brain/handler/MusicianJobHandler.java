@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.handler;
 
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.PetCommand;
 import com.dwinovo.chiikawa.entity.brain.task.musician.PlayMusicBehavior;
 import com.dwinovo.chiikawa.entity.impl.HachiwarePet;
@@ -77,7 +77,7 @@ public final class MusicianJobHandler {
     private static boolean canWorkAsMusician(AbstractPet pet) {
         return pet instanceof HachiwarePet
             && pet.isTame()
-            && pet.getPetMode() == PetMode.WORK
+            && pet.getPetDirective() == PetDirective.FREE
             && pet.getPetJobId() == InitRegistry.MUSICIAN_ID
             && !pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET);
     }

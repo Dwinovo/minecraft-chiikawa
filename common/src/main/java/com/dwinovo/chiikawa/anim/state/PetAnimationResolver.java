@@ -1,6 +1,6 @@
 package com.dwinovo.chiikawa.anim.state;
 
-import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.PetDirective;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ public final class PetAnimationResolver {
     /** Returns the ordered base-loop candidate list for the pet's current state. */
     public static List<String> resolve(PetAnimContext context) {
         PetAnimContext safe = context == null
-                ? PetAnimContext.base(PetMode.FOLLOW, 0, 0f)
+                ? PetAnimContext.base(PetDirective.FOLLOW, 0, 0f)
                 : context;
 
         // Code-bounded activity (level state) wins over everything else —
@@ -41,7 +41,7 @@ public final class PetAnimationResolver {
             return anim == null ? List.of("idle") : List.of(anim, "idle");
         }
 
-        if (safe.mode() == PetMode.SIT) {
+        if (safe.directive() == PetDirective.STAY) {
             return List.of("sit", "idle");
         }
 
@@ -52,7 +52,7 @@ public final class PetAnimationResolver {
             return List.of("walk", "run", "idle");
         }
 
-        if (safe.mode() == PetMode.WORK) {
+        if (safe.directive() == PetDirective.FREE) {
             return switch (safe.job()) {
                 case FARMER -> List.of("work_idle_farmer", "idle");
                 case FENCER -> List.of("work_idle_fencer", "idle");

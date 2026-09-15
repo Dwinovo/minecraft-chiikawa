@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.task.tameable;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.PetDirective;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.Optional;
@@ -42,12 +42,12 @@ public class KeepAroundBehavior<E extends AbstractPet> extends Behavior<E> {
         }
 
         Optional<LivingEntity> owner = Optional.ofNullable(pet.getOwner());
-        if (pet.getPetMode() == PetMode.FOLLOW) {
+        if (pet.getPetDirective() == PetDirective.FOLLOW) {
             return owner.filter(o -> !o.isSpectator() && isSameLevel(level, o) && pet.distanceTo(o) >= this.followMasterDistance)
                 .isPresent();
         }
 
-        if (pet.getPetMode() == PetMode.WORK) {
+        if (pet.getPetDirective() == PetDirective.FREE) {
             return pet.getBrain().getMemory(MemoryModuleType.HOME)
                 .filter(home -> isSameDimension(level, home) && home.pos().distManhattan(pet.getOnPos()) > this.keepHomeAroundDistance)
                 .isPresent();
@@ -59,7 +59,7 @@ public class KeepAroundBehavior<E extends AbstractPet> extends Behavior<E> {
     @Override
     protected void start(ServerLevel level, E pet, long time) {
         Optional<LivingEntity> owner = Optional.ofNullable(pet.getOwner());
-        if (pet.getPetMode() == PetMode.FOLLOW) {
+        if (pet.getPetDirective() == PetDirective.FOLLOW) {
             owner.filter(o -> isSameLevel(level, o)).ifPresent(o -> {
                 if (pet.distanceTo(o) > this.teleportDistance) {
                     pet.teleportToOwner(level, o);
@@ -69,7 +69,7 @@ public class KeepAroundBehavior<E extends AbstractPet> extends Behavior<E> {
                 }
             });
         }
-        else if (pet.getPetMode() == PetMode.WORK) {
+        else if (pet.getPetDirective() == PetDirective.FREE) {
             pet.getBrain().getMemory(MemoryModuleType.HOME)
                 .filter(home -> isSameDimension(level, home))
                 .ifPresent(home -> pet.getBrain().setMemory(
