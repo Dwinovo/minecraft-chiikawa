@@ -6,9 +6,7 @@ package com.dwinovo.chiikawa.entity.brain.task.farmer;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitMemory;
-import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.utils.Utils;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -42,13 +40,7 @@ public class WalkToPlantCropBehavior extends Behavior<AbstractPet>{
      */
     @Override
     protected boolean checkExtraStartConditions(ServerLevel world, AbstractPet pet) {
-        if(
-            pet.getPetDirective() == PetDirective.FREE && 
-            pet.getPetJobId() == InitRegistry.FARMER_ID && 
-            !pet.getBrain().getMemory(InitMemory.HARVEST_POS.get()).isPresent() && 
-            !Utils.getSeed(pet).isEmpty() && 
-            pet.getBrain().getMemory(InitMemory.PLANT_POS.get()).isPresent()
-        ){
+        if (!Utils.getSeed(pet).isEmpty() && pet.getBrain().getMemory(InitMemory.PLANT_POS.get()).isPresent()) {
             net.minecraft.core.BlockPos target = pet.getBrain().getMemory(InitMemory.PLANT_POS.get()).get();
             if (Utils.isPlantableBase(world, pet, target)) {
                 // Single reachability pathfind for the chosen target; blacklist on failure.

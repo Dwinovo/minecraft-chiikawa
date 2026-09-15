@@ -5,9 +5,7 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.PetTargeting;
-import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.utils.Utils;
 
 import net.minecraft.server.level.ServerLevel;
@@ -27,10 +25,8 @@ public class HurtRangedAttackTargetTask extends Behavior<AbstractPet>{
     }
     @Override
     protected boolean checkExtraStartConditions(ServerLevel pLevel, AbstractPet pet) {
-        // Require work mode, archer job, valid target, and no cooldown.
-        return pet.getPetDirective() == PetDirective.FREE 
-        && pet.getPetJobId() == InitRegistry.ARCHER_ID
-        && pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)
+        // Require a valid target in range, arrows, and no cooldown.
+        return pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET)
         && pet.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get().isAlive()
         && pet.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get().distanceTo(pet) <= 15.0F
         && PetTargeting.canTarget(pet, pet.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get())
