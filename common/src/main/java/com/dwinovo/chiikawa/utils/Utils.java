@@ -10,6 +10,9 @@ import net.minecraft.world.level.pathfinder.Path;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.task.farmer.crop.CropHandler;
 import com.dwinovo.chiikawa.entity.brain.task.farmer.crop.FarmRegistry;
+import com.dwinovo.chiikawa.init.InitTag;
+import net.minecraft.world.level.block.DoublePlantBlock;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 
 // Utility helpers. Farming methods dispatch through FarmRegistry to the matching
 // CropHandler (DefaultCropHandler for standard crops); the actual logic lives there.
@@ -34,6 +37,30 @@ public class Utils {
         return FarmRegistry.forCrop(world.getBlockState(pos).getBlock())
             .canHarvest(world, pos, world.getBlockState(pos));
     }
+    /**
+     * Whether the block is a wild plant a farmer pulls up. A two-block-tall plant counts
+     * only at its lower half, which is where its loot comes from and which takes the top
+     * half with it.
+     * @param world the server world
+     * @param pos the block position
+     * @return whether the block is a weed to pull
+     */
+    public static boolean isWeed(ServerLevel world, BlockPos pos) {
+        BlockState state = world.getBlockState(pos);
+        return state.is(InitTag.ENTITY_WEEDS)
+            && (!state.hasProperty(DoublePlantBlock.HALF) || state.getValue(DoublePlantBlock.HALF) == DoubleBlockHalf.LOWER);
+    }
+
+    /**
+     * Whether the block is a mushroom a farmer picks.
+     * @param world the server world
+     * @param pos the block position
+     * @return whether the block is a mushroom to pick
+     */
+    public static boolean isMushroom(ServerLevel world, BlockPos pos) {
+        return world.getBlockState(pos).is(InitTag.ENTITY_MUSHROOMS);
+    }
+
     /**
      * Finds a seed stack in the pet backpack.
      * @param pet the pet
