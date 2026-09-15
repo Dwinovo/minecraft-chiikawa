@@ -45,7 +45,7 @@ public final class PetUnloadFollow {
      *         {@code null} if the pet should stay (and unload) where it is
      */
     private static ServerPlayer findFollowedOwner(AbstractPet pet, ServerLevel level) {
-        if (!pet.isAlive() || !pet.isTame() || pet.getPetMode() != PetMode.FOLLOW
+        if (!pet.isAlive() || !pet.isTame() || pet.getPetDirective() != PetDirective.FOLLOW
                 || pet.isLeashed() || pet.isPassenger()) {
             return null;
         }

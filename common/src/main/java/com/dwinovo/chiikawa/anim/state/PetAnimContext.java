@@ -1,11 +1,11 @@
 package com.dwinovo.chiikawa.anim.state;
 
-import com.dwinovo.chiikawa.entity.PetMode;
+import com.dwinovo.chiikawa.entity.PetDirective;
 
 /**
  * Snapshot of gameplay state consumed by the animation resolver.
  *
- * @param mode player-selected pet mode
+ * @param directive the owner's directive for the pet
  * @param job current job role inferred from the pet's tools
  * @param locomotion coarse movement bucket
  * @param action semantic one-shot action, when known
@@ -17,7 +17,7 @@ import com.dwinovo.chiikawa.entity.PetMode;
  *                 behaviors via {@code AbstractPet.setActivity}.
  */
 public record PetAnimContext(
-        PetMode mode,
+        PetDirective directive,
         PetJobRole job,
         PetLocomotion locomotion,
         PetAction action,
@@ -26,7 +26,7 @@ public record PetAnimContext(
         PetActivity activity
 ) {
     public PetAnimContext {
-        mode = mode == null ? PetMode.FOLLOW : mode;
+        directive = directive == null ? PetDirective.FOLLOW : directive;
         job = job == null ? PetJobRole.NONE : job;
         locomotion = locomotion == null ? PetLocomotion.IDLE : locomotion;
         action = action == null ? PetAction.NONE : action;
@@ -36,13 +36,13 @@ public record PetAnimContext(
     }
 
     /**
-     * Common factory that builds a context from the pet's mode, job id, walk
+     * Common factory that builds a context from the pet's directive, job id, walk
      * speed, and code-bounded activity. Reaction/action/attention default to
      * {@code NONE} (these are vestigial in the resolver's current logic).
      */
-    public static PetAnimContext base(PetMode mode, int jobId, float walkSpeed, PetActivity activity) {
+    public static PetAnimContext base(PetDirective directive, int jobId, float walkSpeed, PetActivity activity) {
         return new PetAnimContext(
-                mode,
+                directive,
                 PetJobRole.fromId(jobId),
                 PetLocomotion.fromWalkSpeed(walkSpeed),
                 PetAction.NONE,
@@ -52,7 +52,7 @@ public record PetAnimContext(
     }
 
     /** Backwards-compatible shorthand defaulting activity to {@link PetActivity#NONE}. */
-    public static PetAnimContext base(PetMode mode, int jobId, float walkSpeed) {
-        return base(mode, jobId, walkSpeed, PetActivity.NONE);
+    public static PetAnimContext base(PetDirective directive, int jobId, float walkSpeed) {
+        return base(directive, jobId, walkSpeed, PetActivity.NONE);
     }
 }
