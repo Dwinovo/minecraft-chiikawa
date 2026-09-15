@@ -39,5 +39,11 @@ public interface IPlatformRegistryAccess {
 
     Supplier<Activity> musicianPlayActivity();
 
+    Supplier<Activity> followOwnerActivity();
+
+    Supplier<Activity> stayActivity();
+
+    Supplier<Activity> pickUpActivity();
+
     Supplier<MenuType<PetBackpackMenu>> petBackpackMenu();
 }

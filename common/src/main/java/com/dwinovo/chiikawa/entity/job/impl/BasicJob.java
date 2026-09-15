@@ -1,44 +1,37 @@
 package com.dwinovo.chiikawa.entity.job.impl;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.job.api.IJobTickHandler;
-import com.dwinovo.chiikawa.entity.job.api.IPetJob;
+import com.dwinovo.chiikawa.entity.job.api.PetCapability;
+import java.util.List;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Standard pet job: holding an item with {@code toolTag} causes the pet to
- * adopt this job (via {@link #canAssume}); the {@link #tickBrain} delegate
- * selects which of the job's pre-registered brain activities to run each
- * server tick.
- *
- * <p>Brain initialisation has moved out of jobs — see
- * {@link com.dwinovo.chiikawa.entity.AbstractPet#makeBrain} which registers
- * every job's activities once at construction. This class only carries the
- * tick-time logic.
+ * Standard pet job: holding an item with {@code toolTag} lets the pet assume it,
+ * which offers the job's intents.
  */
-public class BasicJob implements IPetJob {
+public class BasicJob implements PetCapability {
     private final int id;
     private final int priority;
     private final TagKey<Item> toolTag;
-    private final IJobTickHandler tickHandler;
+    private final List<ResourceLocation> intents;
 
-    public BasicJob(int id, int priority, TagKey<Item> toolTag, IJobTickHandler tickHandler) {
+    public BasicJob(int id, int priority, TagKey<Item> toolTag, List<ResourceLocation> intents) {
         this.id = id;
         this.priority = priority;
         this.toolTag = toolTag;
-        this.tickHandler = tickHandler;
+        this.intents = List.copyOf(intents);
     }
 
     @Override
-    public int getId() {
+    public int id() {
         return id;
     }
 
     @Override
-    public int getPriority() {
+    public int priority() {
         return priority;
     }
 
@@ -49,7 +42,7 @@ public class BasicJob implements IPetJob {
     }
 
     @Override
-    public void tickBrain(AbstractPet pet, Brain<AbstractPet> brain) {
-        tickHandler.tick(pet, brain);
+    public List<ResourceLocation> intents() {
+        return intents;
     }
 }

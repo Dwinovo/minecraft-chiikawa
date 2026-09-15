@@ -1,15 +1,17 @@
 package com.dwinovo.chiikawa.utils;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.PetActivities;
+import com.dwinovo.chiikawa.entity.brain.task.tameable.AnchorLeashBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.FloatBehavior;
-import com.dwinovo.chiikawa.entity.brain.task.tameable.KeepAroundBehavior;
+import com.dwinovo.chiikawa.entity.brain.task.tameable.FollowOwnerBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.PickUpItemTask;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.RandomWalkTask;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.SitBehavior;
+import com.dwinovo.chiikawa.init.InitActivity;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
-
+import java.util.Set;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.Brain;
@@ -17,50 +19,62 @@ import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.behavior.DoNothing;
 import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
-import net.minecraft.world.entity.ai.behavior.RandomStroll;
 import net.minecraft.world.entity.ai.behavior.RunOne;
 import net.minecraft.world.entity.ai.behavior.SetEntityLookTarget;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.schedule.Activity;
 
+/** Activities shared by every pet, whatever its job. */
 public final class BrainUtils {
     private BrainUtils() {
     }
 
+    /** Always active and unrelated to any intent: float, look, move, anchor leash. */
     public static void addCoreTasks(Brain<AbstractPet> brain) {
         Pair<Integer, BehaviorControl<? super AbstractPet>> floatInWater = Pair.of(0, new FloatBehavior<>());
-        Pair<Integer, BehaviorControl<? super AbstractPet>> sit = Pair.of(0, new SitBehavior<>());
-        Pair<Integer, BehaviorControl<? super AbstractPet>> keepAround = Pair.of(2, new KeepAroundBehavior<>(7, 13, 20));
-        Pair<Integer, BehaviorControl<? super AbstractPet>> walkToTarget = Pair.of(1, new MoveToTargetSink());
         Pair<Integer, BehaviorControl<? super AbstractPet>> look = Pair.of(0, new LookAtTargetSink(45, 45));
-        Pair<Integer, BehaviorControl<? super AbstractPet>> pickitem = Pair.of(3, new PickUpItemTask(0.7f));
-        addActivity(brain, Activity.CORE, ImmutableList.of(floatInWater, look, sit, keepAround, walkToTarget,pickitem));
+        Pair<Integer, BehaviorControl<? super AbstractPet>> walkToTarget = Pair.of(1, new MoveToTargetSink());
+        Pair<Integer, BehaviorControl<? super AbstractPet>> anchorLeash = Pair.of(2, new AnchorLeashBehavior());
+        PetActivities.register(brain, Activity.CORE, ImmutableList.of(floatInWater, look, walkToTarget, anchorLeash), Set.of());
     }
 
+    /** {@code follow_owner}: walk back to the owner. */
+    public static void addFollowOwnerTasks(Brain<AbstractPet> brain) {
+        PetActivities.register(brain, InitActivity.FOLLOW_OWNER.get(),
+            ImmutableList.of(Pair.of(2, new FollowOwnerBehavior())), Set.of());
+    }
+
+    /** {@code stay}: hold still but keep glancing around. */
+    public static void addStayTasks(Brain<AbstractPet> brain) {
+        Pair<Integer, BehaviorControl<? super AbstractPet>> sit = Pair.of(0, new SitBehavior<>());
+        Pair<Integer, BehaviorControl<? super AbstractPet>> lookAround = Pair.of(99, new RunOne<AbstractPet>(ImmutableList.of(
+            lookAtPlayer(), lookAtCreature(), doNothing()
+        )));
+        PetActivities.register(brain, InitActivity.STAY.get(), ImmutableList.of(sit, lookAround), Set.of());
+    }
+
+    /** {@code wander}: look around and stroll. */
     public static void addIdleTasks(Brain<AbstractPet> brain) {
-        Pair<Integer, BehaviorControl<? super AbstractPet>> randomTask = Pair.of(99, getLookAndRandomWalk());
-        addActivity(brain, Activity.IDLE, ImmutableList.of(randomTask));
+        Pair<Integer, BehaviorControl<? super AbstractPet>> randomTask = Pair.of(99, new RunOne<AbstractPet>(ImmutableList.of(
+            lookAtPlayer(), lookAtCreature(), Pair.of(new RandomWalkTask(), 2), doNothing()
+        )));
+        PetActivities.register(brain, Activity.IDLE, ImmutableList.of(randomTask), Set.of());
     }
 
-    public static void addActivity(
-        Brain<AbstractPet> brain,
-        Activity activity,
-        ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super AbstractPet>>> behaviorPriorityPairs
-    ) {
-        brain.addActivity(
-            activity,
-            behaviorPriorityPairs,
-            ImmutableSet.<Pair<MemoryModuleType<?>, MemoryStatus>>of(),
-            ImmutableSet.<MemoryModuleType<?>>of()
-        );
+    /** {@code pick_up_item}: walk to the remembered item and take it. */
+    public static void addPickUpTasks(Brain<AbstractPet> brain) {
+        PetActivities.register(brain, InitActivity.PICK_UP.get(),
+            ImmutableList.of(Pair.of(3, new PickUpItemTask(0.7f))), Set.of());
     }
 
-    private static RunOne<AbstractPet> getLookAndRandomWalk() {
-        Pair<BehaviorControl<? super AbstractPet>, Integer> lookToPlayer = Pair.of(SetEntityLookTarget.create(EntityType.PLAYER, 5), 2);
-        Pair<BehaviorControl<? super AbstractPet>, Integer> lookToAny = Pair.of(SetEntityLookTarget.create(MobCategory.CREATURE, 5), 2);
-        Pair<BehaviorControl<? super AbstractPet>, Integer> walkRandomly = Pair.of(new RandomWalkTask(), 2);
-        Pair<BehaviorControl<? super AbstractPet>, Integer> noThing = Pair.of(new DoNothing(30, 60), 1);
-        return new RunOne<AbstractPet>(ImmutableList.of(lookToPlayer, lookToAny, walkRandomly, noThing));
+    private static Pair<BehaviorControl<? super AbstractPet>, Integer> lookAtPlayer() {
+        return Pair.of(SetEntityLookTarget.create(EntityType.PLAYER, 5), 2);
+    }
+
+    private static Pair<BehaviorControl<? super AbstractPet>, Integer> lookAtCreature() {
+        return Pair.of(SetEntityLookTarget.create(MobCategory.CREATURE, 5), 2);
+    }
+
+    private static Pair<BehaviorControl<? super AbstractPet>, Integer> doNothing() {
+        return Pair.of(new DoNothing(30, 60), 1);
     }
 }
