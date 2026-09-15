@@ -2,9 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.task.farmer;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.anim.state.PetAction;
-import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitMemory;
-import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.init.InitTag;
 import com.dwinovo.chiikawa.platform.Services;
 import com.google.common.collect.ImmutableMap;
@@ -50,13 +48,6 @@ public class DeliverCropBehavior extends Behavior<AbstractPet> {
     @SuppressWarnings("null")
     @Override
     protected boolean checkExtraStartConditions(ServerLevel world, AbstractPet pet) {
-        if (pet.getPetDirective() != PetDirective.FREE || pet.getPetJobId() != InitRegistry.FARMER_ID) {
-            return false;
-        }
-        if (pet.getBrain().getMemory(InitMemory.PLANT_POS.get()).isPresent()
-            || pet.getBrain().getMemory(InitMemory.HARVEST_POS.get()).isPresent()) {
-            return false;
-        }
         Optional<BlockPos> containerPosOpt = pet.getBrain().getMemory(InitMemory.CONTAINER_POS.get());
         if (containerPosOpt.isEmpty()) {
             return false;
@@ -114,13 +105,6 @@ public class DeliverCropBehavior extends Behavior<AbstractPet> {
     @SuppressWarnings("null")
     @Override
     protected boolean canStillUse(ServerLevel world, AbstractPet pet, long time) {
-        if (pet.getPetDirective() != PetDirective.FREE || pet.getPetJobId() != InitRegistry.FARMER_ID) {
-            return false;
-        }
-        if (pet.getBrain().getMemory(InitMemory.PLANT_POS.get()).isPresent()
-            || pet.getBrain().getMemory(InitMemory.HARVEST_POS.get()).isPresent()) {
-            return false;
-        }
         Optional<BlockPos> containerPosOpt = pet.getBrain().getMemory(InitMemory.CONTAINER_POS.get());
         if (containerPosOpt.isEmpty()) {
             return false;
