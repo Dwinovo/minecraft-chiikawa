@@ -2,7 +2,6 @@ package com.dwinovo.chiikawa.entity.brain.task.tameable;
 
 import com.google.common.collect.ImmutableMap;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.PetDirective;
 import java.util.Map;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -21,16 +20,6 @@ public class SitBehavior<E extends AbstractPet> extends Behavior<E> {
         super(REQUIRED_MEMORIES, 100);
     }
 
-    /**
-     * Checks whether the task can start.
-     * @param level the server level
-     * @param entity the pet entity
-     * @return whether the task can start
-     */
-    @Override
-    protected boolean checkExtraStartConditions(ServerLevel level, E entity) {
-        return entity.getPetDirective() == PetDirective.STAY;
-    }
     @Override
     protected void tick(ServerLevel level, E entity, long gameTime) {
         entity.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
@@ -38,15 +27,12 @@ public class SitBehavior<E extends AbstractPet> extends Behavior<E> {
     }
 
     /**
-     * Checks whether the task should continue.
-     * @param level the server level
-     * @param entity the pet entity
-     * @param gameTime the current time
-     * @return whether the task can continue
+     * Keeps sitting for as long as the stay activity runs; the intent selector
+     * stops it when the pet is told to do something else.
      */
     @Override
     protected boolean canStillUse(ServerLevel level, E entity, long gameTime) {
-        return entity.getPetDirective() == PetDirective.STAY;
+        return true;
     }
 
     
