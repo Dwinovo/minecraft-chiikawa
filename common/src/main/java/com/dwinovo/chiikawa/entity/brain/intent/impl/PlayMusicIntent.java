@@ -10,13 +10,16 @@ import com.dwinovo.chiikawa.init.InitActivity;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.music.MusicStopReason;
 import com.dwinovo.chiikawa.music.ServerMusicSystem;
+import com.dwinovo.chiikawa.task.PetWorkCounters;
+import java.util.Optional;
 import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.schedule.Activity;
 
 /**
- * Performs the song selected on the held music box, once per selection.
+ * Performs the song selected on the held music box: once per selection, or over and over
+ * while the pet carries a street performance slip.
  *
  * <p>The pet remembers which selection it last started. That memory is forgotten
  * whenever the musician cannot perform (not free, or no longer holding the music
@@ -42,17 +45,22 @@ public final class PlayMusicIntent implements PetIntent {
 
     @Override
     public IntentCheck canRun(IntentContext ctx) {
-        return ctx.hasNewMusicSelection() ? IntentCheck.OK : IntentCheck.fail("no_new_song");
+        return ctx.hasPlayableSelection() ? IntentCheck.OK : IntentCheck.fail("no_new_song");
     }
 
     @Override
     public IntentCheck canContinue(IntentContext ctx) {
-        return ctx.playingMusic() || ctx.hasNewMusicSelection() ? IntentCheck.OK : IntentCheck.fail("song_over");
+        return ctx.playingMusic() || ctx.hasPlayableSelection() ? IntentCheck.OK : IntentCheck.fail("song_over");
     }
 
     @Override
     public float score(IntentContext ctx) {
         return SCORE;
+    }
+
+    @Override
+    public Optional<ResourceLocation> workCounter() {
+        return Optional.of(PetWorkCounters.PLAY_MUSIC_SECOND);
     }
 
     /** Ends the performance's music stream when the pet stops performing. */

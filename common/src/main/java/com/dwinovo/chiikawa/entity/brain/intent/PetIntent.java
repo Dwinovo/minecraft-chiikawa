@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain.intent;
 
+import java.util.Optional;
 import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -31,6 +32,15 @@ public interface PetIntent {
 
     /** Base score from 0 to 1. */
     float score(IntentContext ctx);
+
+    /**
+     * The work counter this intent's work reports, see
+     * {@link com.dwinovo.chiikawa.task.PetWorkCounters}. A pet carrying a slip that
+     * counts it prefers this intent.
+     */
+    default Optional<ResourceLocation> workCounter() {
+        return Optional.empty();
+    }
 
     /** Called when the selector switches away from this intent, before its behaviors are stopped. */
     default void onStop(IntentRuntime runtime) {
