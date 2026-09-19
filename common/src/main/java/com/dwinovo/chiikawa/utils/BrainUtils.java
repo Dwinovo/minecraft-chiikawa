@@ -8,6 +8,7 @@ import com.dwinovo.chiikawa.entity.brain.task.tameable.FollowOwnerBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.PickUpItemTask;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.RandomWalkTask;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.SitBehavior;
+import com.dwinovo.chiikawa.entity.brain.task.tameable.TakeTaskBehavior;
 import com.dwinovo.chiikawa.init.InitActivity;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
@@ -64,6 +65,12 @@ public final class BrainUtils {
     public static void addPickUpTasks(Brain<AbstractPet> brain) {
         PetActivities.register(brain, InitActivity.PICK_UP.get(),
             ImmutableList.of(Pair.of(3, new PickUpItemTask(0.7f))), Set.of());
+    }
+
+    /** {@code take_task}: walk to the nearest labor board and take a slip. */
+    public static void addTakeTaskTasks(Brain<AbstractPet> brain) {
+        PetActivities.register(brain, InitActivity.TAKE_TASK.get(),
+            ImmutableList.of(Pair.of(2, new TakeTaskBehavior())), Set.of());
     }
 
     private static Pair<BehaviorControl<? super AbstractPet>, Integer> lookAtPlayer() {

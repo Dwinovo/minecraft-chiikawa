@@ -1,11 +1,13 @@
 package com.dwinovo.chiikawa.data;
 
+import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.tags.TagAppender;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
@@ -51,6 +53,8 @@ public final class TagData {
             .add(key(Blocks.SHORT_GRASS), key(Blocks.TALL_GRASS), key(Blocks.FERN), key(Blocks.LARGE_FERN));
         tags.tag(InitTag.ENTITY_MUSHROOMS)
             .add(key(Blocks.RED_MUSHROOM), key(Blocks.BROWN_MUSHROOM));
+        tags.tag(BlockTags.MINEABLE_WITH_AXE)
+            .add(key(InitBlocks.LABOR_BOARD.get()));
     }
 
     public static void addItemTags(TagAppenderProvider<Item> tags) {

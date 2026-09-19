@@ -22,23 +22,6 @@ public final class ModRecipeProvider extends RecipeProvider {
         super(registries, output);
     }
 
-    /** The data provider that runs {@link ModRecipeProvider}; registered by both loaders' data generators. */
-    public static final class Runner extends RecipeProvider.Runner {
-        public Runner(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-            super(output, registries);
-        }
-
-        @Override
-        protected RecipeProvider createRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
-            return new ModRecipeProvider(registries, output);
-        }
-
-        @Override
-        public String getName() {
-            return "Chiikawa Recipes";
-        }
-    }
-
     @Override
     public void buildRecipes() {
         HolderGetter<Item> itemLookup = this.registries.lookupOrThrow(Registries.ITEM);
@@ -79,5 +62,32 @@ public final class ModRecipeProvider extends RecipeProvider {
             .pattern(" G ")
             .unlockedBy(getHasName(Items.NOTE_BLOCK), has(Items.NOTE_BLOCK))
             .save(this.output, ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(Constants.MOD_ID, "music_box")));
+
+        ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.DECORATIONS, InitItems.LABOR_BOARD.get())
+            .define('P', Items.PAPER)
+            .define('W', ItemTags.PLANKS)
+            .define('S', Items.STICK)
+            .pattern("PPP")
+            .pattern("WWW")
+            .pattern("S S")
+            .unlockedBy(getHasName(Items.PAPER), has(Items.PAPER))
+            .save(this.output);
+    }
+
+    /** The data provider that runs {@link ModRecipeProvider}; both loaders' datagen entry points register it. */
+    public static final class Runner extends RecipeProvider.Runner {
+        public Runner(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
+            super(output, registries);
+        }
+
+        @Override
+        protected RecipeProvider createRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
+            return new ModRecipeProvider(registries, output);
+        }
+
+        @Override
+        public String getName() {
+            return "Chiikawa Recipes";
+        }
     }
 }

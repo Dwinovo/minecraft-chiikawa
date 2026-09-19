@@ -12,9 +12,12 @@ import com.dwinovo.chiikawa.init.InitSounds;
 import com.dwinovo.chiikawa.init.InitMenu;
 import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.init.InitEntity;
+import com.dwinovo.chiikawa.init.InitBlockEntities;
+import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTabs;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalityLoader;
+import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
 import com.dwinovo.chiikawa.entity.brain.task.farmer.crop.FarmRegistry;
 import com.dwinovo.chiikawa.item.PetDollItem;
 import com.dwinovo.chiikawa.item.PetReviveRitualManager;
@@ -51,6 +54,8 @@ public class ChiikawaFabricMod implements ModInitializer {
         InitMenu.init();
         InitDataComponents.init();
         InitEntity.init();
+        InitBlocks.init();
+        InitBlockEntities.init();
         InitItems.init();
         InitTabs.init();
         FarmRegistry.init();
@@ -70,23 +75,28 @@ public class ChiikawaFabricMod implements ModInitializer {
             }
             return dollItem.tryStartCakeRitual(level, player, stack, hitResult.getBlockPos());
         });
-        PetPersonalityLoader personalityLoader = new PetPersonalityLoader();
-        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new IdentifiableResourceReloadListener() {
-            @Override
-            public ResourceLocation getFabricId() {
-                return PetPersonalityLoader.ID;
-            }
-
-            @Override
-            public CompletableFuture<Void> reload(PreparableReloadListener.PreparationBarrier barrier, ResourceManager manager,
-                    ProfilerFiller prepareProfiler, ProfilerFiller applyProfiler, Executor backgroundExecutor, Executor gameExecutor) {
-                return personalityLoader.reload(barrier, manager, prepareProfiler, applyProfiler, backgroundExecutor, gameExecutor);
-            }
-        });
+        registerServerDataListener(PetPersonalityLoader.ID, new PetPersonalityLoader());
+        registerServerDataListener(PetTaskTypeLoader.ID, new PetTaskTypeLoader());
         ServerTickEvents.END_SERVER_TICK.register(PetReviveRitualManager::tickServer);
         ServerTickEvents.END_SERVER_TICK.register(ServerMusicSystem::tickServer);
         ServerLifecycleEvents.SERVER_STOPPED.register(ServerMusicSystem::stopServer);
         Constants.LOG.info("Hello Chiikawa Fabric world!");
         CommonClass.init();
+    }
+
+    /** Fabric only takes reload listeners that name themselves. */
+    private static void registerServerDataListener(ResourceLocation id, PreparableReloadListener listener) {
+        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new IdentifiableResourceReloadListener() {
+            @Override
+            public ResourceLocation getFabricId() {
+                return id;
+            }
+
+            @Override
+            public CompletableFuture<Void> reload(PreparableReloadListener.PreparationBarrier barrier, ResourceManager manager,
+                    ProfilerFiller prepareProfiler, ProfilerFiller applyProfiler, Executor backgroundExecutor, Executor gameExecutor) {
+                return listener.reload(barrier, manager, prepareProfiler, applyProfiler, backgroundExecutor, gameExecutor);
+            }
+        });
     }
 }
