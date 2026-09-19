@@ -2,10 +2,13 @@ package com.dwinovo.chiikawa.entity.brain.task.farmer;
 
 import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.task.PetWorkCounters;
+import com.dwinovo.chiikawa.task.TaskTracker;
 import com.dwinovo.chiikawa.utils.Utils;
 import com.google.common.collect.ImmutableMap;
 import java.util.function.BiPredicate;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -18,16 +21,20 @@ import net.minecraft.world.phys.Vec3;
 public class CollectBlockBehavior extends Behavior<AbstractPet> {
     private final MemoryModuleType<BlockPos> target;
     private final BiPredicate<ServerLevel, BlockPos> qualifies;
+    private final ResourceLocation workCounter;
 
     /**
      * Creates the task.
      * @param target the memory holding the block to collect
      * @param qualifies whether the block there is still one to collect
+     * @param workCounter the work each collected block reports, see {@link PetWorkCounters}
      */
-    public CollectBlockBehavior(MemoryModuleType<BlockPos> target, BiPredicate<ServerLevel, BlockPos> qualifies) {
+    public CollectBlockBehavior(MemoryModuleType<BlockPos> target, BiPredicate<ServerLevel, BlockPos> qualifies,
+            ResourceLocation workCounter) {
         super(ImmutableMap.of(target, MemoryStatus.VALUE_PRESENT));
         this.target = target;
         this.qualifies = qualifies;
+        this.workCounter = workCounter;
     }
 
     /**
@@ -60,5 +67,6 @@ public class CollectBlockBehavior extends Behavior<AbstractPet> {
         // Drops were already collected above, so don't drop again on removal.
         world.destroyBlock(pos, false, pet);
         pet.getBrain().eraseMemory(target);
+        TaskTracker.advance(pet, workCounter, 1);
     }
 }
