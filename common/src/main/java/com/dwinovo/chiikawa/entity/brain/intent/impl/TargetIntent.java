@@ -27,15 +27,17 @@ public final class TargetIntent implements PetIntent {
     private final float score;
     private final String missingReason;
     private final List<IntentRequirement> requirements;
+    private final Optional<ResourceLocation> workCounter;
 
     /**
      * @param target which remembered target this intent acts on
      * @param missingReason failure reason when there is no such target
      * @param requirements further conditions, checked in order before the target
+     * @param workCounter the work counter its behaviors report, see {@link PetIntent#workCounter}
      */
     public TargetIntent(ResourceLocation id, IntentCategory category, Supplier<Activity> activity,
             Function<PerceivedTargets, Optional<GlobalPos>> target, float score, String missingReason,
-            List<IntentRequirement> requirements) {
+            List<IntentRequirement> requirements, Optional<ResourceLocation> workCounter) {
         this.id = id;
         this.category = category;
         this.activity = activity;
@@ -43,6 +45,7 @@ public final class TargetIntent implements PetIntent {
         this.score = score;
         this.missingReason = missingReason;
         this.requirements = List.copyOf(requirements);
+        this.workCounter = workCounter;
     }
 
     @Override
@@ -76,5 +79,10 @@ public final class TargetIntent implements PetIntent {
     @Override
     public float score(IntentContext ctx) {
         return score;
+    }
+
+    @Override
+    public Optional<ResourceLocation> workCounter() {
+        return workCounter;
     }
 }

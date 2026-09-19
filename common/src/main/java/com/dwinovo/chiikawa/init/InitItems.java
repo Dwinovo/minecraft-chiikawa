@@ -15,6 +15,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
 
@@ -43,6 +44,8 @@ public final class InitItems {
         registerItem("chiikawa_weapon", ChiikawaWeapon::new);
     public static final Supplier<Item> MUSIC_BOX =
         registerItem("music_box", MusicBoxItem::new);
+    public static final Supplier<BlockItem> LABOR_BOARD =
+        registerItem("labor_board", () -> new BlockItem(InitBlocks.LABOR_BOARD.get(), new Item.Properties()));
     public static final Supplier<Item> USAGI_DOLL =
         registerItem("usagi_doll", properties -> new PetDollItem(properties, InitEntity.USAGI_PET));
     public static final Supplier<Item> HACHIWARE_DOLL =
