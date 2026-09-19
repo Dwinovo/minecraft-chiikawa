@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.init;
 
 import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetBoardSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetFarmerWorkSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
 import com.dwinovo.chiikawa.platform.Services;
@@ -14,6 +15,8 @@ public final class InitSensor {
         Services.PLATFORM_REGISTRY.petFarmerWorkSensor();
     public static final Supplier<SensorType<PetPickableItemSensor>> PET_ITEM_ENTITY_SENSOR =
         Services.PLATFORM_REGISTRY.petItemEntitySensor();
+    public static final Supplier<SensorType<PetBoardSensor>> PET_BOARD_SENSOR =
+        Services.PLATFORM_REGISTRY.petBoardSensor();
 
     private InitSensor() {
     }

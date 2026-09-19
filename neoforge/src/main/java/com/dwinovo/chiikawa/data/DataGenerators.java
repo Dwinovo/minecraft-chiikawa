@@ -28,6 +28,7 @@ public final class DataGenerators {
                 new ModSoundDefinitionsProvider(output, existingFileHelper));
         event.getGenerator().addProvider(client,
                 new ModItemModelProvider(output, existingFileHelper));
+        event.getGenerator().addProvider(client, new ModBlockModelProvider(output));
         event.getGenerator().addProvider(client,
                 new ModLanguageProvider(output, "en_us"));
         event.getGenerator().addProvider(client,
@@ -43,6 +44,8 @@ public final class DataGenerators {
                 new ModItemTagsProvider(output, lookupProvider, existingFileHelper));
         event.getGenerator().addProvider(server, new ModRecipeProvider(output, lookupProvider));
         event.getGenerator().addProvider(server, new PetPersonalityProvider(output));
+        event.getGenerator().addProvider(server, new PetTaskTypeProvider(output));
+        event.getGenerator().addProvider(server, new ModLootTableProvider(output, lookupProvider));
         // Entity tags.
         event.getGenerator().addProvider(server,
             new ModEntityTagsProvider(

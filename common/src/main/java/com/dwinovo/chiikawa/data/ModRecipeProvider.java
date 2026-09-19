@@ -18,6 +18,7 @@ import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
@@ -117,6 +118,16 @@ public class ModRecipeProvider extends RecipeProvider {
                 "PNP",
                 " G "
         );
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, InitItems.LABOR_BOARD.get())
+                .define('P', Items.PAPER)
+                .define('W', ItemTags.PLANKS)
+                .define('S', Items.STICK)
+                .pattern("PPP")
+                .pattern("WWW")
+                .pattern("S S")
+                .unlockedBy(getHasName(Items.PAPER), has(Items.PAPER))
+                .save(recipeOutput);
     }
 
     private void saveEnchantedShaped(

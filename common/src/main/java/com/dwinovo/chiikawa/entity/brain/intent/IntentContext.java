@@ -8,7 +8,11 @@ import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
 import com.dwinovo.chiikawa.entity.brain.task.musician.PlayMusicBehavior;
+import com.dwinovo.chiikawa.init.InitBlockEntities;
+import com.dwinovo.chiikawa.init.InitMemory;
+import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.utils.Utils;
+import java.util.Optional;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.level.Level;
@@ -25,9 +29,12 @@ import net.minecraft.world.level.Level;
  * @param personality how the pet's kind leans
  * @param anchor where the pet may act
  * @param targets what the sensors remember
+ * @param task the slip the pet carries
+ * @param offeringBoard the nearest labor board, while it has a slip the pet would take
+ * @param takeTaskCoolingDown whether the pet recently failed to take a slip
  * @param attackCoolingDown whether the pet's attack cooldown is running
  * @param hasArrows whether the pet carries arrows
- * @param hasNewMusicSelection whether the held music box selects a song the pet has not started yet
+ * @param hasPlayableSelection whether the held music box selects a song the pet would play now
  * @param playingMusic whether the pet is performing
  */
 public record IntentContext(
@@ -37,9 +44,12 @@ public record IntentContext(
     Personality personality,
     PetAnchor anchor,
     PerceivedTargets targets,
+    Optional<PetTask> task,
+    Optional<GlobalPos> offeringBoard,
+    boolean takeTaskCoolingDown,
     boolean attackCoolingDown,
     boolean hasArrows,
-    boolean hasNewMusicSelection,
+    boolean hasPlayableSelection,
     boolean playingMusic
 ) {
     public static IntentContext capture(AbstractPet pet, PetOwnership ownership) {
@@ -52,10 +62,22 @@ public record IntentContext(
             PetPersonalities.of(pet.getType()),
             PetConstraints.anchorOf(pet, ownership),
             PerceivedTargets.capture(pet),
+            pet.getTask(),
+            offeringBoard(pet),
+            pet.getBrain().hasMemoryValue(InitMemory.TAKE_TASK_COOLDOWN.get()),
             pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_COOLING_DOWN),
             !Utils.getArrow(pet).isEmpty(),
-            PlayMusicBehavior.unplayedSelection(pet).isPresent(),
+            PlayMusicBehavior.playableSelection(pet).isPresent(),
             pet.getActivity() == PetActivity.PLAY_GUITAR
         );
+    }
+
+    private static Optional<GlobalPos> offeringBoard(AbstractPet pet) {
+        Level level = pet.level();
+        return pet.getBrain().getMemory(InitMemory.NEAREST_BOARD.get())
+            .filter(level::isLoaded)
+            .flatMap(pos -> level.getBlockEntity(pos, InitBlockEntities.LABOR_BOARD.get()))
+            .filter(board -> board.offersSlipTo(pet))
+            .map(board -> GlobalPos.of(level.dimension(), board.getBlockPos()));
     }
 }
