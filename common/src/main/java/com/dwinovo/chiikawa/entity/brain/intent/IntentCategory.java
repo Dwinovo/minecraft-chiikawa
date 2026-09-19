@@ -12,5 +12,7 @@ public enum IntentCategory {
     /** Gathering what grows in the wild, such as weeds and mushrooms. */
     FORAGE,
     COMBAT,
-    PICK_UP
+    PICK_UP,
+    /** Walking to a labor board to take a slip; on the way while following. */
+    TAKE_TASK
 }

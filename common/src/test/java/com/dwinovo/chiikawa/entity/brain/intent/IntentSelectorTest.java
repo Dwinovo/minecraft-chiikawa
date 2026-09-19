@@ -6,20 +6,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.entity.brain.constraint.AnchorDistances;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
-import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.Candidate;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.Decision;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.EndReason;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.SelectorParams;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
+import com.dwinovo.chiikawa.task.PetTask;
+import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.dwinovo.chiikawa.testing.FixedRandom;
+import com.dwinovo.chiikawa.testing.TestContext;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -203,20 +205,41 @@ class IntentSelectorTest {
         assertEquals("intent.chiikawa.fail.higher_priority", plantAndDeliver.get(3).check().reasonKey());
     }
 
+    // ---- slips -----------------------------------------------------------------
+
+    @Test
+    void workTheCarriedSlipCountsIsPreferred() {
+        PetTask weeding = new PetTask(id("weeding"), id("farmer"), PetWorkCounters.WEED, 8,
+            ResourceKey.create(Registries.LOOT_TABLE, id("pet_task/weeding")), 0);
+        Optional<GlobalPos> near = near(true, 1);
+        IntentContext ctx = TestContext.at(PET, new PetAnchor(PET, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, false, true))
+            .targets(new PerceivedTargets(Optional.empty(), near, Optional.empty(), Optional.empty(), near, Optional.empty(),
+                Optional.empty()))
+            .task(weeding)
+            .build();
+        List<Candidate> candidates = IntentSelector.candidates(
+            List.of(PetIntents.get(PetIntents.HARVEST), PetIntents.get(PetIntents.WEED)), ctx, null, category -> true);
+
+        assertEquals(0.6F, candidates.get(0).score(), 1.0E-6F);
+        assertEquals(0.5F + IntentSelector.TASK_BONUS, candidates.get(1).score(), 1.0E-6F);
+        assertEquals(PetIntents.WEED, choose(candidates, null, PLAIN).next());
+    }
+
     // ---- helpers ---------------------------------------------------------------
 
     private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
         ResourceKey.createRegistryKey(new ResourceLocation("dimension")),
         new ResourceLocation("overworld"));
     private static final GlobalPos PET = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
-    private static final PetOwnership OWNED = new PetOwnership.Owned(UUID.fromString("00000000-0000-0000-0000-000000000001"));
 
     /** Wander, harvest, plant and deliver, as a free farmer sees them. */
     private static List<Candidate> farmCandidates(Personality personality, DayPhase phase, PerceivedTargets targets,
             ResourceLocation running) {
-        IntentContext ctx = new IntentContext(PET, phase, OWNED, personality,
-            new PetAnchor(PET, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, false, true),
-            targets, false, false, false, false);
+        IntentContext ctx = TestContext.at(PET, new PetAnchor(PET, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, false, true))
+            .phase(phase)
+            .personality(personality)
+            .targets(targets)
+            .build();
         List<PetIntent> offered = List.of(PetIntents.get(PetIntents.WANDER), PetIntents.get(PetIntents.HARVEST),
             PetIntents.get(PetIntents.PLANT), PetIntents.get(PetIntents.DELIVER));
         return IntentSelector.candidates(offered, ctx, running, category -> true);
