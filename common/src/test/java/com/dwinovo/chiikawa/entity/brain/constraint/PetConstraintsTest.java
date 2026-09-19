@@ -119,8 +119,9 @@ class PetConstraintsTest {
     // ---- permission table ------------------------------------------------------
 
     @Test
-    void followPermitsFollowingAndWandering() {
-        assertPermits(PetDirective.FOLLOW, OWNED, EnumSet.of(IntentCategory.FOLLOW_OWNER, IntentCategory.WANDER));
+    void followPermitsFollowingWanderingAndTakingSlipsOnTheWay() {
+        assertPermits(PetDirective.FOLLOW, OWNED,
+            EnumSet.of(IntentCategory.FOLLOW_OWNER, IntentCategory.WANDER, IntentCategory.TAKE_TASK));
     }
 
     @Test
@@ -129,16 +130,16 @@ class PetConstraintsTest {
     }
 
     @Test
-    void freePermitsWanderingWorkForagingFightsAndPickingUp() {
-        assertPermits(PetDirective.FREE, OWNED, EnumSet.of(
-            IntentCategory.WANDER, IntentCategory.WORK, IntentCategory.FORAGE, IntentCategory.COMBAT, IntentCategory.PICK_UP));
+    void freePermitsWanderingWorkForagingFightsPickingUpAndTakingSlips() {
+        assertPermits(PetDirective.FREE, OWNED, EnumSet.of(IntentCategory.WANDER, IntentCategory.WORK, IntentCategory.FORAGE,
+            IntentCategory.COMBAT, IntentCategory.PICK_UP, IntentCategory.TAKE_TASK));
     }
 
     @Test
-    void wildPermitsWanderingForagingAndFightsWhateverItsDirective() {
+    void wildPermitsWanderingForagingFightsAndTakingSlipsWhateverItsDirective() {
         for (PetDirective directive : PetDirective.values()) {
             assertPermits(directive, PetOwnership.WILD,
-                EnumSet.of(IntentCategory.WANDER, IntentCategory.FORAGE, IntentCategory.COMBAT));
+                EnumSet.of(IntentCategory.WANDER, IntentCategory.FORAGE, IntentCategory.COMBAT, IntentCategory.TAKE_TASK));
         }
     }
 
