@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.platform.services;
 
 import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetBoardSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetFarmerWorkSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
@@ -15,6 +16,8 @@ public interface IPlatformRegistryAccess {
     Supplier<SensorType<PetFarmerWorkSensor>> petFarmerWorkSensor();
 
     Supplier<SensorType<PetPickableItemSensor>> petItemEntitySensor();
+
+    Supplier<SensorType<PetBoardSensor>> petBoardSensor();
 
     Supplier<Activity> farmerHarvestActivity();
 
@@ -48,6 +51,8 @@ public interface IPlatformRegistryAccess {
     Supplier<Activity> stayActivity();
 
     Supplier<Activity> pickUpActivity();
+
+    Supplier<Activity> takeTaskActivity();
 
     Supplier<MenuType<PetBackpackMenu>> petBackpackMenu();
 }

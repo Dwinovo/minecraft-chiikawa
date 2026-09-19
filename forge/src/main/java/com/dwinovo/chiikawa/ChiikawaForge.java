@@ -7,6 +7,8 @@ import com.dwinovo.chiikawa.init.InitCapabilities;
 import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
+import com.dwinovo.chiikawa.init.InitBlockEntities;
+import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitMenu;
 import com.dwinovo.chiikawa.init.InitRegistry;
@@ -14,6 +16,7 @@ import com.dwinovo.chiikawa.init.InitSensor;
 import com.dwinovo.chiikawa.init.InitSounds;
 import com.dwinovo.chiikawa.init.InitTabs;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalityLoader;
+import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
 import com.dwinovo.chiikawa.entity.brain.task.farmer.crop.FarmRegistry;
 import com.dwinovo.chiikawa.item.PetDollItem;
 import com.dwinovo.chiikawa.item.PetReviveRitualManager;
@@ -50,6 +53,8 @@ public class ChiikawaForge {
         InitMenu.init();
         InitDataComponents.init();
         InitEntity.init();
+        InitBlocks.init();
+        InitBlockEntities.init();
         InitItems.init();
         InitTabs.init();
         InitCapabilities.init();
@@ -62,7 +67,10 @@ public class ChiikawaForge {
         MinecraftForge.EVENT_BUS.addListener(ChiikawaForge::onServerTick);
         MinecraftForge.EVENT_BUS.addListener(ChiikawaForge::onServerStopping);
         MinecraftForge.EVENT_BUS.addListener(ChiikawaForge::registerCommands);
-        MinecraftForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> event.addListener(new PetPersonalityLoader()));
+        MinecraftForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> {
+            event.addListener(new PetPersonalityLoader());
+            event.addListener(new PetTaskTypeLoader());
+        });
 
         InitCapabilities.register(modEventBus);
 

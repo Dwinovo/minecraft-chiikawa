@@ -61,5 +61,15 @@ public class ModRecipeProvider extends RecipeProvider {
                 .define('G', Items.GOLD_INGOT)
                 .unlockedBy(getHasName(Items.NOTE_BLOCK), has(Items.NOTE_BLOCK))
                 .save(recipeOutput, new ResourceLocation(Constants.MOD_ID, "music_box"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, InitItems.LABOR_BOARD.get())
+                .define('P', Items.PAPER)
+                .define('W', ItemTags.PLANKS)
+                .define('S', Items.STICK)
+                .pattern("PPP")
+                .pattern("WWW")
+                .pattern("S S")
+                .unlockedBy(getHasName(Items.PAPER), has(Items.PAPER))
+                .save(recipeOutput);
     }
 }

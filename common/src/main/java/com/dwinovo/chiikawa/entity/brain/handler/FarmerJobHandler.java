@@ -11,6 +11,7 @@ import com.dwinovo.chiikawa.entity.brain.task.farmer.WalkToContainerBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.farmer.WalkToPlantCropBehavior;
 import com.dwinovo.chiikawa.init.InitActivity;
 import com.dwinovo.chiikawa.init.InitMemory;
+import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.dwinovo.chiikawa.utils.Utils;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
@@ -53,11 +54,11 @@ public final class FarmerJobHandler {
             Pair.of(4, new WalkToContainerBehavior(0.8F))
         ), Set.of());
         PetActivities.register(brain, InitActivity.WEED.get(), ImmutableList.of(
-            Pair.of(3, new CollectBlockBehavior(InitMemory.WEED_POS.get(), Utils::isWeed)),
+            Pair.of(3, new CollectBlockBehavior(InitMemory.WEED_POS.get(), Utils::isWeed, PetWorkCounters.WEED)),
             Pair.of(4, new WalkToBlockTargetBehavior(InitMemory.WEED_POS.get(), Utils::isWeed, 0.8F))
         ), Set.of());
         PetActivities.register(brain, InitActivity.PICK_MUSHROOM.get(), ImmutableList.of(
-            Pair.of(3, new CollectBlockBehavior(InitMemory.MUSHROOM_POS.get(), Utils::isMushroom)),
+            Pair.of(3, new CollectBlockBehavior(InitMemory.MUSHROOM_POS.get(), Utils::isMushroom, PetWorkCounters.PICK_MUSHROOM)),
             Pair.of(4, new WalkToBlockTargetBehavior(InitMemory.MUSHROOM_POS.get(), Utils::isMushroom, 0.8F))
         ), Set.of());
     }

@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.platform;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetBoardSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetFarmerWorkSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
@@ -35,6 +36,8 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
         SENSOR_TYPES.register("pet_farmer_work_sensor", () -> new SensorType<>(PetFarmerWorkSensor::new));
     private static final RegistryObject<SensorType<PetPickableItemSensor>> PET_ITEM_ENTITY_SENSOR =
         SENSOR_TYPES.register("pet_item_entity_sensor", () -> new SensorType<>(PetPickableItemSensor::new));
+    private static final RegistryObject<SensorType<PetBoardSensor>> PET_BOARD_SENSOR =
+        SENSOR_TYPES.register("pet_board_sensor", () -> new SensorType<>(PetBoardSensor::new));
 
     // Activity registrations
     private static final RegistryObject<Activity> FARMER_HARVEST =
@@ -59,6 +62,8 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
         ACTIVITIES.register("stay", () -> new Activity("stay"));
     private static final RegistryObject<Activity> PICK_UP =
         ACTIVITIES.register("pick_up", () -> new Activity("pick_up"));
+    private static final RegistryObject<Activity> TAKE_TASK =
+        ACTIVITIES.register("take_task", () -> new Activity("take_task"));
 
     // Menu registrations
     private static final RegistryObject<MenuType<PetBackpackMenu>> PET_BACKPACK =
@@ -94,6 +99,11 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
     @Override
     public Supplier<SensorType<PetPickableItemSensor>> petItemEntitySensor() {
         return PET_ITEM_ENTITY_SENSOR;
+    }
+
+    @Override
+    public Supplier<SensorType<PetBoardSensor>> petBoardSensor() {
+        return PET_BOARD_SENSOR;
     }
 
     @Override
@@ -149,6 +159,11 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
     @Override
     public Supplier<Activity> pickUpActivity() {
         return PICK_UP;
+    }
+
+    @Override
+    public Supplier<Activity> takeTaskActivity() {
+        return TAKE_TASK;
     }
 
     @Override

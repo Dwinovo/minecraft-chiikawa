@@ -7,6 +7,7 @@ import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
+import com.dwinovo.chiikawa.task.PetTask;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -40,6 +41,8 @@ public final class IntentSelector {
      * does not flip the pet back and forth at a crossover.
      */
     static final float HOLD_MARGIN = 0.02F;
+    /** Added to the base score of an intent whose work the pet's slip counts. */
+    static final float TASK_BONUS = 0.2F;
 
     private IntentSelector() {
     }
@@ -153,8 +156,9 @@ public final class IntentSelector {
 
     /**
      * Candidates as the selector scores them: whether the directive permits each intent,
-     * its start condition (continue condition for the running one), and its base score
-     * weighted by the personality for the current part of the day.
+     * its start condition (continue condition for the running one), and its base score,
+     * raised by {@link #TASK_BONUS} when the pet's slip counts the intent's work, weighted
+     * by the personality for the current part of the day.
      *
      * @param offered intents in a stable order
      * @param ctx the evaluation snapshot
@@ -169,10 +173,15 @@ public final class IntentSelector {
                 intent.id(),
                 allows.test(intent.category()),
                 intent.id().equals(running) ? intent.canContinue(ctx) : intent.canRun(ctx),
-                intent.score(ctx) * ctx.personality().multiplier(intent.id(), ctx.phase())
+                (intent.score(ctx) + (carriesSlipFor(intent, ctx) ? TASK_BONUS : 0.0F))
+                    * ctx.personality().multiplier(intent.id(), ctx.phase())
             ));
         }
         return candidates;
+    }
+
+    private static boolean carriesSlipFor(PetIntent intent, IntentContext ctx) {
+        return intent.workCounter().isPresent() && ctx.task().map(PetTask::counter).equals(intent.workCounter());
     }
 
     private static @Nullable EndReason endReason(@Nullable Candidate held) {
