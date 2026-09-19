@@ -43,7 +43,9 @@ public final class LanguageData {
             addIntentFailureTranslations(adder, "无法跟随主人", "主人就在附近", "已经回到主人身边", "目标不在范围内",
                 "目标离开了活动范围", "附近没有可拾取的物品", "没有可收割的作物", "没有可种植的耕地", "没有可存放的容器",
                 "没有攻击目标", "攻击冷却中", "没有箭", "没有新的曲子可演奏", "曲子演奏完了", "先做更要紧的活",
-                "附近没有野草", "附近没有蘑菇", "只有野生的才会自己去做", "只在夜里做");
+                "附近没有野草", "附近没有蘑菇", "要领到对应的工作牌才会做", "只在夜里做",
+                "已经带着一张工作牌", "刚才没领到牌，歇一会儿", "附近的公告板没有合适的工作牌");
+            addBlockTranslations(adder, "劳动公告板");
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
@@ -78,7 +80,9 @@ public final class LanguageData {
                 "Target left the allowed area", "No item to pick up", "No crop to harvest", "No farmland to plant", "No container to deliver to",
                 "No target to attack", "Attack is cooling down", "No arrows", "No new song to play", "The song is over",
                 "Something more urgent comes first", "No weeds nearby", "No mushrooms nearby",
-                "Only wild pets do this on their own", "Only done at night");
+                "Only with a matching slip", "Only done at night",
+                "Already carries a slip", "Resting after missing a slip", "No slip for it on a nearby board");
+            addBlockTranslations(adder, "Labor Board");
         }
     }
 
@@ -109,8 +113,11 @@ public final class LanguageData {
         String higherPriority,
         String noWeed,
         String noMushroom,
-        String wildOnly,
-        String notNight
+        String needsSlip,
+        String notNight,
+        String hasSlip,
+        String boardResting,
+        String noSlip
     ) {
         adder.add("intent.chiikawa.fail.owner_unavailable", ownerUnavailable);
         adder.add("intent.chiikawa.fail.owner_nearby", ownerNearby);
@@ -129,8 +136,15 @@ public final class LanguageData {
         adder.add("intent.chiikawa.fail.higher_priority", higherPriority);
         adder.add("intent.chiikawa.fail.no_weed", noWeed);
         adder.add("intent.chiikawa.fail.no_mushroom", noMushroom);
-        adder.add("intent.chiikawa.fail.wild_only", wildOnly);
+        adder.add("intent.chiikawa.fail.needs_slip", needsSlip);
         adder.add("intent.chiikawa.fail.not_night", notNight);
+        adder.add("intent.chiikawa.fail.has_slip", hasSlip);
+        adder.add("intent.chiikawa.fail.board_resting", boardResting);
+        adder.add("intent.chiikawa.fail.no_slip", noSlip);
+    }
+
+    private static void addBlockTranslations(Adder adder, String laborBoard) {
+        adder.add("block.chiikawa.labor_board", laborBoard);
     }
 
     private static void addDollTooltipTranslations(Adder adder, String placeOnCakeHint) {

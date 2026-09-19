@@ -96,7 +96,7 @@ public final class PetConstraints {
         return switch (category) {
             case FOLLOW_OWNER -> !wild && directive == PetDirective.FOLLOW;
             case STAY -> !wild && directive == PetDirective.STAY;
-            case WANDER -> wild || directive != PetDirective.STAY;
+            case WANDER, TAKE_TASK -> wild || directive != PetDirective.STAY;
             case WORK, PICK_UP -> !wild && directive == PetDirective.FREE;
             case FORAGE, COMBAT -> wild || directive == PetDirective.FREE;
         };
