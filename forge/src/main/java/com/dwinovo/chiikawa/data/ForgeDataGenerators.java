@@ -38,6 +38,7 @@ public class ForgeDataGenerators {
         
         // Item model provider
         generator.addProvider(event.includeClient(), new ForgeModItemModelProvider(output, existingFileHelper));
+        generator.addProvider(event.includeClient(), new ModBlockModelProvider(output));
         
         // Tag providers
         ForgeModBlockTagsProvider blockTagsProvider = new ForgeModBlockTagsProvider(output, lookupProvider, existingFileHelper);
@@ -48,6 +49,8 @@ public class ForgeDataGenerators {
         // Recipe provider
         generator.addProvider(event.includeServer(), new ModRecipeProvider(output));
         generator.addProvider(event.includeServer(), new PetPersonalityProvider(output));
+        generator.addProvider(event.includeServer(), new PetTaskTypeProvider(output));
+        generator.addProvider(event.includeServer(), new ModLootTableProvider(output, lookupProvider));
         
         // Sound provider
         generator.addProvider(event.includeClient(), new ForgeModSoundsProvider(output));
