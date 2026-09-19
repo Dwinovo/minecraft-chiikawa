@@ -5,6 +5,8 @@ import net.neoforged.fml.common.Mod;
 import com.dwinovo.chiikawa.command.ChiikawaDebugCommand;
 import com.dwinovo.chiikawa.command.ChiikawaMusicCommand;
 import com.dwinovo.chiikawa.init.InitEntity;
+import com.dwinovo.chiikawa.init.InitBlockEntities;
+import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitMenu;
 import com.dwinovo.chiikawa.init.InitRegistry;
@@ -16,6 +18,7 @@ import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTabs;
 import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalityLoader;
+import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
 import com.dwinovo.chiikawa.entity.brain.task.farmer.crop.FarmRegistry;
 import com.dwinovo.chiikawa.item.PetDollItem;
 import com.dwinovo.chiikawa.item.PetReviveRitualManager;
@@ -51,6 +54,8 @@ public class Chiikawa {
         InitMenu.init();
         InitDataComponents.init();
         InitEntity.init();
+        InitBlocks.init();
+        InitBlockEntities.init();
         InitItems.init();
         InitTabs.init();
         InitCapabilities.init();
@@ -64,7 +69,10 @@ public class Chiikawa {
         NeoForge.EVENT_BUS.addListener((ServerStoppingEvent event) -> ServerMusicSystem.stopServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener(Chiikawa::registerCommands);
         modEventBus.addListener(Chiikawa::buildCreativeTabContents);
-        NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> event.addListener(new PetPersonalityLoader()));
+        NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> {
+            event.addListener(new PetPersonalityLoader());
+            event.addListener(new PetTaskTypeLoader());
+        });
 
         InitCapabilities.register(modEventBus);
 

@@ -26,6 +26,7 @@ import com.dwinovo.chiikawa.item.PetDollData;
 import com.dwinovo.chiikawa.sound.PetSoundCue;
 import com.dwinovo.chiikawa.sound.PetSoundKind;
 import com.dwinovo.chiikawa.sound.PetSoundSet;
+import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.utils.Utils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -77,6 +78,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import java.util.Optional;
 import org.jetbrains.annotations.Nullable;
 
 public class AbstractPet extends TamableAnimal implements RangedAttackMob, ChiikawaAnimated {
@@ -132,6 +134,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitMemory.MUSHROOM_POS.get(),
         InitMemory.PICKABLE_ITEM.get(),
         InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get(),
+        InitMemory.NEAREST_BOARD.get(),
+        InitMemory.TAKE_TASK_COOLDOWN.get(),
         InitMemory.CURRENT_INTENT.get(),
         InitMemory.INTENT_REEVALUATE.get(),
         InitMemory.INTENT_SWITCH_LOG.get()
@@ -141,7 +145,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         net.minecraft.world.entity.ai.sensing.SensorType.NEAREST_LIVING_ENTITIES,
         InitSensor.PET_ATTACKBLE_ENTITY_SENSOR.get(),
         InitSensor.PET_FARMER_WORK_SENSOR.get(),
-        InitSensor.PET_ITEM_ENTITY_SENSOR.get()
+        InitSensor.PET_ITEM_ENTITY_SENSOR.get(),
+        InitSensor.PET_BOARD_SENSOR.get()
     );
     private static final Brain.Provider<AbstractPet> BRAIN_PROVIDER =
         Brain.<AbstractPet>provider(MEMORY_TYPES, SENSOR_TYPES, pet -> java.util.List.of());
@@ -158,6 +163,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
             AbstractPet.this.refreshJobFromMainhand();
         }
     };
+    /** The slip the pet carries, see {@link PetTask}. Server-side. */
+    @Nullable
+    private PetTask task;
 
     protected AbstractPet(EntityType<? extends TamableAnimal> entityType, Level level) {
         super(entityType, level);
@@ -350,6 +358,27 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         }
     }
 
+    /**
+     * @return the slip the pet carries
+     */
+    public Optional<PetTask> getTask() {
+        return Optional.ofNullable(task);
+    }
+
+    /**
+     * @param task the slip the pet now carries, {@code null} for none
+     */
+    public void setTask(@Nullable PetTask task) {
+        this.task = task;
+    }
+
+    /**
+     * @return the registry id of the pet's current capability, such as {@code chiikawa:farmer}
+     */
+    public Identifier getCapabilityId() {
+        return InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.getCapabilityFromId(getPetJobId()));
+    }
+
     public int getPetJobId() {
         return this.entityData.get(PET_JOB);
     }
@@ -413,6 +442,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         BrainUtils.addStayTasks(brain);
         BrainUtils.addIdleTasks(brain);
         BrainUtils.addPickUpTasks(brain);
+        BrainUtils.addTakeTaskTasks(brain);
 
         // Each job's activities — registered once, dormant until the intent
         // selector picks one of that job's intents.
@@ -675,6 +705,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         ContainerHelper.saveAllItems(output.child("Backpack"), backpack.getItems());
         output.putInt("PetJob", getPetJobId());
         output.putByte("PetMode", this.entityData.get(PET_MODE));
+        output.storeNullable("Task", PetTask.CODEC, task);
     }
 
     @Override
@@ -683,6 +714,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         input.child("Backpack").ifPresent(backpackInput -> ContainerHelper.loadAllItems(backpackInput, backpack.getItems()));
         input.getInt("PetJob").ifPresent(this::setPetJobId);
         this.entityData.set(PET_MODE, input.getByteOr("PetMode", this.entityData.get(PET_MODE)));
+        task = input.read("Task", PetTask.CODEC).orElse(null);
         refreshJobFromMainhand();
     }
 
@@ -714,6 +746,13 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
             return result;
         }
         return super.mobInteract(player, hand);
+    }
+
+    /** A pet that falls loses the slip it carried: the job failed and pays nothing. */
+    @Override
+    public void die(DamageSource source) {
+        task = null;
+        super.die(source);
     }
 
     /**

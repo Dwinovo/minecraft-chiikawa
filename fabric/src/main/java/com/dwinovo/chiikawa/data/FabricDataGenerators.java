@@ -10,11 +10,14 @@ public class FabricDataGenerators implements DataGeneratorEntrypoint {
         pack.addProvider((output, registries) -> new FabricModLanguageProvider(output, "en_us", registries));
         pack.addProvider((output, registries) -> new FabricModLanguageProvider(output, "zh_cn", registries));
         pack.addProvider(FabricModItemModelProvider::new);
+        pack.addProvider((net.minecraft.data.DataProvider.Factory<ModBlockModelProvider>) ModBlockModelProvider::new);
         pack.addProvider(FabricModBlockTagsProvider::new);
         pack.addProvider(FabricModItemTagsProvider::new);
         pack.addProvider(FabricModEntityTagsProvider::new);
         pack.addProvider(FabricModSoundsProvider::new);
         pack.addProvider(ModRecipeProvider.Runner::new);
         pack.addProvider((net.minecraft.data.DataProvider.Factory<PetPersonalityProvider>) PetPersonalityProvider::new);
+        pack.addProvider((net.minecraft.data.DataProvider.Factory<PetTaskTypeProvider>) PetTaskTypeProvider::new);
+        pack.addProvider((output, registries) -> new ModLootTableProvider(output, registries));
     }
 }
