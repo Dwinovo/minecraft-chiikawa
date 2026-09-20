@@ -50,7 +50,6 @@ public class HurtRangedAttackTargetTask extends Behavior<AbstractPet>{
         {
             LivingEntity target = pet.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).get();
             pet.getLookControl().setLookAt(target, 30.0f, 30.0f);
-            pet.getNavigation().stop();
         }
         actionTime--;
     }
