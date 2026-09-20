@@ -4,6 +4,7 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
@@ -31,6 +32,12 @@ public interface IRegistryHelper {
      */
     <T extends BlockEntity> Supplier<BlockEntityType<T>> registerBlockEntity(Identifier id,
         BiFunction<BlockPos, BlockState, T> factory, Supplier<? extends Block> block);
+
+    /**
+     * Registers an entity data serializer the game does not have. Loaders differ in where
+     * a mod's serializers are kept and how their network ids are agreed on.
+     */
+    void registerEntityDataSerializer(Identifier id, EntityDataSerializer<?> serializer);
 
     <T> Registry<T> createRegistry(ResourceKey<Registry<T>> key, Identifier defaultId, boolean sync);
 
