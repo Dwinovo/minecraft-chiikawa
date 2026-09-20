@@ -38,6 +38,19 @@ public final class Ui {
         surface.drawText(text, right - surface.textWidth(text), y, argb);
     }
 
+    /**
+     * One line in a little panel of its own, centred on {@code centerX} and sitting on
+     * {@code bottomY} — what a pet says over its head.
+     */
+    public static void chip(DrawSurface surface, String text, int centerX, int bottomY) {
+        int width = surface.textWidth(text) + 2 * UiStyle.PAD;
+        int height = surface.lineHeight() + 2 * UiStyle.CHIP_PAD;
+        int x = centerX - width / 2;
+        int y = bottomY - height;
+        panel(surface, x, y, width, height);
+        surface.drawText(text, x + UiStyle.PAD, y + UiStyle.CHIP_PAD, UiTheme.TEXT);
+    }
+
     /** Text from {@code x}, cut with an ellipsis at {@code maxWidth} so a long name cannot spill. */
     public static void textClipped(DrawSurface surface, String text, int x, int y, int maxWidth, int argb) {
         surface.drawText(TextClip.clip(text, maxWidth, surface::textWidth), x, y, argb);
