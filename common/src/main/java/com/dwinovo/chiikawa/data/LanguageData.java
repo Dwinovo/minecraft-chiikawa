@@ -39,7 +39,7 @@ public final class LanguageData {
                 "吉伊的讨伐棒"
             );
             addMusicBoxTranslations(adder, "八音盒", "未选择歌曲", "歌曲：%s", "选择歌曲", "导入中", "导入失败", "没有可播放的歌曲",
-                "把 MP3 / WAV 文件放入文件夹后点击刷新", "部分歌曲导入失败", "请使用 MP3 格式的音频", "打开文件夹", "刷新");
+                "把 MP3 / WAV 文件放入文件夹后点击刷新", "部分歌曲导入失败", "请使用 MP3 格式的音频", "打开文件夹", "刷新", "上一页", "下一页");
             addIntentFailureTranslations(adder, "无法跟随主人", "主人就在附近", "已经回到主人身边", "目标不在范围内",
                 "目标离开了活动范围", "附近没有可拾取的物品", "没有可收割的作物", "没有可种植的耕地", "没有可存放的容器",
                 "没有攻击目标", "攻击冷却中", "没有箭", "没有新的曲子可演奏", "曲子演奏完了", "先做更要紧的活",
@@ -81,7 +81,7 @@ public final class LanguageData {
                 "Chiikawa Weapon"
             );
             addMusicBoxTranslations(adder, "Music Box", "No song selected", "Song: %s", "Choose Song", "Importing", "Failed", "No playable songs",
-                "Put MP3 / WAV files in the folder, then reload", "Some songs failed to import", "Please use MP3 audio files", "Open Folder", "Reload");
+                "Put MP3 / WAV files in the folder, then reload", "Some songs failed to import", "Please use MP3 audio files", "Open Folder", "Reload", "Previous page", "Next page");
             addIntentFailureTranslations(adder, "Can't follow the owner", "Owner is close by", "Back with the owner", "Target is out of range",
                 "Target left the allowed area", "No item to pick up", "No crop to harvest", "No farmland to plant", "No container to deliver to",
                 "No target to attack", "Attack is cooling down", "No arrows", "No new song to play", "The song is over",
@@ -335,7 +335,9 @@ public final class LanguageData {
         String importFailed,
         String formatHint,
         String openFolder,
-        String reload
+        String reload,
+        String previousPage,
+        String nextPage
     ) {
         adder.add("item.chiikawa.music_box", itemName);
         adder.add("tooltip.chiikawa.music_box.empty", emptyTooltip);
@@ -349,5 +351,8 @@ public final class LanguageData {
         adder.add("screen.chiikawa.music_box.format_hint", formatHint);
         adder.add("screen.chiikawa.music_box.open_folder", openFolder);
         adder.add("screen.chiikawa.music_box.reload", reload);
+        // Read out rather than written on the buttons: the arrows say it plainly enough.
+        adder.add("screen.chiikawa.music_box.previous_page", previousPage);
+        adder.add("screen.chiikawa.music_box.next_page", nextPage);
     }
 }
