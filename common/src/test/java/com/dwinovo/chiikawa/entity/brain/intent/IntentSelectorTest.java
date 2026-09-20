@@ -169,7 +169,7 @@ class IntentSelectorTest {
     @Test
     void scoresAreWeightedByPersonalityAndTimeOfDay() {
         Personality personality = new Personality(Map.of(PetIntents.WANDER, 2.0F),
-            Map.of(DayPhase.NIGHT, Map.of(PetIntents.WANDER, 3.0F)), 0.0F, List.of());
+            Map.of(DayPhase.NIGHT, Map.of(PetIntents.WANDER, 3.0F)), 0.0F, List.of(), List.of());
 
         List<Candidate> day = farmCandidates(personality, DayPhase.DAY, targets(false, false, false), null);
         List<Candidate> night = farmCandidates(personality, DayPhase.NIGHT, targets(false, false, false), null);
@@ -184,7 +184,7 @@ class IntentSelectorTest {
         // personality may have.
         Personality inverted = new Personality(
             Map.of(PetIntents.HARVEST, 0.1F, PetIntents.PLANT, 5.0F, PetIntents.DELIVER, 10.0F),
-            Map.of(DayPhase.DAY, Map.of(PetIntents.PLANT, 2.0F)), 1.0F, List.of());
+            Map.of(DayPhase.DAY, Map.of(PetIntents.PLANT, 2.0F)), 1.0F, List.of(), List.of());
         SelectorParams params = new SelectorParams(IntentSelector.HOLD_MARGIN, inverted.randomness());
 
         for (float noise = 0.0F; noise <= 1.0F; noise += 0.125F) {

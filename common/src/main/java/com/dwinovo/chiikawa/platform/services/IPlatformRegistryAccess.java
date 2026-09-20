@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.platform.services;
 
 import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
-import com.dwinovo.chiikawa.entity.brain.sensor.PetBoardSensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetPlacesSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetFarmerWorkSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
@@ -17,7 +17,8 @@ public interface IPlatformRegistryAccess {
 
     Supplier<SensorType<PetPickableItemSensor>> petItemEntitySensor();
 
-    Supplier<SensorType<PetBoardSensor>> petBoardSensor();
+    /** Finds the places a pet's day is built around: the nearest board and the nearest shop. */
+    Supplier<SensorType<PetPlacesSensor>> petPlacesSensor();
 
     Supplier<Activity> farmerHarvestActivity();
 
@@ -53,6 +54,8 @@ public interface IPlatformRegistryAccess {
     Supplier<Activity> pickUpActivity();
 
     Supplier<Activity> takeTaskActivity();
+
+    Supplier<Activity> shopActivity();
 
     Supplier<MenuType<PetBackpackMenu>> petBackpackMenu();
 }
