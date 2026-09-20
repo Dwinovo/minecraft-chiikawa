@@ -1,6 +1,8 @@
 package com.dwinovo.chiikawa.platform;
 
+import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
+import com.dwinovo.chiikawa.network.BoardPayloads;
 import com.dwinovo.chiikawa.network.MusicPayloads;
 import com.dwinovo.chiikawa.network.MusicServerPacketHandler;
 import net.minecraft.server.level.ServerPlayer;
@@ -8,12 +10,14 @@ import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlers
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-public final class NeoForgeMusicNetworking {
-    private NeoForgeMusicNetworking() {
+/** Registers every payload the mod sends, and how the client handles the ones it receives. */
+public final class NeoForgeModNetworking {
+    private NeoForgeModNetworking() {
     }
 
     public static void registerPayloads(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar("1");
+        registrar.playToClient(BoardPayloads.BoardSlipsPayload.TYPE, BoardPayloads.BoardSlipsPayload.STREAM_CODEC);
         registrar.playToClient(MusicPayloads.MusicCatalogPayload.TYPE, MusicPayloads.MusicCatalogPayload.STREAM_CODEC);
         registrar.playToClient(MusicPayloads.MusicStreamStartPayload.TYPE, MusicPayloads.MusicStreamStartPayload.STREAM_CODEC);
         registrar.playToClient(MusicPayloads.MusicStreamChunkPayload.TYPE, MusicPayloads.MusicStreamChunkPayload.STREAM_CODEC);
@@ -33,6 +37,7 @@ public final class NeoForgeMusicNetworking {
     }
 
     public static void registerClientPayloads(RegisterClientPayloadHandlersEvent event) {
+        event.register(BoardPayloads.BoardSlipsPayload.TYPE, (payload, context) -> ClientBoardPacketHandler.handleSlips(payload));
         event.register(MusicPayloads.MusicCatalogPayload.TYPE, (payload, context) -> ClientMusicPacketHandler.handleCatalog(payload));
         event.register(MusicPayloads.MusicStreamStartPayload.TYPE, (payload, context) -> ClientMusicPacketHandler.handleStreamStart(payload));
         event.register(MusicPayloads.MusicStreamChunkPayload.TYPE, (payload, context) -> ClientMusicPacketHandler.handleStreamChunk(payload));

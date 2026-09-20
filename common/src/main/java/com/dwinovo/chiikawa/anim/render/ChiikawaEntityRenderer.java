@@ -12,6 +12,8 @@ import com.dwinovo.chiikawa.anim.controller.ControllerHandler;
 import com.dwinovo.chiikawa.anim.controller.ControllerSnapshot;
 import com.dwinovo.chiikawa.anim.molang.MolangContext;
 import com.dwinovo.chiikawa.anim.render.layer.HeldItemLayer;
+import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.anim.render.layer.SlipTagLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayerContext;
 import com.dwinovo.chiikawa.anim.runtime.AnimationClock;
@@ -155,6 +157,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         addInterceptor(BoneInterceptor.Stage.LOOK_AT, new HeadLookInterceptor());
         // Default layers shared by all pets.
         addRenderLayer(new HeldItemLayer());
+        addRenderLayer(new SlipTagLayer());
 
         // Default controllers shared by all pets, in priority-from-low order:
         //   "main"     state-driven base loop
@@ -341,6 +344,10 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             // extras map so future layers can register their own keys without
             // adding fields to ChiikawaRenderState.
             state.put(PetData.HELD_ITEM_STACK, living.getMainHandItem());
+        }
+
+        if (entity instanceof AbstractPet pet) {
+            state.put(PetData.CARRYING_SLIP, pet.getTask().isPresent());
         }
 
         if (entity instanceof ChiikawaAnimated animated) {

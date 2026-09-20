@@ -24,7 +24,7 @@ import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
 import com.dwinovo.chiikawa.client.screen.PetBackpackScreen;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitMenu;
-import com.dwinovo.chiikawa.platform.NeoForgeMusicNetworking;
+import com.dwinovo.chiikawa.platform.NeoForgeModNetworking;
 import net.neoforged.neoforge.common.NeoForge;
 
 // Client-only mod entry.
@@ -55,7 +55,7 @@ public class ChiikawaClient {
 
     @SubscribeEvent
     static void registerClientPayloadHandlers(RegisterClientPayloadHandlersEvent event) {
-        NeoForgeMusicNetworking.registerClientPayloads(event);
+        NeoForgeModNetworking.registerClientPayloads(event);
     }
 
     @SubscribeEvent

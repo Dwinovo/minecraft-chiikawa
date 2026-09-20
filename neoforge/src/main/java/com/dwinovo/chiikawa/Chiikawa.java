@@ -23,7 +23,7 @@ import com.dwinovo.chiikawa.entity.brain.task.farmer.crop.FarmRegistry;
 import com.dwinovo.chiikawa.item.PetDollItem;
 import com.dwinovo.chiikawa.item.PetReviveRitualManager;
 import com.dwinovo.chiikawa.music.ServerMusicSystem;
-import com.dwinovo.chiikawa.platform.NeoForgeMusicNetworking;
+import com.dwinovo.chiikawa.platform.NeoForgeModNetworking;
 import com.dwinovo.chiikawa.platform.NeoForgePlatformRegistryAccess;
 import com.dwinovo.chiikawa.platform.Services;
 import net.minecraft.world.InteractionResult;
@@ -61,7 +61,7 @@ public class Chiikawa {
         FarmRegistry.init();
         Services.REGISTRY.registerToEventBus(modEventBus);
         Services.ENTITY.registerToEventBus(modEventBus);
-        modEventBus.addListener(NeoForgeMusicNetworking::registerPayloads);
+        modEventBus.addListener(NeoForgeModNetworking::registerPayloads);
         NeoForge.EVENT_BUS.addListener(Chiikawa::onRightClickBlock);
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> PetReviveRitualManager.tickServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> ServerMusicSystem.tickServer(event.getServer()));
