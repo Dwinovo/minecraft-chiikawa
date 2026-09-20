@@ -2,7 +2,10 @@ package com.dwinovo.chiikawa.platform;
 
 import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
+import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
+import com.dwinovo.chiikawa.network.ShopPayloads;
+import com.dwinovo.chiikawa.network.ShopServerPacketHandler;
 import com.dwinovo.chiikawa.network.MusicPayloads;
 import com.dwinovo.chiikawa.network.MusicServerPacketHandler;
 import java.util.function.Function;
@@ -29,6 +32,11 @@ public final class FabricModNetworking {
                 MusicPayloads.MusicCatalogRequestPayload payload = MusicPayloads.MusicCatalogRequestPayload.read(buffer);
                 server.execute(() -> MusicServerPacketHandler.handleCatalogRequest(payload, player));
             });
+        ServerPlayNetworking.registerGlobalReceiver(ShopPayloads.SHOP_TRADE,
+            (server, player, handler, buffer, responseSender) -> {
+                ShopPayloads.ShopTradePayload payload = ShopPayloads.ShopTradePayload.read(buffer);
+                server.execute(() -> ShopServerPacketHandler.handleTrade(payload, player));
+            });
     }
 
     public static void registerClient() {
@@ -36,6 +44,11 @@ public final class FabricModNetworking {
             (client, handler, buffer, responseSender) -> {
                 BoardPayloads.BoardSlipsPayload payload = BoardPayloads.BoardSlipsPayload.read(buffer);
                 client.execute(() -> ClientBoardPacketHandler.handleSlips(payload));
+            });
+        ClientPlayNetworking.registerGlobalReceiver(ShopPayloads.SHOP_PRICES,
+            (client, handler, buffer, responseSender) -> {
+                ShopPayloads.ShopPricesPayload payload = ShopPayloads.ShopPricesPayload.read(buffer);
+                client.execute(() -> ClientShopPacketHandler.handlePrices(payload));
             });
         ClientPlayNetworking.registerGlobalReceiver(MusicPayloads.MUSIC_CATALOG,
             (client, handler, buffer, responseSender) -> {

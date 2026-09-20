@@ -66,6 +66,8 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
         ACTIVITIES.register("take_task", () -> new Activity("take_task"));
     private static final RegistryObject<Activity> SHOP =
         ACTIVITIES.register("shop", () -> new Activity("shop"));
+    private static final RegistryObject<Activity> GIFT_OWNER =
+        ACTIVITIES.register("gift_owner", () -> new Activity("gift_owner"));
 
     // Menu registrations
     private static final RegistryObject<MenuType<PetBackpackMenu>> PET_BACKPACK =
@@ -171,6 +173,11 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
     @Override
     public Supplier<Activity> shopActivity() {
         return SHOP;
+    }
+
+    @Override
+    public Supplier<Activity> giftOwnerActivity() {
+        return GIFT_OWNER;
     }
 
     @Override

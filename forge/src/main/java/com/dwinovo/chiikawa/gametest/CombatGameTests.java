@@ -33,7 +33,11 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 @PrefixGameTestTemplate(false)
 public final class CombatGameTests {
     private static final String BATCH = "chiikawa_combat";
-    private static final int FIGHT_TICKS = 1200;
+    /**
+     * Long enough for a pet to notice, close the distance and land one. An archer picks its
+     * moment, so a tight clock here measures patience rather than aim.
+     */
+    private static final int FIGHT_TICKS = 2400;
     /** How long an archer with an empty quiver is watched before we believe it. */
     private static final int LEAVE_IT_TICKS = 400;
 
@@ -81,7 +85,8 @@ public final class CombatGameTests {
     public static void an_archer_with_arrows_shoots(GameTestHelper helper) {
         AbstractPet pet = holding(ownedPet(helper, new BlockPos(3, STAND, 4)), Items.BOW);
         pet.getBackpack().addItem(new ItemStack(Items.ARROW, 16));
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(12, STAND, 4));
+        // Well inside what a pet can see, and still far enough that this is a bow shot.
+        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(10, STAND, 4));
 
         helper.succeedWhen(() -> helper.assertTrue(zombie.isDeadOrDying() || zombie.getHealth() < zombie.getMaxHealth(),
             "the archer never hit anything"));
