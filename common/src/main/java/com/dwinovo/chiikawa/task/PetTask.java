@@ -16,6 +16,8 @@ import net.minecraft.world.level.storage.loot.LootTable;
  * @param type the task type it was rolled from
  * @param capability the capability (job) that can take it
  * @param counter the work counter that advances it, see {@link PetWorkCounters}
+ * @param icon the item this work is pictured as, copied from the type like everything else
+ *             here, so a label over a pet needs no data pack of its own to draw it
  * @param target how much of that work finishes it
  * @param reward loot table rolled into the pet's backpack once it is finished
  * @param progress work done so far
@@ -24,14 +26,19 @@ public record PetTask(
     ResourceLocation type,
     ResourceLocation capability,
     ResourceLocation counter,
+    ResourceLocation icon,
     int target,
     ResourceKey<LootTable> reward,
     int progress
 ) {
+    /** What a slip written before slips had a picture, or one naming no item, shows: nothing. */
+    public static final ResourceLocation NO_ICON = ResourceLocation.withDefaultNamespace("air");
+
     public static final Codec<PetTask> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         ResourceLocation.CODEC.fieldOf("type").forGetter(PetTask::type),
         ResourceLocation.CODEC.fieldOf("capability").forGetter(PetTask::capability),
         ResourceLocation.CODEC.fieldOf("counter").forGetter(PetTask::counter),
+        ResourceLocation.CODEC.optionalFieldOf("icon", NO_ICON).forGetter(PetTask::icon),
         ExtraCodecs.POSITIVE_INT.fieldOf("target").forGetter(PetTask::target),
         ResourceKey.codec(Registries.LOOT_TABLE).fieldOf("reward").forGetter(PetTask::reward),
         ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("progress", 0).forGetter(PetTask::progress)
@@ -42,7 +49,7 @@ public record PetTask(
      * @return this slip with that work counted, never past its target
      */
     public PetTask advance(int amount) {
-        return new PetTask(type, capability, counter, target, reward, Math.min(target, progress + amount));
+        return new PetTask(type, capability, counter, icon, target, reward, Math.min(target, progress + amount));
     }
 
     public boolean isDone() {

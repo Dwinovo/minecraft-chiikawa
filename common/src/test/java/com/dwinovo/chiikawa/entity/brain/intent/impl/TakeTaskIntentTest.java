@@ -42,7 +42,7 @@ class TakeTaskIntentTest {
     @Test
     void carriesOneSlipAtATime() {
         PetTask slip = new PetTask(ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding"),
-            ResourceLocation.fromNamespaceAndPath("chiikawa", "farmer"), PetWorkCounters.WEED, 8,
+            ResourceLocation.fromNamespaceAndPath("chiikawa", "farmer"), PetWorkCounters.WEED, PetTask.NO_ICON, 8,
             ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath("chiikawa", "pet_task/weeding")), 0);
 
         assertEquals("intent.chiikawa.fail.has_slip", intent.canRun(boardAt(1).task(slip).build()).reasonKey());
