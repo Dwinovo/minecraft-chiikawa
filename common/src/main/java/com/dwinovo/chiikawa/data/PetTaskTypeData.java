@@ -18,7 +18,6 @@ import net.minecraft.world.level.storage.loot.LootTable;
  */
 public final class PetTaskTypeData {
     public static final ResourceLocation WEEDING = id("weeding");
-    public static final ResourceLocation MUSHROOM_PICKING = id("mushroom_picking");
     public static final ResourceLocation STREET_PERFORMANCE = id("street_performance");
     public static final ResourceLocation MELEE_HUNTING = id("melee_hunting");
     public static final ResourceLocation RANGED_HUNTING = id("ranged_hunting");
@@ -35,11 +34,11 @@ public final class PetTaskTypeData {
         ResourceLocation fencer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FENCER.get());
         ResourceLocation archer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.ARCHER.get());
         return Map.of(
-            // Farmers are the most common job, so their slips come up the most.
+            // Farmers are the most common job, so their slips come up the most. Picking
+            // mushrooms is not among them: mushrooms are only there to pick at night, so a
+            // slip for them left a farmer standing about all day waiting for the dark.
             WEEDING, new PetTaskType(farmer, PetWorkCounters.WEED, vanilla("short_grass"),
-                UniformInt.of(8, 16), reward(WEEDING), 3, BoardSlips.FIRST_LEVEL),
-            MUSHROOM_PICKING, new PetTaskType(farmer, PetWorkCounters.PICK_MUSHROOM, vanilla("red_mushroom"),
-                UniformInt.of(4, 8), reward(MUSHROOM_PICKING), 2, BoardSlips.FIRST_LEVEL),
+                UniformInt.of(8, 16), reward(WEEDING), 5, BoardSlips.FIRST_LEVEL),
             // Seconds of music.
             STREET_PERFORMANCE, new PetTaskType(musician, PetWorkCounters.PLAY_MUSIC_SECOND, vanilla("note_block"),
                 UniformInt.of(120, 240), reward(STREET_PERFORMANCE), 1, BoardSlips.FIRST_LEVEL),
