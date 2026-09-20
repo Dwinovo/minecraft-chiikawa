@@ -57,5 +57,7 @@ public interface IPlatformRegistryAccess {
 
     Supplier<Activity> shopActivity();
 
+    Supplier<Activity> giftOwnerActivity();
+
     Supplier<MenuType<PetBackpackMenu>> petBackpackMenu();
 }
