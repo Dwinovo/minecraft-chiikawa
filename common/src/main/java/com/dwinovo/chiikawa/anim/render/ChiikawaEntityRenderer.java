@@ -13,8 +13,10 @@ import com.dwinovo.chiikawa.anim.controller.ControllerSnapshot;
 import com.dwinovo.chiikawa.anim.molang.MolangContext;
 import com.dwinovo.chiikawa.anim.render.layer.HeldItemLayer;
 import com.dwinovo.chiikawa.client.ui.PetStatusText;
+import com.dwinovo.chiikawa.client.ui.mc.WorldSurface;
+import com.dwinovo.chiikawa.ui.DrawSurface;
 import com.dwinovo.chiikawa.ui.TextClip;
-import com.dwinovo.chiikawa.ui.UiTheme;
+import com.dwinovo.chiikawa.ui.Ui;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.anim.render.layer.SlipTagLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayer;
@@ -28,7 +30,6 @@ import com.dwinovo.chiikawa.anim.state.PetAnimationResolver;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -39,7 +40,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Matrix4f;
 import net.minecraft.world.entity.LivingEntity;
 import org.joml.Quaternionf;
 
@@ -430,9 +430,6 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
 
     /** How far away an owner still reads what their pet is up to. */
     private static final double LABEL_RANGE_SQR = 12.0 * 12.0;
-    /** Barely-there text for the backdrop pass; the second pass draws the text itself. */
-    private static final int TRANSPARENT = 0x04000000;
-    private static final int NO_BACKDROP = 0;
     /** One line of label text, in blocks at the name-tag scale. */
     private static final float LABEL_LINE = 0.28F;
     private static final float LABEL_SCALE = 0.025F;
@@ -453,7 +450,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             super.renderNameTag(entity, displayName, poseStack, bufferSource, packedLight, partialTick);
         }
         statusLabel(entity).ifPresent(label ->
-            drawLabel(entity, label, poseStack, bufferSource, packedLight, partialTick, named ? LABEL_LINE : 0.0F));
+            drawLabel(entity, label, poseStack, bufferSource, partialTick, named ? LABEL_LINE : 0.0F));
     }
 
     /**
@@ -471,27 +468,20 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         return PetStatusText.label(pet);
     }
 
-    /** The mod's own label, drawn where a name tag goes, in the mod's colours. */
+    /** The mod's own label, drawn where a name tag goes, with the same widgets its screens use. */
     private void drawLabel(T entity, Component label, PoseStack poseStack, MultiBufferSource bufferSource,
-                           int packedLight, float partialTick, float extraHeight) {
+                           float partialTick, float extraHeight) {
         Vec3 attachment = entity.getAttachments().getNullable(EntityAttachment.NAME_TAG, 0, entity.getViewYRot(partialTick));
         if (attachment == null) {
             return;
         }
-        Font font = getFont();
-        String text = TextClip.clip(label.getString(), LABEL_MAX_WIDTH, font::width);
         poseStack.pushPose();
         poseStack.translate(attachment.x, attachment.y + 0.5 + extraHeight, attachment.z);
         poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
+        // Text pixels from here on, with y running down as on a screen.
         poseStack.scale(LABEL_SCALE, -LABEL_SCALE, LABEL_SCALE);
-        Matrix4f pose = poseStack.last().pose();
-        float x = -font.width(text) / 2.0F;
-        // Two passes, as vanilla draws a name tag. The backdrop sits a hair in front of the
-        // glyphs, so it only works when drawn without depth writes and the text follows it.
-        font.drawInBatch(text, x, 0.0F, TRANSPARENT, false, pose, bufferSource, Font.DisplayMode.SEE_THROUGH,
-            UiTheme.LABEL_BACKDROP, packedLight);
-        font.drawInBatch(text, x, 0.0F, UiTheme.TEXT, false, pose, bufferSource, Font.DisplayMode.NORMAL,
-            NO_BACKDROP, packedLight);
+        DrawSurface surface = new WorldSurface(poseStack, bufferSource, getFont());
+        Ui.chip(surface, TextClip.clip(label.getString(), LABEL_MAX_WIDTH, surface::textWidth), 0, 0);
         poseStack.popPose();
     }
 

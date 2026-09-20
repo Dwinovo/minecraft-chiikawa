@@ -18,6 +18,8 @@ public final class UiStyle {
     public static final int TITLE_H = 20;
     /** Vertical step between two entries of a list. */
     public static final int ROW_PITCH = 22;
+    /** Space above and below the line inside a chip. */
+    public static final int CHIP_PAD = 3;
     /** Space a nested line is indented by. */
     public static final int INDENT = 8;
 
