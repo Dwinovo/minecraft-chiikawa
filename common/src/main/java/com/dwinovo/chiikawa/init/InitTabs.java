@@ -50,7 +50,8 @@ public final class InitTabs {
         InitItems.CHIIKAWA_WEAPON,
         InitItems.MUSIC_BOX,
         InitItems.LABOR_BOARD,
-        InitItems.SHOP
+        InitItems.SHOP,
+        InitItems.BEAR_BACKPACK
     );
 
     private InitTabs() {
