@@ -56,7 +56,7 @@ public final class LanguageData {
                     "上一页", "下一页");
             addIntentNameTranslations(adder, "跟着主人", "坐着", "闲逛", "捡东西", "去领工作牌",
                 "收割", "种地", "送货", "拔草", "采蘑菇", "讨伐", "射箭", "演奏", "去买东西", "送礼物");
-            addTaskTypeTranslations(adder, "除草", "%s 株", "夜间采蘑菇", "%s 朵", "街头演奏", "%s 秒",
+            addTaskTypeTranslations(adder, "除草", "%s 株", "街头演奏", "%s 秒",
                 "近身讨伐", "远程讨伐", "%s 只");
             addBoardScreenTranslations(adder, "劳动公告板", "%s 张", "今天没有工作牌",
                     "限%s", "待领", "已领", "%s 领走了",
@@ -112,8 +112,7 @@ public final class LanguageData {
             addIntentNameTranslations(adder, "Following its owner", "Sitting", "Wandering", "Picking up an item",
                 "Fetching a slip", "Harvesting", "Planting", "Delivering", "Pulling weeds", "Picking mushrooms",
                 "Fighting", "Shooting", "Performing", "Out shopping", "Bringing a present");
-            addTaskTypeTranslations(adder, "Weeding", "%s weeds", "Mushroom Picking", "%s mushrooms",
-                "Street Performance", "%ss",
+            addTaskTypeTranslations(adder, "Weeding", "%s weeds", "Street Performance", "%ss",
                 "Monster Hunting", "Monster Shooting", "%s slain");
             addBoardScreenTranslations(adder, "Labor Board", "%s up", "No slips up today",
                     "%s only", "Open", "Taken", "Taken by %s",
@@ -264,8 +263,6 @@ public final class LanguageData {
         Adder adder,
         String weeding,
         String weedingAmount,
-        String mushroomPicking,
-        String mushroomPickingAmount,
         String streetPerformance,
         String streetPerformanceAmount,
         String meleeHunting,
@@ -274,8 +271,6 @@ public final class LanguageData {
     ) {
         adder.add("pet_task.chiikawa.weeding", weeding);
         adder.add("pet_task.chiikawa.weeding.amount", weedingAmount);
-        adder.add("pet_task.chiikawa.mushroom_picking", mushroomPicking);
-        adder.add("pet_task.chiikawa.mushroom_picking.amount", mushroomPickingAmount);
         adder.add("pet_task.chiikawa.street_performance", streetPerformance);
         adder.add("pet_task.chiikawa.street_performance.amount", streetPerformanceAmount);
         adder.add("pet_task.chiikawa.melee_hunting", meleeHunting);
