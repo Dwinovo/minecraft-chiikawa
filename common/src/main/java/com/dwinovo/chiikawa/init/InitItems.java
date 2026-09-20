@@ -46,6 +46,9 @@ public final class InitItems {
         registerItem("music_box", MusicBoxItem::new);
     public static final Supplier<BlockItem> LABOR_BOARD =
         registerItem("labor_board", () -> new BlockItem(InitBlocks.LABOR_BOARD.get(), new Item.Properties()));
+
+    public static final Supplier<BlockItem> SHOP =
+        registerItem("shop", () -> new BlockItem(InitBlocks.SHOP.get(), new Item.Properties()));
     public static final Supplier<Item> USAGI_DOLL =
         registerItem("usagi_doll", properties -> new PetDollItem(properties, InitEntity.USAGI_PET));
     public static final Supplier<Item> HACHIWARE_DOLL =
