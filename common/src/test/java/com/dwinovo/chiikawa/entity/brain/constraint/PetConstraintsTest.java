@@ -130,9 +130,9 @@ class PetConstraintsTest {
     }
 
     @Test
-    void freePermitsWanderingWorkForagingFightsPickingUpAndTakingSlips() {
+    void freePermitsWanderingWorkForagingFightsPickingUpTakingSlipsAndShopping() {
         assertPermits(PetDirective.FREE, OWNED, EnumSet.of(IntentCategory.WANDER, IntentCategory.WORK, IntentCategory.FORAGE,
-            IntentCategory.COMBAT, IntentCategory.PICK_UP, IntentCategory.TAKE_TASK));
+            IntentCategory.COMBAT, IntentCategory.PICK_UP, IntentCategory.TAKE_TASK, IntentCategory.SHOP));
     }
 
     @Test
