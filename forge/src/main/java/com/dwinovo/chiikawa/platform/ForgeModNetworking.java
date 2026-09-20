@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
 import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
+import com.dwinovo.chiikawa.network.BoardServerPacketHandler;
 import com.dwinovo.chiikawa.network.ShopPayloads;
 import com.dwinovo.chiikawa.network.ShopServerPacketHandler;
 import com.dwinovo.chiikawa.network.MusicPayloads;
@@ -34,6 +35,13 @@ public final class ForgeModNetworking {
     public static void register() {
         clientbound(BoardPayloads.BoardSlipsPayload.class, BoardPayloads.BoardSlipsPayload::read,
             (payload, context) -> ClientBoardPacketHandler.handleSlips(payload));
+        serverbound(BoardPayloads.BoardUpgradePayload.class, BoardPayloads.BoardUpgradePayload::read,
+            (payload, context) -> {
+                ServerPlayer player = context.getSender();
+                if (player != null) {
+                    BoardServerPacketHandler.handleUpgrade(payload, player);
+                }
+            });
         clientbound(ShopPayloads.ShopPricesPayload.class, ShopPayloads.ShopPricesPayload::read,
             (payload, context) -> ClientShopPacketHandler.handlePrices(payload));
         serverbound(ShopPayloads.ShopTradePayload.class, ShopPayloads.ShopTradePayload::read,
