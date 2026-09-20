@@ -29,6 +29,7 @@ public final class TestContext {
     private Optional<GlobalPos> shopWorthVisiting = Optional.empty();
     private boolean takeTaskCoolingDown;
     private boolean shopCoolingDown;
+    private boolean carryingGift;
 
     private TestContext(GlobalPos petPos, PetAnchor anchor) {
         this.petPos = petPos;
@@ -85,8 +86,14 @@ public final class TestContext {
         return this;
     }
 
+    /** The pet has something for its owner that it has not handed over yet. */
+    public TestContext carryingGift() {
+        this.carryingGift = true;
+        return this;
+    }
+
     public IntentContext build() {
         return new IntentContext(petPos, phase, ownership, personality, anchor, targets, task, offeringBoard,
-            shopWorthVisiting, takeTaskCoolingDown, shopCoolingDown, false, false, false, false);
+            shopWorthVisiting, takeTaskCoolingDown, shopCoolingDown, carryingGift, false, false, false, false);
     }
 }
