@@ -33,5 +33,6 @@ public final class ModItemModelProvider extends ItemModelProvider {
 
         // Weapons have prebuilt models under resources; no datagen needed.
         basicItem(InitItems.MUSIC_BOX.get());
+        basicItem(InitItems.BEAR_BACKPACK.get());
     }
 }

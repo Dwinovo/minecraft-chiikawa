@@ -19,6 +19,7 @@ import com.dwinovo.chiikawa.ui.DrawSurface;
 import com.dwinovo.chiikawa.ui.Fade;
 import com.dwinovo.chiikawa.ui.widget.Chip;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.anim.render.layer.BearBackpackLayer;
 import com.dwinovo.chiikawa.anim.render.layer.SlipTagLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayerContext;
@@ -40,6 +41,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.LivingEntity;
@@ -171,6 +173,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         // Default layers shared by all pets.
         addRenderLayer(new HeldItemLayer());
         addRenderLayer(new SlipTagLayer());
+        addRenderLayer(new BearBackpackLayer());
 
         // Default controllers shared by all pets, in priority-from-low order:
         //   "main"     state-driven base loop
@@ -352,6 +355,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
 
         if (entity instanceof AbstractPet pet) {
             state.put(PetData.CARRYING_SLIP, pet.getTask().isPresent());
+            state.put(PetData.WORN_BAG, pet.getItemBySlot(EquipmentSlot.CHEST));
         }
 
         if (entity instanceof ChiikawaAnimated animated) {

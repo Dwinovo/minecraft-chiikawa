@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.data;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.shop.ShopCatalog;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,10 @@ public final class ShopCatalogData {
             sells(Items.POPPY, 1),
             sells(Items.DANDELION, 1),
             sells(Items.PINK_TULIP, 1),
+            // Things for a pet itself. A name tag is vanilla's own, and a player already
+            // knows what one is for; the shop only has to have one.
+            sells(Items.NAME_TAG, 8),
+            sells(InitItems.BEAR_BACKPACK.get(), 12),
             // Reading.
             sells(Items.PAPER, 1),
             sells(Items.BOOK, 2),
