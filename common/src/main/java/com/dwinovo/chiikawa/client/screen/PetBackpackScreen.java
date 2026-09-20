@@ -28,10 +28,11 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     /** Nudges the model down inside the window (entity-space units; +down). */
     private static final float DISPLAY_Y_OFFSET = 0.18F;
 
-    /** Header strip above the slots: what the pet is doing, and the slip it carries. */
-    private static final int STATUS_X = 8;
-    private static final int DOING_Y = 6;
-    private static final int SLIP_Y = 15;
+    /** What the pet is doing and the slip it carries, above the panel so nothing overlaps. */
+    private static final int STATUS_X = 0;
+    private static final int DOING_Y = -22;
+    private static final int SLIP_Y = -11;
+    private static final int STATUS_COLOR = 0xFFFFFFFF;
 
     /** Info strip below the display: pet name + HP hearts on one line. */
     private static final int NAME_Y = 80;
@@ -110,13 +111,13 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
             .<Component>map(intent -> Component.translatable("screen.chiikawa.pet.doing",
                 Component.translatable("intent." + intent.getNamespace() + "." + intent.getPath())))
             .orElseGet(() -> Component.translatable("screen.chiikawa.pet.doing.nothing"));
-        graphics.drawString(this.font, doing, STATUS_X, DOING_Y, TEXT_COLOR, false);
+        graphics.drawString(this.font, doing, STATUS_X, DOING_Y, STATUS_COLOR, true);
 
         Component slip = pet.getTask()
             .<Component>map(task -> Component.translatable("screen.chiikawa.pet.slip",
                 Component.translatable("pet_task." + task.type().getNamespace() + "." + task.type().getPath()),
                 task.progress(), task.target()))
             .orElseGet(() -> Component.translatable("screen.chiikawa.pet.slip.none"));
-        graphics.drawString(this.font, slip, STATUS_X, SLIP_Y, TEXT_COLOR, false);
+        graphics.drawString(this.font, slip, STATUS_X, SLIP_Y, STATUS_COLOR, true);
     }
 }
