@@ -18,6 +18,7 @@ import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTabs;
 import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.entity.PetFollowKeeper;
+import com.dwinovo.chiikawa.entity.PetRecall;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalityLoader;
 import com.dwinovo.chiikawa.shop.ShopCatalogLoader;
 import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
@@ -68,6 +69,7 @@ public class Chiikawa {
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> PetReviveRitualManager.tickServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> ServerMusicSystem.tickServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> PetFollowKeeper.tickServer(event.getServer()));
+        NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> PetRecall.tickServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener((ServerStoppingEvent event) -> ServerMusicSystem.stopServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener(Chiikawa::registerCommands);
         NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> {
