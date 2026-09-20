@@ -2,11 +2,13 @@ package com.dwinovo.chiikawa.data;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.init.InitItems;
+import com.dwinovo.chiikawa.init.InitTag;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
@@ -69,6 +71,14 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("WWW")
                 .pattern("S S")
                 .unlockedBy(getHasName(Items.PAPER), has(Items.PAPER))
+                .save(recipeOutput);
+
+        // A plate of something hot: bread, a vegetable, and something cooked.
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.FOOD, InitItems.SIMPLE_DISH.get())
+                .requires(Items.BREAD)
+                .requires(Items.BOWL)
+                .requires(InitTag.ENTITY_PLANT_CROPS)
+                .unlockedBy(getHasName(Items.BREAD), has(Items.BREAD))
                 .save(recipeOutput);
 
         // A small satchel: leather about a woollen body, hung on a string.
