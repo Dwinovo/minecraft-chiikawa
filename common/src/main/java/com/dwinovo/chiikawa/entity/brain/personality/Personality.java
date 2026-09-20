@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -33,15 +34,19 @@ import net.minecraft.world.item.ItemStack;
  *                   see {@code IntentSelector#choose}
  * @param wildTools the tools a wild pet of this kind may spawn holding, by weight;
  *                  {@code minecraft:air} weighs spawning empty-handed
+ * @param likes what this kind of pet would spend its own money on, by weight. A pet with
+ *              nothing listed buys nothing: a shop is somewhere it goes because it wants
+ *              something, not a chore it performs
  */
 public record Personality(
     Map<ResourceLocation, Float> intentMultipliers,
     Map<DayPhase, Map<ResourceLocation, Float>> routine,
     float randomness,
-    List<WildTool> wildTools
+    List<WeightedItem> wildTools,
+    List<WeightedItem> likes
 ) {
-    /** No leanings: every multiplier 1, no randomness, and wild pets spawn empty-handed. */
-    public static final Personality DEFAULT = new Personality(Map.of(), Map.of(), 0.0F, List.of());
+    /** No leanings: every multiplier 1, no randomness, nothing held and nothing wanted. */
+    public static final Personality DEFAULT = new Personality(Map.of(), Map.of(), 0.0F, List.of(), List.of());
 
     private static final Codec<Map<ResourceLocation, Float>> MULTIPLIERS_CODEC =
         Codec.unboundedMap(ResourceLocation.CODEC, Codec.floatRange(0.0F, Float.MAX_VALUE));
@@ -50,7 +55,8 @@ public record Personality(
         MULTIPLIERS_CODEC.optionalFieldOf("intent_multipliers", Map.of()).forGetter(Personality::intentMultipliers),
         Codec.unboundedMap(DayPhase.CODEC, MULTIPLIERS_CODEC).optionalFieldOf("routine", Map.of()).forGetter(Personality::routine),
         Codec.floatRange(0.0F, 1.0F).optionalFieldOf("randomness", DEFAULT.randomness()).forGetter(Personality::randomness),
-        WildTool.CODEC.listOf().optionalFieldOf("wild_tools", List.of()).forGetter(Personality::wildTools)
+        WeightedItem.CODEC.listOf().optionalFieldOf("wild_tools", List.of()).forGetter(Personality::wildTools),
+        WeightedItem.CODEC.listOf().optionalFieldOf("likes", List.of()).forGetter(Personality::likes)
     ).apply(instance, Personality::new));
 
     public Personality {
@@ -58,6 +64,7 @@ public record Personality(
         routine = routine.entrySet().stream()
             .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, entry -> Map.copyOf(entry.getValue())));
         wildTools = List.copyOf(wildTools);
+        likes = List.copyOf(likes);
     }
 
     /**
@@ -88,16 +95,28 @@ public record Personality(
     }
 
     /**
-     * One weighted choice of {@link #wildTools}.
+     * What a pet would buy for itself, drawn the same way as what it spawns holding.
+     *
+     * @param random this pet's random source
+     * @return one of its likings, or nothing when this kind of pet wants for nothing
      */
-    public record WildTool(Item item, Weight weight) implements WeightedEntry {
-        /** Lazy because the item registry only exists once the game has bootstrapped. */
-        public static final Codec<WildTool> CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.create(instance -> instance.group(
-            BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(WildTool::item),
-            ExtraCodecs.POSITIVE_INT.xmap(Weight::of, Weight::asInt).fieldOf("weight").forGetter(WildTool::weight)
-        ).apply(instance, WildTool::new)));
+    public Optional<Item> drawLiking(RandomSource random) {
+        return WeightedRandom.getRandomItem(random, likes).map(WeightedItem::item);
+    }
 
-        public WildTool(Item item, int weight) {
+    /**
+     * An item with a weight: one entry of a list a pet draws from. Both the tools a wild
+     * pet turns up holding and the things it would buy are drawn the same way, so they are
+     * the same shape.
+     */
+    public record WeightedItem(Item item, Weight weight) implements WeightedEntry {
+        /** Lazy because the item registry only exists once the game has bootstrapped. */
+        public static final Codec<WeightedItem> CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.create(instance -> instance.group(
+            BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(WeightedItem::item),
+            ExtraCodecs.POSITIVE_INT.xmap(Weight::of, Weight::asInt).fieldOf("weight").forGetter(WeightedItem::weight)
+        ).apply(instance, WeightedItem::new)));
+
+        public WeightedItem(Item item, int weight) {
             this(item, Weight.of(weight));
         }
 

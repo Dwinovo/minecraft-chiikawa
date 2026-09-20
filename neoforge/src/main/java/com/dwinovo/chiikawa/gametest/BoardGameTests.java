@@ -77,7 +77,7 @@ public final class BoardGameTests {
      */
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WORK_TICKS)
     public static void a_farmer_goes_back_for_the_next_slip(GameTestHelper helper) {
-        BlockPos board = weedingBoard(helper);
+        BlockPos board = boardWithASecondFarmerSlip(helper);
         helper.setBlock(board, InitBlocks.LABOR_BOARD.get());
         weedPatch(helper);
 
@@ -170,6 +170,17 @@ public final class BoardGameTests {
         return boardWhere(helper, farmerSlips -> !farmerSlips.isEmpty()
             && farmerSlips.get(0).slip().type().equals(PetTaskTypeData.WEEDING),
             "offers a farmer weeding first");
+    }
+
+    /**
+     * A board offering a farmer weeding and then something else. Without that second slip
+     * there is nothing to go back for, and the case fails for want of work rather than for
+     * want of a pet willing to do it.
+     */
+    private static BlockPos boardWithASecondFarmerSlip(GameTestHelper helper) {
+        return boardWhere(helper, farmerSlips -> farmerSlips.size() >= 2
+            && farmerSlips.get(0).slip().type().equals(PetTaskTypeData.WEEDING),
+            "offers a farmer weeding and another slip after it");
     }
 
     /** A board with one slip for a farmer and no second one to fall back on. */
