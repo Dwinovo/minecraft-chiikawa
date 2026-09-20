@@ -13,6 +13,7 @@ import com.dwinovo.chiikawa.anim.controller.ControllerSnapshot;
 import com.dwinovo.chiikawa.anim.molang.MolangContext;
 import com.dwinovo.chiikawa.anim.render.layer.HeldItemLayer;
 import com.dwinovo.chiikawa.client.ui.PetStatusText;
+import com.dwinovo.chiikawa.ui.TextClip;
 import com.dwinovo.chiikawa.ui.UiTheme;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.anim.render.layer.SlipTagLayer;
@@ -38,6 +39,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Matrix4f;
 import net.minecraft.world.entity.LivingEntity;
 import org.joml.Quaternionf;
 
@@ -428,9 +430,14 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
 
     /** How far away an owner still reads what their pet is up to. */
     private static final double LABEL_RANGE_SQR = 12.0 * 12.0;
+    /** Draws the backdrop without the text; the second pass puts the text on top of it. */
+    private static final int TRANSPARENT = 0x00000000;
+    private static final int NO_BACKDROP = 0;
     /** One line of label text, in blocks at the name-tag scale. */
     private static final float LABEL_LINE = 0.28F;
     private static final float LABEL_SCALE = 0.025F;
+    /** Room a label may take, about two blocks wide, so a long one is cut rather than sprawling. */
+    private static final int LABEL_MAX_WIDTH = 90;
 
     /** A working pet says so over its head, even when it has no name to show. */
     @Override
@@ -471,13 +478,19 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         if (attachment == null) {
             return;
         }
+        Font font = getFont();
+        String text = TextClip.clip(label.getString(), LABEL_MAX_WIDTH, font::width);
         poseStack.pushPose();
         poseStack.translate(attachment.x, attachment.y + 0.5 + extraHeight, attachment.z);
         poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
         poseStack.scale(LABEL_SCALE, -LABEL_SCALE, LABEL_SCALE);
-        Font font = getFont();
-        font.drawInBatch(label, -font.width(label) / 2.0F, 0.0F, UiTheme.TEXT, false, poseStack.last().pose(),
-            bufferSource, Font.DisplayMode.NORMAL, UiTheme.LABEL_BACKDROP, packedLight);
+        Matrix4f pose = poseStack.last().pose();
+        float x = -font.width(text) / 2.0F;
+        // Two passes, as vanilla draws a name tag: the backdrop, then the text over it.
+        font.drawInBatch(text, x, 0.0F, TRANSPARENT, false, pose, bufferSource, Font.DisplayMode.NORMAL,
+            UiTheme.LABEL_BACKDROP, packedLight);
+        font.drawInBatch(text, x, 0.0F, UiTheme.TEXT, false, pose, bufferSource, Font.DisplayMode.NORMAL,
+            NO_BACKDROP, packedLight);
         poseStack.popPose();
     }
 
