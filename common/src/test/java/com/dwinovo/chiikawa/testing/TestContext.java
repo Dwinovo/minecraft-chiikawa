@@ -26,7 +26,9 @@ public final class TestContext {
     private PerceivedTargets targets = PerceivedTargets.NONE;
     private Optional<PetTask> task = Optional.empty();
     private Optional<GlobalPos> offeringBoard = Optional.empty();
+    private Optional<GlobalPos> shopWorthVisiting = Optional.empty();
     private boolean takeTaskCoolingDown;
+    private boolean shopCoolingDown;
 
     private TestContext(GlobalPos petPos, PetAnchor anchor) {
         this.petPos = petPos;
@@ -72,8 +74,19 @@ public final class TestContext {
         return this;
     }
 
+    /** A shop the pet knows about and has both a reason and the money to visit. */
+    public TestContext shopWorthVisiting(GlobalPos shop) {
+        this.shopWorthVisiting = Optional.of(shop);
+        return this;
+    }
+
+    public TestContext shopCoolingDown() {
+        this.shopCoolingDown = true;
+        return this;
+    }
+
     public IntentContext build() {
         return new IntentContext(petPos, phase, ownership, personality, anchor, targets, task, offeringBoard,
-            takeTaskCoolingDown, false, false, false, false);
+            shopWorthVisiting, takeTaskCoolingDown, shopCoolingDown, false, false, false, false);
     }
 }

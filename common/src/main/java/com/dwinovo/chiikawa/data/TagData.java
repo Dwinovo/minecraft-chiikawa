@@ -54,7 +54,7 @@ public final class TagData {
         tags.tag(InitTag.ENTITY_MUSHROOMS)
             .add(key(Blocks.RED_MUSHROOM), key(Blocks.BROWN_MUSHROOM));
         tags.tag(BlockTags.MINEABLE_WITH_AXE)
-            .add(key(InitBlocks.LABOR_BOARD.get()));
+            .add(key(InitBlocks.LABOR_BOARD.get()), key(InitBlocks.SHOP.get()));
     }
 
     public static void addItemTags(TagAppenderProvider<Item> tags) {
