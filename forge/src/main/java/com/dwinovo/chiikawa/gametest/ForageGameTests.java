@@ -3,9 +3,9 @@ package com.dwinovo.chiikawa.gametest;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.MIDNIGHT;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.NOON;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.holding;
-import static com.dwinovo.chiikawa.gametest.GameTestKit.ownedPet;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
-import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.wildWorker;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 
 import com.dwinovo.chiikawa.Constants;
 import net.minecraft.core.BlockPos;
@@ -32,7 +32,7 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 public final class ForageGameTests {
     private static final String DAY_BATCH = "chiikawa_forage_day";
     private static final String NIGHT_BATCH = "chiikawa_forage_night";
-    private static final int WORK_TICKS = 1200;
+    private static final int WORK_TICKS = 3600;
     /** How long a pet is watched leaving something alone before we believe it means to. */
     private static final int LEAVE_IT_TICKS = 600;
 
@@ -51,7 +51,7 @@ public final class ForageGameTests {
     /** Nobody asked, nobody is paying: a wild farmer tidies the grass because it is there. */
     @GameTest(template = "floor16", batch = DAY_BATCH, timeoutTicks = WORK_TICKS)
     public static void a_wild_farmer_pulls_weeds_unasked(GameTestHelper helper) {
-        holding(wildPet(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
+        holding(wildWorker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
         BlockPos weed = new BlockPos(7, STAND, 4);
         helper.setBlock(weed.below(), Blocks.GRASS_BLOCK);
         helper.setBlock(weed, Blocks.SHORT_GRASS);
@@ -65,7 +65,7 @@ public final class ForageGameTests {
      */
     @GameTest(template = "floor16", batch = DAY_BATCH, timeoutTicks = LEAVE_IT_TICKS + 100)
     public static void an_owned_farmer_waits_for_a_slip(GameTestHelper helper) {
-        holding(ownedPet(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
+        holding(worker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
         BlockPos weed = new BlockPos(7, STAND, 4);
         helper.setBlock(weed.below(), Blocks.GRASS_BLOCK);
         helper.setBlock(weed, Blocks.SHORT_GRASS);
@@ -79,7 +79,7 @@ public final class ForageGameTests {
     /** Mushrooms are picked after dark, which is when they are worth picking. */
     @GameTest(template = "floor16", batch = NIGHT_BATCH, timeoutTicks = WORK_TICKS)
     public static void a_wild_farmer_picks_mushrooms_at_night(GameTestHelper helper) {
-        holding(wildPet(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
+        holding(wildWorker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
         BlockPos mushroom = new BlockPos(7, STAND, 4);
         helper.setBlock(mushroom, Blocks.RED_MUSHROOM);
 
@@ -89,7 +89,7 @@ public final class ForageGameTests {
     /** By day it walks past them: the picking is a night's errand, not a standing order. */
     @GameTest(template = "floor16", batch = DAY_BATCH, timeoutTicks = LEAVE_IT_TICKS + 100)
     public static void a_wild_farmer_leaves_mushrooms_by_day(GameTestHelper helper) {
-        holding(wildPet(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
+        holding(wildWorker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
         BlockPos mushroom = new BlockPos(7, STAND, 4);
         helper.setBlock(mushroom, Blocks.RED_MUSHROOM);
 
