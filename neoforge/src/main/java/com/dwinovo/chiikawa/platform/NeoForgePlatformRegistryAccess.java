@@ -60,6 +60,8 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
         ACTIVITIES.register("take_task", () -> new Activity("take_task"));
     private static final DeferredHolder<Activity, Activity> SHOP =
         ACTIVITIES.register("shop", () -> new Activity("shop"));
+    private static final DeferredHolder<Activity, Activity> GIFT_OWNER =
+        ACTIVITIES.register("gift_owner", () -> new Activity("gift_owner"));
 
     private static final DeferredHolder<MenuType<?>, MenuType<PetBackpackMenu>> PET_BACKPACK =
         MENUS.register("pet_backpack", () -> IMenuTypeExtension.create((containerId, inventory, buf) ->
@@ -155,6 +157,11 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
     @Override
     public Supplier<Activity> shopActivity() {
         return SHOP;
+    }
+
+    @Override
+    public Supplier<Activity> giftOwnerActivity() {
+        return GIFT_OWNER;
     }
 
     @Override
