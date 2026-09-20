@@ -3,7 +3,7 @@ package com.dwinovo.chiikawa.gametest;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.NOON;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.count;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.holding;
-import static com.dwinovo.chiikawa.gametest.GameTestKit.ownedPet;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 
 import com.dwinovo.chiikawa.Constants;
@@ -66,7 +66,7 @@ public final class BoardGameTests {
             }
         }
 
-        AbstractPet pet = holding(ownedPet(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
+        AbstractPet pet = holding(worker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
         helper.succeedWhen(() -> helper.assertTrue(count(pet, Items.EMERALD) > 0,
             "the farmer never came away with anything for its trouble"));
     }

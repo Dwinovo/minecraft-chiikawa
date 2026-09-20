@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -55,25 +56,44 @@ public final class GameTestKit {
         level.setWeatherParameters(CLEAR_WEATHER_TICKS, 0, false, false);
     }
 
-    /** A wild pet on the floor at {@code rel}, carrying nothing at all. */
+    /**
+     * The kind of pet a case about work wants: one whose personality leans towards working.
+     * Which pet is not a detail — a personality weighs wandering against working, so a case
+     * that spawns a daydreamer fails on the days the pet fancies a stroll. What a lazy pet
+     * does is worth a case of its own rather than a coin toss inside everyone else's.
+     */
+    static AbstractPet worker(GameTestHelper helper, BlockPos rel) {
+        return pet(helper, InitEntity.SHISA_PET.get(), rel, true);
+    }
+
+    /** The same hard worker, with nobody to answer to. */
+    static AbstractPet wildWorker(GameTestHelper helper, BlockPos rel) {
+        return pet(helper, InitEntity.SHISA_PET.get(), rel, false);
+    }
+
+    /** A wild pet, for a case about what a pet is rather than what it gets done. */
     static AbstractPet wildPet(GameTestHelper helper, BlockPos rel) {
-        AbstractPet pet = helper.spawn(InitEntity.USAGI_PET.get(), rel);
-        // Spawned straight in rather than through finalizeSpawn: that draws a tool from the
-        // pet's personality, and a case is here to say what the pet holds.
-        pet.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
-        pet.setPetDirective(PetDirective.FREE);
-        return pet;
+        return pet(helper, InitEntity.USAGI_PET.get(), rel, false);
+    }
+
+    /** A tamed pet, likewise. */
+    static AbstractPet ownedPet(GameTestHelper helper, BlockPos rel) {
+        return pet(helper, InitEntity.USAGI_PET.get(), rel, true);
     }
 
     /**
-     * A tamed pet on the floor at {@code rel}, free to roam from where it stands. Free
-     * roaming rather than following, because a case has no owner walking about for it to
-     * follow, and a pet at heel does not go looking for work.
+     * Spawned straight onto the floor rather than through the game's own spawning, which
+     * would deal the pet a tool from its personality — a case says what a pet holds. Free
+     * roaming rather than at heel, because there is no owner walking about to follow, and a
+     * pet at heel does not go looking for work.
      */
-    static AbstractPet ownedPet(GameTestHelper helper, BlockPos rel) {
-        AbstractPet pet = helper.spawn(InitEntity.USAGI_PET.get(), rel);
+    private static AbstractPet pet(GameTestHelper helper, EntityType<? extends AbstractPet> type,
+                                   BlockPos rel, boolean owned) {
+        AbstractPet pet = helper.spawn(type, rel);
         pet.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
-        pet.tame(owner(helper));
+        if (owned) {
+            pet.tame(owner(helper));
+        }
         pet.setPetDirective(PetDirective.FREE);
         return pet;
     }
