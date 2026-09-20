@@ -8,12 +8,14 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.phys.AABB;
 
 /**
  * What the in-game cases share. They run headless in the game itself
@@ -37,6 +39,8 @@ public final class GameTestKit {
     static final long NOON = 6000L;
     /** The dead of night: when mushrooms are picked and a bed is worth having. */
     static final long MIDNIGHT = 18000L;
+    /** How far from where a pet fell a case looks for what it dropped. */
+    private static final double DROP_SEARCH = 6.0;
     /** Long enough for a batch to run under one sky. */
     private static final int CLEAR_WEATHER_TICKS = 24000;
 
@@ -117,6 +121,20 @@ public final class GameTestKit {
             }
         }
         return false;
+    }
+
+    /**
+     * The doll a dead pet left near {@code rel}, with everything it was carrying written
+     * into it.
+     */
+    static ItemStack dollNear(GameTestHelper helper, BlockPos rel, Item doll) {
+        return helper.getLevel()
+            .getEntitiesOfClass(ItemEntity.class, new AABB(helper.absolutePos(rel)).inflate(DROP_SEARCH))
+            .stream()
+            .map(ItemEntity::getItem)
+            .filter(stack -> stack.is(doll))
+            .findFirst()
+            .orElseThrow(() -> new AssertionError("the pet died without leaving a doll"));
     }
 
     /** How many of an item the pet has, for a case that cares whether it got paid twice. */
