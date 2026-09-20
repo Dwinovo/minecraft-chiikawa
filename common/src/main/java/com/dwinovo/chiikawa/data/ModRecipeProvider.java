@@ -73,6 +73,17 @@ public final class ModRecipeProvider extends RecipeProvider {
             .unlockedBy(getHasName(Items.PAPER), has(Items.PAPER))
             .save(this.output);
 
+        // A small satchel: leather about a woollen body, hung on a string.
+        ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.TOOLS, InitItems.BEAR_BACKPACK.get())
+            .define('L', Items.LEATHER)
+            .define('W', ItemTags.WOOL)
+            .define('S', Items.STRING)
+            .pattern("S S")
+            .pattern("LWL")
+            .pattern("LLL")
+            .unlockedBy(getHasName(Items.LEATHER), has(Items.LEATHER))
+            .save(this.output);
+
         // A counter: a slab of planks over a chest, with an emerald on the till.
         ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.DECORATIONS, InitItems.SHOP.get())
             .define('W', ItemTags.PLANKS)
