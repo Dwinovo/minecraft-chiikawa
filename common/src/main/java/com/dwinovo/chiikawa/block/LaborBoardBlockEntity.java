@@ -38,6 +38,11 @@ public class LaborBoardBlockEntity extends BlockEntity {
     /** Day number the slots were rolled for. */
     private long day = NOT_ROLLED;
     private List<BoardSlot> slots = List.of();
+    /**
+     * How far the owner has paid the board up; see {@link BoardSlips#slipsAt}. Spelt out
+     * rather than called a level, because a block entity already has a level: the world.
+     */
+    private int boardLevel = BoardSlips.FIRST_LEVEL;
 
     public LaborBoardBlockEntity(BlockPos pos, BlockState state) {
         super(InitBlockEntities.LABOR_BOARD.get(), pos, state);
@@ -91,6 +96,26 @@ public class LaborBoardBlockEntity extends BlockEntity {
         }
     }
 
+    /** @return how far the board has been paid up */
+    public int boardLevel() {
+        return boardLevel;
+    }
+
+    /**
+     * Takes the board up a level. The day's slips are not re-rolled: what the new level
+     * buys goes up beside them, so nobody's pet loses the slip it is out working on.
+     *
+     * @return whether there was a level left to buy
+     */
+    public boolean upgrade() {
+        if (boardLevel >= BoardSlips.MAX_LEVEL) {
+            return false;
+        }
+        boardLevel++;
+        setChanged();
+        return true;
+    }
+
     /** @return today's slips as the board screen shows them */
     public List<BoardPayloads.SlipView> slipViews() {
         return today().stream()
@@ -101,11 +126,19 @@ public class LaborBoardBlockEntity extends BlockEntity {
 
     /** @return today's slips */
     public List<BoardSlot> today() {
-        ServerLevel level = level();
-        long today = level.getDayTime() / Level.TICKS_PER_DAY;
+        ServerLevel world = level();
+        long today = world.getDayTime() / Level.TICKS_PER_DAY;
+        long seed = BoardSlips.seed(world.getSeed(), today, worldPosition);
         if (today != day) {
             day = today;
-            slots = BoardSlips.roll(BoardSlips.seed(level.getSeed(), today, worldPosition), PetTaskTypes.all());
+            slots = BoardSlips.roll(seed, PetTaskTypes.all(), boardLevel);
+            setChanged();
+            return slots;
+        }
+        // A board upgraded partway through the day puts the slip it just bought up now.
+        List<BoardSlot> grown = BoardSlips.topUp(slots, seed, PetTaskTypes.all(), boardLevel);
+        if (grown != slots) {
+            slots = grown;
             setChanged();
         }
         return slots;
@@ -139,6 +172,7 @@ public class LaborBoardBlockEntity extends BlockEntity {
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.putLong("Day", day);
+        tag.putInt("Level", boardLevel);
         tag.put("Slots", SLOTS_CODEC.encodeStart(NbtOps.INSTANCE, slots).getOrThrow());
     }
 
@@ -146,6 +180,9 @@ public class LaborBoardBlockEntity extends BlockEntity {
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         day = tag.contains("Day", Tag.TAG_LONG) ? tag.getLong("Day") : NOT_ROLLED;
+        boardLevel = tag.contains("Level", Tag.TAG_INT)
+            ? BoardSlips.clampLevel(tag.getInt("Level"))
+            : BoardSlips.FIRST_LEVEL;
         slots = tag.contains("Slots", Tag.TAG_LIST)
             ? SLOTS_CODEC.parse(NbtOps.INSTANCE, tag.get("Slots")).result().orElse(List.of())
             : List.of();
