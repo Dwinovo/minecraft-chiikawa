@@ -20,6 +20,7 @@ class LanguageDataUiTranslationTest {
         "screen.chiikawa.labor_board",
         "screen.chiikawa.labor_board.count",
         "screen.chiikawa.labor_board.empty",
+        "screen.chiikawa.labor_board.for_job",
         "screen.chiikawa.labor_board.open",
         "screen.chiikawa.labor_board.taken",
         "screen.chiikawa.labor_board.taken_by",
