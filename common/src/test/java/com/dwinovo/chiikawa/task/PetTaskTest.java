@@ -21,7 +21,8 @@ import org.junit.jupiter.api.Test;
 
 class PetTaskTest {
     private static final ResourceLocation FARMER = id("farmer");
-    private static final PetTask WEEDING = new PetTask(id("weeding"), FARMER, PetWorkCounters.WEED, 3,
+    private static final ResourceLocation GRASS = ResourceLocation.withDefaultNamespace("short_grass");
+    private static final PetTask WEEDING = new PetTask(id("weeding"), FARMER, PetWorkCounters.WEED, GRASS, 3,
         ResourceKey.create(Registries.LOOT_TABLE, id("pet_task/weeding")), 0);
 
     @BeforeAll
@@ -50,16 +51,17 @@ class PetTaskTest {
 
     @Test
     void aTypeRollsAFreshSlipOfItsKind() {
-        PetTaskType type = new PetTaskType(FARMER, PetWorkCounters.WEED, UniformInt.of(4, 4), WEEDING.reward(), 1);
+        PetTaskType type = new PetTaskType(FARMER, PetWorkCounters.WEED, GRASS, UniformInt.of(4, 4),
+            WEEDING.reward(), 1);
 
-        assertEquals(new PetTask(id("weeding"), FARMER, PetWorkCounters.WEED, 4, WEEDING.reward(), 0),
+        assertEquals(new PetTask(id("weeding"), FARMER, PetWorkCounters.WEED, GRASS, 4, WEEDING.reward(), 0),
             type.roll(id("weeding"), RandomSource.create(1L)));
     }
 
     @Test
     void typeFilesParseAndDefaultTheirWeight() {
         PetTaskType type = PetTaskType.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("""
-            { "capability": "chiikawa:farmer", "counter": "chiikawa:weed",
+            { "capability": "chiikawa:farmer", "counter": "chiikawa:weed", "icon": "minecraft:short_grass",
               "amount": { "type": "minecraft:uniform", "min_inclusive": 8, "max_inclusive": 16 },
               "reward": "chiikawa:pet_task/weeding" }""")).getOrThrow();
 
@@ -71,9 +73,11 @@ class PetTaskTest {
     void loaderSkipsBrokenFilesAndWarnsAboutUnknownCapabilitiesOrWork() {
         PetTaskTypeLoader.Loaded loaded = PetTaskTypeLoader.load(Map.of(
             id("good"), JsonParser.parseString("""
-                { "capability": "chiikawa:farmer", "counter": "chiikawa:weed", "amount": 8, "reward": "chiikawa:pet_task/good" }"""),
+                { "capability": "chiikawa:farmer", "counter": "chiikawa:weed", "icon": "minecraft:short_grass",
+                  "amount": 8, "reward": "chiikawa:pet_task/good" }"""),
             id("odd"), JsonParser.parseString("""
-                { "capability": "chiikawa:baker", "counter": "chiikawa:bake", "amount": 8, "reward": "chiikawa:pet_task/odd" }"""),
+                { "capability": "chiikawa:baker", "counter": "chiikawa:bake", "icon": "minecraft:cake",
+                  "amount": 8, "reward": "chiikawa:pet_task/odd" }"""),
             id("broken"), JsonParser.parseString("{ \"capability\": \"chiikawa:farmer\" }")
         ), Set.of(FARMER)::contains);
 
