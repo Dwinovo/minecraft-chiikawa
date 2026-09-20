@@ -50,7 +50,7 @@ public final class LanguageData {
                 "收割", "种地", "送货", "拔草", "采蘑菇", "讨伐", "射箭", "演奏");
             addTaskTypeTranslations(adder, "除草", "%s 株", "夜间采蘑菇", "%s 朵", "街头演奏", "%s 秒");
             addBoardScreenTranslations(adder, "劳动公告板", "%s 张", "今天没有工作牌",
-                    "待领", "已领", "%s 领走了");
+                    "限%s", "待领", "已领", "%s 领走了");
             addPetStatusTranslations(adder, "闲着");
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
@@ -95,7 +95,7 @@ public final class LanguageData {
             addTaskTypeTranslations(adder, "Weeding", "%s weeds", "Mushroom Picking", "%s mushrooms",
                 "Street Performance", "%ss");
             addBoardScreenTranslations(adder, "Labor Board", "%s up", "No slips up today",
-                    "Open", "Taken", "Taken by %s");
+                    "%s only", "Open", "Taken", "Taken by %s");
             addPetStatusTranslations(adder, "Idle");
         }
     }
@@ -217,12 +217,14 @@ public final class LanguageData {
      * is room to say who.
      *
      * @param count how many slips are up, in the title bar
+     * @param forJob which job may take a slip, beside its name
      */
     private static void addBoardScreenTranslations(Adder adder, String title, String count, String empty,
-            String open, String taken, String takenBy) {
+            String forJob, String open, String taken, String takenBy) {
         adder.add("screen.chiikawa.labor_board", title);
         adder.add("screen.chiikawa.labor_board.count", count);
         adder.add("screen.chiikawa.labor_board.empty", empty);
+        adder.add("screen.chiikawa.labor_board.for_job", forJob);
         adder.add("screen.chiikawa.labor_board.open", open);
         adder.add("screen.chiikawa.labor_board.taken", taken);
         adder.add("screen.chiikawa.labor_board.taken_by", takenBy);
