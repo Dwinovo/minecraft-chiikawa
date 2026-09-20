@@ -1,13 +1,13 @@
-package com.dwinovo.chiikawa.client.ui;
+package com.dwinovo.chiikawa.ui;
 
 /**
- * The mod's spacing and sizes. Colour lives in {@link PetTheme}; everything geometric
+ * The mod's spacing and sizes. Colour lives in {@link UiTheme}; everything geometric
  * lives here, so tightening the layout is one file.
  *
- * <p>Only values more than one screen uses belong here. A screen's own column widths
- * stay in that screen.
+ * <p>Only values more than one screen uses belong here. A screen's own column widths stay
+ * in that screen — moving those here would just be a different kind of scattering.
  */
-public final class PetStyle {
+public final class UiStyle {
     /** Panel outline width. */
     public static final int BORDER = 1;
     /** Space between a panel's edge and its contents. */
@@ -21,6 +21,6 @@ public final class PetStyle {
     /** Space a nested line is indented by. */
     public static final int INDENT = 8;
 
-    private PetStyle() {
+    private UiStyle() {
     }
 }
