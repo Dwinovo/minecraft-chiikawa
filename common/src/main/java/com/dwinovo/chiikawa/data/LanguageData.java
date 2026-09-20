@@ -53,9 +53,13 @@ public final class LanguageData {
                     "上一页", "下一页");
             addIntentNameTranslations(adder, "跟着主人", "坐着", "闲逛", "捡东西", "去领工作牌",
                 "收割", "种地", "送货", "拔草", "采蘑菇", "讨伐", "射箭", "演奏", "去买东西", "送礼物");
-            addTaskTypeTranslations(adder, "除草", "%s 株", "夜间采蘑菇", "%s 朵", "街头演奏", "%s 秒");
+            addTaskTypeTranslations(adder, "除草", "%s 株", "夜间采蘑菇", "%s 朵", "街头演奏", "%s 秒",
+                "近身讨伐", "远程讨伐", "%s 只");
             addBoardScreenTranslations(adder, "劳动公告板", "%s 张", "今天没有工作牌",
-                    "限%s", "待领", "已领", "%s 领走了");
+                    "限%s", "待领", "已领", "%s 领走了",
+                    "Lv.%s", "每天 %s 张", "升级 %s",
+                    "每升一级：每天多一张牌，并解锁更难的活",
+                    "已升满", "你有 %s 绿宝石");
             addPetStatusTranslations(adder, "闲着", "戴上小熊挎包可以多装 10 格");
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
@@ -103,9 +107,13 @@ public final class LanguageData {
                 "Fetching a slip", "Harvesting", "Planting", "Delivering", "Pulling weeds", "Picking mushrooms",
                 "Fighting", "Shooting", "Performing", "Out shopping", "Bringing a present");
             addTaskTypeTranslations(adder, "Weeding", "%s weeds", "Mushroom Picking", "%s mushrooms",
-                "Street Performance", "%ss");
+                "Street Performance", "%ss",
+                "Monster Hunting", "Monster Shooting", "%s slain");
             addBoardScreenTranslations(adder, "Labor Board", "%s up", "No slips up today",
-                    "%s only", "Open", "Taken", "Taken by %s");
+                    "%s only", "Open", "Taken", "Taken by %s",
+                    "Lv.%s", "%s a day", "Upgrade %s",
+                    "Each level: one more slip a day, and tougher work",
+                    "Fully upgraded", "You have %s emeralds");
             addPetStatusTranslations(adder, "Idle", "A bear backpack adds ten more slots");
         }
     }
@@ -244,7 +252,10 @@ public final class LanguageData {
         String mushroomPicking,
         String mushroomPickingAmount,
         String streetPerformance,
-        String streetPerformanceAmount
+        String streetPerformanceAmount,
+        String meleeHunting,
+        String rangedHunting,
+        String huntingAmount
     ) {
         adder.add("pet_task.chiikawa.weeding", weeding);
         adder.add("pet_task.chiikawa.weeding.amount", weedingAmount);
@@ -252,6 +263,10 @@ public final class LanguageData {
         adder.add("pet_task.chiikawa.mushroom_picking.amount", mushroomPickingAmount);
         adder.add("pet_task.chiikawa.street_performance", streetPerformance);
         adder.add("pet_task.chiikawa.street_performance.amount", streetPerformanceAmount);
+        adder.add("pet_task.chiikawa.melee_hunting", meleeHunting);
+        adder.add("pet_task.chiikawa.melee_hunting.amount", huntingAmount);
+        adder.add("pet_task.chiikawa.ranged_hunting", rangedHunting);
+        adder.add("pet_task.chiikawa.ranged_hunting.amount", huntingAmount);
     }
 
     /**
@@ -261,9 +276,12 @@ public final class LanguageData {
      *
      * @param count how many slips are up, in the title bar
      * @param forJob which job may take a slip, beside its name
+     * @param daily what a level buys, said in slips a day rather than in levels
+     * @param upgrade the button that buys the next level, with its price on it
      */
     private static void addBoardScreenTranslations(Adder adder, String title, String count, String empty,
-            String forJob, String open, String taken, String takenBy) {
+            String forJob, String open, String taken, String takenBy,
+            String level, String daily, String upgrade, String upgradeHint, String maxLevel, String purse) {
         adder.add("screen.chiikawa.labor_board", title);
         adder.add("screen.chiikawa.labor_board.count", count);
         adder.add("screen.chiikawa.labor_board.empty", empty);
@@ -271,6 +289,12 @@ public final class LanguageData {
         adder.add("screen.chiikawa.labor_board.open", open);
         adder.add("screen.chiikawa.labor_board.taken", taken);
         adder.add("screen.chiikawa.labor_board.taken_by", takenBy);
+        adder.add("screen.chiikawa.labor_board.level", level);
+        adder.add("screen.chiikawa.labor_board.daily", daily);
+        adder.add("screen.chiikawa.labor_board.upgrade", upgrade);
+        adder.add("screen.chiikawa.labor_board.upgrade_hint", upgradeHint);
+        adder.add("screen.chiikawa.labor_board.max_level", maxLevel);
+        adder.add("screen.chiikawa.labor_board.purse", purse);
     }
 
     /**

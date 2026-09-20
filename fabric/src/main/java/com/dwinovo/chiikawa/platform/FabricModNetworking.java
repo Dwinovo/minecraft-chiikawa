@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
 import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
+import com.dwinovo.chiikawa.network.BoardServerPacketHandler;
 import com.dwinovo.chiikawa.network.ShopPayloads;
 import com.dwinovo.chiikawa.network.ShopServerPacketHandler;
 import com.dwinovo.chiikawa.network.MusicPayloads;
@@ -19,6 +20,7 @@ public final class FabricModNetworking {
 
     public static void registerServer() {
         PayloadTypeRegistry.playS2C().register(BoardPayloads.BoardSlipsPayload.TYPE, BoardPayloads.BoardSlipsPayload.STREAM_CODEC);
+        PayloadTypeRegistry.playC2S().register(BoardPayloads.BoardUpgradePayload.TYPE, BoardPayloads.BoardUpgradePayload.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(ShopPayloads.ShopPricesPayload.TYPE, ShopPayloads.ShopPricesPayload.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(ShopPayloads.ShopTradePayload.TYPE, ShopPayloads.ShopTradePayload.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(MusicPayloads.MusicCatalogPayload.TYPE, MusicPayloads.MusicCatalogPayload.STREAM_CODEC);
@@ -31,6 +33,8 @@ public final class FabricModNetworking {
             (payload, context) -> context.server().execute(() -> MusicServerPacketHandler.handleSelectTrack(payload, context.player())));
         ServerPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicCatalogRequestPayload.TYPE,
             (payload, context) -> context.server().execute(() -> MusicServerPacketHandler.handleCatalogRequest(payload, context.player())));
+        ServerPlayNetworking.registerGlobalReceiver(BoardPayloads.BoardUpgradePayload.TYPE,
+            (payload, context) -> context.server().execute(() -> BoardServerPacketHandler.handleUpgrade(payload, context.player())));
         ServerPlayNetworking.registerGlobalReceiver(ShopPayloads.ShopTradePayload.TYPE,
             (payload, context) -> context.server().execute(() -> ShopServerPacketHandler.handleTrade(payload, context.player())));
     }
