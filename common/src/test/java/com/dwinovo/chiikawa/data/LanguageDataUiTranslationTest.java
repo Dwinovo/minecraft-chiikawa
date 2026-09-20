@@ -18,16 +18,12 @@ class LanguageDataUiTranslationTest {
     private static final String[] LOCALES = {"en_us", "zh_cn"};
     private static final String[] SCREEN_KEYS = {
         "screen.chiikawa.labor_board",
+        "screen.chiikawa.labor_board.count",
         "screen.chiikawa.labor_board.empty",
-        "screen.chiikawa.labor_board.detail",
         "screen.chiikawa.labor_board.open",
         "screen.chiikawa.labor_board.taken",
-        "screen.chiikawa.pet.doing",
+        "screen.chiikawa.labor_board.taken_by",
         "screen.chiikawa.pet.doing.nothing",
-        "screen.chiikawa.pet.slip",
-        "screen.chiikawa.pet.slip.none",
-        "screen.chiikawa.pet.slip.short",
-        "screen.chiikawa.pet.label",
         "block.chiikawa.labor_board"
     };
 

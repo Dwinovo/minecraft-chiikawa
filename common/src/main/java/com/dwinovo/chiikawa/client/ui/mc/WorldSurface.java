@@ -1,12 +1,17 @@
 package com.dwinovo.chiikawa.client.ui.mc;
 
 import com.dwinovo.chiikawa.ui.DrawSurface;
+import com.dwinovo.chiikawa.ui.Icon;
+import com.dwinovo.chiikawa.ui.UiStyle;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.world.item.ItemDisplayContext;
 import org.joml.Matrix4f;
 
 /**
@@ -68,6 +73,26 @@ public final class WorldSurface implements DrawSurface {
         pose.translate(0.0F, 0.0F, nextLayer());
         font.drawInBatch(text, x, y, argb, false, pose.last().pose(), bufferSource,
             Font.DisplayMode.NORMAL, 0, FULL_BRIGHT);
+        pose.popPose();
+    }
+
+    /**
+     * An item, in the box a screen would give it. It is pushed half its own depth towards
+     * the camera first: a block's icon is a little cube, and one centred on the card would
+     * have its back half swallowed by the card it sits on.
+     */
+    @Override
+    public void drawIcon(Icon icon, int x, int y) {
+        if (!(icon instanceof ItemIcon item) || item.stack().isEmpty()) {
+            return;
+        }
+        Minecraft minecraft = Minecraft.getInstance();
+        pose.pushPose();
+        pose.translate(x + UiStyle.ICON / 2.0F, y + UiStyle.ICON / 2.0F, nextLayer() + UiStyle.ICON / 2.0F);
+        // The game hands an item a block-wide space with y up; this one is icon-wide with y down.
+        pose.scale(UiStyle.ICON, -UiStyle.ICON, UiStyle.ICON);
+        minecraft.getItemRenderer().renderStatic(item.stack(), ItemDisplayContext.GUI, FULL_BRIGHT,
+            OverlayTexture.NO_OVERLAY, pose, bufferSource, minecraft.level, 0);
         pose.popPose();
     }
 

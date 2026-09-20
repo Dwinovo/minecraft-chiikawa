@@ -209,7 +209,7 @@ class IntentSelectorTest {
 
     @Test
     void workTheCarriedSlipCountsIsPreferred() {
-        PetTask weeding = new PetTask(id("weeding"), id("farmer"), PetWorkCounters.WEED, 8,
+        PetTask weeding = new PetTask(id("weeding"), id("farmer"), PetWorkCounters.WEED, PetTask.NO_ICON, 8,
             ResourceKey.create(Registries.LOOT_TABLE, id("pet_task/weeding")), 0);
         Optional<GlobalPos> near = near(true, 1);
         IntentContext ctx = TestContext.at(PET, new PetAnchor(PET, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, false, true))
