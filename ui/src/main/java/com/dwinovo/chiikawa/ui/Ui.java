@@ -94,6 +94,12 @@ public final class Ui {
         surface.drawText(text, right - surface.textWidth(text), y, argb);
     }
 
+    /** Text in the middle of a box, across and down — what a button's face wants. */
+    public static void textCentered(DrawSurface surface, String text, Rect area, int argb) {
+        surface.drawText(text, area.x() + (area.width() - surface.textWidth(text)) / 2,
+            UiStyle.centerIn(area.y(), area.height(), surface.lineHeight()), argb);
+    }
+
     /** Text from {@code x}, cut with an ellipsis at {@code maxWidth} so a long name cannot spill. */
     public static void textClipped(DrawSurface surface, String text, int x, int y, int maxWidth, int argb) {
         surface.drawText(TextClip.clip(text, maxWidth, surface::textWidth), x, y, argb);
