@@ -71,6 +71,22 @@ public final class InitMemory {
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
+    /** The shop nearest the pet. */
+    public static final Supplier<MemoryModuleType<BlockPos>> NEAREST_SHOP =
+        Services.REGISTRY.<MemoryModuleType<BlockPos>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "nearest_shop"),
+            () -> new MemoryModuleType<>(Optional.empty())
+        );
+
+    /** Present, with an expiry, after the pet has bought something, so it does not buy the shop out. */
+    public static final Supplier<MemoryModuleType<Unit>> SHOP_COOLDOWN =
+        Services.REGISTRY.<MemoryModuleType<Unit>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "shop_cooldown"),
+            () -> new MemoryModuleType<>(Optional.empty())
+        );
+
     /** Present, with an expiry, after the pet failed to take a slip, so it does not retry at once. */
     public static final Supplier<MemoryModuleType<Unit>> TAKE_TASK_COOLDOWN =
         Services.REGISTRY.<MemoryModuleType<Unit>>register(

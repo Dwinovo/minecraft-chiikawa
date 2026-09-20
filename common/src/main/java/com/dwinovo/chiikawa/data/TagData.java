@@ -39,7 +39,7 @@ public final class TagData {
             Blocks.SHORT_GRASS, Blocks.TALL_GRASS, Blocks.FERN, Blocks.LARGE_FERN);
         tags.add(InitTag.ENTITY_MUSHROOMS,
             Blocks.RED_MUSHROOM, Blocks.BROWN_MUSHROOM);
-        tags.add(BlockTags.MINEABLE_WITH_AXE, InitBlocks.LABOR_BOARD.get());
+        tags.add(BlockTags.MINEABLE_WITH_AXE, InitBlocks.LABOR_BOARD.get(), InitBlocks.SHOP.get());
     }
 
     public static void addItemTags(TagAppenderProvider<Item> tags) {

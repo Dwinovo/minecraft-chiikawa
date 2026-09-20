@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.platform;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
-import com.dwinovo.chiikawa.entity.brain.sensor.PetBoardSensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetPlacesSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetFarmerWorkSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
@@ -31,8 +31,8 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
         SENSOR_TYPES.register("pet_farmer_work_sensor", () -> new SensorType<>(PetFarmerWorkSensor::new));
     private static final DeferredHolder<SensorType<?>, SensorType<PetPickableItemSensor>> PET_ITEM_ENTITY_SENSOR =
         SENSOR_TYPES.register("pet_item_entity_sensor", () -> new SensorType<>(PetPickableItemSensor::new));
-    private static final DeferredHolder<SensorType<?>, SensorType<PetBoardSensor>> PET_BOARD_SENSOR =
-        SENSOR_TYPES.register("pet_board_sensor", () -> new SensorType<>(PetBoardSensor::new));
+    private static final DeferredHolder<SensorType<?>, SensorType<PetPlacesSensor>> PET_PLACES_SENSOR =
+        SENSOR_TYPES.register("pet_places_sensor", () -> new SensorType<>(PetPlacesSensor::new));
 
     private static final DeferredHolder<Activity, Activity> FARMER_HARVEST =
         ACTIVITIES.register("farmer_harvest", () -> new Activity("farmer_harvest"));
@@ -58,6 +58,8 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
         ACTIVITIES.register("pick_up", () -> new Activity("pick_up"));
     private static final DeferredHolder<Activity, Activity> TAKE_TASK =
         ACTIVITIES.register("take_task", () -> new Activity("take_task"));
+    private static final DeferredHolder<Activity, Activity> SHOP =
+        ACTIVITIES.register("shop", () -> new Activity("shop"));
 
     private static final DeferredHolder<MenuType<?>, MenuType<PetBackpackMenu>> PET_BACKPACK =
         MENUS.register("pet_backpack", () -> IMenuTypeExtension.create((containerId, inventory, buf) ->
@@ -86,8 +88,8 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
     }
 
     @Override
-    public Supplier<SensorType<PetBoardSensor>> petBoardSensor() {
-        return PET_BOARD_SENSOR;
+    public Supplier<SensorType<PetPlacesSensor>> petPlacesSensor() {
+        return PET_PLACES_SENSOR;
     }
 
     @Override
@@ -148,6 +150,11 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
     @Override
     public Supplier<Activity> takeTaskActivity() {
         return TAKE_TASK;
+    }
+
+    @Override
+    public Supplier<Activity> shopActivity() {
+        return SHOP;
     }
 
     @Override
