@@ -22,6 +22,8 @@ public class FabricModItemModelProvider extends FabricModelProvider {
         generateSpawnEggs(itemModelGenerator);
         generateDolls(itemModelGenerator);
 
+        itemModelGenerator.generateFlatItem(InitItems.BEAR_BACKPACK.get(), ModelTemplates.FLAT_ITEM);
+
         // Weapons use custom Blockbench models under resources.
         itemModelGenerator.declareCustomModelItem(InitItems.USAGI_WEAPON.get());
         itemModelGenerator.declareCustomModelItem(InitItems.HACHIWARE_WEAPON.get());
