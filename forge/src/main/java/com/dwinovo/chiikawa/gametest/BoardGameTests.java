@@ -15,6 +15,7 @@ import com.dwinovo.chiikawa.task.BoardSlips;
 import com.dwinovo.chiikawa.task.BoardSlot;
 import com.dwinovo.chiikawa.task.PetTaskTypes;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
@@ -58,6 +59,38 @@ public final class BoardGameTests {
         BlockPos board = weedingBoard(helper);
         helper.setBlock(board, InitBlocks.LABOR_BOARD.get());
 
+        weedPatch(helper);
+
+        AbstractPet pet = holding(worker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
+        helper.succeedWhen(() -> helper.assertTrue(count(pet, Items.EMERALD) > 0,
+            "the farmer never came away with anything for its trouble"));
+    }
+
+    /**
+     * Paid and straight back for more. The loop only means anything if it is a loop: a pet
+     * that does one job and then stands about for the rest of the day is a pet an owner has
+     * to nudge, which is the thing the board was for.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WORK_TICKS)
+    public static void a_farmer_goes_back_for_the_next_slip(GameTestHelper helper) {
+        BlockPos board = weedingBoard(helper);
+        helper.setBlock(board, InitBlocks.LABOR_BOARD.get());
+        weedPatch(helper);
+
+        AbstractPet pet = holding(worker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
+        AtomicBoolean paid = new AtomicBoolean();
+        helper.succeedWhen(() -> {
+            if (count(pet, Items.EMERALD) > 0) {
+                paid.set(true);
+            }
+            helper.assertTrue(paid.get(), "the farmer has not been paid for the first slip yet");
+            // Being paid clears the slip, so one in hand afterwards is a second one.
+            helper.assertTrue(pet.getTask().isPresent(), "the farmer stopped after one job");
+        });
+    }
+
+    /** Grass over the pet's corner of the floor, enough for any weeding slip the board rolls. */
+    private static void weedPatch(GameTestHelper helper) {
         for (int x = 0; x < WEED_PATCH; x++) {
             for (int z = 0; z < WEED_PATCH; z++) {
                 BlockPos weed = new BlockPos(2 + x, STAND, 2 + z);
@@ -65,10 +98,6 @@ public final class BoardGameTests {
                 helper.setBlock(weed, Blocks.SHORT_GRASS);
             }
         }
-
-        AbstractPet pet = holding(worker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
-        helper.succeedWhen(() -> helper.assertTrue(count(pet, Items.EMERALD) > 0,
-            "the farmer never came away with anything for its trouble"));
     }
 
     /**
