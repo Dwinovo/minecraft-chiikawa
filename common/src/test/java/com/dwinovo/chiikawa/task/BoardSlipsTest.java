@@ -29,6 +29,7 @@ class BoardSlipsTest {
     private static final UUID OTHER = UUID.fromString("00000000-0000-0000-0000-00000000000b");
     private static final long NOON = 6000L;
     private static final long NOW = 100_000L;
+    private static final BoardSlot.Claim TAKER = new BoardSlot.Claim("Usagi", "Dwinovo");
 
     @BeforeAll
     static void bootstrap() {
@@ -86,7 +87,7 @@ class BoardSlipsTest {
 
     @Test
     void skipsTakenSlipsAndSlipsHeldByAnotherPet() {
-        List<BoardSlot> slots = List.of(slot(FARMER).claim(), slot(FARMER).reserve(OTHER, NOW + 10), slot(FARMER));
+        List<BoardSlot> slots = List.of(taken(FARMER), slot(FARMER).reserve(OTHER, NOW + 10), slot(FARMER));
 
         assertEquals(OptionalInt.of(2), BoardSlips.find(slots, FARMER, PET, false, NOON, NOW));
     }
@@ -128,8 +129,10 @@ class BoardSlipsTest {
 
         assertTrue(held.reservedBy(PET, NOW));
         assertTrue(held.release().openTo(OTHER, NOW));
-        assertTrue(held.claim().claimed());
-        assertFalse(held.claim().openTo(PET, NOW));
+        assertTrue(held.claim(TAKER).claimed());
+        assertFalse(held.claim(TAKER).openTo(PET, NOW));
+        assertEquals("Usagi (Dwinovo)", TAKER.describe());
+        assertEquals("Usagi", new BoardSlot.Claim("Usagi", "").describe());
     }
 
     // ---- helpers ---------------------------------------------------------------
@@ -140,6 +143,10 @@ class BoardSlipsTest {
         types.put(id("mushroom_picking"), new PetTaskType(FARMER, PetWorkCounters.PICK_MUSHROOM, UniformInt.of(8, 16),
             reward("mushroom_picking"), 2));
         return types;
+    }
+
+    private static BoardSlot taken(ResourceLocation capability) {
+        return slot(capability).claim(TAKER);
     }
 
     private static BoardSlot slot(ResourceLocation capability) {
