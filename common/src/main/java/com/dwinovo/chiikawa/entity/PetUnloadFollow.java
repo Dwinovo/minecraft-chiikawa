@@ -10,10 +10,11 @@ import net.minecraft.world.level.entity.EntityAccess;
 /**
  * Rescues following pets whose chunk is about to unload.
  *
- * <p>{@link com.dwinovo.chiikawa.entity.brain.task.tameable.AnchorLeashBehavior} only
- * teleports a pet from its own AI, so an owner who jumps far away (commands, ender
- * pearls, fast elytra flight, respawning) can leave the pet's chunk to stop ticking
- * and unload before that check runs. The entity manager mixin calls
+ * <p>{@link PetFollowKeeper} looks every couple of seconds and fetches pets that have
+ * fallen behind, which covers a pet whose chunk has stopped ticking. A chunk can still
+ * be saved and unloaded between two of those looks — an owner who jumps far away with
+ * a command, an ender pearl, fast elytra flight or a respawn — and an unloaded pet is
+ * no longer there to be found. The entity manager mixin calls
  * {@link #onChunkPreUnload} with the entities of each chunk right before they are
  * saved and unloaded, and eligible pets are moved next to their owner instead.
  *
