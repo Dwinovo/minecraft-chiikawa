@@ -54,6 +54,7 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.schedule.Activity;
@@ -94,6 +95,20 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * rest is room for things. The bag's own ten come after them.
      */
     public static final int BACKPACK_SIZE = 16;
+    /**
+     * What every pet is made of. One builder rather than eight copies of the same four
+     * lines, and {@code ATTACK_SPEED} is among them so that a weapon's own speed means
+     * something in a pet's hands: vanilla hangs a sword's -2.4 off a base of 4, which is
+     * where these numbers come from.
+     */
+    public static AttributeSupplier.Builder petAttributes() {
+        return TamableAnimal.createMobAttributes()
+            .add(Attributes.MAX_HEALTH, 20.0D)
+            .add(Attributes.MOVEMENT_SPEED, 0.3D)
+            .add(Attributes.ATTACK_DAMAGE, 4.0D)
+            .add(Attributes.ATTACK_SPEED, 4.0D);
+    }
+
     /** How often a pet writes down where it is; see {@link PetRoster}. */
     private static final int ROSTER_TICKS = 100;
 
