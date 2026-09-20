@@ -42,6 +42,9 @@ public final class FarmGameTests {
      */
     private static final int WORK_TICKS = 3600;
 
+    /** How long a pet is watched leaving something alone before we believe it means to. */
+    private static final int LEAVE_IT_TICKS = 600;
+
     private static final int STAND = 2;
 
     @BeforeBatch(batch = BATCH)
@@ -77,6 +80,21 @@ public final class FarmGameTests {
                 + pet.getIntent().map(Object::toString).orElse("doing nothing")
                 + " and had been told about a container at "
                 + pet.getBrain().getMemory(InitMemory.CONTAINER_POS.get()).map(Object::toString).orElse("nowhere"));
+        });
+    }
+
+    /**
+     * Cobblestone on the floor stays there. A pet that hoovered up everything loose would
+     * empty a player's dropped inventory into its own bag, which is a way to lose things.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = LEAVE_IT_TICKS + 100)
+    public static void a_pet_leaves_alone_what_is_not_its_business(GameTestHelper helper) {
+        AbstractPet pet = holding(worker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
+        helper.spawnItem(Items.COBBLESTONE, new BlockPos(7, STAND, 4));
+
+        helper.runAtTickTime(LEAVE_IT_TICKS, () -> {
+            helper.assertFalse(carries(pet, Items.COBBLESTONE), "the pet pocketed somebody's cobblestone");
+            helper.succeed();
         });
     }
 
