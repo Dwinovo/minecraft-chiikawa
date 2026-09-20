@@ -38,7 +38,7 @@ import net.minecraft.world.entity.player.Inventory;
  */
 public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> {
     private static final int PANEL_WIDTH = 196;
-    private static final int PANEL_HEIGHT = 204;
+    private static final int PANEL_HEIGHT = 224;
 
     /** The window the live pet is shown in, inside a well of its own. */
     private static final int PORTRAIT_X = UiStyle.PAD, PORTRAIT_Y = UiStyle.PAD;
@@ -47,8 +47,11 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     /** Nudges the model down inside the window (entity-space units; +down). */
     private static final float PORTRAIT_Y_OFFSET = 0.18F;
 
-    /** The pet's name, and how much of it is left, on one line under its picture. */
-    private static final int NAME_Y = PORTRAIT_Y + PORTRAIT_H + UiStyle.GAP;
+    /** Where the bag's own rows sit, empty until a bag is worn. */
+    private static final int BAG_ROWS_Y = 59;
+    private static final int BAG_ROWS_H = 2 * 17;
+    /** The pet's name, and how much of it is left, on one line under everything it carries. */
+    private static final int NAME_Y = BAG_ROWS_Y + BAG_ROWS_H + UiStyle.GAP;
     /**
      * What the pet is at, on the line under its name. Written straight onto the panel and
      * not in a well: a well is where a thing is put, so an idle pet's two words sat in a
@@ -85,10 +88,14 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
         Ui.well(surface, this.leftPos + PORTRAIT_X, this.topPos + PORTRAIT_Y, PORTRAIT_W, PORTRAIT_H);
 
         // A well behind every slot, each one asked where it is — the menu owns the layout,
-        // and the screen never keeps a second copy of it to fall out of step.
+        // and the screen never keeps a second copy of it to fall out of step. A slot that is
+        // not in use yet gets no well: an empty well says "put something here", which the
+        // bag's rows cannot honour until there is a bag.
         for (net.minecraft.world.inventory.Slot slot : this.menu.slots) {
-            Ui.well(surface, this.leftPos + slot.x - UiStyle.BORDER, this.topPos + slot.y - UiStyle.BORDER,
-                UiStyle.SLOT, UiStyle.SLOT);
+            if (slot.isActive()) {
+                Ui.well(surface, this.leftPos + slot.x - UiStyle.BORDER, this.topPos + slot.y - UiStyle.BORDER,
+                    UiStyle.SLOT, UiStyle.SLOT);
+            }
         }
         Ui.divider(surface, this.leftPos, this.topPos + DIVIDER_Y, this.imageWidth);
 
@@ -119,6 +126,11 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
         Ui.textClipped(surface, pet.getDisplayName().getString(), UiStyle.PAD, NAME_Y,
             heartsX - UiStyle.GAP_SECTION - UiStyle.PAD, UiTheme.TEXT);
 
+        if (!pet.isWearingBag()) {
+            // Says what the empty band is for, rather than leaving a hole in the panel.
+            Ui.emptyState(surface, Component.translatable("screen.chiikawa.pet.bag_hint").getString(),
+                this.imageWidth / 2, UiStyle.centerIn(BAG_ROWS_Y, BAG_ROWS_H, surface.lineHeight()));
+        }
         drawStatus(surface, pet, UiStyle.PAD, STATUS_Y, this.imageWidth - 2 * UiStyle.PAD);
     }
 
