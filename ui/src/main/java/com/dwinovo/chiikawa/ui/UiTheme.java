@@ -15,6 +15,10 @@ public final class UiTheme {
     public static final int PANEL = 0xFFF7E9D2;
     /** A well cut into a card — an icon's box, a bar's groove. Reads as recessed. */
     public static final int SURFACE = 0xFFE7D2B2;
+    /** The lit edge of anything raised, and the far edge of anything sunken. */
+    public static final int HIGHLIGHT = 0xFFFFF7E8;
+    /** The shaded edge of anything raised, and the near edge of anything sunken. */
+    public static final int SHADE = 0xFFD9BE96;
     /** The line around a card. */
     public static final int BORDER = 0xFFA9754F;
     /** The line between two parts of one card; quieter than a border, which encloses. */
@@ -27,6 +31,8 @@ public final class UiTheme {
     public static final int ACCENT = 0xFFD08A3E;
     /** Finished, taken, paid. */
     public static final int SUCCESS = 0xFF4C7A34;
+    /** A life still in hand. Lives lost are drawn in {@link #SHADE}: the row keeps its length. */
+    public static final int LIFE = 0xFFE0748A;
     /** Laid over the row the cursor is on, so a list answers the mouse. */
     public static final int HOVER = 0x33A9754F;
     /** The hard shadow a card casts, one step down and to the right. */
