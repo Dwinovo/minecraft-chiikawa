@@ -49,8 +49,9 @@ public final class LanguageData {
             addIntentNameTranslations(adder, "跟着主人", "坐着", "闲逛", "捡东西", "去领工作牌",
                 "收割", "种地", "送货", "拔草", "采蘑菇", "讨伐", "射箭", "演奏");
             addTaskTypeTranslations(adder, "除草", "%s 株", "夜间采蘑菇", "%s 朵", "街头演奏", "%s 秒");
-            addBoardScreenTranslations(adder, "劳动公告板", "今天没有工作牌", "%s · %s", "还没人领", "%s 领走了");
-            addPetStatusTranslations(adder, "正在：%s", "闲着", "工作牌：%s", "没有工作牌", "%s %s/%s", "%s · %s");
+            addBoardScreenTranslations(adder, "劳动公告板", "%s 张", "今天没有工作牌",
+                    "待领", "已领", "%s 领走了");
+            addPetStatusTranslations(adder, "闲着");
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
@@ -93,8 +94,9 @@ public final class LanguageData {
                 "Fighting", "Shooting", "Performing");
             addTaskTypeTranslations(adder, "Weeding", "%s weeds", "Mushroom Picking", "%s mushrooms",
                 "Street Performance", "%ss");
-            addBoardScreenTranslations(adder, "Labor Board", "No slips up today", "%s · %s", "Still up", "Taken by %s");
-            addPetStatusTranslations(adder, "Doing: %s", "Idle", "Slip: %s", "No slip", "%s %s/%s", "%s · %s");
+            addBoardScreenTranslations(adder, "Labor Board", "%s up", "No slips up today",
+                    "Open", "Taken", "Taken by %s");
+            addPetStatusTranslations(adder, "Idle");
         }
     }
 
@@ -209,28 +211,31 @@ public final class LanguageData {
         adder.add("pet_task.chiikawa.street_performance.amount", streetPerformanceAmount);
     }
 
-    /** @param detail how much work and for which job, on a board row */
-    private static void addBoardScreenTranslations(Adder adder, String title, String empty, String detail,
-            String open, String taken) {
+    /**
+     * The board's screen. {@code open} and {@code taken} are badges on a row and have to
+     * stay to a word or two; {@code takenBy} is the sentence under the cursor, where there
+     * is room to say who.
+     *
+     * @param count how many slips are up, in the title bar
+     */
+    private static void addBoardScreenTranslations(Adder adder, String title, String count, String empty,
+            String open, String taken, String takenBy) {
         adder.add("screen.chiikawa.labor_board", title);
+        adder.add("screen.chiikawa.labor_board.count", count);
         adder.add("screen.chiikawa.labor_board.empty", empty);
-        adder.add("screen.chiikawa.labor_board.detail", detail);
         adder.add("screen.chiikawa.labor_board.open", open);
         adder.add("screen.chiikawa.labor_board.taken", taken);
+        adder.add("screen.chiikawa.labor_board.taken_by", takenBy);
     }
 
     /**
-     * @param slipProgress a slip and how far along it is, such as "Weeding 3/8"
-     * @param label what a pet shows over its head: what it is doing, and its slip
+     * What a pet is at. Only the idle case needs words of its own: a pet that is doing
+     * something is named by the intent it is running, and a slip by its own type, both of
+     * which already have names. How far along it is comes out as a bar and a count, which
+     * read the same in every language.
      */
-    private static void addPetStatusTranslations(Adder adder, String doing, String doingNothing, String slip,
-            String noSlip, String slipProgress, String label) {
-        adder.add("screen.chiikawa.pet.doing", doing);
+    private static void addPetStatusTranslations(Adder adder, String doingNothing) {
         adder.add("screen.chiikawa.pet.doing.nothing", doingNothing);
-        adder.add("screen.chiikawa.pet.slip", slip);
-        adder.add("screen.chiikawa.pet.slip.none", noSlip);
-        adder.add("screen.chiikawa.pet.slip.short", slipProgress);
-        adder.add("screen.chiikawa.pet.label", label);
     }
 
     private static void addDollTooltipTranslations(Adder adder, String placeOnCakeHint) {
