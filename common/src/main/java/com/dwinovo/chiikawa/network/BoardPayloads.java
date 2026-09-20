@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.network;
 
 import com.dwinovo.chiikawa.Constants;
 import java.util.List;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -42,13 +43,47 @@ public final class BoardPayloads {
         );
     }
 
-    /** Opens the labor board screen with the day's slips. */
-    public record BoardSlipsPayload(List<SlipView> slips) implements CustomPacketPayload {
+    /**
+     * Opens the labor board screen with the day's slips, and sends it again after an
+     * upgrade so the screen shows what was just paid for.
+     *
+     * @param board which board; the screen sends it back when the owner buys a level
+     * @param level how far the board has been paid up
+     * @param price what the next level costs, or 0 when there is none left to buy
+     */
+    public record BoardSlipsPayload(BlockPos board, int level, int price, List<SlipView> slips)
+            implements CustomPacketPayload {
         public static final Type<BoardSlipsPayload> TYPE = new Type<>(
             ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "board_slips"));
         public static final StreamCodec<RegistryFriendlyByteBuf, BoardSlipsPayload> STREAM_CODEC = StreamCodec.of(
-            (buffer, value) -> buffer.writeCollection(value.slips, (buf, slip) -> SlipView.STREAM_CODEC.encode(buf, slip)),
-            buffer -> new BoardSlipsPayload(buffer.readList(buf -> SlipView.STREAM_CODEC.decode(buf)))
+            (buffer, value) -> {
+                buffer.writeBlockPos(value.board);
+                buffer.writeVarInt(value.level);
+                buffer.writeVarInt(value.price);
+                buffer.writeCollection(value.slips, (buf, slip) -> SlipView.STREAM_CODEC.encode(buf, slip));
+            },
+            buffer -> new BoardSlipsPayload(buffer.readBlockPos(), buffer.readVarInt(), buffer.readVarInt(),
+                buffer.readList(buf -> SlipView.STREAM_CODEC.decode(buf)))
+        );
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
+    /**
+     * A level bought for a board. The price is not in here: what a level costs is the
+     * server's business, and a screen only asks for the next one.
+     *
+     * @param board which board; the server checks the player is still standing at it
+     */
+    public record BoardUpgradePayload(BlockPos board) implements CustomPacketPayload {
+        public static final Type<BoardUpgradePayload> TYPE = new Type<>(
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "board_upgrade"));
+        public static final StreamCodec<RegistryFriendlyByteBuf, BoardUpgradePayload> STREAM_CODEC = StreamCodec.of(
+            (buffer, value) -> buffer.writeBlockPos(value.board),
+            buffer -> new BoardUpgradePayload(buffer.readBlockPos())
         );
 
         @Override
