@@ -44,6 +44,9 @@ public final class InitItems {
     public static final Supplier<BlockItem> LABOR_BOARD =
         registerItem("labor_board", () -> new BlockItem(InitBlocks.LABOR_BOARD.get(), new Item.Properties()));
 
+    public static final Supplier<Item> BEAR_BACKPACK =
+        registerItem("bear_backpack", () -> new Item(new Item.Properties().stacksTo(1)));
+
     public static final Supplier<BlockItem> SHOP =
         registerItem("shop", () -> new BlockItem(InitBlocks.SHOP.get(), new Item.Properties()));
     public static final Supplier<Item> USAGI_DOLL =

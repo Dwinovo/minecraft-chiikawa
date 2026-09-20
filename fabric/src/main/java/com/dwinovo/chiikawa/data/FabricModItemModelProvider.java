@@ -21,6 +21,8 @@ public class FabricModItemModelProvider extends FabricModelProvider {
         generateSpawnEggs(itemModelGenerator);
         generateDolls(itemModelGenerator);
 
+        itemModelGenerator.generateFlatItem(InitItems.BEAR_BACKPACK.get(), ModelTemplates.FLAT_ITEM);
+
         // Weapons have prebuilt models under resources; no datagen needed.
         itemModelGenerator.generateFlatItem(InitItems.MUSIC_BOX.get(), ModelTemplates.FLAT_ITEM);
     }
