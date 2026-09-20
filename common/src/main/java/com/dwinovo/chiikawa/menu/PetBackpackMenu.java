@@ -14,15 +14,17 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.SimpleContainer;
 
 public class PetBackpackMenu extends AbstractContainerMenu {
-    // Slot positions match the pet_gui texture (item top-left = visual cell + 1px inset).
-    private static final int SLOT_PITCH = 17;          // 18px cell, overlapping 1px
+    // Where the slots are. The screen draws a well behind each one by asking the slot
+    // where it is, so these numbers are the layout and there is no second copy of them.
+    // An item sits a pixel inside its 18px cell, and cells overlap by a pixel.
+    private static final int SLOT_PITCH = 17;
     private static final int MAINHAND_X = 77;
-    private static final int MAINHAND_Y = 38;
-    private static final int PET_GRID_X = 101;
-    private static final int PET_GRID_Y = 20;
-    private static final int PLAYER_INV_X = 24;
-    private static final int PLAYER_INV_Y = 97;
-    private static final int HOTBAR_Y = 151;
+    private static final int MAINHAND_Y = 32;
+    private static final int PET_GRID_X = 103;
+    private static final int PET_GRID_Y = 9;
+    private static final int PLAYER_INV_X = 22;
+    private static final int PLAYER_INV_Y = 124;
+    private static final int HOTBAR_Y = 179;
 
     private final AbstractPet pet;
     private final int petSlotCount;
