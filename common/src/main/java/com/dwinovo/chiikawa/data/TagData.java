@@ -103,12 +103,21 @@ public final class TagData {
     }
 
     public static void addEntityTags(TagAppenderProvider<EntityType<?>> tags) {
+        // Creepers are in the list now. They are not something a pet with a sword walks
+        // up to — a pet's reach is a block and a half, well inside the distance at which a
+        // creeper starts swelling — but a pet has to be able to see one to keep away from
+        // it, and an archer can answer one from outside the blast.
         tags.tag(InitTag.ENTITY_HOSTILE_ENTITY)
             .add(EntityType.BLAZE)
+            .add(EntityType.BOGGED)
+            .add(EntityType.BREEZE)
             .add(EntityType.CAVE_SPIDER)
+            .add(EntityType.CREEPER)
             .add(EntityType.DROWNED)
+            .add(EntityType.ENDERMITE)
             .add(EntityType.EVOKER)
             .add(EntityType.GUARDIAN)
+            .add(EntityType.HOGLIN)
             .add(EntityType.HUSK)
             .add(EntityType.ILLUSIONER)
             .add(EntityType.MAGMA_CUBE)
@@ -126,6 +135,7 @@ public final class TagData {
             .add(EntityType.WITCH)
             .add(EntityType.WITHER_SKELETON)
             .add(EntityType.ZOGLIN)
-            .add(EntityType.ZOMBIE);
+            .add(EntityType.ZOMBIE)
+            .add(EntityType.ZOMBIE_VILLAGER);
     }
 }
