@@ -85,6 +85,29 @@ public final class CareGameTests {
     }
 
     /**
+     * Told to sit, it sits, even when its owner walks off. Sitting has to beat following or
+     * "wait here" means "wait here until I move", which is no use to anyone leaving a pet
+     * behind on purpose.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = LEAVE_IT_TICKS + 100)
+    public static void a_sitting_pet_does_not_come_along(GameTestHelper helper) {
+        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        pet.setPetDirective(PetDirective.STAY);
+        BlockPos seat = pet.blockPosition();
+
+        BlockPos away = helper.absolutePos(new BlockPos(13, STAND, 13));
+        owner.teleportTo(away.getX() + 0.5, away.getY(), away.getZ() + 0.5);
+
+        helper.runAtTickTime(LEAVE_IT_TICKS, () -> {
+            helper.assertTrue(pet.blockPosition().distSqr(seat) < AT_HEEL * AT_HEEL,
+                "a sitting pet got up and went after its owner");
+            helper.succeed();
+        });
+    }
+
+    /**
      * A wild pet with a sword is a pet with a job, not a threat. Anything else and a
      * player could not walk up to one to feed it in the first place.
      */
