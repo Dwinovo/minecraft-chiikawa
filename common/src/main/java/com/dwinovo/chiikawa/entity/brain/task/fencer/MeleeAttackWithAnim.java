@@ -3,9 +3,13 @@ package com.dwinovo.chiikawa.entity.brain.task.fencer;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.entity.brain.PetTargeting;
+import com.dwinovo.chiikawa.entity.brain.combat.PetCombat;
+import com.dwinovo.chiikawa.utils.Utils;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.behavior.OneShot;
 import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
@@ -18,7 +22,15 @@ public final class MeleeAttackWithAnim {
     private MeleeAttackWithAnim() {
     }
 
-    public static OneShot<AbstractPet> create(int cooldownBetweenAttacks) {
+    /**
+     * The swing itself, on its own so both jobs can run it: a fencer's whole fight, and an
+     * archer's answer to something that got inside its bow.
+     *
+     * <p>How long until the next one comes from the weapon in hand rather than a fixed
+     * second — {@link PetCombat#swingCooldown} — so a sword is worth carrying for more
+     * than its damage.
+     */
+    public static OneShot<AbstractPet> create() {
         return BehaviorBuilder.create(
             brain -> brain.group(
                     brain.registered(MemoryModuleType.LOOK_TARGET),
@@ -31,7 +43,7 @@ public final class MeleeAttackWithAnim {
                     (lookTarget, attackTarget, cooldown, visibleTargets) -> (ServerLevel level, AbstractPet pet, long time) -> {
                         LivingEntity target = brain.get(attackTarget);
                         if (!PetTargeting.canTarget(pet, target)
-                            || isHoldingUsableProjectileWeapon(pet)
+                            || (isHoldingUsableProjectileWeapon(pet) && !Utils.getArrow(pet).isEmpty())
                             || !pet.isWithinMeleeAttackRange(target)
                             || !brain.<NearestVisibleLivingEntities>get(visibleTargets).contains(target)) {
                             return false;
@@ -41,11 +53,17 @@ public final class MeleeAttackWithAnim {
                         pet.swing(InteractionHand.MAIN_HAND);
                         pet.doHurtTarget(level, target);
                         pet.playAttackSound();
-                        cooldown.setWithExpiry(true, (long) cooldownBetweenAttacks);
+                        cooldown.setWithExpiry(true, (long) PetCombat.swingCooldown(attackSpeedOf(pet)));
                         return true;
                     }
                 )
         );
+    }
+
+    /** What the game says about the weapon in hand; 0 when the pet has no such attribute. */
+    private static double attackSpeedOf(AbstractPet pet) {
+        AttributeInstance speed = pet.getAttribute(Attributes.ATTACK_SPEED);
+        return speed == null ? 0.0 : speed.getValue();
     }
 
     private static boolean isHoldingUsableProjectileWeapon(AbstractPet pet) {
