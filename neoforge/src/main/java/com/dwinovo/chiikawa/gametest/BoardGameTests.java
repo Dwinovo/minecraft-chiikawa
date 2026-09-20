@@ -16,6 +16,7 @@ import com.dwinovo.chiikawa.task.BoardSlot;
 import com.dwinovo.chiikawa.task.PetTaskTypes;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
@@ -23,6 +24,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -47,6 +49,8 @@ public final class BoardGameTests {
     private static final int STAND = 2;
     /** Grass to pull: more than the largest weeding slip asks for, so the work cannot run out. */
     private static final int WEED_PATCH = 6;
+    /** How long two pets are watched, which is longer than one takes to walk over and claim. */
+    private static final int WATCH_TICKS = 1200;
 
     @BeforeBatch(batch = BATCH)
     public static void settle(ServerLevel level) {
@@ -101,6 +105,54 @@ public final class BoardGameTests {
     }
 
     /**
+     * Paid with nowhere to put it. A pet whose bag is full still gets what it earned — it
+     * lands at its feet rather than quietly going nowhere, which is the difference between
+     * a full bag and a robbery.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WORK_TICKS)
+    public static void a_farmer_with_a_full_bag_is_paid_at_its_feet(GameTestHelper helper) {
+        helper.setBlock(weedingBoard(helper), InitBlocks.LABOR_BOARD.get());
+        weedPatch(helper);
+
+        AbstractPet pet = holding(worker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
+        // Everything but the hand it holds the hoe in, packed with something an emerald
+        // cannot join and a farmer will not pick up again.
+        for (int slot = 1; slot < pet.getBackpack().getContainerSize(); slot++) {
+            pet.getBackpack().setItem(slot, new ItemStack(Items.COBBLESTONE, Items.COBBLESTONE.getDefaultMaxStackSize()));
+        }
+
+        helper.succeedWhen(() -> helper.assertItemEntityPresent(Items.EMERALD, new BlockPos(4, STAND, 4), 10.0));
+    }
+
+    /**
+     * One slip, two farmers: one of them gets it and the other does not. A slip taken twice
+     * is work paid for twice, and a pair of pets walking to the same board and both coming
+     * away with the same job is exactly what the reservation is there to stop.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WATCH_TICKS + 200)
+    public static void two_farmers_cannot_take_the_same_slip(GameTestHelper helper) {
+        helper.setBlock(boardWithOneFarmerSlip(helper), InitBlocks.LABOR_BOARD.get());
+        weedPatch(helper);
+
+        AbstractPet first = holding(worker(helper, new BlockPos(3, STAND, 4)), Items.WOODEN_HOE);
+        AbstractPet second = holding(worker(helper, new BlockPos(5, STAND, 4)), Items.WOODEN_HOE);
+        AtomicBoolean taken = new AtomicBoolean();
+
+        helper.startSequence()
+            .thenExecuteFor(WATCH_TICKS, () -> {
+                boolean firstHasOne = first.getTask().isPresent();
+                boolean secondHasOne = second.getTask().isPresent();
+                helper.assertFalse(firstHasOne && secondHasOne,
+                    "both farmers walked away with the day's only slip");
+                if (firstHasOne || secondHasOne) {
+                    taken.set(true);
+                }
+            })
+            .thenExecute(() -> helper.assertTrue(taken.get(), "neither farmer ever took the slip"))
+            .thenSucceed();
+    }
+
+    /**
      * Where to put the board so that the first thing it offers a farmer today is weeding.
      *
      * <p>A board's day is rolled from the world seed, the day and its own position, so what
@@ -115,6 +167,24 @@ public final class BoardGameTests {
      * at noon, and the case waits out its clock for nothing.
      */
     private static BlockPos weedingBoard(GameTestHelper helper) {
+        return boardWhere(helper, farmerSlips -> !farmerSlips.isEmpty()
+            && farmerSlips.get(0).slip().type().equals(PetTaskTypeData.WEEDING),
+            "offers a farmer weeding first");
+    }
+
+    /** A board with one slip for a farmer and no second one to fall back on. */
+    private static BlockPos boardWithOneFarmerSlip(GameTestHelper helper) {
+        return boardWhere(helper, farmerSlips -> farmerSlips.size() == 1
+            && farmerSlips.get(0).slip().type().equals(PetTaskTypeData.WEEDING),
+            "offers a farmer exactly one slip, for weeding");
+    }
+
+    /**
+     * The first spot on the floor whose day, rolled, answers {@code wanted}.
+     *
+     * @param wanted asked of the day's slips a farmer could take, in the order a pet meets them
+     */
+    private static BlockPos boardWhere(GameTestHelper helper, Predicate<List<BoardSlot>> wanted, String what) {
         ServerLevel level = helper.getLevel();
         long day = level.getDayTime() / Level.TICKS_PER_DAY;
         ResourceLocation farmer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FARMER.get());
@@ -122,17 +192,15 @@ public final class BoardGameTests {
             for (int z = 2; z < 15; z++) {
                 BlockPos rel = new BlockPos(x, STAND, z);
                 long seed = BoardSlips.seed(level.getSeed(), day, helper.absolutePos(rel));
-                List<BoardSlot> slips = BoardSlips.roll(seed, PetTaskTypes.all());
-                if (slips.stream()
+                List<BoardSlot> farmerSlips = BoardSlips.roll(seed, PetTaskTypes.all()).stream()
                     .filter(slot -> slot.slip().capability().equals(farmer))
-                    .findFirst()
-                    .filter(slot -> slot.slip().type().equals(PetTaskTypeData.WEEDING))
-                    .isPresent()) {
+                    .toList();
+                if (wanted.test(farmerSlips)) {
                     return rel;
                 }
             }
         }
-        throw new AssertionError("nowhere on this floor offers a farmer weeding first today — "
+        throw new AssertionError("nowhere on this floor " + what + " today — "
             + "the roll, the weights or the slip types changed");
     }
 }
