@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * pet cannot wander out of sight of what it is meant to be doing.
  */
 public final class GameTestStructureData {
+    public static final ResourceLocation FLOOR_32 = id("floor32");
     public static final ResourceLocation FLOOR_16 = id("floor16");
     public static final ResourceLocation FLOOR_8 = id("floor8");
 
@@ -31,6 +32,8 @@ public final class GameTestStructureData {
      */
     public static Map<ResourceLocation, Vec3i> all() {
         return Map.of(
+            // Wide enough to walk a pet past the distance it is allowed to stray from home.
+            FLOOR_32, new Vec3i(32, 8, 32),
             FLOOR_16, new Vec3i(16, 8, 16),
             FLOOR_8, new Vec3i(8, 8, 8));
     }
