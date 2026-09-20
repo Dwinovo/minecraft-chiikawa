@@ -20,6 +20,7 @@ public class ForgeModItemModelProvider extends ItemModelProvider {
         generatedItem(InitItems.MUSIC_BOX.get());
         generatedItem(InitItems.BEAR_BACKPACK.get());
         generatedItem(InitItems.SIMPLE_DISH.get());
+        generatedItem(InitItems.PET_BELL.get());
         // Weapons have prebuilt models under resources; no datagen needed.
     }
 
