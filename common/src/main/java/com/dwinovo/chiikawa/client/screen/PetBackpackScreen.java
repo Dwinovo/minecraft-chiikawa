@@ -50,9 +50,15 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
 
     /** The pet's name, and how much of it is left, on one line under its picture. */
     private static final int NAME_Y = PORTRAIT_Y + PORTRAIT_H + UiStyle.GAP;
-    /** What the pet is at, in a strip of its own. */
+    /**
+     * What the pet is at, on the line under its name. Written straight onto the panel and
+     * not in a well: a well is where a thing is put, so an idle pet's two words sat in a
+     * long empty box, and an empty box is emptiness drawn large. Bare text with room after
+     * it is just room.
+     */
     private static final int STATUS_Y = NAME_Y + UiStyle.LINE + UiStyle.GAP;
-    private static final int STATUS_H = UiStyle.SLOT + 2 * UiStyle.TIGHT;
+    /** Tall enough for the work's icon on the days there is one. */
+    private static final int STATUS_H = UiStyle.SLOT;
     /** Long enough that a slip barely started and one nearly done look nothing alike. */
     private static final int STATUS_BAR_W = 56;
     /** The line between the pet's things and the player's own. */
@@ -117,25 +123,27 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
 
     /** What the pet is at: the work's picture, what it is doing, the count and the bar. */
     private void drawStatus(DrawSurface surface, AbstractPet pet, int x, int y, int width) {
-        Ui.well(surface, x, y, width, STATUS_H);
         Optional<PetTask> slip = pet.getTask();
-        int textX = x + UiStyle.GAP;
+        int textX = x;
         if (slip.isPresent()) {
-            Slot.draw(surface, ItemIcon.of(slip.get().icon()), x + UiStyle.TIGHT,
-                UiStyle.centerIn(y, STATUS_H, UiStyle.SLOT));
-            textX = x + UiStyle.TIGHT + UiStyle.SLOT + UiStyle.GAP;
+            Slot.draw(surface, ItemIcon.of(slip.get().icon()), x, UiStyle.centerIn(y, STATUS_H, UiStyle.SLOT));
+            textX = x + UiStyle.SLOT + UiStyle.GAP;
         }
         int textY = UiStyle.centerIn(y, STATUS_H, surface.lineHeight());
-        int textRoom = x + width - UiStyle.GAP - textX;
+        int textRoom = x + width - textX;
 
         if (slip.isPresent()) {
             PetTask task = slip.get();
-            int barX = x + width - UiStyle.GAP - STATUS_BAR_W;
+            int barX = x + width - STATUS_BAR_W;
             Bar.draw(surface, barX, UiStyle.centerIn(y, STATUS_H, UiStyle.BAR_H),
                 STATUS_BAR_W, UiStyle.BAR_H, task.progress(), task.target());
             String count = PetStatusText.slipCount(task).getString();
             Ui.textRight(surface, count, barX - UiStyle.GAP, textY, UiTheme.TEXT_MUTED);
             textRoom = barX - UiStyle.GAP - surface.textWidth(count) - UiStyle.GAP - textX;
+            // The slip's own name, which is what the picture and the bar are about.
+            Ui.textClipped(surface, PetStatusText.taskName(task.type()).getString(), textX, textY,
+                textRoom, UiTheme.TEXT);
+            return;
         }
         Ui.textClipped(surface, PetStatusText.activity(pet).getString(), textX, textY, textRoom, UiTheme.TEXT);
     }
@@ -159,9 +167,12 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
             Tooltip.draw(surface, detail(task), mouseX, mouseY, this.width, this.height)));
     }
 
-    private static List<String> detail(PetTask task) {
+    private List<String> detail(PetTask task) {
+        AbstractPet pet = this.menu.getPet(Minecraft.getInstance().level);
         return List.of(
             PetStatusText.taskName(task.type()).getString(),
+            // What the pet is at this second: the line itself now names the slip.
+            PetStatusText.activity(pet).getString(),
             PetStatusText.taskAmount(task.type(), task.target()).getString(),
             PetStatusText.jobName(task.capability()).getString());
     }
