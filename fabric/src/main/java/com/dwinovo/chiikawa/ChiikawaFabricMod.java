@@ -11,6 +11,7 @@ import com.dwinovo.chiikawa.init.InitActivity;
 import com.dwinovo.chiikawa.init.InitSounds;
 import com.dwinovo.chiikawa.init.InitMenu;
 import com.dwinovo.chiikawa.init.InitDataComponents;
+import com.dwinovo.chiikawa.init.InitEntityDataSerializers;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitBlocks;
@@ -23,7 +24,7 @@ import com.dwinovo.chiikawa.item.PetDollItem;
 import com.dwinovo.chiikawa.item.PetReviveRitualManager;
 import com.dwinovo.chiikawa.data.FabricBiomeModifications;
 import com.dwinovo.chiikawa.music.ServerMusicSystem;
-import com.dwinovo.chiikawa.platform.FabricMusicNetworking;
+import com.dwinovo.chiikawa.platform.FabricModNetworking;
 import com.dwinovo.chiikawa.platform.Services;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
@@ -53,6 +54,7 @@ public class ChiikawaFabricMod implements ModInitializer {
         InitSounds.init();
         InitMenu.init();
         InitDataComponents.init();
+        InitEntityDataSerializers.init();
         InitEntity.init();
         InitBlocks.init();
         InitBlockEntities.init();
@@ -63,7 +65,7 @@ public class ChiikawaFabricMod implements ModInitializer {
         FabricBiomeModifications.init();
         Services.ENTITY.registerAttributes();
         Services.ENTITY.registerSpawnPlacements();
-        FabricMusicNetworking.registerServer();
+        FabricModNetworking.registerServer();
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             ChiikawaMusicCommand.register(dispatcher);
             ChiikawaDebugCommand.register(dispatcher);

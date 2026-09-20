@@ -10,6 +10,8 @@ import net.fabricmc.fabric.api.object.builder.v1.world.poi.PointOfInterestHelper
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.syncher.EntityDataSerializer;
+import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
@@ -37,6 +39,13 @@ public class FabricRegistryHelper implements IRegistryHelper {
         BlockEntityType<T> type = FabricBlockEntityTypeBuilder.create(factory::apply, block.get()).build();
         Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, id, type);
         return () -> type;
+    }
+
+    @Override
+    public void registerEntityDataSerializer(Identifier id, EntityDataSerializer<?> serializer) {
+        // Fabric has no registry for these: a serializer's id is its place in vanilla's own
+        // list, the same on both sides because both run the same mods' init in the same order.
+        EntityDataSerializers.registerSerializer(serializer);
     }
 
     @Override
