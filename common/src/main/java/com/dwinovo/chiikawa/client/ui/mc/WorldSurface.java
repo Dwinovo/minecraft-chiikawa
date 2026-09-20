@@ -42,16 +42,20 @@ public final class WorldSurface implements DrawSurface {
     private final PoseStack pose;
     private final MultiBufferSource bufferSource;
     private final Font font;
+    private final float alpha;
     private float layer;
 
     /**
      * @param pose already translated to the label's spot, turned to the camera and scaled
      *             to text pixels, with y running down as on a screen and z towards the camera
+     * @param alpha how far faded in the whole surface is, 0 to 1 — its fills, its glyphs and
+     *              the items drawn on it give way together
      */
-    public WorldSurface(PoseStack pose, MultiBufferSource bufferSource, Font font) {
+    public WorldSurface(PoseStack pose, MultiBufferSource bufferSource, Font font, float alpha) {
         this.pose = pose;
         this.bufferSource = bufferSource;
         this.font = font;
+        this.alpha = alpha;
     }
 
     @Override
@@ -60,10 +64,11 @@ public final class WorldSurface implements DrawSurface {
         Matrix4f matrix = pose.last().pose();
         VertexConsumer consumer = bufferSource.getBuffer(RenderType.textBackground());
         // Wound as the game winds its own name-tag backdrop, which this render type culls by.
-        consumer.addVertex(matrix, x, y + height, z).setColor(argb).setLight(FULL_BRIGHT);
-        consumer.addVertex(matrix, x + width, y + height, z).setColor(argb).setLight(FULL_BRIGHT);
-        consumer.addVertex(matrix, x + width, y, z).setColor(argb).setLight(FULL_BRIGHT);
-        consumer.addVertex(matrix, x, y, z).setColor(argb).setLight(FULL_BRIGHT);
+        int faded = faded(argb);
+        consumer.addVertex(matrix, x, y + height, z).setColor(faded).setLight(FULL_BRIGHT);
+        consumer.addVertex(matrix, x + width, y + height, z).setColor(faded).setLight(FULL_BRIGHT);
+        consumer.addVertex(matrix, x + width, y, z).setColor(faded).setLight(FULL_BRIGHT);
+        consumer.addVertex(matrix, x, y, z).setColor(faded).setLight(FULL_BRIGHT);
     }
 
     @Override
@@ -71,7 +76,7 @@ public final class WorldSurface implements DrawSurface {
         // drawInBatch takes no z, so the layer goes through the matrix.
         pose.pushPose();
         pose.translate(0.0F, 0.0F, nextLayer());
-        font.drawInBatch(text, x, y, argb, false, pose.last().pose(), bufferSource,
+        font.drawInBatch(text, x, y, faded(argb), false, pose.last().pose(), bufferSource,
             Font.DisplayMode.NORMAL, 0, FULL_BRIGHT);
         pose.popPose();
     }
@@ -92,7 +97,7 @@ public final class WorldSurface implements DrawSurface {
         // The game hands an item a block-wide space with y up; this one is icon-wide with y down.
         pose.scale(UiStyle.ICON, -UiStyle.ICON, UiStyle.ICON);
         minecraft.getItemRenderer().renderStatic(item.stack(), ItemDisplayContext.GUI, FULL_BRIGHT,
-            OverlayTexture.NO_OVERLAY, pose, bufferSource, minecraft.level, 0);
+            OverlayTexture.NO_OVERLAY, pose, new FadingBufferSource(bufferSource, alpha), minecraft.level, 0);
         pose.popPose();
     }
 
@@ -104,6 +109,11 @@ public final class WorldSurface implements DrawSurface {
     @Override
     public int lineHeight() {
         return font.lineHeight;
+    }
+
+    /** The colour as it reads through the fade. */
+    private int faded(int argb) {
+        return Math.round((argb >>> 24) * alpha) << 24 | argb & 0x00FFFFFF;
     }
 
     private float nextLayer() {
