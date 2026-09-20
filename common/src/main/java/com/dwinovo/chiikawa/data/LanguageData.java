@@ -45,10 +45,12 @@ public final class LanguageData {
                 "没有攻击目标", "攻击冷却中", "没有箭", "没有新的曲子可演奏", "曲子演奏完了", "先做更要紧的活",
                 "附近没有野草", "附近没有蘑菇", "要领到对应的工作牌才会做", "只在夜里做",
                 "已经带着一张工作牌", "刚才没领到牌，歇一会儿", "附近的公告板没有合适的工作牌",
-                "刚买过东西", "商店里没有它想要又买得起的");
+                "刚买过东西", "商店里没有它想要又买得起的", "手上没有要送的东西");
             addBlockTranslations(adder, "劳动公告板", "商店");
+            addShopScreenTranslations(adder, "商店", "买 %s", "卖 %s", "今天什么都不卖",
+                    "上一页", "下一页");
             addIntentNameTranslations(adder, "跟着主人", "坐着", "闲逛", "捡东西", "去领工作牌",
-                "收割", "种地", "送货", "拔草", "采蘑菇", "讨伐", "射箭", "演奏", "去买东西");
+                "收割", "种地", "送货", "拔草", "采蘑菇", "讨伐", "射箭", "演奏", "去买东西", "送礼物");
             addTaskTypeTranslations(adder, "除草", "%s 株", "夜间采蘑菇", "%s 朵", "街头演奏", "%s 秒");
             addBoardScreenTranslations(adder, "劳动公告板", "%s 张", "今天没有工作牌",
                     "限%s", "待领", "已领", "%s 领走了");
@@ -89,11 +91,13 @@ public final class LanguageData {
                 "Something more urgent comes first", "No weeds nearby", "No mushrooms nearby",
                 "Only with a matching slip", "Only done at night",
                 "Already carries a slip", "Resting after missing a slip", "No slip for it on a nearby board",
-                "Just bought something", "Nothing here it wants and can afford");
+                "Just bought something", "Nothing here it wants and can afford", "Nothing to give");
             addBlockTranslations(adder, "Labor Board", "Shop");
+            addShopScreenTranslations(adder, "Shop", "Buy %s", "Sell %s", "Nothing for sale today",
+                    "Previous page", "Next page");
             addIntentNameTranslations(adder, "Following its owner", "Sitting", "Wandering", "Picking up an item",
                 "Fetching a slip", "Harvesting", "Planting", "Delivering", "Pulling weeds", "Picking mushrooms",
-                "Fighting", "Shooting", "Performing", "Out shopping");
+                "Fighting", "Shooting", "Performing", "Out shopping", "Bringing a present");
             addTaskTypeTranslations(adder, "Weeding", "%s weeds", "Mushroom Picking", "%s mushrooms",
                 "Street Performance", "%ss");
             addBoardScreenTranslations(adder, "Labor Board", "%s up", "No slips up today",
@@ -135,7 +139,8 @@ public final class LanguageData {
         String boardResting,
         String noSlip,
         String shopResting,
-        String nothingToBuy
+        String nothingToBuy,
+        String noGift
     ) {
         adder.add("intent.chiikawa.fail.owner_unavailable", ownerUnavailable);
         adder.add("intent.chiikawa.fail.owner_nearby", ownerNearby);
@@ -161,6 +166,21 @@ public final class LanguageData {
         adder.add("intent.chiikawa.fail.no_slip", noSlip);
         adder.add("intent.chiikawa.fail.shop_resting", shopResting);
         adder.add("intent.chiikawa.fail.nothing_to_buy", nothingToBuy);
+        adder.add("intent.chiikawa.fail.no_gift", noGift);
+    }
+
+    /**
+     * The shop screen. The prices go on the buttons — "buy 3" is what pressing it does —
+     * so the words are a verb and a number and nothing else.
+     */
+    private static void addShopScreenTranslations(Adder adder, String title, String buy, String sell,
+            String empty, String previousPage, String nextPage) {
+        adder.add("screen.chiikawa.shop", title);
+        adder.add("screen.chiikawa.shop.buy", buy);
+        adder.add("screen.chiikawa.shop.sell", sell);
+        adder.add("screen.chiikawa.shop.empty", empty);
+        adder.add("screen.chiikawa.shop.previous_page", previousPage);
+        adder.add("screen.chiikawa.shop.next_page", nextPage);
     }
 
     private static void addBlockTranslations(Adder adder, String laborBoard, String shop) {
@@ -184,7 +204,8 @@ public final class LanguageData {
         String melee,
         String ranged,
         String playMusic,
-        String shop
+        String shop,
+        String giftOwner
     ) {
         adder.add("intent.chiikawa.follow_owner", followOwner);
         adder.add("intent.chiikawa.stay", stay);
@@ -200,6 +221,7 @@ public final class LanguageData {
         adder.add("intent.chiikawa.ranged", ranged);
         adder.add("intent.chiikawa.play_music", playMusic);
         adder.add("intent.chiikawa.shop", shop);
+        adder.add("intent.chiikawa.gift_owner", giftOwner);
     }
 
     /** Names of the slip types a labor board puts up, each with the unit it counts in. */
