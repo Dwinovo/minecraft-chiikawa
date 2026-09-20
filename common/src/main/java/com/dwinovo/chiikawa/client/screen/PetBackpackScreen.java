@@ -2,8 +2,20 @@ package com.dwinovo.chiikawa.client.screen;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.client.ui.PetStatusText;
+import com.dwinovo.chiikawa.client.ui.mc.GuiSurface;
+import com.dwinovo.chiikawa.client.ui.mc.ItemIcon;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
+import com.dwinovo.chiikawa.task.PetTask;
+import com.dwinovo.chiikawa.ui.Rect;
+import com.dwinovo.chiikawa.ui.Ui;
+import com.dwinovo.chiikawa.ui.UiStyle;
+import com.dwinovo.chiikawa.ui.UiTheme;
+import com.dwinovo.chiikawa.ui.widget.Bar;
+import com.dwinovo.chiikawa.ui.widget.Slot;
+import com.dwinovo.chiikawa.ui.widget.Tooltip;
+import java.util.List;
+import java.util.Optional;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -29,16 +41,14 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     /** Nudges the model down inside the window (entity-space units; +down). */
     private static final float DISPLAY_Y_OFFSET = 0.18F;
 
-    /** What the pet is doing and the slip it carries, above the panel so nothing overlaps. */
-    private static final int STATUS_X = 0;
-    private static final int DOING_Y = -22;
-    private static final int SLIP_Y = -11;
-    private static final int STATUS_COLOR = 0xFFFFFFFF;
+    /** The card above the panel: what the pet is at, and how far along its slip is. */
+    private static final int CARD_H = UiStyle.SLOT + 2 * UiStyle.GAP;
+    /** Long enough that a slip barely started and one nearly done look nothing alike. */
+    private static final int CARD_BAR_W = 56;
 
     /** Info strip below the display: pet name + HP hearts on one line. */
     private static final int NAME_Y = 80;
     private static final int HEARTS_Y = 79;
-    private static final int TEXT_COLOR = 0xFF5A3A2B; // theme dark brown, reads on cream
 
     /** HP heart sprites packed in the atlas (9x9 each), addressed by V offset. */
     private static final int HEART_U = 0;
@@ -56,6 +66,7 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
         // In 1.21.11 AbstractContainerScreen.render() no longer draws the item tooltip itself;
         // every vanilla container screen overrides render() and calls renderTooltip() explicitly.
         super.render(graphics, mouseX, mouseY, partialTick);
+        renderStatusCard(graphics, mouseX, mouseY);
         this.renderTooltip(graphics, mouseX, mouseY);
     }
 
@@ -86,9 +97,7 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
         int nameWidth = this.font.width(name);
         int displayCenterX = (DISPLAY_X1 + DISPLAY_X2) / 2;
         int nameX = displayCenterX - nameWidth / 2;
-        graphics.drawString(this.font, name, nameX, NAME_Y, TEXT_COLOR, false);
-
-        renderStatus(graphics, this.menu.getPet(Minecraft.getInstance().level));
+        graphics.drawString(this.font, name, nameX, NAME_Y, UiTheme.TEXT, false);
 
         int maxHp = Math.max(1, Mth.ceil(pet.getMaxHealth()));
         int hp = Math.max(0, Mth.ceil(pet.getHealth()));
@@ -103,12 +112,53 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
         }
     }
 
-    /** Two lines the owner would otherwise have to guess: what it is doing, and its slip. */
-    private void renderStatus(GuiGraphics graphics, AbstractPet pet) {
+    /**
+     * What the owner opened the screen to find out, above the panel and on its own card: a
+     * picture of the work, what the pet is at, and a bar. The slip's own particulars — what
+     * it is called, how much it asks for, which job it is for — wait under the cursor,
+     * where they cost nothing to anyone not asking.
+     */
+    private void renderStatusCard(GuiGraphics graphics, int mouseX, int mouseY) {
+        AbstractPet pet = this.menu.getPet(Minecraft.getInstance().level);
         if (pet == null) {
             return;
         }
-        graphics.drawString(this.font, PetStatusText.doing(pet), STATUS_X, DOING_Y, STATUS_COLOR, true);
-        graphics.drawString(this.font, PetStatusText.slip(pet), STATUS_X, SLIP_Y, STATUS_COLOR, true);
+        GuiSurface surface = new GuiSurface(graphics, this.font);
+        Rect card = new Rect(this.leftPos, this.topPos - CARD_H - UiStyle.GAP, this.imageWidth, CARD_H);
+        Ui.card(surface, card.x(), card.y(), card.width(), card.height());
+
+        Optional<PetTask> slip = pet.getTask();
+        int textX = card.x() + UiStyle.PAD;
+        if (slip.isPresent()) {
+            Slot.draw(surface, ItemIcon.of(slip.get().icon()), card.x() + UiStyle.GAP,
+                UiStyle.centerIn(card.y(), card.height(), UiStyle.SLOT));
+            textX = card.x() + UiStyle.GAP + UiStyle.SLOT + UiStyle.GAP;
+        }
+        int textY = UiStyle.centerIn(card.y(), card.height(), surface.lineHeight());
+        int textRoom = card.right() - UiStyle.PAD - textX;
+
+        if (slip.isPresent()) {
+            PetTask task = slip.get();
+            int barX = card.right() - UiStyle.PAD - CARD_BAR_W;
+            Bar.draw(surface, barX, UiStyle.centerIn(card.y(), card.height(), UiStyle.BAR_H),
+                CARD_BAR_W, UiStyle.BAR_H, task.progress(), task.target());
+            String count = PetStatusText.slipCount(task).getString();
+            Ui.textRight(surface, count, barX - UiStyle.GAP, textY, UiTheme.TEXT_MUTED);
+            textRoom = barX - UiStyle.GAP - surface.textWidth(count) - UiStyle.GAP - textX;
+        }
+        Ui.textClipped(surface, PetStatusText.activity(pet).getString(), textX, textY, textRoom, UiTheme.TEXT);
+
+        if (card.contains(mouseX, mouseY)) {
+            slip.ifPresent(task -> surface.onTop(() ->
+                Tooltip.draw(surface, detail(task), mouseX, mouseY, this.width, this.height)));
+        }
+    }
+
+    /** The slip, spelled out: what it is, how much it asks for, and whose work it is. */
+    private static List<String> detail(PetTask task) {
+        return List.of(
+            PetStatusText.taskName(task.type()).getString(),
+            PetStatusText.taskAmount(task.type(), task.target()).getString(),
+            PetStatusText.jobName(task.capability()).getString());
     }
 }
