@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.client.screen;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 
 import net.minecraft.client.Minecraft;
@@ -26,6 +27,11 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     private static final int DISPLAY_SCALE = 40;
     /** Nudges the model down inside the window (entity-space units; +down). */
     private static final float DISPLAY_Y_OFFSET = 0.18F;
+
+    /** Header strip above the slots: what the pet is doing, and the slip it carries. */
+    private static final int STATUS_X = 8;
+    private static final int DOING_Y = 6;
+    private static final int SLIP_Y = 15;
 
     /** Info strip below the display: pet name + HP hearts on one line. */
     private static final int NAME_Y = 80;
@@ -80,6 +86,8 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
         int nameX = displayCenterX - nameWidth / 2;
         graphics.drawString(this.font, name, nameX, NAME_Y, TEXT_COLOR, false);
 
+        renderStatus(graphics, this.menu.getPet(Minecraft.getInstance().level));
+
         int maxHp = Math.max(1, Mth.ceil(pet.getMaxHealth()));
         int hp = Math.max(0, Mth.ceil(pet.getHealth()));
         int hearts = (maxHp + 1) / 2;
@@ -91,5 +99,24 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
                     heartsX + i * HEART_STEP, HEARTS_Y, (float) HEART_U, (float) v,
                     HEART_SIZE, HEART_SIZE, 256, 256);
         }
+    }
+
+    /** Two lines the owner would otherwise have to guess: what it is doing, and its slip. */
+    private void renderStatus(GuiGraphics graphics, AbstractPet pet) {
+        if (pet == null) {
+            return;
+        }
+        Component doing = pet.getIntent()
+            .<Component>map(intent -> Component.translatable("screen.chiikawa.pet.doing",
+                Component.translatable("intent." + intent.getNamespace() + "." + intent.getPath())))
+            .orElseGet(() -> Component.translatable("screen.chiikawa.pet.doing.nothing"));
+        graphics.drawString(this.font, doing, STATUS_X, DOING_Y, TEXT_COLOR, false);
+
+        Component slip = pet.getTask()
+            .<Component>map(task -> Component.translatable("screen.chiikawa.pet.slip",
+                Component.translatable("pet_task." + task.type().getNamespace() + "." + task.type().getPath()),
+                task.progress(), task.target()))
+            .orElseGet(() -> Component.translatable("screen.chiikawa.pet.slip.none"));
+        graphics.drawString(this.font, slip, STATUS_X, SLIP_Y, TEXT_COLOR, false);
     }
 }

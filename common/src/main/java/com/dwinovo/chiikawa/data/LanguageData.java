@@ -46,6 +46,12 @@ public final class LanguageData {
                 "附近没有野草", "附近没有蘑菇", "要领到对应的工作牌才会做", "只在夜里做",
                 "已经带着一张工作牌", "刚才没领到牌，歇一会儿", "附近的公告板没有合适的工作牌");
             addBlockTranslations(adder, "劳动公告板");
+            addIntentNameTranslations(adder, "跟着主人", "坐着", "闲逛", "捡东西", "去领工作牌",
+                "收割", "种地", "送货", "拔草", "采蘑菇", "讨伐", "射箭", "演奏");
+            addTaskTypeTranslations(adder, "除草", "夜间采蘑菇", "街头演奏");
+            addBoardScreenTranslations(adder, "劳动公告板", "今天没有工作牌", "%s · %s 个 · %s",
+                "还没人领", "%s 领走了");
+            addPetStatusTranslations(adder, "正在：%s", "闲着", "工作牌：%s %s/%s", "没有工作牌");
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
@@ -83,6 +89,13 @@ public final class LanguageData {
                 "Only with a matching slip", "Only done at night",
                 "Already carries a slip", "Resting after missing a slip", "No slip for it on a nearby board");
             addBlockTranslations(adder, "Labor Board");
+            addIntentNameTranslations(adder, "Following its owner", "Sitting", "Wandering", "Picking up an item",
+                "Fetching a slip", "Harvesting", "Planting", "Delivering", "Pulling weeds", "Picking mushrooms",
+                "Fighting", "Shooting", "Performing");
+            addTaskTypeTranslations(adder, "Weeding", "Mushroom Picking", "Street Performance");
+            addBoardScreenTranslations(adder, "Labor Board", "No slips up today", "%s · %s · %s",
+                "Still up", "Taken by %s");
+            addPetStatusTranslations(adder, "Doing: %s", "Idle", "Slip: %s %s/%s", "No slip");
         }
     }
 
@@ -145,6 +158,61 @@ public final class LanguageData {
 
     private static void addBlockTranslations(Adder adder, String laborBoard) {
         adder.add("block.chiikawa.labor_board", laborBoard);
+    }
+
+    /** Names of what a pet may be doing, shown in its backpack; one per intent. */
+    private static void addIntentNameTranslations(
+        Adder adder,
+        String followOwner,
+        String stay,
+        String wander,
+        String pickUpItem,
+        String takeTask,
+        String harvest,
+        String plant,
+        String deliver,
+        String weed,
+        String pickMushroom,
+        String melee,
+        String ranged,
+        String playMusic
+    ) {
+        adder.add("intent.chiikawa.follow_owner", followOwner);
+        adder.add("intent.chiikawa.stay", stay);
+        adder.add("intent.chiikawa.wander", wander);
+        adder.add("intent.chiikawa.pick_up_item", pickUpItem);
+        adder.add("intent.chiikawa.take_task", takeTask);
+        adder.add("intent.chiikawa.harvest", harvest);
+        adder.add("intent.chiikawa.plant", plant);
+        adder.add("intent.chiikawa.deliver", deliver);
+        adder.add("intent.chiikawa.weed", weed);
+        adder.add("intent.chiikawa.pick_mushroom", pickMushroom);
+        adder.add("intent.chiikawa.melee", melee);
+        adder.add("intent.chiikawa.ranged", ranged);
+        adder.add("intent.chiikawa.play_music", playMusic);
+    }
+
+    /** Names of the slip types a labor board puts up. */
+    private static void addTaskTypeTranslations(Adder adder, String weeding, String mushroomPicking, String streetPerformance) {
+        adder.add("pet_task.chiikawa.weeding", weeding);
+        adder.add("pet_task.chiikawa.mushroom_picking", mushroomPicking);
+        adder.add("pet_task.chiikawa.street_performance", streetPerformance);
+    }
+
+    private static void addBoardScreenTranslations(Adder adder, String title, String empty, String slip,
+            String open, String taken) {
+        adder.add("screen.chiikawa.labor_board", title);
+        adder.add("screen.chiikawa.labor_board.empty", empty);
+        adder.add("screen.chiikawa.labor_board.slip", slip);
+        adder.add("screen.chiikawa.labor_board.open", open);
+        adder.add("screen.chiikawa.labor_board.taken", taken);
+    }
+
+    private static void addPetStatusTranslations(Adder adder, String doing, String doingNothing, String slip, String noSlip) {
+        adder.add("screen.chiikawa.pet.doing", doing);
+        adder.add("screen.chiikawa.pet.doing.nothing", doingNothing);
+        adder.add("screen.chiikawa.pet.slip", slip);
+        adder.add("screen.chiikawa.pet.slip.none", noSlip);
     }
 
     private static void addDollTooltipTranslations(Adder adder, String placeOnCakeHint) {

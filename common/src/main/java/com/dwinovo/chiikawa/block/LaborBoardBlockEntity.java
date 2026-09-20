@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.block;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
+import com.dwinovo.chiikawa.network.BoardPayloads;
 import com.dwinovo.chiikawa.task.BoardSlips;
 import com.dwinovo.chiikawa.task.BoardSlot;
 import com.dwinovo.chiikawa.task.PetTask;
@@ -20,6 +21,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -75,7 +77,7 @@ public class LaborBoardBlockEntity extends BlockEntity {
             return Optional.empty();
         }
         BoardSlot slot = slots.get(index.getAsInt());
-        update(index.getAsInt(), BoardSlot::claim);
+        update(index.getAsInt(), open -> open.claim(claimOf(pet)));
         return Optional.of(slot.slip());
     }
 
@@ -89,6 +91,14 @@ public class LaborBoardBlockEntity extends BlockEntity {
         }
     }
 
+    /** @return today's slips as the board screen shows them */
+    public List<BoardPayloads.SlipView> slipViews() {
+        return today().stream()
+            .map(slot -> new BoardPayloads.SlipView(slot.slip().type(), slot.slip().capability(), slot.slip().target(),
+                slot.claim().map(BoardSlot.Claim::describe).orElse("")))
+            .toList();
+    }
+
     /** @return today's slips */
     public List<BoardSlot> today() {
         ServerLevel level = level();
@@ -99,6 +109,12 @@ public class LaborBoardBlockEntity extends BlockEntity {
             setChanged();
         }
         return slots;
+    }
+
+    private static BoardSlot.Claim claimOf(AbstractPet pet) {
+        LivingEntity owner = pet.getOwner();
+        return new BoardSlot.Claim(pet.getDisplayName().getString(),
+            owner == null ? "" : owner.getDisplayName().getString());
     }
 
     private OptionalInt find(AbstractPet pet) {
