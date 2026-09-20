@@ -44,6 +44,9 @@ public final class InitActivity {
     // Walking to a shop to spend what the pet has earned.
     public static final Supplier<Activity> SHOP =
         Services.PLATFORM_REGISTRY.shopActivity();
+    // Taking the owner a present.
+    public static final Supplier<Activity> GIFT_OWNER =
+        Services.PLATFORM_REGISTRY.giftOwnerActivity();
 
     private InitActivity() {
     }

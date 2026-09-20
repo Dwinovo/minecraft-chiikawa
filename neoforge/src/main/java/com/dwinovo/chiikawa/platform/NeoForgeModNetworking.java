@@ -2,7 +2,10 @@ package com.dwinovo.chiikawa.platform;
 
 import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
+import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
+import com.dwinovo.chiikawa.network.ShopPayloads;
+import com.dwinovo.chiikawa.network.ShopServerPacketHandler;
 import com.dwinovo.chiikawa.network.MusicPayloads;
 import com.dwinovo.chiikawa.network.MusicServerPacketHandler;
 import net.minecraft.server.level.ServerPlayer;
@@ -18,6 +21,13 @@ public final class NeoForgeModNetworking {
     public static void registerPayloads(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar("1");
         registrar.playToClient(BoardPayloads.BoardSlipsPayload.TYPE, BoardPayloads.BoardSlipsPayload.STREAM_CODEC);
+        registrar.playToClient(ShopPayloads.ShopPricesPayload.TYPE, ShopPayloads.ShopPricesPayload.STREAM_CODEC);
+        registrar.playToServer(ShopPayloads.ShopTradePayload.TYPE, ShopPayloads.ShopTradePayload.STREAM_CODEC,
+            (payload, context) -> {
+                if (context.player() instanceof ServerPlayer player) {
+                    ShopServerPacketHandler.handleTrade(payload, player);
+                }
+            });
         registrar.playToClient(MusicPayloads.MusicCatalogPayload.TYPE, MusicPayloads.MusicCatalogPayload.STREAM_CODEC);
         registrar.playToClient(MusicPayloads.MusicStreamStartPayload.TYPE, MusicPayloads.MusicStreamStartPayload.STREAM_CODEC);
         registrar.playToClient(MusicPayloads.MusicStreamChunkPayload.TYPE, MusicPayloads.MusicStreamChunkPayload.STREAM_CODEC);
@@ -38,6 +48,7 @@ public final class NeoForgeModNetworking {
 
     public static void registerClientPayloads(RegisterClientPayloadHandlersEvent event) {
         event.register(BoardPayloads.BoardSlipsPayload.TYPE, (payload, context) -> ClientBoardPacketHandler.handleSlips(payload));
+        event.register(ShopPayloads.ShopPricesPayload.TYPE, (payload, context) -> ClientShopPacketHandler.handlePrices(payload));
         event.register(MusicPayloads.MusicCatalogPayload.TYPE, (payload, context) -> ClientMusicPacketHandler.handleCatalog(payload));
         event.register(MusicPayloads.MusicStreamStartPayload.TYPE, (payload, context) -> ClientMusicPacketHandler.handleStreamStart(payload));
         event.register(MusicPayloads.MusicStreamChunkPayload.TYPE, (payload, context) -> ClientMusicPacketHandler.handleStreamChunk(payload));
