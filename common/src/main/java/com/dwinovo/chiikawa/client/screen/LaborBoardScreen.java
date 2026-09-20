@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.client.ui.mc.ItemIcon;
 import com.dwinovo.chiikawa.network.BoardPayloads.SlipView;
 import com.dwinovo.chiikawa.ui.DrawSurface;
 import com.dwinovo.chiikawa.ui.Rect;
+import com.dwinovo.chiikawa.ui.TextClip;
 import com.dwinovo.chiikawa.ui.Ui;
 import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.UiTheme;
@@ -76,9 +77,11 @@ public class LaborBoardScreen extends Screen {
     }
 
     /**
-     * A row says three things: what the work is (its icon), what it is called, and whether
-     * anyone has it. Which job it is for and who took it are a sentence each, and a list of
-     * sentences is a list nobody scans — those wait in {@link #detail}.
+     * What the owner is at the board to find out: what the work is (its icon), what it is
+     * called, whose job it is, how much of it, and whether anyone has it yet. Which job may
+     * take a slip decides whether it is any of this owner's business at all, so it is read
+     * off the row rather than hunted for — quiet, beside the name, since the name is what
+     * tells two rows apart. Only the taker's name waits in {@link #detail}.
      */
     private void drawRow(DrawSurface surface, SlipView slip, Rect row, boolean hovered) {
         if (hovered) {
@@ -100,17 +103,27 @@ public class LaborBoardScreen extends Screen {
         Ui.textRight(surface, amount, amountRight,
             UiStyle.centerIn(row.y(), row.height(), surface.lineHeight()), UiTheme.TEXT_MUTED);
 
+
+        String forJob = Component.translatable("screen.chiikawa.labor_board.for_job",
+            PetStatusText.jobName(slip.capability())).getString();
         int nameX = row.x() + UiStyle.SLOT + UiStyle.GAP;
-        Ui.textClipped(surface, PetStatusText.taskName(slip.type()).getString(), nameX,
-            UiStyle.centerIn(row.y(), row.height(), surface.lineHeight()),
-            amountRight - surface.textWidth(amount) - UiStyle.GAP - nameX, UiTheme.TEXT);
+        int textY = UiStyle.centerIn(row.y(), row.height(), surface.lineHeight());
+        int nameRoom = amountRight - surface.textWidth(amount) - UiStyle.GAP
+            - surface.textWidth(forJob) - UiStyle.GAP - nameX;
+        // The name gives way first: whose job it is stays whole, or the row stops answering
+        // the question it is there to answer.
+        String name = TextClip.clip(PetStatusText.taskName(slip.type()).getString(), nameRoom, surface::textWidth);
+        surface.drawText(name, nameX, textY, UiTheme.TEXT);
+        surface.drawText(forJob, nameX + surface.textWidth(name) + UiStyle.GAP, textY, UiTheme.TEXT_MUTED);
     }
 
-    /** What the row under the cursor does not have room to say. */
+    /** The slip in full, including the one thing a row has no room for: who took it. */
     private static List<String> detail(SlipView slip) {
         List<String> lines = new ArrayList<>();
         lines.add(PetStatusText.taskName(slip.type()).getString());
-        lines.add(PetStatusText.jobName(slip.capability()).getString());
+        lines.add(Component.translatable("screen.chiikawa.labor_board.for_job",
+            PetStatusText.jobName(slip.capability())).getString());
+        lines.add(PetStatusText.taskAmount(slip.type(), slip.target()).getString());
         lines.add(slip.taker().isEmpty()
             ? Component.translatable("screen.chiikawa.labor_board.open").getString()
             : Component.translatable("screen.chiikawa.labor_board.taken_by", slip.taker()).getString());
