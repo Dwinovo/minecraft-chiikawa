@@ -29,8 +29,6 @@ import com.dwinovo.chiikawa.sound.PetSoundCue;
 import com.dwinovo.chiikawa.sound.PetSoundKind;
 import com.dwinovo.chiikawa.sound.PetSoundSet;
 import com.dwinovo.chiikawa.task.PetTask;
-import com.dwinovo.chiikawa.task.PetWorkCounters;
-import com.dwinovo.chiikawa.task.TaskTracker;
 import com.dwinovo.chiikawa.utils.Utils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -60,7 +58,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
@@ -946,19 +943,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
             return result;
         }
         return super.mobInteract(player, hand);
-    }
-
-    /**
-     * A hunting slip counts what the pet puts down. The game hands the credit for a kill
-     * to whoever dealt it, arrows included, so this is the one place both a sword and a
-     * bow report through.
-     */
-    @Override
-    public void awardKillScore(Entity killed, int score, DamageSource source) {
-        super.awardKillScore(killed, score, source);
-        if (killed instanceof Enemy) {
-            TaskTracker.advance(this, PetWorkCounters.SLAY, 1);
-        }
     }
 
     /** A pet that falls loses the slip it carried: the job failed and pays nothing. */

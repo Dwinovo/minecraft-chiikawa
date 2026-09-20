@@ -1,32 +1,22 @@
 package com.dwinovo.chiikawa.gametest;
 
 import static com.dwinovo.chiikawa.gametest.GameTestKit.NOON;
-import static com.dwinovo.chiikawa.gametest.GameTestKit.count;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
-import static com.dwinovo.chiikawa.gametest.GameTestKit.wildWorker;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
-import com.dwinovo.chiikawa.data.PetTaskTypeData;
-import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitBlocks;
-import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.network.BoardServerPacketHandler;
 import com.dwinovo.chiikawa.task.BoardSlips;
 import com.dwinovo.chiikawa.task.BoardSlot;
-import com.dwinovo.chiikawa.task.PetTask;
-import com.dwinovo.chiikawa.task.PetWorkCounters;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -34,9 +24,9 @@ import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
- * What an owner's emeralds buy a labor board, and the work that only an upgraded board
- * puts up. A level is the one thing on that screen an owner can spend money on, so what
- * it costs and what it gives are both worth holding still.
+ * What an owner's emeralds buy a labor board. A level is the one thing on that screen an
+ * owner can spend money on, so what it costs and what it gives are both worth holding
+ * still; what the hunting slips it unlocks then count is in {@code HuntGameTests}.
  */
 @GameTestHolder(Constants.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -46,8 +36,6 @@ public final class UpgradeGameTests {
     private static final BlockPos BOARD = new BlockPos(3, STAND, 3);
     /** More than any level costs, so a case about paying is never a case about saving up. */
     private static final int PLENTY = 64;
-    /** How many monsters the hunting slip in these cases asks for. */
-    private static final int QUARRY = 2;
 
     @BeforeBatch(batch = BATCH)
     public static void settle(ServerLevel level) {
@@ -134,40 +122,6 @@ public final class UpgradeGameTests {
         helper.succeed();
     }
 
-    /**
-     * A hunting slip counts monsters, and pays when it has counted enough. The kill is
-     * dealt here rather than waited for: what this case is about is the credit for it
-     * reaching the slip, not how well a pet swings.
-     */
-    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 200)
-    public static void monsters_a_pet_puts_down_count_towards_its_slip(GameTestHelper helper) {
-        AbstractPet pet = wildWorker(helper, new BlockPos(3, STAND, 5));
-        pet.setTask(hunting());
-
-        for (int i = 0; i < QUARRY; i++) {
-            Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(5, STAND, 5));
-            zombie.hurt(pet.damageSources().mobAttack(pet), zombie.getMaxHealth() * 2.0F);
-        }
-
-        helper.assertTrue(pet.getTask().isEmpty(), "the slip was not finished by the monsters it asked for");
-        helper.assertTrue(count(pet, Items.EMERALD) > 0, "a finished hunting slip paid nothing");
-        helper.succeed();
-    }
-
-    /** What a pet was not sent after does not count: a cow is not a monster. */
-    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 200)
-    public static void a_harmless_animal_does_not_count_towards_a_hunting_slip(GameTestHelper helper) {
-        AbstractPet pet = wildWorker(helper, new BlockPos(3, STAND, 5));
-        pet.setTask(hunting());
-
-        helper.spawn(EntityType.COW, new BlockPos(5, STAND, 5))
-            .hurt(pet.damageSources().mobAttack(pet), 100.0F);
-
-        helper.assertTrue(pet.getTask().map(task -> task.progress() == 0).orElse(false),
-            "a cow counted towards a hunting slip");
-        helper.succeed();
-    }
-
     /** A board on the floor, at the level it is placed at. */
     private static LaborBoardBlockEntity board(GameTestHelper helper) {
         helper.setBlock(BOARD, InitBlocks.LABOR_BOARD.get());
@@ -186,12 +140,5 @@ public final class UpgradeGameTests {
             owner.getInventory().add(new ItemStack(Items.EMERALD, emeralds));
         }
         return owner;
-    }
-
-    /** The slip an upgraded board puts up for a fencer. */
-    private static PetTask hunting() {
-        ResourceLocation fencer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FENCER.get());
-        return new PetTask(PetTaskTypeData.MELEE_HUNTING, fencer, PetWorkCounters.SLAY, PetTask.NO_ICON, QUARRY,
-            PetTaskTypeData.reward(PetTaskTypeData.MELEE_HUNTING), 0);
     }
 }
