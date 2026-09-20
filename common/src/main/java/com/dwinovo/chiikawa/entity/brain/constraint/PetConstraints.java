@@ -97,7 +97,10 @@ public final class PetConstraints {
             case FOLLOW_OWNER -> !wild && directive == PetDirective.FOLLOW;
             case STAY -> !wild && directive == PetDirective.STAY;
             case WANDER, TAKE_TASK -> wild || directive != PetDirective.STAY;
-            case WORK, PICK_UP -> !wild && directive == PetDirective.FREE;
+            // Shopping goes with work: it is what an owner's pet does with its own day
+            // once it has been let loose in it. A wild pet has no wages to spend, and one
+            // at heel is out with its owner rather than out on its own errand.
+            case WORK, PICK_UP, SHOP -> !wild && directive == PetDirective.FREE;
             case FORAGE, COMBAT -> wild || directive == PetDirective.FREE;
         };
     }
