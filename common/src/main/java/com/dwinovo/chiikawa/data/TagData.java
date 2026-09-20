@@ -103,29 +103,17 @@ public final class TagData {
     }
 
     public static void addEntityTags(TagAppenderProvider<EntityType<?>> tags) {
+        // Creepers are in the list now. They are not something a pet with a sword walks
+        // up to — a pet's reach is a block and a half, well inside the distance at which a
+        // creeper starts swelling — but a pet has to be able to see one to keep away from
+        // it, and an archer can answer one from outside the blast.
         tags.tag(InitTag.ENTITY_HOSTILE_ENTITY)
-            .add(EntityType.BLAZE)
-            .add(EntityType.CAVE_SPIDER)
-            .add(EntityType.DROWNED)
-            .add(EntityType.EVOKER)
-            .add(EntityType.GUARDIAN)
-            .add(EntityType.HUSK)
-            .add(EntityType.ILLUSIONER)
-            .add(EntityType.MAGMA_CUBE)
-            .add(EntityType.PHANTOM)
-            .add(EntityType.PIGLIN)
-            .add(EntityType.PIGLIN_BRUTE)
-            .add(EntityType.PILLAGER)
-            .add(EntityType.SILVERFISH)
-            .add(EntityType.SKELETON)
-            .add(EntityType.SLIME)
-            .add(EntityType.SPIDER)
-            .add(EntityType.STRAY)
-            .add(EntityType.VEX)
-            .add(EntityType.VINDICATOR)
-            .add(EntityType.WITCH)
-            .add(EntityType.WITHER_SKELETON)
-            .add(EntityType.ZOGLIN)
-            .add(EntityType.ZOMBIE);
+            .add(EntityType.BLAZE, EntityType.BOGGED, EntityType.BREEZE, EntityType.CAVE_SPIDER, EntityType.CREEPER,
+            EntityType.DROWNED, EntityType.ENDERMITE, EntityType.EVOKER, EntityType.GUARDIAN, EntityType.HOGLIN,
+            EntityType.HUSK,
+            EntityType.ILLUSIONER, EntityType.MAGMA_CUBE, EntityType.PHANTOM, EntityType.PIGLIN, EntityType.PIGLIN_BRUTE,
+            EntityType.PILLAGER, EntityType.SILVERFISH, EntityType.SKELETON, EntityType.SLIME, EntityType.SPIDER, EntityType.STRAY,
+            EntityType.VEX, EntityType.VINDICATOR, EntityType.WITCH, EntityType.WITHER_SKELETON, EntityType.ZOGLIN,
+            EntityType.ZOMBIE, EntityType.ZOMBIE_VILLAGER);
     }
 }
