@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
 import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
+import com.dwinovo.chiikawa.network.BoardServerPacketHandler;
 import com.dwinovo.chiikawa.network.ShopPayloads;
 import com.dwinovo.chiikawa.network.ShopServerPacketHandler;
 import com.dwinovo.chiikawa.network.MusicPayloads;
@@ -21,6 +22,12 @@ public final class NeoForgeModNetworking {
         PayloadRegistrar registrar = event.registrar("1");
         registrar.playToClient(BoardPayloads.BoardSlipsPayload.TYPE, BoardPayloads.BoardSlipsPayload.STREAM_CODEC,
             (payload, context) -> ClientBoardPacketHandler.handleSlips(payload));
+        registrar.playToServer(BoardPayloads.BoardUpgradePayload.TYPE, BoardPayloads.BoardUpgradePayload.STREAM_CODEC,
+            (payload, context) -> {
+                if (context.player() instanceof ServerPlayer player) {
+                    BoardServerPacketHandler.handleUpgrade(payload, player);
+                }
+            });
         registrar.playToClient(ShopPayloads.ShopPricesPayload.TYPE, ShopPayloads.ShopPricesPayload.STREAM_CODEC,
             (payload, context) -> ClientShopPacketHandler.handlePrices(payload));
         registrar.playToServer(ShopPayloads.ShopTradePayload.TYPE, ShopPayloads.ShopTradePayload.STREAM_CODEC,
