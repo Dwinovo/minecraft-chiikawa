@@ -52,7 +52,8 @@ public final class InitTabs {
         InitItems.MUSIC_BOX,
         InitItems.LABOR_BOARD,
         InitItems.SHOP,
-        InitItems.BEAR_BACKPACK
+        InitItems.BEAR_BACKPACK,
+        InitItems.SIMPLE_DISH
     );
 
     private InitTabs() {

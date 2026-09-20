@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.entity.interact;
 
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
+import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitTag;
@@ -24,6 +25,8 @@ public final class PetInteractHandler {
      * the same whether an owner hands it over or the pet queues up for it.
      */
     public static final float FEED_HEAL = 4.0F;
+    /** How long a dish keeps a pet in the mood: a Minecraft day's work is 24000. */
+    private static final int DISH_TICKS = 6000;
 
     private PetInteractHandler() {
     }
@@ -38,6 +41,9 @@ public final class PetInteractHandler {
 
         if (!isTame && isFood) {
             return handleTame(level, pet, player, hand);
+        }
+        if (isTame && isOwner && held.is(InitItems.SIMPLE_DISH.get())) {
+            return handleDish(level, pet, player, hand);
         }
         if (isTame && isOwner && held.is(Items.EMERALD)) {
             return handleGiveMoney(level, pet, player, hand);
@@ -70,6 +76,25 @@ public final class PetInteractHandler {
                 pet.triggerReaction(PetReaction.CONFUSED);
                 level.broadcastEntityEvent(pet, (byte) 6);
             }
+        }
+        return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
+    }
+
+    /**
+     * A proper meal rather than a snack: it heals nothing and instead puts the pet in the
+     * mood to work for a while. Fed to a pet that is already eager, it tops the mood up
+     * rather than stacking — two dishes at once would be a way to keep a pet permanently
+     * sprinting, which is not what a meal is.
+     */
+    private static InteractionResult handleDish(Level level, AbstractPet pet, Player player, InteractionHand hand) {
+        if (!level.isClientSide()) {
+            if (!player.getAbilities().instabuild) {
+                player.getItemInHand(hand).shrink(1);
+            }
+            pet.feedDish(DISH_TICKS);
+            pet.triggerReaction(PetReaction.HAPPY);
+            pet.playTameSound();
+            IntentSelector.requestReevaluate(pet);
         }
         return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
     }

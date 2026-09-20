@@ -49,6 +49,7 @@ public final class ShopCatalogData {
             sells(Items.PINK_TULIP, 1),
             // Things for a pet itself. A name tag is vanilla's own, and a player already
             // knows what one is for; the shop only has to have one.
+            sells(InitItems.SIMPLE_DISH.get(), 3),
             sells(Items.NAME_TAG, 8),
             sells(InitItems.BEAR_BACKPACK.get(), 12),
             // Reading.

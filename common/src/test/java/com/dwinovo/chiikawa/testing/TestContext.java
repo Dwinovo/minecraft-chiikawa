@@ -30,6 +30,7 @@ public final class TestContext {
     private boolean takeTaskCoolingDown;
     private boolean shopCoolingDown;
     private boolean carryingGift;
+    private boolean eager;
 
     private TestContext(GlobalPos petPos, PetAnchor anchor) {
         this.petPos = petPos;
@@ -92,8 +93,15 @@ public final class TestContext {
         return this;
     }
 
+    /** The pet has been fed something worth working off. */
+    public TestContext eager() {
+        this.eager = true;
+        return this;
+    }
+
     public IntentContext build() {
         return new IntentContext(petPos, phase, ownership, personality, anchor, targets, task, offeringBoard,
-            shopWorthVisiting, takeTaskCoolingDown, shopCoolingDown, carryingGift, false, false, false, false);
+            shopWorthVisiting, takeTaskCoolingDown, shopCoolingDown, carryingGift, eager,
+            false, false, false, false);
     }
 }
