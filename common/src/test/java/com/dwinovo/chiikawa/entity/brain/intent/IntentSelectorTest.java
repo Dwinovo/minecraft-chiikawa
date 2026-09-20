@@ -225,12 +225,38 @@ class IntentSelectorTest {
         assertEquals(PetIntents.WEED, choose(candidates, null, PLAIN).next());
     }
 
+    // ---- a good meal -----------------------------------------------------------
+
+    @Test
+    void aMealTipsTheScalesTowardsWorkAndNothingElse() {
+        PerceivedTargets crop = targets(true, false, false);
+        List<PetIntent> offered = List.of(PetIntents.get(PetIntents.WANDER), PetIntents.get(PetIntents.HARVEST));
+        List<Candidate> hungry = IntentSelector.candidates(offered, fed(crop, false), null, category -> true);
+        List<Candidate> full = IntentSelector.candidates(offered, fed(crop, true), null, category -> true);
+
+        assertEquals(hungry.get(0).score(), full.get(0).score(), 1.0E-6F);
+        assertEquals(hungry.get(1).score() + IntentSelector.EAGER_BONUS, full.get(1).score(), 1.0E-6F);
+    }
+
+    @Test
+    void aMealIsNotWorthAsMuchAsTheSlipThePetCarries() {
+        assertTrue(IntentSelector.EAGER_BONUS < IntentSelector.TASK_BONUS);
+    }
+
     // ---- helpers ---------------------------------------------------------------
 
     private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
         ResourceKey.createRegistryKey(new ResourceLocation("dimension")),
         new ResourceLocation("overworld"));
     private static final GlobalPos PET = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
+
+    /** A free pet with a crop in sight, either freshly fed or not. */
+    private static IntentContext fed(PerceivedTargets targets, boolean eager) {
+        TestContext ctx = TestContext.at(PET,
+                new PetAnchor(PET, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, false, true))
+            .targets(targets);
+        return (eager ? ctx.eager() : ctx).build();
+    }
 
     /** Wander, harvest, plant and deliver, as a free farmer sees them. */
     private static List<Candidate> farmCandidates(Personality personality, DayPhase phase, PerceivedTargets targets,

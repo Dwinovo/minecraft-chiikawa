@@ -43,6 +43,12 @@ public final class IntentSelector {
     static final float HOLD_MARGIN = 0.02F;
     /** Added to the base score of an intent whose work the pet's slip counts. */
     static final float TASK_BONUS = 0.2F;
+    /**
+     * Added to work while a pet is in the mood after a proper meal. Enough to win against
+     * pottering about, not enough to overrule the owner's directive or a slip it carries —
+     * a meal makes a pet keener, not a different pet.
+     */
+    static final float EAGER_BONUS = 0.15F;
 
     private IntentSelector() {
     }
@@ -173,11 +179,19 @@ public final class IntentSelector {
                 intent.id(),
                 allows.test(intent.category()),
                 intent.id().equals(running) ? intent.canContinue(ctx) : intent.canRun(ctx),
-                (intent.score(ctx) + (carriesSlipFor(intent, ctx) ? TASK_BONUS : 0.0F))
+                (intent.score(ctx)
+                    + (carriesSlipFor(intent, ctx) ? TASK_BONUS : 0.0F)
+                    + (eagerFor(intent, ctx) ? EAGER_BONUS : 0.0F))
                     * ctx.personality().multiplier(intent.id(), ctx.phase())
             ));
         }
         return candidates;
+    }
+
+    /** Whether this is work, and the pet has just been fed something worth working off. */
+    private static boolean eagerFor(PetIntent intent, IntentContext ctx) {
+        return ctx.eager()
+            && (intent.category() == IntentCategory.WORK || intent.category() == IntentCategory.FORAGE);
     }
 
     private static boolean carriesSlipFor(PetIntent intent, IntentContext ctx) {
