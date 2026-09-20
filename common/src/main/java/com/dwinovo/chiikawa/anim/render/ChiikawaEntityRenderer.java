@@ -13,7 +13,7 @@ import com.dwinovo.chiikawa.anim.controller.ControllerSnapshot;
 import com.dwinovo.chiikawa.anim.molang.MolangContext;
 import com.dwinovo.chiikawa.anim.render.layer.HeldItemLayer;
 import com.dwinovo.chiikawa.client.ui.PetStatusText;
-import com.dwinovo.chiikawa.client.ui.PetTheme;
+import com.dwinovo.chiikawa.ui.UiTheme;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.anim.render.layer.SlipTagLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayer;
@@ -477,8 +477,8 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
         poseStack.scale(LABEL_SCALE, -LABEL_SCALE, LABEL_SCALE);
         Font font = getFont();
-        font.drawInBatch(label, -font.width(label) / 2.0F, 0.0F, PetTheme.TEXT, false, poseStack.last().pose(),
-            bufferSource, Font.DisplayMode.NORMAL, PetTheme.LABEL_BACKDROP, packedLight);
+        font.drawInBatch(label, -font.width(label) / 2.0F, 0.0F, UiTheme.TEXT, false, poseStack.last().pose(),
+            bufferSource, Font.DisplayMode.NORMAL, UiTheme.LABEL_BACKDROP, packedLight);
         poseStack.popPose();
     }
 
