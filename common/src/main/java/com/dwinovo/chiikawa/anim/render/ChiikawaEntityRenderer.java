@@ -15,8 +15,7 @@ import com.dwinovo.chiikawa.anim.render.layer.HeldItemLayer;
 import com.dwinovo.chiikawa.client.ui.PetStatusText;
 import com.dwinovo.chiikawa.client.ui.mc.WorldSurface;
 import com.dwinovo.chiikawa.ui.DrawSurface;
-import com.dwinovo.chiikawa.ui.TextClip;
-import com.dwinovo.chiikawa.ui.Ui;
+import com.dwinovo.chiikawa.ui.widget.Chip;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.anim.render.layer.SlipTagLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayer;
@@ -435,13 +434,11 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     /** One line of label text, in blocks at the name-tag scale. */
     private static final float LABEL_LINE = 0.28F;
     private static final float LABEL_SCALE = 0.025F;
-    /** Room a label may take, about two blocks wide, so a long one is cut rather than sprawling. */
-    private static final int LABEL_MAX_WIDTH = 90;
 
     /** A working pet says so over its head, even when it has no name to show. */
     @Override
     protected boolean shouldShowName(T entity) {
-        return super.shouldShowName(entity) || statusLabel(entity).isPresent();
+        return super.shouldShowName(entity) || statusChip(entity).isPresent();
     }
 
     @Override
@@ -451,15 +448,15 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         if (named) {
             super.renderNameTag(entity, displayName, poseStack, bufferSource, packedLight, partialTick);
         }
-        statusLabel(entity).ifPresent(label ->
-            drawLabel(entity, label, poseStack, bufferSource, partialTick, named ? LABEL_LINE : 0.0F));
+        statusChip(entity).ifPresent(chip ->
+            drawLabel(entity, chip, poseStack, bufferSource, partialTick, named ? LABEL_LINE : 0.0F));
     }
 
     /**
      * What this pet is doing, for its owner standing nearby. Someone else's pets, pets
      * out of earshot and idle pets stay quiet, and F1 hides it with the rest of the HUD.
      */
-    private Optional<Component> statusLabel(T entity) {
+    private Optional<Chip> statusChip(T entity) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.options.hideGui || minecraft.player == null || !(entity instanceof AbstractPet pet)) {
             return Optional.empty();
@@ -467,11 +464,11 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         if (!pet.isOwnedBy(minecraft.player) || pet.distanceToSqr(minecraft.player) > LABEL_RANGE_SQR) {
             return Optional.empty();
         }
-        return PetStatusText.label(pet);
+        return PetStatusText.chip(pet);
     }
 
     /** The mod's own label, drawn where a name tag goes, with the same widgets its screens use. */
-    private void drawLabel(T entity, Component label, PoseStack poseStack, MultiBufferSource bufferSource,
+    private void drawLabel(T entity, Chip chip, PoseStack poseStack, MultiBufferSource bufferSource,
                            float partialTick, float extraHeight) {
         Vec3 attachment = entity.getAttachments().getNullable(EntityAttachment.NAME_TAG, 0, entity.getViewYRot(partialTick));
         if (attachment == null) {
@@ -483,7 +480,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         // Text pixels from here on, with y running down as on a screen.
         poseStack.scale(LABEL_SCALE, -LABEL_SCALE, LABEL_SCALE);
         DrawSurface surface = new WorldSurface(poseStack, bufferSource, getFont());
-        Ui.chip(surface, TextClip.clip(label.getString(), LABEL_MAX_WIDTH, surface::textWidth), 0, 0);
+        chip.draw(surface, 0, 0);
         poseStack.popPose();
     }
 

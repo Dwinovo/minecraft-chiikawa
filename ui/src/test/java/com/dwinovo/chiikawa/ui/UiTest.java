@@ -1,9 +1,11 @@
 package com.dwinovo.chiikawa.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
+import com.dwinovo.chiikawa.ui.RecordingSurface.Rectangle;
+import com.dwinovo.chiikawa.ui.RecordingSurface.Text;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -11,13 +13,29 @@ class UiTest {
     private final RecordingSurface surface = new RecordingSurface();
 
     @Test
-    void aPanelIsItsOutlineWithTheBodyInsideIt() {
+    void aPanelIsItsOutlineWithTheFaceInsideIt() {
         Ui.panel(surface, 10, 20, 100, 50);
 
         assertEquals(List.of(
-            new Rect(10, 20, 100, 50, UiTheme.BORDER),
-            new Rect(11, 21, 98, 48, UiTheme.PANEL)
+            new Rectangle(10, 20, 100, 50, UiTheme.BORDER),
+            new Rectangle(11, 21, 98, 48, UiTheme.PANEL)
         ), surface.rects);
+    }
+
+    @Test
+    void aCardCastsItsShadowBehindItself() {
+        Ui.card(surface, 10, 20, 100, 50);
+
+        assertEquals(new Rectangle(10 + UiStyle.SHADOW_OFF, 20 + UiStyle.SHADOW_OFF, 100, 50, UiTheme.SHADOW),
+            surface.rects.get(0));
+        assertEquals(new Rectangle(10, 20, 100, 50, UiTheme.BORDER), surface.rects.get(1));
+    }
+
+    @Test
+    void aWellIsRecessedRatherThanRaised() {
+        Ui.well(surface, 0, 0, 18, 18);
+
+        assertEquals(UiTheme.SURFACE, surface.rects.get(1).argb());
     }
 
     @Test
@@ -25,9 +43,17 @@ class UiTest {
         int contentY = Ui.titledPanel(surface, 0, 0, 100, 80, "Labor Board");
 
         assertEquals(UiStyle.TITLE_H + UiStyle.PAD, contentY);
-        assertEquals(List.of(new Text("Labor Board", UiStyle.PAD, UiTheme.TEXT)), surface.texts);
-        assertTrue(surface.rects.contains(new Rect(UiStyle.BORDER, UiStyle.TITLE_H, 98, UiStyle.BORDER, UiTheme.DIVIDER)),
+        assertEquals("Labor Board", surface.texts.get(0).text());
+        assertTrue(surface.rects.contains(
+                new Rectangle(UiStyle.BORDER, UiStyle.TITLE_H, 98, UiStyle.BORDER, UiTheme.DIVIDER)),
             () -> "no divider under the title: " + surface.rects);
+    }
+
+    @Test
+    void aTitleSitsInTheMiddleOfItsBar() {
+        Ui.titledPanel(surface, 0, 0, 100, 80, "Labor Board");
+
+        assertEquals((UiStyle.TITLE_H - surface.lineHeight()) / 2, surface.texts.get(0).y());
     }
 
     @Test
@@ -38,51 +64,36 @@ class UiTest {
     }
 
     @Test
-    void aChipSitsOnItsLineCentredOnTheSpotItIsGiven() {
-        Ui.chip(surface, "Idle", 100, 50);
-
-        int width = 4 * 5 + 2 * UiStyle.PAD;
-        int height = 9 + 2 * UiStyle.CHIP_PAD;
-        assertEquals(new Rect(100 - width / 2, 50 - height, width, height, UiTheme.BORDER), surface.rects.get(0));
-        assertEquals(new Text("Idle", 100 - width / 2 + UiStyle.PAD, UiTheme.TEXT), surface.texts.get(0));
-    }
-
-    @Test
     void aTooLongLineIsClippedToItsRoom() {
         Ui.textClipped(surface, "Hachiware", 0, 0, 30, UiTheme.TEXT);
 
         assertEquals("Hachi…", surface.texts.get(0).text());
     }
 
-    private record Rect(int x, int y, int width, int height, int argb) {
+    @Test
+    void anEmptyStateSitsInTheMiddleAndKeepsQuiet() {
+        Ui.emptyState(surface, "nothing up today", 100, 40);
+
+        Text line = surface.texts.get(0);
+        assertEquals(100 - surface.textWidth("nothing up today") / 2, line.x());
+        assertEquals(UiTheme.TEXT_MUTED, line.argb());
     }
 
-    private record Text(String text, int x, int argb) {
+    @Test
+    void onlyTheHoveredRowIsTinted() {
+        Ui.rowHighlight(surface, new Rect(4, 8, 100, UiStyle.ROW_H));
+
+        assertEquals(new Rectangle(4, 8, 100, UiStyle.ROW_H, UiTheme.HOVER), surface.rects.get(0));
+        assertFalse(surface.rects.isEmpty());
     }
 
-    /** Stands in for the game's drawing API: five pixels a character. */
-    private static final class RecordingSurface implements DrawSurface {
-        private final List<Rect> rects = new ArrayList<>();
-        private final List<Text> texts = new ArrayList<>();
+    @Test
+    void aRowKnowsWhetherTheCursorIsInIt() {
+        Rect row = new Rect(10, 20, 100, UiStyle.ROW_H);
 
-        @Override
-        public void fillRect(int x, int y, int width, int height, int argb) {
-            rects.add(new Rect(x, y, width, height, argb));
-        }
-
-        @Override
-        public void drawText(String text, int x, int y, int argb) {
-            texts.add(new Text(text, x, argb));
-        }
-
-        @Override
-        public int textWidth(String text) {
-            return text.length() * 5;
-        }
-
-        @Override
-        public int lineHeight() {
-            return 9;
-        }
+        assertTrue(row.contains(10, 20));
+        assertTrue(row.contains(109, 20 + UiStyle.ROW_H - 1));
+        assertFalse(row.contains(110, 25));
+        assertFalse(row.contains(50, 20 + UiStyle.ROW_H));
     }
 }
