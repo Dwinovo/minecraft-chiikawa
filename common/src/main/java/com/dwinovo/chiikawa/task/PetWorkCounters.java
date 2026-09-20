@@ -15,8 +15,10 @@ public final class PetWorkCounters {
     public static final ResourceLocation PICK_MUSHROOM = id("pick_mushroom");
     /** One second of a performance. */
     public static final ResourceLocation PLAY_MUSIC_SECOND = id("play_music_second");
+    /** One hostile mob put down, by whichever hand or arrow did it. */
+    public static final ResourceLocation SLAY = id("slay");
 
-    public static final Set<ResourceLocation> ALL = Set.of(WEED, PICK_MUSHROOM, PLAY_MUSIC_SECOND);
+    public static final Set<ResourceLocation> ALL = Set.of(WEED, PICK_MUSHROOM, PLAY_MUSIC_SECOND, SLAY);
 
     private PetWorkCounters() {
     }
