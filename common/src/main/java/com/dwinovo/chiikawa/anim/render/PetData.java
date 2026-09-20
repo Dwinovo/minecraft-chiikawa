@@ -20,7 +20,9 @@ package com.dwinovo.chiikawa.anim.render;
  */
 public enum PetData {
     /** Mainhand {@link net.minecraft.world.item.ItemStack} snapshot consumed by {@code HeldItemLayer}. */
-    HELD_ITEM_STACK;
+    HELD_ITEM_STACK,
+    /** {@link Boolean}: the pet carries a slip, consumed by {@code SlipTagLayer}. */
+    CARRYING_SLIP;
 
     /** Cached values() to avoid per-frame allocation; treat as immutable. */
     public static final PetData[] VALUES = values();

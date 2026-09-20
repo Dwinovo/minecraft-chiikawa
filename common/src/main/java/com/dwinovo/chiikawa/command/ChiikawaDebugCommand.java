@@ -125,10 +125,10 @@ public final class ChiikawaDebugCommand {
         List<BoardSlot> slots = board.today();
         source.sendSuccess(() -> Component.literal("[chiikawa-board] " + slots.size() + " slips today:"), false);
         for (BoardSlot slot : slots) {
-            String state = slot.claimed() ? "taken"
-                : slot.reservation().filter(held -> held.until() > gameTime)
+            String state = slot.claim().map(claim -> "taken by " + claim.describe())
+                .orElseGet(() -> slot.reservation().filter(held -> held.until() > gameTime)
                     .map(held -> "held by " + held.pet() + " for " + (held.until() - gameTime) + "t")
-                    .orElse("open");
+                    .orElse("open"));
             source.sendSuccess(() -> Component.literal(" " + slot.slip().type() + " x" + slot.slip().target()
                 + " for " + slot.slip().capability() + ": " + state), false);
         }

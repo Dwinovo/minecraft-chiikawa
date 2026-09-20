@@ -257,6 +257,7 @@ public final class IntentSelector {
         } else {
             brain.eraseMemory(InitMemory.CURRENT_INTENT.get());
         }
+        pet.setIntent(next == null ? null : next.id());
         brain.getMemory(InitMemory.INTENT_SWITCH_LOG.get()).ifPresent(log -> log.record(
             now, previous == null ? null : previous.id(), next == null ? null : next.id(), cause, ranking));
     }
