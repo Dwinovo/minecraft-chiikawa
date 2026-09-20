@@ -139,9 +139,10 @@ class BoardSlipsTest {
 
     private static SortedMap<ResourceLocation, PetTaskType> types() {
         SortedMap<ResourceLocation, PetTaskType> types = new TreeMap<>();
-        types.put(id("weeding"), new PetTaskType(FARMER, PetWorkCounters.WEED, UniformInt.of(8, 16), reward("weeding"), 3));
-        types.put(id("mushroom_picking"), new PetTaskType(FARMER, PetWorkCounters.PICK_MUSHROOM, UniformInt.of(8, 16),
-            reward("mushroom_picking"), 2));
+        types.put(id("weeding"), new PetTaskType(FARMER, PetWorkCounters.WEED, PetTask.NO_ICON,
+            UniformInt.of(8, 16), reward("weeding"), 3));
+        types.put(id("mushroom_picking"), new PetTaskType(FARMER, PetWorkCounters.PICK_MUSHROOM, PetTask.NO_ICON,
+            UniformInt.of(8, 16), reward("mushroom_picking"), 2));
         return types;
     }
 
@@ -150,7 +151,8 @@ class BoardSlipsTest {
     }
 
     private static BoardSlot slot(ResourceLocation capability) {
-        return BoardSlot.open(new PetTask(id("test"), capability, PetWorkCounters.WEED, 10, reward("test"), 0));
+        return BoardSlot.open(new PetTask(id("test"), capability, PetWorkCounters.WEED, PetTask.NO_ICON, 10,
+            reward("test"), 0));
     }
 
     private static ResourceKey<LootTable> reward(String path) {
