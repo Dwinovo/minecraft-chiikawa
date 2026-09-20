@@ -1,9 +1,15 @@
 package com.dwinovo.chiikawa.block;
 
+import com.dwinovo.chiikawa.network.BoardPayloads.BoardSlipsPayload;
+import com.dwinovo.chiikawa.platform.Services;
 import com.mojang.serialization.MapCodec;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -16,6 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -79,5 +86,18 @@ public class LaborBoardBlock extends BaseEntityBlock {
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new LaborBoardBlockEntity(pos, state);
+    }
+
+    /** Shows the day's slips: what is up, and whose pet took what. */
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        if (level.isClientSide()) {
+            return InteractionResult.SUCCESS;
+        }
+        if (player instanceof ServerPlayer serverPlayer
+                && level.getBlockEntity(pos) instanceof LaborBoardBlockEntity board) {
+            Services.NETWORK.sendToClient(serverPlayer, new BoardSlipsPayload(board.slipViews()));
+        }
+        return InteractionResult.CONSUME;
     }
 }

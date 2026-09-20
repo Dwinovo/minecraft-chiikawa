@@ -114,6 +114,10 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * so server can call {@code setActivity} every tick if convenient.
      */
     private static final EntityDataAccessor<Byte> ACTIVITY = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.BYTE);
+    /** The slip the pet carries, empty when none. Synced so the client can show and hang it. */
+    private static final EntityDataAccessor<CompoundTag> TASK = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.COMPOUND_TAG);
+    /** Id of the intent the pet is following, empty when none. Synced for the backpack screen. */
+    private static final EntityDataAccessor<String> INTENT = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.STRING);
 
     /** Legacy animation-id namespace for {@link #ANIM_TRIGGER}'s low byte. */
     public static final int TRIGGER_NONE         = 0;
@@ -169,9 +173,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
             AbstractPet.this.refreshJobFromMainhand();
         }
     };
-    /** The slip the pet carries, see {@link PetTask}. Server-side. */
-    @Nullable
-    private PetTask task;
 
     /**
      * Creates a new pet instance tied to its entity type and level.
@@ -376,17 +377,35 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     }
 
     /**
-     * @return the slip the pet carries
+     * @return the slip the pet carries; readable on both sides
      */
     public Optional<PetTask> getTask() {
-        return Optional.ofNullable(task);
+        CompoundTag tag = this.entityData.get(TASK);
+        return tag.isEmpty() ? Optional.empty() : PetTask.CODEC.parse(NbtOps.INSTANCE, tag).result();
     }
 
     /**
      * @param task the slip the pet now carries, {@code null} for none
      */
     public void setTask(@Nullable PetTask task) {
-        this.task = task;
+        this.entityData.set(TASK, task == null
+            ? new CompoundTag()
+            : (CompoundTag) PetTask.CODEC.encodeStart(NbtOps.INSTANCE, task).getOrThrow());
+    }
+
+    /**
+     * @return the id of the intent the pet is following; readable on both sides
+     */
+    public Optional<ResourceLocation> getIntent() {
+        String id = this.entityData.get(INTENT);
+        return id.isEmpty() ? Optional.empty() : Optional.ofNullable(ResourceLocation.tryParse(id));
+    }
+
+    /**
+     * @param intent the intent the pet now follows, {@code null} for none
+     */
+    public void setIntent(@Nullable ResourceLocation intent) {
+        this.entityData.set(INTENT, intent == null ? "" : intent.toString());
     }
 
     /**
@@ -610,6 +629,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         this.entityData.define(ANIM_TRIGGER, 0);
         this.entityData.define(REACTION_TRIGGER, 0);
         this.entityData.define(ACTIVITY, (byte) PetActivity.NONE.networkId());
+        this.entityData.define(TASK, new CompoundTag());
+        this.entityData.define(INTENT, "");
     }
 
     /**
@@ -752,8 +773,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         tag.put("Backpack", ContainerHelper.saveAllItems(new CompoundTag(), items));
         tag.putInt("PetJob", getPetJobId());
         tag.putByte("PetMode", this.entityData.get(PET_MODE));
-        if (task != null) {
-            tag.put("Task", PetTask.CODEC.encodeStart(NbtOps.INSTANCE, task).getOrThrow());
+        CompoundTag task = this.entityData.get(TASK);
+        if (!task.isEmpty()) {
+            tag.put("Task", task);
         }
     }
 
@@ -771,9 +793,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         if (tag.contains("PetMode", Tag.TAG_BYTE)) {
             this.entityData.set(PET_MODE, tag.getByte("PetMode"));
         }
-        task = tag.contains("Task", Tag.TAG_COMPOUND)
-            ? PetTask.CODEC.parse(NbtOps.INSTANCE, tag.get("Task")).result().orElse(null)
-            : null;
+        this.entityData.set(TASK, tag.contains("Task", Tag.TAG_COMPOUND) ? tag.getCompound("Task") : new CompoundTag());
         refreshJobFromMainhand();
     }
 
@@ -810,7 +830,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     /** A pet that falls loses the slip it carried: the job failed and pays nothing. */
     @Override
     public void die(DamageSource source) {
-        task = null;
+        setTask(null);
         super.die(source);
     }
 
