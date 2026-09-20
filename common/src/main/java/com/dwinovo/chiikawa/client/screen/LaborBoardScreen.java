@@ -1,12 +1,12 @@
 package com.dwinovo.chiikawa.client.screen;
 
 import com.dwinovo.chiikawa.client.ui.PetStatusText;
-import com.dwinovo.chiikawa.client.ui.PetStyle;
-import com.dwinovo.chiikawa.client.ui.PetTheme;
-import com.dwinovo.chiikawa.client.ui.Surface;
-import com.dwinovo.chiikawa.client.ui.Ui;
 import com.dwinovo.chiikawa.client.ui.mc.GuiSurface;
 import com.dwinovo.chiikawa.network.BoardPayloads.SlipView;
+import com.dwinovo.chiikawa.ui.DrawSurface;
+import com.dwinovo.chiikawa.ui.Ui;
+import com.dwinovo.chiikawa.ui.UiStyle;
+import com.dwinovo.chiikawa.ui.UiTheme;
 import java.util.List;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -32,7 +32,7 @@ public class LaborBoardScreen extends Screen {
     @Override
     protected void init() {
         int rows = Math.max(1, slips.size());
-        this.panelHeight = PetStyle.TITLE_H + PetStyle.PAD + rows * PetStyle.ROW_PITCH + PetStyle.PAD;
+        this.panelHeight = UiStyle.TITLE_H + UiStyle.PAD + rows * UiStyle.ROW_PITCH + UiStyle.PAD;
         this.leftPos = (this.width - WIDTH) / 2;
         this.topPos = (this.height - panelHeight) / 2;
     }
@@ -40,23 +40,26 @@ public class LaborBoardScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
-        Surface surface = new GuiSurface(graphics, this.font);
-        int y = Ui.titledPanel(surface, leftPos, topPos, WIDTH, panelHeight, this.title);
-        int right = leftPos + WIDTH - PetStyle.PAD;
+        DrawSurface surface = new GuiSurface(graphics, this.font);
+        int y = Ui.titledPanel(surface, leftPos, topPos, WIDTH, panelHeight, this.title.getString());
+        int left = leftPos + UiStyle.PAD;
+        int right = leftPos + WIDTH - UiStyle.PAD;
 
         if (slips.isEmpty()) {
-            surface.drawText(Component.translatable("screen.chiikawa.labor_board.empty"),
-                leftPos + PetStyle.PAD, y, PetTheme.TEXT_MUTED);
+            surface.drawText(Component.translatable("screen.chiikawa.labor_board.empty").getString(),
+                left, y, UiTheme.TEXT_MUTED);
             return;
         }
         for (SlipView slip : slips) {
-            surface.drawText(PetStatusText.taskName(slip.type()), leftPos + PetStyle.PAD, y, PetTheme.TEXT);
-            Ui.textRight(surface, Component.translatable("screen.chiikawa.labor_board.detail",
-                PetStatusText.taskAmount(slip.type(), slip.target()), PetStatusText.jobName(slip.capability())),
-                right, y, PetTheme.TEXT_MUTED);
-            surface.drawText(status(slip), leftPos + PetStyle.PAD + PetStyle.INDENT, y + PetStyle.LINE,
-                slip.taker().isEmpty() ? PetTheme.TEXT_MUTED : PetTheme.SUCCESS);
-            y += PetStyle.ROW_PITCH;
+            String detail = Component.translatable("screen.chiikawa.labor_board.detail",
+                PetStatusText.taskAmount(slip.type(), slip.target()), PetStatusText.jobName(slip.capability())).getString();
+            Ui.textRight(surface, detail, right, y, UiTheme.TEXT_MUTED);
+            // The name gives way to the detail beside it rather than running into it.
+            Ui.textClipped(surface, PetStatusText.taskName(slip.type()).getString(), left, y,
+                right - left - surface.textWidth(detail) - UiStyle.PAD, UiTheme.TEXT);
+            Ui.textClipped(surface, status(slip).getString(), left + UiStyle.INDENT, y + UiStyle.LINE,
+                right - left - UiStyle.INDENT, slip.taker().isEmpty() ? UiTheme.TEXT_MUTED : UiTheme.SUCCESS);
+            y += UiStyle.ROW_PITCH;
         }
     }
 
