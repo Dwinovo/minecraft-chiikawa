@@ -37,6 +37,11 @@ public final class PetUnloadFollow {
                 if (owner != null) {
                     pet.teleportToOwner(level, owner);
                 }
+                // Whether or not it followed, this is the last anyone will see of it until
+                // somebody loads the chunk again, which is exactly what a bell is rung for.
+                if (pet.getOwnerUUID() != null) {
+                    PetRoster.of(level).note(pet);
+                }
             }
         }
     }

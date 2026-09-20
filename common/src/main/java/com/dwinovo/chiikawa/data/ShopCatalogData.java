@@ -52,6 +52,7 @@ public final class ShopCatalogData {
             sells(InitItems.SIMPLE_DISH.get(), 3),
             sells(Items.NAME_TAG, 8),
             sells(InitItems.BEAR_BACKPACK.get(), 12),
+            sells(InitItems.PET_BELL.get(), 16),
             // Reading.
             sells(Items.PAPER, 1),
             sells(Items.BOOK, 2),
