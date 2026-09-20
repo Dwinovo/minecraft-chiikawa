@@ -38,6 +38,16 @@ class UiTest {
     }
 
     @Test
+    void aChipSitsOnItsLineCentredOnTheSpotItIsGiven() {
+        Ui.chip(surface, "Idle", 100, 50);
+
+        int width = 4 * 5 + 2 * UiStyle.PAD;
+        int height = 9 + 2 * UiStyle.CHIP_PAD;
+        assertEquals(new Rect(100 - width / 2, 50 - height, width, height, UiTheme.BORDER), surface.rects.get(0));
+        assertEquals(new Text("Idle", 100 - width / 2 + UiStyle.PAD, UiTheme.TEXT), surface.texts.get(0));
+    }
+
+    @Test
     void aTooLongLineIsClippedToItsRoom() {
         Ui.textClipped(surface, "Hachiware", 0, 0, 30, UiTheme.TEXT);
 
