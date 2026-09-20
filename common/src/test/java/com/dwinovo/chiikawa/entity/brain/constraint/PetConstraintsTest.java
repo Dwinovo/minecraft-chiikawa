@@ -119,9 +119,10 @@ class PetConstraintsTest {
     // ---- permission table ------------------------------------------------------
 
     @Test
-    void followPermitsFollowingWanderingAndTakingSlipsOnTheWay() {
+    void followPermitsFollowingWanderingTakingSlipsAndGivingOnTheWay() {
         assertPermits(PetDirective.FOLLOW, OWNED,
-            EnumSet.of(IntentCategory.FOLLOW_OWNER, IntentCategory.WANDER, IntentCategory.TAKE_TASK));
+            EnumSet.of(IntentCategory.FOLLOW_OWNER, IntentCategory.WANDER, IntentCategory.TAKE_TASK,
+                IntentCategory.GIFT));
     }
 
     @Test
@@ -130,9 +131,10 @@ class PetConstraintsTest {
     }
 
     @Test
-    void freePermitsWanderingWorkForagingFightsPickingUpTakingSlipsAndShopping() {
+    void freePermitsEverythingAPetDoesOnItsOwnTime() {
         assertPermits(PetDirective.FREE, OWNED, EnumSet.of(IntentCategory.WANDER, IntentCategory.WORK, IntentCategory.FORAGE,
-            IntentCategory.COMBAT, IntentCategory.PICK_UP, IntentCategory.TAKE_TASK, IntentCategory.SHOP));
+            IntentCategory.COMBAT, IntentCategory.PICK_UP, IntentCategory.TAKE_TASK, IntentCategory.SHOP,
+            IntentCategory.GIFT));
     }
 
     @Test
