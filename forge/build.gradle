@@ -47,6 +47,12 @@ minecraft {
         server {
             args '--nogui'
         }
+        // Headless batch of the in-game cases: ./gradlew :forge:runGameTestServer
+        // Its exit code is the number of failures, so CI reads it without parsing a log.
+        gameTestServer {
+            workingDirectory project.file('runs/gametestserver')
+            property 'forge.enabledGameTestNamespaces', mod_id
+        }
 
         data {
             workingDirectory project.file('run-data')
