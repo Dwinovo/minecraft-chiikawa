@@ -76,6 +76,6 @@ class ForageIntentsTest {
 
     private static PetTask slip(ResourceLocation counter) {
         return new PetTask(ResourceLocation.fromNamespaceAndPath("chiikawa", "test"), ResourceLocation.fromNamespaceAndPath("chiikawa", "farmer"),
-            counter, 10, ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath("chiikawa", "pet_task/test")), 0);
+            counter, PetTask.NO_ICON, 10, ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath("chiikawa", "pet_task/test")), 0);
     }
 }
