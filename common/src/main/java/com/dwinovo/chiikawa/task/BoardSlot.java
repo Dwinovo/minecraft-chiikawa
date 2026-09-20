@@ -11,17 +11,17 @@ import net.minecraft.core.UUIDUtil;
  *
  * @param slip the slip
  * @param reservation the pet on its way to take it; honoured until it expires
- * @param claimed whether a pet has taken it
+ * @param claim who took it, if anyone
  */
-public record BoardSlot(PetTask slip, Optional<Reservation> reservation, boolean claimed) {
+public record BoardSlot(PetTask slip, Optional<Reservation> reservation, Optional<Claim> claim) {
     public static final Codec<BoardSlot> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         PetTask.CODEC.fieldOf("slip").forGetter(BoardSlot::slip),
         Reservation.CODEC.optionalFieldOf("reservation").forGetter(BoardSlot::reservation),
-        Codec.BOOL.optionalFieldOf("claimed", false).forGetter(BoardSlot::claimed)
+        Claim.CODEC.optionalFieldOf("claim").forGetter(BoardSlot::claim)
     ).apply(instance, BoardSlot::new));
 
     public static BoardSlot open(PetTask slip) {
-        return new BoardSlot(slip, Optional.empty(), false);
+        return new BoardSlot(slip, Optional.empty(), Optional.empty());
     }
 
     /**
@@ -35,25 +35,47 @@ public record BoardSlot(PetTask slip, Optional<Reservation> reservation, boolean
         ).apply(instance, Reservation::new));
     }
 
+    /**
+     * Who took a slip, as the board shows it.
+     *
+     * @param pet the pet's name
+     * @param owner its owner's name, empty for a wild pet
+     */
+    public record Claim(String pet, String owner) {
+        public static final Codec<Claim> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.STRING.fieldOf("pet").forGetter(Claim::pet),
+            Codec.STRING.optionalFieldOf("owner", "").forGetter(Claim::owner)
+        ).apply(instance, Claim::new));
+
+        /** @return {@code "<pet> (<owner>)"}, or just the pet's name when it has no owner */
+        public String describe() {
+            return owner.isEmpty() ? pet : pet + " (" + owner + ")";
+        }
+    }
+
+    public boolean claimed() {
+        return claim.isPresent();
+    }
+
     /** Whether {@code pet} may take this slip: it is not taken and nobody else holds it. */
     public boolean openTo(UUID pet, long gameTime) {
-        return !claimed && reservation.filter(held -> !held.pet().equals(pet) && held.until() > gameTime).isEmpty();
+        return !claimed() && reservation.filter(held -> !held.pet().equals(pet) && held.until() > gameTime).isEmpty();
     }
 
     /** Whether {@code pet} holds a live reservation on this slip. */
     public boolean reservedBy(UUID pet, long gameTime) {
-        return !claimed && reservation.filter(held -> held.pet().equals(pet) && held.until() > gameTime).isPresent();
+        return !claimed() && reservation.filter(held -> held.pet().equals(pet) && held.until() > gameTime).isPresent();
     }
 
     public BoardSlot reserve(UUID pet, long until) {
-        return new BoardSlot(slip, Optional.of(new Reservation(pet, until)), false);
+        return new BoardSlot(slip, Optional.of(new Reservation(pet, until)), Optional.empty());
     }
 
     public BoardSlot release() {
-        return new BoardSlot(slip, Optional.empty(), claimed);
+        return new BoardSlot(slip, Optional.empty(), claim);
     }
 
-    public BoardSlot claim() {
-        return new BoardSlot(slip, Optional.empty(), true);
+    public BoardSlot claim(Claim by) {
+        return new BoardSlot(slip, Optional.empty(), Optional.of(by));
     }
 }
