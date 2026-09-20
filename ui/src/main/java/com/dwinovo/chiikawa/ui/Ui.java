@@ -12,11 +12,26 @@ public final class Ui {
     private Ui() {
     }
 
-    /** Panel face with a one-pixel outline. */
+    /**
+     * A raised panel: outlined, with its corner pixels left out and a lit edge along the
+     * top and left, a shaded one along the bottom and right.
+     *
+     * <p>Those two details are most of the difference between a panel and a rectangle. The
+     * missing corners read as rounded at this size, and the two edges give the light a
+     * direction, which is what makes a flat cream box look like a raised thing rather than
+     * a hole cut in the screen. Neither costs an image.
+     */
     public static void panel(DrawSurface surface, int x, int y, int width, int height) {
-        surface.fillRect(x, y, width, height, UiTheme.BORDER);
-        surface.fillRect(x + UiStyle.BORDER, y + UiStyle.BORDER,
-            width - 2 * UiStyle.BORDER, height - 2 * UiStyle.BORDER, UiTheme.PANEL);
+        int inner = UiStyle.BORDER;
+        // Edges rather than one filled rectangle, so the four corner pixels stay empty.
+        surface.fillRect(x + inner, y, width - 2 * inner, inner, UiTheme.BORDER);
+        surface.fillRect(x + inner, y + height - inner, width - 2 * inner, inner, UiTheme.BORDER);
+        surface.fillRect(x, y + inner, inner, height - 2 * inner, UiTheme.BORDER);
+        surface.fillRect(x + width - inner, y + inner, inner, height - 2 * inner, UiTheme.BORDER);
+
+        surface.fillRect(x + inner, y + inner, width - 2 * inner, height - 2 * inner, UiTheme.PANEL);
+        bevel(surface, x + inner, y + inner, width - 2 * inner, height - 2 * inner,
+            UiTheme.HIGHLIGHT, UiTheme.SHADE);
     }
 
     /**
@@ -31,12 +46,25 @@ public final class Ui {
 
     /**
      * A well cut into a card: where something is put rather than where something is
-     * written. Darker than the face, so it reads as below it.
+     * written. The same light as a panel, turned over — shaded where a panel is lit — which
+     * is the whole of what tells a hole from a lump, and the way the game draws its own
+     * item slots.
+     *
+     * <p>No outline: a well is as wide as it is told to be, and an item slot has exactly
+     * sixteen pixels inside eighteen. A border would have to come out of the item.
      */
     public static void well(DrawSurface surface, int x, int y, int width, int height) {
-        surface.fillRect(x, y, width, height, UiTheme.DIVIDER);
-        surface.fillRect(x + UiStyle.BORDER, y + UiStyle.BORDER,
-            width - 2 * UiStyle.BORDER, height - 2 * UiStyle.BORDER, UiTheme.SURFACE);
+        surface.fillRect(x, y, width, height, UiTheme.SURFACE);
+        bevel(surface, x, y, width, height, UiTheme.SHADE, UiTheme.HIGHLIGHT);
+    }
+
+    /** Lit along the top and left, shaded along the bottom and right — or the other way about. */
+    private static void bevel(DrawSurface surface, int x, int y, int width, int height, int top, int bottom) {
+        int edge = UiStyle.BORDER;
+        surface.fillRect(x, y, width - edge, edge, top);
+        surface.fillRect(x, y, edge, height - edge, top);
+        surface.fillRect(x + edge, y + height - edge, width - edge, edge, bottom);
+        surface.fillRect(x + width - edge, y + edge, edge, height - edge, bottom);
     }
 
     /**
