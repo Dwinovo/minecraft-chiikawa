@@ -26,6 +26,7 @@ public final class ModItemModelProvider extends ModelProvider {
         itemModels.generateFlatItem(InitItems.MUSIC_BOX.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(InitItems.BEAR_BACKPACK.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(InitItems.SIMPLE_DISH.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(InitItems.PET_BELL.get(), ModelTemplates.FLAT_ITEM);
     }
 
     private static void generateSpawnEggs(ItemModelGenerators itemModels) {

@@ -53,7 +53,8 @@ public final class InitTabs {
         InitItems.LABOR_BOARD,
         InitItems.SHOP,
         InitItems.BEAR_BACKPACK,
-        InitItems.SIMPLE_DISH
+        InitItems.SIMPLE_DISH,
+        InitItems.PET_BELL
     );
 
     private InitTabs() {

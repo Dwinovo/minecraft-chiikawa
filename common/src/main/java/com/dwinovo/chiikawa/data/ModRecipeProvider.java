@@ -75,6 +75,17 @@ public final class ModRecipeProvider extends RecipeProvider {
             .unlockedBy(getHasName(Items.PAPER), has(Items.PAPER))
             .save(this.output);
 
+        // A little bell on a stick: gold for the ring, an emerald for the pets to hear.
+        ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.TOOLS, InitItems.PET_BELL.get())
+            .pattern(" G ")
+            .pattern("GEG")
+            .pattern(" S ")
+            .define('G', Items.GOLD_INGOT)
+            .define('E', Items.EMERALD)
+            .define('S', Items.STICK)
+            .unlockedBy(getHasName(Items.EMERALD), has(Items.EMERALD))
+            .save(this.output);
+
         // A plate of something hot: bread, a vegetable, and something cooked.
         ShapelessRecipeBuilder.shapeless(itemLookup, RecipeCategory.FOOD, InitItems.SIMPLE_DISH.get())
             .requires(Items.BREAD)

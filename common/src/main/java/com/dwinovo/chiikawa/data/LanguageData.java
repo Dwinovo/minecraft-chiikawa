@@ -48,7 +48,10 @@ public final class LanguageData {
                 "刚买过东西", "商店里没有它想要又买得起的", "手上没有要送的东西");
             addBlockTranslations(adder, "劳动公告板", "商店");
             addSupplyTranslations(adder, "小熊挎包", "给宠物戴上，背包多 10 格",
-                    "简单料理", "喂给宠物，一阵子干活更起劲");
+                    "简单料理", "喂给宠物，一阵子干活更起劲",
+                    "宠物铃铛", "叫回你的宠物，跨维度也听得见；响过一次要等半分钟");
+            addRecallTranslations(adder, "叫回了 %s 只宠物", "你没有宠物可叫",
+                    "%s 没有应声，上次见到它的地方已经没它了");
             addShopScreenTranslations(adder, "商店", "买 %s", "卖 %s", "今天什么都不卖",
                     "上一页", "下一页");
             addIntentNameTranslations(adder, "跟着主人", "坐着", "闲逛", "捡东西", "去领工作牌",
@@ -100,7 +103,10 @@ public final class LanguageData {
                 "Just bought something", "Nothing here it wants and can afford", "Nothing to give");
             addBlockTranslations(adder, "Labor Board", "Shop");
             addSupplyTranslations(adder, "Bear Backpack", "Worn by a pet: ten more slots",
-                    "Simple Dish", "Fed to a pet: keener on work for a while");
+                    "Simple Dish", "Fed to a pet: keener on work for a while",
+                    "Pet Bell", "Calls your pets home, even from another dimension; half a minute between rings");
+            addRecallTranslations(adder, "%s came running", "You have no pets to call",
+                    "%s did not answer; it is gone from where it was last seen");
             addShopScreenTranslations(adder, "Shop", "Buy %s", "Sell %s", "Nothing for sale today",
                     "Previous page", "Next page");
             addIntentNameTranslations(adder, "Following its owner", "Sitting", "Wandering", "Picking up an item",
@@ -196,11 +202,20 @@ public final class LanguageData {
     }
 
     private static void addSupplyTranslations(Adder adder, String bearBackpack, String bearBackpackTip,
-            String simpleDish, String simpleDishTip) {
+            String simpleDish, String simpleDishTip, String petBell, String petBellTip) {
         adder.add("item.chiikawa.bear_backpack", bearBackpack);
         adder.add("tooltip.chiikawa.bear_backpack", bearBackpackTip);
         adder.add("item.chiikawa.simple_dish", simpleDish);
         adder.add("tooltip.chiikawa.simple_dish", simpleDishTip);
+        adder.add("item.chiikawa.pet_bell", petBell);
+        adder.add("tooltip.chiikawa.pet_bell", petBellTip);
+    }
+
+    /** What a rung bell tells its owner. */
+    private static void addRecallTranslations(Adder adder, String came, String nobody, String missing) {
+        adder.add("message.chiikawa.pet_bell.came", came);
+        adder.add("message.chiikawa.pet_bell.nobody", nobody);
+        adder.add("message.chiikawa.pet_bell.missing", missing);
     }
 
     private static void addBlockTranslations(Adder adder, String laborBoard, String shop) {
