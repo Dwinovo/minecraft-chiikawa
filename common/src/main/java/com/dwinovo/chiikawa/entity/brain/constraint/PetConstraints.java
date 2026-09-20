@@ -105,7 +105,11 @@ public final class PetConstraints {
             // once it has been let loose in it. A wild pet has no wages to spend, and one
             // at heel is out with its owner rather than out on its own errand.
             case WORK, PICK_UP, SHOP -> !wild && directive == PetDirective.FREE;
-            case FORAGE, COMBAT -> wild || directive == PetDirective.FREE;
+            case FORAGE -> wild || directive == PetDirective.FREE;
+            // Fighting is the one kind of work a pet at heel still does: it is walking
+            // beside its owner, and something is attacking them. Only a pet told to sit
+            // sits through that.
+            case COMBAT -> wild || directive != PetDirective.STAY;
         };
     }
 
