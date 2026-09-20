@@ -200,10 +200,18 @@ public final class PetCombat {
      * creeper looks like from the outside, so the sensor and the feet cannot disagree.
      */
     public static Foe of(Entity entity, double distance) {
-        boolean explosive = entity instanceof Creeper;
         boolean armed = entity instanceof Creeper creeper
             && (creeper.getSwellDir() > 0 || creeper.isIgnited());
-        return new Foe(entity.getId(), distance, explosive, armed);
+        return new Foe(entity.getId(), distance, explodes(entity), armed);
+    }
+
+    /**
+     * Whether this thing goes off. A pet never swings at one: its reach is inside the
+     * distance at which a creeper swells, so a hit is a lit fuse, and one hit is nowhere
+     * near enough to put a creeper down. Keeping away is the whole answer.
+     */
+    public static boolean explodes(Entity entity) {
+        return entity instanceof Creeper;
     }
 
     /** No target; the id no entity has. */

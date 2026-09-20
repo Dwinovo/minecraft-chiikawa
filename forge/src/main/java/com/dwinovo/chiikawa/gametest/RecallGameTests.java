@@ -10,6 +10,7 @@ import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.PetRecall;
 import com.dwinovo.chiikawa.entity.PetRoster;
 import com.dwinovo.chiikawa.entity.PetUnloadFollow;
+import com.dwinovo.chiikawa.init.InitItems;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -19,7 +20,9 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.Vec3;
@@ -162,6 +165,27 @@ public final class RecallGameTests {
             helper.assertTrue(roster.pets(owner.getUUID()).isEmpty(), "the roster kept a pet that is not there");
             helper.succeed();
         });
+    }
+
+    /**
+     * What a ring costs. Nothing is spent and nothing is worn out, so the only thing
+     * keeping a bell from being a way to drag pets about on demand is the half minute
+     * before it can be rung again.
+     */
+    @GameTest(template = "floor32", batch = BATCH, timeoutTicks = 200)
+    public static void ringing_the_bell_puts_it_away_for_a_while(GameTestHelper helper) {
+        ServerPlayer owner = owner(helper);
+        pet(helper, owner);
+        ItemStack bell = new ItemStack(InitItems.PET_BELL.get());
+        owner.setItemInHand(InteractionHand.MAIN_HAND, bell);
+
+        bell.use(helper.getLevel(), owner, InteractionHand.MAIN_HAND);
+
+        helper.assertTrue(owner.getCooldowns().isOnCooldown(InitItems.PET_BELL.get()),
+            "the bell can be rung again on the next tick");
+        helper.assertTrue(owner.getItemInHand(InteractionHand.MAIN_HAND).getCount() == 1,
+            "ringing the bell used it up");
+        helper.succeed();
     }
 
     /** Somebody to own the pets, standing in the test area. */
