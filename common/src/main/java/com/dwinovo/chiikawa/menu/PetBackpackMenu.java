@@ -33,6 +33,7 @@ public class PetBackpackMenu extends AbstractContainerMenu {
     private static final int HOTBAR_Y = 199;
 
     private final AbstractPet pet;
+    private final Level level;
     private final int petSlotCount;
     private final DataSlot petId = DataSlot.standalone();
 
@@ -43,10 +44,11 @@ public class PetBackpackMenu extends AbstractContainerMenu {
     public PetBackpackMenu(int containerId, Inventory playerInventory, AbstractPet pet) {
         super(InitMenu.PET_BACKPACK.get(), containerId);
         this.pet = pet;
+        this.level = playerInventory.player.level();
         this.petId.set(pet != null ? pet.getId() : -1);
         this.addDataSlot(this.petId);
 
-        SimpleContainer handler = pet != null ? pet.getBackpack() : new SimpleContainer(AbstractPet.BACKPACK_SIZE);
+        SimpleContainer handler = pet != null ? pet.getBackpack() : new SimpleContainer(petSlots());
         this.petSlotCount = handler.getContainerSize();
         // Avoid SimpleContainer.startOpen to keep cross-loader bytecode free of ContainerUser.
         if (petSlotCount > 0) {
@@ -80,6 +82,25 @@ public class PetBackpackMenu extends AbstractContainerMenu {
         }
     }
 
+    /**
+     * How many pockets a pet has, and so how many slots a menu builds for one. The client
+     * is handed a menu without the pet in it and has to lay out the same slots all the
+     * same: one fewer and the first packet of contents falls off the end of the list, which
+     * is a disconnect rather than a missing slot.
+     */
+    public static int petSlots() {
+        return AbstractPet.FULL_BACKPACK_SIZE;
+    }
+
+    /**
+     * The pet this menu is about, on either side. The server has it in hand; the client
+     * looks it up by the id the menu carries, which is what lets a slot know whether the
+     * pet is wearing its bag.
+     */
+    private AbstractPet pet() {
+        return pet != null ? pet : getPet(level);
+    }
+
     /** Where the worn bag goes: one bag, and nothing else. */
     private final class BagSlot extends Slot {
         private BagSlot(SimpleContainer handler, int x, int y) {
@@ -101,8 +122,9 @@ public class PetBackpackMenu extends AbstractContainerMenu {
             super.onTake(player, stack);
             // Taking the bag off empties it where the owner can see, rather than leaving
             // ten slots of things in a bag nobody is wearing.
-            if (pet != null && !pet.isWearingBag()) {
-                pet.dropBagContents();
+            AbstractPet wearer = pet();
+            if (wearer != null && !wearer.isWearingBag()) {
+                wearer.dropBagContents();
             }
         }
     }
@@ -115,7 +137,8 @@ public class PetBackpackMenu extends AbstractContainerMenu {
 
         @Override
         public boolean isActive() {
-            return pet != null && pet.isWearingBag();
+            AbstractPet wearer = pet();
+            return wearer != null && wearer.isWearingBag();
         }
     }
 
