@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.task;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -42,27 +43,29 @@ class BoardSlipsTest {
     @Test
     void sameBoardAndDayRollsTheSameSlipsForEveryone() {
         long seed = BoardSlips.seed(42L, 7L, new BlockPos(10, 64, -3));
-        List<BoardSlot> first = BoardSlips.roll(seed, types());
+        List<BoardSlot> first = BoardSlips.roll(seed, types(), BoardSlips.FIRST_LEVEL);
 
-        assertEquals(BoardSlips.SLIPS_PER_DAY, first.size());
-        assertEquals(first, BoardSlips.roll(seed, types()));
+        assertEquals(BoardSlips.slipsAt(BoardSlips.FIRST_LEVEL), first.size());
+        assertEquals(first, BoardSlips.roll(seed, types(), BoardSlips.FIRST_LEVEL));
         first.forEach(slot -> assertTrue(slot.openTo(PET, NOW)));
     }
 
     @Test
     void anotherDayOrBoardRollsOtherwise() {
         BlockPos pos = new BlockPos(10, 64, -3);
-        List<BoardSlot> today = BoardSlips.roll(BoardSlips.seed(42L, 7L, pos), types());
+        List<BoardSlot> today = BoardSlips.roll(BoardSlips.seed(42L, 7L, pos), types(), BoardSlips.FIRST_LEVEL);
 
         assertTrue(LongStream.rangeClosed(8L, 20L)
-            .anyMatch(day -> !BoardSlips.roll(BoardSlips.seed(42L, day, pos), types()).equals(today)));
+            .anyMatch(day -> !BoardSlips.roll(BoardSlips.seed(42L, day, pos), types(), BoardSlips.FIRST_LEVEL)
+                .equals(today)));
         assertNotEquals(BoardSlips.seed(42L, 7L, pos), BoardSlips.seed(42L, 7L, pos.east()));
     }
 
     @Test
     void rolledTargetsStayWithinTheTypeAmount() {
         for (long day = 0; day < 50; day++) {
-            for (BoardSlot slot : BoardSlips.roll(BoardSlips.seed(1L, day, BlockPos.ZERO), types())) {
+            for (BoardSlot slot : BoardSlips.roll(BoardSlips.seed(1L, day, BlockPos.ZERO), types(),
+                    BoardSlips.FIRST_LEVEL)) {
                 assertTrue(slot.slip().target() >= 8 && slot.slip().target() <= 16, () -> "target " + slot.slip().target());
                 assertEquals(0, slot.slip().progress());
             }
@@ -71,7 +74,64 @@ class BoardSlipsTest {
 
     @Test
     void noLoadedTypesMeansNoSlips() {
-        assertEquals(List.of(), BoardSlips.roll(1L, new TreeMap<>()));
+        assertEquals(List.of(), BoardSlips.roll(1L, new TreeMap<>(), BoardSlips.FIRST_LEVEL));
+    }
+
+    // ---- levels ----------------------------------------------------------------
+
+    @Test
+    void eachLevelPutsUpOneMoreSlip() {
+        long seed = BoardSlips.seed(42L, 7L, new BlockPos(10, 64, -3));
+
+        assertEquals(3, BoardSlips.roll(seed, types(), BoardSlips.FIRST_LEVEL).size());
+        assertEquals(4, BoardSlips.roll(seed, types(), 2).size());
+        assertEquals(5, BoardSlips.roll(seed, types(), BoardSlips.MAX_LEVEL).size());
+        assertEquals(BoardSlips.MAX_LEVEL, BoardSlips.clampLevel(BoardSlips.MAX_LEVEL + 4));
+        assertEquals(BoardSlips.FIRST_LEVEL, BoardSlips.clampLevel(0));
+    }
+
+    @Test
+    void upgradingKeepsTheSlipsTheBoardAlreadyHad() {
+        long seed = BoardSlips.seed(42L, 7L, new BlockPos(10, 64, -3));
+        List<BoardSlot> before = BoardSlips.roll(seed, types(), BoardSlips.FIRST_LEVEL);
+        List<BoardSlot> taken = List.of(before.get(0).claim(TAKER), before.get(1), before.get(2));
+
+        List<BoardSlot> after = BoardSlips.topUp(taken, seed, types(), 2);
+
+        assertEquals(4, after.size());
+        assertEquals(taken, after.subList(0, 3));
+        assertEquals(after, BoardSlips.topUp(taken, seed, types(), 2));
+    }
+
+    @Test
+    void aTopUpThatIsNotNeededChangesNothing() {
+        long seed = BoardSlips.seed(42L, 7L, BlockPos.ZERO);
+        List<BoardSlot> slots = BoardSlips.roll(seed, types(), 2);
+
+        assertSame(slots, BoardSlips.topUp(slots, seed, types(), BoardSlips.FIRST_LEVEL));
+    }
+
+    @Test
+    void workATooLowBoardCannotPutUpStaysOff() {
+        SortedMap<ResourceLocation, PetTaskType> types = types();
+        types.put(id("melee_hunting"), new PetTaskType(id("fencer"), PetWorkCounters.SLAY, PetTask.NO_ICON,
+            UniformInt.of(3, 6), reward("melee_hunting"), 50, 2));
+
+        for (long day = 0; day < 50; day++) {
+            long seed = BoardSlips.seed(1L, day, BlockPos.ZERO);
+            assertTrue(BoardSlips.roll(seed, types, BoardSlips.FIRST_LEVEL).stream()
+                .noneMatch(slot -> slot.slip().counter().equals(PetWorkCounters.SLAY)));
+        }
+        assertTrue(LongStream.range(0, 50)
+            .anyMatch(day -> BoardSlips.roll(BoardSlips.seed(1L, day, BlockPos.ZERO), types, 2).stream()
+                .anyMatch(slot -> slot.slip().counter().equals(PetWorkCounters.SLAY))));
+    }
+
+    @Test
+    void aBoardIsPaidUpOnceAndThenHasNothingLeftToSell() {
+        assertTrue(BoardSlips.upgradePrice(BoardSlips.FIRST_LEVEL) > 0);
+        assertTrue(BoardSlips.upgradePrice(2) > BoardSlips.upgradePrice(BoardSlips.FIRST_LEVEL));
+        assertEquals(0, BoardSlips.upgradePrice(BoardSlips.MAX_LEVEL));
     }
 
     // ---- finding ---------------------------------------------------------------
@@ -140,9 +200,9 @@ class BoardSlipsTest {
     private static SortedMap<ResourceLocation, PetTaskType> types() {
         SortedMap<ResourceLocation, PetTaskType> types = new TreeMap<>();
         types.put(id("weeding"), new PetTaskType(FARMER, PetWorkCounters.WEED, PetTask.NO_ICON,
-            UniformInt.of(8, 16), reward("weeding"), 3));
+            UniformInt.of(8, 16), reward("weeding"), 3, BoardSlips.FIRST_LEVEL));
         types.put(id("mushroom_picking"), new PetTaskType(FARMER, PetWorkCounters.PICK_MUSHROOM, PetTask.NO_ICON,
-            UniformInt.of(8, 16), reward("mushroom_picking"), 2));
+            UniformInt.of(8, 16), reward("mushroom_picking"), 2, BoardSlips.FIRST_LEVEL));
         return types;
     }
 

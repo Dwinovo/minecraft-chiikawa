@@ -1,6 +1,6 @@
 package com.dwinovo.chiikawa.block;
 
-import com.dwinovo.chiikawa.network.BoardPayloads.BoardSlipsPayload;
+import com.dwinovo.chiikawa.network.BoardServerPacketHandler;
 import com.dwinovo.chiikawa.platform.Services;
 import com.mojang.serialization.MapCodec;
 import java.util.Map;
@@ -103,7 +103,7 @@ public class LaborBoardBlock extends BaseEntityBlock {
         }
         if (player instanceof ServerPlayer serverPlayer
                 && level.getBlockEntity(pos) instanceof LaborBoardBlockEntity board) {
-            Services.NETWORK.sendToClient(serverPlayer, new BoardSlipsPayload(board.slipViews()));
+            Services.NETWORK.sendToClient(serverPlayer, BoardServerPacketHandler.view(pos, board));
         }
         return InteractionResult.CONSUME;
     }
