@@ -9,6 +9,10 @@ configurations {
     commonResources{
         canBeResolved = true
     }
+    // 纯 JVM 的 UI 组件库,和 common 一样按源码并入。
+    uiJava{
+        canBeResolved = true
+    }
 }
 
 dependencies {
@@ -19,11 +23,14 @@ dependencies {
     }
     commonJava project(path: ':common', configuration: 'commonJava')
     commonResources project(path: ':common', configuration: 'commonResources')
+    uiJava project(path: ':ui', configuration: 'uiJava')
 }
 
 tasks.named('compileJava', JavaCompile) {
     dependsOn(configurations.commonJava)
     source(configurations.commonJava)
+    dependsOn(configurations.uiJava)
+    source(configurations.uiJava)
 }
 
 processResources {
@@ -34,11 +41,15 @@ processResources {
 tasks.named('javadoc', Javadoc).configure {
     dependsOn(configurations.commonJava)
     source(configurations.commonJava)
+    dependsOn(configurations.uiJava)
+    source(configurations.uiJava)
 }
 
 tasks.named('sourcesJar', Jar) {
     dependsOn(configurations.commonJava)
     from(configurations.commonJava)
+    dependsOn(configurations.uiJava)
+    from(configurations.uiJava)
     dependsOn(configurations.commonResources)
     from(configurations.commonResources)
 }

@@ -1,0 +1,46 @@
+// chiikawa-ui:游戏内 UI 组件库,纯 JVM——classpath 里没有 Minecraft,"零 MC import"
+// 由编译器保证,不靠自觉。上面是各 loader 里的画布适配器(DrawSurface 实现,几十行)
+// 与屏幕组装层(允许 import MC),下面什么都没有。
+//
+// 住户:主题令牌 UiTheme(语义色)、样式令牌 UiStyle(几何)、画布契约 DrawSurface、
+// 绘制件 Ui(面板/分隔线/右对齐文字)、排版 TextClip。
+//
+// 和 common 一样按源码并入两个 loader 的 jar(见 multiloader-loader.gradle),
+// 不额外打包一个库,也就没有 jar-in-jar 那套。
+plugins {
+    id 'java-library'
+}
+
+base {
+    archivesName = "${mod_id}-ui"
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.11.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
+
+// 供 loader 以源码方式并入,和 common 的 commonJava 同一套做法。
+configurations {
+    uiJava {
+        canBeResolved = false
+        canBeConsumed = true
+    }
+}
+
+artifacts {
+    uiJava sourceSets.main.java.sourceDirectories.singleFile
+}
