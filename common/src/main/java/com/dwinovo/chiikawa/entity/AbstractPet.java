@@ -141,6 +141,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get(),
         InitMemory.NEAREST_BOARD.get(),
         InitMemory.TAKE_TASK_COOLDOWN.get(),
+        InitMemory.NEAREST_SHOP.get(),
+        InitMemory.SHOP_COOLDOWN.get(),
         InitMemory.CURRENT_INTENT.get(),
         InitMemory.INTENT_REEVALUATE.get(),
         InitMemory.INTENT_SWITCH_LOG.get()
@@ -151,7 +153,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitSensor.PET_ATTACKBLE_ENTITY_SENSOR.get(),
         InitSensor.PET_FARMER_WORK_SENSOR.get(),
         InitSensor.PET_ITEM_ENTITY_SENSOR.get(),
-        InitSensor.PET_BOARD_SENSOR.get()
+        InitSensor.PET_PLACES_SENSOR.get()
     );
     private static final Brain.Provider<AbstractPet> BRAIN_PROVIDER =
         Brain.<AbstractPet>provider(MEMORY_TYPES, SENSOR_TYPES, pet -> java.util.List.of());
@@ -460,6 +462,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         BrainUtils.addIdleTasks(brain);
         BrainUtils.addPickUpTasks(brain);
         BrainUtils.addTakeTaskTasks(brain);
+        BrainUtils.addShopTasks(brain);
 
         // Each job's activities — registered once, dormant until the intent
         // selector picks one of that job's intents.

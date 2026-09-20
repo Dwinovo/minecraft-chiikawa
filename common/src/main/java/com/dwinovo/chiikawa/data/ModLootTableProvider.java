@@ -40,6 +40,7 @@ public final class ModLootTableProvider extends LootTableProvider {
         @Override
         public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
             dropSelf(output, InitBlocks.LABOR_BOARD.get());
+            dropSelf(output, InitBlocks.SHOP.get());
         }
 
         private static void dropSelf(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output, Block block) {

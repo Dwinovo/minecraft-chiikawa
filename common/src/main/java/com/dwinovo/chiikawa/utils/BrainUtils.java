@@ -8,6 +8,7 @@ import com.dwinovo.chiikawa.entity.brain.task.tameable.FollowOwnerBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.PickUpItemTask;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.RandomWalkTask;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.SitBehavior;
+import com.dwinovo.chiikawa.entity.brain.task.tameable.GoShoppingBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.TakeTaskBehavior;
 import com.dwinovo.chiikawa.init.InitActivity;
 import com.google.common.collect.ImmutableList;
@@ -65,6 +66,12 @@ public final class BrainUtils {
     public static void addPickUpTasks(Brain<AbstractPet> brain) {
         PetActivities.register(brain, InitActivity.PICK_UP.get(),
             ImmutableList.of(Pair.of(3, new PickUpItemTask(0.7f))), Set.of());
+    }
+
+    /** {@code shop}: walk to the nearest shop and buy something the pet likes. */
+    public static void addShopTasks(Brain<AbstractPet> brain) {
+        PetActivities.register(brain, InitActivity.SHOP.get(),
+            ImmutableList.of(Pair.of(2, new GoShoppingBehavior())), Set.of());
     }
 
     /** {@code take_task}: walk to the nearest labor board and take a slip. */

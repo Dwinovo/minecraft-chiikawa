@@ -72,6 +72,17 @@ public final class ModRecipeProvider extends RecipeProvider {
             .pattern("S S")
             .unlockedBy(getHasName(Items.PAPER), has(Items.PAPER))
             .save(this.output);
+
+        // A counter: a slab of planks over a chest, with an emerald on the till.
+        ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.DECORATIONS, InitItems.SHOP.get())
+            .define('W', ItemTags.PLANKS)
+            .define('C', Items.CHEST)
+            .define('E', Items.EMERALD)
+            .pattern("WEW")
+            .pattern("WCW")
+            .pattern("W W")
+            .unlockedBy(getHasName(Items.EMERALD), has(Items.EMERALD))
+            .save(this.output);
     }
 
     /** The data provider that runs {@link ModRecipeProvider}; both loaders' datagen entry points register it. */
