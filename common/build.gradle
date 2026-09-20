@@ -13,6 +13,9 @@ neoForge {
 }
 
 dependencies {
+    // UI 组件库:common 只在编译期见到它,运行期的类由 loader 并入源码带进 jar。
+    compileOnly project(':ui')
+    testImplementation project(':ui')
     compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
     // fabric and neoforge both bundle mixinextras, so it is safe to use it in common
     compileOnly group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
