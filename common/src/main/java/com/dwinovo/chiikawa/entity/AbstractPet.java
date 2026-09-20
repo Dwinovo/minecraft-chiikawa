@@ -88,6 +88,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import java.util.Optional;
@@ -103,6 +104,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * rest is room for things. The bag's own ten come after them.
      */
     public static final int BACKPACK_SIZE = 16;
+    /** How often a pet writes down where it is; see {@link PetRoster}. */
+    private static final int ROSTER_TICKS = 100;
+
     /** How much quicker an eager pet moves. */
     private static final double EAGER_SPEED_BONUS = 0.3;
     private static final ResourceLocation EAGER_SPEED_ID =
@@ -557,6 +561,33 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         return brain;
     }
 
+    /**
+     * Crossing worlds builds the pet afresh in the new one, so the note is written again
+     * there: a pet led through a portal and left behind is exactly what a bell is for.
+     */
+    @Override
+    public Entity changeDimension(DimensionTransition transition) {
+        Entity moved = super.changeDimension(transition);
+        if (moved instanceof AbstractPet crossed && crossed.isTame()
+                && crossed.level() instanceof ServerLevel server) {
+            PetRoster.of(server).note(crossed);
+        }
+        return moved;
+    }
+
+    /**
+     * Notes where this pet is every few seconds, so a bell can find it once nobody is
+     * loading the chunk it is in. Done from {@code tick} rather than the AI step because
+     * a pet with its AI off still has a position worth remembering.
+     */
+    @Override
+    public void tick() {
+        super.tick();
+        if (level() instanceof ServerLevel server && isTame() && tickCount % ROSTER_TICKS == 0) {
+            PetRoster.of(server).note(this);
+        }
+    }
+
     @Override
     protected void customServerAiStep() {
         ServerLevel serverLevel = (ServerLevel) level();
@@ -963,6 +994,11 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     public void tame(Player player) {
         super.tame(player);
         setPetDirective(PetDirective.FOLLOW);
+        // On its owner's roster from the moment it is theirs, so a bell has somewhere to
+        // start looking even for a pet nobody has seen since.
+        if (level() instanceof ServerLevel server) {
+            PetRoster.of(server).note(this);
+        }
     }
 
     @Override
@@ -991,6 +1027,10 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     @Override
     public void die(DamageSource source) {
         setTask(null);
+        if (level() instanceof ServerLevel server && getOwnerUUID() != null) {
+            // Its doll is what is left to find now, and that is on the floor, not in a roster.
+            PetRoster.of(server).forget(getOwnerUUID(), getUUID());
+        }
         super.die(source);
     }
 

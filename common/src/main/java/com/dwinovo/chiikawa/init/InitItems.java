@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.item.ChiikawaWeapon;
 import com.dwinovo.chiikawa.item.HachiwareWeapon;
 import com.dwinovo.chiikawa.item.MusicBoxItem;
+import com.dwinovo.chiikawa.item.PetBellItem;
 import com.dwinovo.chiikawa.item.PetDollItem;
 import com.dwinovo.chiikawa.item.UsagiWeapon;
 import com.dwinovo.chiikawa.platform.Services;
@@ -46,6 +47,9 @@ public final class InitItems {
 
     public static final Supplier<Item> SIMPLE_DISH =
         registerItem("simple_dish", () -> new Item(new Item.Properties()));
+
+    public static final Supplier<Item> PET_BELL =
+        registerItem("pet_bell", () -> new PetBellItem(new Item.Properties()));
 
     public static final Supplier<Item> BEAR_BACKPACK =
         registerItem("bear_backpack", () -> new Item(new Item.Properties().stacksTo(1)));
