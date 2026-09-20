@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.data;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.init.InitRegistry;
+import com.dwinovo.chiikawa.task.BoardSlips;
 import com.dwinovo.chiikawa.task.PetTaskType;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
 import java.util.Map;
@@ -12,13 +13,17 @@ import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.storage.loot.LootTable;
 
 /**
- * The generated slip types (gameplay doc, section 3). Hunting slips come with board
- * upgrades.
+ * The generated slip types (gameplay doc, section 3). Hunting slips wait for a board
+ * upgrade; everything else goes up from the day the board is placed.
  */
 public final class PetTaskTypeData {
     public static final ResourceLocation WEEDING = id("weeding");
     public static final ResourceLocation MUSHROOM_PICKING = id("mushroom_picking");
     public static final ResourceLocation STREET_PERFORMANCE = id("street_performance");
+    public static final ResourceLocation MELEE_HUNTING = id("melee_hunting");
+    public static final ResourceLocation RANGED_HUNTING = id("ranged_hunting");
+    /** The level a board reaches before it dares put hunting up. */
+    private static final int HUNTING_LEVEL = 2;
 
     private PetTaskTypeData() {
     }
@@ -27,15 +32,24 @@ public final class PetTaskTypeData {
     public static Map<ResourceLocation, PetTaskType> all() {
         ResourceLocation farmer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FARMER.get());
         ResourceLocation musician = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.MUSICIAN.get());
+        ResourceLocation fencer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FENCER.get());
+        ResourceLocation archer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.ARCHER.get());
         return Map.of(
             // Farmers are the most common job, so their slips come up the most.
             WEEDING, new PetTaskType(farmer, PetWorkCounters.WEED, vanilla("short_grass"),
-                UniformInt.of(8, 16), reward(WEEDING), 3),
+                UniformInt.of(8, 16), reward(WEEDING), 3, BoardSlips.FIRST_LEVEL),
             MUSHROOM_PICKING, new PetTaskType(farmer, PetWorkCounters.PICK_MUSHROOM, vanilla("red_mushroom"),
-                UniformInt.of(4, 8), reward(MUSHROOM_PICKING), 2),
+                UniformInt.of(4, 8), reward(MUSHROOM_PICKING), 2, BoardSlips.FIRST_LEVEL),
             // Seconds of music.
             STREET_PERFORMANCE, new PetTaskType(musician, PetWorkCounters.PLAY_MUSIC_SECOND, vanilla("note_block"),
-                UniformInt.of(120, 240), reward(STREET_PERFORMANCE), 1)
+                UniformInt.of(120, 240), reward(STREET_PERFORMANCE), 1, BoardSlips.FIRST_LEVEL),
+            // Hunting pays the most and asks the most: a pet that falls loses the slip.
+            // It waits for an upgrade, so paying a board up buys new work and not only
+            // more of the same.
+            MELEE_HUNTING, new PetTaskType(fencer, PetWorkCounters.SLAY, vanilla("iron_sword"),
+                UniformInt.of(3, 6), reward(MELEE_HUNTING), 2, HUNTING_LEVEL),
+            RANGED_HUNTING, new PetTaskType(archer, PetWorkCounters.SLAY, vanilla("bow"),
+                UniformInt.of(3, 6), reward(RANGED_HUNTING), 2, HUNTING_LEVEL)
         );
     }
 
