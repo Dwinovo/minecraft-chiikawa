@@ -47,6 +47,8 @@ public final class GuardGameTests {
     private static final int FIGHT_TICKS = 1200;
     /** Long enough to get out of the way of something. */
     private static final int BACK_OFF_TICKS = 200;
+    /** Long enough to be sure a pet that was going to do something has not done it. */
+    private static final int WATCH_TICKS = 200;
 
     @BeforeBatch(batch = BATCH)
     public static void settle(ServerLevel level) {
@@ -140,6 +142,154 @@ public final class GuardGameTests {
                     + " blocks away, doing " + doing(pet));
             helper.succeed();
         });
+    }
+
+    /**
+     * A pet told to sit sits, whatever is going on. Fighting is now allowed to a pet at
+     * heel, and this is the line that did not move: an owner who says stay has said stay.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WATCH_TICKS + 100)
+    public static void a_sitting_pet_stays_out_of_it(GameTestHelper helper) {
+        ServerPlayer owner = owner(helper);
+        AbstractPet pet = heeling(helper, owner);
+        pet.setPetDirective(PetDirective.STAY);
+        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(7, STAND, 4));
+        zombie.setNoAi(true);
+        zombie.setTarget(owner);
+
+        helper.runAtTickTime(WATCH_TICKS, () -> {
+            helper.assertTrue(zombie.getHealth() == zombie.getMaxHealth(),
+                "a pet that was told to sit went for the zombie anyway");
+            helper.succeed();
+        });
+    }
+
+    /**
+     * The owner's own sword catches the pet in a sweep. It is the commonest way a pet is
+     * hurt by something it must never hit back at, and the grudge has to be dropped
+     * rather than carried around as a target.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WATCH_TICKS + 100)
+    public static void a_pet_does_not_turn_on_its_owner(GameTestHelper helper) {
+        ServerPlayer owner = owner(helper);
+        AbstractPet pet = heeling(helper, owner);
+
+        pet.hurt(owner.damageSources().playerAttack(owner), 1.0F);
+
+        helper.runAtTickTime(WATCH_TICKS, () -> {
+            helper.assertFalse(fighting(pet, owner), "the pet squared up to its own owner");
+            helper.assertTrue(owner.getHealth() == owner.getMaxHealth(), "the pet hit its owner");
+            helper.succeed();
+        });
+    }
+
+    /** And not on another of the same owner's pets, whose arrows land the same way. */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WATCH_TICKS + 100)
+    public static void a_pet_does_not_turn_on_a_sibling(GameTestHelper helper) {
+        ServerPlayer owner = owner(helper);
+        AbstractPet pet = heeling(helper, owner);
+        AbstractPet sibling = heeling(helper, owner, new BlockPos(6, STAND, 4));
+
+        pet.hurt(sibling.damageSources().mobAttack(sibling), 1.0F);
+
+        helper.runAtTickTime(WATCH_TICKS, () -> {
+            helper.assertFalse(fighting(pet, sibling), "the pet squared up to its own housemate");
+            helper.assertTrue(sibling.getHealth() == sibling.getMaxHealth(), "the pet hit its own housemate");
+            helper.succeed();
+        });
+    }
+
+    /**
+     * Picked one, finishes it. Re-choosing the nearest every scan is how a pet in a crowd
+     * ends up turning towards something new every couple of seconds and killing nothing.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WATCH_TICKS + 200)
+    public static void a_pet_finishes_the_one_it_started_on(GameTestHelper helper) {
+        ServerPlayer owner = owner(helper);
+        AbstractPet pet = heeling(helper, owner);
+        Zombie first = helper.spawn(EntityType.ZOMBIE, new BlockPos(8, STAND, 4));
+        first.setNoAi(true);
+        // Neither of them can be killed: this case is about which one the pet chooses, and
+        // a zombie that falls over mid-case would answer that question for it.
+        first.setInvulnerable(true);
+
+        helper.runAtTickTime(40, () -> {
+            helper.assertTrue(fighting(pet, first), "the pet never took an interest in the first zombie");
+            Zombie nearer = helper.spawn(EntityType.ZOMBIE, new BlockPos(5, STAND, 4));
+            nearer.setNoAi(true);
+            nearer.setInvulnerable(true);
+            helper.runAtTickTime(100, () -> {
+                helper.assertTrue(fighting(pet, first),
+                    "the pet dropped what it was fighting for whatever wandered closer");
+                helper.succeed();
+            });
+        });
+    }
+
+    /** What a bow is for: the creeper a pet with a sword can only walk away from. */
+    @GameTest(template = "floor32", batch = BATCH, timeoutTicks = FIGHT_TICKS)
+    public static void an_archer_answers_a_creeper_from_outside_the_blast(GameTestHelper helper) {
+        ServerPlayer owner = owner(helper, MIDDLE);
+        AbstractPet pet = holding(heeling(helper, owner, MIDDLE), Items.BOW);
+        pet.getBackpack().addItem(new ItemStack(Items.ARROW, 16));
+        Creeper creeper = helper.spawn(EntityType.CREEPER, MIDDLE.offset(8, 0, 0));
+        creeper.setNoAi(true);
+
+        helper.succeedWhen(() -> {
+            helper.assertTrue(creeper.getHealth() < creeper.getMaxHealth(), "the archer never shot the creeper");
+            helper.assertTrue(pet.distanceTo(creeper) >= PetCombat.FUSE_RADIUS - 1.0,
+                "the archer walked up to the creeper it was shooting");
+        });
+    }
+
+    /**
+     * Backing off is not the same as giving up: what is on top of the pet still gets hit
+     * on the way out. This is the whole point of keeping the feet and the hands apart.
+     */
+    @GameTest(template = "floor32", batch = BATCH, timeoutTicks = BACK_OFF_TICKS + 100)
+    public static void a_pet_backing_off_still_hits_what_is_on_top_of_it(GameTestHelper helper) {
+        ServerPlayer owner = owner(helper, MIDDLE);
+        AbstractPet pet = heeling(helper, owner, MIDDLE);
+        Zombie zombie = helper.spawn(EntityType.ZOMBIE, MIDDLE.offset(1, 0, 0));
+        zombie.setNoAi(true);
+        zombie.setTarget(owner);
+        pet.setHealth(pet.getMaxHealth() * 0.2F);
+
+        helper.runAtTickTime(BACK_OFF_TICKS, () -> {
+            helper.assertTrue(zombie.getHealth() < zombie.getMaxHealth(),
+                "the pet backed away without so much as a swing at what was on top of it");
+            helper.succeed();
+        });
+    }
+
+    /** And once it has its health back it goes in again, rather than sulking for good. */
+    @GameTest(template = "floor32", batch = BATCH, timeoutTicks = 600)
+    public static void a_pet_that_has_healed_goes_back_in(GameTestHelper helper) {
+        ServerPlayer owner = owner(helper, MIDDLE);
+        AbstractPet pet = heeling(helper, owner, MIDDLE);
+        Zombie zombie = helper.spawn(EntityType.ZOMBIE, MIDDLE.offset(2, 0, 0));
+        zombie.setNoAi(true);
+        zombie.setTarget(owner);
+        pet.setHealth(pet.getMaxHealth() * 0.2F);
+
+        helper.runAtTickTime(BACK_OFF_TICKS, () -> {
+            double away = pet.distanceTo(zombie);
+            helper.assertTrue(away > 3.0, "the pet never broke off to begin with, so there is nothing to come back from");
+            pet.setHealth(pet.getMaxHealth());
+            helper.runAtTickTime(300, () -> {
+                helper.assertTrue(pet.distanceTo(zombie) < away - 1.0,
+                    "a healed pet stayed out of a fight it had broken off, " + (int) pet.distanceTo(zombie)
+                        + " blocks out, doing " + doing(pet));
+                helper.succeed();
+            });
+        });
+    }
+
+    /** Whether the pet has settled on this one as the thing it is fighting. */
+    private static boolean fighting(AbstractPet pet, LivingEntity foe) {
+        return pet.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET)
+            .map(target -> target == foe)
+            .orElse(false);
     }
 
     /** Somebody for the pet to walk beside. */

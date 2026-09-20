@@ -1,25 +1,33 @@
 package com.dwinovo.chiikawa.gametest;
 
 import static com.dwinovo.chiikawa.gametest.GameTestKit.NOON;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.holding;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
+import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitBlocks;
+import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.network.BoardServerPacketHandler;
 import com.dwinovo.chiikawa.task.BoardSlips;
 import com.dwinovo.chiikawa.task.BoardSlot;
+import com.dwinovo.chiikawa.task.PetTaskTypes;
+import com.dwinovo.chiikawa.task.PetWorkCounters;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
@@ -122,6 +130,27 @@ public final class UpgradeGameTests {
         helper.succeed();
     }
 
+    /**
+     * What the levels are for, end to end: a board paid up to where it puts hunting out,
+     * and a pet with a sword that walks over and takes one down. Up to here the hunting
+     * slips were only ever checked as a rolled list.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = 1200)
+    public static void a_fencer_takes_a_hunting_slip_off_a_paid_up_board(GameTestHelper helper) {
+        BlockPos where = boardOfferingHunting(helper);
+        helper.setBlock(where, InitBlocks.LABOR_BOARD.get());
+        if (helper.getBlockEntity(where) instanceof LaborBoardBlockEntity board) {
+            while (board.upgrade()) {
+                // paid up to the top, which is where hunting comes from
+            }
+        }
+        AbstractPet pet = holding(worker(helper, new BlockPos(4, STAND, 4)), Items.IRON_SWORD);
+
+        helper.succeedWhen(() -> helper.assertTrue(
+            pet.getTask().map(task -> task.counter().equals(PetWorkCounters.SLAY)).orElse(false),
+            "the fencer came away with " + pet.getTask().map(task -> task.type().toString()).orElse("nothing")));
+    }
+
     /** A board on the floor, at the level it is placed at. */
     private static LaborBoardBlockEntity board(GameTestHelper helper) {
         helper.setBlock(BOARD, InitBlocks.LABOR_BOARD.get());
@@ -129,6 +158,31 @@ public final class UpgradeGameTests {
             return board;
         }
         throw new AssertionError("the labor board was placed without its block entity");
+    }
+
+    /**
+     * The first spot on this floor whose top-level roll puts hunting up for a fencer.
+     * Which slips a board shows depends on where it stands, so a case that wants a
+     * particular kind of work goes looking for a board that has it rather than rolling
+     * until it turns up.
+     */
+    private static BlockPos boardOfferingHunting(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        long day = level.getDayTime() / Level.TICKS_PER_DAY;
+        ResourceLocation fencer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FENCER.get());
+        for (int x = 8; x < 15; x++) {
+            for (int z = 2; z < 15; z++) {
+                BlockPos rel = new BlockPos(x, STAND, z);
+                long seed = BoardSlips.seed(level.getSeed(), day, helper.absolutePos(rel));
+                boolean hunting = BoardSlips.roll(seed, PetTaskTypes.all(), BoardSlips.MAX_LEVEL).stream()
+                    .anyMatch(slot -> slot.slip().capability().equals(fencer));
+                if (hunting) {
+                    return rel;
+                }
+            }
+        }
+        throw new AssertionError("nowhere on this floor puts hunting up today — "
+            + "the roll, the weights or the slip types changed");
     }
 
     /** Somebody at the board with emeralds in their pockets. */
