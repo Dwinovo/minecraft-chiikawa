@@ -19,13 +19,15 @@ class LanguageDataUiTranslationTest {
     private static final String[] SCREEN_KEYS = {
         "screen.chiikawa.labor_board",
         "screen.chiikawa.labor_board.empty",
-        "screen.chiikawa.labor_board.slip",
+        "screen.chiikawa.labor_board.detail",
         "screen.chiikawa.labor_board.open",
         "screen.chiikawa.labor_board.taken",
         "screen.chiikawa.pet.doing",
         "screen.chiikawa.pet.doing.nothing",
         "screen.chiikawa.pet.slip",
         "screen.chiikawa.pet.slip.none",
+        "screen.chiikawa.pet.slip.short",
+        "screen.chiikawa.pet.label",
         "block.chiikawa.labor_board"
     };
 
@@ -54,6 +56,7 @@ class LanguageDataUiTranslationTest {
                     PetTaskTypeData.STREET_PERFORMANCE)) {
                 String key = "pet_task." + type.getNamespace() + "." + type.getPath();
                 assertTrue(translations.containsKey(key), () -> locale + " is missing " + key);
+                assertTrue(translations.containsKey(key + ".amount"), () -> locale + " is missing " + key + ".amount");
             }
         }
     }
