@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.handler;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.PetActivities;
+import com.dwinovo.chiikawa.entity.brain.task.combat.CombatMoveBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.fencer.MeleeAttackWithAnim;
 import com.dwinovo.chiikawa.init.InitActivity;
 import com.google.common.collect.ImmutableList;
@@ -9,7 +10,6 @@ import com.mojang.datafixers.util.Pair;
 import java.util.Set;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
-import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromAttackTargetIfTargetOutOfReach;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.schedule.Activity;
 
@@ -32,11 +32,14 @@ public final class FencerJobHandler {
     }
 
     public static void registerActivities(Brain<AbstractPet> brain) {
-        Pair<Integer, BehaviorControl<? super AbstractPet>> walkToAttackTarget =
-            Pair.of(5, SetWalkTargetFromAttackTargetIfTargetOutOfReach.create(0.9F));
+        // The two legs of a fight: where to stand, and whether this tick lands a hit.
+        // They run side by side — a pet backing off a lit creeper still swings at what is
+        // in front of it.
+        Pair<Integer, BehaviorControl<? super AbstractPet>> keepStation =
+            Pair.of(5, new CombatMoveBehavior(false));
         Pair<Integer, BehaviorControl<? super AbstractPet>> meleeAttack =
-            Pair.of(4, MeleeAttackWithAnim.create(20));
+            Pair.of(4, MeleeAttackWithAnim.create());
         PetActivities.register(brain, InitActivity.FENCER_FIGHT.get(),
-            ImmutableList.of(walkToAttackTarget, meleeAttack), Set.of(MemoryModuleType.ATTACK_TARGET));
+            ImmutableList.of(keepStation, meleeAttack), Set.of(MemoryModuleType.ATTACK_TARGET));
     }
 }
