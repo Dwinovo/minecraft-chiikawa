@@ -51,6 +51,9 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.animal.Animal;
@@ -93,6 +96,11 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * rest is room for things. The bag's own ten come after them.
      */
     public static final int BACKPACK_SIZE = 16;
+    /** How much quicker an eager pet moves. */
+    private static final double EAGER_SPEED_BONUS = 0.3;
+    private static final ResourceLocation EAGER_SPEED_ID =
+        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "eager");
+
     /** Slot the held tool lives in; see {@link #getItemBySlot}. */
     public static final int MAINHAND_SLOT = 0;
     /** Slot the worn bag lives in, for the same reason the tool lives in a slot. */
@@ -180,6 +188,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     private int lastSeenReactionSeq;
     /** Bought for the owner and not yet handed over; see {@link #setPendingGift}. */
     private ItemStack pendingGift = ItemStack.EMPTY;
+    /** Ticks of eagerness left after a good meal; see {@link #feedDish}. */
+    private int eagerTicks;
 
     private final SimpleContainer backpack = new SimpleContainer(FULL_BACKPACK_SIZE) {
         @Override
@@ -542,6 +552,12 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     @Override
     protected void customServerAiStep(ServerLevel level) {
+        if (eagerTicks > 0) {
+            eagerTicks--;
+            if (eagerTicks == 0) {
+                applyEagerness();
+            }
+        }
         IntentSelector.tick(this, level);
         getBrain().tick(level, this);
         super.customServerAiStep(level);
@@ -643,6 +659,37 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
             }
         }
         spawnAtLocation(inBagSlot);
+    }
+
+    /**
+     * A proper meal puts a pet in the mood to work: it moves quicker and picks work over
+     * pottering about for a while. Work itself is instant — a pet pulls a weed the moment
+     * it can reach one — so "faster" can only mean getting there sooner and dawdling less,
+     * and those are the two things this changes.
+     */
+    public void feedDish(int ticks) {
+        eagerTicks = Math.max(eagerTicks, ticks);
+        applyEagerness();
+    }
+
+    /** Whether the pet is still in the mood, for the selector and for anything watching. */
+    public boolean isEager() {
+        return eagerTicks > 0;
+    }
+
+    /** Keeps the speed bonus in step with the mood, adding or removing it exactly once. */
+    private void applyEagerness() {
+        AttributeInstance speed = getAttribute(Attributes.MOVEMENT_SPEED);
+        if (speed == null) {
+            return;
+        }
+        boolean applied = speed.getModifier(EAGER_SPEED_ID) != null;
+        if (isEager() && !applied) {
+            speed.addTransientModifier(new AttributeModifier(EAGER_SPEED_ID, EAGER_SPEED_BONUS,
+                AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
+        } else if (!isEager() && applied) {
+            speed.removeModifier(EAGER_SPEED_ID);
+        }
     }
 
     /** Whether the pet is wearing a bag, which is what the last ten slots wait for. */
@@ -844,6 +891,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         if (!pendingGift.isEmpty()) {
             output.store("Gift", ItemStack.CODEC, pendingGift);
         }
+        if (eagerTicks > 0) {
+            output.putInt("Eager", eagerTicks);
+        }
     }
 
     @Override
@@ -857,6 +907,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         this.entityData.set(PET_MODE, input.getByteOr("PetMode", this.entityData.get(PET_MODE)));
         this.entityData.set(TASK, input.read("Task", CompoundTag.CODEC).orElseGet(CompoundTag::new));
         pendingGift = input.read("Gift", ItemStack.CODEC).orElse(ItemStack.EMPTY);
+        eagerTicks = input.getIntOr("Eager", 0);
+        applyEagerness();
         refreshJobFromMainhand();
     }
 
