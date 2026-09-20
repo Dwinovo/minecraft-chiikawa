@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.init;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.block.LaborBoardBlock;
+import com.dwinovo.chiikawa.block.ShopBlock;
 import com.dwinovo.chiikawa.platform.Services;
 import java.util.function.Supplier;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -16,6 +17,7 @@ import net.minecraft.world.level.material.MapColor;
 
 public final class InitBlocks {
     private static final ResourceLocation LABOR_BOARD_ID = new ResourceLocation(Constants.MOD_ID, "labor_board");
+    private static final ResourceLocation SHOP_ID = new ResourceLocation(Constants.MOD_ID, "shop");
 
     public static final Supplier<LaborBoardBlock> LABOR_BOARD = Services.REGISTRY.<LaborBoardBlock>register(
         BuiltInRegistries.BLOCK,
@@ -29,11 +31,26 @@ public final class InitBlocks {
             .ignitedByLava())
     );
 
+    public static final Supplier<ShopBlock> SHOP = Services.REGISTRY.<ShopBlock>register(
+        BuiltInRegistries.BLOCK,
+        SHOP_ID,
+        () -> new ShopBlock(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.WOOD)
+            .instrument(NoteBlockInstrument.BASS)
+            .strength(2.5F)
+            .sound(SoundType.WOOD)
+            .noOcclusion()
+            .ignitedByLava())
+    );
+
     /** Where labor boards stand, so pets can find the nearest one. */
     public static final ResourceKey<PoiType> LABOR_BOARD_POI = ResourceKey.create(Registries.POINT_OF_INTEREST_TYPE, LABOR_BOARD_ID);
+    /** Where shops stand, likewise. */
+    public static final ResourceKey<PoiType> SHOP_POI = ResourceKey.create(Registries.POINT_OF_INTEREST_TYPE, SHOP_ID);
 
     static {
         Services.REGISTRY.registerPoi(LABOR_BOARD_ID, LABOR_BOARD);
+        Services.REGISTRY.registerPoi(SHOP_ID, SHOP);
     }
 
     private InitBlocks() {
