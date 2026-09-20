@@ -7,6 +7,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitItems;
+import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
@@ -87,6 +88,26 @@ public final class SupplyGameTests {
             "a bag put in the bag slot is not what the pet is wearing");
         helper.succeed();
     }
+    /**
+     * The menu the client builds, which has no pet in it, must lay out exactly as many
+     * slots as the one the server builds with the pet in hand. One short and the first
+     * packet of contents runs off the end of the list, which the player does not see as a
+     * missing slot — they see themselves thrown out of the world.
+     */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void both_sides_of_the_backpack_menu_lay_out_the_same_slots(GameTestHelper helper) {
+        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+
+        int withPet = new PetBackpackMenu(1, owner.getInventory(), pet).slots.size();
+        int withoutPet = new PetBackpackMenu(2, owner.getInventory()).slots.size();
+
+        helper.assertTrue(withPet == withoutPet,
+            "the server lays out " + withPet + " slots and the client " + withoutPet);
+        helper.succeed();
+    }
+
     /** A dish handed to your own pet is eaten, and the pet gets on with things quicker. */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void a_dish_puts_a_pet_in_the_mood(GameTestHelper helper) {
