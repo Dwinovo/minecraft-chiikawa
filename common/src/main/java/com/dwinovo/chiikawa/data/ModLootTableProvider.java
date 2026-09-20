@@ -58,7 +58,6 @@ public final class ModLootTableProvider extends LootTableProvider {
         @Override
         public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
             reward(output, PetTaskTypeData.WEEDING, 1, 2, Items.BREAD, 1, 1);
-            reward(output, PetTaskTypeData.MUSHROOM_PICKING, 1, 3, Items.MUSHROOM_STEW, 1, 1);
             reward(output, PetTaskTypeData.STREET_PERFORMANCE, 2, 4, Items.COOKIE, 2, 4);
             // Hunting pays most: it is the only work a pet can fail by falling.
             reward(output, PetTaskTypeData.MELEE_HUNTING, 4, 7, Items.COOKED_BEEF, 1, 2);
