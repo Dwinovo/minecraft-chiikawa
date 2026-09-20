@@ -69,6 +69,23 @@ class PetCombatTest {
         assertFalse(band.tooFar(1000.0), "a pet that broke off was told to come back for more");
     }
 
+    @Test
+    void aWideTargetIsWalkedUpToFromFartherOut() {
+        double zombie = PetCombat.meleeFar(0.6, 0.6);
+        double spider = PetCombat.meleeFar(0.6, 1.4);
+
+        assertTrue(spider > zombie + 0.35,
+            "a spider is walked up to from a zombie's distance, which does not reach it");
+        assertTrue(zombie > 1.0 && zombie < 2.0, "a pet's reach is about a block and a half: " + zombie);
+    }
+
+    @Test
+    void aPetNeverSwingsAtSomethingThatGoesOff() {
+        // The rule the swing itself asks about, so it cannot drift from the band.
+        assertTrue(PetCombat.band(false, false, creeper(1, 1.0, false), MELEE_REACH).tooClose(1.0),
+            "the band let a pet stand where it could swing at a creeper");
+    }
+
     // ---- when to break off -----------------------------------------------------
 
     @Test
