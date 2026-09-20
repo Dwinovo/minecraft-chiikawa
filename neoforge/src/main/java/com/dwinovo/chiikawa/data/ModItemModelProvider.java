@@ -35,5 +35,6 @@ public final class ModItemModelProvider extends ItemModelProvider {
         basicItem(InitItems.MUSIC_BOX.get());
         basicItem(InitItems.BEAR_BACKPACK.get());
         basicItem(InitItems.SIMPLE_DISH.get());
+        basicItem(InitItems.PET_BELL.get());
     }
 }
