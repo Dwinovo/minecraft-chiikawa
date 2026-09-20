@@ -7,11 +7,11 @@ import net.minecraft.server.level.ServerPlayer;
 public final class FabricNetworkHelper implements INetworkHelper {
     @Override
     public void sendToClient(ServerPlayer player, MusicPayloads.Payload payload) {
-        FabricMusicNetworking.sendToClient(player, payload);
+        FabricModNetworking.sendToClient(player, payload);
     }
 
     @Override
     public void sendToServer(MusicPayloads.Payload payload) {
-        FabricMusicNetworking.sendToServer(payload);
+        FabricModNetworking.sendToServer(payload);
     }
 }

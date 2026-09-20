@@ -7,11 +7,11 @@ import net.minecraft.server.level.ServerPlayer;
 public final class ForgeNetworkHelper implements INetworkHelper {
     @Override
     public void sendToClient(ServerPlayer player, MusicPayloads.Payload payload) {
-        ForgeMusicNetworking.sendToClient(player, payload);
+        ForgeModNetworking.sendToClient(player, payload);
     }
 
     @Override
     public void sendToServer(MusicPayloads.Payload payload) {
-        ForgeMusicNetworking.sendToServer(payload);
+        ForgeModNetworking.sendToServer(payload);
     }
 }
