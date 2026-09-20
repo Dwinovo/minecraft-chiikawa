@@ -25,6 +25,7 @@ class LanguageDataUiTranslationTest {
         "screen.chiikawa.labor_board.taken",
         "screen.chiikawa.labor_board.taken_by",
         "screen.chiikawa.pet.doing.nothing",
+        "screen.chiikawa.pet.bag_hint",
         "block.chiikawa.labor_board"
     };
 

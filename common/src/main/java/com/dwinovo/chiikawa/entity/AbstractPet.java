@@ -19,6 +19,7 @@ import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
 import com.dwinovo.chiikawa.utils.BrainUtils;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
 import com.dwinovo.chiikawa.entity.job.api.PetCapability;
+import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.init.InitSensor;
@@ -88,7 +89,19 @@ import org.jetbrains.annotations.Nullable;
  */
 public class AbstractPet extends TamableAnimal implements RangedAttackMob, ChiikawaAnimated {
     /** Number of slots available in the pet's backpack inventory. */
+    /**
+     * The pet's own pockets: slot 0 is what it holds, slot 1 is what it wears, and the
+     * rest is room for things. The bag's own ten come after them.
+     */
     public static final int BACKPACK_SIZE = 16;
+    /** Slot the held tool lives in; see {@link #getItemBySlot}. */
+    public static final int MAINHAND_SLOT = 0;
+    /** Slot the worn bag lives in, for the same reason the tool lives in a slot. */
+    public static final int BAG_SLOT = 1;
+    /** How much room a bear backpack adds. */
+    public static final int BAG_SIZE = 10;
+    /** Everything: pockets plus whatever the bag adds when one is worn. */
+    public static final int FULL_BACKPACK_SIZE = BACKPACK_SIZE + BAG_SIZE;
     /** Synced {@link PetDirective} ordinal; same slot and {@code PetMode} save key as 0.0.9. */
     private static final EntityDataAccessor<Byte> PET_MODE = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Integer> PET_JOB = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.INT);
@@ -169,7 +182,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     /** Bought for the owner and not yet handed over; see {@link #setPendingGift}. */
     private ItemStack pendingGift = ItemStack.EMPTY;
 
-    private final SimpleContainer backpack = new SimpleContainer(BACKPACK_SIZE) {
+    private final SimpleContainer backpack = new SimpleContainer(FULL_BACKPACK_SIZE) {
         @Override
         public void setChanged() {
             super.setChanged();
@@ -592,7 +605,10 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     @Override
     public ItemStack getItemBySlot(EquipmentSlot slot) {
         if (slot == EquipmentSlot.MAINHAND) {
-            return backpack.getItem(0);
+            return backpack.getItem(MAINHAND_SLOT);
+        }
+        if (slot == EquipmentSlot.CHEST) {
+            return backpack.getItem(BAG_SLOT);
         }
         return super.getItemBySlot(slot);
     }
@@ -600,11 +616,54 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     @Override
     public void setItemSlot(EquipmentSlot slot, ItemStack stack) {
         if (slot == EquipmentSlot.MAINHAND) {
-            backpack.setItem(0, stack);
+            backpack.setItem(MAINHAND_SLOT, stack);
             refreshJobFromMainhand();
             return;
         }
+        if (slot == EquipmentSlot.CHEST) {
+            backpack.setItem(BAG_SLOT, stack);
+            return;
+        }
         super.setItemSlot(slot, stack);
+    }
+
+    /**
+     * The bag slot used to be ordinary storage. A pet saved before pets could wear a bag
+     * may have anything in it, so whatever is there moves into the first free pocket —
+     * or onto the floor if there is none. Either way the owner can find it again.
+     */
+    private void clearBagSlotOfOldStorage() {
+        ItemStack inBagSlot = backpack.getItem(BAG_SLOT);
+        if (inBagSlot.isEmpty() || inBagSlot.is(InitItems.BEAR_BACKPACK.get())) {
+            return;
+        }
+        backpack.setItem(BAG_SLOT, ItemStack.EMPTY);
+        for (int slot = BAG_SLOT + 1; slot < BACKPACK_SIZE; slot++) {
+            if (backpack.getItem(slot).isEmpty()) {
+                backpack.setItem(slot, inBagSlot);
+                return;
+            }
+        }
+        spawnAtLocation(inBagSlot);
+    }
+
+    /** Whether the pet is wearing a bag, which is what the last ten slots wait for. */
+    public boolean isWearingBag() {
+        return backpack.getItem(BAG_SLOT).is(InitItems.BEAR_BACKPACK.get());
+    }
+
+    /**
+     * Empties the bag's own slots onto the floor. Called when the bag comes off: what was
+     * in it has to go somewhere a player can see, rather than vanishing or being quietly
+     * stuffed into pockets that were already full.
+     */
+    public void dropBagContents() {
+        for (int slot = BACKPACK_SIZE; slot < backpack.getContainerSize(); slot++) {
+            ItemStack stack = backpack.removeItemNoUpdate(slot);
+            if (!stack.isEmpty()) {
+                spawnAtLocation(stack);
+            }
+        }
     }
 
     @Override
@@ -794,6 +853,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         super.readAdditionalSaveData(tag);
         if (tag.contains("Backpack", Tag.TAG_COMPOUND)) {
             ContainerHelper.loadAllItems(tag.getCompound("Backpack"), backpack.getItems(), level().registryAccess());
+            clearBagSlotOfOldStorage();
         }
         if (tag.contains("PetJob", Tag.TAG_INT)) {
             setPetJobId(tag.getInt("PetJob"));
