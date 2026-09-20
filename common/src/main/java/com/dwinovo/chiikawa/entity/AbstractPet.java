@@ -163,6 +163,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     private int lastSeenTriggerSeq;
     /** Last {@link #REACTION_TRIGGER} sequence number this client handled. Server copy is unused. */
     private int lastSeenReactionSeq;
+    /** Bought for the owner and not yet handed over; see {@link #setPendingGift}. */
+    private ItemStack pendingGift = ItemStack.EMPTY;
+
     private final SimpleContainer backpack = new SimpleContainer(BACKPACK_SIZE) {
         @Override
         public void setChanged() {
@@ -377,6 +380,24 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     }
 
     /**
+     * @return what the pet bought for its owner and has not handed over yet
+     */
+    public ItemStack getPendingGift() {
+        return pendingGift;
+    }
+
+    /**
+     * Kept apart from the backpack on purpose: a gift is in the pet's paws, not in its
+     * luggage. An owner rummaging through the bag cannot take it back before it is given,
+     * and the pet cannot spend it or lose track of which of two cakes was meant for whom.
+     *
+     * @param gift what the pet now means to give, empty for nothing
+     */
+    public void setPendingGift(ItemStack gift) {
+        this.pendingGift = gift == null ? ItemStack.EMPTY : gift;
+    }
+
+    /**
      * @return the id of the intent the pet is following; readable on both sides
      */
     public Optional<Identifier> getIntent() {
@@ -463,6 +484,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         BrainUtils.addPickUpTasks(brain);
         BrainUtils.addTakeTaskTasks(brain);
         BrainUtils.addShopTasks(brain);
+        BrainUtils.addGiftTasks(brain);
 
         // Each job's activities — registered once, dormant until the intent
         // selector picks one of that job's intents.
@@ -728,6 +750,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         output.putInt("PetJob", getPetJobId());
         output.putByte("PetMode", this.entityData.get(PET_MODE));
         output.storeNullable("Task", PetTask.CODEC, this.entityData.get(TASK).orElse(null));
+        output.storeNullable("Gift", ItemStack.CODEC, pendingGift.isEmpty() ? null : pendingGift);
     }
 
     @Override
@@ -737,6 +760,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         input.getInt("PetJob").ifPresent(this::setPetJobId);
         this.entityData.set(PET_MODE, input.getByteOr("PetMode", this.entityData.get(PET_MODE)));
         this.entityData.set(TASK, input.read("Task", PetTask.CODEC));
+        pendingGift = input.read("Gift", ItemStack.CODEC).orElse(ItemStack.EMPTY);
         refreshJobFromMainhand();
     }
 

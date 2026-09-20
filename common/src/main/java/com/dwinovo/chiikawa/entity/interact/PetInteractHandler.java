@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.entity.interact;
 
 import com.dwinovo.chiikawa.anim.state.PetReaction;
+import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitTag;
@@ -11,13 +12,18 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.network.chat.Component;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 
 public final class PetInteractHandler {
     private static final float TAME_CHANCE = 0.3F;
-    private static final float FEED_HEAL = 4.0F;
+    /**
+     * What a snack is worth to a pet. Shared with the pet buying its own: a cookie heals
+     * the same whether an owner hands it over or the pet queues up for it.
+     */
+    public static final float FEED_HEAL = 4.0F;
 
     private PetInteractHandler() {
     }
@@ -32,6 +38,9 @@ public final class PetInteractHandler {
 
         if (!isTame && isFood) {
             return handleTame(level, pet, player, hand);
+        }
+        if (isTame && isOwner && held.is(Items.EMERALD)) {
+            return handleGiveMoney(level, pet, player, hand);
         }
         if (isTame && isOwner && isFood) {
             return handleFeed(level, pet, player, hand);
@@ -61,6 +70,31 @@ public final class PetInteractHandler {
                 pet.triggerReaction(PetReaction.CONFUSED);
                 level.broadcastEntityEvent(pet, (byte) 6);
             }
+        }
+        return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
+    }
+
+    /**
+     * Spending money is the pet's business; where it comes from need not be. An owner can
+     * hand over emeralds and let the pet go and choose something for itself, which is the
+     * whole difference between a pet and a vending machine.
+     */
+    private static InteractionResult handleGiveMoney(Level level, AbstractPet pet, Player player, InteractionHand hand) {
+        if (!level.isClientSide()) {
+            ItemStack held = player.getItemInHand(hand);
+            ItemStack given = player.getAbilities().instabuild ? held.copy() : held;
+            ItemStack left = pet.getBackpack().addItem(given);
+            if (left.getCount() == given.getCount()) {
+                // Nowhere to put it: nothing changes hands rather than the coins vanishing.
+                return InteractionResult.PASS;
+            }
+            if (player.getAbilities().instabuild) {
+                // The stack in a creative hand is untouched, but what the pet took is real.
+                pet.getBackpack().setChanged();
+            }
+            pet.triggerReaction(PetReaction.HAPPY);
+            pet.playTameSound();
+            IntentSelector.requestReevaluate(pet);
         }
         return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
     }
