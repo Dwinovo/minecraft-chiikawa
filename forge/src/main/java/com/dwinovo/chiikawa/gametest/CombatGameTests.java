@@ -14,6 +14,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -57,6 +58,22 @@ public final class CombatGameTests {
 
         helper.succeedWhen(() -> helper.assertTrue(zombie.isDeadOrDying() || zombie.getHealth() < zombie.getMaxHealth(),
             "the fencer never landed a hit"));
+    }
+
+    /**
+     * A cow in the same field is a cow, not a target. A fencer that went for whatever moved
+     * would clear out a farm it was meant to be guarding.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = LEAVE_IT_TICKS + 100)
+    public static void a_fencer_leaves_the_livestock_alone(GameTestHelper helper) {
+        holding(ownedPet(helper, new BlockPos(4, STAND, 4)), Items.IRON_SWORD);
+        Cow cow = helper.spawn(EntityType.COW, new BlockPos(7, STAND, 4));
+        float health = cow.getHealth();
+
+        helper.runAtTickTime(LEAVE_IT_TICKS, () -> {
+            helper.assertTrue(cow.isAlive() && cow.getHealth() >= health, "the fencer went for the cow");
+            helper.succeed();
+        });
     }
 
     /** A bow and a quiver with something in it. */
