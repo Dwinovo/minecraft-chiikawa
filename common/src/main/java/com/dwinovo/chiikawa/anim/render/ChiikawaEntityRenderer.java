@@ -12,6 +12,8 @@ import com.dwinovo.chiikawa.anim.controller.ControllerHandler;
 import com.dwinovo.chiikawa.anim.controller.ControllerSnapshot;
 import com.dwinovo.chiikawa.anim.molang.MolangContext;
 import com.dwinovo.chiikawa.anim.render.layer.HeldItemLayer;
+import com.dwinovo.chiikawa.client.ui.PetStatusText;
+import com.dwinovo.chiikawa.client.ui.PetTheme;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.anim.render.layer.SlipTagLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayer;
@@ -24,12 +26,18 @@ import com.dwinovo.chiikawa.anim.state.PetAnimContext;
 import com.dwinovo.chiikawa.anim.state.PetAnimationResolver;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityAttachment;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.LivingEntity;
 import org.joml.Quaternionf;
 
@@ -38,6 +46,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Base entity renderer for Bedrock-format pets. Owns the per-pet controller
@@ -415,6 +424,61 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             if (animation != null) return animation;
         }
         return null;
+    }
+
+    /** How far away an owner still reads what their pet is up to. */
+    private static final double LABEL_RANGE_SQR = 12.0 * 12.0;
+    /** One line of label text, in blocks at the name-tag scale. */
+    private static final float LABEL_LINE = 0.28F;
+    private static final float LABEL_SCALE = 0.025F;
+
+    /** A working pet says so over its head, even when it has no name to show. */
+    @Override
+    protected boolean shouldShowName(T entity) {
+        return super.shouldShowName(entity) || statusLabel(entity).isPresent();
+    }
+
+    @Override
+    protected void renderNameTag(T entity, Component displayName, PoseStack poseStack, MultiBufferSource bufferSource,
+                                 int packedLight, float partialTick) {
+        boolean named = super.shouldShowName(entity);
+        if (named) {
+            super.renderNameTag(entity, displayName, poseStack, bufferSource, packedLight, partialTick);
+        }
+        statusLabel(entity).ifPresent(label ->
+            drawLabel(entity, label, poseStack, bufferSource, packedLight, partialTick, named ? LABEL_LINE : 0.0F));
+    }
+
+    /**
+     * What this pet is doing, for its owner standing nearby. Someone else's pets, pets
+     * out of earshot and idle pets stay quiet, and F1 hides it with the rest of the HUD.
+     */
+    private Optional<Component> statusLabel(T entity) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.options.hideGui || minecraft.player == null || !(entity instanceof AbstractPet pet)) {
+            return Optional.empty();
+        }
+        if (!pet.isOwnedBy(minecraft.player) || pet.distanceToSqr(minecraft.player) > LABEL_RANGE_SQR) {
+            return Optional.empty();
+        }
+        return PetStatusText.label(pet);
+    }
+
+    /** The mod's own label, drawn where a name tag goes, in the mod's colours. */
+    private void drawLabel(T entity, Component label, PoseStack poseStack, MultiBufferSource bufferSource,
+                           int packedLight, float partialTick, float extraHeight) {
+        Vec3 attachment = entity.getAttachments().getNullable(EntityAttachment.NAME_TAG, 0, entity.getViewYRot(partialTick));
+        if (attachment == null) {
+            return;
+        }
+        poseStack.pushPose();
+        poseStack.translate(attachment.x, attachment.y + 0.5 + extraHeight, attachment.z);
+        poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
+        poseStack.scale(LABEL_SCALE, -LABEL_SCALE, LABEL_SCALE);
+        Font font = getFont();
+        font.drawInBatch(label, -font.width(label) / 2.0F, 0.0F, PetTheme.TEXT, false, poseStack.last().pose(),
+            bufferSource, Font.DisplayMode.NORMAL, PetTheme.LABEL_BACKDROP, packedLight);
+        poseStack.popPose();
     }
 
     @Override
