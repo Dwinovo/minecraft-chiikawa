@@ -10,6 +10,8 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.init.InitEntity;
+import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
@@ -69,9 +71,26 @@ public final class JobGameTests {
         helper.assertTrue(pet.getPetJobId() == InitRegistry.ARCHER_ID,
             "a bow did not make an archer");
 
+        // A music box in a rabbit's hands is just a music box: playing is Hachiware's,
+        // and a job nobody else can take is the sort of rule that gets lost in a refactor.
+        holding(pet, InitItems.MUSIC_BOX.get());
+        helper.assertTrue(pet.getPetJobId() == InitRegistry.NONE.get().id(),
+            "a pet who cannot play took the musician's job anyway");
+
         holding(pet, Items.AIR);
         helper.assertTrue(pet.getPetJobId() == InitRegistry.NONE.get().id(),
             "an emptied hand left the pet with its old job");
+        helper.succeed();
+    }
+
+    /** The one job that is not the tool's alone: only Hachiware plays. */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void only_hachiware_takes_the_music_box(GameTestHelper helper) {
+        AbstractPet hachiware = helper.spawn(InitEntity.HACHIWARE_PET.get(), new BlockPos(3, STAND, 3));
+
+        holding(hachiware, InitItems.MUSIC_BOX.get());
+        helper.assertTrue(hachiware.getPetJobId() == InitRegistry.MUSICIAN_ID,
+            "Hachiware with a music box is not a musician");
         helper.succeed();
     }
 
