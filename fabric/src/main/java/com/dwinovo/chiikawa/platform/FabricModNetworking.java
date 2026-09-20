@@ -1,17 +1,21 @@
 package com.dwinovo.chiikawa.platform;
 
+import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
+import com.dwinovo.chiikawa.network.BoardPayloads;
 import com.dwinovo.chiikawa.network.MusicPayloads;
 import com.dwinovo.chiikawa.network.MusicServerPacketHandler;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
-public final class FabricMusicNetworking {
-    private FabricMusicNetworking() {
+/** Registers every payload the mod sends, and the client side of the ones it receives. */
+public final class FabricModNetworking {
+    private FabricModNetworking() {
     }
 
     public static void registerServer() {
+        PayloadTypeRegistry.playS2C().register(BoardPayloads.BoardSlipsPayload.TYPE, BoardPayloads.BoardSlipsPayload.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(MusicPayloads.MusicCatalogPayload.TYPE, MusicPayloads.MusicCatalogPayload.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(MusicPayloads.MusicStreamStartPayload.TYPE, MusicPayloads.MusicStreamStartPayload.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(MusicPayloads.MusicStreamChunkPayload.TYPE, MusicPayloads.MusicStreamChunkPayload.STREAM_CODEC);
@@ -25,6 +29,8 @@ public final class FabricMusicNetworking {
     }
 
     public static void registerClient() {
+        ClientPlayNetworking.registerGlobalReceiver(BoardPayloads.BoardSlipsPayload.TYPE,
+            (payload, context) -> context.client().execute(() -> ClientBoardPacketHandler.handleSlips(payload)));
         ClientPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicCatalogPayload.TYPE,
             (payload, context) -> context.client().execute(() -> ClientMusicPacketHandler.handleCatalog(payload)));
         ClientPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicStreamStartPayload.TYPE,
