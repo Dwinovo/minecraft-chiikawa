@@ -20,6 +20,15 @@ public class WalkToContainerBehavior extends Behavior<AbstractPet>{
     private static final Map<MemoryModuleType<?>, MemoryStatus> REQUIRED_MEMORIES = ImmutableMap.of(
         InitMemory.CONTAINER_POS.get(), MemoryStatus.VALUE_PRESENT
     );
+    /**
+     * How close the pet walks. Strictly nearer than the three blocks
+     * {@link DeliverCropBehavior} needs to reach in: arriving at exactly that distance puts
+     * the pet on the boundary, and a container's middle sits half a block above its feet,
+     * so the delivery check came out over the line about as often as under it and the pet
+     * stood beside the chest holding the crop.
+     */
+    private static final int ARRIVE_DISTANCE = 2;
+
     // Move speed.
     private final float speed;
     /**
@@ -72,7 +81,8 @@ public class WalkToContainerBehavior extends Behavior<AbstractPet>{
     @SuppressWarnings("null")
     @Override
     protected void start(ServerLevel world, AbstractPet pet, long time) {
-        BehaviorUtils.setWalkAndLookTargetMemories(pet, pet.getBrain().getMemory(InitMemory.CONTAINER_POS.get()).get(), speed, 3);
+        BehaviorUtils.setWalkAndLookTargetMemories(pet,
+            pet.getBrain().getMemory(InitMemory.CONTAINER_POS.get()).get(), speed, ARRIVE_DISTANCE);
     }
     
 

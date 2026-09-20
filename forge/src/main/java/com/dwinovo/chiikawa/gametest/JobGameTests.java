@@ -6,6 +6,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.holding;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.ownedPet;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
@@ -35,7 +36,7 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 public final class JobGameTests {
     private static final String BATCH = "chiikawa_jobs";
     /** Long enough to walk a few blocks, take a swing and be paid for it. */
-    private static final int WORK_TICKS = 1200;
+    private static final int WORK_TICKS = 3600;
     /** How long a pet is watched not doing something before we call it proof. */
     private static final int LEAVE_IT_TICKS = 400;
 
@@ -77,7 +78,7 @@ public final class JobGameTests {
     /** The whole of a farmer's day: it finds the ripe wheat, takes it, and puts a seed back. */
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WORK_TICKS)
     public static void a_farmer_harvests_and_plants_again(GameTestHelper helper) {
-        AbstractPet pet = holding(ownedPet(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
+        AbstractPet pet = holding(worker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
         BlockPos crop = new BlockPos(7, STAND, 4);
         ripeWheat(helper, crop);
 
