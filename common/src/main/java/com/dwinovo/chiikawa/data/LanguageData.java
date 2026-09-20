@@ -47,6 +47,7 @@ public final class LanguageData {
                 "已经带着一张工作牌", "刚才没领到牌，歇一会儿", "附近的公告板没有合适的工作牌",
                 "刚买过东西", "商店里没有它想要又买得起的", "手上没有要送的东西");
             addBlockTranslations(adder, "劳动公告板", "商店");
+            addSupplyTranslations(adder, "小熊挎包", "给宠物戴上，背包多 10 格");
             addShopScreenTranslations(adder, "商店", "买 %s", "卖 %s", "今天什么都不卖",
                     "上一页", "下一页");
             addIntentNameTranslations(adder, "跟着主人", "坐着", "闲逛", "捡东西", "去领工作牌",
@@ -54,7 +55,7 @@ public final class LanguageData {
             addTaskTypeTranslations(adder, "除草", "%s 株", "夜间采蘑菇", "%s 朵", "街头演奏", "%s 秒");
             addBoardScreenTranslations(adder, "劳动公告板", "%s 张", "今天没有工作牌",
                     "限%s", "待领", "已领", "%s 领走了");
-            addPetStatusTranslations(adder, "闲着");
+            addPetStatusTranslations(adder, "闲着", "戴上小熊挎包可以多装 10 格");
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
@@ -93,6 +94,7 @@ public final class LanguageData {
                 "Already carries a slip", "Resting after missing a slip", "No slip for it on a nearby board",
                 "Just bought something", "Nothing here it wants and can afford", "Nothing to give");
             addBlockTranslations(adder, "Labor Board", "Shop");
+            addSupplyTranslations(adder, "Bear Backpack", "Worn by a pet: ten more slots");
             addShopScreenTranslations(adder, "Shop", "Buy %s", "Sell %s", "Nothing for sale today",
                     "Previous page", "Next page");
             addIntentNameTranslations(adder, "Following its owner", "Sitting", "Wandering", "Picking up an item",
@@ -102,7 +104,7 @@ public final class LanguageData {
                 "Street Performance", "%ss");
             addBoardScreenTranslations(adder, "Labor Board", "%s up", "No slips up today",
                     "%s only", "Open", "Taken", "Taken by %s");
-            addPetStatusTranslations(adder, "Idle");
+            addPetStatusTranslations(adder, "Idle", "A bear backpack adds ten more slots");
         }
     }
 
@@ -181,6 +183,11 @@ public final class LanguageData {
         adder.add("screen.chiikawa.shop.empty", empty);
         adder.add("screen.chiikawa.shop.previous_page", previousPage);
         adder.add("screen.chiikawa.shop.next_page", nextPage);
+    }
+
+    private static void addSupplyTranslations(Adder adder, String bearBackpack, String bearBackpackTip) {
+        adder.add("item.chiikawa.bear_backpack", bearBackpack);
+        adder.add("tooltip.chiikawa.bear_backpack", bearBackpackTip);
     }
 
     private static void addBlockTranslations(Adder adder, String laborBoard, String shop) {
@@ -267,8 +274,9 @@ public final class LanguageData {
      * which already have names. How far along it is comes out as a bar and a count, which
      * read the same in every language.
      */
-    private static void addPetStatusTranslations(Adder adder, String doingNothing) {
+    private static void addPetStatusTranslations(Adder adder, String doingNothing, String bagHint) {
         adder.add("screen.chiikawa.pet.doing.nothing", doingNothing);
+        adder.add("screen.chiikawa.pet.bag_hint", bagHint);
     }
 
     private static void addDollTooltipTranslations(Adder adder, String placeOnCakeHint) {
