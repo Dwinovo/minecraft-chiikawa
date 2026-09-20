@@ -54,9 +54,13 @@ public class PetRoster extends SavedData {
         if (owner == null) {
             return;
         }
-        Entry entry = new Entry(pet.getUUID(), pet.getDisplayName().getString(),
-            pet.level().dimension(), pet.blockPosition());
-        byOwner.computeIfAbsent(owner, key -> new HashMap<>()).put(pet.getUUID(), entry);
+        put(owner, new Entry(pet.getUUID(), pet.getDisplayName().getString(),
+            pet.level().dimension(), pet.blockPosition()));
+    }
+
+    /** Writes one entry down; the seam a case can reach without a live pet. */
+    void put(UUID owner, Entry entry) {
+        byOwner.computeIfAbsent(owner, key -> new HashMap<>()).put(entry.pet(), entry);
         setDirty();
     }
 
@@ -76,7 +80,7 @@ public class PetRoster extends SavedData {
         return List.copyOf(byOwner.getOrDefault(owner, Map.of()).values());
     }
 
-    private static PetRoster load(CompoundTag tag, HolderLookup.Provider registries) {
+    static PetRoster load(CompoundTag tag, HolderLookup.Provider registries) {
         PetRoster roster = new PetRoster();
         ListTag owners = tag.getList("Owners", Tag.TAG_COMPOUND);
         for (int i = 0; i < owners.size(); i++) {
