@@ -10,6 +10,8 @@ import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
 import com.dwinovo.chiikawa.entity.brain.task.musician.PlayMusicBehavior;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitMemory;
+import com.dwinovo.chiikawa.shop.ShopBasket;
+import com.dwinovo.chiikawa.shop.Wallet;
 import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.utils.Utils;
 import java.util.Optional;
@@ -31,6 +33,8 @@ import net.minecraft.world.level.Level;
  * @param targets what the sensors remember
  * @param task the slip the pet carries
  * @param offeringBoard the nearest labor board, while it has a slip the pet would take
+ * @param shopWorthVisiting the nearest shop, while it sells something the pet likes and can afford
+ * @param shopCoolingDown whether the pet has just bought something
  * @param takeTaskCoolingDown whether the pet recently failed to take a slip
  * @param attackCoolingDown whether the pet's attack cooldown is running
  * @param hasArrows whether the pet carries arrows
@@ -46,7 +50,9 @@ public record IntentContext(
     PerceivedTargets targets,
     Optional<PetTask> task,
     Optional<GlobalPos> offeringBoard,
+    Optional<GlobalPos> shopWorthVisiting,
     boolean takeTaskCoolingDown,
+    boolean shopCoolingDown,
     boolean attackCoolingDown,
     boolean hasArrows,
     boolean hasPlayableSelection,
@@ -64,12 +70,29 @@ public record IntentContext(
             PerceivedTargets.capture(pet),
             pet.getTask(),
             offeringBoard(pet),
+            shopWorthVisiting(pet),
             pet.getBrain().hasMemoryValue(InitMemory.TAKE_TASK_COOLDOWN.get()),
+            pet.getBrain().hasMemoryValue(InitMemory.SHOP_COOLDOWN.get()),
             pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_COOLING_DOWN),
             !Utils.getArrow(pet).isEmpty(),
             PlayMusicBehavior.playableSelection(pet).isPresent(),
             pet.getActivity() == PetActivity.PLAY_GUITAR
         );
+    }
+
+    /**
+     * The shop the pet remembers, while there is a reason to go: something it likes, on
+     * sale, and within what it is carrying. Asked every time the pet decides what to do,
+     * so it only reads — the choosing of what to buy happens again at the counter.
+     */
+    private static Optional<GlobalPos> shopWorthVisiting(AbstractPet pet) {
+        Level level = pet.level();
+        return pet.getBrain().getMemory(InitMemory.NEAREST_SHOP.get())
+            .filter(level::isLoaded)
+            .flatMap(pos -> level.getBlockEntity(pos, InitBlockEntities.SHOP.get()))
+            .filter(shop -> ShopBasket.wantsAnything(PetPersonalities.of(pet.getType()), shop.catalog(),
+                Wallet.count(pet.getBackpack())))
+            .map(shop -> GlobalPos.of(level.dimension(), shop.getBlockPos()));
     }
 
     private static Optional<GlobalPos> offeringBoard(AbstractPet pet) {

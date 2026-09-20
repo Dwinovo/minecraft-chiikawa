@@ -14,5 +14,7 @@ public enum IntentCategory {
     COMBAT,
     PICK_UP,
     /** Walking to a labor board to take a slip; on the way while following. */
-    TAKE_TASK
+    TAKE_TASK,
+    /** Walking to a shop to spend what the pet has earned. */
+    SHOP
 }
