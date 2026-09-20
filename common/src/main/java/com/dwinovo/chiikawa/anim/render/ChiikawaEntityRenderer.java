@@ -429,8 +429,8 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
 
     /** How far away an owner still reads what their pet is up to. */
     private static final double LABEL_RANGE_SQR = 12.0 * 12.0;
-    /** Draws the backdrop without the text; the second pass puts the text on top of it. */
-    private static final int TRANSPARENT = 0x00000000;
+    /** Barely-there text for the backdrop pass; the second pass draws the text itself. */
+    private static final int TRANSPARENT = 0x04000000;
     private static final int NO_BACKDROP = 0;
     /** One line of label text, in blocks at the name-tag scale. */
     private static final float LABEL_LINE = 0.28F;
@@ -485,8 +485,9 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         poseStack.scale(LABEL_SCALE, -LABEL_SCALE, LABEL_SCALE);
         Matrix4f pose = poseStack.last().pose();
         float x = -font.width(text) / 2.0F;
-        // Two passes, as vanilla draws a name tag: the backdrop, then the text over it.
-        font.drawInBatch(text, x, 0.0F, TRANSPARENT, false, pose, bufferSource, Font.DisplayMode.NORMAL,
+        // Two passes, as vanilla draws a name tag. The backdrop sits a hair in front of the
+        // glyphs, so it only works when drawn without depth writes and the text follows it.
+        font.drawInBatch(text, x, 0.0F, TRANSPARENT, false, pose, bufferSource, Font.DisplayMode.SEE_THROUGH,
             UiTheme.LABEL_BACKDROP, packedLight);
         font.drawInBatch(text, x, 0.0F, UiTheme.TEXT, false, pose, bufferSource, Font.DisplayMode.NORMAL,
             NO_BACKDROP, packedLight);
