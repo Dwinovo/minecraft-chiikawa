@@ -3,7 +3,13 @@ package com.dwinovo.chiikawa.client.screen;
 import com.dwinovo.chiikawa.client.ui.PetStatusText;
 import com.dwinovo.chiikawa.client.ui.mc.GuiSurface;
 import com.dwinovo.chiikawa.client.ui.mc.ItemIcon;
+import com.dwinovo.chiikawa.client.ui.mc.UiButton;
+import com.dwinovo.chiikawa.network.BoardPayloads.BoardSlipsPayload;
+import com.dwinovo.chiikawa.network.BoardPayloads.BoardUpgradePayload;
 import com.dwinovo.chiikawa.network.BoardPayloads.SlipView;
+import com.dwinovo.chiikawa.platform.Services;
+import com.dwinovo.chiikawa.shop.Wallet;
+import com.dwinovo.chiikawa.task.BoardSlips;
 import com.dwinovo.chiikawa.ui.DrawSurface;
 import com.dwinovo.chiikawa.ui.Rect;
 import com.dwinovo.chiikawa.ui.TextClip;
@@ -16,35 +22,64 @@ import com.dwinovo.chiikawa.ui.widget.Tooltip;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 
 /**
- * The day's slips on a labor board. Read-only — pets take their own slips, the owner only
- * looks — so it is built to be looked at: a row is a picture, a name and a state, and
- * everything else waits under the cursor.
+ * The day's slips on a labor board. The slips themselves are read-only — pets take their
+ * own, the owner only looks — so the list is built to be looked at: a row is a picture, a
+ * name and a state, and everything else waits under the cursor. The one thing the owner
+ * can do here, buy the board a level, sits under a rule at the bottom, away from the
+ * slips.
  */
 public class LaborBoardScreen extends Screen {
     private static final int WIDTH = 236;
+    /** Room for the word and its price, whichever language it is in. */
+    private static final int UPGRADE_MIN_W = 64;
 
+    private final BlockPos board;
+    private final int level;
+    private final int price;
     private final List<SlipView> slips;
     private int leftPos;
     private int topPos;
     private int panelHeight;
+    private int footerY;
 
-    public LaborBoardScreen(List<SlipView> slips) {
+    public LaborBoardScreen(BoardSlipsPayload payload) {
         super(Component.translatable("screen.chiikawa.labor_board"));
-        this.slips = slips;
+        this.board = payload.board();
+        this.level = payload.level();
+        this.price = payload.price();
+        this.slips = payload.slips();
     }
 
     @Override
     protected void init() {
         int rows = Math.max(1, slips.size());
         this.panelHeight = UiStyle.TITLE_H + UiStyle.PAD
-            + rows * UiStyle.ROW_H + (rows - 1) * UiStyle.GAP + UiStyle.PAD;
+            + rows * UiStyle.ROW_H + (rows - 1) * UiStyle.GAP
+            + UiStyle.GAP_SECTION + UiStyle.CONTROL_H + UiStyle.PAD;
         this.leftPos = (this.width - WIDTH) / 2;
         this.topPos = (this.height - panelHeight) / 2;
+        this.footerY = topPos + panelHeight - UiStyle.PAD - UiStyle.CONTROL_H;
+        clearWidgets();
+        if (price > 0) {
+            addRenderableWidget(upgradeButton());
+        }
+    }
+
+    /** What the next level costs, on the button that buys it. */
+    private UiButton upgradeButton() {
+        Component label = Component.translatable("screen.chiikawa.labor_board.upgrade", price);
+        int width = Math.max(UPGRADE_MIN_W, this.font.width(label) + 2 * UiStyle.PAD);
+        UiButton button = UiButton.text(leftPos + WIDTH - UiStyle.PAD - width, footerY, width, UiStyle.CONTROL_H,
+            label, () -> Services.NETWORK.sendToServer(new BoardUpgradePayload(board)));
+        button.active = purse() >= price;
+        return button;
     }
 
     @Override
@@ -67,8 +102,57 @@ public class LaborBoardScreen extends Screen {
             Rect row = rowAt(contentY, i);
             drawRow(surface, slips.get(i), row, row.contains(mouseX, mouseY));
         }
+        drawFooter(surface);
         hovered(contentY, mouseX, mouseY).ifPresent(slip -> surface.onTop(() ->
             Tooltip.draw(surface, detail(slip), mouseX, mouseY, this.width, this.height)));
+        if (footer().contains(mouseX, mouseY)) {
+            surface.onTop(() -> Tooltip.draw(surface, upgradeDetail(), mouseX, mouseY, this.width, this.height));
+        }
+    }
+
+    /**
+     * How far the board has been paid up, and what that buys — a level is a number until
+     * it is said in slips a day, so it is said in slips a day.
+     */
+    private void drawFooter(DrawSurface surface) {
+        Ui.divider(surface, leftPos + UiStyle.PAD, footerY - UiStyle.GAP_SECTION / 2, WIDTH - 2 * UiStyle.PAD);
+        String badge = Component.translatable("screen.chiikawa.labor_board.level", level).getString();
+        Badge.draw(surface, badge, leftPos + UiStyle.PAD,
+            UiStyle.centerIn(footerY, UiStyle.CONTROL_H, Badge.height(surface)), UiTheme.ACCENT);
+        String daily = Component.translatable("screen.chiikawa.labor_board.daily",
+            BoardSlips.slipsAt(level)).getString();
+        surface.drawText(daily, leftPos + UiStyle.PAD + Badge.width(surface, badge) + UiStyle.GAP,
+            UiStyle.centerIn(footerY, UiStyle.CONTROL_H, surface.lineHeight()), UiTheme.TEXT_MUTED);
+        if (price <= 0) {
+            Ui.textRight(surface, Component.translatable("screen.chiikawa.labor_board.max_level").getString(),
+                leftPos + WIDTH - UiStyle.PAD,
+                UiStyle.centerIn(footerY, UiStyle.CONTROL_H, surface.lineHeight()), UiTheme.TEXT_MUTED);
+        }
+    }
+
+    /** What a level is worth, and whether the owner can afford the next one. */
+    private List<String> upgradeDetail() {
+        List<String> lines = new ArrayList<>();
+        lines.add(Component.translatable("screen.chiikawa.labor_board.level", level).getString());
+        lines.add(Component.translatable("screen.chiikawa.labor_board.daily",
+            BoardSlips.slipsAt(level)).getString());
+        if (price > 0) {
+            lines.add(Component.translatable("screen.chiikawa.labor_board.upgrade_hint").getString());
+            lines.add(Component.translatable("screen.chiikawa.labor_board.purse", purse()).getString());
+        } else {
+            lines.add(Component.translatable("screen.chiikawa.labor_board.max_level").getString());
+        }
+        return lines;
+    }
+
+    private Rect footer() {
+        return new Rect(leftPos + UiStyle.PAD, footerY, WIDTH - 2 * UiStyle.PAD, UiStyle.CONTROL_H);
+    }
+
+    /** How many emeralds the owner is carrying, which is what a price is measured against. */
+    private static int purse() {
+        Minecraft minecraft = Minecraft.getInstance();
+        return minecraft.player == null ? 0 : Wallet.count(minecraft.player.getInventory());
     }
 
     private Rect rowAt(int contentY, int index) {

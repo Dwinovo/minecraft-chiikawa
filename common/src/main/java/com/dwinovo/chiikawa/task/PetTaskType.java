@@ -21,6 +21,8 @@ import net.minecraft.world.level.storage.loot.LootTable;
  * @param amount how much of that work a rolled slip asks for
  * @param reward loot table rolled into the pet's backpack once a slip is finished
  * @param weight how often a board puts up this type relative to the others
+ * @param minLevel the board level this type needs before it goes up at all, so an
+ *                 upgrade is worth paying for rather than only worth counting
  */
 public record PetTaskType(
     ResourceLocation capability,
@@ -28,7 +30,8 @@ public record PetTaskType(
     ResourceLocation icon,
     IntProvider amount,
     ResourceKey<LootTable> reward,
-    int weight
+    int weight,
+    int minLevel
 ) {
     public static final Codec<PetTaskType> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         ResourceLocation.CODEC.fieldOf("capability").forGetter(PetTaskType::capability),
@@ -36,7 +39,8 @@ public record PetTaskType(
         ResourceLocation.CODEC.fieldOf("icon").forGetter(PetTaskType::icon),
         IntProvider.POSITIVE_CODEC.fieldOf("amount").forGetter(PetTaskType::amount),
         ResourceKey.codec(Registries.LOOT_TABLE).fieldOf("reward").forGetter(PetTaskType::reward),
-        ExtraCodecs.POSITIVE_INT.optionalFieldOf("weight", 1).forGetter(PetTaskType::weight)
+        ExtraCodecs.POSITIVE_INT.optionalFieldOf("weight", 1).forGetter(PetTaskType::weight),
+        ExtraCodecs.POSITIVE_INT.optionalFieldOf("min_level", BoardSlips.FIRST_LEVEL).forGetter(PetTaskType::minLevel)
     ).apply(instance, PetTaskType::new));
 
     /**
