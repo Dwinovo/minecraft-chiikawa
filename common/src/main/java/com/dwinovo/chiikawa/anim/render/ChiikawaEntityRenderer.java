@@ -45,6 +45,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import org.joml.Quaternionf;
 
 import java.util.ArrayList;
@@ -432,8 +433,14 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         return null;
     }
 
-    /** How far away an owner still reads what their pet is up to. */
-    private static final double LABEL_RANGE_SQR = 12.0 * 12.0;
+    /** How far down the owner's line of sight a pet still answers for itself. */
+    private static final double LABEL_RANGE = 12.0;
+    /**
+     * How much wider than the pet the aim may be. A pet is a small thing at twelve blocks,
+     * and asking for the crosshair dead on it would make the label feel broken rather than
+     * deliberate.
+     */
+    private static final double LOOK_SLACK = 0.3;
     /** One line of label text, in blocks at the name-tag scale. */
     private static final float LABEL_LINE = 0.28F;
     private static final float LABEL_SCALE = 0.025F;
@@ -456,18 +463,31 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     }
 
     /**
-     * What this pet is doing, for its owner standing nearby. Someone else's pets, pets
-     * out of earshot and idle pets stay quiet, and F1 hides it with the rest of the HUD.
+     * What this pet is doing, for the owner who is looking at it. A pet answers when asked
+     * — the crosshair is the asking — so a yard full of pets is a yard, not a wall of
+     * labels. Someone else's pets and idle pets stay quiet whatever you point at, and F1
+     * hides it with the rest of the HUD.
      */
     private Optional<Chip> statusChip(T entity) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.options.hideGui || minecraft.player == null || !(entity instanceof AbstractPet pet)) {
             return Optional.empty();
         }
-        if (!pet.isOwnedBy(minecraft.player) || pet.distanceToSqr(minecraft.player) > LABEL_RANGE_SQR) {
+        if (!pet.isOwnedBy(minecraft.player) || !isLookedAt(entity, minecraft.player)) {
             return Optional.empty();
         }
         return PetStatusText.chip(pet);
+    }
+
+    /**
+     * Whether the player's crosshair is on this pet, within the range a label is readable
+     * at. Its own line of sight rather than the game's pick: the game only picks what is
+     * within arm's reach, and a pet is worth asking about from across the garden.
+     */
+    private static boolean isLookedAt(Entity entity, Player player) {
+        Vec3 eye = player.getEyePosition();
+        Vec3 aim = eye.add(player.getViewVector(1.0F).scale(LABEL_RANGE));
+        return entity.getBoundingBox().inflate(LOOK_SLACK).clip(eye, aim).isPresent();
     }
 
     /** The mod's own label, drawn where a name tag goes, with the same widgets its screens use. */
