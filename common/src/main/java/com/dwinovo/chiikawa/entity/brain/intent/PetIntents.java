@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.entity.brain.intent.impl.CombatIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.ConstantIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.FollowOwnerIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.PlayMusicIntent;
+import com.dwinovo.chiikawa.entity.brain.intent.impl.ShopIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.TakeTaskIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.TargetIntent;
 import com.dwinovo.chiikawa.init.InitActivity;
@@ -44,6 +45,7 @@ public final class PetIntents {
     public static final ResourceLocation RANGED = id("ranged");
     public static final ResourceLocation PLAY_MUSIC = id("play_music");
     public static final ResourceLocation TAKE_TASK = id("take_task");
+    public static final ResourceLocation SHOP = id("shop");
 
     private static final Map<ResourceLocation, PetIntent> BY_ID = new LinkedHashMap<>();
 
@@ -54,7 +56,8 @@ public final class PetIntents {
         register(new ConstantIntent(WANDER, IntentCategory.WANDER, () -> Activity.IDLE, 0.05F)),
         register(new TargetIntent(PICK_UP_ITEM, IntentCategory.PICK_UP, () -> InitActivity.PICK_UP.get(),
             PerceivedTargets::pickableItem, 0.4F, "no_item", List.of(), Optional.empty())),
-        register(new TakeTaskIntent())
+        register(new TakeTaskIntent()),
+        register(new ShopIntent())
     );
 
     static {
