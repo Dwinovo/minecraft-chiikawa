@@ -1,60 +1,61 @@
 package com.dwinovo.chiikawa.client.screen;
 
-import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.client.ui.PetStatusText;
 import com.dwinovo.chiikawa.client.ui.mc.GuiSurface;
 import com.dwinovo.chiikawa.client.ui.mc.ItemIcon;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.task.PetTask;
+import com.dwinovo.chiikawa.ui.DrawSurface;
 import com.dwinovo.chiikawa.ui.Rect;
 import com.dwinovo.chiikawa.ui.Ui;
 import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.UiTheme;
 import com.dwinovo.chiikawa.ui.widget.Bar;
+import com.dwinovo.chiikawa.ui.widget.Hearts;
 import com.dwinovo.chiikawa.ui.widget.Slot;
 import com.dwinovo.chiikawa.ui.widget.Tooltip;
 import java.util.List;
 import java.util.Optional;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 
+/**
+ * A pet's backpack, drawn rather than blitted: the panel, the wells under every slot, the
+ * hearts and the bar all come out of the {@code chiikawa-ui} library, so the screen keeps
+ * step with the palette and there is no image to redraw when the layout moves.
+ *
+ * <p>Two things the owner came for, one above the line and one below. Above is the pet —
+ * its picture, what it holds, what it carries, how it is doing; below is the player's own
+ * inventory. What the pet is at sits in a strip among its things rather than on a card
+ * floating over the panel, where it read as a notice pinned to someone else's board.
+ */
 public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> {
+    private static final int PANEL_WIDTH = 196;
+    private static final int PANEL_HEIGHT = 204;
 
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "textures/gui/pet_backpack.png");
-
-    /** Panel size — matches the pet_gui texture (drawn from the 256x256 atlas top-left). */
-    private static final int PANEL_WIDTH = 200;
-    private static final int PANEL_HEIGHT = 178;
-
-    /** Pet display window (GUI-local) where the live entity is rendered. */
-    private static final int DISPLAY_X1 = 14, DISPLAY_Y1 = 15, DISPLAY_X2 = 69, DISPLAY_Y2 = 75;
-    private static final int DISPLAY_SCALE = 40;
+    /** The window the live pet is shown in, inside a well of its own. */
+    private static final int PORTRAIT_X = UiStyle.PAD, PORTRAIT_Y = UiStyle.PAD;
+    private static final int PORTRAIT_W = 60, PORTRAIT_H = 64;
+    private static final int PORTRAIT_SCALE = 40;
     /** Nudges the model down inside the window (entity-space units; +down). */
-    private static final float DISPLAY_Y_OFFSET = 0.18F;
+    private static final float PORTRAIT_Y_OFFSET = 0.18F;
 
-    /** The card above the panel: what the pet is at, and how far along its slip is. */
-    private static final int CARD_H = UiStyle.SLOT + 2 * UiStyle.GAP;
+    /** The pet's name, and how much of it is left, on one line under its picture. */
+    private static final int NAME_Y = PORTRAIT_Y + PORTRAIT_H + UiStyle.GAP;
+    /** What the pet is at, in a strip of its own. */
+    private static final int STATUS_Y = NAME_Y + UiStyle.LINE + UiStyle.GAP;
+    private static final int STATUS_H = UiStyle.SLOT + 2 * UiStyle.TIGHT;
     /** Long enough that a slip barely started and one nearly done look nothing alike. */
-    private static final int CARD_BAR_W = 56;
-
-    /** Info strip below the display: pet name + HP hearts on one line. */
-    private static final int NAME_Y = 80;
-    private static final int HEARTS_Y = 79;
-
-    /** HP heart sprites packed in the atlas (9x9 each), addressed by V offset. */
-    private static final int HEART_U = 0;
-    private static final int HEART_FULL_V = 178, HEART_HALF_V = 187, HEART_EMPTY_V = 196;
-    private static final int HEART_SIZE = 9, HEART_STEP = 8;
+    private static final int STATUS_BAR_W = 56;
+    /** The line between the pet's things and the player's own. */
+    private static final int DIVIDER_Y = STATUS_Y + STATUS_H + UiStyle.PAD;
 
     public PetBackpackScreen(PetBackpackMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -67,95 +68,98 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
         // In 1.21.11 AbstractContainerScreen.render() no longer draws the item tooltip itself;
         // every vanilla container screen overrides render() and calls renderTooltip() explicitly.
         super.render(graphics, mouseX, mouseY, partialTick);
-        renderStatusCard(graphics, mouseX, mouseY);
+        renderSlipTooltip(graphics, mouseX, mouseY);
         this.renderTooltip(graphics, mouseX, mouseY);
     }
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, this.leftPos, this.topPos, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256);
+        DrawSurface surface = new GuiSurface(graphics, this.font);
+        Ui.card(surface, this.leftPos, this.topPos, this.imageWidth, this.imageHeight);
+        Ui.well(surface, this.leftPos + PORTRAIT_X, this.topPos + PORTRAIT_Y, PORTRAIT_W, PORTRAIT_H);
+
+        // A well behind every slot, each one asked where it is — the menu owns the layout,
+        // and the screen never keeps a second copy of it to fall out of step.
+        for (net.minecraft.world.inventory.Slot slot : this.menu.slots) {
+            Ui.well(surface, this.leftPos + slot.x - UiStyle.BORDER, this.topPos + slot.y - UiStyle.BORDER,
+                UiStyle.SLOT, UiStyle.SLOT);
+        }
+        Ui.divider(surface, this.leftPos, this.topPos + DIVIDER_Y, this.imageWidth);
 
         LivingEntity pet = this.menu.getPet(Minecraft.getInstance().level);
         if (pet != null) {
-            InventoryScreen.renderEntityInInventoryFollowsMouse(
-                    graphics,
-                    this.leftPos + DISPLAY_X1, this.topPos + DISPLAY_Y1,
-                    this.leftPos + DISPLAY_X2, this.topPos + DISPLAY_Y2,
-                    DISPLAY_SCALE, DISPLAY_Y_OFFSET, mouseX, mouseY, pet);
+            InventoryScreen.renderEntityInInventoryFollowsMouse(graphics,
+                this.leftPos + PORTRAIT_X + UiStyle.BORDER, this.topPos + PORTRAIT_Y + UiStyle.BORDER,
+                this.leftPos + PORTRAIT_X + PORTRAIT_W - UiStyle.BORDER,
+                this.topPos + PORTRAIT_Y + PORTRAIT_H - UiStyle.BORDER,
+                PORTRAIT_SCALE, PORTRAIT_Y_OFFSET, mouseX, mouseY, pet);
         }
     }
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        // Replace the default title / "Inventory" labels with the pet's name + HP hearts.
-        // Coordinates here are GUI-local (the label pass is translated to leftPos/topPos).
-        LivingEntity pet = this.menu.getPet(Minecraft.getInstance().level);
-        if (pet == null) {
-            return;
-        }
-
-        Component name = pet.getDisplayName();
-        int nameWidth = this.font.width(name);
-        int displayCenterX = (DISPLAY_X1 + DISPLAY_X2) / 2;
-        int nameX = displayCenterX - nameWidth / 2;
-        graphics.drawString(this.font, name, nameX, NAME_Y, UiTheme.TEXT, false);
-
-        int maxHp = Math.max(1, Mth.ceil(pet.getMaxHealth()));
-        int hp = Math.max(0, Mth.ceil(pet.getHealth()));
-        int hearts = (maxHp + 1) / 2;
-        int heartsX = nameX + nameWidth + 6;
-        for (int i = 0; i < hearts; i++) {
-            int remain = hp - i * 2;
-            int v = remain >= 2 ? HEART_FULL_V : (remain == 1 ? HEART_HALF_V : HEART_EMPTY_V);
-            graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE,
-                    heartsX + i * HEART_STEP, HEARTS_Y, (float) HEART_U, (float) v,
-                    HEART_SIZE, HEART_SIZE, 256, 256);
-        }
-    }
-
-    /**
-     * What the owner opened the screen to find out, above the panel and on its own card: a
-     * picture of the work, what the pet is at, and a bar. The slip's own particulars — what
-     * it is called, how much it asks for, which job it is for — wait under the cursor,
-     * where they cost nothing to anyone not asking.
-     */
-    private void renderStatusCard(GuiGraphics graphics, int mouseX, int mouseY) {
+        // The pet's name and state stand in for the default title and "Inventory" labels.
+        // Coordinates here are panel-local: the label pass is translated to leftPos/topPos.
         AbstractPet pet = this.menu.getPet(Minecraft.getInstance().level);
         if (pet == null) {
             return;
         }
-        GuiSurface surface = new GuiSurface(graphics, this.font);
-        Rect card = new Rect(this.leftPos, this.topPos - CARD_H - UiStyle.GAP, this.imageWidth, CARD_H);
-        Ui.card(surface, card.x(), card.y(), card.width(), card.height());
+        DrawSurface surface = new GuiSurface(graphics, this.font);
+        int maxHealth = Math.max(1, Mth.ceil(pet.getMaxHealth()));
+        int heartsWidth = Hearts.width(maxHealth);
+        int heartsX = this.imageWidth - UiStyle.PAD - heartsWidth;
 
+        Hearts.draw(surface, heartsX, NAME_Y, Math.max(0, Mth.ceil(pet.getHealth())), maxHealth);
+        Ui.textClipped(surface, pet.getDisplayName().getString(), UiStyle.PAD, NAME_Y,
+            heartsX - UiStyle.GAP_SECTION - UiStyle.PAD, UiTheme.TEXT);
+
+        drawStatus(surface, pet, UiStyle.PAD, STATUS_Y, this.imageWidth - 2 * UiStyle.PAD);
+    }
+
+    /** What the pet is at: the work's picture, what it is doing, the count and the bar. */
+    private void drawStatus(DrawSurface surface, AbstractPet pet, int x, int y, int width) {
+        Ui.well(surface, x, y, width, STATUS_H);
         Optional<PetTask> slip = pet.getTask();
-        int textX = card.x() + UiStyle.PAD;
+        int textX = x + UiStyle.GAP;
         if (slip.isPresent()) {
-            Slot.draw(surface, ItemIcon.of(slip.get().icon()), card.x() + UiStyle.GAP,
-                UiStyle.centerIn(card.y(), card.height(), UiStyle.SLOT));
-            textX = card.x() + UiStyle.GAP + UiStyle.SLOT + UiStyle.GAP;
+            Slot.draw(surface, ItemIcon.of(slip.get().icon()), x + UiStyle.TIGHT,
+                UiStyle.centerIn(y, STATUS_H, UiStyle.SLOT));
+            textX = x + UiStyle.TIGHT + UiStyle.SLOT + UiStyle.GAP;
         }
-        int textY = UiStyle.centerIn(card.y(), card.height(), surface.lineHeight());
-        int textRoom = card.right() - UiStyle.PAD - textX;
+        int textY = UiStyle.centerIn(y, STATUS_H, surface.lineHeight());
+        int textRoom = x + width - UiStyle.GAP - textX;
 
         if (slip.isPresent()) {
             PetTask task = slip.get();
-            int barX = card.right() - UiStyle.PAD - CARD_BAR_W;
-            Bar.draw(surface, barX, UiStyle.centerIn(card.y(), card.height(), UiStyle.BAR_H),
-                CARD_BAR_W, UiStyle.BAR_H, task.progress(), task.target());
+            int barX = x + width - UiStyle.GAP - STATUS_BAR_W;
+            Bar.draw(surface, barX, UiStyle.centerIn(y, STATUS_H, UiStyle.BAR_H),
+                STATUS_BAR_W, UiStyle.BAR_H, task.progress(), task.target());
             String count = PetStatusText.slipCount(task).getString();
             Ui.textRight(surface, count, barX - UiStyle.GAP, textY, UiTheme.TEXT_MUTED);
             textRoom = barX - UiStyle.GAP - surface.textWidth(count) - UiStyle.GAP - textX;
         }
         Ui.textClipped(surface, PetStatusText.activity(pet).getString(), textX, textY, textRoom, UiTheme.TEXT);
-
-        if (card.contains(mouseX, mouseY)) {
-            slip.ifPresent(task -> surface.onTop(() ->
-                Tooltip.draw(surface, detail(task), mouseX, mouseY, this.width, this.height)));
-        }
     }
 
-    /** The slip, spelled out: what it is, how much it asks for, and whose work it is. */
+    /**
+     * The slip, spelled out for whoever points at the strip. It repeats nothing the strip
+     * already shows but its name, which is what makes the rest of it mean anything.
+     */
+    private void renderSlipTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
+        AbstractPet pet = this.menu.getPet(Minecraft.getInstance().level);
+        if (pet == null) {
+            return;
+        }
+        Rect strip = new Rect(this.leftPos + UiStyle.PAD, this.topPos + STATUS_Y,
+            this.imageWidth - 2 * UiStyle.PAD, STATUS_H);
+        if (!strip.contains(mouseX, mouseY)) {
+            return;
+        }
+        GuiSurface surface = new GuiSurface(graphics, this.font);
+        pet.getTask().ifPresent(task -> surface.onTop(() ->
+            Tooltip.draw(surface, detail(task), mouseX, mouseY, this.width, this.height)));
+    }
+
     private static List<String> detail(PetTask task) {
         return List.of(
             PetStatusText.taskName(task.type()).getString(),

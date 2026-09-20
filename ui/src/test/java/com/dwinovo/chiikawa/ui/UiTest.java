@@ -13,13 +13,45 @@ class UiTest {
     private final RecordingSurface surface = new RecordingSurface();
 
     @Test
-    void aPanelIsItsOutlineWithTheFaceInsideIt() {
+    void aPanelLeavesItsCornersEmptySoItReadsAsRounded() {
         Ui.panel(surface, 10, 20, 100, 50);
 
-        assertEquals(List.of(
-            new Rectangle(10, 20, 100, 50, UiTheme.BORDER),
-            new Rectangle(11, 21, 98, 48, UiTheme.PANEL)
-        ), surface.rects);
+        for (Rectangle rect : surface.rects) {
+            if (rect.argb() != UiTheme.BORDER) {
+                continue;
+            }
+            assertFalse(rect.x() == 10 && rect.y() == 20, () -> "a pixel in the top-left corner: " + rect);
+            assertFalse(rect.x() == 10 && rect.y() + rect.height() == 70, () -> "bottom-left corner: " + rect);
+        }
+        assertTrue(surface.rects.contains(new Rectangle(11, 21, 98, 48, UiTheme.PANEL)),
+            () -> "no face inside the outline: " + surface.rects);
+    }
+
+    @Test
+    void aPanelIsLitFromTheTopLeft() {
+        Ui.panel(surface, 10, 20, 100, 50);
+
+        assertEquals(new Rectangle(11, 21, 97, 1, UiTheme.HIGHLIGHT), surface.rectOf(UiTheme.HIGHLIGHT));
+        assertEquals(new Rectangle(12, 68, 97, 1, UiTheme.SHADE), surface.rectOf(UiTheme.SHADE));
+    }
+
+    @Test
+    void aWellIsTheSameLightTurnedOver() {
+        Ui.well(surface, 0, 0, 18, 18);
+
+        assertEquals(new Rectangle(0, 0, 18, 18, UiTheme.SURFACE), surface.rects.get(0));
+        assertEquals(new Rectangle(0, 0, 17, 1, UiTheme.SHADE), surface.rectOf(UiTheme.SHADE));
+        assertEquals(new Rectangle(1, 17, 17, 1, UiTheme.HIGHLIGHT), surface.rectOf(UiTheme.HIGHLIGHT));
+    }
+
+    @Test
+    void aWellKeepsToTheSizeItIsGiven() {
+        Ui.well(surface, 4, 4, UiStyle.SLOT, UiStyle.SLOT);
+
+        for (Rectangle rect : surface.rects) {
+            assertTrue(rect.x() >= 4 && rect.x() + rect.width() <= 4 + UiStyle.SLOT,
+                () -> "a well spilled out of its slot: " + rect);
+        }
     }
 
     @Test
@@ -28,14 +60,7 @@ class UiTest {
 
         assertEquals(new Rectangle(10 + UiStyle.SHADOW_OFF, 20 + UiStyle.SHADOW_OFF, 100, 50, UiTheme.SHADOW),
             surface.rects.get(0));
-        assertEquals(new Rectangle(10, 20, 100, 50, UiTheme.BORDER), surface.rects.get(1));
-    }
-
-    @Test
-    void aWellIsRecessedRatherThanRaised() {
-        Ui.well(surface, 0, 0, 18, 18);
-
-        assertEquals(UiTheme.SURFACE, surface.rects.get(1).argb());
+        assertEquals(UiTheme.BORDER, surface.rects.get(1).argb());
     }
 
     @Test

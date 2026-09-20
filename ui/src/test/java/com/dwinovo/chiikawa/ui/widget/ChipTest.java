@@ -23,8 +23,8 @@ class ChipTest {
         int width = 4 * 5 + 2 * UiStyle.PAD;
         int height = 9 + 2 * UiStyle.CHIP_PAD;
         assertEquals(width, chip.width(surface));
-        assertEquals(new RecordingSurface.Rectangle(100 - width / 2, 50 - height, width, height, UiTheme.BORDER),
-            surface.rects.get(0));
+        assertEquals(new RecordingSurface.Rectangle(100 - width / 2 + 1, 50 - height + 1, width - 2, height - 2,
+            UiTheme.PANEL), surface.rectOf(UiTheme.PANEL));
         assertEquals("Idle", surface.texts.get(0).text());
     }
 
