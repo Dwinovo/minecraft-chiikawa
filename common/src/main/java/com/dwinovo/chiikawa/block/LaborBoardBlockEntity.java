@@ -94,8 +94,8 @@ public class LaborBoardBlockEntity extends BlockEntity {
     /** @return today's slips as the board screen shows them */
     public List<BoardPayloads.SlipView> slipViews() {
         return today().stream()
-            .map(slot -> new BoardPayloads.SlipView(slot.slip().type(), slot.slip().capability(), slot.slip().target(),
-                slot.claim().map(BoardSlot.Claim::describe).orElse("")))
+            .map(slot -> new BoardPayloads.SlipView(slot.slip().type(), slot.slip().icon(), slot.slip().capability(),
+                slot.slip().target(), slot.claim().map(BoardSlot.Claim::describe).orElse("")))
             .toList();
     }
 

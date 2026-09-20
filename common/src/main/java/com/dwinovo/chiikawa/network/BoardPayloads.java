@@ -17,13 +17,16 @@ public final class BoardPayloads {
      * One slip on the board.
      *
      * @param type the slip type, named in the screen
+     * @param icon the item the slip is pictured as
      * @param capability the job it is for
      * @param target how much work it asks for
      * @param taker who took it; empty while it is still up
      */
-    public record SlipView(ResourceLocation type, ResourceLocation capability, int target, String taker) {
+    public record SlipView(ResourceLocation type, ResourceLocation icon, ResourceLocation capability,
+                           int target, String taker) {
         public static SlipView read(FriendlyByteBuf buffer) {
             return new SlipView(
+                buffer.readResourceLocation(),
                 buffer.readResourceLocation(),
                 buffer.readResourceLocation(),
                 buffer.readVarInt(),
@@ -33,6 +36,7 @@ public final class BoardPayloads {
 
         public void write(FriendlyByteBuf buffer) {
             buffer.writeResourceLocation(type);
+            buffer.writeResourceLocation(icon);
             buffer.writeResourceLocation(capability);
             buffer.writeVarInt(target);
             buffer.writeUtf(taker);
