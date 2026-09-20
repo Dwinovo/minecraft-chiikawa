@@ -24,7 +24,7 @@ import com.dwinovo.chiikawa.item.PetDollItem;
 import com.dwinovo.chiikawa.item.PetReviveRitualManager;
 import com.dwinovo.chiikawa.data.FabricBiomeModifications;
 import com.dwinovo.chiikawa.music.ServerMusicSystem;
-import com.dwinovo.chiikawa.platform.FabricMusicNetworking;
+import com.dwinovo.chiikawa.platform.FabricModNetworking;
 import com.dwinovo.chiikawa.platform.Services;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -63,7 +63,7 @@ public class ChiikawaFabricMod implements ModInitializer {
         FabricBiomeModifications.init();
         Services.ENTITY.registerAttributes();
         Services.ENTITY.registerSpawnPlacements();
-        FabricMusicNetworking.registerServer();
+        FabricModNetworking.registerServer();
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             ChiikawaMusicCommand.register(dispatcher);
             ChiikawaDebugCommand.register(dispatcher);

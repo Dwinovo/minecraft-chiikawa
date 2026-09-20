@@ -13,7 +13,7 @@ import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
 import com.dwinovo.chiikawa.client.screen.PetBackpackScreen;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitMenu;
-import com.dwinovo.chiikawa.platform.FabricMusicNetworking;
+import com.dwinovo.chiikawa.platform.FabricModNetworking;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -39,7 +39,7 @@ public class ChiikawaFabricClient implements ClientModInitializer {
         EntityRendererRegistry.register(InitEntity.FURUHONYA_PET.get(), FuruhonyaRenderer::new);
 
         MenuScreens.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);
-        FabricMusicNetworking.registerClient();
+        FabricModNetworking.registerClient();
         ClientTickEvents.END_CLIENT_TICK.register(client -> ClientMusicStreamManager.tick());
 
         BedrockResourceLoader loader = new BedrockResourceLoader();

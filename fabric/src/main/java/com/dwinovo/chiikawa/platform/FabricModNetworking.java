@@ -1,6 +1,8 @@
 package com.dwinovo.chiikawa.platform;
 
+import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
+import com.dwinovo.chiikawa.network.BoardPayloads;
 import com.dwinovo.chiikawa.network.MusicPayloads;
 import com.dwinovo.chiikawa.network.MusicServerPacketHandler;
 import java.util.function.Function;
@@ -11,8 +13,9 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
-public final class FabricMusicNetworking {
-    private FabricMusicNetworking() {
+/** Registers every payload the mod sends, and the client side of the ones it receives. */
+public final class FabricModNetworking {
+    private FabricModNetworking() {
     }
 
     public static void registerServer() {
@@ -29,6 +32,11 @@ public final class FabricMusicNetworking {
     }
 
     public static void registerClient() {
+        ClientPlayNetworking.registerGlobalReceiver(BoardPayloads.BOARD_SLIPS,
+            (client, handler, buffer, responseSender) -> {
+                BoardPayloads.BoardSlipsPayload payload = BoardPayloads.BoardSlipsPayload.read(buffer);
+                client.execute(() -> ClientBoardPacketHandler.handleSlips(payload));
+            });
         ClientPlayNetworking.registerGlobalReceiver(MusicPayloads.MUSIC_CATALOG,
             (client, handler, buffer, responseSender) -> {
                 MusicPayloads.MusicCatalogPayload payload = MusicPayloads.MusicCatalogPayload.read(buffer);

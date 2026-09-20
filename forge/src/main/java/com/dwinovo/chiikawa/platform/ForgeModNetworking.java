@@ -1,7 +1,9 @@
 package com.dwinovo.chiikawa.platform;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
+import com.dwinovo.chiikawa.network.BoardPayloads;
 import com.dwinovo.chiikawa.network.MusicPayloads;
 import com.dwinovo.chiikawa.network.MusicServerPacketHandler;
 import java.util.function.BiConsumer;
@@ -15,20 +17,23 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
-public final class ForgeMusicNetworking {
+/** Registers every payload the mod sends, and how the client handles the ones it receives. */
+public final class ForgeModNetworking {
     private static final String PROTOCOL_VERSION = "1";
     private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-        new ResourceLocation(Constants.MOD_ID, "music"),
+        new ResourceLocation(Constants.MOD_ID, "main"),
         () -> PROTOCOL_VERSION,
         PROTOCOL_VERSION::equals,
         PROTOCOL_VERSION::equals
     );
     private static int packetId;
 
-    private ForgeMusicNetworking() {
+    private ForgeModNetworking() {
     }
 
     public static void register() {
+        clientbound(BoardPayloads.BoardSlipsPayload.class, BoardPayloads.BoardSlipsPayload::read,
+            (payload, context) -> ClientBoardPacketHandler.handleSlips(payload));
         clientbound(MusicPayloads.MusicCatalogPayload.class, MusicPayloads.MusicCatalogPayload::read,
             (payload, context) -> ClientMusicPacketHandler.handleCatalog(payload));
         clientbound(MusicPayloads.MusicStreamStartPayload.class, MusicPayloads.MusicStreamStartPayload::read,
