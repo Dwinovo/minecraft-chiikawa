@@ -160,4 +160,45 @@ public final class SupplyGameTests {
                 "the mood wore off and left the pet hurrying anyway");
         });
     }
+
+    /** A dish from somebody else is a dish somebody else is holding. */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void a_stranger_cannot_feed_your_pet(GameTestHelper helper) {
+        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        ServerPlayer stranger = helper.makeMockServerPlayerInLevel();
+        stranger.setGameMode(GameType.SURVIVAL);
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+
+        stranger.setShiftKeyDown(false);
+        stranger.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(InitItems.SIMPLE_DISH.get()));
+        pet.mobInteract(stranger, InteractionHand.MAIN_HAND);
+
+        helper.assertFalse(pet.isEager(), "somebody else's dish put the pet in the mood");
+        helper.assertTrue(stranger.getItemInHand(InteractionHand.MAIN_HAND).getCount() == 1,
+            "the dish was eaten by a pet that is not theirs");
+        helper.succeed();
+    }
+
+    /**
+     * The ten slots a bag brings are shut until the bag is on. They are drawn as a hint
+     * rather than as empty wells, and a shut slot is what makes that true rather than
+     * decorative.
+     */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void the_bags_slots_stay_shut_until_a_bag_is_worn(GameTestHelper helper) {
+        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        PetBackpackMenu menu = new PetBackpackMenu(1, owner.getInventory(), pet);
+
+        helper.assertFalse(menu.slots.get(FIRST_BAG_SLOT).isActive(),
+            "a pet with no bag had the bag's slots open");
+
+        pet.setItemSlot(EquipmentSlot.CHEST, new ItemStack(InitItems.BEAR_BACKPACK.get()));
+
+        helper.assertTrue(menu.slots.get(FIRST_BAG_SLOT).isActive(),
+            "the bag went on and its slots stayed shut");
+        helper.succeed();
+    }
 }
