@@ -47,7 +47,8 @@ public final class LanguageData {
                 "已经带着一张工作牌", "刚才没领到牌，歇一会儿", "附近的公告板没有合适的工作牌",
                 "刚买过东西", "商店里没有它想要又买得起的", "手上没有要送的东西");
             addBlockTranslations(adder, "劳动公告板", "商店");
-            addSupplyTranslations(adder, "小熊挎包", "给宠物戴上，背包多 10 格");
+            addSupplyTranslations(adder, "小熊挎包", "给宠物戴上，背包多 10 格",
+                    "简单料理", "喂给宠物，一阵子干活更起劲");
             addShopScreenTranslations(adder, "商店", "买 %s", "卖 %s", "今天什么都不卖",
                     "上一页", "下一页");
             addIntentNameTranslations(adder, "跟着主人", "坐着", "闲逛", "捡东西", "去领工作牌",
@@ -94,7 +95,8 @@ public final class LanguageData {
                 "Already carries a slip", "Resting after missing a slip", "No slip for it on a nearby board",
                 "Just bought something", "Nothing here it wants and can afford", "Nothing to give");
             addBlockTranslations(adder, "Labor Board", "Shop");
-            addSupplyTranslations(adder, "Bear Backpack", "Worn by a pet: ten more slots");
+            addSupplyTranslations(adder, "Bear Backpack", "Worn by a pet: ten more slots",
+                    "Simple Dish", "Fed to a pet: keener on work for a while");
             addShopScreenTranslations(adder, "Shop", "Buy %s", "Sell %s", "Nothing for sale today",
                     "Previous page", "Next page");
             addIntentNameTranslations(adder, "Following its owner", "Sitting", "Wandering", "Picking up an item",
@@ -185,9 +187,12 @@ public final class LanguageData {
         adder.add("screen.chiikawa.shop.next_page", nextPage);
     }
 
-    private static void addSupplyTranslations(Adder adder, String bearBackpack, String bearBackpackTip) {
+    private static void addSupplyTranslations(Adder adder, String bearBackpack, String bearBackpackTip,
+            String simpleDish, String simpleDishTip) {
         adder.add("item.chiikawa.bear_backpack", bearBackpack);
         adder.add("tooltip.chiikawa.bear_backpack", bearBackpackTip);
+        adder.add("item.chiikawa.simple_dish", simpleDish);
+        adder.add("tooltip.chiikawa.simple_dish", simpleDishTip);
     }
 
     private static void addBlockTranslations(Adder adder, String laborBoard, String shop) {

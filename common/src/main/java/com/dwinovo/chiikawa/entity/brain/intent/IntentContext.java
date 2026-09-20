@@ -36,6 +36,7 @@ import net.minecraft.world.level.Level;
  * @param shopWorthVisiting the nearest shop, while it sells something the pet likes and can afford
  * @param shopCoolingDown whether the pet has just bought something
  * @param carryingGift whether the pet has something for its owner that it has not handed over
+ * @param eager whether the pet is still in the mood after a proper meal
  * @param takeTaskCoolingDown whether the pet recently failed to take a slip
  * @param attackCoolingDown whether the pet's attack cooldown is running
  * @param hasArrows whether the pet carries arrows
@@ -55,6 +56,7 @@ public record IntentContext(
     boolean takeTaskCoolingDown,
     boolean shopCoolingDown,
     boolean carryingGift,
+    boolean eager,
     boolean attackCoolingDown,
     boolean hasArrows,
     boolean hasPlayableSelection,
@@ -76,6 +78,7 @@ public record IntentContext(
             pet.getBrain().hasMemoryValue(InitMemory.TAKE_TASK_COOLDOWN.get()),
             pet.getBrain().hasMemoryValue(InitMemory.SHOP_COOLDOWN.get()),
             !pet.getPendingGift().isEmpty(),
+            pet.isEager(),
             pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_COOLING_DOWN),
             !Utils.getArrow(pet).isEmpty(),
             PlayMusicBehavior.playableSelection(pet).isPresent(),
