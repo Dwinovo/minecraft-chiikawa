@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.block.ShopBlockEntity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
+import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.shop.ShopBasket;
@@ -12,6 +13,7 @@ import com.dwinovo.chiikawa.shop.Wallet;
 import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Unit;
@@ -32,6 +34,8 @@ import net.minecraft.world.phys.Vec3;
  * at the counter buying the shop out one cookie at a time.
  */
 public class GoShoppingBehavior extends Behavior<AbstractPet> {
+    /** How often a purchase turns out to be for the owner rather than the pet. */
+    private static final float GIFT_CHANCE = 0.34F;
     /** How long a pet leaves the shop alone after buying something. */
     private static final int REST_TICKS = 600;
     private static final float SPEED = 0.7F;
@@ -98,20 +102,54 @@ public class GoShoppingBehavior extends Behavior<AbstractPet> {
             return;
         }
         ShopCatalog.Entry entry = wanted.get();
-        ItemStack bag = new ItemStack(entry.item());
+        ItemStack goods = new ItemStack(entry.item());
+        boolean forTheOwner = buyingForTheOwner(pet);
         // Paid for only once there is somewhere to put it: a pet with a full bag goes home
-        // with its money rather than handing it over for nothing.
-        if (!pet.getBackpack().canAddItem(bag) || !Wallet.pay(pet.getBackpack(), entry.buy())) {
+        // with its money rather than handing it over for nothing. A present needs no room
+        // in the bag — the pet carries that one in its paws.
+        if (!forTheOwner && !pet.getBackpack().canAddItem(goods)) {
             return;
         }
-        ItemStack remainder = pet.getBackpack().addItem(bag);
-        if (!remainder.isEmpty()) {
-            pet.spawnAtLocation(remainder);
+        if (!Wallet.pay(pet.getBackpack(), entry.buy())) {
+            return;
+        }
+        if (forTheOwner) {
+            pet.setPendingGift(goods);
+        } else {
+            keep(pet, goods);
         }
         bought = true;
         level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pet.getX(), pet.getY() + pet.getBbHeight() * 0.8, pet.getZ(),
             HAPPY_PARTICLES, 0.35, 0.3, 0.35, 0.0);
         pet.triggerReaction(PetReaction.HAPPY);
+    }
+
+    /**
+     * Whether this one is for the owner. About one purchase in three, and only when the
+     * pet has an owner and is not already carrying something for them: a pet turning up
+     * with a present now and then is a pet; one that hands over everything it buys is a
+     * courier.
+     */
+    private static boolean buyingForTheOwner(AbstractPet pet) {
+        return pet.getOwner() != null
+            && pet.getPendingGift().isEmpty()
+            && pet.getRandom().nextFloat() < GIFT_CHANCE;
+    }
+
+    /**
+     * Keeps what it bought for itself — and eats it there and then if it is food and the
+     * pet is the worse for wear. A pet that buys a cake and carries it about while limping
+     * is a pet that has misunderstood what money is for.
+     */
+    private static void keep(AbstractPet pet, ItemStack goods) {
+        if (pet.getHealth() < pet.getMaxHealth() && goods.has(DataComponents.FOOD)) {
+            pet.heal(PetInteractHandler.FEED_HEAL);
+            return;
+        }
+        ItemStack remainder = pet.getBackpack().addItem(goods);
+        if (!remainder.isEmpty()) {
+            pet.spawnAtLocation(remainder);
+        }
     }
 
     /** What the pet would buy at the shop it remembers, if anything. */

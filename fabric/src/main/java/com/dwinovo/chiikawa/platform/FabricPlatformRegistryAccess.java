@@ -33,6 +33,7 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     private final Supplier<Activity> pickUpActivity;
     private final Supplier<Activity> takeTaskActivity;
     private final Supplier<Activity> shopActivity;
+    private final Supplier<Activity> giftOwnerActivity;
     private final Supplier<MenuType<PetBackpackMenu>> petBackpackMenu;
 
     public FabricPlatformRegistryAccess() {
@@ -54,6 +55,7 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
         pickUpActivity = registerActivity("pick_up", new Activity("pick_up"));
         takeTaskActivity = registerActivity("take_task", new Activity("take_task"));
         shopActivity = registerActivity("shop", new Activity("shop"));
+        giftOwnerActivity = registerActivity("gift_owner", new Activity("gift_owner"));
 
         petBackpackMenu = registerMenu("pet_backpack", new MenuType<>(PetBackpackMenu::new, net.minecraft.world.flag.FeatureFlags.DEFAULT_FLAGS));
     }
@@ -160,6 +162,11 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     @Override
     public Supplier<Activity> shopActivity() {
         return shopActivity;
+    }
+
+    @Override
+    public Supplier<Activity> giftOwnerActivity() {
+        return giftOwnerActivity;
     }
 
     @Override
