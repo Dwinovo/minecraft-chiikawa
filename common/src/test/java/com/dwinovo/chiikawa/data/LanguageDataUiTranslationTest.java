@@ -50,8 +50,8 @@ class LanguageDataUiTranslationTest {
     void everySlipTypeHasAName() {
         for (String locale : LOCALES) {
             Map<String, String> translations = collect(locale);
-            for (ResourceLocation type : List.of(PetTaskTypeData.WEEDING, PetTaskTypeData.MUSHROOM_PICKING,
-                    PetTaskTypeData.STREET_PERFORMANCE)) {
+            for (ResourceLocation type : List.of(PetTaskTypeData.WEEDING, PetTaskTypeData.STREET_PERFORMANCE,
+                    PetTaskTypeData.MELEE_HUNTING, PetTaskTypeData.RANGED_HUNTING)) {
                 String key = "pet_task." + type.getNamespace() + "." + type.getPath();
                 assertTrue(translations.containsKey(key), () -> locale + " is missing " + key);
                 assertTrue(translations.containsKey(key + ".amount"), () -> locale + " is missing " + key + ".amount");
