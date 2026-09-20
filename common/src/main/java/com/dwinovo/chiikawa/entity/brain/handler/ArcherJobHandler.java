@@ -3,6 +3,8 @@ package com.dwinovo.chiikawa.entity.brain.handler;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.PetActivities;
 import com.dwinovo.chiikawa.entity.brain.task.archer.HurtRangedAttackTargetTask;
+import com.dwinovo.chiikawa.entity.brain.task.combat.CombatMoveBehavior;
+import com.dwinovo.chiikawa.entity.brain.task.fencer.MeleeAttackWithAnim;
 import com.dwinovo.chiikawa.init.InitActivity;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
@@ -29,9 +31,15 @@ public final class ArcherJobHandler {
     }
 
     public static void registerActivities(Brain<AbstractPet> brain) {
-        Pair<Integer, BehaviorControl<? super AbstractPet>> hurtRangedAttackTarget =
+        // Backing off is half of shooting: an archer with a zombie in its face is an
+        // archer being eaten. The swing is here too, for when backing off is not an option.
+        Pair<Integer, BehaviorControl<? super AbstractPet>> keepStation =
+            Pair.of(5, new CombatMoveBehavior(true));
+        Pair<Integer, BehaviorControl<? super AbstractPet>> shoot =
             Pair.of(4, new HurtRangedAttackTargetTask());
+        Pair<Integer, BehaviorControl<? super AbstractPet>> lastResort =
+            Pair.of(3, MeleeAttackWithAnim.create());
         PetActivities.register(brain, InitActivity.ARCHER_SHOOT.get(),
-            ImmutableList.of(hurtRangedAttackTarget), Set.of(MemoryModuleType.ATTACK_TARGET));
+            ImmutableList.of(keepStation, shoot, lastResort), Set.of(MemoryModuleType.ATTACK_TARGET));
     }
 }

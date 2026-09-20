@@ -119,10 +119,10 @@ class PetConstraintsTest {
     // ---- permission table ------------------------------------------------------
 
     @Test
-    void followPermitsFollowingWanderingTakingSlipsAndGivingOnTheWay() {
+    void followPermitsFollowingWanderingTakingSlipsGivingAndDefendingTheOwner() {
         assertPermits(PetDirective.FOLLOW, OWNED,
             EnumSet.of(IntentCategory.FOLLOW_OWNER, IntentCategory.WANDER, IntentCategory.TAKE_TASK,
-                IntentCategory.GIFT));
+                IntentCategory.GIFT, IntentCategory.COMBAT));
     }
 
     @Test
