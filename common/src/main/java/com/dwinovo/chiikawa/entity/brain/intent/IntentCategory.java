@@ -16,5 +16,7 @@ public enum IntentCategory {
     /** Walking to a labor board to take a slip; on the way while following. */
     TAKE_TASK,
     /** Walking to a shop to spend what the pet has earned. */
-    SHOP
+    SHOP,
+    /** Taking the owner something the pet bought for them. */
+    GIFT
 }

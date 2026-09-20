@@ -2,7 +2,10 @@ package com.dwinovo.chiikawa.platform;
 
 import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
+import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
+import com.dwinovo.chiikawa.network.ShopPayloads;
+import com.dwinovo.chiikawa.network.ShopServerPacketHandler;
 import com.dwinovo.chiikawa.network.MusicPayloads;
 import com.dwinovo.chiikawa.network.MusicServerPacketHandler;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -16,6 +19,8 @@ public final class FabricModNetworking {
 
     public static void registerServer() {
         PayloadTypeRegistry.clientboundPlay().register(BoardPayloads.BoardSlipsPayload.TYPE, BoardPayloads.BoardSlipsPayload.STREAM_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(ShopPayloads.ShopPricesPayload.TYPE, ShopPayloads.ShopPricesPayload.STREAM_CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(ShopPayloads.ShopTradePayload.TYPE, ShopPayloads.ShopTradePayload.STREAM_CODEC);
         PayloadTypeRegistry.clientboundPlay().register(MusicPayloads.MusicCatalogPayload.TYPE, MusicPayloads.MusicCatalogPayload.STREAM_CODEC);
         PayloadTypeRegistry.clientboundPlay().register(MusicPayloads.MusicStreamStartPayload.TYPE, MusicPayloads.MusicStreamStartPayload.STREAM_CODEC);
         PayloadTypeRegistry.clientboundPlay().register(MusicPayloads.MusicStreamChunkPayload.TYPE, MusicPayloads.MusicStreamChunkPayload.STREAM_CODEC);
@@ -26,11 +31,15 @@ public final class FabricModNetworking {
             (payload, context) -> context.server().execute(() -> MusicServerPacketHandler.handleSelectTrack(payload, context.player())));
         ServerPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicCatalogRequestPayload.TYPE,
             (payload, context) -> context.server().execute(() -> MusicServerPacketHandler.handleCatalogRequest(payload, context.player())));
+        ServerPlayNetworking.registerGlobalReceiver(ShopPayloads.ShopTradePayload.TYPE,
+            (payload, context) -> context.server().execute(() -> ShopServerPacketHandler.handleTrade(payload, context.player())));
     }
 
     public static void registerClient() {
         ClientPlayNetworking.registerGlobalReceiver(BoardPayloads.BoardSlipsPayload.TYPE,
             (payload, context) -> context.client().execute(() -> ClientBoardPacketHandler.handleSlips(payload)));
+        ClientPlayNetworking.registerGlobalReceiver(ShopPayloads.ShopPricesPayload.TYPE,
+            (payload, context) -> context.client().execute(() -> ClientShopPacketHandler.handlePrices(payload)));
         ClientPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicCatalogPayload.TYPE,
             (payload, context) -> context.client().execute(() -> ClientMusicPacketHandler.handleCatalog(payload)));
         ClientPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicStreamStartPayload.TYPE,

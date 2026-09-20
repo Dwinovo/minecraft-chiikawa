@@ -1,7 +1,17 @@
 package com.dwinovo.chiikawa.block;
 
+import com.dwinovo.chiikawa.network.ShopPayloads.PriceView;
+import com.dwinovo.chiikawa.network.ShopPayloads.ShopPricesPayload;
+import com.dwinovo.chiikawa.platform.Services;
 import com.mojang.serialization.MapCodec;
+import java.util.List;
 import java.util.Map;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -81,5 +91,20 @@ public class ShopBlock extends BaseEntityBlock {
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new ShopBlockEntity(pos, state);
+    }
+
+    /** Shows the price list: what is on the shelf, and what the shop will take off you. */
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        if (level.isClientSide()) {
+            return InteractionResult.SUCCESS;
+        }
+        if (player instanceof ServerPlayer serverPlayer && level.getBlockEntity(pos) instanceof ShopBlockEntity shop) {
+            List<PriceView> prices = shop.catalog().entries().stream()
+                .map(entry -> new PriceView(BuiltInRegistries.ITEM.getKey(entry.item()), entry.buy(), entry.sell()))
+                .toList();
+            Services.NETWORK.sendToClient(serverPlayer, new ShopPricesPayload(pos, prices));
+        }
+        return InteractionResult.CONSUME;
     }
 }
