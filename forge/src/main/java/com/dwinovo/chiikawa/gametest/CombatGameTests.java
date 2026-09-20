@@ -87,6 +87,9 @@ public final class CombatGameTests {
         pet.getBackpack().addItem(new ItemStack(Items.ARROW, 16));
         // Well inside what a pet can see, and still far enough that this is a bow shot.
         Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(10, STAND, 4));
+        // Standing still. A zombie left to close the distance turns this into a scuffle,
+        // and whether the archer got a shot off first comes down to the day it is having.
+        zombie.setNoAi(true);
 
         helper.succeedWhen(() -> helper.assertTrue(zombie.isDeadOrDying() || zombie.getHealth() < zombie.getMaxHealth(),
             "the archer never hit anything"));

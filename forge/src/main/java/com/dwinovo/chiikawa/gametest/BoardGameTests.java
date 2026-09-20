@@ -203,7 +203,8 @@ public final class BoardGameTests {
             for (int z = 2; z < 15; z++) {
                 BlockPos rel = new BlockPos(x, STAND, z);
                 long seed = BoardSlips.seed(level.getSeed(), day, helper.absolutePos(rel));
-                List<BoardSlot> farmerSlips = BoardSlips.roll(seed, PetTaskTypes.all()).stream()
+                List<BoardSlot> farmerSlips = BoardSlips.roll(seed, PetTaskTypes.all(), BoardSlips.FIRST_LEVEL)
+                    .stream()
                     .filter(slot -> slot.slip().capability().equals(farmer))
                     .toList();
                 if (wanted.test(farmerSlips)) {
