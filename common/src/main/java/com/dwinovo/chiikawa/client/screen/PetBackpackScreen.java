@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.client.screen;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.client.ui.PetStatusText;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 
@@ -99,17 +100,7 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
         if (pet == null) {
             return;
         }
-        Component doing = pet.getIntent()
-            .<Component>map(intent -> Component.translatable("screen.chiikawa.pet.doing",
-                Component.translatable("intent." + intent.getNamespace() + "." + intent.getPath())))
-            .orElseGet(() -> Component.translatable("screen.chiikawa.pet.doing.nothing"));
-        graphics.drawString(this.font, doing, STATUS_X, DOING_Y, STATUS_COLOR, true);
-
-        Component slip = pet.getTask()
-            .<Component>map(task -> Component.translatable("screen.chiikawa.pet.slip",
-                Component.translatable("pet_task." + task.type().getNamespace() + "." + task.type().getPath()),
-                task.progress(), task.target()))
-            .orElseGet(() -> Component.translatable("screen.chiikawa.pet.slip.none"));
-        graphics.drawString(this.font, slip, STATUS_X, SLIP_Y, STATUS_COLOR, true);
+        graphics.drawString(this.font, PetStatusText.doing(pet), STATUS_X, DOING_Y, STATUS_COLOR, true);
+        graphics.drawString(this.font, PetStatusText.slip(pet), STATUS_X, SLIP_Y, STATUS_COLOR, true);
     }
 }
