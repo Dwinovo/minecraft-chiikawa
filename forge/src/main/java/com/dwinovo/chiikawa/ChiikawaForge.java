@@ -16,6 +16,7 @@ import com.dwinovo.chiikawa.init.InitSensor;
 import com.dwinovo.chiikawa.init.InitSounds;
 import com.dwinovo.chiikawa.init.InitTabs;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalityLoader;
+import com.dwinovo.chiikawa.shop.ShopCatalogLoader;
 import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
 import com.dwinovo.chiikawa.entity.brain.task.farmer.crop.FarmRegistry;
 import com.dwinovo.chiikawa.item.PetDollItem;
@@ -70,6 +71,7 @@ public class ChiikawaForge {
         MinecraftForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> {
             event.addListener(new PetPersonalityLoader());
             event.addListener(new PetTaskTypeLoader());
+            event.addListener(new ShopCatalogLoader());
         });
 
         InitCapabilities.register(modEventBus);

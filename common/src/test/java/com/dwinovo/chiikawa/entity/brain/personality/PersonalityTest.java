@@ -46,7 +46,7 @@ class PersonalityTest {
         assertEquals(0.5F, personality.multiplier(WANDER, DayPhase.DAY), 1.0E-6F);
         assertEquals(1.5F, personality.multiplier(WANDER, DayPhase.NIGHT), 1.0E-6F);
         assertEquals(0.1F, personality.randomness(), 1.0E-6F);
-        assertEquals(List.of(Items.WOODEN_HOE, Items.AIR), personality.wildTools().stream().map(Personality.WildTool::item).toList());
+        assertEquals(List.of(Items.WOODEN_HOE, Items.AIR), personality.wildTools().stream().map(Personality.WeightedItem::item).toList());
         assertEquals(Set.of(HARVEST, WANDER), personality.intentIds());
     }
 
@@ -70,7 +70,8 @@ class PersonalityTest {
     @Test
     void encodesWhatItParses() {
         Personality personality = new Personality(Map.of(HARVEST, 1.3F), Map.of(DayPhase.MORNING, Map.of(HARVEST, 1.2F)),
-            0.05F, List.of(new Personality.WildTool(Items.STONE_SWORD, 4)));
+            0.05F, List.of(new Personality.WeightedItem(Items.STONE_SWORD, 4)),
+            List.of(new Personality.WeightedItem(Items.COOKIE, 2)));
 
         JsonElement json = Personality.CODEC.encodeStart(JsonOps.INSTANCE, personality).getOrThrow();
         Personality decoded = Personality.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
@@ -85,9 +86,9 @@ class PersonalityTest {
     @Test
     void drawsWildToolsByWeight() {
         Personality personality = new Personality(Map.of(), Map.of(), 0.0F, List.of(
-            new Personality.WildTool(Items.WOODEN_HOE, 6),
-            new Personality.WildTool(Items.AIR, 1),
-            new Personality.WildTool(Items.WOODEN_SWORD, 3)));
+            new Personality.WeightedItem(Items.WOODEN_HOE, 6),
+            new Personality.WeightedItem(Items.AIR, 1),
+            new Personality.WeightedItem(Items.WOODEN_SWORD, 3)), List.of());
 
         // The draw picks an index below the total weight of 10.
         assertEquals(Items.WOODEN_HOE, personality.drawWildTool(FixedRandom.ints(0)).getItem());
