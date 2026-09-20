@@ -10,12 +10,16 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitBlocks;
+import com.dwinovo.chiikawa.network.ShopPayloads.ShopTradePayload;
+import com.dwinovo.chiikawa.network.ShopServerPacketHandler;
 import com.dwinovo.chiikawa.shop.Wallet;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -56,6 +60,68 @@ public final class ShopGameTests {
             helper.assertTrue(carries(pet, Items.HONEY_BOTTLE) || carries(pet, Items.MILK_BUCKET),
                 "the pet came away from the counter with money gone and nothing in its bag");
         });
+    }
+
+    /** The owner's side of the counter: money out, goods in. */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void an_owner_buys_across_the_counter(GameTestHelper helper) {
+        BlockPos counter = new BlockPos(4, STAND, 4);
+        helper.setBlock(counter, InitBlocks.SHOP.get());
+        ServerPlayer customer = atTheCounter(helper, counter);
+        customer.getInventory().add(new ItemStack(Items.EMERALD, WAGES));
+
+        ShopServerPacketHandler.handleTrade(
+            new ShopTradePayload(helper.absolutePos(counter), BuiltInRegistries.ITEM.getKey(Items.COOKIE), true),
+            customer);
+
+        helper.assertTrue(customer.getInventory().contains(new ItemStack(Items.COOKIE)), "no cookie");
+        helper.assertTrue(Wallet.count(customer.getInventory()) == WAGES - 1, "the price was not what it said");
+        helper.succeed();
+    }
+
+    /** And the other way: what the farm brought in, turned back into money. */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void an_owner_sells_the_harvest(GameTestHelper helper) {
+        BlockPos counter = new BlockPos(4, STAND, 4);
+        helper.setBlock(counter, InitBlocks.SHOP.get());
+        ServerPlayer customer = atTheCounter(helper, counter);
+        customer.getInventory().add(new ItemStack(Items.WHEAT, 3));
+
+        ShopServerPacketHandler.handleTrade(
+            new ShopTradePayload(helper.absolutePos(counter), BuiltInRegistries.ITEM.getKey(Items.WHEAT), false),
+            customer);
+
+        helper.assertTrue(Wallet.count(customer.getInventory()) > 0, "the shop paid nothing for the wheat");
+        helper.succeed();
+    }
+
+    /**
+     * Shouted from across the field, the order does not get taken. The screen is a picture
+     * of what the server had a moment ago; the counter is where the deal happens.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = 100)
+    public static void a_customer_across_the_field_is_not_served(GameTestHelper helper) {
+        BlockPos counter = new BlockPos(2, STAND, 2);
+        helper.setBlock(counter, InitBlocks.SHOP.get());
+        ServerPlayer customer = helper.makeMockServerPlayerInLevel();
+        BlockPos away = helper.absolutePos(new BlockPos(15, STAND, 15));
+        customer.teleportTo(away.getX() + 0.5, away.getY(), away.getZ() + 0.5);
+        customer.getInventory().add(new ItemStack(Items.EMERALD, WAGES));
+
+        ShopServerPacketHandler.handleTrade(
+            new ShopTradePayload(helper.absolutePos(counter), BuiltInRegistries.ITEM.getKey(Items.COOKIE), true),
+            customer);
+
+        helper.assertTrue(Wallet.count(customer.getInventory()) == WAGES, "the shop served someone out of reach");
+        helper.succeed();
+    }
+
+    /** Standing where a customer stands. */
+    private static ServerPlayer atTheCounter(GameTestHelper helper, BlockPos counter) {
+        ServerPlayer customer = helper.makeMockServerPlayerInLevel();
+        BlockPos beside = helper.absolutePos(counter.south());
+        customer.teleportTo(beside.getX() + 0.5, beside.getY(), beside.getZ() + 0.5);
+        return customer;
     }
 
     /**
