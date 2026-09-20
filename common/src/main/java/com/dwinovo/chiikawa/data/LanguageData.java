@@ -48,10 +48,9 @@ public final class LanguageData {
             addBlockTranslations(adder, "劳动公告板");
             addIntentNameTranslations(adder, "跟着主人", "坐着", "闲逛", "捡东西", "去领工作牌",
                 "收割", "种地", "送货", "拔草", "采蘑菇", "讨伐", "射箭", "演奏");
-            addTaskTypeTranslations(adder, "除草", "夜间采蘑菇", "街头演奏");
-            addBoardScreenTranslations(adder, "劳动公告板", "今天没有工作牌", "%s · %s 个 · %s",
-                "还没人领", "%s 领走了");
-            addPetStatusTranslations(adder, "正在：%s", "闲着", "工作牌：%s %s/%s", "没有工作牌");
+            addTaskTypeTranslations(adder, "除草", "%s 株", "夜间采蘑菇", "%s 朵", "街头演奏", "%s 秒");
+            addBoardScreenTranslations(adder, "劳动公告板", "今天没有工作牌", "%s · %s", "还没人领", "%s 领走了");
+            addPetStatusTranslations(adder, "正在：%s", "闲着", "工作牌：%s", "没有工作牌", "%s %s/%s", "%s · %s");
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
@@ -92,10 +91,10 @@ public final class LanguageData {
             addIntentNameTranslations(adder, "Following its owner", "Sitting", "Wandering", "Picking up an item",
                 "Fetching a slip", "Harvesting", "Planting", "Delivering", "Pulling weeds", "Picking mushrooms",
                 "Fighting", "Shooting", "Performing");
-            addTaskTypeTranslations(adder, "Weeding", "Mushroom Picking", "Street Performance");
-            addBoardScreenTranslations(adder, "Labor Board", "No slips up today", "%s · %s · %s",
-                "Still up", "Taken by %s");
-            addPetStatusTranslations(adder, "Doing: %s", "Idle", "Slip: %s %s/%s", "No slip");
+            addTaskTypeTranslations(adder, "Weeding", "%s weeds", "Mushroom Picking", "%s mushrooms",
+                "Street Performance", "%ss");
+            addBoardScreenTranslations(adder, "Labor Board", "No slips up today", "%s · %s", "Still up", "Taken by %s");
+            addPetStatusTranslations(adder, "Doing: %s", "Idle", "Slip: %s", "No slip", "%s %s/%s", "%s · %s");
         }
     }
 
@@ -192,27 +191,46 @@ public final class LanguageData {
         adder.add("intent.chiikawa.play_music", playMusic);
     }
 
-    /** Names of the slip types a labor board puts up. */
-    private static void addTaskTypeTranslations(Adder adder, String weeding, String mushroomPicking, String streetPerformance) {
+    /** Names of the slip types a labor board puts up, each with the unit it counts in. */
+    private static void addTaskTypeTranslations(
+        Adder adder,
+        String weeding,
+        String weedingAmount,
+        String mushroomPicking,
+        String mushroomPickingAmount,
+        String streetPerformance,
+        String streetPerformanceAmount
+    ) {
         adder.add("pet_task.chiikawa.weeding", weeding);
+        adder.add("pet_task.chiikawa.weeding.amount", weedingAmount);
         adder.add("pet_task.chiikawa.mushroom_picking", mushroomPicking);
+        adder.add("pet_task.chiikawa.mushroom_picking.amount", mushroomPickingAmount);
         adder.add("pet_task.chiikawa.street_performance", streetPerformance);
+        adder.add("pet_task.chiikawa.street_performance.amount", streetPerformanceAmount);
     }
 
-    private static void addBoardScreenTranslations(Adder adder, String title, String empty, String slip,
+    /** @param detail how much work and for which job, on a board row */
+    private static void addBoardScreenTranslations(Adder adder, String title, String empty, String detail,
             String open, String taken) {
         adder.add("screen.chiikawa.labor_board", title);
         adder.add("screen.chiikawa.labor_board.empty", empty);
-        adder.add("screen.chiikawa.labor_board.slip", slip);
+        adder.add("screen.chiikawa.labor_board.detail", detail);
         adder.add("screen.chiikawa.labor_board.open", open);
         adder.add("screen.chiikawa.labor_board.taken", taken);
     }
 
-    private static void addPetStatusTranslations(Adder adder, String doing, String doingNothing, String slip, String noSlip) {
+    /**
+     * @param slipProgress a slip and how far along it is, such as "Weeding 3/8"
+     * @param label what a pet shows over its head: what it is doing, and its slip
+     */
+    private static void addPetStatusTranslations(Adder adder, String doing, String doingNothing, String slip,
+            String noSlip, String slipProgress, String label) {
         adder.add("screen.chiikawa.pet.doing", doing);
         adder.add("screen.chiikawa.pet.doing.nothing", doingNothing);
         adder.add("screen.chiikawa.pet.slip", slip);
         adder.add("screen.chiikawa.pet.slip.none", noSlip);
+        adder.add("screen.chiikawa.pet.slip.short", slipProgress);
+        adder.add("screen.chiikawa.pet.label", label);
     }
 
     private static void addDollTooltipTranslations(Adder adder, String placeOnCakeHint) {
