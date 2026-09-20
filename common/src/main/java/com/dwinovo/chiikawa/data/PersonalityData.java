@@ -43,6 +43,9 @@ public final class PersonalityData {
             .wildTool(Items.WOODEN_HOE, 6)
             .wildTool(Items.STONE_HOE, 2)
             .wildTool(InitItems.CHIIKAWA_WEAPON.get(), 2)
+            // Snacks, and not much else.
+            .likes(Items.COOKIE, 3)
+            .likes(Items.BREAD, 1)
             .build());
         // Cheerful, often playing music.
         all.put(id(InitEntity.HACHIWARE_PET.get()), personality()
@@ -52,6 +55,10 @@ public final class PersonalityData {
             .wildTool(Items.WOODEN_HOE, 3)
             .wildTool(Items.STONE_HOE, 1)
             .wildTool(InitItems.HACHIWARE_WEAPON.get(), 4)
+            // Things to cook with.
+            .likes(Items.SUGAR, 2)
+            .likes(Items.EGG, 2)
+            .likes(Items.WHEAT, 1)
             .build());
         // Very whimsical.
         all.put(id(InitEntity.USAGI_PET.get()), personality()
@@ -60,6 +67,12 @@ public final class PersonalityData {
             .randomness(0.15F)
             .wildTool(InitItems.USAGI_WEAPON.get(), 6)
             .wildTool(Items.WOODEN_HOE, 1)
+            // Anything at all, in equal measure.
+            .likes(Items.COOKIE, 1)
+            .likes(Items.CAKE, 1)
+            .likes(Items.PUMPKIN_PIE, 1)
+            .likes(Items.SWEET_BERRIES, 1)
+            .likes(Items.APPLE, 1)
             .build());
         // Hard-working.
         all.put(id(InitEntity.SHISA_PET.get()), personality()
@@ -70,6 +83,9 @@ public final class PersonalityData {
             .randomness(0.05F)
             .wildTool(Items.WOODEN_HOE, 5)
             .wildTool(Items.STONE_HOE, 3)
+            // Something bottled to drink.
+            .likes(Items.HONEY_BOTTLE, 3)
+            .likes(Items.MILK_BUCKET, 1)
             .build());
         // Would rather not work.
         all.put(id(InitEntity.MOMONGA_PET.get()), personality()
@@ -80,6 +96,10 @@ public final class PersonalityData {
             .wildTool(Items.AIR, 6)
             .wildTool(Items.WOODEN_HOE, 1)
             .wildTool(Items.WOODEN_SWORD, 1)
+            // Small pretty things.
+            .likes(Items.POPPY, 2)
+            .likes(Items.PINK_TULIP, 2)
+            .likes(Items.DANDELION, 1)
             .build());
         // Laid-back.
         all.put(id(InitEntity.KURIMANJU_PET.get()), personality()
@@ -89,6 +109,10 @@ public final class PersonalityData {
             .randomness(0.08F)
             .wildTool(Items.WOODEN_HOE, 3)
             .wildTool(Items.AIR, 2)
+            // What goes with a drink, the drink itself left out.
+            .likes(Items.COOKED_COD, 2)
+            .likes(Items.BAKED_POTATO, 2)
+            .likes(Items.DRIED_KELP, 1)
             .build());
         // Loves subjugation.
         all.put(id(InitEntity.RAKKO_PET.get()), personality()
@@ -98,12 +122,19 @@ public final class PersonalityData {
             .wildTool(Items.STONE_SWORD, 5)
             .wildTool(Items.WOODEN_SWORD, 3)
             .wildTool(Items.AIR, 1)
+            // Sweet things.
+            .likes(Items.CAKE, 3)
+            .likes(Items.PUMPKIN_PIE, 2)
+            .likes(Items.SWEET_BERRIES, 2)
             .build());
         // Quiet.
         all.put(id(InitEntity.FURUHONYA_PET.get()), personality()
             .weigh(0.7F, FIGHTING)
             .weigh(0.5F, PetIntents.WANDER)
             .randomness(0.02F)
+            // Books, of course.
+            .likes(Items.BOOK, 3)
+            .likes(Items.PAPER, 1)
             .build());
         return all;
     }
@@ -119,7 +150,8 @@ public final class PersonalityData {
     private static final class Builder {
         private final Map<ResourceLocation, Float> multipliers = new HashMap<>();
         private final Map<DayPhase, Map<ResourceLocation, Float>> routine = new EnumMap<>(DayPhase.class);
-        private final List<Personality.WildTool> wildTools = new ArrayList<>();
+        private final List<Personality.WeightedItem> wildTools = new ArrayList<>();
+        private final List<Personality.WeightedItem> likes = new ArrayList<>();
         private float randomness;
 
         Builder weigh(float factor, ResourceLocation intent) {
@@ -147,12 +179,18 @@ public final class PersonalityData {
         }
 
         Builder wildTool(ItemLike item, int weight) {
-            wildTools.add(new Personality.WildTool(item.asItem(), weight));
+            wildTools.add(new Personality.WeightedItem(item.asItem(), weight));
+            return this;
+        }
+
+        /** Something this kind of pet would buy for itself, given the money and a shop. */
+        Builder likes(ItemLike item, int weight) {
+            likes.add(new Personality.WeightedItem(item.asItem(), weight));
             return this;
         }
 
         Personality build() {
-            return new Personality(multipliers, routine, randomness, wildTools);
+            return new Personality(multipliers, routine, randomness, wildTools, likes);
         }
     }
 }
