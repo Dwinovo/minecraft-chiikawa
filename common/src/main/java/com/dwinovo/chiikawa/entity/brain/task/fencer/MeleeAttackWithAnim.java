@@ -14,7 +14,6 @@ import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.behavior.OneShot;
 import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ProjectileWeaponItem;
 
@@ -35,17 +34,21 @@ public final class MeleeAttackWithAnim {
             brain -> brain.group(
                     brain.registered(MemoryModuleType.LOOK_TARGET),
                     brain.present(MemoryModuleType.ATTACK_TARGET),
-                    brain.absent(MemoryModuleType.ATTACK_COOLING_DOWN),
-                    brain.present(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES)
+                    brain.absent(MemoryModuleType.ATTACK_COOLING_DOWN)
                 )
                 .apply(
                     brain,
-                    (lookTarget, attackTarget, cooldown, visibleTargets) -> (ServerLevel level, AbstractPet pet, long time) -> {
+                    (lookTarget, attackTarget, cooldown) -> (ServerLevel level, AbstractPet pet, long time) -> {
                         LivingEntity target = brain.get(attackTarget);
+                        // Line of sight is asked of the world, not of the "nearest visible"
+                        // memory: that list is refreshed every twenty ticks, so a pet that
+                        // had just started moving never had itself and its target in the
+                        // same snapshot, and swung at nothing all the way out of the fight.
                         if (!PetTargeting.canTarget(pet, target)
+                            || PetCombat.explodes(target)
                             || (isHoldingUsableProjectileWeapon(pet) && !Utils.getArrow(pet).isEmpty())
                             || !pet.isWithinMeleeAttackRange(target)
-                            || !brain.<NearestVisibleLivingEntities>get(visibleTargets).contains(target)) {
+                            || !pet.hasLineOfSight(target)) {
                             return false;
                         }
                         lookTarget.set(new EntityTracker(target, true));
