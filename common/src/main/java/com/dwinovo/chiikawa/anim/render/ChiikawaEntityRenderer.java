@@ -12,9 +12,11 @@ import com.dwinovo.chiikawa.anim.controller.ControllerHandler;
 import com.dwinovo.chiikawa.anim.controller.ControllerSnapshot;
 import com.dwinovo.chiikawa.anim.molang.MolangContext;
 import com.dwinovo.chiikawa.anim.render.layer.HeldItemLayer;
+import com.dwinovo.chiikawa.client.ui.PetLabelFades;
 import com.dwinovo.chiikawa.client.ui.PetStatusText;
 import com.dwinovo.chiikawa.client.ui.mc.WorldSurface;
 import com.dwinovo.chiikawa.ui.DrawSurface;
+import com.dwinovo.chiikawa.ui.Fade;
 import com.dwinovo.chiikawa.ui.widget.Chip;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.anim.render.layer.SlipTagLayer;
@@ -436,7 +438,11 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     private static final float LABEL_LINE = 0.28F;
     private static final float LABEL_SCALE = 0.025F;
 
-    /** A working pet says so over its head, even when it has no name to show. */
+    /**
+     * A working pet says so over its head, even when it has no name to show. True for any
+     * pet with something to say, asked about or not: the name tag pass is where a label
+     * fades in and out, and one on its way out still has to be drawn.
+     */
     @Override
     protected boolean shouldShowName(T entity) {
         return super.shouldShowName(entity) || statusChip(entity).isPresent();
@@ -449,31 +455,44 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         if (named) {
             super.renderNameTag(entity, displayName, poseStack, bufferSource, packedLight, partialTick);
         }
-        statusChip(entity).ifPresent(chip ->
-            drawLabel(entity, chip, poseStack, bufferSource, partialTick, named ? LABEL_LINE : 0.0F));
+        Optional<Chip> chip = statusChip(entity);
+        // Stepped every frame the pet is drawn, asked about or not: a label on its way out
+        // is only there because it was asked for a moment ago.
+        Fade fade = PetLabelFades.step(entity.getId(), chip.isPresent() && isAsked(entity));
+        if (chip.isPresent() && fade.isVisible()) {
+            drawLabel(entity, chip.get(), fade.alpha(), poseStack, bufferSource, partialTick,
+                named ? LABEL_LINE : 0.0F);
+        }
     }
 
     /**
-     * What this pet is doing, for the owner who is pointing at it. The game's own crosshair
-     * pick does the asking, which is to say: near enough to reach out and pet it. That is a
-     * distance the game already decides — the owner's interaction range, longer in creative
-     * — so there is no radius of ours to argue about, and a yard full of pets stays a yard
-     * rather than a wall of labels. Someone else's pets and idle pets stay quiet whatever
-     * you point at, and F1 hides it with the rest of the HUD.
+     * What this pet would say if asked. Someone else's pets and idle pets have nothing to
+     * say, and F1 hides it with the rest of the HUD.
      */
     private Optional<Chip> statusChip(T entity) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.options.hideGui || minecraft.player == null || !(entity instanceof AbstractPet pet)) {
             return Optional.empty();
         }
-        if (!pet.isOwnedBy(minecraft.player) || entity != this.entityRenderDispatcher.crosshairPickEntity) {
+        if (!pet.isOwnedBy(minecraft.player)) {
             return Optional.empty();
         }
         return PetStatusText.chip(pet);
     }
 
+    /**
+     * Whether the owner is asking this pet. The game's own crosshair pick is the asking,
+     * which is to say: pointed at, and near enough to reach out and pet it. That distance
+     * the game already decides — the owner's interaction range, longer in creative — so
+     * there is no radius of ours to argue about, and a yard full of pets stays a yard
+     * rather than a wall of labels.
+     */
+    private boolean isAsked(T entity) {
+        return entity == this.entityRenderDispatcher.crosshairPickEntity;
+    }
+
     /** The mod's own label, drawn where a name tag goes, with the same widgets its screens use. */
-    private void drawLabel(T entity, Chip chip, PoseStack poseStack, MultiBufferSource bufferSource,
+    private void drawLabel(T entity, Chip chip, float alpha, PoseStack poseStack, MultiBufferSource bufferSource,
                            float partialTick, float extraHeight) {
         Vec3 attachment = entity.getAttachments().getNullable(EntityAttachment.NAME_TAG, 0, entity.getViewYRot(partialTick));
         if (attachment == null) {
@@ -484,7 +503,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
         // Text pixels from here on, with y running down as on a screen.
         poseStack.scale(LABEL_SCALE, -LABEL_SCALE, LABEL_SCALE);
-        DrawSurface surface = new WorldSurface(poseStack, bufferSource, getFont());
+        DrawSurface surface = new WorldSurface(poseStack, bufferSource, getFont(), alpha);
         chip.draw(surface, 0, 0);
         poseStack.popPose();
     }
