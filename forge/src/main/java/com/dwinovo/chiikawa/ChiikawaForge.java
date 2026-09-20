@@ -15,6 +15,7 @@ import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.init.InitSensor;
 import com.dwinovo.chiikawa.init.InitSounds;
 import com.dwinovo.chiikawa.init.InitTabs;
+import com.dwinovo.chiikawa.entity.PetFollowKeeper;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalityLoader;
 import com.dwinovo.chiikawa.shop.ShopCatalogLoader;
 import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
@@ -102,6 +103,7 @@ public class ChiikawaForge {
         if (event.phase == TickEvent.Phase.END) {
             PetReviveRitualManager.tickServer(event.getServer());
             ServerMusicSystem.tickServer(event.getServer());
+            PetFollowKeeper.tickServer(event.getServer());
         }
     }
 
