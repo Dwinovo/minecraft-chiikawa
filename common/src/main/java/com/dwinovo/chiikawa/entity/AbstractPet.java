@@ -19,10 +19,10 @@ import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
 import com.dwinovo.chiikawa.utils.BrainUtils;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
 import com.dwinovo.chiikawa.entity.job.api.PetCapability;
-import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.init.InitSensor;
+import com.dwinovo.chiikawa.item.BagItem;
 import com.dwinovo.chiikawa.item.PetDollData;
 import com.dwinovo.chiikawa.sound.PetSoundCue;
 import com.dwinovo.chiikawa.sound.PetSoundKind;
@@ -126,7 +126,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     public static final int MAINHAND_SLOT = 0;
     /** Slot the worn bag lives in, for the same reason the tool lives in a slot. */
     public static final int BAG_SLOT = 1;
-    /** How much room a bear backpack adds. */
+    /** How much room a bag adds. */
     public static final int BAG_SIZE = 10;
     /** Everything: pockets plus whatever the bag adds when one is worn. */
     public static final int FULL_BACKPACK_SIZE = BACKPACK_SIZE + BAG_SIZE;
@@ -702,7 +702,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      */
     private void clearBagSlotOfOldStorage() {
         ItemStack inBagSlot = backpack.getItem(BAG_SLOT);
-        if (inBagSlot.isEmpty() || inBagSlot.is(InitItems.BEAR_BACKPACK.get())) {
+        if (inBagSlot.isEmpty() || BagItem.isBag(inBagSlot)) {
             return;
         }
         backpack.setItem(BAG_SLOT, ItemStack.EMPTY);
@@ -754,7 +754,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     /** Whether the pet is wearing a bag, which is what the last ten slots wait for. */
     public boolean isWearingBag() {
-        return backpack.getItem(BAG_SLOT).is(InitItems.BEAR_BACKPACK.get());
+        return BagItem.isBag(backpack.getItem(BAG_SLOT));
     }
 
     /**
