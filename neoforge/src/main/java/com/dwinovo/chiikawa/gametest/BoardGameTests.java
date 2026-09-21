@@ -19,9 +19,11 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
@@ -158,6 +160,39 @@ public final class BoardGameTests {
      * players nearby can see how much work is left. What they are sent is the board's
      * {@code hanging} places, and a claim has to take one away.
      */
+    /**
+     * Telling a player about the board changes nothing about it. The game asks while it is
+     * sending the chunk's changed blocks out, and a board that put its day's slips up then —
+     * and told the chunk so — lost the chunk track of that part of itself: no block broken
+     * there ever reached a player again.
+     */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 20)
+    public static void sending_a_board_to_players_changes_nothing(GameTestHelper helper) {
+        BlockPos at = new BlockPos(3, STAND, 3);
+        helper.setBlock(at, InitBlocks.LABOR_BOARD.get());
+        LaborBoardBlockEntity board = (LaborBoardBlockEntity) helper.getBlockEntity(at);
+        HolderLookup.Provider registries = helper.getLevel().registryAccess();
+        CompoundTag before = board.saveWithoutMetadata(registries);
+
+        board.getUpdateTag(registries);
+
+        helper.assertTrue(before.equals(board.saveWithoutMetadata(registries)),
+            "asking for what players see changed the board: " + before + " became " + board.saveWithoutMetadata(registries));
+        helper.succeed();
+    }
+
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void a_board_puts_its_plates_up_by_itself(GameTestHelper helper) {
+        BlockPos at = new BlockPos(3, STAND, 3);
+        helper.setBlock(at, InitBlocks.LABOR_BOARD.get());
+        LaborBoardBlockEntity board = (LaborBoardBlockEntity) helper.getBlockEntity(at);
+
+        // Nothing asks it: no pet about, no player at it.
+        helper.succeedWhen(() -> helper.assertTrue(
+            board.hanging() == (1 << BoardSlips.slipsAt(board.boardLevel())) - 1,
+            "a board nobody has looked at still hangs no plates: " + Integer.toBinaryString(board.hanging())));
+    }
+
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WATCH_TICKS + 200)
     public static void a_plate_comes_down_when_a_pet_takes_its_slip(GameTestHelper helper) {
         BlockPos at = weedingBoard(helper);
