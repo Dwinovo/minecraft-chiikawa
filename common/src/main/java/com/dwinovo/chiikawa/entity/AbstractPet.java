@@ -71,6 +71,7 @@ import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.registries.Registries;
@@ -455,10 +456,13 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * bought and what it gave them. Only the owner hears it, and only while they are about
      * in the pet's world — a line about a pet somewhere else is a line with nothing to look
      * at.
+     *
+     * <p>In grey italics, the way a book sets what someone does apart from what they say:
+     * a pet's doings land in chat among what players say, and should not be taken for it.
      */
     public void tellOwner(Component message) {
         if (getOwner() instanceof ServerPlayer owner) {
-            owner.displayClientMessage(message, false);
+            owner.displayClientMessage(message.copy().withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), false);
         }
     }
 
