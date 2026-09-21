@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa;
 
 import com.dwinovo.chiikawa.anim.compile.BedrockResourceLoader;
-import com.dwinovo.chiikawa.anim.render.BagRenderer;
+import com.dwinovo.chiikawa.anim.render.PropRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.ChiikawaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.FuruhonyaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.HachiwareRenderer;
@@ -11,7 +11,9 @@ import com.dwinovo.chiikawa.anim.render.impl.RakkoRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.ShisaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.UsagiRenderer;
 import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
+import com.dwinovo.chiikawa.client.render.LaborBoardRenderer;
 import com.dwinovo.chiikawa.client.screen.PetBackpackScreen;
+import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMenu;
@@ -24,6 +26,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -44,10 +47,11 @@ public class ChiikawaFabricClient implements ClientModInitializer {
         EntityRendererRegistry.register(InitEntity.RAKKO_PET.get(), RakkoRenderer::new);
         EntityRendererRegistry.register(InitEntity.FURUHONYA_PET.get(), FuruhonyaRenderer::new);
 
-        // Bags are drawn from their own Bedrock models, in a hand as on a pet.
-        for (Supplier<Item> bag : InitItems.BAGS) {
-            BuiltinItemRendererRegistry.INSTANCE.register(bag.get(), BagRenderer::drawItem);
+        // Props are drawn from their own Bedrock models, as items as everywhere else.
+        for (Supplier<? extends Item> prop : InitItems.PROPS) {
+            BuiltinItemRendererRegistry.INSTANCE.register(prop.get(), PropRenderer::drawItem);
         }
+        BlockEntityRenderers.register(InitBlockEntities.LABOR_BOARD.get(), context -> new LaborBoardRenderer());
 
         MenuScreens.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);
         FabricModNetworking.registerClient();
