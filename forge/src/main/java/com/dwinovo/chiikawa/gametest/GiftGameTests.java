@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.gametest;
 
 import static com.dwinovo.chiikawa.gametest.GameTestKit.NOON;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.carries;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 
@@ -43,7 +44,7 @@ public final class GiftGameTests {
     /** With something bought for its owner, the pet goes and finds them with it. */
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WALK_TICKS)
     public static void a_pet_takes_its_present_to_its_owner(GameTestHelper helper) {
-        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        ServerPlayer owner = player(helper);
         BlockPos across = helper.absolutePos(new BlockPos(12, STAND, 12));
         owner.teleportTo(across.getX() + 0.5, across.getY(), across.getZ() + 0.5);
 
@@ -63,7 +64,7 @@ public final class GiftGameTests {
     /** Emeralds pressed into its paws go into its bag, for it to spend as it sees fit. */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void an_owner_can_hand_a_pet_pocket_money(GameTestHelper helper) {
-        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        ServerPlayer owner = player(helper);
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         owner.setShiftKeyDown(false);
@@ -80,8 +81,8 @@ public final class GiftGameTests {
     /** A stranger's emeralds are their own business. */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void a_stranger_cannot_hand_a_pet_money(GameTestHelper helper) {
-        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
-        ServerPlayer stranger = helper.makeMockServerPlayerInLevel();
+        ServerPlayer owner = player(helper);
+        ServerPlayer stranger = player(helper);
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         stranger.setShiftKeyDown(false);

@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.gametest;
 
 import static com.dwinovo.chiikawa.gametest.GameTestKit.MIDNIGHT;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.holding;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 
@@ -298,7 +299,7 @@ public final class GuardGameTests {
     }
 
     private static ServerPlayer owner(GameTestHelper helper, BlockPos where) {
-        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        ServerPlayer owner = player(helper);
         owner.setGameMode(GameType.SURVIVAL);
         owner.setPos(helper.absoluteVec(where.getCenter()));
         return owner;
