@@ -108,6 +108,28 @@ public final class SupplyGameTests {
         helper.succeed();
     }
 
+    /**
+     * The pet screen has pages and only one of them is the backpack: on the others every
+     * slot is shut, the player's own included, so nothing can be dropped into a slot
+     * nobody can see.
+     */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void on_a_page_without_the_backpack_every_slot_is_shut(GameTestHelper helper) {
+        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        PetBackpackMenu menu = new PetBackpackMenu(1, owner.getInventory(), pet);
+
+        menu.showSlots(false);
+        helper.assertTrue(menu.slots.stream().noneMatch(net.minecraft.world.inventory.Slot::isActive),
+            "a slot stayed open on a page that does not show slots");
+
+        menu.showSlots(true);
+        helper.assertTrue(menu.slots.get(AbstractPet.MAINHAND_SLOT).isActive(), "the hand did not come back");
+        helper.assertTrue(menu.slots.get(menu.slots.size() - 1).isActive(), "the player's own hotbar did not come back");
+        helper.succeed();
+    }
+
     /** A dish handed to your own pet is eaten, and the pet gets on with things quicker. */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void a_dish_puts_a_pet_in_the_mood(GameTestHelper helper) {

@@ -64,6 +64,15 @@ public final class LanguageData {
                     "每升一级：每天多一张牌，并解锁更难的活",
                     "已升满", "你有 %s 绿宝石");
             addPetStatusTranslations(adder, "闲着", "戴上小熊挎包可以多装 10 格");
+            addPetScreenTranslations(adder, "背包", "状态", "指令",
+                    "没有领工作牌",
+                    "干劲十足：还剩 %s",
+                    "零花钱：%s 颗绿宝石",
+                    "准备送给你的礼物",
+                    "它会自己走过来递给你",
+                    "跟在你身边，有怪就上",
+                    "待在原地不动",
+                    "在家附近干活、逛街、领牌子");
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
@@ -120,12 +129,24 @@ public final class LanguageData {
                     "Each level: one more slip a day, and tougher work",
                     "Fully upgraded", "You have %s emeralds");
             addPetStatusTranslations(adder, "Idle", "A bear backpack adds ten more slots");
+            addPetScreenTranslations(adder, "Backpack", "Status", "Orders",
+                    "No slip taken",
+                    "Keen on work: %s left",
+                    "Pocket money: %s emeralds",
+                    "A present for you",
+                    "It will bring it over itself",
+                    "Stays by you and steps in when something attacks",
+                    "Stays right where it is",
+                    "Works, shops and takes slips around home");
         }
     }
 
     private static void addCommonTranslations(Adder adder, String tabName, String backpackMenu, String follow, String stay, String free) {
         adder.add("itemGroup.chiikawa", tabName);
         adder.add("menu.chiikawa.pet_backpack", backpackMenu);
+        adder.add("screen.chiikawa.pet.order.follow", follow);
+        adder.add("screen.chiikawa.pet.order.stay", stay);
+        adder.add("screen.chiikawa.pet.order.free", free);
         adder.add("message.chiikawa.pet_follow", follow + ": %s");
         adder.add("message.chiikawa.pet_stay", stay + ": %s");
         adder.add("message.chiikawa.pet_free", free + ": %s");
@@ -313,6 +334,27 @@ public final class LanguageData {
      * which already have names. How far along it is comes out as a bar and a count, which
      * read the same in every language.
      */
+    /**
+     * The pet screen's pages. The tab names are what the tabs say under the cursor; the
+     * order hints are the one line under each order, so they say what the pet will do
+     * rather than what the word means.
+     */
+    private static void addPetScreenTranslations(Adder adder, String backpack, String status, String orders,
+            String noSlip, String eager, String money, String gift, String giftHint,
+            String followHint, String stayHint, String freeHint) {
+        adder.add("screen.chiikawa.pet.tab.backpack", backpack);
+        adder.add("screen.chiikawa.pet.tab.status", status);
+        adder.add("screen.chiikawa.pet.tab.orders", orders);
+        adder.add("screen.chiikawa.pet.no_slip", noSlip);
+        adder.add("screen.chiikawa.pet.eager", eager);
+        adder.add("screen.chiikawa.pet.money", money);
+        adder.add("screen.chiikawa.pet.gift", gift);
+        adder.add("screen.chiikawa.pet.gift_hint", giftHint);
+        adder.add("screen.chiikawa.pet.order.follow.hint", followHint);
+        adder.add("screen.chiikawa.pet.order.stay.hint", stayHint);
+        adder.add("screen.chiikawa.pet.order.free.hint", freeHint);
+    }
+
     private static void addPetStatusTranslations(Adder adder, String doingNothing, String bagHint) {
         adder.add("screen.chiikawa.pet.doing.nothing", doingNothing);
         adder.add("screen.chiikawa.pet.bag_hint", bagHint);

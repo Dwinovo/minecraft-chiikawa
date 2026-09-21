@@ -5,6 +5,8 @@ import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
 import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
 import com.dwinovo.chiikawa.network.BoardServerPacketHandler;
+import com.dwinovo.chiikawa.network.PetPayloads;
+import com.dwinovo.chiikawa.network.PetServerPacketHandler;
 import com.dwinovo.chiikawa.network.ShopPayloads;
 import com.dwinovo.chiikawa.network.ShopServerPacketHandler;
 import com.dwinovo.chiikawa.network.MusicPayloads;
@@ -37,6 +39,11 @@ public final class FabricModNetworking {
             (server, player, handler, buffer, responseSender) -> {
                 BoardPayloads.BoardUpgradePayload payload = BoardPayloads.BoardUpgradePayload.read(buffer);
                 server.execute(() -> BoardServerPacketHandler.handleUpgrade(payload, player));
+            });
+        ServerPlayNetworking.registerGlobalReceiver(PetPayloads.PET_DIRECTIVE,
+            (server, player, handler, buffer, responseSender) -> {
+                PetPayloads.PetDirectivePayload payload = PetPayloads.PetDirectivePayload.read(buffer);
+                server.execute(() -> PetServerPacketHandler.handleDirective(payload, player));
             });
         ServerPlayNetworking.registerGlobalReceiver(ShopPayloads.SHOP_TRADE,
             (server, player, handler, buffer, responseSender) -> {

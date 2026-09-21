@@ -6,6 +6,8 @@ import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
 import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
 import com.dwinovo.chiikawa.network.BoardServerPacketHandler;
+import com.dwinovo.chiikawa.network.PetPayloads;
+import com.dwinovo.chiikawa.network.PetServerPacketHandler;
 import com.dwinovo.chiikawa.network.ShopPayloads;
 import com.dwinovo.chiikawa.network.ShopServerPacketHandler;
 import com.dwinovo.chiikawa.network.MusicPayloads;
@@ -43,6 +45,13 @@ public final class ForgeModNetworking {
                 ServerPlayer player = context.getSender();
                 if (player != null) {
                     BoardServerPacketHandler.handleUpgrade(payload, player);
+                }
+            });
+        serverbound(PetPayloads.PetDirectivePayload.class, PetPayloads.PetDirectivePayload::read,
+            (payload, context) -> {
+                ServerPlayer player = context.getSender();
+                if (player != null) {
+                    PetServerPacketHandler.handleDirective(payload, player);
                 }
             });
         clientbound(ShopPayloads.ShopPricesPayload.class, ShopPayloads.ShopPricesPayload::read,
