@@ -24,7 +24,6 @@ public final class ModItemModelProvider extends ModelProvider {
         itemModels.declareCustomModelItem(InitItems.HACHIWARE_WEAPON.get());
         itemModels.declareCustomModelItem(InitItems.CHIIKAWA_WEAPON.get());
         itemModels.generateFlatItem(InitItems.MUSIC_BOX.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(InitItems.BEAR_BACKPACK.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(InitItems.SIMPLE_DISH.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(InitItems.PET_BELL.get(), ModelTemplates.FLAT_ITEM);
     }

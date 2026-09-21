@@ -33,4 +33,21 @@ public record RenderLayerContext(
         int packedLight,
         int packedOverlay
 ) {
+    /**
+     * Whether a bone is not being drawn this frame: it, or any bone above it, is hidden by
+     * a visibility rule. Something attached to a hidden bone would float where the bone
+     * would have been.
+     */
+    public boolean isHidden(int boneIdx) {
+        boolean[] hidden = state.hiddenBones;
+        if (hidden == null || hidden.length != model.bones.length) {
+            return false;
+        }
+        for (int idx = boneIdx; idx >= 0; idx = model.bones[idx].parentIdx) {
+            if (hidden[idx]) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

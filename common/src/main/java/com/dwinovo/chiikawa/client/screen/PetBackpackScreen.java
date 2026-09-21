@@ -75,7 +75,7 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     private static final int ORDER_PITCH = 36;
 
     private static final int[] TAB_TINTS = {UiTheme.ACCENT_PALE, UiTheme.SKY_PALE, UiTheme.LEAF_PALE};
-    private static final ItemStack BAG_ICON_STACK = new ItemStack(InitItems.BEAR_BACKPACK.get());
+    private static final ItemStack BAG_ICON_STACK = new ItemStack(InitItems.BACKPACK.get());
 
     /** The pages, in tab order. */
     private enum Page {
