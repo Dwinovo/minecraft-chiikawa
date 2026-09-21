@@ -133,6 +133,11 @@ public final class PetReviveRitualManager {
             CompoundTag petDataCopy = revive.petData.copy();
             PetDollData.sanitizeForRevive(petDataCopy);
             pet.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), petDataCopy));
+        } else {
+            // A doll nobody died in, which only creative mode hands out: a new pet, brought
+            // into the world the way any other is.
+            pet.finalizeSpawn(level, level.getCurrentDifficultyAt(BlockPos.containing(revive.spawnPos)),
+                EntitySpawnReason.MOB_SUMMONED, null);
         }
 
         pet.snapTo(revive.spawnPos.x, revive.spawnPos.y, revive.spawnPos.z, revive.yRot, revive.xRot);
