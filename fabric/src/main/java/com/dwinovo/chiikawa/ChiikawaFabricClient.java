@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa;
 
 import com.dwinovo.chiikawa.anim.compile.BedrockResourceLoader;
+import com.dwinovo.chiikawa.anim.render.BagRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.ChiikawaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.FuruhonyaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.HachiwareRenderer;
@@ -12,11 +13,13 @@ import com.dwinovo.chiikawa.anim.render.impl.UsagiRenderer;
 import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
 import com.dwinovo.chiikawa.client.screen.PetBackpackScreen;
 import com.dwinovo.chiikawa.init.InitEntity;
+import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMenu;
 import com.dwinovo.chiikawa.platform.FabricModNetworking;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
@@ -24,6 +27,9 @@ import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.item.Item;
+
+import java.util.function.Supplier;
 
 public class ChiikawaFabricClient implements ClientModInitializer {
     @Override
@@ -37,6 +43,11 @@ public class ChiikawaFabricClient implements ClientModInitializer {
         EntityRendererRegistry.register(InitEntity.KURIMANJU_PET.get(), KurimanjuRenderer::new);
         EntityRendererRegistry.register(InitEntity.RAKKO_PET.get(), RakkoRenderer::new);
         EntityRendererRegistry.register(InitEntity.FURUHONYA_PET.get(), FuruhonyaRenderer::new);
+
+        // Bags are drawn from their own Bedrock models, in a hand as on a pet.
+        for (Supplier<Item> bag : InitItems.BAGS) {
+            BuiltinItemRendererRegistry.INSTANCE.register(bag.get(), BagRenderer::drawItem);
+        }
 
         MenuScreens.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);
         FabricModNetworking.registerClient();
