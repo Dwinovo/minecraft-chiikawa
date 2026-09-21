@@ -10,7 +10,11 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
+import com.dwinovo.chiikawa.item.PetDollItem;
+import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -19,8 +23,10 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.gametest.GameTestHolder;
@@ -28,7 +34,8 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Where a pet comes from and what happens after it is gone: the tool a wild one is born
- * with, and the doll that brings a dead one back with everything it had.
+ * with, and the doll that brings a dead one back with everything it had — and only that,
+ * since a doll anyone could make would be a spawn egg.
  */
 @GameTestHolder(Constants.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -102,6 +109,53 @@ public final class LifeGameTests {
             helper.assertTrue(GameTestKit.carries(revived, Items.WHEAT),
                 "the pet came back without what was in its bag");
         });
+    }
+
+    /**
+     * A doll nobody died in — only creative mode hands one out — brings a new pet of its
+     * kind, which belongs to nobody and goes its own way until someone tames it, the same
+     * as one met in the wild.
+     */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = RITUAL_TICKS)
+    public static void a_blank_doll_on_a_cake_brings_a_wild_pet(GameTestHelper helper) {
+        BlockPos cake = new BlockPos(4, STAND, 3);
+        helper.setBlock(cake, Blocks.CAKE);
+        // Full, as the other doll case's player is: this goes straight to the block and past
+        // the loaders' click events, so a player who could eat would take a slice instead.
+        Player player = GameTestKit.owner(helper);
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(InitItems.MOMONGA_DOLL.get()));
+        helper.useBlock(cake, player);
+
+        helper.succeedWhen(() -> {
+            AbstractPet pet = helper.getLevel()
+                .getEntitiesOfClass(AbstractPet.class, new AABB(helper.absolutePos(cake)).inflate(6.0))
+                .stream()
+                .filter(AbstractPet::isAlive)
+                .findFirst()
+                .orElse(null);
+            helper.assertTrue(pet != null, "nothing came from the cake");
+            helper.assertTrue(pet.getType() == InitEntity.MOMONGA_PET.get(), "the doll brought the wrong friend: " + pet.getType());
+            helper.assertFalse(pet.isTame(), "a blank doll handed over a pet already tamed");
+            helper.assertTrue(pet.getPetDirective() == PetDirective.FREE,
+                "a pet nobody owns is waiting to follow someone");
+        });
+    }
+
+    /**
+     * A doll is what a pet leaves behind, and the way back for that pet — nothing makes one.
+     * A doll anyone could make would bring pets out of thin air: a spawn egg by another name.
+     */
+    @GameTest(template = "floor8", batch = BATCH)
+    public static void no_doll_can_be_made(GameTestHelper helper) {
+        RegistryAccess registries = helper.getLevel().registryAccess();
+        List<RecipeHolder<?>> recipes = List.copyOf(helper.getLevel().getRecipeManager().getRecipes());
+        for (Item item : BuiltInRegistries.ITEM) {
+            if (item instanceof PetDollItem) {
+                helper.assertFalse(recipes.stream().anyMatch(recipe -> recipe.value().getResultItem(registries).is(item)),
+                    BuiltInRegistries.ITEM.getKey(item) + " can be made, which turns it into a spawn egg");
+            }
+        }
+        helper.succeed();
     }
 
 }
