@@ -23,7 +23,8 @@ public final class BakedCube {
     /**
      * Per-face UV in pixel coordinates: [face][vert] -> {u, v}. Face order:
      * 0=NORTH(-Z), 1=SOUTH(+Z), 2=WEST(-X), 3=EAST(+X), 4=UP(+Y), 5=DOWN(-Y).
-     * Vertex order per face is CCW when viewed from outside the cube.
+     * Vertex order per face is CCW when viewed from outside the cube. {@code null} for a face
+     * the model leaves out, which is not drawn.
      */
     public final float[][][] faceUV;
 
