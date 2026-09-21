@@ -103,6 +103,21 @@ public final class BoardSlips {
         return List.copyOf(filled);
     }
 
+    /**
+     * Which of a board's slips still hang on it, a bit for each place from the lowest up:
+     * every one nobody has taken down. A slip a pet is on its way to is still there to see
+     * until the pet gets there.
+     */
+    public static int hanging(List<BoardSlot> slots) {
+        int hanging = 0;
+        for (int i = 0; i < slots.size(); i++) {
+            if (!slots.get(i).claimed()) {
+                hanging |= 1 << i;
+            }
+        }
+        return hanging;
+    }
+
     /** The slip at one place on the board: the same one every time it is worked out. */
     private static BoardSlot rollOne(long seed, int index,
             List<Map.Entry<ResourceLocation, PetTaskType>> offered, int totalWeight) {

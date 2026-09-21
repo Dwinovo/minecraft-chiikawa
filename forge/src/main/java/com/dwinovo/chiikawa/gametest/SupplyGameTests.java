@@ -8,7 +8,9 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitItems;
+import com.dwinovo.chiikawa.item.BagItem;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
+import java.util.List;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
@@ -59,9 +61,9 @@ public final class SupplyGameTests {
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
 
         helper.assertFalse(pet.isWearingBag(), "a pet turned up already wearing a bag");
-        for (Supplier<Item> bag : InitItems.BAGS) {
-            pet.setItemSlot(EquipmentSlot.CHEST, new ItemStack(bag.get()));
-            helper.assertTrue(pet.isWearingBag(), "a " + bag.get() + " went on and the pet did not notice");
+        for (Item bag : bags()) {
+            pet.setItemSlot(EquipmentSlot.CHEST, new ItemStack(bag));
+            helper.assertTrue(pet.isWearingBag(), "a " + bag + " went on and the pet did not notice");
         }
         helper.assertTrue(pet.getBackpack().getContainerSize() == AbstractPet.FULL_BACKPACK_SIZE,
             "the bag's slots are not there to be used");
@@ -100,8 +102,8 @@ public final class SupplyGameTests {
         pet.tame(owner);
         Slot bagSlot = new PetBackpackMenu(1, owner.getInventory(), pet).slots.get(AbstractPet.BAG_SLOT);
 
-        for (Supplier<Item> bag : InitItems.BAGS) {
-            helper.assertTrue(bagSlot.mayPlace(new ItemStack(bag.get())), "the bag slot refused a " + bag.get());
+        for (Item bag : bags()) {
+            helper.assertTrue(bagSlot.mayPlace(new ItemStack(bag)), "the bag slot refused a " + bag);
         }
         helper.assertFalse(bagSlot.mayPlace(new ItemStack(Items.CAKE)), "the bag slot took a cake");
         helper.succeed();
@@ -270,5 +272,11 @@ public final class SupplyGameTests {
         helper.assertTrue(menu.slots.get(FIRST_BAG_SLOT).isActive(),
             "the bag went on and its slots stayed shut");
         helper.succeed();
+    }
+
+    /** Every bag there is: the props that are bags. */
+    private static List<Item> bags() {
+        return InitItems.PROPS.stream().map(Supplier::get).filter(BagItem.class::isInstance)
+            .map(Item.class::cast).toList();
     }
 }

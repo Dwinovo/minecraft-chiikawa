@@ -2,14 +2,9 @@ package com.dwinovo.chiikawa.data;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.init.InitItems;
-import java.util.function.Supplier;
-import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
-import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
 public class ForgeModItemModelProvider extends ItemModelProvider {
@@ -25,14 +20,7 @@ public class ForgeModItemModelProvider extends ItemModelProvider {
         generatedItem(InitItems.MUSIC_BOX.get());
         generatedItem(InitItems.SIMPLE_DISH.get());
         generatedItem(InitItems.PET_BELL.get());
-
-        // Bags are drawn from their own Bedrock models by a built-in renderer, lit from
-        // the front in a slot the way a flat item is.
-        for (Supplier<Item> bag : InitItems.BAGS) {
-            getBuilder(BuiltInRegistries.ITEM.getKey(bag.get()).getPath())
-                .parent(new ModelFile.UncheckedModelFile("builtin/entity"))
-                .guiLight(BlockModel.GuiLight.FRONT);
-        }
+        // The props' item models come from PropItemModelProvider, shared with Fabric.
         // Weapons have prebuilt models under resources; no datagen needed.
     }
 

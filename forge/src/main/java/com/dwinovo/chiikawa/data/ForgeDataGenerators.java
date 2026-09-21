@@ -39,6 +39,7 @@ public class ForgeDataGenerators {
         // Item model provider
         generator.addProvider(event.includeClient(), new ForgeModItemModelProvider(output, existingFileHelper));
         generator.addProvider(event.includeClient(), new ModBlockModelProvider(output));
+        generator.addProvider(event.includeClient(), new PropItemModelProvider(output));
         
         // Tag providers
         ForgeModBlockTagsProvider blockTagsProvider = new ForgeModBlockTagsProvider(output, lookupProvider, existingFileHelper);

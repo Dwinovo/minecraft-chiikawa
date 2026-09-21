@@ -18,6 +18,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.level.block.Block;
 
 public final class InitItems {
     public static final Supplier<SpawnEggItem> USAGI_SPAWN_EGG =
@@ -45,7 +46,7 @@ public final class InitItems {
     public static final Supplier<Item> MUSIC_BOX =
         registerItem("music_box", MusicBoxItem::new);
     public static final Supplier<BlockItem> LABOR_BOARD =
-        registerItem("labor_board", () -> new BlockItem(InitBlocks.LABOR_BOARD.get(), new Item.Properties()));
+        registerPropBlock("labor_board", InitBlocks.LABOR_BOARD);
 
     public static final Supplier<Item> SIMPLE_DISH =
         registerItem("simple_dish", () -> new Item(new Item.Properties()));
@@ -61,8 +62,13 @@ public final class InitItems {
         registerBag("whale_pouch", BagItem.Wear.SLUNG);
     public static final Supplier<Item> STAR_POUCH =
         registerBag("star_pouch", BagItem.Wear.SLUNG);
-    /** Every bag, for whatever has to be told about each of them: its renderer, its model. */
-    public static final List<Supplier<Item>> BAGS = List.of(BACKPACK, BEAR_POUCH, WHALE_POUCH, STAR_POUCH);
+    /**
+     * Everything drawn from a Bedrock model of its own, by {@code PropRenderer}: the bags
+     * and the labor board. Each loader gives these their built-in item renderer, and their
+     * item models are generated from this list.
+     */
+    public static final List<Supplier<? extends Item>> PROPS =
+        List.of(BACKPACK, BEAR_POUCH, WHALE_POUCH, STAR_POUCH, LABOR_BOARD);
 
     public static final Supplier<BlockItem> SHOP =
         registerItem("shop", () -> new BlockItem(InitBlocks.SHOP.get(), new Item.Properties()));
@@ -106,10 +112,16 @@ public final class InitItems {
         );
     }
 
+    // Props are drawn by a built-in item renderer, and Forge 1.20.1 hands an item its client
+    // renderer only through the item itself, so the loader makes these.
     private static Supplier<Item> registerBag(String name, BagItem.Wear wear) {
         ResourceLocation id = new ResourceLocation(Constants.MOD_ID, name);
-        // Forge 1.20.1 hands an item its client renderer only through the item itself.
         return Services.REGISTRY.registerBag(id, wear, new Item.Properties());
+    }
+
+    private static Supplier<BlockItem> registerPropBlock(String name, Supplier<? extends Block> block) {
+        ResourceLocation id = new ResourceLocation(Constants.MOD_ID, name);
+        return Services.REGISTRY.registerPropBlockItem(id, block, new Item.Properties());
     }
 
     private static <T extends Item> Supplier<T> registerItem(String name, Supplier<T> factory) {

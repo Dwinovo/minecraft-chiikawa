@@ -131,7 +131,23 @@ public class ForgeRegistryHelper implements IRegistryHelper {
                 public void initializeClient(
                         java.util.function.Consumer<net.minecraftforge.client.extensions.common.IClientItemExtensions> consumer) {
                     // Only called on the client, so the client-only renderer stays off a server.
-                    consumer.accept(com.dwinovo.chiikawa.ChiikawaForgeClient.BAG_ITEM_EXTENSIONS);
+                    consumer.accept(com.dwinovo.chiikawa.ChiikawaForgeClient.PROP_ITEM_EXTENSIONS);
+                }
+            });
+    }
+
+    @Override
+    public java.util.function.Supplier<net.minecraft.world.item.BlockItem> registerPropBlockItem(
+        ResourceLocation id,
+        Supplier<? extends Block> block,
+        net.minecraft.world.item.Item.Properties properties
+    ) {
+        return register(net.minecraft.core.registries.BuiltInRegistries.ITEM, id,
+            () -> new net.minecraft.world.item.BlockItem(block.get(), properties) {
+                @Override
+                public void initializeClient(
+                        java.util.function.Consumer<net.minecraftforge.client.extensions.common.IClientItemExtensions> consumer) {
+                    consumer.accept(com.dwinovo.chiikawa.ChiikawaForgeClient.PROP_ITEM_EXTENSIONS);
                 }
             });
     }
