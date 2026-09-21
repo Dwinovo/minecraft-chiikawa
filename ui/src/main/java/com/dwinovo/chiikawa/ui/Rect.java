@@ -16,4 +16,9 @@ public record Rect(int x, int y, int width, int height) {
     public int bottom() {
         return y + height;
     }
+
+    /** The same box, moved: a layout written relative to a panel, placed on the screen. */
+    public Rect offset(int dx, int dy) {
+        return new Rect(x + dx, y + dy, width, height);
+    }
 }
