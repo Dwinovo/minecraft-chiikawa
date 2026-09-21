@@ -14,6 +14,7 @@ import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.UiTheme;
 import com.dwinovo.chiikawa.ui.widget.Arrow;
 import com.dwinovo.chiikawa.ui.widget.Slot;
+import com.dwinovo.chiikawa.ui.widget.TitledPanel;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -114,7 +115,7 @@ public class ShopScreen extends Screen {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
         GuiSurface surface = new GuiSurface(graphics, this.font);
-        Ui.titledPanel(surface, leftPos, topPos, PANEL_W, panelHeight, this.title.getString());
+        TitledPanel.draw(surface, leftPos, topPos, PANEL_W, panelHeight, this.title.getString());
         // What the customer has to spend, where a shopper looks first.
         Ui.textRight(surface, String.valueOf(purse()), leftPos + PANEL_W - UiStyle.PAD,
             UiStyle.centerIn(topPos, UiStyle.TITLE_H, surface.lineHeight()), UiTheme.TEXT_MUTED);

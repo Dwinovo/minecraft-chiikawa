@@ -13,46 +13,50 @@ class BarTest {
 
     @Test
     void anUntouchedSlipIsAllGroove() {
-        Bar.draw(surface, 0, 0, 40, 4, 0, 11);
+        Bar.draw(surface, 0, 0, 40, 7, 0, 11);
 
-        assertEquals(1, surface.rects.size());
-        assertEquals(UiTheme.SURFACE, surface.rects.get(0).argb());
+        assertFalse(surface.hasRectOf(UiTheme.LEAF));
+        assertEquals(UiTheme.SURFACE, surface.colorAt(20, 3));
+        assertEquals(UiTheme.INK, surface.colorAt(20, 0), "the track has no line round it");
     }
 
     @Test
     void aPetWithNoSlipHasNothingToFill() {
-        Bar.draw(surface, 0, 0, 40, 4, 3, 0);
+        Bar.draw(surface, 0, 0, 40, 7, 3, 0);
 
-        assertFalse(surface.hasRectOf(UiTheme.ACCENT));
+        assertFalse(surface.hasRectOf(UiTheme.LEAF));
     }
 
     @Test
     void theFirstStepIsVisibleEvenWhenItRoundsToNothing() {
-        Bar.draw(surface, 0, 0, 24, 4, 1, 240);
+        Bar.draw(surface, 0, 0, 24, 7, 1, 240);
 
-        assertEquals(Bar.MIN_FILL, surface.rectOf(UiTheme.ACCENT).width());
+        assertEquals(UiTheme.LEAF, surface.colorAt(1, 3), "the first step is not there to see");
     }
 
     @Test
     void aBarNearlyThereIsNotDrawnFull() {
-        Bar.draw(surface, 0, 0, 24, 4, 239, 240);
+        Bar.draw(surface, 0, 0, 24, 7, 239, 240);
 
-        assertTrue(surface.rectOf(UiTheme.ACCENT).width() < 24,
-            () -> "nearly done read as done: " + surface.rects);
+        assertEquals(UiTheme.SURFACE, surface.colorAt(22, 3), () -> "nearly done read as done: " + surface.rects);
+        assertFalse(surface.hasRectOf(UiTheme.SUCCESS));
     }
 
     @Test
     void aFinishedSlipFillsTheBarAndChangesItsColour() {
-        Bar.draw(surface, 0, 0, 24, 4, 11, 11);
+        Bar.draw(surface, 0, 0, 24, 7, 11, 11);
 
-        assertEquals(24, surface.rectOf(UiTheme.SUCCESS).width());
-        assertFalse(surface.hasRectOf(UiTheme.ACCENT));
+        assertEquals(UiTheme.SUCCESS, surface.colorAt(22, 3));
+        assertEquals(UiTheme.SUCCESS, surface.colorAt(1, 3));
+        assertFalse(surface.hasRectOf(UiTheme.LEAF));
     }
 
     @Test
     void halfDoneIsHalfTheBar() {
-        Bar.draw(surface, 0, 0, 40, 4, 5, 10);
+        Bar.draw(surface, 0, 0, 42, 7, 5, 10);
 
-        assertEquals(20, surface.rectOf(UiTheme.ACCENT).width());
+        // Forty pixels of track inside the line: half of it is twenty.
+        assertEquals(UiTheme.LEAF, surface.colorAt(20, 3));
+        assertEquals(UiTheme.SURFACE, surface.colorAt(21, 3));
     }
 }

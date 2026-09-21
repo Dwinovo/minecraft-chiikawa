@@ -8,6 +8,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
+import com.dwinovo.chiikawa.network.PetServerPacketHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
@@ -58,6 +59,52 @@ public final class InteractGameTests {
         pet.mobInteract(owner, InteractionHand.MAIN_HAND);
         helper.assertTrue(pet.getPetDirective() == first,
             "the instructions do not come back round to where they started");
+        helper.succeed();
+    }
+
+    /**
+     * The pet screen's orders page: picking an order is the same as crouching and clicking
+     * through to it, and it goes straight to the one picked.
+     */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void an_owner_can_order_a_pet_from_its_screen(GameTestHelper helper) {
+        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        owner.setPos(helper.absoluteVec(new BlockPos(3, STAND, 5).getCenter()));
+
+        helper.assertTrue(PetServerPacketHandler.order(owner, pet, PetDirective.STAY), "the owner's order was refused");
+        helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, "the pet did not take its owner's order");
+        helper.succeed();
+    }
+
+    /** Anybody's client can send anything; only the owner's orders are heard. */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void a_stranger_cannot_order_somebody_elses_pet(GameTestHelper helper) {
+        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        ServerPlayer stranger = helper.makeMockServerPlayerInLevel();
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        pet.setPetDirective(PetDirective.FOLLOW);
+        stranger.setPos(helper.absoluteVec(new BlockPos(3, STAND, 5).getCenter()));
+
+        helper.assertFalse(PetServerPacketHandler.order(stranger, pet, PetDirective.FREE),
+            "a stranger's order was heard");
+        helper.assertTrue(pet.getPetDirective() == PetDirective.FOLLOW, "the pet did what a stranger told it");
+        helper.succeed();
+    }
+
+    /** And an owner has to be near enough to be heard, as with any other screen. */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void an_order_from_across_the_field_is_not_heard(GameTestHelper helper) {
+        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        pet.setPetDirective(PetDirective.FOLLOW);
+        owner.setPos(helper.absoluteVec(new BlockPos(3, STAND, 3).getCenter()).add(40.0, 0.0, 0.0));
+
+        helper.assertFalse(PetServerPacketHandler.order(owner, pet, PetDirective.STAY), "an order carried forty blocks");
+        helper.assertTrue(pet.getPetDirective() == PetDirective.FOLLOW, "the pet heard its owner from forty blocks off");
         helper.succeed();
     }
 

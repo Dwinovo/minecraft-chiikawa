@@ -13,35 +13,37 @@ class UiTest {
     private final RecordingSurface surface = new RecordingSurface();
 
     @Test
-    void aPanelLeavesItsCornersEmptySoItReadsAsRounded() {
+    void aPanelIsRoundedAtEveryCorner() {
         Ui.panel(surface, 10, 20, 100, 50);
 
-        for (Rectangle rect : surface.rects) {
-            if (rect.argb() != UiTheme.BORDER) {
-                continue;
-            }
-            assertFalse(rect.x() == 10 && rect.y() == 20, () -> "a pixel in the top-left corner: " + rect);
-            assertFalse(rect.x() == 10 && rect.y() + rect.height() == 70, () -> "bottom-left corner: " + rect);
+        // The corner pixels are clear, and so is the one next to each along the edge.
+        for (int[] corner : new int[][] {{10, 20}, {109, 20}, {10, 69}, {109, 69}}) {
+            assertEquals(0, surface.colorAt(corner[0], corner[1]), () -> "a square corner at " + corner[0] + "," + corner[1]);
         }
-        assertTrue(surface.rects.contains(new Rectangle(11, 21, 98, 48, UiTheme.PANEL)),
-            () -> "no face inside the outline: " + surface.rects);
+        assertEquals(0, surface.colorAt(11, 20), "the curve starts on the very next pixel");
+        assertEquals(UiTheme.INK, surface.colorAt(60, 20), "no ink line along the top");
+        assertEquals(UiTheme.INK, surface.colorAt(10, 45), "no ink line down the side");
     }
 
     @Test
-    void aPanelIsLitFromTheTopLeft() {
+    void aPanelIsAStickerInkThenRimThenPaper() {
         Ui.panel(surface, 10, 20, 100, 50);
 
-        assertEquals(new Rectangle(11, 21, 97, 1, UiTheme.HIGHLIGHT), surface.rectOf(UiTheme.HIGHLIGHT));
-        assertEquals(new Rectangle(12, 68, 97, 1, UiTheme.SHADE), surface.rectOf(UiTheme.SHADE));
+        assertEquals(UiTheme.INK, surface.colorAt(60, 20));
+        assertEquals(UiTheme.HIGHLIGHT, surface.colorAt(60, 21), "no white rim inside the line");
+        assertEquals(UiTheme.PANEL, surface.colorAt(60, 22));
+        assertEquals(UiTheme.HIGHLIGHT, surface.colorAt(60, 68), "the rim stops short of the bottom");
+        assertEquals(UiTheme.INK, surface.colorAt(60, 69));
     }
 
     @Test
-    void aWellIsTheSameLightTurnedOver() {
+    void aWellIsShadedAlongItsTopAndLeft() {
         Ui.well(surface, 0, 0, 18, 18);
 
-        assertEquals(new Rectangle(0, 0, 18, 18, UiTheme.SURFACE), surface.rects.get(0));
-        assertEquals(new Rectangle(0, 0, 17, 1, UiTheme.SHADE), surface.rectOf(UiTheme.SHADE));
-        assertEquals(new Rectangle(1, 17, 17, 1, UiTheme.HIGHLIGHT), surface.rectOf(UiTheme.HIGHLIGHT));
+        assertEquals(UiTheme.SHADE, surface.colorAt(9, 0), "no lip along the top");
+        assertEquals(UiTheme.SHADE, surface.colorAt(0, 9), "no lip down the left");
+        assertEquals(UiTheme.SURFACE, surface.colorAt(9, 9));
+        assertEquals(UiTheme.SURFACE, surface.colorAt(17, 9), "the right edge is floor, not lip");
     }
 
     @Test
@@ -58,27 +60,9 @@ class UiTest {
     void aCardCastsItsShadowBehindItself() {
         Ui.card(surface, 10, 20, 100, 50);
 
-        assertEquals(new Rectangle(10 + UiStyle.SHADOW_OFF, 20 + UiStyle.SHADOW_OFF, 100, 50, UiTheme.SHADOW),
-            surface.rects.get(0));
-        assertEquals(UiTheme.BORDER, surface.rects.get(1).argb());
-    }
-
-    @Test
-    void aTitledPanelSaysWhereItsContentsStart() {
-        int contentY = Ui.titledPanel(surface, 0, 0, 100, 80, "Labor Board");
-
-        assertEquals(UiStyle.TITLE_H + UiStyle.PAD, contentY);
-        assertEquals("Labor Board", surface.texts.get(0).text());
-        assertTrue(surface.rects.contains(
-                new Rectangle(UiStyle.BORDER, UiStyle.TITLE_H, 98, UiStyle.BORDER, UiTheme.DIVIDER)),
-            () -> "no divider under the title: " + surface.rects);
-    }
-
-    @Test
-    void aTitleSitsInTheMiddleOfItsBar() {
-        Ui.titledPanel(surface, 0, 0, 100, 80, "Labor Board");
-
-        assertEquals((UiStyle.TITLE_H - surface.lineHeight()) / 2, surface.texts.get(0).y());
+        assertEquals(UiTheme.SHADOW, surface.rects.get(0).argb(), "the shadow was not drawn first");
+        assertEquals(UiTheme.SHADOW, surface.colorAt(10 + 100, 20 + 30), "no shadow past the right edge");
+        assertEquals(UiTheme.INK, surface.colorAt(60, 20), "the panel is not over its shadow");
     }
 
     @Test
@@ -108,8 +92,9 @@ class UiTest {
     void onlyTheHoveredRowIsTinted() {
         Ui.rowHighlight(surface, new Rect(4, 8, 100, UiStyle.ROW_H));
 
-        assertEquals(new Rectangle(4, 8, 100, UiStyle.ROW_H, UiTheme.HOVER), surface.rects.get(0));
-        assertFalse(surface.rects.isEmpty());
+        assertEquals(UiTheme.HOVER, surface.colorAt(54, 8 + UiStyle.ROW_H / 2));
+        assertEquals(0, surface.colorAt(4, 8), "the tint has square corners");
+        assertEquals(0, surface.colorAt(104, 8 + UiStyle.ROW_H / 2), "the tint spilled past its row");
     }
 
     @Test

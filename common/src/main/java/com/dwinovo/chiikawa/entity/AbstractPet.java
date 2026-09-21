@@ -154,6 +154,17 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     private static final EntityDataAccessor<CompoundTag> TASK = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.COMPOUND_TAG);
     /** Id of the intent the pet is following, empty when none. Synced for the backpack screen. */
     private static final EntityDataAccessor<String> INTENT = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.STRING);
+    /**
+     * Bought for the owner and not yet handed over; see {@link #setPendingGift}. Synced,
+     * because the owner is shown what is coming before it arrives.
+     */
+    private static final EntityDataAccessor<ItemStack> GIFT = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.ITEM_STACK);
+    /**
+     * The game time a good meal wears off at; see {@link #feedDish}. A time rather than a
+     * countdown, so it is synced once when the pet is fed rather than every tick after,
+     * and the client works out how long is left against its own clock.
+     */
+    private static final EntityDataAccessor<Long> EAGER_UNTIL = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.LONG);
 
     /** Legacy animation-id namespace for {@link #ANIM_TRIGGER}'s low byte. */
     public static final int TRIGGER_NONE         = 0;
@@ -204,10 +215,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     private int lastSeenTriggerSeq;
     /** Last {@link #REACTION_TRIGGER} sequence number this client handled. Server copy is unused. */
     private int lastSeenReactionSeq;
-    /** Bought for the owner and not yet handed over; see {@link #setPendingGift}. */
-    private ItemStack pendingGift = ItemStack.EMPTY;
-    /** Ticks of eagerness left after a good meal; see {@link #feedDish}. */
-    private int eagerTicks;
 
     private final SimpleContainer backpack = new SimpleContainer(FULL_BACKPACK_SIZE) {
         @Override
@@ -429,7 +436,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * @return what the pet bought for its owner and has not handed over yet
      */
     public ItemStack getPendingGift() {
-        return pendingGift;
+        return this.entityData.get(GIFT);
     }
 
     /**
@@ -440,7 +447,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * @param gift what the pet now means to give, empty for nothing
      */
     public void setPendingGift(ItemStack gift) {
-        this.pendingGift = gift == null ? ItemStack.EMPTY : gift;
+        this.entityData.set(GIFT, gift == null ? ItemStack.EMPTY : gift.copy());
     }
 
     /**
@@ -578,11 +585,10 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     @Override
     protected void customServerAiStep(ServerLevel level) {
-        if (eagerTicks > 0) {
-            eagerTicks--;
-            if (eagerTicks == 0) {
-                applyEagerness();
-            }
+        if (this.entityData.get(EAGER_UNTIL) != 0L && !isEager()) {
+            // Worn off: forget when it was, and take the hurry away with it.
+            this.entityData.set(EAGER_UNTIL, 0L);
+            applyEagerness();
         }
         IntentSelector.tick(this, level);
         getBrain().tick(level, this);
@@ -694,13 +700,19 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * and those are the two things this changes.
      */
     public void feedDish(int ticks) {
-        eagerTicks = Math.max(eagerTicks, ticks);
+        long until = Math.max(this.entityData.get(EAGER_UNTIL), level().getGameTime() + ticks);
+        this.entityData.set(EAGER_UNTIL, until);
         applyEagerness();
     }
 
     /** Whether the pet is still in the mood, for the selector and for anything watching. */
     public boolean isEager() {
-        return eagerTicks > 0;
+        return eagerTicksLeft() > 0;
+    }
+
+    /** How long the mood has left, in ticks; 0 once it has worn off. */
+    public long eagerTicksLeft() {
+        return Math.max(0L, this.entityData.get(EAGER_UNTIL) - level().getGameTime());
     }
 
     /** Keeps the speed bonus in step with the mood, adding or removing it exactly once. */
@@ -790,6 +802,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         builder.define(ACTIVITY, (byte) PetActivity.NONE.networkId());
         builder.define(TASK, new CompoundTag());
         builder.define(INTENT, "");
+        builder.define(GIFT, ItemStack.EMPTY);
+        builder.define(EAGER_UNTIL, 0L);
     }
 
     /**
@@ -914,11 +928,12 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         if (!task.isEmpty()) {
             output.store("Task", CompoundTag.CODEC, task);
         }
-        if (!pendingGift.isEmpty()) {
-            output.store("Gift", ItemStack.CODEC, pendingGift);
+        ItemStack gift = getPendingGift();
+        if (!gift.isEmpty()) {
+            output.store("Gift", ItemStack.CODEC, gift);
         }
-        if (eagerTicks > 0) {
-            output.putInt("Eager", eagerTicks);
+        if (isEager()) {
+            output.putLong("EagerUntil", this.entityData.get(EAGER_UNTIL));
         }
     }
 
@@ -932,8 +947,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         input.getInt("PetJob").ifPresent(this::setPetJobId);
         this.entityData.set(PET_MODE, input.getByteOr("PetMode", this.entityData.get(PET_MODE)));
         this.entityData.set(TASK, input.read("Task", CompoundTag.CODEC).orElseGet(CompoundTag::new));
-        pendingGift = input.read("Gift", ItemStack.CODEC).orElse(ItemStack.EMPTY);
-        eagerTicks = input.getIntOr("Eager", 0);
+        setPendingGift(input.read("Gift", ItemStack.CODEC).orElse(ItemStack.EMPTY));
+        this.entityData.set(EAGER_UNTIL, input.getLongOr("EagerUntil", 0L));
         applyEagerness();
         refreshJobFromMainhand();
     }
