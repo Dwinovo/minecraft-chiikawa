@@ -26,6 +26,20 @@ class LanguageDataUiTranslationTest {
         "screen.chiikawa.labor_board.taken_by",
         "screen.chiikawa.pet.doing.nothing",
         "screen.chiikawa.pet.bag_hint",
+        "screen.chiikawa.pet.tab.backpack",
+        "screen.chiikawa.pet.tab.status",
+        "screen.chiikawa.pet.tab.orders",
+        "screen.chiikawa.pet.no_slip",
+        "screen.chiikawa.pet.eager",
+        "screen.chiikawa.pet.money",
+        "screen.chiikawa.pet.gift",
+        "screen.chiikawa.pet.gift_hint",
+        "screen.chiikawa.pet.order.follow",
+        "screen.chiikawa.pet.order.follow.hint",
+        "screen.chiikawa.pet.order.stay",
+        "screen.chiikawa.pet.order.stay.hint",
+        "screen.chiikawa.pet.order.free",
+        "screen.chiikawa.pet.order.free.hint",
         "block.chiikawa.labor_board"
     };
 

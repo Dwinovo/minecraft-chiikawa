@@ -15,6 +15,7 @@ import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.UiTheme;
 import com.dwinovo.chiikawa.ui.widget.Arrow;
 import com.dwinovo.chiikawa.ui.widget.Badge;
+import com.dwinovo.chiikawa.ui.widget.TitledPanel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -132,7 +133,7 @@ public class MusicBoxScreen extends Screen {
         // already stayed sharp, which is why only the panel looked fuzzy before.)
         super.renderBackground(graphics, mouseX, mouseY, partialTick);
         DrawSurface surface = new GuiSurface(graphics, this.font);
-        int contentY = Ui.titledPanel(surface, leftPos, topPos, PANEL_W, panelHeight, this.title.getString());
+        int contentY = TitledPanel.draw(surface, leftPos, topPos, PANEL_W, panelHeight, this.title.getString());
         Ui.textRight(surface, (page + 1) + "/" + pages(), leftPos + PANEL_W - UiStyle.PAD,
             UiStyle.centerIn(topPos, UiStyle.TITLE_H, surface.lineHeight()), UiTheme.TEXT_MUTED);
 

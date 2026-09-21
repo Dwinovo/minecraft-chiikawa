@@ -40,8 +40,11 @@ public final class UiStyle {
     public static final int ROW_H = SLOT + 2 * TIGHT;
     /** Step from one row to the next: the row, plus the air between two of them. */
     public static final int ROW_PITCH = ROW_H + GAP;
-    /** A bar's thickness. Thin enough to be a reading, thick enough to see at a glance. */
-    public static final int BAR_H = 4;
+    /**
+     * A bar's thickness: the ink line top and bottom and five pixels of track between them.
+     * Thinner and the line eats the fill.
+     */
+    public static final int BAR_H = 7;
     /** How tall anything you can press is — one height for all of them, so a row of them lines up. */
     public static final int CONTROL_H = 20;
     /** Space above and below the line inside a chip. */
