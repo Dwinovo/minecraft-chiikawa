@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.ui.widget.Badge;
 import com.dwinovo.chiikawa.ui.widget.Bar;
 import com.dwinovo.chiikawa.ui.widget.Chip;
 import com.dwinovo.chiikawa.ui.widget.Hearts;
+import com.dwinovo.chiikawa.ui.widget.Price;
 import com.dwinovo.chiikawa.ui.widget.Sign;
 import com.dwinovo.chiikawa.ui.widget.Tabs;
 import java.awt.image.BufferedImage;
@@ -102,6 +103,7 @@ class PreviewTest {
         Ui.divider(surface, px, py + 120, 200);
         Ui.sticker(surface, px + 8, py + 124, 184, 12, Ui.CARD_RADIUS, UiTheme.ACCENT_SOFT);
         PixelArt.CHECK.draw(surface, px + 175, py + 126);
+        Price.draw(surface, "Buy 3", px + 12, py + 124, 12, UiTheme.TEXT);
 
         File out = new File("build/ui-preview.png");
         out.getParentFile().mkdirs();
