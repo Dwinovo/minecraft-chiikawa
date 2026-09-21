@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.gametest;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.NOON;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.carries;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.holding;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.wildWorker;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
@@ -103,7 +104,7 @@ public final class ShopGameTests {
     public static void a_customer_across_the_field_is_not_served(GameTestHelper helper) {
         BlockPos counter = new BlockPos(2, STAND, 2);
         helper.setBlock(counter, InitBlocks.SHOP.get());
-        ServerPlayer customer = helper.makeMockServerPlayerInLevel();
+        ServerPlayer customer = player(helper);
         BlockPos away = helper.absolutePos(new BlockPos(15, STAND, 15));
         customer.teleportTo(away.getX() + 0.5, away.getY(), away.getZ() + 0.5);
         customer.getInventory().add(new ItemStack(Items.EMERALD, WAGES));
@@ -118,7 +119,7 @@ public final class ShopGameTests {
 
     /** Standing where a customer stands. */
     private static ServerPlayer atTheCounter(GameTestHelper helper, BlockPos counter) {
-        ServerPlayer customer = helper.makeMockServerPlayerInLevel();
+        ServerPlayer customer = player(helper);
         BlockPos beside = helper.absolutePos(counter.south());
         customer.teleportTo(beside.getX() + 0.5, beside.getY(), beside.getZ() + 0.5);
         return customer;

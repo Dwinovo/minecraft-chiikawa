@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.init.InitEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -83,6 +84,21 @@ public final class GameTestKit {
     /** A tamed pet, likewise. */
     static AbstractPet ownedPet(GameTestHelper helper, BlockPos rel) {
         return pet(helper, InitEntity.USAGI_PET.get(), rel, true);
+    }
+
+    /**
+     * A player in the case's level, as the server sees one: an owner, a customer, a
+     * stranger. Vanilla marks the only way to make one for removal and gives this version
+     * nothing to use instead, so every case gets its player here and the day it goes, this
+     * is the one line that changes.
+     *
+     * <p>The player starts in creative mode, and the server cannot send it a mod's own
+     * packets: a case about eating or paying sets survival, and a case about a screen calls
+     * the handler's logic rather than the handler.
+     */
+    @SuppressWarnings("removal")
+    static ServerPlayer player(GameTestHelper helper) {
+        return helper.makeMockServerPlayerInLevel();
     }
 
     /**

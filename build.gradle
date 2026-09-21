@@ -8,6 +8,35 @@ def secondLoader = findProject(':neoforge') != null ? 'neoforge' : 'forge'
 def loaders = ['fabric', secondLoader]
 
 /**
+ * 全仓库统一 UTF-8,所有子工程(common、两个 loader、ui)在这一处生效。
+ *
+ * <p>源码里有中文注释和字符串,读源码的编码钉死成 UTF-8,不跟系统默认走——中文 Windows 默认是 GBK。
+ * 构建起的子进程(javadoc、单元测试、游戏与数据生成)也一律用 UTF-8 输出:Gradle 按 UTF-8 读它们的
+ * 输出(见 gradle.properties 的 file.encoding),两头不一致就是满屏"锟斤拷"。Gradle 自己往终端打印时
+ * 仍按终端的编码,所以这里不动终端。
+ *
+ * <p>javadoc 的注释是写给读源码的人的:严格的 doclint(每个 & 和 < 都要转义、每个记录分量都要 @param)
+ * 只会刷上百条警告,对 mod 的 jar 没有好处,关掉,只在真出错时出声。
+ */
+subprojects {
+    def utf8Output = ['-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8']
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+    }
+    tasks.withType(Javadoc).configureEach {
+        options.encoding = 'UTF-8'
+        options.addStringOption('Xdoclint:none', '-quiet')
+        options.jFlags(*utf8Output)
+    }
+    tasks.withType(Test).configureEach {
+        jvmArgs(utf8Output)
+    }
+    tasks.withType(JavaExec).configureEach {
+        jvmArgs(utf8Output)
+    }
+}
+
+/**
  * 游戏内用例的统一入口。只在 NeoForge 上跑：原版把测试的命名空间定在 {@code @GameTestHolder}
  * 上，而那是 NeoForge 专有注解；宠物逻辑几乎全在 common，跑一个 loader 照样测得到。
  * 退出码是失败用例数，CI 不用解日志。

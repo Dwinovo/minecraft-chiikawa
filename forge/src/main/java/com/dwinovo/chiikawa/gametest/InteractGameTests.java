@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.gametest;
 
 import static com.dwinovo.chiikawa.gametest.GameTestKit.NOON;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 
@@ -43,7 +44,7 @@ public final class InteractGameTests {
     /** Crouch and click, and the pet takes its next instruction: heel, sit, off you go. */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void crouching_and_clicking_walks_through_the_instructions(GameTestHelper helper) {
-        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        ServerPlayer owner = player(helper);
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         pet.setPetDirective(PetDirective.FOLLOW);
@@ -68,7 +69,7 @@ public final class InteractGameTests {
      */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void an_owner_can_order_a_pet_from_its_screen(GameTestHelper helper) {
-        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        ServerPlayer owner = player(helper);
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         owner.setPos(helper.absoluteVec(new BlockPos(3, STAND, 5).getCenter()));
@@ -81,8 +82,8 @@ public final class InteractGameTests {
     /** Anybody's client can send anything; only the owner's orders are heard. */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void a_stranger_cannot_order_somebody_elses_pet(GameTestHelper helper) {
-        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
-        ServerPlayer stranger = helper.makeMockServerPlayerInLevel();
+        ServerPlayer owner = player(helper);
+        ServerPlayer stranger = player(helper);
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         pet.setPetDirective(PetDirective.FOLLOW);
@@ -97,7 +98,7 @@ public final class InteractGameTests {
     /** And an owner has to be near enough to be heard, as with any other screen. */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void an_order_from_across_the_field_is_not_heard(GameTestHelper helper) {
-        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        ServerPlayer owner = player(helper);
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         pet.setPetDirective(PetDirective.FOLLOW);
@@ -111,7 +112,7 @@ public final class InteractGameTests {
     /** Food in hand for a pet that is already yours feeds it rather than taming it again. */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void feeding_your_own_pet_heals_it(GameTestHelper helper) {
-        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        ServerPlayer owner = player(helper);
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         pet.setHealth(pet.getMaxHealth() - WOUND);
@@ -128,7 +129,7 @@ public final class InteractGameTests {
     /** Empty hand, standing up: the pet's backpack opens. */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void clicking_a_pet_opens_its_backpack(GameTestHelper helper) {
-        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        ServerPlayer owner = player(helper);
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         owner.setShiftKeyDown(false);
@@ -144,8 +145,8 @@ public final class InteractGameTests {
     /** Somebody else's pet keeps its business to itself. */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void a_stranger_cannot_open_a_pet_s_backpack(GameTestHelper helper) {
-        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
-        ServerPlayer stranger = helper.makeMockServerPlayerInLevel();
+        ServerPlayer owner = player(helper);
+        ServerPlayer stranger = player(helper);
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         stranger.setShiftKeyDown(false);

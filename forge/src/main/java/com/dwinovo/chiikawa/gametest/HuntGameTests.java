@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.gametest;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.MIDNIGHT;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.count;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.holding;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.wildWorker;
 
@@ -68,7 +69,7 @@ public final class HuntGameTests {
      */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 200)
     public static void a_monster_the_owner_softened_up_still_counts(GameTestHelper helper) {
-        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        ServerPlayer owner = player(helper);
         owner.setGameMode(GameType.SURVIVAL);
         AbstractPet pet = hunter(helper);
         pet.tame(owner);

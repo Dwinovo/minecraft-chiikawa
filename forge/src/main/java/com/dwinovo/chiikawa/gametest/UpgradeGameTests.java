@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.gametest;
 
 import static com.dwinovo.chiikawa.gametest.GameTestKit.NOON;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.holding;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 
@@ -187,7 +188,7 @@ public final class UpgradeGameTests {
 
     /** Somebody at the board with emeralds in their pockets. */
     private static ServerPlayer customer(GameTestHelper helper, int emeralds) {
-        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        ServerPlayer owner = player(helper);
         owner.setGameMode(GameType.SURVIVAL);
         owner.setPos(helper.absoluteVec(BOARD.getCenter()));
         if (emeralds > 0) {
