@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.gametest;
 
 import static com.dwinovo.chiikawa.gametest.GameTestKit.NOON;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 
@@ -8,6 +9,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
+import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
@@ -18,6 +20,9 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -45,17 +50,60 @@ public final class SupplyGameTests {
         settleWorld(level, Difficulty.NORMAL, NOON);
     }
 
-    /** A bag on its back is ten more slots, and the pet knows it is wearing one. */
+    /**
+     * Any bag on it is ten more slots, and the pet knows it is wearing one: the rucksack
+     * and each of the pouches alike. Which one is the owner's choice, not the pet's.
+     */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
-    public static void a_bag_adds_room(GameTestHelper helper) {
+    public static void every_bag_adds_room(GameTestHelper helper) {
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
 
         helper.assertFalse(pet.isWearingBag(), "a pet turned up already wearing a bag");
-        pet.setItemSlot(EquipmentSlot.CHEST, new ItemStack(InitItems.BEAR_BACKPACK.get()));
-
-        helper.assertTrue(pet.isWearingBag(), "the bag went on and the pet did not notice");
+        for (Supplier<Item> bag : InitItems.BAGS) {
+            pet.setItemSlot(EquipmentSlot.CHEST, new ItemStack(bag.get()));
+            helper.assertTrue(pet.isWearingBag(), "a " + bag.get() + " went on and the pet did not notice");
+        }
         helper.assertTrue(pet.getBackpack().getContainerSize() == AbstractPet.FULL_BACKPACK_SIZE,
             "the bag's slots are not there to be used");
+        helper.succeed();
+    }
+
+    /**
+     * Swapping one bag for another in the menu — a bag on the cursor, clicked onto the one
+     * the pet wears — keeps what was in the old one: the pet never stood without a bag, so
+     * the ten slots never shut and nothing lands on the floor.
+     */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void swapping_bags_keeps_what_is_in_them(GameTestHelper helper) {
+        ServerPlayer owner = player(helper);
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        pet.setItemSlot(EquipmentSlot.CHEST, new ItemStack(InitItems.BACKPACK.get()));
+        pet.getBackpack().setItem(FIRST_BAG_SLOT, new ItemStack(Items.CAKE));
+        PetBackpackMenu menu = new PetBackpackMenu(1, owner.getInventory(), pet);
+
+        menu.setCarried(new ItemStack(InitItems.STAR_POUCH.get()));
+        menu.clicked(AbstractPet.BAG_SLOT, 0, ClickType.PICKUP, owner);
+
+        helper.assertTrue(pet.getItemBySlot(EquipmentSlot.CHEST).is(InitItems.STAR_POUCH.get()),
+            "the star pouch did not go on");
+        helper.assertTrue(menu.getCarried().is(InitItems.BACKPACK.get()), "the rucksack did not come off onto the cursor");
+        helper.assertTrue(pet.getBackpack().getItem(FIRST_BAG_SLOT).is(Items.CAKE), "the cake did not stay with the pet");
+        helper.succeed();
+    }
+
+    /** The bag slot takes a bag, any bag, and nothing that is not one. */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void the_bag_slot_takes_bags_and_nothing_else(GameTestHelper helper) {
+        ServerPlayer owner = player(helper);
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        Slot bagSlot = new PetBackpackMenu(1, owner.getInventory(), pet).slots.get(AbstractPet.BAG_SLOT);
+
+        for (Supplier<Item> bag : InitItems.BAGS) {
+            helper.assertTrue(bagSlot.mayPlace(new ItemStack(bag.get())), "the bag slot refused a " + bag.get());
+        }
+        helper.assertFalse(bagSlot.mayPlace(new ItemStack(Items.CAKE)), "the bag slot took a cake");
         helper.succeed();
     }
 
@@ -66,7 +114,7 @@ public final class SupplyGameTests {
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void taking_the_bag_off_empties_it_onto_the_floor(GameTestHelper helper) {
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
-        pet.setItemSlot(EquipmentSlot.CHEST, new ItemStack(InitItems.BEAR_BACKPACK.get()));
+        pet.setItemSlot(EquipmentSlot.CHEST, new ItemStack(InitItems.BACKPACK.get()));
         pet.getBackpack().setItem(FIRST_BAG_SLOT, new ItemStack(Items.CAKE));
 
         pet.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
@@ -82,9 +130,9 @@ public final class SupplyGameTests {
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void the_worn_bag_is_part_of_what_the_pet_carries(GameTestHelper helper) {
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
-        pet.getBackpack().setItem(AbstractPet.BAG_SLOT, new ItemStack(InitItems.BEAR_BACKPACK.get()));
+        pet.getBackpack().setItem(AbstractPet.BAG_SLOT, new ItemStack(InitItems.BACKPACK.get()));
 
-        helper.assertTrue(pet.getItemBySlot(EquipmentSlot.CHEST).is(InitItems.BEAR_BACKPACK.get()),
+        helper.assertTrue(pet.getItemBySlot(EquipmentSlot.CHEST).is(InitItems.BACKPACK.get()),
             "a bag put in the bag slot is not what the pet is wearing");
         helper.succeed();
     }
@@ -96,7 +144,7 @@ public final class SupplyGameTests {
      */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void both_sides_of_the_backpack_menu_lay_out_the_same_slots(GameTestHelper helper) {
-        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        ServerPlayer owner = player(helper);
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
 
@@ -115,7 +163,7 @@ public final class SupplyGameTests {
      */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void on_a_page_without_the_backpack_every_slot_is_shut(GameTestHelper helper) {
-        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        ServerPlayer owner = player(helper);
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         PetBackpackMenu menu = new PetBackpackMenu(1, owner.getInventory(), pet);
@@ -133,7 +181,7 @@ public final class SupplyGameTests {
     /** A dish handed to your own pet is eaten, and the pet gets on with things quicker. */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void a_dish_puts_a_pet_in_the_mood(GameTestHelper helper) {
-        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        ServerPlayer owner = player(helper);
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         // A mock player turns up in creative, where nothing in a hand is ever spent.
@@ -186,8 +234,8 @@ public final class SupplyGameTests {
     /** A dish from somebody else is a dish somebody else is holding. */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void a_stranger_cannot_feed_your_pet(GameTestHelper helper) {
-        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
-        ServerPlayer stranger = helper.makeMockServerPlayerInLevel();
+        ServerPlayer owner = player(helper);
+        ServerPlayer stranger = player(helper);
         stranger.setGameMode(GameType.SURVIVAL);
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
@@ -209,7 +257,7 @@ public final class SupplyGameTests {
      */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void the_bags_slots_stay_shut_until_a_bag_is_worn(GameTestHelper helper) {
-        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        ServerPlayer owner = player(helper);
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         PetBackpackMenu menu = new PetBackpackMenu(1, owner.getInventory(), pet);
@@ -217,7 +265,7 @@ public final class SupplyGameTests {
         helper.assertFalse(menu.slots.get(FIRST_BAG_SLOT).isActive(),
             "a pet with no bag had the bag's slots open");
 
-        pet.setItemSlot(EquipmentSlot.CHEST, new ItemStack(InitItems.BEAR_BACKPACK.get()));
+        pet.setItemSlot(EquipmentSlot.CHEST, new ItemStack(InitItems.BACKPACK.get()));
 
         helper.assertTrue(menu.slots.get(FIRST_BAG_SLOT).isActive(),
             "the bag went on and its slots stayed shut");
