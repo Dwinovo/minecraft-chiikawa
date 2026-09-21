@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.gametest;
 
 import static com.dwinovo.chiikawa.gametest.GameTestKit.NOON;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 
@@ -101,7 +102,7 @@ public final class FollowGameTests {
 
     /** Somebody standing in the test area for a pet to belong to and fall behind. */
     private static ServerPlayer owner(GameTestHelper helper) {
-        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        ServerPlayer owner = player(helper);
         owner.setPos(helper.absoluteVec(HERE.getCenter()));
         return owner;
     }

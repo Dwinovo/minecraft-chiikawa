@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.gametest;
 
 import static com.dwinovo.chiikawa.gametest.GameTestKit.NOON;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.holding;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 
@@ -72,7 +73,7 @@ public final class CareGameTests {
     /** Its owner walks off; it comes along. */
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = FOLLOW_TICKS)
     public static void a_pet_follows_its_owner(GameTestHelper helper) {
-        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        ServerPlayer owner = player(helper);
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         pet.setPetDirective(PetDirective.FOLLOW);
@@ -91,7 +92,7 @@ public final class CareGameTests {
      */
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = LEAVE_IT_TICKS + 100)
     public static void a_sitting_pet_does_not_come_along(GameTestHelper helper) {
-        ServerPlayer owner = helper.makeMockServerPlayerInLevel();
+        ServerPlayer owner = player(helper);
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         pet.setPetDirective(PetDirective.STAY);
@@ -113,7 +114,7 @@ public final class CareGameTests {
      */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = LEAVE_IT_TICKS + 100)
     public static void a_wild_pet_does_not_go_for_the_player(GameTestHelper helper) {
-        ServerPlayer bystander = helper.makeMockServerPlayerInLevel();
+        ServerPlayer bystander = player(helper);
         BlockPos beside = helper.absolutePos(new BlockPos(4, STAND, 3));
         bystander.teleportTo(beside.getX() + 0.5, beside.getY(), beside.getZ() + 0.5);
         holding(wildPet(helper, new BlockPos(3, STAND, 3)), Items.IRON_SWORD);
