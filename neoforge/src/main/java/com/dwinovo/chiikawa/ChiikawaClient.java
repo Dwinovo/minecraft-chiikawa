@@ -15,12 +15,13 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import com.dwinovo.chiikawa.anim.compile.BedrockResourceLoader;
-import com.dwinovo.chiikawa.anim.render.BagRenderer;
+import com.dwinovo.chiikawa.anim.render.PropRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.ChiikawaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.FuruhonyaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.HachiwareRenderer;
@@ -30,7 +31,9 @@ import com.dwinovo.chiikawa.anim.render.impl.RakkoRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.ShisaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.UsagiRenderer;
 import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
+import com.dwinovo.chiikawa.client.render.LaborBoardRenderer;
 import com.dwinovo.chiikawa.client.screen.PetBackpackScreen;
+import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMenu;
@@ -64,31 +67,36 @@ public class ChiikawaClient {
 
     @SubscribeEvent
     static void registerItemExtensions(RegisterClientExtensionsEvent event) {
-        // Bags are drawn from their own Bedrock models, in a hand as on a pet.
+        // Props are drawn from their own Bedrock models, as items as everywhere else.
         event.registerItem(new IClientItemExtensions() {
             private BlockEntityWithoutLevelRenderer renderer;
 
             @Override
             public BlockEntityWithoutLevelRenderer getCustomRenderer() {
                 if (renderer == null) {
-                    renderer = new BagItemRenderer();
+                    renderer = new PropItemRenderer();
                 }
                 return renderer;
             }
-        }, InitItems.BAGS.stream().map(Supplier::get).toArray(Item[]::new));
+        }, InitItems.PROPS.stream().map(Supplier::get).toArray(Item[]::new));
     }
 
-    /** The built-in item renderer NeoForge wants, handing each bag to {@link BagRenderer}. */
-    private static final class BagItemRenderer extends BlockEntityWithoutLevelRenderer {
-        private BagItemRenderer() {
+    /** The built-in item renderer NeoForge wants, handing each prop to {@link PropRenderer}. */
+    private static final class PropItemRenderer extends BlockEntityWithoutLevelRenderer {
+        private PropItemRenderer() {
             super(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
         }
 
         @Override
         public void renderByItem(ItemStack stack, ItemDisplayContext context, PoseStack pose,
                 MultiBufferSource buffers, int light, int overlay) {
-            BagRenderer.drawItem(stack, context, pose, buffers, light, overlay);
+            PropRenderer.drawItem(stack, context, pose, buffers, light, overlay);
         }
+    }
+
+    @SubscribeEvent
+    static void registerBlockEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerBlockEntityRenderer(InitBlockEntities.LABOR_BOARD.get(), context -> new LaborBoardRenderer());
     }
 
     @SubscribeEvent
