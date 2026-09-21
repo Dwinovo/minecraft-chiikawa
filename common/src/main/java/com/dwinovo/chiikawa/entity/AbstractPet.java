@@ -94,9 +94,10 @@ import org.jetbrains.annotations.Nullable;
 public class AbstractPet extends TamableAnimal implements RangedAttackMob, ChiikawaAnimated {
     /**
      * The pet's own pockets: slot 0 is what it holds, slot 1 is what it wears, and the
-     * rest is room for things. The bag's own ten come after them.
+     * rest is room for things — fifteen, three full rows of five in its screen. The bag's
+     * own ten come after them.
      */
-    public static final int BACKPACK_SIZE = 16;
+    public static final int BACKPACK_SIZE = 17;
     /**
      * What every pet is made of. One builder rather than eight copies of the same four
      * lines, and {@code ATTACK_SPEED} is among them so that a weapon's own speed means
