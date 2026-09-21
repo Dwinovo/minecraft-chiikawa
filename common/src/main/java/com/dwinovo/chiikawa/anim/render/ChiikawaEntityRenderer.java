@@ -19,7 +19,8 @@ import com.dwinovo.chiikawa.ui.DrawSurface;
 import com.dwinovo.chiikawa.ui.Fade;
 import com.dwinovo.chiikawa.ui.widget.Chip;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.anim.render.layer.BearBackpackLayer;
+import com.dwinovo.chiikawa.item.BagItem;
+import com.dwinovo.chiikawa.anim.render.layer.BagLayer;
 import com.dwinovo.chiikawa.anim.render.layer.SlipTagLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayerContext;
@@ -174,7 +175,12 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         // Default layers shared by all pets.
         addRenderLayer(new HeldItemLayer());
         addRenderLayer(new SlipTagLayer());
-        addRenderLayer(new BearBackpackLayer());
+        addRenderLayer(new BagLayer());
+        // A bag's strap is part of the pet's own model, there only while a bag worn
+        // that way is on.
+        for (BagItem.Wear wear : BagItem.Wear.values()) {
+            addBoneVisibilityRule(wear.strap(), (state, animCtx) -> BagLayer.wearOf(state) == wear);
+        }
 
         // Default controllers shared by all pets, in priority-from-low order:
         //   "main"     state-driven base loop

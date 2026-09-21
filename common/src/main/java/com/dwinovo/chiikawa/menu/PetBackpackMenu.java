@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.menu;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitMenu;
+import com.dwinovo.chiikawa.item.BagItem;
 
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -11,7 +12,6 @@ import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import com.dwinovo.chiikawa.init.InitItems;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import com.dwinovo.chiikawa.shop.Wallet;
@@ -145,7 +145,7 @@ public class PetBackpackMenu extends AbstractContainerMenu {
 
         @Override
         public boolean mayPlace(ItemStack stack) {
-            return stack.is(InitItems.BEAR_BACKPACK.get());
+            return BagItem.isBag(stack);
         }
 
         @Override

@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.init;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.item.BagItem;
 import com.dwinovo.chiikawa.item.ChiikawaWeapon;
 import com.dwinovo.chiikawa.item.HachiwareWeapon;
 import com.dwinovo.chiikawa.item.MusicBoxItem;
@@ -8,6 +9,7 @@ import com.dwinovo.chiikawa.item.PetBellItem;
 import com.dwinovo.chiikawa.item.PetDollItem;
 import com.dwinovo.chiikawa.item.UsagiWeapon;
 import com.dwinovo.chiikawa.platform.Services;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -54,8 +56,16 @@ public final class InitItems {
     public static final Supplier<Item> PET_BELL =
         registerItem("pet_bell", () -> new PetBellItem(new Item.Properties()));
 
-    public static final Supplier<Item> BEAR_BACKPACK =
-        registerItem("bear_backpack", () -> new Item(new Item.Properties().stacksTo(1)));
+    public static final Supplier<Item> BACKPACK =
+        registerItem("backpack", () -> new BagItem(new Item.Properties(), BagItem.Wear.ON_BACK));
+    public static final Supplier<Item> BEAR_POUCH =
+        registerItem("bear_pouch", () -> new BagItem(new Item.Properties(), BagItem.Wear.SLUNG));
+    public static final Supplier<Item> WHALE_POUCH =
+        registerItem("whale_pouch", () -> new BagItem(new Item.Properties(), BagItem.Wear.SLUNG));
+    public static final Supplier<Item> STAR_POUCH =
+        registerItem("star_pouch", () -> new BagItem(new Item.Properties(), BagItem.Wear.SLUNG));
+    /** Every bag, for whatever has to be told about each of them: its renderer, its model. */
+    public static final List<Supplier<Item>> BAGS = List.of(BACKPACK, BEAR_POUCH, WHALE_POUCH, STAR_POUCH);
 
     public static final Supplier<BlockItem> SHOP =
         registerItem("shop", () -> new BlockItem(InitBlocks.SHOP.get(), new Item.Properties()));
