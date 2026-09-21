@@ -98,7 +98,7 @@ public final class PetCombat {
      *
      * @param brokenOff the pet has broken off and is getting away
      * @param shooting the pet is fighting with a bow
-     * @param foeArmed the target is about to go off — a creeper with its fuse lit
+     * @param foe what the pet is fighting: a creeper with its fuse lit is about to go off
      * @param meleeReach how far this pet can reach this target, vanilla's own number
      */
     public static Band band(boolean brokenOff, boolean shooting, Foe foe, double meleeReach) {
