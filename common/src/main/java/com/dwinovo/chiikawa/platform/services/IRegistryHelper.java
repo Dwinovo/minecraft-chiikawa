@@ -46,5 +46,16 @@ public interface IRegistryHelper {
         net.minecraft.world.item.Item.Properties properties
     );
 
+    /**
+     * Registers a bag. Bags are drawn by a built-in item renderer, and Forge 1.20.1 hands an
+     * item its client renderer only through the item's own {@code initializeClient}, so each
+     * loader builds the item its own way.
+     */
+    java.util.function.Supplier<net.minecraft.world.item.Item> registerBag(
+        ResourceLocation id,
+        com.dwinovo.chiikawa.item.BagItem.Wear wear,
+        net.minecraft.world.item.Item.Properties properties
+    );
+
     <T> Iterable<T> getRegistry(ResourceKey<Registry<T>> key);
 }

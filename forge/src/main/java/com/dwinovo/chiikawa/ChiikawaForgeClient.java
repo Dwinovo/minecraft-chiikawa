@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa;
 
 import com.dwinovo.chiikawa.anim.compile.BedrockResourceLoader;
+import com.dwinovo.chiikawa.anim.render.BagRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.ChiikawaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.FuruhonyaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.HachiwareRenderer;
@@ -13,10 +14,17 @@ import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
 import com.dwinovo.chiikawa.client.screen.PetBackpackScreen;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitMenu;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -25,6 +33,23 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 @Mod.EventBusSubscriber(modid = ChiikawaForge.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ChiikawaForgeClient {
+    /**
+     * Bags are drawn from their own Bedrock models, in a hand as on a pet. Forge 1.20.1 has
+     * no event to hand an item its client extensions; each bag takes these from its own
+     * {@code initializeClient} (see {@code ForgeRegistryHelper#registerBag}).
+     */
+    public static final IClientItemExtensions BAG_ITEM_EXTENSIONS = new IClientItemExtensions() {
+        private BlockEntityWithoutLevelRenderer renderer;
+
+        @Override
+        public BlockEntityWithoutLevelRenderer getCustomRenderer() {
+            if (renderer == null) {
+                renderer = new BagItemRenderer();
+            }
+            return renderer;
+        }
+    };
+
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
@@ -44,6 +69,19 @@ public class ChiikawaForgeClient {
     private static void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
             ClientMusicStreamManager.tick();
+        }
+    }
+
+    /** The built-in item renderer Forge wants, handing each bag to {@link BagRenderer}. */
+    private static final class BagItemRenderer extends BlockEntityWithoutLevelRenderer {
+        private BagItemRenderer() {
+            super(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
+        }
+
+        @Override
+        public void renderByItem(ItemStack stack, ItemDisplayContext context, PoseStack pose,
+                MultiBufferSource buffers, int light, int overlay) {
+            BagRenderer.drawItem(stack, context, pose, buffers, light, overlay);
         }
     }
 

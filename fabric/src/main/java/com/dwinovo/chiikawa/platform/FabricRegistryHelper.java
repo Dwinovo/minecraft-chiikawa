@@ -82,4 +82,14 @@ public class FabricRegistryHelper implements IRegistryHelper {
          return (Supplier<net.minecraft.world.item.SpawnEggItem>) (Supplier<?>) register(net.minecraft.core.registries.BuiltInRegistries.ITEM, id, 
             () -> new net.minecraft.world.item.SpawnEggItem(type.get(), primaryColor, secondaryColor, properties));
     }
+
+    @Override
+    public java.util.function.Supplier<net.minecraft.world.item.Item> registerBag(
+        ResourceLocation id,
+        com.dwinovo.chiikawa.item.BagItem.Wear wear,
+        net.minecraft.world.item.Item.Properties properties
+    ) {
+        return register(net.minecraft.core.registries.BuiltInRegistries.ITEM, id,
+            () -> new com.dwinovo.chiikawa.item.BagItem(properties, wear));
+    }
 }
