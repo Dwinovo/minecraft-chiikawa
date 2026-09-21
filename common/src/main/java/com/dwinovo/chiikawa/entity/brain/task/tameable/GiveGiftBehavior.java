@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -80,6 +81,7 @@ public class GiveGiftBehavior extends Behavior<AbstractPet> {
         }
         pet.setPendingGift(ItemStack.EMPTY);
         given = true;
+        pet.tellOwner(Component.translatable("message.chiikawa.gift.given", pet.getDisplayName(), gift.getDisplayName()));
         pet.getNavigation().stop();
         level.sendParticles(ParticleTypes.HEART, pet.getX(), pet.getY() + pet.getBbHeight() * 0.9, pet.getZ(),
             HAPPY_PARTICLES, 0.35, 0.3, 0.35, 0.0);
