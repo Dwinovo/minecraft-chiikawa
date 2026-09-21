@@ -10,7 +10,8 @@ package com.dwinovo.chiikawa.ui;
  *
  * <h2>The letters</h2>
  * {@code X} ink, {@code W} white, {@code w} paper, {@code o} wood, {@code l} light wood,
- * {@code d} dark wood, {@code p} pink, {@code g} leaf; anything else is left clear.
+ * {@code d} dark wood, {@code p} pink, {@code g} leaf, {@code e} emerald, {@code E} its lit
+ * facet; anything else is left clear.
  */
 public record PixelArt(String... rows) {
     /** A labor slip on its string — what a pet is working at. */
@@ -90,6 +91,19 @@ public record PixelArt(String... rows) {
         ".XXXXX....",
         "..XXX.....");
 
+    /**
+     * An emerald, as tall as a capital letter: written after a number, it makes the number
+     * a price.
+     */
+    public static final PixelArt EMERALD = new PixelArt(
+        "..XXXX..",
+        ".XEEeeX.",
+        "XEEeeeeX",
+        "XEeeeeeX",
+        ".XeeeeX.",
+        "..XeeX..",
+        "...XX...");
+
     public int width() {
         int widest = 0;
         for (String row : rows) {
@@ -138,6 +152,8 @@ public record PixelArt(String... rows) {
             case 'd' -> UiTheme.WOOD_DARK;
             case 'p' -> UiTheme.ACCENT_SOFT;
             case 'g' -> UiTheme.LEAF;
+            case 'e' -> UiTheme.EMERALD;
+            case 'E' -> UiTheme.EMERALD_LIGHT;
             default -> 0;
         };
     }
