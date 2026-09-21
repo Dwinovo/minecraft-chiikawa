@@ -1,9 +1,10 @@
 package com.dwinovo.chiikawa.anim.render.layer;
 
-import com.dwinovo.chiikawa.anim.render.BagRenderer;
 import com.dwinovo.chiikawa.anim.render.ChiikawaRenderState;
 import com.dwinovo.chiikawa.anim.render.PetData;
+import com.dwinovo.chiikawa.anim.render.PropRenderer;
 import com.dwinovo.chiikawa.item.BagItem;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -34,10 +35,11 @@ public final class BagLayer implements RenderLayer {
         if (locator == null || ctx.isHidden(locator)) {
             return;
         }
+        ItemStack bag = ctx.state().get(PetData.WORN_BAG);
         ctx.poseStack().pushPose();
         walker.transformToBone(ctx.model(), ctx.poseBuf(), locator, ctx.poseStack());
-        BagRenderer.drawWorn(ctx.state().get(PetData.WORN_BAG), ctx.poseStack(), ctx.bufferSource(),
-            ctx.packedLight(), ctx.packedOverlay());
+        PropRenderer.draw(BuiltInRegistries.ITEM.getKey(bag.getItem()),
+            ctx.poseStack(), ctx.bufferSource(), ctx.packedLight(), ctx.packedOverlay());
         ctx.poseStack().popPose();
     }
 }
