@@ -20,9 +20,13 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -43,6 +47,11 @@ public class LaborBoardBlockEntity extends BlockEntity {
      * rather than called a level, because a block entity already has a level: the world.
      */
     private int boardLevel = BoardSlips.FIRST_LEVEL;
+    /**
+     * Which of the day's plates still hang on the board, as {@link BoardSlips#hanging}
+     * reckons it: worked out here and sent to the players nearby, who see only this.
+     */
+    private int hanging;
 
     public LaborBoardBlockEntity(BlockPos pos, BlockState state) {
         super(InitBlockEntities.LABOR_BOARD.get(), pos, state);
@@ -96,6 +105,11 @@ public class LaborBoardBlockEntity extends BlockEntity {
         }
     }
 
+    /** @return which of the day's plates still hang, a bit for each place */
+    public int hanging() {
+        return hanging;
+    }
+
     /** @return how far the board has been paid up */
     public int boardLevel() {
         return boardLevel;
@@ -132,14 +146,14 @@ public class LaborBoardBlockEntity extends BlockEntity {
         if (today != day) {
             day = today;
             slots = BoardSlips.roll(seed, PetTaskTypes.all(), boardLevel);
-            setChanged();
+            changed();
             return slots;
         }
         // A board upgraded partway through the day puts the slip it just bought up now.
         List<BoardSlot> grown = BoardSlips.topUp(slots, seed, PetTaskTypes.all(), boardLevel);
         if (grown != slots) {
             slots = grown;
-            setChanged();
+            changed();
         }
         return slots;
     }
@@ -161,7 +175,31 @@ public class LaborBoardBlockEntity extends BlockEntity {
         List<BoardSlot> changed = new ArrayList<>(slots);
         changed.set(index, change.apply(changed.get(index)));
         slots = List.copyOf(changed);
+        changed();
+    }
+
+    /**
+     * The slips changed: saved with the chunk, and the plates the board shows told to the
+     * players who can see it, so a plate comes down the moment a pet takes it.
+     */
+    private void changed() {
+        hanging = BoardSlips.hanging(slots);
         setChanged();
+        level().sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
+    }
+
+    /** What a player's game is told of the board: only which plates hang, nothing of whose they are. */
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        today();
+        CompoundTag tag = new CompoundTag();
+        tag.putInt("Hanging", hanging);
+        return tag;
+    }
+
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 
     private ServerLevel level() {
@@ -186,5 +224,8 @@ public class LaborBoardBlockEntity extends BlockEntity {
         slots = tag.contains("Slots", Tag.TAG_LIST)
             ? SLOTS_CODEC.parse(NbtOps.INSTANCE, tag.get("Slots")).result().orElse(List.of())
             : List.of();
+        // A save holds the slips and the plates follow from them; a player's game is sent
+        // the plates alone.
+        hanging = tag.contains("Hanging", Tag.TAG_INT) ? tag.getInt("Hanging") : BoardSlips.hanging(slots);
     }
 }

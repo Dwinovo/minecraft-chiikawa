@@ -92,4 +92,14 @@ public class FabricRegistryHelper implements IRegistryHelper {
         return register(net.minecraft.core.registries.BuiltInRegistries.ITEM, id,
             () -> new com.dwinovo.chiikawa.item.BagItem(properties, wear));
     }
+
+    @Override
+    public java.util.function.Supplier<net.minecraft.world.item.BlockItem> registerPropBlockItem(
+        ResourceLocation id,
+        Supplier<? extends Block> block,
+        net.minecraft.world.item.Item.Properties properties
+    ) {
+        return register(net.minecraft.core.registries.BuiltInRegistries.ITEM, id,
+            () -> new net.minecraft.world.item.BlockItem(block.get(), properties));
+    }
 }
