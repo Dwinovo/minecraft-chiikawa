@@ -12,29 +12,41 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import com.dwinovo.chiikawa.init.InitItems;
+import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
+import com.dwinovo.chiikawa.shop.Wallet;
 
 public class PetBackpackMenu extends AbstractContainerMenu {
     // Where the slots are. The screen draws a well behind each one by asking the slot
     // where it is, so these numbers are the layout and there is no second copy of them.
-    // An item sits a pixel inside its 18px cell, and cells overlap by a pixel.
-    private static final int SLOT_PITCH = 17;
-    private static final int MAINHAND_X = 77;
-    private static final int MAINHAND_Y = 32;
+    // An item sits a pixel inside its 18px well, and wells sit side by side.
+    private static final int SLOT_PITCH = 18;
+    /** The hand, beside the pet's picture. */
+    private static final int MAINHAND_X = 71;
+    private static final int MAINHAND_Y = 25;
     /** The bag the pet wears, under the hand that holds its tool. */
     private static final int BAG_X = MAINHAND_X;
-    private static final int BAG_Y = MAINHAND_Y + SLOT_PITCH + 4;
-    private static final int PET_GRID_X = 103;
-    private static final int PET_GRID_Y = 9;
+    private static final int BAG_Y = MAINHAND_Y + 21;
+    private static final int PET_GRID_X = 95;
+    private static final int PET_GRID_Y = MAINHAND_Y;
     /** How wide the pet's own grid is; the bag's ten hang under it in two rows. */
     private static final int PET_GRID_COLUMNS = 5;
-    private static final int PLAYER_INV_X = 22;
-    private static final int PLAYER_INV_Y = 144;
-    private static final int HOTBAR_Y = 199;
+    /** Where the bag's rows start: under the pockets, with a gap to say they are another thing. */
+    private static final int BAG_ROWS_Y = 83;
+    private static final int PLAYER_INV_X = 16;
+    private static final int PLAYER_INV_Y = 132;
+    private static final int HOTBAR_Y = 190;
 
     private final AbstractPet pet;
     private final Level level;
+    private final SimpleContainer petContainer;
     private final int petSlotCount;
+    /**
+     * Whether the slots are showing: the pet screen has pages, and only one of them is its
+     * backpack. Only ever turned off on the client — the server keeps every slot live, so
+     * nothing it does with them depends on which page the owner happens to be looking at.
+     */
+    private boolean slotsShown = true;
     private final DataSlot petId = DataSlot.standalone();
 
     public PetBackpackMenu(int containerId, Inventory playerInventory) {
@@ -49,36 +61,36 @@ public class PetBackpackMenu extends AbstractContainerMenu {
         this.addDataSlot(this.petId);
 
         SimpleContainer handler = pet != null ? pet.getBackpack() : new SimpleContainer(petSlots());
+        this.petContainer = handler;
         this.petSlotCount = handler.getContainerSize();
         // Avoid SimpleContainer.startOpen to keep cross-loader bytecode free of ContainerUser.
         if (petSlotCount > 0) {
-            this.addSlot(new Slot(handler, AbstractPet.MAINHAND_SLOT, MAINHAND_X, MAINHAND_Y));
+            this.addSlot(new PageSlot(handler, AbstractPet.MAINHAND_SLOT, MAINHAND_X, MAINHAND_Y));
             this.addSlot(new BagSlot(handler, BAG_X, BAG_Y));
             int slot = AbstractPet.BAG_SLOT + 1;
             for (int row = 0; slot < Math.min(petSlotCount, AbstractPet.BACKPACK_SIZE); row++) {
                 for (int col = 0; col < PET_GRID_COLUMNS && slot < AbstractPet.BACKPACK_SIZE; col++) {
-                    this.addSlot(new Slot(handler, slot++,
+                    this.addSlot(new PageSlot(handler, slot++,
                         PET_GRID_X + col * SLOT_PITCH, PET_GRID_Y + row * SLOT_PITCH));
                 }
             }
             // The bag's own ten, waiting under the pet's grid for a bag to be worn.
-            int bagRowsStart = PET_GRID_Y + 3 * SLOT_PITCH;
             for (int row = 0; slot < petSlotCount; row++) {
                 for (int col = 0; col < PET_GRID_COLUMNS && slot < petSlotCount; col++) {
                     this.addSlot(new BagContentSlot(handler, slot++,
-                        PET_GRID_X + col * SLOT_PITCH, bagRowsStart + row * SLOT_PITCH));
+                        PET_GRID_X + col * SLOT_PITCH, BAG_ROWS_Y + row * SLOT_PITCH));
                 }
             }
         }
 
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, PLAYER_INV_X + col * SLOT_PITCH, PLAYER_INV_Y + row * SLOT_PITCH));
+                this.addSlot(new PageSlot(playerInventory, col + row * 9 + 9, PLAYER_INV_X + col * SLOT_PITCH, PLAYER_INV_Y + row * SLOT_PITCH));
             }
         }
 
         for (int col = 0; col < 9; col++) {
-            this.addSlot(new Slot(playerInventory, col, PLAYER_INV_X + col * SLOT_PITCH, HOTBAR_Y));
+            this.addSlot(new PageSlot(playerInventory, col, PLAYER_INV_X + col * SLOT_PITCH, HOTBAR_Y));
         }
     }
 
@@ -101,8 +113,30 @@ public class PetBackpackMenu extends AbstractContainerMenu {
         return pet != null ? pet : getPet(level);
     }
 
+    /** Shows or hides every slot, for the page of the pet screen that is open. Client only. */
+    public void showSlots(boolean shown) {
+        this.slotsShown = shown;
+    }
+
+    /** How many emeralds the pet has on it, as the owner sees its pockets. */
+    public int petEmeralds() {
+        return Wallet.count(petContainer);
+    }
+
+    /** A slot that is only there on the page that shows slots. */
+    private class PageSlot extends Slot {
+        private PageSlot(Container container, int index, int x, int y) {
+            super(container, index, x, y);
+        }
+
+        @Override
+        public boolean isActive() {
+            return slotsShown;
+        }
+    }
+
     /** Where the worn bag goes: one bag, and nothing else. */
-    private final class BagSlot extends Slot {
+    private final class BagSlot extends PageSlot {
         private BagSlot(SimpleContainer handler, int x, int y) {
             super(handler, AbstractPet.BAG_SLOT, x, y);
         }
@@ -130,7 +164,7 @@ public class PetBackpackMenu extends AbstractContainerMenu {
     }
 
     /** One of the bag's own slots: there to be used only while a bag is worn. */
-    private final class BagContentSlot extends Slot {
+    private final class BagContentSlot extends PageSlot {
         private BagContentSlot(SimpleContainer handler, int index, int x, int y) {
             super(handler, index, x, y);
         }
@@ -138,7 +172,7 @@ public class PetBackpackMenu extends AbstractContainerMenu {
         @Override
         public boolean isActive() {
             AbstractPet wearer = pet();
-            return wearer != null && wearer.isWearingBag();
+            return super.isActive() && wearer != null && wearer.isWearingBag();
         }
     }
 
