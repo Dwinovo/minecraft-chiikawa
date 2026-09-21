@@ -26,9 +26,12 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 
 /**
- * Block states and models of the mod's blocks, drawn from vanilla textures. Shared by
- * both loaders' data generators, since vanilla model generation has no way to describe
- * a model's own elements.
+ * Block states and models of the mod's blocks. The shop is drawn from vanilla textures by
+ * a block model of its own boxes; the labor board is drawn from its Bedrock model by its
+ * block entity's renderer, so its block model is only there for its break particles, and
+ * its item model comes with the other props' from {@link PropItemModelProvider}. Shared by
+ * both loaders' data generators, since vanilla model generation has no way to describe a
+ * model's own elements.
  */
 public final class ModBlockModelProvider implements DataProvider {
     private final PackOutput.PathProvider blockStates;
@@ -48,8 +51,7 @@ public final class ModBlockModelProvider implements DataProvider {
         return CompletableFuture.allOf(
             DataProvider.saveStable(cache, horizontalBlockState(board, LaborBoardBlock.FACING, boardModel),
                 blockStates.json(BuiltInRegistries.BLOCK.getKey(board))),
-            DataProvider.saveStable(cache, laborBoardModel(), models.json(boardModel)),
-            DataProvider.saveStable(cache, new DelegatedModel(boardModel).get(), models.json(ModelLocationUtils.getModelLocation(board.asItem()))),
+            DataProvider.saveStable(cache, particlesOnly(Blocks.SPRUCE_PLANKS), models.json(boardModel)),
             DataProvider.saveStable(cache, horizontalBlockState(shop, ShopBlock.FACING, shopModel),
                 blockStates.json(BuiltInRegistries.BLOCK.getKey(shop))),
             DataProvider.saveStable(cache, shopModel(), models.json(shopModel)),
@@ -87,26 +89,16 @@ public final class ModBlockModelProvider implements DataProvider {
             .get();
     }
 
-    /** Two dark posts holding a birch board, with three notes pinned on its north face. */
-    private static JsonElement laborBoardModel() {
+    /**
+     * A block drawn by its block entity's renderer has nothing for the block model to draw,
+     * only a texture for the bits that fly off it when it breaks.
+     */
+    private static JsonElement particlesOnly(Block like) {
         JsonObject textures = new JsonObject();
-        textures.addProperty("post", TextureMapping.getBlockTexture(Blocks.DARK_OAK_LOG).toString());
-        textures.addProperty("board", TextureMapping.getBlockTexture(Blocks.BIRCH_PLANKS).toString());
-        textures.addProperty("note", TextureMapping.getBlockTexture(Blocks.WHITE_WOOL).toString());
-        textures.addProperty("particle", TextureMapping.getBlockTexture(Blocks.BIRCH_PLANKS).toString());
-
-        List<Direction> all = List.of(Direction.values());
-        // A note lies flat on the board, so its back face is never seen.
-        List<Direction> note = List.of(Direction.NORTH, Direction.EAST, Direction.WEST, Direction.UP, Direction.DOWN);
-        JsonArray elements = new JsonArray();
-        elements.add(element(1, 0, 7, 3, 16, 9, "post", all));
-        elements.add(element(13, 0, 7, 15, 16, 9, "post", all));
-        elements.add(element(0, 6, 6, 16, 15, 7, "board", all));
-        elements.add(element(2, 9, 5.5F, 6, 13.5F, 6, "note", note));
-        elements.add(element(7, 7.5F, 5.5F, 10, 12, 6, "note", note));
-        elements.add(element(11, 9.5F, 5.5F, 14, 13.5F, 6, "note", note));
-
-        return model(textures, elements);
+        textures.addProperty("particle", TextureMapping.getBlockTexture(like).toString());
+        JsonObject model = new JsonObject();
+        model.add("textures", textures);
+        return model;
     }
 
     /** A model of nothing but its own boxes, so a block needs no art of its own. */

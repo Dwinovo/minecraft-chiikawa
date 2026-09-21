@@ -35,12 +35,17 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class LaborBoardBlock extends BaseEntityBlock {
     public static final MapCodec<LaborBoardBlock> CODEC = simpleCodec(LaborBoardBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-    /** Posts and board, by the side the notes face. */
+    /**
+     * Posts, board and the plates on it, which stand the same depth either side of the
+     * middle of the block whichever way the board faces.
+     */
+    private static final VoxelShape ACROSS_X = Block.box(1, 0, 5.5, 15, 16, 10.5);
+    private static final VoxelShape ACROSS_Z = Block.box(5.5, 0, 1, 10.5, 16, 15);
     private static final Map<Direction, VoxelShape> SHAPES = Map.of(
-        Direction.NORTH, Block.box(0, 0, 6, 16, 16, 9),
-        Direction.SOUTH, Block.box(0, 0, 7, 16, 16, 10),
-        Direction.EAST, Block.box(7, 0, 0, 10, 16, 16),
-        Direction.WEST, Block.box(6, 0, 0, 9, 16, 16)
+        Direction.NORTH, ACROSS_X,
+        Direction.SOUTH, ACROSS_X,
+        Direction.EAST, ACROSS_Z,
+        Direction.WEST, ACROSS_Z
     );
 
     public LaborBoardBlock(Properties properties) {
@@ -53,9 +58,13 @@ public class LaborBoardBlock extends BaseEntityBlock {
         return CODEC;
     }
 
+    /**
+     * Drawn by its block entity's renderer from the board's own model, so the plates on it
+     * can come down as pets take them; see {@code LaborBoardRenderer}.
+     */
     @Override
     protected RenderShape getRenderShape(BlockState state) {
-        return RenderShape.MODEL;
+        return RenderShape.ENTITYBLOCK_ANIMATED;
     }
 
     @Override
