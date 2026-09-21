@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.client.screen;
 
+import com.dwinovo.chiikawa.anim.render.ChiikawaEntityRenderer;
 import com.dwinovo.chiikawa.client.ui.PetStatusText;
 import com.dwinovo.chiikawa.client.ui.mc.GuiSurface;
 import com.dwinovo.chiikawa.client.ui.mc.ItemIcon;
@@ -189,11 +190,13 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
         int y2 = at.bottom() - 2;
         float centerX = (x1 + x2) / 2.0F;
         float centerY = (y1 + y2) / 2.0F;
-        graphics.enableScissor(x1, y1, x2, y2);
-        InventoryScreen.renderEntityInInventoryFollowsMouse(graphics, (int) centerX,
-            (int) (centerY + PORTRAIT_SCALE * (pet.getBbHeight() / 2.0F + PORTRAIT_Y_OFFSET)),
-            PORTRAIT_SCALE, centerX - mouseX, centerY - mouseY, pet);
-        graphics.disableScissor();
+        ChiikawaEntityRenderer.drawPortrait(() -> {
+            graphics.enableScissor(x1, y1, x2, y2);
+            InventoryScreen.renderEntityInInventoryFollowsMouse(graphics, (int) centerX,
+                (int) (centerY + PORTRAIT_SCALE * (pet.getBbHeight() / 2.0F + PORTRAIT_Y_OFFSET)),
+                PORTRAIT_SCALE, centerX - mouseX, centerY - mouseY, pet);
+            graphics.disableScissor();
+        });
     }
 
     /**
