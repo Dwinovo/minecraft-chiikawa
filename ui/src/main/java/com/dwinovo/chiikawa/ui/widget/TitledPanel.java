@@ -24,6 +24,11 @@ public final class TitledPanel {
         Ui.card(surface, x, y, width, height);
         Sign.draw(surface, x + UiStyle.PAD, y - SIGN_RISE, title);
         Ui.divider(surface, x, y + UiStyle.TITLE_H, width);
+        return contentY(y);
+    }
+
+    /** Where the contents of a panel whose card starts at {@code y} begin, before it is drawn. */
+    public static int contentY(int y) {
         return y + UiStyle.TITLE_H + UiStyle.PAD;
     }
 }
