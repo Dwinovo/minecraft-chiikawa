@@ -18,6 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ItemLike;
 
 public final class ModRecipeProvider extends RecipeProvider {
     public ModRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
@@ -93,15 +94,15 @@ public final class ModRecipeProvider extends RecipeProvider {
             .save(this.output);
 
         // A little bell on a stick: gold for the ring, an emerald for the pets to hear.
-        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, InitItems.PET_BELL.get())
-                .pattern(" G ")
-                .pattern("GEG")
-                .pattern(" S ")
-                .define('G', Items.GOLD_INGOT)
-                .define('E', Items.EMERALD)
-                .define('S', Items.STICK)
-                .unlockedBy(getHasName(Items.EMERALD), has(Items.EMERALD))
-                .save(recipeOutput);
+        ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.TOOLS, InitItems.PET_BELL.get())
+            .pattern(" G ")
+            .pattern("GEG")
+            .pattern(" S ")
+            .define('G', Items.GOLD_INGOT)
+            .define('E', Items.EMERALD)
+            .define('S', Items.STICK)
+            .unlockedBy(getHasName(Items.EMERALD), has(Items.EMERALD))
+            .save(this.output);
 
         // A plate of something hot: bread, a vegetable, and something cooked.
         ShapelessRecipeBuilder.shapeless(itemLookup, RecipeCategory.FOOD, InitItems.SIMPLE_DISH.get())
@@ -111,16 +112,21 @@ public final class ModRecipeProvider extends RecipeProvider {
             .unlockedBy(getHasName(Items.BREAD), has(Items.BREAD))
             .save(this.output);
 
-        // A small satchel: leather about a woollen body, hung on a string.
-        ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.TOOLS, InitItems.BEAR_BACKPACK.get())
+        // The grey rucksack everybody takes to work: leather about a grey woollen body,
+        // a string for each shoulder.
+        ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.TOOLS, InitItems.BACKPACK.get())
             .define('L', Items.LEATHER)
-            .define('W', ItemTags.WOOL)
+            .define('W', Items.GRAY_WOOL)
             .define('S', Items.STRING)
             .pattern("S S")
             .pattern("LWL")
             .pattern("LLL")
             .unlockedBy(getHasName(Items.LEATHER), has(Items.LEATHER))
             .save(this.output);
+        // The pouches: fleece in the friend's own colour, on a string.
+        pouch(recipeOutput, InitItems.BEAR_POUCH.get(), Items.PINK_WOOL);
+        pouch(recipeOutput, InitItems.WHALE_POUCH.get(), Items.LIGHT_BLUE_WOOL);
+        pouch(recipeOutput, InitItems.STAR_POUCH.get(), Items.YELLOW_WOOL);
 
         // A counter: a slab of planks over a chest, with an emerald on the till.
         ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.DECORATIONS, InitItems.SHOP.get())
@@ -131,6 +137,17 @@ public final class ModRecipeProvider extends RecipeProvider {
             .pattern("WCW")
             .pattern("W W")
             .unlockedBy(getHasName(Items.EMERALD), has(Items.EMERALD))
+            .save(this.output);
+    }
+
+    /** A pouch: a string over the top, three of its wool for the body. */
+    private static void pouch(RecipeOutput recipeOutput, ItemLike pouch, ItemLike wool) {
+        ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.TOOLS, pouch)
+            .define('W', wool)
+            .define('S', Items.STRING)
+            .pattern("S S")
+            .pattern("WWW")
+            .unlockedBy(getHasName(wool), has(wool))
             .save(this.output);
     }
 }
