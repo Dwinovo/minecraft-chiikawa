@@ -12,11 +12,9 @@ import com.dwinovo.chiikawa.anim.controller.ControllerHandler;
 import com.dwinovo.chiikawa.anim.controller.ControllerSnapshot;
 import com.dwinovo.chiikawa.anim.molang.MolangContext;
 import com.dwinovo.chiikawa.anim.render.layer.HeldItemLayer;
-import com.dwinovo.chiikawa.client.ui.PetLabelFades;
 import com.dwinovo.chiikawa.client.ui.PetStatusText;
 import com.dwinovo.chiikawa.client.ui.mc.WorldSurface;
 import com.dwinovo.chiikawa.ui.DrawSurface;
-import com.dwinovo.chiikawa.ui.Fade;
 import com.dwinovo.chiikawa.ui.widget.Chip;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.item.BagItem;
@@ -441,8 +439,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     /**
      * Draws a pet as a picture in a screen: the model, and nothing over its head. The
      * label is the world answering an owner who points at a pet; in the pet's own screen
-     * the question has been asked already, and the screen says the rest. Nor does the
-     * picture step the label's fade, which the pet in the world behind the screen does.
+     * the question has been asked already, and the screen says the rest.
      */
     public static void drawPortrait(Runnable draw) {
         drawingPortrait = true;
@@ -454,13 +451,13 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     }
 
     /**
-     * A working pet says so over its head, even when it has no name to show. True for any
-     * pet with something to say, asked about or not: the name tag pass is where a label
-     * fades in and out, and one on its way out still has to be drawn.
+     * A working pet says so over its head when its owner asks, even when it has no name to
+     * show. Like a name tag, the label is there or it is not: it comes up the frame the
+     * crosshair lands and goes the frame it leaves, the way everything in the game does.
      */
     @Override
     protected boolean shouldShowName(T entity) {
-        return !drawingPortrait && (super.shouldShowName(entity) || statusChip(entity).isPresent());
+        return !drawingPortrait && (super.shouldShowName(entity) || answer(entity).isPresent());
     }
 
     @Override
@@ -470,14 +467,13 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         if (named) {
             super.renderNameTag(entity, displayName, poseStack, bufferSource, packedLight, partialTick);
         }
-        Optional<Chip> chip = statusChip(entity);
-        // Stepped every frame the pet is drawn, asked about or not: a label on its way out
-        // is only there because it was asked for a moment ago.
-        Fade fade = PetLabelFades.step(entity.getId(), chip.isPresent() && isAsked(entity));
-        if (chip.isPresent() && fade.isVisible()) {
-            drawLabel(entity, chip.get(), fade.alpha(), poseStack, bufferSource, partialTick,
-                named ? LABEL_LINE : 0.0F);
-        }
+        answer(entity).ifPresent(chip -> drawLabel(entity, chip, poseStack, bufferSource, partialTick,
+            named ? LABEL_LINE : 0.0F));
+    }
+
+    /** What the pet says over its head right now: its status, if its owner is asking. */
+    private Optional<Chip> answer(T entity) {
+        return isAsked(entity) ? statusChip(entity) : Optional.empty();
     }
 
     /**
@@ -507,7 +503,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     }
 
     /** The mod's own label, drawn where a name tag goes, with the same widgets its screens use. */
-    private void drawLabel(T entity, Chip chip, float alpha, PoseStack poseStack, MultiBufferSource bufferSource,
+    private void drawLabel(T entity, Chip chip, PoseStack poseStack, MultiBufferSource bufferSource,
                            float partialTick, float extraHeight) {
         Vec3 attachment = entity.getAttachments().getNullable(EntityAttachment.NAME_TAG, 0, entity.getViewYRot(partialTick));
         if (attachment == null) {
@@ -518,7 +514,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
         // Text pixels from here on, with y running down as on a screen.
         poseStack.scale(LABEL_SCALE, -LABEL_SCALE, LABEL_SCALE);
-        DrawSurface surface = new WorldSurface(poseStack, bufferSource, getFont(), alpha);
+        DrawSurface surface = new WorldSurface(poseStack, bufferSource, getFont());
         chip.draw(surface, 0, 0);
         poseStack.popPose();
     }
