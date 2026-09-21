@@ -15,6 +15,7 @@ import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.ui.DrawSurface;
 import com.dwinovo.chiikawa.ui.PixelArt;
 import com.dwinovo.chiikawa.ui.Rect;
+import com.dwinovo.chiikawa.ui.TextClip;
 import com.dwinovo.chiikawa.ui.Ui;
 import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.UiTheme;
@@ -235,9 +236,10 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
                 task.progress(), task.target());
             notes.add(new HoverNote(strip, slipDetail(pet, task)));
         } else {
-            Ui.textClipped(surface, PetStatusText.activity(pet).getString(), strip.x() + UiStyle.GAP,
-                UiStyle.centerIn(strip.y(), strip.height(), surface.lineHeight()),
-                strip.width() - 2 * UiStyle.GAP, UiTheme.TEXT_MUTED);
+            // A word on its own sits in the middle of its card, as a label on a button does.
+            String doing = TextClip.clip(PetStatusText.activity(pet).getString(),
+                strip.width() - 2 * UiStyle.GAP, surface::textWidth);
+            Ui.textCentered(surface, doing, strip, UiTheme.TEXT_MUTED);
         }
     }
 
