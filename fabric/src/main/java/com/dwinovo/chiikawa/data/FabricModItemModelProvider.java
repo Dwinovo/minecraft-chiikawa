@@ -7,14 +7,6 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.model.ModelTemplates;
-import com.google.gson.JsonObject;
-import java.util.function.Supplier;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
-import net.minecraft.data.models.BlockModelGenerators;
-import net.minecraft.data.models.ItemModelGenerators;
-import net.minecraft.data.models.model.ModelLocationUtils;
-import net.minecraft.data.models.model.ModelTemplates;
-import net.minecraft.world.item.Item;
 
 public class FabricModItemModelProvider extends FabricModelProvider {
     public FabricModItemModelProvider(FabricDataOutput output) {
@@ -38,17 +30,7 @@ public class FabricModItemModelProvider extends FabricModelProvider {
         itemModelGenerator.declareCustomModelItem(InitItems.HACHIWARE_WEAPON.get());
         itemModelGenerator.declareCustomModelItem(InitItems.CHIIKAWA_WEAPON.get());
         itemModelGenerator.generateFlatItem(InitItems.MUSIC_BOX.get(), ModelTemplates.FLAT_ITEM);
-
-        // Bags are drawn from their own Bedrock models by a built-in renderer, lit from
-        // the front in a slot the way a flat item is.
-        for (Supplier<Item> bag : InitItems.BAGS) {
-            itemModelGenerator.output.accept(ModelLocationUtils.getModelLocation(bag.get()), () -> {
-                JsonObject model = new JsonObject();
-                model.addProperty("parent", "minecraft:builtin/entity");
-                model.addProperty("gui_light", "front");
-                return model;
-            });
-        }
+        // The props' item models come from PropItemModelProvider, shared with NeoForge.
     }
 
     private static void generateSpawnEggs(ItemModelGenerators itemModelGenerator) {

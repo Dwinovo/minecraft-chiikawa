@@ -10,7 +10,9 @@ import com.dwinovo.chiikawa.anim.baked.BakedCube;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
 import com.dwinovo.chiikawa.anim.compile.ModelBaker;
 import com.dwinovo.chiikawa.anim.format.BedrockGeoFile;
+import com.dwinovo.chiikawa.client.render.LaborBoardRenderer;
 import com.dwinovo.chiikawa.item.BagItem;
+import com.dwinovo.chiikawa.task.BoardSlips;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.Reader;
@@ -21,13 +23,16 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 /**
- * What the art has to give the code for a bag to show: every pet a place to hang each
- * kind of bag and a strap to hold it, and every bag a model and a texture of its own.
- * A pet is a model with animations; a bag is a model without.
+ * What the art has to give the code. Every pet needs a place to hang each kind of bag and a
+ * strap to hold it; every prop — a model without animations — needs a texture, and needs to
+ * be one the code draws: a bag, hung from its centre, or the labor board, with a plate for
+ * every slip a board can put up.
  */
-class BagModelsTest {
+class PropModelsTest {
     private static final Path ASSETS = Path.of("src/main/resources/assets/chiikawa");
     private static final Gson GSON = new Gson();
+    private static final List<String> BAGS = List.of("backpack", "bear_pouch", "whale_pouch", "star_pouch");
+    private static final String LABOR_BOARD = "labor_board";
 
     @Test
     void everyPetHasABoneToHangEachKindOfBagFromAndAStrapToHoldIt() throws IOException {
@@ -48,14 +53,20 @@ class BagModelsTest {
     }
 
     @Test
-    void everyBagIsOneBoneCentredOnItsOriginWithATextureOfItsOwn() throws IOException {
-        List<String> bags = modelNames(false);
-        assertFalse(bags.isEmpty(), "no bag models found under " + ASSETS);
-        for (String bag : bags) {
+    void everyPropIsOneTheCodeDrawsAndHasATexture() throws IOException {
+        List<String> props = modelNames(false);
+        for (String prop : props) {
+            assertTrue(BAGS.contains(prop) || prop.equals(LABOR_BOARD), prop + " is a model nothing draws");
+            assertTrue(Files.exists(ASSETS.resolve("textures/entities/" + prop + ".png")), prop + " has no texture");
+        }
+        assertTrue(props.containsAll(BAGS) && props.contains(LABOR_BOARD), "a prop the code draws has no model: " + props);
+    }
+
+    @Test
+    void everyBagIsOneBoneHungFromItsCentre() throws IOException {
+        for (String bag : BAGS) {
             BakedModel model = bake(bag);
             assertEquals(1, model.bones.length, bag + " is not one bone");
-            assertTrue(Files.exists(ASSETS.resolve("textures/entities/" + bag + ".png")), bag + " has no texture");
-            // Centred, so a pet's bone says where the middle of the bag goes.
             float minX = Float.MAX_VALUE, maxX = -Float.MAX_VALUE, minY = Float.MAX_VALUE, maxY = -Float.MAX_VALUE;
             for (BakedCube cube : model.cubes) {
                 minX = Math.min(minX, cube.minX);
@@ -68,7 +79,19 @@ class BagModelsTest {
         }
     }
 
-    /** The geo models with an animation file (the pets) or without one (the bags). */
+    @Test
+    void theLaborBoardHasAPlateForEverySlipABoardCanPutUp() throws IOException {
+        BakedModel model = bake(LABOR_BOARD);
+        int most = BoardSlips.slipsAt(BoardSlips.MAX_LEVEL);
+        for (int place = 0; place < most; place++) {
+            assertTrue(bone(model, LABOR_BOARD, LaborBoardRenderer.PLATE_BONE + place).cubeCount > 0,
+                "plate " + place + " has nothing on it");
+        }
+        assertEquals(null, model.boneIndex.get(LaborBoardRenderer.PLATE_BONE + most),
+            "the board has a plate no board ever puts up");
+    }
+
+    /** The geo models with an animation file (the pets) or without one (the props). */
     private static List<String> modelNames(boolean animated) throws IOException {
         try (Stream<Path> files = Files.list(ASSETS.resolve("models/entity"))) {
             return files.map(file -> file.getFileName().toString().replace(".json", ""))
@@ -84,9 +107,9 @@ class BagModelsTest {
         }
     }
 
-    private static BakedBone bone(BakedModel model, String pet, String name) {
+    private static BakedBone bone(BakedModel model, String owner, String name) {
         Integer idx = model.boneIndex.get(name);
-        assertNotNull(idx, pet + " has no " + name);
+        assertNotNull(idx, owner + " has no " + name);
         return model.bones[idx];
     }
 }

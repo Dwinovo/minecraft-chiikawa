@@ -26,14 +26,7 @@ public final class ModItemModelProvider extends ModelProvider {
         itemModels.generateFlatItem(InitItems.MUSIC_BOX.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(InitItems.SIMPLE_DISH.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(InitItems.PET_BELL.get(), ModelTemplates.FLAT_ITEM);
-
-        // Bags are drawn from their own Bedrock models by a built-in renderer, lit from
-        // the front in a slot the way a flat item is.
-        for (Supplier<Item> bag : InitItems.BAGS) {
-            getBuilder(BuiltInRegistries.ITEM.getKey(bag.get()).getPath())
-                .parent(new ModelFile.UncheckedModelFile("builtin/entity"))
-                .guiLight(BlockModel.GuiLight.FRONT);
-    
+        // The props' item models come from PropItemModelProvider, shared with Fabric.
     }
 
     private static void generateSpawnEggs(ItemModelGenerators itemModels) {
