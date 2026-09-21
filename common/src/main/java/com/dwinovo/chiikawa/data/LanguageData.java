@@ -50,6 +50,10 @@ public final class LanguageData {
             addSupplyTranslations(adder, "双肩包", "小熊挎包", "鲸鱼挎包", "星星挎包", "给宠物背上，背包多 10 格",
                     "简单料理", "喂给宠物，一阵子干活更起劲",
                     "宠物铃铛", "叫回你的宠物，跨维度也听得见；响过一次要等半分钟");
+            addPetNewsTranslations(adder, "%1$s 花 %2$s 颗绿宝石买了 %3$s",
+                    "%1$s 花 %2$s 颗绿宝石买了 %3$s，当场吃掉了",
+                    "%1$s 花 %2$s 颗绿宝石买了 %3$s，说要送给你",
+                    "%1$s 把 %2$s 送给了你");
             addRecallTranslations(adder, "叫回了 %s 只宠物", "你没有宠物可叫",
                     "%s 没有应声，上次见到它的地方已经没它了");
             addShopScreenTranslations(adder, "商店", "买 %s", "卖 %s", "今天什么都不卖",
@@ -114,6 +118,10 @@ public final class LanguageData {
             addSupplyTranslations(adder, "Rucksack", "Bear Pouch", "Whale Pouch", "Star Pouch", "Worn by a pet: ten more slots",
                     "Simple Dish", "Fed to a pet: keener on work for a while",
                     "Pet Bell", "Calls your pets home, even from another dimension; half a minute between rings");
+            addPetNewsTranslations(adder, "%1$s spent %2$s emeralds on %3$s",
+                    "%1$s spent %2$s emeralds on %3$s and ate it on the spot",
+                    "%1$s spent %2$s emeralds on %3$s, and says it is for you",
+                    "%1$s gave you %2$s");
             addRecallTranslations(adder, "%s came running", "You have no pets to call",
                     "%s did not answer; it is gone from where it was last seen");
             addShopScreenTranslations(adder, "Shop", "Buy %s", "Sell %s", "Nothing for sale today",
@@ -239,6 +247,19 @@ public final class LanguageData {
         adder.add("message.chiikawa.pet_bell.came", came);
         adder.add("message.chiikawa.pet_bell.nobody", nobody);
         adder.add("message.chiikawa.pet_bell.missing", missing);
+    }
+
+    /**
+     * What a pet tells its owner in chat about its own spending: the pet, the price, the
+     * thing; and the present it hands over. Numbered, since the languages put them in
+     * different orders.
+     */
+    private static void addPetNewsTranslations(Adder adder, String bought, String boughtAte, String boughtGift,
+            String given) {
+        adder.add("message.chiikawa.shop.bought", bought);
+        adder.add("message.chiikawa.shop.bought_ate", boughtAte);
+        adder.add("message.chiikawa.shop.bought_gift", boughtGift);
+        adder.add("message.chiikawa.gift.given", given);
     }
 
     private static void addBlockTranslations(Adder adder, String laborBoard, String shop) {
