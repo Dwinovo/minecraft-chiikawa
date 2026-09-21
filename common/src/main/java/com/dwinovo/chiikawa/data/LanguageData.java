@@ -47,7 +47,7 @@ public final class LanguageData {
                 "已经带着一张工作牌", "刚才没领到牌，歇一会儿", "附近的公告板没有合适的工作牌",
                 "刚买过东西", "商店里没有它想要又买得起的", "手上没有要送的东西");
             addBlockTranslations(adder, "劳动公告板", "商店");
-            addSupplyTranslations(adder, "小熊挎包", "给宠物戴上，背包多 10 格",
+            addSupplyTranslations(adder, "双肩包", "小熊挎包", "鲸鱼挎包", "星星挎包", "给宠物背上，背包多 10 格",
                     "简单料理", "喂给宠物，一阵子干活更起劲",
                     "宠物铃铛", "叫回你的宠物，跨维度也听得见；响过一次要等半分钟");
             addRecallTranslations(adder, "叫回了 %s 只宠物", "你没有宠物可叫",
@@ -63,7 +63,7 @@ public final class LanguageData {
                     "Lv.%s", "每天 %s 张", "升级 %s",
                     "每升一级：每天多一张牌，并解锁更难的活",
                     "已升满", "你有 %s 绿宝石");
-            addPetStatusTranslations(adder, "闲着", "戴上小熊挎包可以多装 10 格");
+            addPetStatusTranslations(adder, "闲着", "背上双肩包或挎包，可以多装 10 格");
             addPetScreenTranslations(adder, "背包", "状态", "指令",
                     "没有领工作牌",
                     "干劲十足：还剩 %s",
@@ -111,7 +111,7 @@ public final class LanguageData {
                 "Already carries a slip", "Resting after missing a slip", "No slip for it on a nearby board",
                 "Just bought something", "Nothing here it wants and can afford", "Nothing to give");
             addBlockTranslations(adder, "Labor Board", "Shop");
-            addSupplyTranslations(adder, "Bear Backpack", "Worn by a pet: ten more slots",
+            addSupplyTranslations(adder, "Rucksack", "Bear Pouch", "Whale Pouch", "Star Pouch", "Worn by a pet: ten more slots",
                     "Simple Dish", "Fed to a pet: keener on work for a while",
                     "Pet Bell", "Calls your pets home, even from another dimension; half a minute between rings");
             addRecallTranslations(adder, "%s came running", "You have no pets to call",
@@ -128,7 +128,7 @@ public final class LanguageData {
                     "Lv.%s", "%s a day", "Upgrade %s",
                     "Each level: one more slip a day, and tougher work",
                     "Fully upgraded", "You have %s emeralds");
-            addPetStatusTranslations(adder, "Idle", "A bear backpack adds ten more slots");
+            addPetStatusTranslations(adder, "Idle", "A rucksack or a pouch adds ten more slots");
             addPetScreenTranslations(adder, "Backpack", "Status", "Orders",
                     "No slip taken",
                     "Keen on work: %s left",
@@ -221,10 +221,13 @@ public final class LanguageData {
         adder.add("screen.chiikawa.shop.next_page", nextPage);
     }
 
-    private static void addSupplyTranslations(Adder adder, String bearBackpack, String bearBackpackTip,
-            String simpleDish, String simpleDishTip, String petBell, String petBellTip) {
-        adder.add("item.chiikawa.bear_backpack", bearBackpack);
-        adder.add("tooltip.chiikawa.bear_backpack", bearBackpackTip);
+    private static void addSupplyTranslations(Adder adder, String backpack, String bearPouch, String whalePouch,
+            String starPouch, String bagTip, String simpleDish, String simpleDishTip, String petBell, String petBellTip) {
+        adder.add("item.chiikawa.backpack", backpack);
+        adder.add("item.chiikawa.bear_pouch", bearPouch);
+        adder.add("item.chiikawa.whale_pouch", whalePouch);
+        adder.add("item.chiikawa.star_pouch", starPouch);
+        adder.add("tooltip.chiikawa.bag", bagTip);
         adder.add("item.chiikawa.simple_dish", simpleDish);
         adder.add("tooltip.chiikawa.simple_dish", simpleDishTip);
         adder.add("item.chiikawa.pet_bell", petBell);
