@@ -22,27 +22,23 @@ class HeartsTest {
         Hearts.draw(surface, 0, 0, 0, 20);
 
         assertFalse(surface.hasRectOf(UiTheme.LIFE));
-        assertTrue(surface.hasRectOf(UiTheme.SHADE), () -> "the spent hearts left the row: " + surface.rects);
+        assertTrue(surface.hasRectOf(UiTheme.SURFACE), () -> "the spent hearts left the row: " + surface.rects);
+        assertTrue(surface.hasRectOf(UiTheme.INK), "a spent heart lost its outline");
     }
 
     @Test
     void afullRowIsAllLife() {
         Hearts.draw(surface, 0, 0, 20, 20);
 
-        assertFalse(surface.hasRectOf(UiTheme.SHADE), () -> "a full row had a hole in it: " + surface.rects);
+        assertFalse(surface.hasRectOf(UiTheme.SURFACE), () -> "a full row had a hole in it: " + surface.rects);
     }
 
     @Test
     void halfAHeartIsHalfLitAndHalfShaded() {
         Hearts.draw(surface, 0, 0, 1, 2);
 
-        assertTrue(surface.hasRectOf(UiTheme.LIFE));
-        assertTrue(surface.hasRectOf(UiTheme.SHADE));
-        for (RecordingSurface.Rectangle rect : surface.rects) {
-            if (rect.argb() == UiTheme.LIFE) {
-                assertTrue(rect.x() + rect.width() <= 3, () -> "the lit half spilled past the middle: " + rect);
-            }
-        }
+        assertEquals(UiTheme.LIFE, surface.colorAt(2, 2), "the left half is not lit");
+        assertEquals(UiTheme.SURFACE, surface.colorAt(5, 2), "the right half of half a heart was lit");
     }
 
     @Test
