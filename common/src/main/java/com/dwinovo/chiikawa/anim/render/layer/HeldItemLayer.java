@@ -1,6 +1,8 @@
 package com.dwinovo.chiikawa.anim.render.layer;
 
 import com.dwinovo.chiikawa.anim.render.PetData;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -24,6 +26,14 @@ import net.minecraft.world.item.ItemStack;
  * Item models render in <b>block</b> units, so a compensating {@code scale(16)}
  * is applied before rendering. Without it the held item would render at 1/16
  * of its intended size.
+ *
+ * <h2>Into the fist</h2>
+ * An item's third-person display transforms are written for vanilla's hand, which
+ * {@code ItemInHandLayer} turns so that the item's up runs out of the front of the fist.
+ * The locator's frame is the model's own — up is up, the pet faces {@code -Z} — so the
+ * item is turned the same way before it is drawn; see {@link #intoFist}. Without that
+ * turn a sword stood on its pommel pointing at the sky, and every swing of the arm swung
+ * its blade backwards.
  */
 public final class HeldItemLayer implements RenderLayer {
 
@@ -67,8 +77,25 @@ public final class HeldItemLayer implements RenderLayer {
         walker.transformToBone(ctx.model(), ctx.poseBuf(), targetIdx, ctx.poseStack());
         // Cancel the entity-level scale(1/16): items expect block-unit space.
         ctx.poseStack().scale(16f, 16f, 16f);
+        intoFist(ctx.poseStack());
         itemRenderState.render(ctx.poseStack(), ctx.bufferSource(), ctx.packedLight(),
                 OverlayTexture.NO_OVERLAY);
         ctx.poseStack().popPose();
+    }
+
+    /**
+     * From the hand locator, in block units, to where vanilla holds an item: a quarter
+     * turn about X so the item's up points out ahead of the fist, then a pixel down into
+     * the palm and two ahead of the knuckles.
+     *
+     * <p>This is what vanilla's {@code ItemInHandLayer} and Touhou Little Maid's held-item
+     * layer do — {@code X -90°, Y 180°} and then {@code (0, 0.125, -0.0625)} from a hand
+     * bone — written for a frame that is vanilla's model space flipped by
+     * {@code scale(-1, -1, 1)}. That flip is a half turn about Z, and a half turn about Z
+     * followed by theirs comes to the single quarter turn here.
+     */
+    static void intoFist(PoseStack pose) {
+        pose.mulPose(Axis.XP.rotationDegrees(-90.0F));
+        pose.translate(0.0F, 0.125F, -0.0625F);
     }
 }
