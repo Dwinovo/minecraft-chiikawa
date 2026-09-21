@@ -197,6 +197,14 @@ class BoardSlipsTest {
 
     // ---- helpers ---------------------------------------------------------------
 
+    @Test
+    void theSlipsStillHangingAreTheOnesNobodyTookDown() {
+        List<BoardSlot> slots = List.of(slot(FARMER), taken(FARMER), slot(MUSICIAN).reserve(OTHER, NOW + 100));
+
+        assertEquals(0b101, BoardSlips.hanging(slots), "a taken slip still hangs, or a held one came down early");
+        assertEquals(0, BoardSlips.hanging(List.of()), "an empty board hangs something");
+    }
+
     private static SortedMap<ResourceLocation, PetTaskType> types() {
         SortedMap<ResourceLocation, PetTaskType> types = new TreeMap<>();
         types.put(id("weeding"), new PetTaskType(FARMER, PetWorkCounters.WEED, PetTask.NO_ICON,
