@@ -1,43 +1,73 @@
 package com.dwinovo.chiikawa.ui;
 
 /**
- * The mod's colours, written down as what a colour is <i>for</i> rather than what it looks
- * like. A widget asks for {@link #TEXT_MUTED}, never for a brown, so the day the palette
- * changes it changes here and nowhere else.
+ * The mod's colours, by what they are for.
  *
- * <h2>What earns a slot</h2>
- * A slot is a job on screen that more than one widget has. "The colour of the labor
- * board's second line" is not a job; "words that support other words" is. Slots that
- * multiply until each widget has its own are just hard-coded colours with longer names.
+ * <p>Drawn after Chiikawa Pocket, the official game, rather than after the vanilla GUI:
+ * <b>cream paper and a dark ink line</b>, a white rim just inside the line so every panel
+ * reads as a sticker, wood for anything written on a sign, and colour kept for things that
+ * mean something — pink for what is picked, green for work and how far along it is, sky
+ * behind the pet. The old palette put beige, tan and brown in one hue and one value, so
+ * nothing stood off anything; this one keeps the paper light, the ink dark, and the colour
+ * saturated only where it has a job.
  */
 public final class UiTheme {
-    /** A card's face: what content sits on. */
-    public static final int PANEL = 0xFFF7E9D2;
-    /** A well cut into a card — an icon's box, a bar's groove. Reads as recessed. */
-    public static final int SURFACE = 0xFFE7D2B2;
-    /** The lit edge of anything raised, and the far edge of anything sunken. */
-    public static final int HIGHLIGHT = 0xFFFFF7E8;
-    /** The shaded edge of anything raised, and the near edge of anything sunken. */
-    public static final int SHADE = 0xFFD9BE96;
-    /** The line around a card. */
-    public static final int BORDER = 0xFFA9754F;
-    /** The line between two parts of one card; quieter than a border, which encloses. */
-    public static final int DIVIDER = 0xFFD9C3A5;
-    /** Words. */
-    public static final int TEXT = 0xFF5A3A2B;
-    /** Words that support other words: units, hints, who took what. */
-    public static final int TEXT_MUTED = 0xFF8A7360;
-    /** Work under way: the filled part of a bar. */
-    public static final int ACCENT = 0xFFD08A3E;
-    /** Finished, taken, paid. */
-    public static final int SUCCESS = 0xFF4C7A34;
-    /** A life still in hand. Lives lost are drawn in {@link #SHADE}: the row keeps its length. */
-    public static final int LIFE = 0xFFE0748A;
-    /** Laid over the row the cursor is on, so a list answers the mouse. */
-    public static final int HOVER = 0x33A9754F;
-    /** The hard shadow a card casts, one step down and to the right. */
-    public static final int SHADOW = 0x40402A1E;
+    /** The paper every panel is cut from. */
+    public static final int PANEL = 0xFFFFF9EF;
+    /** The line round everything: the manga's own ink, a warm near-black. */
+    public static final int INK = 0xFF4B3526;
+    /** Kept for callers that ask for "the outline": it is the ink. */
+    public static final int BORDER = INK;
+    /** The white rim just inside the ink, which is what makes a panel read as a sticker. */
+    public static final int HIGHLIGHT = 0xFFFFFFFF;
+    /** The floor of a well: where something is put, a shade below the paper. */
+    public static final int SURFACE = 0xFFF3E6D2;
+    /** A well's shadowed lip, an empty heart, the dashes of a divider. */
+    public static final int SHADE = 0xFFDDC8A8;
+    /** Between two parts of a panel: dashed, in the lip's colour. */
+    public static final int DIVIDER = SHADE;
+    /** Text: the ink again, so words and lines are one colour. */
+    public static final int TEXT = INK;
+    /** What can be read second. */
+    public static final int TEXT_MUTED = 0xFFA48B74;
+    /** Pink: what is picked, and the one thing on a screen to press. */
+    public static final int ACCENT = 0xFFF49AB1;
+    /** A picked card's fill: the pink, softened so ink reads on it. */
+    public static final int ACCENT_SOFT = 0xFFF9C3D0;
+    /** Behind something the pink is about. */
+    public static final int ACCENT_PALE = 0xFFFDE4EB;
+    /** Behind the pet: its own bit of sky. */
+    public static final int SKY_PALE = 0xFFDDF1FA;
+    /** Work, and how far along it is. */
+    public static final int LEAF = 0xFFA5D48C;
+    /** Behind something the green is about. */
+    public static final int LEAF_PALE = 0xFFE6F4DC;
+    /** Done. */
+    public static final int SUCCESS = 0xFF6DA356;
+    /** Hearts. */
+    public static final int LIFE = ACCENT;
+    /** A sign's board — the labor board's own wood. */
+    public static final int WOOD = 0xFFE4BE8C;
+    /** The lit edge of a board. */
+    public static final int WOOD_LIGHT = 0xFFF0D3A9;
+    /** The grain, and the board's shaded edge. */
+    public static final int WOOD_DARK = 0xFFB3844F;
+    /** Laid over a row the cursor is on. */
+    public static final int HOVER = 0x33F49AB1;
+    /** Under a card, so it stands off what is behind it. */
+    public static final int SHADOW = 0x46140E08;
 
     private UiTheme() {
+    }
+
+    /** A colour washed most of the way to white, for a pale fill behind that colour. */
+    public static int pale(int argb) {
+        int r = (argb >> 16) & 0xFF;
+        int g = (argb >> 8) & 0xFF;
+        int b = argb & 0xFF;
+        r = r + (255 - r) * 3 / 4;
+        g = g + (255 - g) * 3 / 4;
+        b = b + (255 - b) * 3 / 4;
+        return 0xFF000000 | (r << 16) | (g << 8) | b;
     }
 }

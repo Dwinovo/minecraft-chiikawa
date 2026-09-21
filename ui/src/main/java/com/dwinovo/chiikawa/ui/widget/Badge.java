@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.ui.widget;
 
 import com.dwinovo.chiikawa.ui.DrawSurface;
+import com.dwinovo.chiikawa.ui.Ui;
 import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.UiTheme;
 
@@ -9,9 +10,9 @@ import com.dwinovo.chiikawa.ui.UiTheme;
  * row it sits in; "Taken by Usagi" written out as a line is read as prose, and prose in a
  * list has to be read line by line before the list can be scanned at all.
  *
- * <p>The colour is in the word, not behind it. A row of filled badges shouting in three
- * colours is louder than the content they label — the quiet well says "this is a state"
- * and the ink says which one.
+ * <p>A small sticker in the ink line, the colour washed pale behind ink-coloured words.
+ * Saturated fills in a list shout louder than the rows they label; a pale tint says which
+ * state it is and leaves the words readable.
  */
 public final class Badge {
     private Badge() {
@@ -31,10 +32,14 @@ public final class Badge {
      *             {@link UiTheme#SUCCESS} for one worth noticing
      * @return the width it took, so a caller can place the next one
      */
+    /**
+     * @param argb the state's colour; the badge is filled with a pale wash of it
+     * @return the width it took
+     */
     public static int draw(DrawSurface surface, String text, int x, int y, int argb) {
         int width = width(surface, text);
-        surface.fillRect(x, y, width, height(surface), UiTheme.SURFACE);
-        surface.drawText(text, x + UiStyle.GAP, y + UiStyle.TIGHT, argb);
+        Ui.sticker(surface, x, y, width, height(surface), Ui.WELL_RADIUS + 1, UiTheme.pale(argb));
+        surface.drawText(text, x + UiStyle.GAP, y + UiStyle.TIGHT, UiTheme.TEXT);
         return width;
     }
 }
