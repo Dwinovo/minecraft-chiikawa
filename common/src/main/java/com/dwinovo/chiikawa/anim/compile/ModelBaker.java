@@ -224,6 +224,8 @@ public final class ModelBaker {
             float v = cube.uv.getAsJsonArray().get(1).getAsFloat();
             simpleBoxUV(out, u, v, sx, sy, sz, uFlip);
         } else if (cube.uv.isJsonObject()) {
+            // Per-face UV lists the faces the cube has; one left out is not drawn, as in
+            // Bedrock — a cloth edge is two sides of a sheet, with nothing across its thickness.
             JsonObject obj = cube.uv.getAsJsonObject();
             applyFaceUV(out, BakedCube.FACE_NORTH, obj, "north", uFlip);
             applyFaceUV(out, BakedCube.FACE_SOUTH, obj, "south", uFlip);
@@ -272,11 +274,13 @@ public final class ModelBaker {
     /** Per-face explicit UV from JSON. {@code uv} is top-left, {@code uv_size} can be negative. */
     private static void applyFaceUV(float[][][] out, int face, JsonObject parent, String key, boolean uFlip) {
         JsonElement el = parent.get(key);
-        if (el == null || !el.isJsonObject()) return;
-        JsonObject f = el.getAsJsonObject();
-        JsonElement uvEl = f.get("uv");
-        JsonElement sizeEl = f.get("uv_size");
-        if (uvEl == null || sizeEl == null) return;
+        JsonObject f = el != null && el.isJsonObject() ? el.getAsJsonObject() : null;
+        JsonElement uvEl = f == null ? null : f.get("uv");
+        JsonElement sizeEl = f == null ? null : f.get("uv_size");
+        if (uvEl == null || sizeEl == null) {
+            out[face] = null;
+            return;
+        }
         float u0 = uvEl.getAsJsonArray().get(0).getAsFloat();
         float v0 = uvEl.getAsJsonArray().get(1).getAsFloat();
         float du = sizeEl.getAsJsonArray().get(0).getAsFloat();
