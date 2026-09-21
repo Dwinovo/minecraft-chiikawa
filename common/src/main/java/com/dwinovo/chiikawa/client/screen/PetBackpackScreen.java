@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.client.screen;
 
+import com.dwinovo.chiikawa.anim.render.ChiikawaEntityRenderer;
 import com.dwinovo.chiikawa.client.ui.PetStatusText;
 import com.dwinovo.chiikawa.client.ui.mc.GuiSurface;
 import com.dwinovo.chiikawa.client.ui.mc.ItemIcon;
@@ -180,9 +181,9 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     private void drawPortrait(GuiGraphics graphics, DrawSurface surface, AbstractPet pet, int mouseX, int mouseY) {
         Rect at = PORTRAIT.offset(this.leftPos, this.topPos);
         Ui.sticker(surface, at.x(), at.y(), at.width(), at.height(), Ui.CARD_RADIUS, UiTheme.SKY_PALE);
-        InventoryScreen.renderEntityInInventoryFollowsMouse(graphics,
+        ChiikawaEntityRenderer.drawPortrait(() -> InventoryScreen.renderEntityInInventoryFollowsMouse(graphics,
             at.x() + 2, at.y() + 2, at.right() - 2, at.bottom() - 2,
-            PORTRAIT_SCALE, PORTRAIT_Y_OFFSET, mouseX, mouseY, pet);
+            PORTRAIT_SCALE, PORTRAIT_Y_OFFSET, mouseX, mouseY, pet));
     }
 
     /**
