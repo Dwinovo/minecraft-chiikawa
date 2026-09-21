@@ -442,6 +442,24 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     private static final float LABEL_LINE = 0.28F;
     private static final float LABEL_SCALE = 0.025F;
 
+    /** Whether a pet is being drawn as a picture in a screen rather than in the world. */
+    private static boolean drawingPortrait;
+
+    /**
+     * Draws a pet as a picture in a screen: the model, and nothing over its head. The
+     * label is the world answering an owner who points at a pet; in the pet's own screen
+     * the question has been asked already, and the screen says the rest. Nor does the
+     * picture step the label's fade, which the pet in the world behind the screen does.
+     */
+    public static void drawPortrait(Runnable draw) {
+        drawingPortrait = true;
+        try {
+            draw.run();
+        } finally {
+            drawingPortrait = false;
+        }
+    }
+
     /**
      * A working pet says so over its head, even when it has no name to show. True for any
      * pet with something to say, asked about or not: the name tag pass is where a label
@@ -449,7 +467,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
      */
     @Override
     protected boolean shouldShowName(T entity) {
-        return super.shouldShowName(entity) || statusChip(entity).isPresent();
+        return !drawingPortrait && (super.shouldShowName(entity) || statusChip(entity).isPresent());
     }
 
     @Override
