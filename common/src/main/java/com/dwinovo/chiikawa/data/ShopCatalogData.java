@@ -51,7 +51,10 @@ public final class ShopCatalogData {
             // knows what one is for; the shop only has to have one.
             sells(InitItems.SIMPLE_DISH.get(), 3),
             sells(Items.NAME_TAG, 8),
-            sells(InitItems.BEAR_BACKPACK.get(), 12),
+            sells(InitItems.BACKPACK.get(), 12),
+            sells(InitItems.BEAR_POUCH.get(), 12),
+            sells(InitItems.WHALE_POUCH.get(), 12),
+            sells(InitItems.STAR_POUCH.get(), 12),
             sells(InitItems.PET_BELL.get(), 16),
             // Reading.
             sells(Items.PAPER, 1),

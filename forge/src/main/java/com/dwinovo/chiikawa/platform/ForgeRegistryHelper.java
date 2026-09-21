@@ -120,6 +120,23 @@ public class ForgeRegistryHelper implements IRegistryHelper {
     }
 
     @Override
+    public java.util.function.Supplier<net.minecraft.world.item.Item> registerBag(
+        ResourceLocation id,
+        com.dwinovo.chiikawa.item.BagItem.Wear wear,
+        net.minecraft.world.item.Item.Properties properties
+    ) {
+        return register(net.minecraft.core.registries.BuiltInRegistries.ITEM, id,
+            () -> new com.dwinovo.chiikawa.item.BagItem(properties, wear) {
+                @Override
+                public void initializeClient(
+                        java.util.function.Consumer<net.minecraftforge.client.extensions.common.IClientItemExtensions> consumer) {
+                    // Only called on the client, so the client-only renderer stays off a server.
+                    consumer.accept(com.dwinovo.chiikawa.ChiikawaForgeClient.BAG_ITEM_EXTENSIONS);
+                }
+            });
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public <T> Iterable<T> getRegistry(ResourceKey<Registry<T>> key) {
         return (Iterable<T>) net.minecraftforge.registries.RegistryManager.ACTIVE.getRegistry(key.location());
