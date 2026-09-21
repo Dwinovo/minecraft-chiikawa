@@ -9,20 +9,24 @@ import org.junit.jupiter.api.Test;
 /**
  * Which way a held item points once it is in the fist. The model's frame has up up and the
  * pet facing {@code -Z}; vanilla's third-person display transforms expect the item's up to
- * run out of the front of the fist and its back to face the sky.
+ * run out of the front of the fist and its back to face the sky — lifted a tenth of a turn,
+ * as vanilla lifts an arm that holds something.
  */
 class HeldItemLayerTest {
     private static final float EPSILON = 1.0E-5F;
+    private static final float LIFT = (float) (Math.PI / 10.0);
 
     @Test
-    void anItemsUpPointsTheWayThePetFaces() {
-        assertDirection(new Vector3f(0, 0, -1), direction(new Vector3f(0, 1, 0)),
-            "the item's up does not point ahead of the fist, so a sword stands on its pommel");
+    void anItemsUpPointsAheadAndALittleUp() {
+        assertDirection(new Vector3f(0, (float) Math.sin(LIFT), (float) -Math.cos(LIFT)),
+            direction(new Vector3f(0, 1, 0)),
+            "the item's up does not point ahead of the fist, so a tool stands on end or digs into the ground");
     }
 
     @Test
     void anItemsFaceLooksUp() {
-        assertDirection(new Vector3f(0, 1, 0), direction(new Vector3f(0, 0, 1)),
+        assertDirection(new Vector3f(0, (float) Math.cos(LIFT), (float) Math.sin(LIFT)),
+            direction(new Vector3f(0, 0, 1)),
             "the item's face is not turned to the sky");
     }
 
@@ -41,10 +45,20 @@ class HeldItemLayerTest {
         assertDirection(new Vector3f(0, -0.0625F, -0.125F), grip, "the item is not a pixel down and two ahead");
     }
 
+    @Test
+    void aPetHoldsThingsSmallerThanAPlayerDoes() {
+        PoseStack pose = new PoseStack();
+        HeldItemLayer.intoFist(pose);
+        float size = pose.last().pose().transformDirection(new Vector3f(1, 0, 0)).length();
+
+        assertEquals(true, size > 0.0F && size < 1.0F, "a held item is drawn at a player's size: " + size);
+    }
+
+    /** Which way an item's axis ends up, whatever size the hand makes it. */
     private static Vector3f direction(Vector3f itemAxis) {
         PoseStack pose = new PoseStack();
         HeldItemLayer.intoFist(pose);
-        return pose.last().pose().transformDirection(itemAxis);
+        return pose.last().pose().transformDirection(itemAxis).normalize();
     }
 
     private static void assertDirection(Vector3f expected, Vector3f actual, String message) {
