@@ -18,6 +18,7 @@ import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.UiTheme;
 import com.dwinovo.chiikawa.ui.widget.Badge;
 import com.dwinovo.chiikawa.ui.widget.Slot;
+import com.dwinovo.chiikawa.ui.widget.TitledPanel;
 import com.dwinovo.chiikawa.ui.widget.Tooltip;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +87,7 @@ public class LaborBoardScreen extends Screen {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
         GuiSurface surface = new GuiSurface(graphics, this.font);
-        int contentY = Ui.titledPanel(surface, leftPos, topPos, WIDTH, panelHeight, this.title.getString());
+        int contentY = TitledPanel.draw(surface, leftPos, topPos, WIDTH, panelHeight, this.title.getString());
         int right = leftPos + WIDTH - UiStyle.PAD;
 
         if (slips.isEmpty()) {
