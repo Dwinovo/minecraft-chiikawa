@@ -29,6 +29,7 @@ public final class DataGenerators {
         event.getGenerator().addProvider(client,
                 new ModItemModelProvider(output, existingFileHelper));
         event.getGenerator().addProvider(client, new ModBlockModelProvider(output));
+        event.getGenerator().addProvider(client, new PropItemModelProvider(output));
         event.getGenerator().addProvider(client,
                 new ModLanguageProvider(output, "en_us"));
         event.getGenerator().addProvider(client,

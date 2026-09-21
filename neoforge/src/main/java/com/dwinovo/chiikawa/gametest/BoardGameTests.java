@@ -7,6 +7,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
 import com.dwinovo.chiikawa.data.PetTaskTypeData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitBlocks;
@@ -150,6 +151,29 @@ public final class BoardGameTests {
             })
             .thenExecute(() -> helper.assertTrue(taken.get(), "neither farmer ever took the slip"))
             .thenSucceed();
+    }
+
+    /**
+     * A board shows its day's slips as plates, and the one a pet takes comes down, so the
+     * players nearby can see how much work is left. What they are sent is the board's
+     * {@code hanging} places, and a claim has to take one away.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WATCH_TICKS + 200)
+    public static void a_plate_comes_down_when_a_pet_takes_its_slip(GameTestHelper helper) {
+        BlockPos at = weedingBoard(helper);
+        helper.setBlock(at, InitBlocks.LABOR_BOARD.get());
+        LaborBoardBlockEntity board = (LaborBoardBlockEntity) helper.getBlockEntity(at);
+        int all = (1 << board.today().size()) - 1;
+        helper.assertTrue(board.hanging() == all, "a new day's board does not hang all its plates: " + board.hanging());
+        weedPatch(helper);
+
+        AbstractPet farmer = holding(worker(helper, new BlockPos(3, STAND, 4)), Items.WOODEN_HOE);
+
+        helper.succeedWhen(() -> {
+            helper.assertTrue(farmer.getTask().isPresent(), "the farmer has not taken a slip yet");
+            helper.assertTrue(Integer.bitCount(board.hanging()) == Integer.bitCount(all) - 1,
+                "the farmer took a slip and its plate is still up: " + Integer.toBinaryString(board.hanging()));
+        });
     }
 
     /**

@@ -61,8 +61,13 @@ public final class InitItems {
         registerItem("whale_pouch", () -> new BagItem(new Item.Properties(), BagItem.Wear.SLUNG));
     public static final Supplier<Item> STAR_POUCH =
         registerItem("star_pouch", () -> new BagItem(new Item.Properties(), BagItem.Wear.SLUNG));
-    /** Every bag, for whatever has to be told about each of them: its renderer, its model. */
-    public static final List<Supplier<Item>> BAGS = List.of(BACKPACK, BEAR_POUCH, WHALE_POUCH, STAR_POUCH);
+    /**
+     * Everything drawn from a Bedrock model of its own, by {@code PropRenderer}: the bags
+     * and the labor board. Each loader gives these their built-in item renderer, and their
+     * item models are generated from this list.
+     */
+    public static final List<Supplier<? extends Item>> PROPS =
+        List.of(BACKPACK, BEAR_POUCH, WHALE_POUCH, STAR_POUCH, LABOR_BOARD);
 
     public static final Supplier<BlockItem> SHOP =
         registerItem("shop", () -> new BlockItem(InitBlocks.SHOP.get(), new Item.Properties()));
