@@ -1,11 +1,15 @@
 package com.dwinovo.chiikawa.data;
 
 import com.dwinovo.chiikawa.init.InitItems;
+import com.google.gson.JsonObject;
+import java.util.function.Supplier;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
 import net.minecraft.data.models.BlockModelGenerators;
 import net.minecraft.data.models.ItemModelGenerators;
+import net.minecraft.data.models.model.ModelLocationUtils;
 import net.minecraft.data.models.model.ModelTemplates;
+import net.minecraft.world.item.Item;
 
 public class FabricModItemModelProvider extends FabricModelProvider {
     public FabricModItemModelProvider(FabricDataOutput output) {
@@ -21,12 +25,22 @@ public class FabricModItemModelProvider extends FabricModelProvider {
         generateSpawnEggs(itemModelGenerator);
         generateDolls(itemModelGenerator);
 
-        itemModelGenerator.generateFlatItem(InitItems.BEAR_BACKPACK.get(), ModelTemplates.FLAT_ITEM);
         itemModelGenerator.generateFlatItem(InitItems.SIMPLE_DISH.get(), ModelTemplates.FLAT_ITEM);
         itemModelGenerator.generateFlatItem(InitItems.PET_BELL.get(), ModelTemplates.FLAT_ITEM);
 
         // Weapons have prebuilt models under resources; no datagen needed.
         itemModelGenerator.generateFlatItem(InitItems.MUSIC_BOX.get(), ModelTemplates.FLAT_ITEM);
+
+        // Bags are drawn from their own Bedrock models by a built-in renderer, lit from
+        // the front in a slot the way a flat item is.
+        for (Supplier<Item> bag : InitItems.BAGS) {
+            itemModelGenerator.output.accept(ModelLocationUtils.getModelLocation(bag.get()), () -> {
+                JsonObject model = new JsonObject();
+                model.addProperty("parent", "minecraft:builtin/entity");
+                model.addProperty("gui_light", "front");
+                return model;
+            });
+        }
     }
 
     private static void generateSpawnEggs(ItemModelGenerators itemModelGenerator) {

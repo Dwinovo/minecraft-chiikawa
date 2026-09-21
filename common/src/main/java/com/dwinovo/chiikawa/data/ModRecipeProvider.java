@@ -25,6 +25,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
@@ -150,16 +151,21 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy(getHasName(Items.BREAD), has(Items.BREAD))
                 .save(recipeOutput);
 
-        // A small satchel: leather about a woollen body, hung on a string.
-        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, InitItems.BEAR_BACKPACK.get())
+        // The grey rucksack everybody takes to work: leather about a grey woollen body,
+        // a string for each shoulder.
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, InitItems.BACKPACK.get())
                 .define('L', Items.LEATHER)
-                .define('W', ItemTags.WOOL)
+                .define('W', Items.GRAY_WOOL)
                 .define('S', Items.STRING)
                 .pattern("S S")
                 .pattern("LWL")
                 .pattern("LLL")
                 .unlockedBy(getHasName(Items.LEATHER), has(Items.LEATHER))
                 .save(recipeOutput);
+        // The pouches: fleece in the friend's own colour, on a string.
+        pouch(recipeOutput, InitItems.BEAR_POUCH.get(), Items.PINK_WOOL);
+        pouch(recipeOutput, InitItems.WHALE_POUCH.get(), Items.LIGHT_BLUE_WOOL);
+        pouch(recipeOutput, InitItems.STAR_POUCH.get(), Items.YELLOW_WOOL);
 
         // A counter: a slab of planks over a chest, with an emerald on the till.
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, InitItems.SHOP.get())
@@ -170,6 +176,17 @@ public class ModRecipeProvider extends RecipeProvider {
                 .pattern("WCW")
                 .pattern("W W")
                 .unlockedBy(getHasName(Items.EMERALD), has(Items.EMERALD))
+                .save(recipeOutput);
+    }
+
+    /** A pouch: a string over the top, three of its wool for the body. */
+    private static void pouch(RecipeOutput recipeOutput, ItemLike pouch, ItemLike wool) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, pouch)
+                .define('W', wool)
+                .define('S', Items.STRING)
+                .pattern("S S")
+                .pattern("WWW")
+                .unlockedBy(getHasName(wool), has(wool))
                 .save(recipeOutput);
     }
 
