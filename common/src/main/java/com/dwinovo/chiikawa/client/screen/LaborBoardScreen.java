@@ -17,6 +17,7 @@ import com.dwinovo.chiikawa.ui.Ui;
 import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.UiTheme;
 import com.dwinovo.chiikawa.ui.widget.Badge;
+import com.dwinovo.chiikawa.ui.widget.Price;
 import com.dwinovo.chiikawa.ui.widget.Slot;
 import com.dwinovo.chiikawa.ui.widget.TitledPanel;
 import com.dwinovo.chiikawa.ui.widget.Tooltip;
@@ -34,7 +35,7 @@ import net.minecraft.network.chat.Component;
  * own, the owner only looks — so the list is built to be looked at: a row is a picture, a
  * name and a state, and everything else waits under the cursor. The one thing the owner
  * can do here, buy the board a level, sits under a rule at the bottom, away from the
- * slips.
+ * slips, with its price in emeralds on the button.
  */
 public class LaborBoardScreen extends Screen {
     private static final int WIDTH = 236;
@@ -48,6 +49,7 @@ public class LaborBoardScreen extends Screen {
     private int leftPos;
     private int topPos;
     private int panelHeight;
+    private int contentY;
     private int footerY;
 
     public LaborBoardScreen(BoardSlipsPayload payload) {
@@ -66,6 +68,7 @@ public class LaborBoardScreen extends Screen {
             + UiStyle.GAP_SECTION + UiStyle.CONTROL_H + UiStyle.PAD;
         this.leftPos = (this.width - WIDTH) / 2;
         this.topPos = (this.height - panelHeight) / 2;
+        this.contentY = TitledPanel.contentY(topPos);
         this.footerY = topPos + panelHeight - UiStyle.PAD - UiStyle.CONTROL_H;
         clearWidgets();
         if (price > 0) {
@@ -73,38 +76,51 @@ public class LaborBoardScreen extends Screen {
         }
     }
 
-    /** What the next level costs, on the button that buys it. */
+    /** What the next level costs in emeralds, on the button that buys it. */
     private UiButton upgradeButton() {
         Component label = Component.translatable("screen.chiikawa.labor_board.upgrade", price);
-        int width = Math.max(UPGRADE_MIN_W, this.font.width(label) + 2 * UiStyle.PAD);
-        UiButton button = UiButton.text(leftPos + WIDTH - UiStyle.PAD - width, footerY, width, UiStyle.CONTROL_H,
-            label, () -> Services.NETWORK.sendToServer(new BoardUpgradePayload(board)));
+        int width = Math.max(UPGRADE_MIN_W, Price.width(this.font.width(label)) + 2 * UiStyle.PAD);
+        UiButton button = new UiButton(leftPos + WIDTH - UiStyle.PAD - width, footerY, width, UiStyle.CONTROL_H,
+            label, (surface, area, argb) -> Price.drawCentered(surface, label.getString(), area, argb),
+            () -> Services.NETWORK.sendToServer(new BoardUpgradePayload(board)));
         button.active = purse() >= price;
         return button;
     }
 
+    /**
+     * The panel, its slips and its footer, drawn right after the game dims what is behind
+     * the screen and before the upgrade button, as the music box draws its own: drawn after
+     * it, the panel would cover it.
+     */
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(graphics, mouseX, mouseY, partialTick);
         GuiSurface surface = new GuiSurface(graphics, this.font);
-        int contentY = TitledPanel.draw(surface, leftPos, topPos, WIDTH, panelHeight, this.title.getString());
+        TitledPanel.draw(surface, leftPos, topPos, WIDTH, panelHeight, this.title.getString());
         int right = leftPos + WIDTH - UiStyle.PAD;
 
         if (slips.isEmpty()) {
             Ui.emptyState(surface, Component.translatable("screen.chiikawa.labor_board.empty").getString(),
                 leftPos + WIDTH / 2, UiStyle.centerIn(contentY, UiStyle.ROW_H, surface.lineHeight()));
-            return;
+        } else {
+            // How many are up belongs beside the title, not in a row of its own.
+            Ui.textRight(surface, Component.translatable("screen.chiikawa.labor_board.count", slips.size()).getString(),
+                right, UiStyle.centerIn(topPos, UiStyle.TITLE_H, surface.lineHeight()), UiTheme.TEXT_MUTED);
+            for (int i = 0; i < slips.size(); i++) {
+                Rect row = rowAt(i);
+                drawRow(surface, slips.get(i), row, row.contains(mouseX, mouseY));
+            }
         }
-        // How many are up belongs beside the title, not in a row of its own.
-        Ui.textRight(surface, Component.translatable("screen.chiikawa.labor_board.count", slips.size()).getString(),
-            right, UiStyle.centerIn(topPos, UiStyle.TITLE_H, surface.lineHeight()), UiTheme.TEXT_MUTED);
-
-        for (int i = 0; i < slips.size(); i++) {
-            Rect row = rowAt(contentY, i);
-            drawRow(surface, slips.get(i), row, row.contains(mouseX, mouseY));
-        }
+        // A board with nothing on it today can still be paid up.
         drawFooter(surface);
-        hovered(contentY, mouseX, mouseY).ifPresent(slip -> surface.onTop(() ->
+    }
+
+    /** The buttons over the panel, then whatever the cursor is asking about over them. */
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.render(graphics, mouseX, mouseY, partialTick);
+        GuiSurface surface = new GuiSurface(graphics, this.font);
+        hovered(mouseX, mouseY).ifPresent(slip -> surface.onTop(() ->
             Tooltip.draw(surface, detail(slip), mouseX, mouseY, this.width, this.height)));
         if (footer().contains(mouseX, mouseY)) {
             surface.onTop(() -> Tooltip.draw(surface, upgradeDetail(), mouseX, mouseY, this.width, this.height));
@@ -156,7 +172,7 @@ public class LaborBoardScreen extends Screen {
         return minecraft.player == null ? 0 : Wallet.count(minecraft.player.getInventory());
     }
 
-    private Rect rowAt(int contentY, int index) {
+    private Rect rowAt(int index) {
         return new Rect(leftPos + UiStyle.PAD, contentY + index * (UiStyle.ROW_H + UiStyle.GAP),
             WIDTH - 2 * UiStyle.PAD, UiStyle.ROW_H);
     }
@@ -215,9 +231,9 @@ public class LaborBoardScreen extends Screen {
         return lines;
     }
 
-    private Optional<SlipView> hovered(int contentY, int mouseX, int mouseY) {
+    private Optional<SlipView> hovered(int mouseX, int mouseY) {
         for (int i = 0; i < slips.size(); i++) {
-            if (rowAt(contentY, i).contains(mouseX, mouseY)) {
+            if (rowAt(i).contains(mouseX, mouseY)) {
                 return Optional.of(slips.get(i));
             }
         }
