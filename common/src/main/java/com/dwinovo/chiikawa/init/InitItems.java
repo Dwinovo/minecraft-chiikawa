@@ -47,6 +47,8 @@ public final class InitItems {
         registerItem("music_box", MusicBoxItem::new);
     public static final Supplier<BlockItem> LABOR_BOARD =
         registerPropBlock("labor_board", InitBlocks.LABOR_BOARD);
+    public static final Supplier<BlockItem> SHOP =
+        registerPropBlock("shop", InitBlocks.SHOP);
 
     public static final Supplier<Item> SIMPLE_DISH =
         registerItem("simple_dish", () -> new Item(new Item.Properties()));
@@ -63,15 +65,13 @@ public final class InitItems {
     public static final Supplier<Item> STAR_POUCH =
         registerBag("star_pouch", BagItem.Wear.SLUNG);
     /**
-     * Everything drawn from a Bedrock model of its own, by {@code PropRenderer}: the bags
-     * and the labor board. Each loader gives these their built-in item renderer, and their
+     * Everything drawn from a Bedrock model of its own, by {@code PropRenderer}: the bags,
+     * the labor board and the shop. Each loader gives these their built-in item renderer, and their
      * item models are generated from this list.
      */
     public static final List<Supplier<? extends Item>> PROPS =
-        List.of(BACKPACK, BEAR_POUCH, WHALE_POUCH, STAR_POUCH, LABOR_BOARD);
+        List.of(BACKPACK, BEAR_POUCH, WHALE_POUCH, STAR_POUCH, LABOR_BOARD, SHOP);
 
-    public static final Supplier<BlockItem> SHOP =
-        registerItem("shop", () -> new BlockItem(InitBlocks.SHOP.get(), new Item.Properties()));
     public static final Supplier<Item> USAGI_DOLL =
         registerItem("usagi_doll", () -> new PetDollItem(new Item.Properties(), InitEntity.USAGI_PET));
     public static final Supplier<Item> HACHIWARE_DOLL =
