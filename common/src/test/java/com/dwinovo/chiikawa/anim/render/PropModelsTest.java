@@ -20,19 +20,25 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.junit.jupiter.api.Test;
 
 /**
  * What the art has to give the code. Every pet needs a place to hang each kind of bag and a
  * strap to hold it; every prop — a model without animations — needs a texture, and needs to
- * be one the code draws: a bag, hung from its centre, or the labor board, with a plate for
- * every slip a board can put up.
+ * be one the code draws: a bag, hung from its centre, or a block — the labor board, with a
+ * plate for every slip a board can put up, or the shop, standing inside its block.
  */
 class PropModelsTest {
     private static final Path ASSETS = Path.of("src/main/resources/assets/chiikawa");
     private static final Gson GSON = new Gson();
     private static final List<String> BAGS = List.of("backpack", "bear_pouch", "whale_pouch", "star_pouch");
     private static final String LABOR_BOARD = "labor_board";
+    private static final String SHOP = "shop";
+    private static final List<String> BLOCKS = List.of(LABOR_BOARD, SHOP);
+    private static final float HALF_BLOCK = 8.0F;
+    private static final float EPSILON = 1.0E-3F;
 
     @Test
     void everyPetHasABoneToHangEachKindOfBagFromAndAStrapToHoldIt() throws IOException {
@@ -56,10 +62,10 @@ class PropModelsTest {
     void everyPropIsOneTheCodeDrawsAndHasATexture() throws IOException {
         List<String> props = modelNames(false);
         for (String prop : props) {
-            assertTrue(BAGS.contains(prop) || prop.equals(LABOR_BOARD), prop + " is a model nothing draws");
+            assertTrue(BAGS.contains(prop) || BLOCKS.contains(prop), prop + " is a model nothing draws");
             assertTrue(Files.exists(ASSETS.resolve("textures/entities/" + prop + ".png")), prop + " has no texture");
         }
-        assertTrue(props.containsAll(BAGS) && props.contains(LABOR_BOARD), "a prop the code draws has no model: " + props);
+        assertTrue(props.containsAll(BAGS) && props.containsAll(BLOCKS), "a prop the code draws has no model: " + props);
     }
 
     @Test
@@ -89,6 +95,29 @@ class PropModelsTest {
         }
         assertEquals(null, model.boneIndex.get(LaborBoardRenderer.PLATE_BONE + most),
             "the board has a plate no board ever puts up");
+    }
+
+    /**
+     * The shop stays inside its block, awning and all, so nothing it draws pokes into the
+     * block above it or beside it, and its outline covers all of it.
+     */
+    @Test
+    void theShopStandsInsideItsBlock() throws IOException {
+        BakedModel model = bake(SHOP);
+        for (BakedCube cube : model.cubes) {
+            Matrix4f turn = new Matrix4f()
+                .translate(cube.pivotX, cube.pivotY, cube.pivotZ)
+                .rotateXYZ(cube.rotX, cube.rotY, cube.rotZ)
+                .translate(-cube.pivotX, -cube.pivotY, -cube.pivotZ);
+            for (int corner = 0; corner < 8; corner++) {
+                Vector3f at = turn.transformPosition(new Vector3f(
+                    (corner & 1) != 0 ? cube.maxX : cube.minX,
+                    (corner & 2) != 0 ? cube.maxY : cube.minY,
+                    (corner & 4) != 0 ? cube.maxZ : cube.minZ));
+                assertTrue(Math.abs(at.x) <= HALF_BLOCK + EPSILON && Math.abs(at.z) <= HALF_BLOCK + EPSILON
+                    && at.y >= -EPSILON && at.y <= 2 * HALF_BLOCK + EPSILON, "the shop reaches out of its block at " + at);
+            }
+        }
     }
 
     /** The geo models with an animation file (the pets) or without one (the props). */
