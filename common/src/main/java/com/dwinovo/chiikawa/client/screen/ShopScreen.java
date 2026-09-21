@@ -13,6 +13,7 @@ import com.dwinovo.chiikawa.ui.Ui;
 import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.UiTheme;
 import com.dwinovo.chiikawa.ui.widget.Arrow;
+import com.dwinovo.chiikawa.ui.widget.Price;
 import com.dwinovo.chiikawa.ui.widget.Slot;
 import com.dwinovo.chiikawa.ui.widget.TitledPanel;
 import java.util.List;
@@ -31,20 +32,21 @@ import net.minecraft.world.item.ItemStack;
  *
  * <p>A row is a picture, a name and a price. What a thing costs and what it fetches are
  * the whole point of the screen, so they are on the buttons themselves rather than
- * written out beside them — pressing "3" is buying it for three.
+ * written out beside them — pressing "Buy 3" and an emerald is buying it for three
+ * emeralds. The customer's own emeralds are in the corner, counted the same way.
  */
 public class ShopScreen extends Screen {
     private static final int PANEL_W = 236;
     private static final int ROWS = 7;
     private static final int ROW_H = UiStyle.ROW_H;
-    /** Wide enough for a price of two digits and the word in front of it. */
-    private static final int TRADE_BUTTON_W = 42;
 
     private final BlockPos shop;
     private final List<PriceView> prices;
     private int page;
     private int leftPos, topPos, panelHeight;
     private int listY, footerY;
+    /** Each column of buttons as wide as its widest price, so the prices line up; 0 for none. */
+    private int buyWidth, sellWidth;
 
     public ShopScreen(BlockPos shop, List<PriceView> prices) {
         super(Component.translatable("screen.chiikawa.shop"));
@@ -58,9 +60,22 @@ public class ShopScreen extends Screen {
             + UiStyle.CONTROL_H + UiStyle.PAD;
         this.leftPos = (this.width - PANEL_W) / 2;
         this.topPos = (this.height - panelHeight) / 2;
-        this.listY = topPos + UiStyle.TITLE_H + UiStyle.PAD;
+        this.listY = TitledPanel.contentY(topPos);
         this.footerY = topPos + panelHeight - UiStyle.PAD - UiStyle.CONTROL_H;
+        this.buyWidth = columnWidth(true);
+        this.sellWidth = columnWidth(false);
         rebuildButtons();
+    }
+
+    private int columnWidth(boolean buying) {
+        int widest = 0;
+        for (PriceView price : prices) {
+            int amount = buying ? price.buy() : price.sell();
+            if (amount > 0) {
+                widest = Math.max(widest, Price.width(this.font.width(label(buying, amount))) + 2 * UiStyle.GAP);
+            }
+        }
+        return widest;
     }
 
     private void rebuildButtons() {
@@ -71,15 +86,13 @@ public class ShopScreen extends Screen {
         for (int i = start; i < end; i++) {
             PriceView price = prices.get(i);
             int rowY = listY + (i - start) * ROW_H;
-            int right = leftPos + PANEL_W - UiStyle.PAD;
+            int sellX = leftPos + PANEL_W - UiStyle.PAD - sellWidth;
+            int buyX = (sellWidth > 0 ? sellX - UiStyle.GAP : sellX) - buyWidth;
             if (price.sell() > 0) {
-                addRenderableWidget(tradeButton(price, false, right - TRADE_BUTTON_W, rowY));
+                addRenderableWidget(tradeButton(price, false, sellX, sellWidth, rowY));
             }
             if (price.buy() > 0) {
-                int x = price.sell() > 0
-                    ? right - 2 * TRADE_BUTTON_W - UiStyle.GAP
-                    : right - TRADE_BUTTON_W;
-                addRenderableWidget(tradeButton(price, true, x, rowY));
+                addRenderableWidget(tradeButton(price, true, buyX, buyWidth, rowY));
             }
         }
 
@@ -99,26 +112,34 @@ public class ShopScreen extends Screen {
         addRenderableWidget(next);
     }
 
-    /** One side of one row's trade, with what it costs written on it. */
-    private UiButton tradeButton(PriceView price, boolean buying, int x, int rowY) {
-        Component label = Component.translatable(
-            buying ? "screen.chiikawa.shop.buy" : "screen.chiikawa.shop.sell",
-            buying ? price.buy() : price.sell());
-        UiButton button = UiButton.text(x, UiStyle.centerIn(rowY, ROW_H, UiStyle.CONTROL_H),
-            TRADE_BUTTON_W, UiStyle.CONTROL_H, label,
+    /** One side of one row's trade, with what it costs in emeralds written on it. */
+    private UiButton tradeButton(PriceView price, boolean buying, int x, int width, int rowY) {
+        Component label = label(buying, buying ? price.buy() : price.sell());
+        UiButton button = new UiButton(x, UiStyle.centerIn(rowY, ROW_H, UiStyle.CONTROL_H),
+            width, UiStyle.CONTROL_H, label,
+            (surface, area, argb) -> Price.drawCentered(surface, label.getString(), area, argb),
             () -> Services.NETWORK.sendToServer(new ShopTradePayload(shop, price.item(), buying)));
         button.active = buying ? canAfford(price) : holds(price);
         return button;
     }
 
+    private static Component label(boolean buying, int emeralds) {
+        return Component.translatable(buying ? "screen.chiikawa.shop.buy" : "screen.chiikawa.shop.sell", emeralds);
+    }
+
+    /**
+     * The panel and its rows, drawn right after the game dims what is behind the screen and
+     * before the buttons, as the music box draws its own: drawn after them, the panel would
+     * cover them.
+     */
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(graphics, mouseX, mouseY, partialTick);
         GuiSurface surface = new GuiSurface(graphics, this.font);
         TitledPanel.draw(surface, leftPos, topPos, PANEL_W, panelHeight, this.title.getString());
         // What the customer has to spend, where a shopper looks first.
-        Ui.textRight(surface, String.valueOf(purse()), leftPos + PANEL_W - UiStyle.PAD,
-            UiStyle.centerIn(topPos, UiStyle.TITLE_H, surface.lineHeight()), UiTheme.TEXT_MUTED);
+        Price.drawRight(surface, String.valueOf(purse()), leftPos + PANEL_W - UiStyle.PAD,
+            topPos, UiStyle.TITLE_H, UiTheme.TEXT_MUTED);
 
         int start = page * ROWS;
         int end = Math.min(prices.size(), start + ROWS);
@@ -138,10 +159,10 @@ public class ShopScreen extends Screen {
         }
         Slot.draw(surface, ItemIcon.of(price.item()), row.x(), UiStyle.centerIn(rowY, ROW_H, UiStyle.SLOT));
         int nameX = row.x() + UiStyle.SLOT + UiStyle.GAP;
-        int buttons = (price.buy() > 0 ? TRADE_BUTTON_W : 0) + (price.sell() > 0 ? TRADE_BUTTON_W : 0) + UiStyle.GAP;
+        int buttons = (buyWidth > 0 ? buyWidth + UiStyle.GAP : 0) + (sellWidth > 0 ? sellWidth + UiStyle.GAP : 0);
         Ui.textClipped(surface, name(price).getString(), nameX,
             UiStyle.centerIn(rowY, ROW_H, surface.lineHeight()),
-            row.right() - buttons - UiStyle.GAP - nameX, UiTheme.TEXT);
+            row.right() - buttons - nameX, UiTheme.TEXT);
     }
 
     /** How many emeralds the customer is carrying. */

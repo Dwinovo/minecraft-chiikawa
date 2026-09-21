@@ -46,6 +46,10 @@ public final class UiTheme {
     public static final int SUCCESS = 0xFF6DA356;
     /** Hearts. */
     public static final int LIFE = ACCENT;
+    /** Money: the emerald everything is priced in. */
+    public static final int EMERALD = 0xFF3FBF6E;
+    /** The lit facet of an emerald. */
+    public static final int EMERALD_LIGHT = 0xFFA8EDC0;
     /** A sign's board — the labor board's own wood. */
     public static final int WOOD = 0xFFE4BE8C;
     /** The lit edge of a board. */
