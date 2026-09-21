@@ -156,6 +156,9 @@ public final class ModelRenderer {
         float invH = 1.0f / cube.texH;
 
         for (int face = 0; face < 6; face++) {
+            if (cube.faceUV[face] == null) {
+                continue;
+            }
             int[] corners = FACE_CORNERS[face];
             float[] n = FACE_NORMALS[face];
             for (int v = 0; v < 4; v++) {
