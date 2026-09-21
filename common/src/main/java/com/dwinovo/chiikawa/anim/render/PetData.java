@@ -21,8 +21,6 @@ package com.dwinovo.chiikawa.anim.render;
 public enum PetData {
     /** Mainhand {@link net.minecraft.world.item.ItemStack} snapshot consumed by {@code HeldItemLayer}. */
     HELD_ITEM_STACK,
-    /** {@link Boolean}: the pet carries a slip, consumed by {@code SlipTagLayer}. */
-    CARRYING_SLIP,
     /** Worn {@link net.minecraft.world.item.ItemStack} snapshot consumed by {@code BagLayer} and the strap rules. */
     WORN_BAG;
 
