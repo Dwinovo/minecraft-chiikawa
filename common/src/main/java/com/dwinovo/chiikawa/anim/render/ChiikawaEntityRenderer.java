@@ -19,7 +19,6 @@ import com.dwinovo.chiikawa.ui.widget.Chip;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.item.BagItem;
 import com.dwinovo.chiikawa.anim.render.layer.BagLayer;
-import com.dwinovo.chiikawa.anim.render.layer.SlipTagLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayerContext;
 import com.dwinovo.chiikawa.anim.runtime.AnimationClock;
@@ -172,7 +171,6 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         addInterceptor(BoneInterceptor.Stage.LOOK_AT, new HeadLookInterceptor());
         // Default layers shared by all pets.
         addRenderLayer(new HeldItemLayer());
-        addRenderLayer(new SlipTagLayer());
         addRenderLayer(new BagLayer());
         // A bag's strap is part of the pet's own model, there only while a bag worn
         // that way is on.
@@ -368,7 +366,6 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         }
 
         if (entity instanceof AbstractPet pet) {
-            state.put(PetData.CARRYING_SLIP, pet.getTask().isPresent());
             state.put(PetData.WORN_BAG, pet.getItemBySlot(EquipmentSlot.CHEST));
         }
 
