@@ -38,6 +38,8 @@ import net.minecraft.world.level.block.state.BlockState;
 public class LaborBoardBlockEntity extends BlockEntity {
     private static final Codec<List<BoardSlot>> SLOTS_CODEC = BoardSlot.CODEC.listOf();
     private static final long NOT_ROLLED = -1L;
+    /** How often a board looks at the clock: a second is soon enough for a plate to go up. */
+    private static final int CLOCK_TICKS = 20;
 
     /** Day number the slots were rolled for. */
     private long day = NOT_ROLLED;
@@ -146,14 +148,14 @@ public class LaborBoardBlockEntity extends BlockEntity {
         if (today != day) {
             day = today;
             slots = BoardSlips.roll(seed, PetTaskTypes.all(), boardLevel);
-            changed();
+            markUpdated();
             return slots;
         }
         // A board upgraded partway through the day puts the slip it just bought up now.
         List<BoardSlot> grown = BoardSlips.topUp(slots, seed, PetTaskTypes.all(), boardLevel);
         if (grown != slots) {
             slots = grown;
-            changed();
+            markUpdated();
         }
         return slots;
     }
@@ -175,23 +177,43 @@ public class LaborBoardBlockEntity extends BlockEntity {
         List<BoardSlot> changed = new ArrayList<>(slots);
         changed.set(index, change.apply(changed.get(index)));
         slots = List.copyOf(changed);
-        changed();
+        markUpdated();
     }
 
     /**
      * The slips changed: saved with the chunk, and the plates the board shows told to the
-     * players who can see it, so a plate comes down the moment a pet takes it.
+     * players who can see it, so a plate comes down the moment a pet takes it. The way the
+     * campfire tells them what is on its grill.
      */
-    private void changed() {
+    private void markUpdated() {
         hanging = BoardSlips.hanging(slots);
         setChanged();
-        level().sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
+        level().sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL);
     }
 
-    /** What a player's game is told of the board: only which plates hang, nothing of whose they are. */
+    /**
+     * Keeps the plates up to date by itself: puts the day's slips up the first second of a
+     * new day, and the first second after the board is placed, with nobody having to look
+     * at it first.
+     */
+    public static void serverTick(Level level, BlockPos pos, BlockState state, LaborBoardBlockEntity board) {
+        if (level.getGameTime() % CLOCK_TICKS == 0) {
+            board.today();
+        }
+    }
+
+    /**
+     * What a player's game is told of the board: only which plates hang, nothing of whose
+     * they are.
+     *
+     * <p>Only read here, never worked out: the game asks for this while it is sending the
+     * chunk's changed blocks out, and a board that changed itself then — putting its day's
+     * slips up and telling the chunk about it — would be telling it in the middle of that
+     * send. The chunk would lose track of that part of itself, and no block broken there
+     * would ever reach a player again.
+     */
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        today();
         CompoundTag tag = new CompoundTag();
         tag.putInt("Hanging", hanging);
         return tag;
