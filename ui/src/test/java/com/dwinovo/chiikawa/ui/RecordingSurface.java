@@ -53,6 +53,20 @@ public final class RecordingSurface implements DrawSurface {
             .orElseThrow(() -> new AssertionError("no rectangle of colour " + Integer.toHexString(argb) + " in " + rects));
     }
 
+    /**
+     * The colour a pixel ends up, the last rectangle over it winning, or 0 where nothing
+     * was drawn. What a test of a shape wants is what shows, not which calls made it.
+     */
+    public int colorAt(int x, int y) {
+        for (int i = rects.size() - 1; i >= 0; i--) {
+            Rectangle rect = rects.get(i);
+            if (x >= rect.x() && x < rect.x() + rect.width() && y >= rect.y() && y < rect.y() + rect.height()) {
+                return rect.argb();
+            }
+        }
+        return 0;
+    }
+
     public boolean hasRectOf(int argb) {
         return rects.stream().anyMatch(rect -> rect.argb() == argb);
     }
