@@ -79,18 +79,35 @@ public final class HeldItemLayer implements RenderLayer {
     }
 
     /**
+     * How far a hand is raised for holding something: vanilla's humanoid lifts its arm
+     * forward by a tenth of a turn when it holds an item ({@code ArmPose.ITEM}), which is
+     * what makes a tool point ahead rather than at the ground. A pet's own animations do
+     * not, so the hand does it.
+     */
+    private static final float HOLDING_LIFT = (float) (Math.PI / 10.0);
+    /**
+     * How big a pet's hand makes what it holds. A pet stands about half a player's height,
+     * and a sword at a player's size was as long as the pet and dug into the ground in
+     * front of it. Vanilla does the same for its own small holder, the allay.
+     */
+    private static final float HAND_SCALE = 0.6F;
+
+    /**
      * From the hand locator, in block units, to where vanilla holds an item: a quarter
      * turn about X so the item's up points out ahead of the fist, then a pixel down into
-     * the palm and two ahead of the knuckles.
+     * the palm and two ahead of the knuckles; then the lift of a hand that is holding
+     * something, and a pet's size.
      *
-     * <p>This is what vanilla's {@code ItemInHandLayer} and Touhou Little Maid's held-item
-     * layer do — {@code X -90°, Y 180°} and then {@code (0, 0.125, -0.0625)} from a hand
-     * bone — written for a frame that is vanilla's model space flipped by
-     * {@code scale(-1, -1, 1)}. That flip is a half turn about Z, and a half turn about Z
-     * followed by theirs comes to the single quarter turn here.
+     * <p>The turn and the offset are what vanilla's {@code ItemInHandLayer} and Touhou
+     * Little Maid's held-item layer do — {@code X -90°, Y 180°} and then
+     * {@code (0, 0.125, -0.0625)} from a hand bone — written for a frame that is vanilla's
+     * model space flipped by {@code scale(-1, -1, 1)}. That flip is a half turn about Z,
+     * and a half turn about Z followed by theirs comes to the single quarter turn here.
      */
     static void intoFist(PoseStack pose) {
         pose.mulPose(Axis.XP.rotationDegrees(-90.0F));
         pose.translate(0.0F, 0.125F, -0.0625F);
+        pose.mulPose(Axis.XP.rotation(HOLDING_LIFT));
+        pose.scale(HAND_SCALE, HAND_SCALE, HAND_SCALE);
     }
 }
