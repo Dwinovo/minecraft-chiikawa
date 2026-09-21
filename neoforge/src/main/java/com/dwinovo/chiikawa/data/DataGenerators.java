@@ -25,6 +25,7 @@ public final class DataGenerators {
         event.getGenerator().addProvider(true,
                 new ModItemModelProvider(output));
         event.getGenerator().addProvider(true, new ModBlockModelProvider(output));
+        event.getGenerator().addProvider(true, new PropItemModelProvider(output));
         event.getGenerator().addProvider(true,
                 new ModLanguageProvider(output, "en_us"));
         event.getGenerator().addProvider(true,
