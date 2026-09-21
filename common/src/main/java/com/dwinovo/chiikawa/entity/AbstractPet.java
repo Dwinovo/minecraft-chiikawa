@@ -32,6 +32,7 @@ import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.utils.Utils;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -40,6 +41,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.InteractionHand;
@@ -464,6 +466,18 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      */
     public void setPendingGift(ItemStack gift) {
         this.entityData.set(GIFT, gift == null ? ItemStack.EMPTY : gift.copy());
+    }
+
+    /**
+     * Tells the owner, in chat, something the pet did with the owner out of sight: what it
+     * bought and what it gave them. Only the owner hears it, and only while they are about
+     * in the pet's world — a line about a pet somewhere else is a line with nothing to look
+     * at.
+     */
+    public void tellOwner(Component message) {
+        if (getOwner() instanceof ServerPlayer owner) {
+            owner.displayClientMessage(message, false);
+        }
     }
 
     /**
