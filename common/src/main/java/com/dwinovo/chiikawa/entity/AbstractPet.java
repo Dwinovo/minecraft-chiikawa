@@ -999,10 +999,12 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType,
             @Nullable SpawnGroupData spawnGroupData) {
+        // One the world found for itself comes with a tool, as a pet met in the wild does.
         if (spawnType == MobSpawnType.NATURAL || spawnType == MobSpawnType.CHUNK_GENERATION) {
             setItemSlot(EquipmentSlot.MAINHAND, PetPersonalities.of(getType()).drawWildTool(level.getRandom()));
-            setPetDirective(PetDirective.FREE);
         }
+        // However it came, a new pet is nobody's yet, and goes its own way until it is tamed.
+        setPetDirective(PetDirective.FREE);
         return super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
     }
 
