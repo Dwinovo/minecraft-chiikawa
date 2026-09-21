@@ -31,7 +31,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
  * The shop: a counter a pet walks up to and spends its wages at, and where an owner trades
- * what the farm brought in.
+ * what the farm brought in. A market stall under a pink-and-cream awning, with bread, jam
+ * and a cake out on the counter, drawn from its own model by its block entity's renderer.
  *
  * <p>Solid, unlike the labor board — a counter is a thing you stand at, and a pet that
  * could walk through it would be serving itself from the wrong side.
@@ -39,12 +40,12 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class ShopBlock extends BaseEntityBlock {
     public static final MapCodec<ShopBlock> CODEC = simpleCodec(ShopBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-    /** A counter, its top overhanging the customer's side. */
+    /** The stall up to its awning, the counter's top and the awning overhanging the customer's side. */
     private static final Map<Direction, VoxelShape> SHAPES = Map.of(
-        Direction.NORTH, Block.box(0, 0, 0, 16, 14, 13),
-        Direction.SOUTH, Block.box(0, 0, 3, 16, 14, 16),
-        Direction.EAST, Block.box(3, 0, 0, 16, 14, 16),
-        Direction.WEST, Block.box(0, 0, 0, 13, 14, 16)
+        Direction.NORTH, Block.box(0, 0, 0, 16, 16, 12.5),
+        Direction.SOUTH, Block.box(0, 0, 3.5, 16, 16, 16),
+        Direction.EAST, Block.box(3.5, 0, 0, 16, 16, 16),
+        Direction.WEST, Block.box(0, 0, 0, 12.5, 16, 16)
     );
 
     public ShopBlock(Properties properties) {
@@ -59,7 +60,7 @@ public class ShopBlock extends BaseEntityBlock {
 
     @Override
     protected RenderShape getRenderShape(BlockState state) {
-        return RenderShape.MODEL;
+        return RenderShape.ENTITYBLOCK_ANIMATED;
     }
 
     @Override
