@@ -21,6 +21,9 @@ import com.dwinovo.chiikawa.entity.PetFollowKeeper;
 import com.dwinovo.chiikawa.entity.PetRecall;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalityLoader;
 import com.dwinovo.chiikawa.shop.ShopCatalogLoader;
+import com.dwinovo.chiikawa.spawn.PetSpawnLoader;
+import com.dwinovo.chiikawa.spawn.PetSpawnsBiomeModifier;
+import com.dwinovo.chiikawa.task.BoardLevelsLoader;
 import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
 import com.dwinovo.chiikawa.entity.brain.task.farmer.crop.FarmRegistry;
 import com.dwinovo.chiikawa.item.PetDollItem;
@@ -64,6 +67,7 @@ public class Chiikawa {
         FarmRegistry.init();
         Services.REGISTRY.registerToEventBus(modEventBus);
         Services.ENTITY.registerToEventBus(modEventBus);
+        PetSpawnsBiomeModifier.register(modEventBus);
         modEventBus.addListener(NeoForgeModNetworking::registerPayloads);
         NeoForge.EVENT_BUS.addListener(Chiikawa::onRightClickBlock);
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> PetReviveRitualManager.tickServer(event.getServer()));
@@ -76,6 +80,8 @@ public class Chiikawa {
             event.addListener(new PetPersonalityLoader());
             event.addListener(new PetTaskTypeLoader());
             event.addListener(new ShopCatalogLoader());
+            event.addListener(new BoardLevelsLoader());
+            event.addListener(new PetSpawnLoader());
         });
 
         InitCapabilities.register(modEventBus);

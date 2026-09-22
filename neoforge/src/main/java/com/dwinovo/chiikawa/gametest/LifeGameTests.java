@@ -13,20 +13,25 @@ import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.item.PetDollItem;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.gametest.GameTestHolder;
@@ -139,6 +144,26 @@ public final class LifeGameTests {
             helper.assertTrue(pet.getPetDirective() == PetDirective.FREE,
                 "a pet nobody owns is waiting to follow someone");
         });
+    }
+
+    /**
+     * Wild pets spawn where the data pack says, and only there: the plains are on the mod's
+     * own list and the ocean is not. The spawns reach a biome only through the pet_spawn
+     * data, so this is also the case that the data got there at all.
+     */
+    @GameTest(template = "floor8", batch = BATCH)
+    public static void wild_pets_spawn_where_the_data_pack_says(GameTestHelper helper) {
+        Registry<Biome> biomes = helper.getLevel().registryAccess().registryOrThrow(Registries.BIOME);
+        EntityType<?> usagi = InitEntity.USAGI_PET.get();
+
+        helper.assertTrue(spawns(biomes.getOrThrow(Biomes.PLAINS), usagi), "no Usagi turns up on the plains");
+        helper.assertFalse(spawns(biomes.getOrThrow(Biomes.OCEAN), usagi), "Usagi turns up at sea, where no list puts it");
+        helper.succeed();
+    }
+
+    private static boolean spawns(Biome biome, EntityType<?> type) {
+        return biome.getMobSettings().getMobs(type.getCategory()).unwrap().stream()
+            .anyMatch(spawner -> spawner.type == type);
     }
 
     /**

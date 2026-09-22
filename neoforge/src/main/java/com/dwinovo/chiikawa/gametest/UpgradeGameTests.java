@@ -8,10 +8,13 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
+import com.dwinovo.chiikawa.data.LaborBoardLevelData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitRegistry;
+import com.dwinovo.chiikawa.network.BoardPayloads;
 import com.dwinovo.chiikawa.network.BoardServerPacketHandler;
+import com.dwinovo.chiikawa.task.BoardLevels;
 import com.dwinovo.chiikawa.task.BoardSlips;
 import com.dwinovo.chiikawa.task.BoardSlot;
 import com.dwinovo.chiikawa.task.PetTaskTypes;
@@ -51,6 +54,38 @@ public final class UpgradeGameTests {
         settleWorld(level, Difficulty.NORMAL, NOON);
     }
 
+    /**
+     * The levels come out of the data pack, not the code: with nothing overriding it, what
+     * boards go by is exactly what the mod generated, so a pack has one file to replace.
+     */
+    @GameTest(template = "floor8", batch = BATCH)
+    public static void boards_go_by_the_levels_in_the_data_pack(GameTestHelper helper) {
+        helper.assertTrue(BoardLevels.current().equals(LaborBoardLevelData.LEVELS),
+            "boards go by " + BoardLevels.current() + ", not the generated " + LaborBoardLevelData.LEVELS);
+        helper.succeed();
+    }
+
+    /**
+     * The screen is told what the next level gives, since the levels never leave the server:
+     * its slips a day, its price, and the work that first goes up at it.
+     */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 200)
+    public static void a_board_says_what_its_next_level_gives(GameTestHelper helper) {
+        LaborBoardBlockEntity board = board(helper);
+        BoardPayloads.NextLevel next = BoardServerPacketHandler.view(helper.absolutePos(BOARD), board).next();
+        BoardLevels levels = BoardLevels.current();
+        int level = board.boardLevel();
+
+        helper.assertTrue(next.price() == levels.priceAfter(level), "the screen quotes another price: " + next.price());
+        helper.assertTrue(next.daily() == levels.slipsAt(level + 1), "the screen promises " + next.daily() + " slips a day");
+        helper.assertTrue(PetTaskTypes.all().entrySet().stream()
+                .filter(entry -> entry.getValue().minLevel() == level + 1)
+                .allMatch(entry -> next.unlocks().contains(entry.getKey()))
+                && !next.unlocks().isEmpty(),
+            "the screen does not say what work the next level puts up: " + next.unlocks());
+        helper.succeed();
+    }
+
     /** A level buys a slip a day, and leaves the slips already up exactly where they were. */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 200)
     public static void paying_a_board_up_puts_another_slip_on_it(GameTestHelper helper) {
@@ -72,12 +107,12 @@ public final class UpgradeGameTests {
     public static void a_board_takes_the_emeralds_and_goes_up_a_level(GameTestHelper helper) {
         LaborBoardBlockEntity board = board(helper);
         ServerPlayer owner = customer(helper, PLENTY);
-        int price = BoardSlips.upgradePrice(board.boardLevel());
+        int price = BoardLevels.current().priceAfter(board.boardLevel());
 
         helper.assertTrue(BoardServerPacketHandler.buyLevel(helper.absolutePos(BOARD), owner),
             "the board would not sell a level to somebody standing at it with the money");
 
-        helper.assertTrue(board.boardLevel() == BoardSlips.FIRST_LEVEL + 1,
+        helper.assertTrue(board.boardLevel() == BoardLevels.FIRST_LEVEL + 1,
             "the board took the money and stayed where it was");
         helper.assertTrue(owner.getInventory().countItem(Items.EMERALD) == PLENTY - price,
             "the board charged something other than the price on its own screen");
@@ -88,13 +123,13 @@ public final class UpgradeGameTests {
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 200)
     public static void a_board_nobody_can_pay_for_stays_where_it_is(GameTestHelper helper) {
         LaborBoardBlockEntity board = board(helper);
-        int short_ = BoardSlips.upgradePrice(board.boardLevel()) - 1;
+        int short_ = BoardLevels.current().priceAfter(board.boardLevel()) - 1;
         ServerPlayer owner = customer(helper, short_);
 
         helper.assertFalse(BoardServerPacketHandler.buyLevel(helper.absolutePos(BOARD), owner),
             "the board sold a level to somebody who was an emerald short");
 
-        helper.assertTrue(board.boardLevel() == BoardSlips.FIRST_LEVEL, "the board went up a level for free");
+        helper.assertTrue(board.boardLevel() == BoardLevels.FIRST_LEVEL, "the board went up a level for free");
         helper.assertTrue(owner.getInventory().countItem(Items.EMERALD) == short_,
             "the board took what it was given and gave nothing back");
         helper.succeed();
@@ -112,7 +147,7 @@ public final class UpgradeGameTests {
         helper.assertFalse(BoardServerPacketHandler.buyLevel(helper.absolutePos(BOARD), owner),
             "a board at its top level sold another one");
 
-        helper.assertTrue(board.boardLevel() == BoardSlips.MAX_LEVEL, "a board went past its top level");
+        helper.assertTrue(board.boardLevel() == BoardLevels.current().top(), "a board went past its top level");
         helper.assertTrue(owner.getInventory().countItem(Items.EMERALD) == PLENTY,
             "the board charged for a level it did not have");
         helper.succeed();
@@ -127,7 +162,7 @@ public final class UpgradeGameTests {
 
         helper.assertFalse(BoardServerPacketHandler.buyLevel(helper.absolutePos(BOARD), owner),
             "a board sold a level to somebody nowhere near it");
-        helper.assertTrue(board.boardLevel() == BoardSlips.FIRST_LEVEL, "the far-off board went up anyway");
+        helper.assertTrue(board.boardLevel() == BoardLevels.FIRST_LEVEL, "the far-off board went up anyway");
         helper.succeed();
     }
 
@@ -175,7 +210,7 @@ public final class UpgradeGameTests {
             for (int z = 2; z < 15; z++) {
                 BlockPos rel = new BlockPos(x, STAND, z);
                 long seed = BoardSlips.seed(level.getSeed(), day, helper.absolutePos(rel));
-                boolean hunting = BoardSlips.roll(seed, PetTaskTypes.all(), BoardSlips.MAX_LEVEL).stream()
+                boolean hunting = BoardSlips.roll(seed, PetTaskTypes.all(), BoardLevels.current(), BoardLevels.current().top()).stream()
                     .anyMatch(slot -> slot.slip().capability().equals(fencer));
                 if (hunting) {
                     return rel;
