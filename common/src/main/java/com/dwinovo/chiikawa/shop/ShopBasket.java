@@ -22,15 +22,15 @@ public final class ShopBasket {
     /**
      * @param personality what this kind of pet likes, by weight
      * @param catalog what the shop deals in
-     * @param emeralds what the pet is carrying
+     * @param money what the pet is carrying
      * @param random the pet's own random source
      * @return the line of the price list it would buy from, or nothing when it wants for
      *         nothing here or cannot afford what it wants
      */
     public static Optional<ShopCatalog.Entry> wants(Personality personality, ShopCatalog catalog,
-                                                    int emeralds, RandomSource random) {
+                                                    int money, RandomSource random) {
         List<Personality.WeightedItem> affordable = personality.likes().stream()
-            .filter(liking -> catalog.sale(liking.item()).filter(entry -> entry.buy() <= emeralds).isPresent())
+            .filter(liking -> catalog.sale(liking.item()).filter(entry -> entry.buy() <= money).isPresent())
             .toList();
         return WeightedRandom.getRandomItem(random, affordable)
             .flatMap(liking -> catalog.sale(liking.item()));
@@ -40,8 +40,8 @@ public final class ShopBasket {
      * Whether there is anything here worth stopping for. Asked while a pet is deciding what
      * to do next, and so asked often — it must not change the world or the pet.
      */
-    public static boolean wantsAnything(Personality personality, ShopCatalog catalog, int emeralds) {
+    public static boolean wantsAnything(Personality personality, ShopCatalog catalog, int money) {
         return personality.likes().stream()
-            .anyMatch(liking -> catalog.sale(liking.item()).filter(entry -> entry.buy() <= emeralds).isPresent());
+            .anyMatch(liking -> catalog.sale(liking.item()).filter(entry -> entry.buy() <= money).isPresent());
     }
 }
