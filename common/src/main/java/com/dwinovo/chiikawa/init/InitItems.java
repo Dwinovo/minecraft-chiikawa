@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.item.BagItem;
 import com.dwinovo.chiikawa.item.ChiikawaWeapon;
 import com.dwinovo.chiikawa.item.HachiwareWeapon;
+import com.dwinovo.chiikawa.item.HandbookItem;
 import com.dwinovo.chiikawa.item.MusicBoxItem;
 import com.dwinovo.chiikawa.item.PetBellItem;
 import com.dwinovo.chiikawa.item.PetDollItem;
@@ -66,13 +67,15 @@ public final class InitItems {
         registerItem("whale_pouch", () -> new BagItem(new Item.Properties(), BagItem.Wear.SLUNG));
     public static final Supplier<Item> STAR_POUCH =
         registerItem("star_pouch", () -> new BagItem(new Item.Properties(), BagItem.Wear.SLUNG));
+    public static final Supplier<Item> HANDBOOK =
+        registerItem("handbook", () -> new HandbookItem(new Item.Properties()));
     /**
      * Everything drawn from a Bedrock model of its own, by {@code PropRenderer}: the bags,
-     * the labor board and the shop. Each loader gives these their built-in item renderer, and their
+     * the labor board, the shop and the handbook. Each loader gives these their built-in item renderer, and their
      * item models are generated from this list.
      */
     public static final List<Supplier<? extends Item>> PROPS =
-        List.of(BACKPACK, BEAR_POUCH, WHALE_POUCH, STAR_POUCH, LABOR_BOARD, SHOP);
+        List.of(BACKPACK, BEAR_POUCH, WHALE_POUCH, STAR_POUCH, LABOR_BOARD, SHOP, HANDBOOK);
 
     public static final Supplier<Item> USAGI_DOLL =
         registerItem("usagi_doll", properties -> new PetDollItem(properties, InitEntity.USAGI_PET));

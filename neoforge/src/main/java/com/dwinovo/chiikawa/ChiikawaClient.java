@@ -40,6 +40,7 @@ import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMenu;
+import com.dwinovo.chiikawa.manual.ManualLoader;
 import com.dwinovo.chiikawa.platform.NeoForgeModNetworking;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -117,6 +118,7 @@ public class ChiikawaClient {
         event.addListener(
                 ResourceLocation.fromNamespaceAndPath(Chiikawa.MODID, "anim_loader"),
                 new BedrockResourceLoader());
+        event.addListener(ManualLoader.ID, new ManualLoader());
     }
 }
 
