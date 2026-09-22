@@ -8,6 +8,7 @@ import com.dwinovo.chiikawa.network.ShopPayloads.ShopTradePayload;
 import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.shop.Wallet;
 import com.dwinovo.chiikawa.ui.DrawSurface;
+import com.dwinovo.chiikawa.ui.Icon;
 import com.dwinovo.chiikawa.ui.Rect;
 import com.dwinovo.chiikawa.ui.Ui;
 import com.dwinovo.chiikawa.ui.UiStyle;
@@ -32,8 +33,9 @@ import net.minecraft.world.item.ItemStack;
  *
  * <p>A row is a picture, a name and a price. What a thing costs and what it fetches are
  * the whole point of the screen, so they are on the buttons themselves rather than
- * written out beside them — pressing "Buy 3" and an emerald is buying it for three
- * emeralds. The customer's own emeralds are in the corner, counted the same way.
+ * written out beside them — pressing "Buy 3" with an emerald after it is buying it for
+ * three emeralds, or three of whatever a pack has made money of. The customer's own money
+ * is in the corner, counted the same way.
  */
 public class ShopScreen extends Screen {
     private static final int PANEL_W = 236;
@@ -47,6 +49,8 @@ public class ShopScreen extends Screen {
     private int listY, footerY;
     /** Each column of buttons as wide as its widest price, so the prices line up; 0 for none. */
     private int buyWidth, sellWidth;
+    /** What prices are in, pictured beside every one of them. */
+    private Icon coin = Icon.NONE;
 
     public ShopScreen(BlockPos shop, List<PriceView> prices) {
         super(Component.translatable("screen.chiikawa.shop"));
@@ -62,6 +66,7 @@ public class ShopScreen extends Screen {
         this.topPos = (this.height - panelHeight) / 2;
         this.listY = TitledPanel.contentY(topPos);
         this.footerY = topPos + panelHeight - UiStyle.PAD - UiStyle.CONTROL_H;
+        this.coin = new ItemIcon(Wallet.coins(1));
         this.buyWidth = columnWidth(true);
         this.sellWidth = columnWidth(false);
         rebuildButtons();
@@ -112,19 +117,19 @@ public class ShopScreen extends Screen {
         addRenderableWidget(next);
     }
 
-    /** One side of one row's trade, with what it costs in emeralds written on it. */
+    /** One side of one row's trade, with what it costs written on it. */
     private UiButton tradeButton(PriceView price, boolean buying, int x, int width, int rowY) {
         Component label = label(buying, buying ? price.buy() : price.sell());
         UiButton button = new UiButton(x, UiStyle.centerIn(rowY, ROW_H, UiStyle.CONTROL_H),
             width, UiStyle.CONTROL_H, label,
-            (surface, area, argb) -> Price.drawCentered(surface, label.getString(), area, argb),
+            (surface, area, argb) -> Price.drawCentered(surface, coin, label.getString(), area, argb),
             () -> Services.NETWORK.sendToServer(new ShopTradePayload(shop, price.item(), buying)));
         button.active = buying ? canAfford(price) : holds(price);
         return button;
     }
 
-    private static Component label(boolean buying, int emeralds) {
-        return Component.translatable(buying ? "screen.chiikawa.shop.buy" : "screen.chiikawa.shop.sell", emeralds);
+    private static Component label(boolean buying, int money) {
+        return Component.translatable(buying ? "screen.chiikawa.shop.buy" : "screen.chiikawa.shop.sell", money);
     }
 
     /**
@@ -138,7 +143,7 @@ public class ShopScreen extends Screen {
         GuiSurface surface = new GuiSurface(graphics, this.font);
         TitledPanel.draw(surface, leftPos, topPos, PANEL_W, panelHeight, this.title.getString());
         // What the customer has to spend, where a shopper looks first.
-        Price.drawRight(surface, String.valueOf(purse()), leftPos + PANEL_W - UiStyle.PAD,
+        Price.drawRight(surface, coin, String.valueOf(purse()), leftPos + PANEL_W - UiStyle.PAD,
             topPos, UiStyle.TITLE_H, UiTheme.TEXT_MUTED);
 
         int start = page * ROWS;
@@ -165,7 +170,7 @@ public class ShopScreen extends Screen {
             row.right() - buttons - nameX, UiTheme.TEXT);
     }
 
-    /** How many emeralds the customer is carrying. */
+    /** How much money the customer is carrying. */
     private int purse() {
         Minecraft minecraft = Minecraft.getInstance();
         return minecraft.player == null ? 0 : Wallet.count(minecraft.player.getInventory());

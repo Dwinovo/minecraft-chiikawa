@@ -88,7 +88,7 @@ public record BoardLevels(List<Level> levels) {
 
     /**
      * @param slips how many slips a board of this level puts up a day
-     * @param price what the owner pays in emeralds to reach it from the level below; a
+     * @param price what the owner pays to reach it from the level below; a
      *              board starts at the first level, so the first's is never asked
      */
     public record Level(int slips, int price) {
