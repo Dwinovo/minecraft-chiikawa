@@ -38,6 +38,7 @@ import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMenu;
+import com.dwinovo.chiikawa.manual.ManualLoader;
 import net.neoforged.neoforge.common.NeoForge;
 
 // Client-only mod entry.
@@ -107,5 +108,6 @@ public class ChiikawaClient {
         // Without this the renderer's ModelLibrary.get(...) returns null and submit()
         // short-circuits — entity exists and is interactable but renders as nothing.
         event.registerReloadListener(new BedrockResourceLoader());
+        event.registerReloadListener(new ManualLoader());
     }
 }
