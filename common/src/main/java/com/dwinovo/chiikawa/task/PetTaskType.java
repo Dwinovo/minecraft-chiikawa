@@ -40,7 +40,7 @@ public record PetTaskType(
         IntProvider.POSITIVE_CODEC.fieldOf("amount").forGetter(PetTaskType::amount),
         ResourceKey.codec(Registries.LOOT_TABLE).fieldOf("reward").forGetter(PetTaskType::reward),
         ExtraCodecs.POSITIVE_INT.optionalFieldOf("weight", 1).forGetter(PetTaskType::weight),
-        ExtraCodecs.POSITIVE_INT.optionalFieldOf("min_level", BoardSlips.FIRST_LEVEL).forGetter(PetTaskType::minLevel)
+        ExtraCodecs.POSITIVE_INT.optionalFieldOf("min_level", BoardLevels.FIRST_LEVEL).forGetter(PetTaskType::minLevel)
     ).apply(instance, PetTaskType::new));
 
     /**

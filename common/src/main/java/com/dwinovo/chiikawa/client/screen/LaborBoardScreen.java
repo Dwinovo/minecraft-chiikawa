@@ -4,12 +4,12 @@ import com.dwinovo.chiikawa.client.ui.PetStatusText;
 import com.dwinovo.chiikawa.client.ui.mc.GuiSurface;
 import com.dwinovo.chiikawa.client.ui.mc.ItemIcon;
 import com.dwinovo.chiikawa.client.ui.mc.UiButton;
+import com.dwinovo.chiikawa.network.BoardPayloads;
 import com.dwinovo.chiikawa.network.BoardPayloads.BoardSlipsPayload;
 import com.dwinovo.chiikawa.network.BoardPayloads.BoardUpgradePayload;
 import com.dwinovo.chiikawa.network.BoardPayloads.SlipView;
 import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.shop.Wallet;
-import com.dwinovo.chiikawa.task.BoardSlips;
 import com.dwinovo.chiikawa.ui.DrawSurface;
 import com.dwinovo.chiikawa.ui.Rect;
 import com.dwinovo.chiikawa.ui.TextClip;
@@ -29,6 +29,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * The day's slips on a labor board. The slips themselves are read-only — pets take their
@@ -44,6 +45,8 @@ public class LaborBoardScreen extends Screen {
 
     private final BlockPos board;
     private final int level;
+    private final int daily;
+    private final BoardPayloads.NextLevel next;
     private final int price;
     private final List<SlipView> slips;
     private int leftPos;
@@ -56,7 +59,9 @@ public class LaborBoardScreen extends Screen {
         super(Component.translatable("screen.chiikawa.labor_board"));
         this.board = payload.board();
         this.level = payload.level();
-        this.price = payload.price();
+        this.daily = payload.daily();
+        this.next = payload.next();
+        this.price = next.price();
         this.slips = payload.slips();
     }
 
@@ -136,9 +141,8 @@ public class LaborBoardScreen extends Screen {
         String badge = Component.translatable("screen.chiikawa.labor_board.level", level).getString();
         Badge.draw(surface, badge, leftPos + UiStyle.PAD,
             UiStyle.centerIn(footerY, UiStyle.CONTROL_H, Badge.height(surface)), UiTheme.ACCENT);
-        String daily = Component.translatable("screen.chiikawa.labor_board.daily",
-            BoardSlips.slipsAt(level)).getString();
-        surface.drawText(daily, leftPos + UiStyle.PAD + Badge.width(surface, badge) + UiStyle.GAP,
+        String perDay = Component.translatable("screen.chiikawa.labor_board.daily", daily).getString();
+        surface.drawText(perDay, leftPos + UiStyle.PAD + Badge.width(surface, badge) + UiStyle.GAP,
             UiStyle.centerIn(footerY, UiStyle.CONTROL_H, surface.lineHeight()), UiTheme.TEXT_MUTED);
         if (price <= 0) {
             Ui.textRight(surface, Component.translatable("screen.chiikawa.labor_board.max_level").getString(),
@@ -151,10 +155,14 @@ public class LaborBoardScreen extends Screen {
     private List<String> upgradeDetail() {
         List<String> lines = new ArrayList<>();
         lines.add(Component.translatable("screen.chiikawa.labor_board.level", level).getString());
-        lines.add(Component.translatable("screen.chiikawa.labor_board.daily",
-            BoardSlips.slipsAt(level)).getString());
+        lines.add(Component.translatable("screen.chiikawa.labor_board.daily", daily).getString());
         if (price > 0) {
-            lines.add(Component.translatable("screen.chiikawa.labor_board.upgrade_hint").getString());
+            lines.add(Component.translatable("screen.chiikawa.labor_board.upgrade_hint", level + 1, next.daily())
+                .getString());
+            for (ResourceLocation type : next.unlocks()) {
+                lines.add(Component.translatable("screen.chiikawa.labor_board.unlocks", PetStatusText.taskName(type))
+                    .getString());
+            }
             lines.add(Component.translatable("screen.chiikawa.labor_board.purse", purse()).getString());
         } else {
             lines.add(Component.translatable("screen.chiikawa.labor_board.max_level").getString());
