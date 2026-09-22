@@ -44,14 +44,38 @@ public final class BoardPayloads {
     }
 
     /**
+     * The next level of a board, as its screen offers it. The levels are server data, so the
+     * screen is told rather than working it out.
+     *
+     * @param price what it costs, or 0 when there is none left to buy
+     * @param daily how many slips a day it puts up
+     * @param unlocks the kinds of work a board first puts up at it
+     */
+    public record NextLevel(int price, int daily, List<ResourceLocation> unlocks) {
+        /** A board at the top: nothing left to buy. */
+        public static final NextLevel NONE = new NextLevel(0, 0, List.of());
+
+        public static final StreamCodec<FriendlyByteBuf, NextLevel> STREAM_CODEC = StreamCodec.of(
+            (buffer, value) -> {
+                buffer.writeVarInt(value.price);
+                buffer.writeVarInt(value.daily);
+                buffer.writeCollection(value.unlocks, FriendlyByteBuf::writeResourceLocation);
+            },
+            buffer -> new NextLevel(buffer.readVarInt(), buffer.readVarInt(),
+                buffer.readList(FriendlyByteBuf::readResourceLocation))
+        );
+    }
+
+    /**
      * Opens the labor board screen with the day's slips, and sends it again after an
      * upgrade so the screen shows what was just paid for.
      *
      * @param board which board; the screen sends it back when the owner buys a level
      * @param level how far the board has been paid up
-     * @param price what the next level costs, or 0 when there is none left to buy
+     * @param daily how many slips a day it puts up at that level
+     * @param next what the level after it costs and gives
      */
-    public record BoardSlipsPayload(BlockPos board, int level, int price, List<SlipView> slips)
+    public record BoardSlipsPayload(BlockPos board, int level, int daily, NextLevel next, List<SlipView> slips)
             implements CustomPacketPayload {
         public static final Type<BoardSlipsPayload> TYPE = new Type<>(
             ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "board_slips"));
@@ -59,11 +83,12 @@ public final class BoardPayloads {
             (buffer, value) -> {
                 buffer.writeBlockPos(value.board);
                 buffer.writeVarInt(value.level);
-                buffer.writeVarInt(value.price);
+                buffer.writeVarInt(value.daily);
+                NextLevel.STREAM_CODEC.encode(buffer, value.next);
                 buffer.writeCollection(value.slips, (buf, slip) -> SlipView.STREAM_CODEC.encode(buf, slip));
             },
             buffer -> new BoardSlipsPayload(buffer.readBlockPos(), buffer.readVarInt(), buffer.readVarInt(),
-                buffer.readList(buf -> SlipView.STREAM_CODEC.decode(buf)))
+                NextLevel.STREAM_CODEC.decode(buffer), buffer.readList(buf -> SlipView.STREAM_CODEC.decode(buf)))
         );
 
         @Override

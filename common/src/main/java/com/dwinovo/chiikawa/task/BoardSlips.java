@@ -15,14 +15,6 @@ import net.minecraft.util.RandomSource;
  * tested on their own.
  */
 public final class BoardSlips {
-    /** Where a board stands the day it is placed. */
-    public static final int FIRST_LEVEL = 1;
-    /** As far as an owner can take one. */
-    public static final int MAX_LEVEL = 3;
-    /** Slips a board of the first level puts up; each level adds one. */
-    private static final int SLIPS_AT_FIRST_LEVEL = 3;
-    /** What the owner pays in emeralds to go up a level, from the first on up. */
-    private static final int[] UPGRADE_PRICES = {16, 32};
     /** Gives every slip a roll of its own, so a board that grows keeps the slips it had. */
     private static final long SLIP_SEED_STEP = 0x632BE59BD9B4E019L;
     /** Wild pets only take what owned pets left: from this long after sunrise on. */
@@ -45,33 +37,16 @@ public final class BoardSlips {
         return worldSeed ^ (day * 0x9E3779B97F4A7C15L) ^ (pos.asLong() * 0xC2B2AE3D27D4EB4FL);
     }
 
-    /** The level a board is at, whatever a save file or a packet claims. */
-    public static int clampLevel(int level) {
-        return Math.clamp(level, FIRST_LEVEL, MAX_LEVEL);
-    }
-
-    /** How many slips a board of this level puts up a day. */
-    public static int slipsAt(int level) {
-        return SLIPS_AT_FIRST_LEVEL + clampLevel(level) - FIRST_LEVEL;
-    }
-
-    /**
-     * @return what it costs to take a board from this level to the next, or 0 at the top,
-     *         which is also how a screen knows there is nothing left to buy
-     */
-    public static int upgradePrice(int level) {
-        int at = clampLevel(level);
-        return at >= MAX_LEVEL ? 0 : UPGRADE_PRICES[at - FIRST_LEVEL];
-    }
-
     /**
      * @param seed see {@link #seed}
      * @param types the loaded task types in id order
+     * @param levels what each level of board puts up
      * @param level the board's level, which decides how many slips and which kinds
      * @return the day's slips, none when no types are loaded
      */
-    public static List<BoardSlot> roll(long seed, SortedMap<ResourceLocation, PetTaskType> types, int level) {
-        return topUp(List.of(), seed, types, level);
+    public static List<BoardSlot> roll(long seed, SortedMap<ResourceLocation, PetTaskType> types, BoardLevels levels,
+            int level) {
+        return topUp(List.of(), seed, types, levels, level);
     }
 
     /**
@@ -84,13 +59,13 @@ public final class BoardSlips {
      * @return the board's slips, the old ones first
      */
     public static List<BoardSlot> topUp(List<BoardSlot> slots, long seed,
-            SortedMap<ResourceLocation, PetTaskType> types, int level) {
-        int wanted = slipsAt(level);
+            SortedMap<ResourceLocation, PetTaskType> types, BoardLevels levels, int level) {
+        int wanted = levels.slipsAt(level);
         if (slots.size() >= wanted) {
             return slots;
         }
         List<Map.Entry<ResourceLocation, PetTaskType>> offered = types.entrySet().stream()
-            .filter(entry -> entry.getValue().minLevel() <= clampLevel(level))
+            .filter(entry -> entry.getValue().minLevel() <= levels.clamp(level))
             .toList();
         int totalWeight = offered.stream().mapToInt(entry -> entry.getValue().weight()).sum();
         if (totalWeight == 0) {
