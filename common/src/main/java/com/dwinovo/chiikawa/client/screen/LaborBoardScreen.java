@@ -30,13 +30,14 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * The day's slips on a labor board. The slips themselves are read-only — pets take their
  * own, the owner only looks — so the list is built to be looked at: a row is a picture, a
  * name and a state, and everything else waits under the cursor. The one thing the owner
  * can do here, buy the board a level, sits under a rule at the bottom, away from the
- * slips, with its price in emeralds on the button.
+ * slips, with its price on the button.
  */
 public class LaborBoardScreen extends Screen {
     private static final int WIDTH = 236;
@@ -49,6 +50,8 @@ public class LaborBoardScreen extends Screen {
     private final BoardPayloads.NextLevel next;
     private final int price;
     private final List<SlipView> slips;
+    /** What the upgrade is paid in: pictured on the button, named in the tooltip. */
+    private final ItemStack coin = Wallet.coins(1);
     private int leftPos;
     private int topPos;
     private int panelHeight;
@@ -81,12 +84,12 @@ public class LaborBoardScreen extends Screen {
         }
     }
 
-    /** What the next level costs in emeralds, on the button that buys it. */
+    /** What the next level costs, on the button that buys it. */
     private UiButton upgradeButton() {
         Component label = Component.translatable("screen.chiikawa.labor_board.upgrade", price);
         int width = Math.max(UPGRADE_MIN_W, Price.width(this.font.width(label)) + 2 * UiStyle.PAD);
         UiButton button = new UiButton(leftPos + WIDTH - UiStyle.PAD - width, footerY, width, UiStyle.CONTROL_H,
-            label, (surface, area, argb) -> Price.drawCentered(surface, label.getString(), area, argb),
+            label, (surface, area, argb) -> Price.drawCentered(surface, new ItemIcon(coin), label.getString(), area, argb),
             () -> Services.NETWORK.sendToServer(new BoardUpgradePayload(board)));
         button.active = purse() >= price;
         return button;
@@ -163,7 +166,7 @@ public class LaborBoardScreen extends Screen {
                 lines.add(Component.translatable("screen.chiikawa.labor_board.unlocks", PetStatusText.taskName(type))
                     .getString());
             }
-            lines.add(Component.translatable("screen.chiikawa.labor_board.purse", purse()).getString());
+            lines.add(Component.translatable("screen.chiikawa.labor_board.purse", purse(), coin.getHoverName()).getString());
         } else {
             lines.add(Component.translatable("screen.chiikawa.labor_board.max_level").getString());
         }
@@ -174,7 +177,7 @@ public class LaborBoardScreen extends Screen {
         return new Rect(leftPos + UiStyle.PAD, footerY, WIDTH - 2 * UiStyle.PAD, UiStyle.CONTROL_H);
     }
 
-    /** How many emeralds the owner is carrying, which is what a price is measured against. */
+    /** How much money the owner is carrying, which is what a price is measured against. */
     private static int purse() {
         Minecraft minecraft = Minecraft.getInstance();
         return minecraft.player == null ? 0 : Wallet.count(minecraft.player.getInventory());

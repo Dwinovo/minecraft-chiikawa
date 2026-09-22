@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 
 class PixelArtTest {
     private static final List<PixelArt> SHIPPED = List.of(
-        PixelArt.SLIP, PixelArt.SPEECH, PixelArt.PAWS, PixelArt.CUSHION, PixelArt.TUFT, PixelArt.CHECK,
-        PixelArt.EMERALD);
+        PixelArt.SLIP, PixelArt.SPEECH, PixelArt.PAWS, PixelArt.CUSHION, PixelArt.TUFT, PixelArt.CHECK);
 
     @Test
     void everyIconFitsWhereAnItemWould() {
