@@ -45,7 +45,7 @@ class FaceAnimationsTest {
         for (String face : FACE) {
             assertTrue(animations.has(face), "Chiikawa has no " + face);
         }
-        assertTrue(modelBones("chiikawa").containsAll(List.of("LeftEyelid", "RightEyelid", "Mouth2", "Mouth3")),
+        assertTrue(modelBones("chiikawa").containsAll(List.of("LeftEyelid", "RightEyelid", "Mouth", "Mouth3")),
             "Chiikawa's eyes and mouth are painted on again");
     }
 
