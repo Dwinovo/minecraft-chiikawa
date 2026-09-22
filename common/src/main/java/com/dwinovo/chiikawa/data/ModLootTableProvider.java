@@ -1,12 +1,15 @@
 package com.dwinovo.chiikawa.data;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.init.InitBlocks;
+import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.data.loot.LootTableSubProvider;
@@ -31,11 +34,26 @@ import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
  * each cover all blocks in their own way, so both loaders share this one provider.
  */
 public final class ModLootTableProvider extends LootTableProvider {
+    /** What a newcomer is handed: the handbook, by the advancement that marks their arrival. */
+    public static final ResourceKey<LootTable> HANDBOOK_GIFT = ResourceKey.create(Registries.LOOT_TABLE,
+        new ResourceLocation(Constants.MOD_ID, "gifts/handbook"));
+
     public ModLootTableProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
         super(output, Set.of(), List.of(
             new SubProviderEntry(lookup -> new BlockDrops(), LootContextParamSets.BLOCK),
-            new SubProviderEntry(lookup -> new SlipRewards(), LootContextParamSets.GIFT)
+            new SubProviderEntry(lookup -> new SlipRewards(), LootContextParamSets.GIFT),
+            new SubProviderEntry(lookup -> new Gifts(), LootContextParamSets.ADVANCEMENT_REWARD)
         ), registries);
+    }
+
+    /** What advancements hand out. */
+    private static final class Gifts implements LootTableSubProvider {
+        @Override
+        public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
+            output.accept(HANDBOOK_GIFT, LootTable.lootTable().withPool(LootPool.lootPool()
+                .setRolls(ConstantValue.exactly(1))
+                .add(LootItem.lootTableItem(InitItems.HANDBOOK.get()))));
+        }
     }
 
     private static final class BlockDrops implements LootTableSubProvider {

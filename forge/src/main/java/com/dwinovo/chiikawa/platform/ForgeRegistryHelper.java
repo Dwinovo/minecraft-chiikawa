@@ -137,6 +137,21 @@ public class ForgeRegistryHelper implements IRegistryHelper {
     }
 
     @Override
+    public java.util.function.Supplier<net.minecraft.world.item.Item> registerHandbook(
+        ResourceLocation id,
+        net.minecraft.world.item.Item.Properties properties
+    ) {
+        return register(net.minecraft.core.registries.BuiltInRegistries.ITEM, id,
+            () -> new com.dwinovo.chiikawa.item.HandbookItem(properties) {
+                @Override
+                public void initializeClient(
+                        java.util.function.Consumer<net.minecraftforge.client.extensions.common.IClientItemExtensions> consumer) {
+                    consumer.accept(com.dwinovo.chiikawa.ChiikawaForgeClient.PROP_ITEM_EXTENSIONS);
+                }
+            });
+    }
+
+    @Override
     public java.util.function.Supplier<net.minecraft.world.item.BlockItem> registerPropBlockItem(
         ResourceLocation id,
         Supplier<? extends Block> block,

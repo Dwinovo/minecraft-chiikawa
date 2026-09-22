@@ -1,10 +1,12 @@
 package com.dwinovo.chiikawa.platform;
 
 import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
+import com.dwinovo.chiikawa.client.manual.ClientManualPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
 import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
 import com.dwinovo.chiikawa.network.BoardServerPacketHandler;
+import com.dwinovo.chiikawa.network.ManualPayloads;
 import com.dwinovo.chiikawa.network.PetPayloads;
 import com.dwinovo.chiikawa.network.PetServerPacketHandler;
 import com.dwinovo.chiikawa.network.ShopPayloads;
@@ -63,6 +65,8 @@ public final class FabricModNetworking {
                 ShopPayloads.ShopPricesPayload payload = ShopPayloads.ShopPricesPayload.read(buffer);
                 client.execute(() -> ClientShopPacketHandler.handlePrices(payload));
             });
+        ClientPlayNetworking.registerGlobalReceiver(ManualPayloads.OPEN_HANDBOOK,
+            (client, handler, buffer, responseSender) -> client.execute(ClientManualPacketHandler::open));
         ClientPlayNetworking.registerGlobalReceiver(MusicPayloads.MUSIC_CATALOG,
             (client, handler, buffer, responseSender) -> {
                 MusicPayloads.MusicCatalogPayload payload = MusicPayloads.MusicCatalogPayload.read(buffer);

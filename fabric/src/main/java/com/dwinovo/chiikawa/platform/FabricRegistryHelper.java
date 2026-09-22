@@ -102,4 +102,13 @@ public class FabricRegistryHelper implements IRegistryHelper {
         return register(net.minecraft.core.registries.BuiltInRegistries.ITEM, id,
             () -> new net.minecraft.world.item.BlockItem(block.get(), properties));
     }
+
+    @Override
+    public java.util.function.Supplier<net.minecraft.world.item.Item> registerHandbook(
+        ResourceLocation id,
+        net.minecraft.world.item.Item.Properties properties
+    ) {
+        return register(net.minecraft.core.registries.BuiltInRegistries.ITEM, id,
+            () -> new com.dwinovo.chiikawa.item.HandbookItem(properties));
+    }
 }

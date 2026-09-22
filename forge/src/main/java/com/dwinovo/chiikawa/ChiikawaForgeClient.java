@@ -17,6 +17,7 @@ import com.dwinovo.chiikawa.client.screen.PetBackpackScreen;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitMenu;
+import com.dwinovo.chiikawa.manual.ManualLoader;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -98,5 +99,6 @@ public class ChiikawaForgeClient {
     @SubscribeEvent
     static void registerReloadListeners(RegisterClientReloadListenersEvent event) {
         event.registerReloadListener(new BedrockResourceLoader());
+        event.registerReloadListener(new ManualLoader());
     }
 }

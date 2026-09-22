@@ -6,16 +6,23 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.data.ModAdvancementProvider;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitItems;
+import com.dwinovo.chiikawa.init.InitTabs;
 import com.dwinovo.chiikawa.item.BagItem;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
@@ -50,6 +57,41 @@ public final class SupplyGameTests {
     @BeforeBatch(batch = BATCH)
     public static void settle(ServerLevel level) {
         settleWorld(level, Difficulty.NORMAL, NOON);
+    }
+
+    /**
+     * Everything the mod adds can be found in its creative tab. The tab is a list kept by
+     * hand, and a new item left off it is an item nobody in creative can get.
+     */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void every_item_is_in_the_creative_tab(GameTestHelper helper) {
+        Set<Item> listed = new HashSet<>();
+        InitTabs.addMainItems(item -> listed.add(item.asItem()));
+        for (Item item : BuiltInRegistries.ITEM) {
+            ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+            if (id.getNamespace().equals(Constants.MOD_ID)) {
+                helper.assertTrue(listed.contains(item), id + " is not in the creative tab");
+            }
+        }
+        helper.succeed();
+    }
+
+    /**
+     * A newcomer is handed the handbook, by the hidden advancement that marks their
+     * arrival. Awarded by hand here — a case's player does not tick its way in as a joining
+     * one does — to see what the reward gives.
+     */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void a_newcomer_is_handed_the_handbook(GameTestHelper helper) {
+        ServerPlayer newcomer = player(helper);
+        AdvancementHolder arrival = helper.getLevel().getServer().getAdvancements().get(ModAdvancementProvider.HANDBOOK);
+        helper.assertTrue(arrival != null, "there is no advancement to hand the handbook out");
+
+        newcomer.getAdvancements().award(arrival, "arrived");
+
+        helper.assertTrue(newcomer.getInventory().contains(new ItemStack(InitItems.HANDBOOK.get())),
+            "a newcomer arrived and was handed nothing");
+        helper.succeed();
     }
 
     /**
