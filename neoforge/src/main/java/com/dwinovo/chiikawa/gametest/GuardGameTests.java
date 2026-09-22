@@ -10,6 +10,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.combat.PetCombat;
+import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
 import com.dwinovo.chiikawa.init.InitMemory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
@@ -255,10 +256,18 @@ public final class GuardGameTests {
         zombie.setNoAi(true);
         zombie.setTarget(owner);
         pet.setHealth(pet.getMaxHealth() * 0.2F);
+        // In the fight from the first tick, with the zombie on top of it — what the sensor
+        // does a moment later anyway. Left to that moment, a pet at heel can stroll a few
+        // steps off first, and whether a fight starts is measured from its owner: it then
+        // starts the fight already out of reach and backs off with nothing on top of it to
+        // hit, which is right, and not what this case is about.
+        pet.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, zombie);
+        IntentSelector.requestReevaluate(pet);
 
         helper.runAtTickTime(BACK_OFF_TICKS, () -> {
             helper.assertTrue(zombie.getHealth() < zombie.getMaxHealth(),
-                "the pet backed away without so much as a swing at what was on top of it");
+                "the pet backed away without so much as a swing at what was on top of it, "
+                    + (int) pet.distanceTo(zombie) + " blocks out, doing " + doing(pet));
             helper.succeed();
         });
     }
