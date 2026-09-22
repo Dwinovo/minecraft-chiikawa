@@ -11,6 +11,7 @@ import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.network.PetPayloads.PetDirectivePayload;
 import com.dwinovo.chiikawa.platform.Services;
+import com.dwinovo.chiikawa.shop.Wallet;
 import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.ui.DrawSurface;
 import com.dwinovo.chiikawa.ui.PixelArt;
@@ -279,10 +280,10 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
                 UiTheme.ACCENT_PALE, List.of(Component.translatable("screen.chiikawa.pet.eager", left).getString()))
                 + UiStyle.GAP;
         }
-        int emeralds = this.menu.petEmeralds();
-        chip(surface, chipX, chipY, new ItemIcon(new ItemStack(net.minecraft.world.item.Items.EMERALD)),
-            String.valueOf(emeralds), UiTheme.LEAF_PALE,
-            List.of(Component.translatable("screen.chiikawa.pet.money", emeralds).getString()));
+        int money = this.menu.petMoney();
+        ItemStack coin = Wallet.coins(1);
+        chip(surface, chipX, chipY, new ItemIcon(coin), String.valueOf(money), UiTheme.LEAF_PALE,
+            List.of(Component.translatable("screen.chiikawa.pet.money", money, coin.getHoverName()).getString()));
 
         int y = this.topPos + PORTRAIT.bottom() + 6;
         ItemStack gift = pet.getPendingGift();

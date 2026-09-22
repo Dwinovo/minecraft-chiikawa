@@ -63,6 +63,20 @@ public final class ShopGameTests {
         });
     }
 
+    /**
+     * Money is what the currency tag holds, and nothing else: emeralds, as the mod ships, so
+     * a diamond buys nothing. The shop pays out in the tag's first item. A pack that puts
+     * something else in the tag changes all of this, and what slips pay, in one place.
+     */
+    @GameTest(template = "floor8", batch = BATCH)
+    public static void money_is_what_the_currency_tag_holds(GameTestHelper helper) {
+        helper.assertTrue(Wallet.isMoney(new ItemStack(Items.EMERALD)), "an emerald is not money");
+        helper.assertFalse(Wallet.isMoney(new ItemStack(Items.DIAMOND)), "a diamond is money though no tag says so");
+        helper.assertTrue(Wallet.coins(3).is(Items.EMERALD) && Wallet.coins(3).getCount() == 3,
+            "the shop pays out in " + Wallet.coins(3));
+        helper.succeed();
+    }
+
     /** The owner's side of the counter: money out, goods in. */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void an_owner_buys_across_the_counter(GameTestHelper helper) {

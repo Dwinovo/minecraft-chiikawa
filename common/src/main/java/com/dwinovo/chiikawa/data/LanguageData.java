@@ -50,9 +50,9 @@ public final class LanguageData {
             addSupplyTranslations(adder, "双肩包", "小熊挎包", "鲸鱼挎包", "星星挎包", "给宠物背上，背包多 10 格",
                     "简单料理", "喂给宠物，一阵子干活更起劲",
                     "宠物铃铛", "叫回你的宠物，跨维度也听得见；响过一次要等半分钟");
-            addPetNewsTranslations(adder, "%1$s 花 %2$s 颗绿宝石买了 %3$s",
-                    "%1$s 花 %2$s 颗绿宝石买了 %3$s，当场吃掉了",
-                    "%1$s 花 %2$s 颗绿宝石买了 %3$s，说要送给你",
+            addPetNewsTranslations(adder, "%1$s 花 %2$s 个%4$s买了 %3$s",
+                    "%1$s 花 %2$s 个%4$s买了 %3$s，当场吃掉了",
+                    "%1$s 花 %2$s 个%4$s买了 %3$s，说要送给你",
                     "%1$s 把 %2$s 送给了你");
             addRecallTranslations(adder, "叫回了 %s 只宠物", "你没有宠物可叫",
                     "%s 没有应声，上次见到它的地方已经没它了");
@@ -66,12 +66,12 @@ public final class LanguageData {
                     "限%s", "待领", "已领", "%s 领走了",
                     "Lv.%s", "每天 %s 张", "升级 %s",
                     "升到 Lv.%1$s：每天 %2$s 张", "解锁：%s",
-                    "已升满", "你有 %s 绿宝石");
+                    "已升满", "你有 %1$s 个%2$s");
             addPetStatusTranslations(adder, "闲着", "背上双肩包或挎包，可以多装 10 格");
             addPetScreenTranslations(adder, "背包", "状态", "指令",
                     "没有领工作牌",
                     "干劲十足：还剩 %s",
-                    "零花钱：%s 颗绿宝石",
+                    "零花钱：%1$s 个%2$s",
                     "准备送给你的礼物",
                     "它会自己走过来递给你",
                     "跟在你身边，有怪就上",
@@ -118,9 +118,9 @@ public final class LanguageData {
             addSupplyTranslations(adder, "Rucksack", "Bear Pouch", "Whale Pouch", "Star Pouch", "Worn by a pet: ten more slots",
                     "Simple Dish", "Fed to a pet: keener on work for a while",
                     "Pet Bell", "Calls your pets home, even from another dimension; half a minute between rings");
-            addPetNewsTranslations(adder, "%1$s spent %2$s emeralds on %3$s",
-                    "%1$s spent %2$s emeralds on %3$s and ate it on the spot",
-                    "%1$s spent %2$s emeralds on %3$s, and says it is for you",
+            addPetNewsTranslations(adder, "%1$s spent %2$s × %4$s on %3$s",
+                    "%1$s spent %2$s × %4$s on %3$s and ate it on the spot",
+                    "%1$s spent %2$s × %4$s on %3$s, and says it is for you",
                     "%1$s gave you %2$s");
             addRecallTranslations(adder, "%s came running", "You have no pets to call",
                     "%s did not answer; it is gone from where it was last seen");
@@ -135,12 +135,12 @@ public final class LanguageData {
                     "%s only", "Open", "Taken", "Taken by %s",
                     "Lv.%s", "%s a day", "Upgrade %s",
                     "At Lv.%1$s: %2$s a day", "New work: %s",
-                    "Fully upgraded", "You have %s emeralds");
+                    "Fully upgraded", "You have %1$s × %2$s");
             addPetStatusTranslations(adder, "Idle", "A rucksack or a pouch adds ten more slots");
             addPetScreenTranslations(adder, "Backpack", "Status", "Orders",
                     "No slip taken",
                     "Keen on work: %s left",
-                    "Pocket money: %s emeralds",
+                    "Pocket money: %1$s × %2$s",
                     "A present for you",
                     "It will bring it over itself",
                     "Stays by you and steps in when something attacks",
