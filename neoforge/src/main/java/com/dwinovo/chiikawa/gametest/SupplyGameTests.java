@@ -6,6 +6,8 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.data.LanguageData;
+import com.dwinovo.chiikawa.data.ManualData;
 import com.dwinovo.chiikawa.data.ModAdvancementProvider;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitItems;
@@ -72,6 +74,27 @@ public final class SupplyGameTests {
             if (id.getNamespace().equals(Constants.MOD_ID)) {
                 helper.assertTrue(listed.contains(item), id + " is not in the creative tab");
             }
+        }
+        helper.succeed();
+    }
+
+    /**
+     * Every word the handbook's own pages show is written in both languages: a title, a
+     * caption or a bubble left out shows its raw key on the page.
+     */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void every_handbook_word_is_written_in_both_languages(GameTestHelper helper) {
+        for (String locale : List.of("zh_cn", "en_us")) {
+            Set<String> written = new HashSet<>();
+            LanguageData.addTranslations(locale, (key, value) -> written.add(key));
+            ManualData.all().forEach((id, page) -> {
+                helper.assertTrue(written.contains(page.title()), locale + " has no " + page.title());
+                page.panels().forEach(panel -> {
+                    helper.assertTrue(written.contains(panel.caption()), locale + " has no " + panel.caption());
+                    panel.actors().forEach(actor -> actor.motion().say().ifPresent(say ->
+                        helper.assertTrue(written.contains(say), locale + " has no " + say)));
+                });
+            });
         }
         helper.succeed();
     }
