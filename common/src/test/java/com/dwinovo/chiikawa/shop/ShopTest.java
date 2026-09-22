@@ -11,6 +11,7 @@ import com.mojang.serialization.JsonOps;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 import net.minecraft.SharedConstants;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
@@ -23,6 +24,8 @@ import org.junit.jupiter.api.Test;
 
 /** Money, price lists, and what a pet would buy with the one from the other. */
 class ShopTest {
+    /** Money as a pack that made money of diamonds has it: the wallet takes whatever it is told money is. */
+    private static final Predicate<ItemStack> DIAMONDS = stack -> stack.is(Items.DIAMOND);
     private static final ShopCatalog SHOP = new ShopCatalog(List.of(
         new ShopCatalog.Entry(Items.COOKIE, 1, 0),
         new ShopCatalog.Entry(Items.CAKE, 3, 0),
@@ -35,32 +38,32 @@ class ShopTest {
     }
 
     @Test
-    void aWalletCountsOnlyEmeralds() {
+    void aWalletCountsOnlyWhatIsMoney() {
         SimpleContainer bag = new SimpleContainer(4);
-        bag.setItem(0, new ItemStack(Items.EMERALD, 3));
-        bag.setItem(1, new ItemStack(Items.DIAMOND, 9));
-        bag.setItem(2, new ItemStack(Items.EMERALD, 2));
+        bag.setItem(0, new ItemStack(Items.DIAMOND, 3));
+        bag.setItem(1, new ItemStack(Items.EMERALD, 9));
+        bag.setItem(2, new ItemStack(Items.DIAMOND, 2));
 
-        assertEquals(5, Wallet.count(bag));
+        assertEquals(5, Wallet.count(bag, DIAMONDS), "a pack that made money of diamonds");
     }
 
     @Test
     void payingTakesTheMoneyOutOfWhicheverPocketsItIsIn() {
         SimpleContainer bag = new SimpleContainer(3);
-        bag.setItem(0, new ItemStack(Items.EMERALD, 2));
-        bag.setItem(2, new ItemStack(Items.EMERALD, 2));
+        bag.setItem(0, new ItemStack(Items.DIAMOND, 2));
+        bag.setItem(2, new ItemStack(Items.DIAMOND, 2));
 
-        assertTrue(Wallet.pay(bag, 3));
-        assertEquals(1, Wallet.count(bag));
+        assertTrue(Wallet.pay(bag, 3, DIAMONDS));
+        assertEquals(1, Wallet.count(bag, DIAMONDS));
     }
 
     @Test
     void nothingIsPaidWhenThereIsNotEnough() {
         SimpleContainer bag = new SimpleContainer(2);
-        bag.setItem(0, new ItemStack(Items.EMERALD, 2));
+        bag.setItem(0, new ItemStack(Items.DIAMOND, 2));
 
-        assertFalse(Wallet.pay(bag, 3));
-        assertEquals(2, Wallet.count(bag), "a pet paid part of a price and got nothing for it");
+        assertFalse(Wallet.pay(bag, 3, DIAMONDS));
+        assertEquals(2, Wallet.count(bag, DIAMONDS), "a pet paid part of a price and got nothing for it");
     }
 
     @Test

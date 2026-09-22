@@ -17,7 +17,7 @@ import net.minecraft.sounds.SoundSource;
 
 /**
  * Levels bought for a labor board. The screen shows a price and the server charges it:
- * a screen is a picture of what the board was a moment ago, and the emeralds leave the
+ * a screen is a picture of what the board was a moment ago, and the money leaves the
  * player's pockets here.
  */
 public final class BoardServerPacketHandler {
@@ -55,7 +55,7 @@ public final class BoardServerPacketHandler {
     }
 
     /**
-     * Sells a board its next level, if the owner is standing at it and has the emeralds.
+     * Sells a board its next level, if the owner is standing at it and has the money.
      *
      * @return whether the board went up a level
      */
@@ -71,7 +71,7 @@ public final class BoardServerPacketHandler {
         LaborBoardBlockEntity board = found.get();
         int price = BoardLevels.current().priceAfter(board.boardLevel());
         // A board at its top level has nothing to sell, and a price is paid in full or not
-        // at all: nobody leaves half the emeralds on the counter for half a level.
+        // at all: nobody leaves half the money on the counter for half a level.
         if (price <= 0 || !Wallet.pay(player.getInventory(), price)) {
             return false;
         }

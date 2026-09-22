@@ -62,6 +62,8 @@ public final class TagData {
         tags.addOptionalTag(InitTag.ENTITY_PLANT_CROPS, ResourceLocation.fromNamespaceAndPath("c", "seeds"));
         tags.add(InitTag.ENTITY_DELIVER_ITEMS,
             Items.WHEAT, Items.BEETROOT, Items.POTATO, Items.CARROT, Items.MELON_SLICE, Items.PUMPKIN);
+        // Emeralds, as the villagers have it; a pack can make money of anything.
+        tags.add(InitTag.CURRENCY, Items.EMERALD);
         tags.add(InitTag.ENTITY_PICKABLE_ITEMS,
             Items.WHEAT, Items.WHEAT_SEEDS, Items.POTATO, Items.CARROT, Items.BEETROOT, Items.MELON_SLICE, Items.PUMPKIN);
     }
