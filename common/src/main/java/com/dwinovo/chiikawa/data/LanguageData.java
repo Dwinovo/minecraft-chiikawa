@@ -13,13 +13,43 @@ public final class LanguageData {
         if ("zh_cn".equals(locale)) {
             addCommonTranslations(adder, "Chiikawa", "背包", "跟随", "坐下", "自由活动");
             addDollTooltipTranslations(adder, "试着把玩偶放在蛋糕上？");
-            addHandbookTranslations(adder, "吉伊的打工手册", "右键翻开，看大家怎么打工", "这本手册还是空白的",
-                "上一页", "下一页", "哇！", "耶！");
-            addHandbookWorkTranslations(adder, "去打工",
+            addHandbookTranslations(adder, "吉伊的打工手册", "右键翻开，看大家怎么过日子", "这本手册还是空白的",
+                "上一页", "下一页", "哇！", "耶！", "好吃！", "给你！", "呜……");
+            addHandbookPage(adder, "meet", "遇见吉伊",
+                "平原、草原、沙漠和雪地里，会遇到拿着工具闲逛的吉伊们。",
+                "拿吃的喂它就能驯服，它会跟着你走。",
+                "蹲下右键换指令：跟着你、坐下等你，或者自由活动。",
+                "右键打开它的界面，背包、状态和指令都在里面。");
+            addHandbookPage(adder, "work", "去打工",
                 "放一块劳动公告板，每天早上它会贴出几张工作牌。",
                 "拿着工具的吉伊会自己去领牌：锄头去除草，剑去讨伐。",
                 "领了牌就去干活，牌上写着要干多少。",
                 "干完了！工钱直接进它的背包，主人随时可以拿。");
+            addHandbookPage(adder, "shop", "去商店",
+                "放一个商店。宠物攒够了钱，会自己去买喜欢的东西。",
+                "它按自己的口味挑：吉伊最爱零食。",
+                "你也能在柜台卖作物、买东西，价钱写在按钮上。",
+                "拿着钱右键它，就是给它零花钱。");
+            addHandbookPage(adder, "presents", "送礼物",
+                "宠物有时会在商店给你挑一份礼物……",
+                "……揣着它来找你……",
+                "……亲手交给你！",
+                "它买了什么、送了什么，聊天框里都会说一声。");
+            addHandbookPage(adder, "supplies", "背包和用品",
+                "背上双肩包，背包多出 10 格。",
+                "小熊、鲸鱼、星星挎包，谁都能背。",
+                "喂一份简单料理，一阵子干活更快、更有干劲。",
+                "用名字牌给它起个名字。");
+            addHandbookPage(adder, "upgrade", "升级公告板",
+                "花钱给公告板升级，每天多贴几张牌。",
+                "升到二级后会贴出讨伐牌。",
+                "拿剑的上前砍，拿弓的在远处射。",
+                "讨伐报酬最高，但倒下就算失败。");
+            addHandbookPage(adder, "safety", "倒下与召回",
+                "宠物倒下会变成玩偶，身上的东西都在里面。",
+                "把玩偶放到蛋糕上，它就带着东西回来了。",
+                "打不过时它会先退到你身边，回了血再上。",
+                "摇一摇宠物铃铛，你的宠物都会回来，别的维度也听得见。");
             addJobTranslations(adder, "职业", "无", "农夫", "剑士", "弓箭手", "音乐家", "未知");
             addEntityTranslations(adder, "乌萨奇", "小八", "吉伊", "狮萨", "飞鼠", "栗子馒头", "獭师父", "古本屋");
             addItemTagTranslations(adder, "农夫工具", "剑士工具", "弓箭手工具", "音乐家工具", "驯服食物", "种植作物", "运送物品", "可拾取物品");
@@ -87,13 +117,43 @@ public final class LanguageData {
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
-            addHandbookTranslations(adder, "Chiikawa's Work Handbook", "Right-click to see how everyone gets to work",
-                "This handbook is still blank", "Previous page", "Next page", "Wah!", "Yay!");
-            addHandbookWorkTranslations(adder, "Off to Work",
+            addHandbookTranslations(adder, "Chiikawa's Work Handbook", "Right-click to see how everyone gets by",
+                "This handbook is still blank", "Previous page", "Next page", "Wah!", "Yay!", "Yum!", "For you!", "Ow...");
+            addHandbookPage(adder, "meet", "Meeting Them",
+                "Out on the plains and in the snow, they wander about with a tool.",
+                "Feed one something tasty to tame it, and it will follow you.",
+                "Sneak and right-click to switch: follow, sit and wait, or roam free.",
+                "Right-click to open its screen: its bag, how it is, and orders.");
+            addHandbookPage(adder, "work", "Off to Work",
                 "Put up a labor board. Every morning it puts up a few work slips.",
                 "A pet with a tool takes a slip itself: a hoe weeds, a sword hunts.",
                 "Slip in hand, off it goes to work. The slip says how much.",
                 "Done! The pay goes straight into its bag, yours to take any time.");
+            addHandbookPage(adder, "shop", "The Shop",
+                "Put up a shop. A pet with money saved goes and buys what it likes.",
+                "It picks by its own taste: Chiikawa loves snacks.",
+                "You can sell crops and buy things at the counter too.",
+                "Right-click it holding money to give it pocket money.");
+            addHandbookPage(adder, "presents", "Presents",
+                "Now and then a pet picks out a present for you...",
+                "...carries it all the way to you...",
+                "...and hands it over itself!",
+                "What it bought and what it gave, it tells you in chat.");
+            addHandbookPage(adder, "supplies", "Bags and Treats",
+                "A rucksack on its back gives it ten more slots.",
+                "The bear, whale and star pouches fit anyone.",
+                "A simple dish makes it quicker and keener for a while.",
+                "Give it a name with a name tag.");
+            addHandbookPage(adder, "upgrade", "A Better Board",
+                "Pay to upgrade a board, and it puts up more slips a day.",
+                "From level two it puts up hunting slips.",
+                "A sword goes in close; a bow shoots from afar.",
+                "Hunting pays best, but a pet that falls loses the slip.");
+            addHandbookPage(adder, "safety", "Falling and Coming Back",
+                "A pet that falls leaves a doll with all its things inside.",
+                "Put the doll on a cake, and back it comes, things and all.",
+                "When a fight goes badly it backs off to you, then goes back in.",
+                "Ring the pet bell and your pets come back, even from other worlds.");
             addJobTranslations(adder, "Job", "None", "Farmer", "Fencer", "Archer", "Musician", "Unknown");
             addEntityTranslations(adder, "Usagi", "Hachiware", "Chiikawa", "Shisa", "Momonga", "Kurimanju", "Rakko", "Furuhonya");
             addItemTagTranslations(adder, "Farmer Tools", "Fencer Tools", "Archer Tools", "Musician Tools", "Tame Foods", "Plant Crops", "Deliver Items", "Pickable Items");
@@ -401,7 +461,7 @@ public final class LanguageData {
     }
 
     private static void addHandbookTranslations(Adder adder, String name, String tip, String empty,
-            String previousPage, String nextPage, String wa, String yay) {
+            String previousPage, String nextPage, String wa, String yay, String yum, String present, String ouch) {
         adder.add("item.chiikawa.handbook", name);
         adder.add("tooltip.chiikawa.handbook", tip);
         adder.add("screen.chiikawa.handbook.empty", empty);
@@ -409,15 +469,17 @@ public final class LanguageData {
         adder.add("screen.chiikawa.handbook.next_page", nextPage);
         adder.add("manual.chiikawa.say.wa", wa);
         adder.add("manual.chiikawa.say.yay", yay);
+        adder.add("manual.chiikawa.say.yum", yum);
+        adder.add("manual.chiikawa.say.present", present);
+        adder.add("manual.chiikawa.say.ouch", ouch);
     }
 
-    private static void addHandbookWorkTranslations(Adder adder, String title, String board, String take, String work,
-            String paid) {
-        adder.add("manual.chiikawa.work.title", title);
-        adder.add("manual.chiikawa.work.board", board);
-        adder.add("manual.chiikawa.work.take", take);
-        adder.add("manual.chiikawa.work.do", work);
-        adder.add("manual.chiikawa.work.paid", paid);
+    /** A handbook page's title and the lines under its panels, under the keys its page names. */
+    private static void addHandbookPage(Adder adder, String page, String title, String... captions) {
+        adder.add(ManualData.titleKey(page), title);
+        for (int i = 0; i < captions.length; i++) {
+            adder.add(ManualData.captionKey(page, i + 1), captions[i]);
+        }
     }
 
     private static void addDollTooltipTranslations(Adder adder, String placeOnCakeHint) {
