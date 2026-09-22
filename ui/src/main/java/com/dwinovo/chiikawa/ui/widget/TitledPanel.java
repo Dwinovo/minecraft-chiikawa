@@ -13,8 +13,8 @@ import com.dwinovo.chiikawa.ui.UiStyle;
  * of the contents — the same board the pet screen hangs its pet's name on.
  */
 public final class TitledPanel {
-    /** How far the board hangs above the card's top edge. */
-    private static final int SIGN_RISE = 9;
+    /** How far the board hangs above the card's top edge: room a screen leaves above the card. */
+    public static final int SIGN_RISE = 9;
 
     private TitledPanel() {
     }
