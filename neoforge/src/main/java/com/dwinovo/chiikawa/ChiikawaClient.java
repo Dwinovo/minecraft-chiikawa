@@ -41,6 +41,7 @@ import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMenu;
 import com.dwinovo.chiikawa.platform.NeoForgeModNetworking;
+import com.dwinovo.chiikawa.manual.ManualLoader;
 import net.neoforged.neoforge.common.NeoForge;
 
 // Client-only mod entry.
@@ -116,6 +117,7 @@ public class ChiikawaClient {
         event.addListener(
                 Identifier.fromNamespaceAndPath(Chiikawa.MODID, "anim_loader"),
                 new BedrockResourceLoader());
+        event.addListener(ManualLoader.ID, new ManualLoader());
     }
 }
 
