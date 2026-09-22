@@ -26,6 +26,7 @@ public final class DataGenerators {
                 new ModItemModelProvider(output));
         event.getGenerator().addProvider(true, new ModBlockModelProvider(output));
         event.getGenerator().addProvider(true, new PropItemModelProvider(output));
+        event.getGenerator().addProvider(true, new ManualProvider(output));
         event.getGenerator().addProvider(true,
                 new ModLanguageProvider(output, "en_us"));
         event.getGenerator().addProvider(true,
@@ -47,6 +48,7 @@ public final class DataGenerators {
         event.getGenerator().addProvider(true, new ShopCatalogProvider(output));
         event.getGenerator().addProvider(true, new LaborBoardLevelProvider(output));
         event.getGenerator().addProvider(true, new PetSpawnProvider(output));
+        event.getGenerator().addProvider(true, new ModAdvancementProvider(output, lookupProvider));
         event.getGenerator().addProvider(true, new ModLootTableProvider(output, lookupProvider));
         // Entity tags.
         event.getGenerator().addProvider(true, 
