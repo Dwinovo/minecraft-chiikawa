@@ -11,8 +11,8 @@ import com.dwinovo.chiikawa.anim.baked.BakedModel;
 import com.dwinovo.chiikawa.anim.compile.ModelBaker;
 import com.dwinovo.chiikawa.anim.format.BedrockGeoFile;
 import com.dwinovo.chiikawa.client.render.LaborBoardRenderer;
+import com.dwinovo.chiikawa.data.LaborBoardLevelData;
 import com.dwinovo.chiikawa.item.BagItem;
-import com.dwinovo.chiikawa.task.BoardSlips;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.io.Reader;
@@ -28,7 +28,8 @@ import org.junit.jupiter.api.Test;
  * What the art has to give the code. Every pet needs a place to hang each kind of bag and a
  * strap to hold it; every prop — a model without animations — needs a texture, and needs to
  * be one the code draws: a bag, hung from its centre, or a block — the labor board, with a
- * plate for every slip a board can put up, or the shop, standing inside its block.
+ * plate for every slip the mod's own levels put up, or the shop, standing inside its block.
+ * A pack that gives boards more slips than that has them hang without a plate each.
  */
 class PropModelsTest {
     private static final Path ASSETS = Path.of("src/main/resources/assets/chiikawa");
@@ -86,9 +87,9 @@ class PropModelsTest {
     }
 
     @Test
-    void theLaborBoardHasAPlateForEverySlipABoardCanPutUp() throws IOException {
+    void theLaborBoardHasAPlateForEverySlipItsOwnLevelsPutUp() throws IOException {
         BakedModel model = bake(LABOR_BOARD);
-        int most = BoardSlips.slipsAt(BoardSlips.MAX_LEVEL);
+        int most = LaborBoardLevelData.LEVELS.slipsAt(LaborBoardLevelData.LEVELS.top());
         for (int place = 0; place < most; place++) {
             assertTrue(bone(model, LABOR_BOARD, LaborBoardRenderer.PLATE_BONE + place).cubeCount > 0,
                 "plate " + place + " has nothing on it");

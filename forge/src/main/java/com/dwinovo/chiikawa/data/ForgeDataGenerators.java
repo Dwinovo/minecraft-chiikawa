@@ -53,6 +53,8 @@ public class ForgeDataGenerators {
         generator.addProvider(event.includeServer(), new PetTaskTypeProvider(output));
         generator.addProvider(event.includeServer(), new GameTestStructureProvider(output));
         generator.addProvider(event.includeServer(), new ShopCatalogProvider(output));
+        generator.addProvider(event.includeServer(), new LaborBoardLevelProvider(output));
+        generator.addProvider(event.includeServer(), new PetSpawnProvider(output));
         generator.addProvider(event.includeServer(), new ModLootTableProvider(output, lookupProvider));
         
         // Sound provider

@@ -12,6 +12,7 @@ import com.dwinovo.chiikawa.data.PetTaskTypeData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitRegistry;
+import com.dwinovo.chiikawa.task.BoardLevels;
 import com.dwinovo.chiikawa.task.BoardSlips;
 import com.dwinovo.chiikawa.task.BoardSlot;
 import com.dwinovo.chiikawa.task.PetTaskTypes;
@@ -189,7 +190,7 @@ public final class BoardGameTests {
 
         // Nothing asks it: no pet about, no player at it.
         helper.succeedWhen(() -> helper.assertTrue(
-            board.hanging() == (1 << BoardSlips.slipsAt(board.boardLevel())) - 1,
+            board.hanging() == (1 << BoardLevels.current().slipsAt(board.boardLevel())) - 1,
             "a board nobody has looked at still hangs no plates: " + Integer.toBinaryString(board.hanging())));
     }
 
@@ -262,7 +263,7 @@ public final class BoardGameTests {
             for (int z = 2; z < 15; z++) {
                 BlockPos rel = new BlockPos(x, STAND, z);
                 long seed = BoardSlips.seed(level.getSeed(), day, helper.absolutePos(rel));
-                List<BoardSlot> farmerSlips = BoardSlips.roll(seed, PetTaskTypes.all(), BoardSlips.FIRST_LEVEL)
+                List<BoardSlot> farmerSlips = BoardSlips.roll(seed, PetTaskTypes.all(), BoardLevels.current(), BoardLevels.FIRST_LEVEL)
                     .stream()
                     .filter(slot -> slot.slip().capability().equals(farmer))
                     .toList();
