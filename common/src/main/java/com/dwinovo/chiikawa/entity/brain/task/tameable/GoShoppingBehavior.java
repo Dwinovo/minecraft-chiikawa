@@ -123,7 +123,8 @@ public class GoShoppingBehavior extends Behavior<AbstractPet> {
         }
         // Said by name and with the thing itself, which a player can hover over: a pet
         // that spends its wages where nobody can see ought at least to say on what.
-        pet.tellOwner(Component.translatable(news, pet.getDisplayName(), entry.buy(), goods.getDisplayName()));
+        pet.tellOwner(Component.translatable(news, pet.getDisplayName(), entry.buy(), goods.getDisplayName(),
+            Wallet.coins(1).getHoverName()));
         bought = true;
         level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pet.getX(), pet.getY() + pet.getBbHeight() * 0.8, pet.getZ(),
             HAPPY_PARTICLES, 0.35, 0.3, 0.35, 0.0);

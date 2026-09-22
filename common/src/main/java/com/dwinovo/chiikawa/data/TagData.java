@@ -108,6 +108,9 @@ public final class TagData {
             .add(key(Items.CARROT))
             .add(key(Items.MELON_SLICE))
             .add(key(Items.PUMPKIN));
+        // Emeralds, as the villagers have it; a pack can make money of anything.
+        tags.tag(InitTag.CURRENCY)
+            .add(key(Items.EMERALD));
         tags.tag(InitTag.ENTITY_PICKABLE_ITEMS)
             .add(key(Items.WHEAT), key(Items.WHEAT_SEEDS))
             .add(key(Items.POTATO))
