@@ -4,9 +4,13 @@ import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.shop.Wallet;
-import com.dwinovo.chiikawa.task.BoardSlips;
+import com.dwinovo.chiikawa.task.BoardLevels;
+import com.dwinovo.chiikawa.task.PetTaskTypes;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -25,8 +29,21 @@ public final class BoardServerPacketHandler {
 
     /** @return the board as its screen shows it */
     public static BoardPayloads.BoardSlipsPayload view(BlockPos pos, LaborBoardBlockEntity board) {
-        return new BoardPayloads.BoardSlipsPayload(pos, board.boardLevel(),
-            BoardSlips.upgradePrice(board.boardLevel()), board.slipViews());
+        BoardLevels levels = BoardLevels.current();
+        int level = board.boardLevel();
+        int price = levels.priceAfter(level);
+        BoardPayloads.NextLevel next = price > 0
+            ? new BoardPayloads.NextLevel(price, levels.slipsAt(level + 1), firstPutUpAt(level + 1))
+            : BoardPayloads.NextLevel.NONE;
+        return new BoardPayloads.BoardSlipsPayload(pos, level, levels.slipsAt(level), next, board.slipViews());
+    }
+
+    /** The kinds of work a board first puts up at this level: what buying it adds besides slips. */
+    private static List<ResourceLocation> firstPutUpAt(int level) {
+        return PetTaskTypes.all().entrySet().stream()
+            .filter(entry -> entry.getValue().minLevel() == level)
+            .map(Map.Entry::getKey)
+            .toList();
     }
 
     public static void handleUpgrade(BoardPayloads.BoardUpgradePayload payload, ServerPlayer player) {
@@ -52,7 +69,7 @@ public final class BoardServerPacketHandler {
             return false;
         }
         LaborBoardBlockEntity board = found.get();
-        int price = BoardSlips.upgradePrice(board.boardLevel());
+        int price = BoardLevels.current().priceAfter(board.boardLevel());
         // A board at its top level has nothing to sell, and a price is paid in full or not
         // at all: nobody leaves half the emeralds on the counter for half a level.
         if (price <= 0 || !Wallet.pay(player.getInventory(), price)) {
