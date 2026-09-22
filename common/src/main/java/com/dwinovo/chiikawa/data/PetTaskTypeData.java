@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.data;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.init.InitRegistry;
-import com.dwinovo.chiikawa.task.BoardSlips;
+import com.dwinovo.chiikawa.task.BoardLevels;
 import com.dwinovo.chiikawa.task.PetTaskType;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
 import java.util.Map;
@@ -38,10 +38,10 @@ public final class PetTaskTypeData {
             // mushrooms is not among them: mushrooms are only there to pick at night, so a
             // slip for them left a farmer standing about all day waiting for the dark.
             WEEDING, new PetTaskType(farmer, PetWorkCounters.WEED, vanilla("short_grass"),
-                UniformInt.of(8, 16), reward(WEEDING), 5, BoardSlips.FIRST_LEVEL),
+                UniformInt.of(8, 16), reward(WEEDING), 5, BoardLevels.FIRST_LEVEL),
             // Seconds of music.
             STREET_PERFORMANCE, new PetTaskType(musician, PetWorkCounters.PLAY_MUSIC_SECOND, vanilla("note_block"),
-                UniformInt.of(120, 240), reward(STREET_PERFORMANCE), 1, BoardSlips.FIRST_LEVEL),
+                UniformInt.of(120, 240), reward(STREET_PERFORMANCE), 1, BoardLevels.FIRST_LEVEL),
             // Hunting pays the most and asks the most: a pet that falls loses the slip.
             // It waits for an upgrade, so paying a board up buys new work and not only
             // more of the same.
