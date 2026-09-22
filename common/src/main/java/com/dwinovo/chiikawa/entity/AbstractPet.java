@@ -89,6 +89,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import java.util.List;
 import java.util.Optional;
 import org.jetbrains.annotations.Nullable;
 
@@ -530,16 +531,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         if (level().isClientSide()) {
             return;
         }
-
-        PetCapability best = null;
-        for (PetCapability capability : InitRegistry.PET_JOB_REGISTRY) {
-            if (capability.canAssume(this) && (best == null || capability.priority() > best.priority())) {
-                best = capability;
-            }
-        }
-        if (best == null) {
-            best = InitRegistry.NONE.get();
-        }
+        PetCapability best = jobFromMainhand();
         if (best.id() != getPetJobId()) {
             setPetJobId(best.id());
             IntentSelector.requestReevaluate(this);
@@ -696,6 +688,21 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
             return backpack.getItem(BAG_SLOT);
         }
         return super.getItemBySlot(slot);
+    }
+
+    /**
+     * The highest-priority capability whose tool the pet holds in its mainhand, or none.
+     * Worked out on either side; only the server writes it to the pet, but a picture of a
+     * pet that never joins a world can take it straight from here.
+     */
+    public PetCapability jobFromMainhand() {
+        PetCapability best = null;
+        for (PetCapability capability : InitRegistry.PET_JOB_REGISTRY) {
+            if (capability.canAssume(this) && (best == null || capability.priority() > best.priority())) {
+                best = capability;
+            }
+        }
+        return best == null ? InitRegistry.NONE.get() : best;
     }
 
     @Override
@@ -906,13 +913,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         if (seq == 0 || seq == lastSeenTriggerSeq) return;
         lastSeenTriggerSeq = seq;
         PetAction action = PetAction.fromNetworkId(packed & 0xFF);
-        if (action == PetAction.NONE) return;
-        ResourceLocation typeId = BuiltInRegistries.ENTITY_TYPE.getKey(getType());
-        BakedAnimation anim = firstAvailableActionAnimation(typeId, action);
-        if (anim != null) {
-            getPetAnimator().playOnce(ACTION_CONTROLLER, anim, AnimationClock.fromTicks(tickCount, 0f));
-        } else {
-            Constants.LOG.warn("[chiikawa-anim] no baked animation for action '{}' on {}", action, typeId);
+        if (action != PetAction.NONE && !playActionAnimation(action)) {
+            Constants.LOG.warn("[chiikawa-anim] no baked animation for action '{}' on {}", action,
+                BuiltInRegistries.ENTITY_TYPE.getKey(getType()));
         }
     }
 
@@ -922,34 +925,49 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         if (seq == 0 || seq == lastSeenReactionSeq) return;
         lastSeenReactionSeq = seq;
         PetReaction reaction = PetReaction.fromNetworkId(packed & 0xFF);
-        if (reaction == PetReaction.NONE) return;
+        if (reaction != PetReaction.NONE) {
+            playReactionAnimation(reaction);
+        }
+    }
+
+    /**
+     * Plays an action's animation once on this copy of the pet, the first of its candidates
+     * this pet has: what a synced trigger does on a player's game, and what a picture of a
+     * pet at work does directly. Client side.
+     *
+     * @return whether the pet had any of them
+     */
+    public boolean playActionAnimation(PetAction action) {
+        return playOnce(ACTION_CONTROLLER, action.animationCandidates());
+    }
+
+    /** As {@link #playActionAnimation}, for a reaction, on its own layer. */
+    public boolean playReactionAnimation(PetReaction reaction) {
+        return playOnce(REACTION_CONTROLLER, reaction.animationCandidates());
+    }
+
+    /**
+     * Plays the first of these animations this pet has, once, on the action layer: for a
+     * picture that asks for a move by name, since which moves there are differs from pet
+     * to pet. Client side.
+     *
+     * @return whether the pet had any of them
+     */
+    public boolean playAnimation(List<String> candidates) {
+        return playOnce(ACTION_CONTROLLER, candidates);
+    }
+
+    private boolean playOnce(String controller, List<String> candidates) {
         ResourceLocation typeId = BuiltInRegistries.ENTITY_TYPE.getKey(getType());
-        BakedAnimation anim = firstAvailableReactionAnimation(typeId, reaction);
-        if (anim != null) {
-            getPetAnimator().playOnce(REACTION_CONTROLLER, anim, AnimationClock.fromTicks(tickCount, 0f));
-        }
-    }
-
-    private BakedAnimation firstAvailableActionAnimation(ResourceLocation typeId, PetAction action) {
-        for (String name : action.animationCandidates()) {
+        for (String name : candidates) {
             BakedAnimation anim = AnimationLibrary.get(
                     ResourceLocation.fromNamespaceAndPath(typeId.getNamespace(), typeId.getPath() + "/" + name));
             if (anim != null) {
-                return anim;
+                getPetAnimator().playOnce(controller, anim, AnimationClock.fromTicks(tickCount, 0f));
+                return true;
             }
         }
-        return null;
-    }
-
-    private BakedAnimation firstAvailableReactionAnimation(ResourceLocation typeId, PetReaction reaction) {
-        for (String name : reaction.animationCandidates()) {
-            BakedAnimation anim = AnimationLibrary.get(
-                    ResourceLocation.fromNamespaceAndPath(typeId.getNamespace(), typeId.getPath() + "/" + name));
-            if (anim != null) {
-                return anim;
-            }
-        }
-        return null;
+        return false;
     }
 
     @Override
