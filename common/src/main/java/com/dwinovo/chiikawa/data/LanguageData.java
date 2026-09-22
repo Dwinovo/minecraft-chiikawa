@@ -65,7 +65,7 @@ public final class LanguageData {
             addBoardScreenTranslations(adder, "劳动公告板", "%s 张", "今天没有工作牌",
                     "限%s", "待领", "已领", "%s 领走了",
                     "Lv.%s", "每天 %s 张", "升级 %s",
-                    "每升一级：每天多一张牌，并解锁更难的活",
+                    "升到 Lv.%1$s：每天 %2$s 张", "解锁：%s",
                     "已升满", "你有 %s 绿宝石");
             addPetStatusTranslations(adder, "闲着", "背上双肩包或挎包，可以多装 10 格");
             addPetScreenTranslations(adder, "背包", "状态", "指令",
@@ -134,7 +134,7 @@ public final class LanguageData {
             addBoardScreenTranslations(adder, "Labor Board", "%s up", "No slips up today",
                     "%s only", "Open", "Taken", "Taken by %s",
                     "Lv.%s", "%s a day", "Upgrade %s",
-                    "Each level: one more slip a day, and tougher work",
+                    "At Lv.%1$s: %2$s a day", "New work: %s",
                     "Fully upgraded", "You have %s emeralds");
             addPetStatusTranslations(adder, "Idle", "A rucksack or a pouch adds ten more slots");
             addPetScreenTranslations(adder, "Backpack", "Status", "Orders",
@@ -336,7 +336,8 @@ public final class LanguageData {
      */
     private static void addBoardScreenTranslations(Adder adder, String title, String count, String empty,
             String forJob, String open, String taken, String takenBy,
-            String level, String daily, String upgrade, String upgradeHint, String maxLevel, String purse) {
+            String level, String daily, String upgrade, String upgradeHint, String unlocks, String maxLevel,
+            String purse) {
         adder.add("screen.chiikawa.labor_board", title);
         adder.add("screen.chiikawa.labor_board.count", count);
         adder.add("screen.chiikawa.labor_board.empty", empty);
@@ -348,6 +349,7 @@ public final class LanguageData {
         adder.add("screen.chiikawa.labor_board.daily", daily);
         adder.add("screen.chiikawa.labor_board.upgrade", upgrade);
         adder.add("screen.chiikawa.labor_board.upgrade_hint", upgradeHint);
+        adder.add("screen.chiikawa.labor_board.unlocks", unlocks);
         adder.add("screen.chiikawa.labor_board.max_level", maxLevel);
         adder.add("screen.chiikawa.labor_board.purse", purse);
     }
