@@ -111,6 +111,13 @@ public final class ModRecipeProvider extends RecipeProvider {
         pouch(itemLookup, InitItems.WHALE_POUCH.get(), Items.LIGHT_BLUE_WOOL);
         pouch(itemLookup, InitItems.STAR_POUCH.get(), Items.YELLOW_WOOL);
 
+        // Another handbook, for one lost or given away: a book with a pink cover.
+        ShapelessRecipeBuilder.shapeless(itemLookup, RecipeCategory.MISC, InitItems.HANDBOOK.get())
+            .requires(Items.BOOK)
+            .requires(Items.PINK_DYE)
+            .unlockedBy(getHasName(Items.BOOK), has(Items.BOOK))
+            .save(this.output);
+
         // A counter: a slab of planks over a chest, with an emerald on the till.
         ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.DECORATIONS, InitItems.SHOP.get())
             .define('W', ItemTags.PLANKS)

@@ -13,6 +13,13 @@ public final class LanguageData {
         if ("zh_cn".equals(locale)) {
             addCommonTranslations(adder, "Chiikawa", "背包", "跟随", "坐下", "自由活动");
             addDollTooltipTranslations(adder, "试着把玩偶放在蛋糕上？");
+            addHandbookTranslations(adder, "吉伊的打工手册", "右键翻开，看大家怎么打工", "这本手册还是空白的",
+                "上一页", "下一页", "哇！", "耶！");
+            addHandbookWorkTranslations(adder, "去打工",
+                "放一块劳动公告板，每天早上它会贴出几张工作牌。",
+                "拿着工具的吉伊会自己去领牌：锄头去除草，剑去讨伐。",
+                "领了牌就去干活，牌上写着要干多少。",
+                "干完了！工钱直接进它的背包，主人随时可以拿。");
             addJobTranslations(adder, "职业", "无", "农夫", "剑士", "弓箭手", "音乐家", "未知");
             addEntityTranslations(adder, "乌萨奇", "小八", "吉伊", "狮萨", "飞鼠", "栗子馒头", "獭师父", "古本屋");
             addItemTagTranslations(adder, "农夫工具", "剑士工具", "弓箭手工具", "音乐家工具", "驯服食物", "种植作物", "运送物品", "可拾取物品");
@@ -80,6 +87,13 @@ public final class LanguageData {
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
+            addHandbookTranslations(adder, "Chiikawa's Work Handbook", "Right-click to see how everyone gets to work",
+                "This handbook is still blank", "Previous page", "Next page", "Wah!", "Yay!");
+            addHandbookWorkTranslations(adder, "Off to Work",
+                "Put up a labor board. Every morning it puts up a few work slips.",
+                "A pet with a tool takes a slip itself: a hoe weeds, a sword hunts.",
+                "Slip in hand, off it goes to work. The slip says how much.",
+                "Done! The pay goes straight into its bag, yours to take any time.");
             addJobTranslations(adder, "Job", "None", "Farmer", "Fencer", "Archer", "Musician", "Unknown");
             addEntityTranslations(adder, "Usagi", "Hachiware", "Chiikawa", "Shisa", "Momonga", "Kurimanju", "Rakko", "Furuhonya");
             addItemTagTranslations(adder, "Farmer Tools", "Fencer Tools", "Archer Tools", "Musician Tools", "Tame Foods", "Plant Crops", "Deliver Items", "Pickable Items");
@@ -384,6 +398,26 @@ public final class LanguageData {
     private static void addPetStatusTranslations(Adder adder, String doingNothing, String bagHint) {
         adder.add("screen.chiikawa.pet.doing.nothing", doingNothing);
         adder.add("screen.chiikawa.pet.bag_hint", bagHint);
+    }
+
+    private static void addHandbookTranslations(Adder adder, String name, String tip, String empty,
+            String previousPage, String nextPage, String wa, String yay) {
+        adder.add("item.chiikawa.handbook", name);
+        adder.add("tooltip.chiikawa.handbook", tip);
+        adder.add("screen.chiikawa.handbook.empty", empty);
+        adder.add("screen.chiikawa.handbook.previous_page", previousPage);
+        adder.add("screen.chiikawa.handbook.next_page", nextPage);
+        adder.add("manual.chiikawa.say.wa", wa);
+        adder.add("manual.chiikawa.say.yay", yay);
+    }
+
+    private static void addHandbookWorkTranslations(Adder adder, String title, String board, String take, String work,
+            String paid) {
+        adder.add("manual.chiikawa.work.title", title);
+        adder.add("manual.chiikawa.work.board", board);
+        adder.add("manual.chiikawa.work.take", take);
+        adder.add("manual.chiikawa.work.do", work);
+        adder.add("manual.chiikawa.work.paid", paid);
     }
 
     private static void addDollTooltipTranslations(Adder adder, String placeOnCakeHint) {
