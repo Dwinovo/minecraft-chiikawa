@@ -118,8 +118,8 @@ public class PetBackpackMenu extends AbstractContainerMenu {
         this.slotsShown = shown;
     }
 
-    /** How many emeralds the pet has on it, as the owner sees its pockets. */
-    public int petEmeralds() {
+    /** How much money the pet has on it, as the owner sees its pockets. */
+    public int petMoney() {
         return Wallet.count(petContainer);
     }
 
