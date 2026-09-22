@@ -103,7 +103,7 @@ class PreviewTest {
         Ui.divider(surface, px, py + 120, 200);
         Ui.sticker(surface, px + 8, py + 124, 184, 12, Ui.CARD_RADIUS, UiTheme.ACCENT_SOFT);
         PixelArt.CHECK.draw(surface, px + 175, py + 126);
-        Price.draw(surface, "Buy 3", px + 12, py + 124, 12, UiTheme.TEXT);
+        Price.draw(surface, Icon.NONE, "Buy 3", px + 12, py + 124, 12, UiTheme.TEXT);
 
         File out = new File("build/ui-preview.png");
         out.getParentFile().mkdirs();
