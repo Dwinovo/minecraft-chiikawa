@@ -25223,28 +25223,68 @@
     "open_mouth1": {
       "animation_length": 0.64,
       "bones": {
+        "Mouth": {
+          "position": {
+            "0.04": {
+              "post": [
+                0,
+                0,
+                0
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.12": {
+              "post": [
+                0,
+                -0.065,
+                0
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.64": {
+              "post": [
+                0,
+                0,
+                0
+              ],
+              "lerp_mode": "catmullrom"
+            }
+          }
+        },
         "Mouth3": {
           "scale": {
-            "0.0": [
-              1,
-              0,
-              1
-            ],
-            "0.12": [
-              1,
-              1,
-              1
-            ],
-            "0.48": [
-              1,
-              1,
-              1
-            ],
-            "0.64": [
-              1,
-              0,
-              1
-            ]
+            "0.0": {
+              "post": [
+                1,
+                0,
+                1
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.12": {
+              "post": [
+                1,
+                0.6,
+                1
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.48": {
+              "post": [
+                1,
+                0.6,
+                1
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.64": {
+              "post": [
+                1,
+                0,
+                1
+              ],
+              "lerp_mode": "catmullrom"
+            }
           }
         }
       }
@@ -25252,38 +25292,76 @@
     "open_mouth2": {
       "animation_length": 0.84,
       "bones": {
+        "Mouth": {
+          "position": {
+            "0.0": {
+              "post": [
+                0,
+                0,
+                0
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.08": {
+              "post": [
+                0,
+                -0.065,
+                0
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.84": {
+              "post": [
+                0,
+                0,
+                0
+              ],
+              "lerp_mode": "catmullrom"
+            }
+          }
+        },
         "Mouth3": {
           "scale": {
-            "0.0": [
-              1,
-              0,
-              1
-            ],
-            "0.12": [
-              1,
-              1,
-              1
-            ],
-            "0.3": [
-              1,
-              0.35,
-              1
-            ],
-            "0.48": [
-              1,
-              1,
-              1
-            ],
-            "0.72": [
-              1,
-              1,
-              1
-            ],
-            "0.84": [
-              1,
-              0,
-              1
-            ]
+            "0.0": {
+              "post": [
+                1,
+                0,
+                1
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.12": {
+              "post": [
+                1,
+                0.8,
+                1
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.4": {
+              "post": [
+                0.82,
+                0.9,
+                1
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.68": {
+              "post": [
+                1,
+                0.8,
+                1
+              ],
+              "lerp_mode": "catmullrom"
+            },
+            "0.84": {
+              "post": [
+                1,
+                0,
+                1
+              ],
+              "lerp_mode": "catmullrom"
+            }
           }
         }
       }
