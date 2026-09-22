@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.data;
 
 import com.dwinovo.chiikawa.init.InitBlocks;
+import com.dwinovo.chiikawa.init.InitTag;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -17,6 +18,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.entries.TagEntry;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
@@ -51,7 +53,11 @@ public final class ModLootTableProvider extends LootTableProvider {
         }
     }
 
-    /** Mostly emeralds, now and then a little something (gameplay doc, section 3). */
+    /**
+     * Mostly money, now and then a little something (gameplay doc, section 3). The money is
+     * whatever is in the currency tag, so a pack that changes what money is changes what
+     * slips pay without touching these.
+     */
     private static final class SlipRewards implements LootTableSubProvider {
         private static final float EXTRA_CHANCE = 0.3F;
 
@@ -65,12 +71,12 @@ public final class ModLootTableProvider extends LootTableProvider {
         }
 
         private static void reward(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output, ResourceLocation type,
-                int minEmeralds, int maxEmeralds, Item extra, int minExtra, int maxExtra) {
+                int minPay, int maxPay, Item extra, int minExtra, int maxExtra) {
             output.accept(PetTaskTypeData.reward(type), LootTable.lootTable()
                 .withPool(LootPool.lootPool()
                     .setRolls(ConstantValue.exactly(1))
-                    .add(LootItem.lootTableItem(Items.EMERALD)
-                        .apply(SetItemCountFunction.setCount(UniformGenerator.between(minEmeralds, maxEmeralds)))))
+                    .add(TagEntry.expandTag(InitTag.CURRENCY)
+                        .apply(SetItemCountFunction.setCount(UniformGenerator.between(minPay, maxPay)))))
                 .withPool(LootPool.lootPool()
                     .setRolls(ConstantValue.exactly(1))
                     .when(LootItemRandomChanceCondition.randomChance(EXTRA_CHANCE))
