@@ -2,7 +2,6 @@ package com.dwinovo.chiikawa.shop;
 
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
 /**
  * One trade over a counter, from the customer's side: money out and goods in, or the
@@ -38,13 +37,15 @@ public final class ShopTrade {
      * Sells one.
      *
      * @return whether it went through; false when the shop does not want it, the customer
-     *         has none, or there is no room for the money
+     *         has none, there is no room for the money, or a pack has left the world without
+     *         any money to pay in
      */
     public static boolean sell(Inventory customer, ShopCatalog.Entry entry) {
-        if (entry.sell() <= 0 || !take(customer, entry)) {
+        ItemStack payment = Wallet.coins(entry.sell());
+        if (entry.sell() <= 0 || payment.isEmpty() || !take(customer, entry)) {
             return false;
         }
-        if (!customer.add(new ItemStack(Items.EMERALD, entry.sell()))) {
+        if (!customer.add(payment)) {
             // No room for the money, so the goods go back where they came from.
             customer.add(new ItemStack(entry.item()));
             return false;
