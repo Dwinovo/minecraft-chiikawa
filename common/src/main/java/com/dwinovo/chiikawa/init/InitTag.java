@@ -17,6 +17,11 @@ public final class InitTag {
     public static final TagKey<Item> ENTITY_PLANT_CROPS = tag("entity_plant_crops");
     public static final TagKey<Item> ENTITY_DELIVER_ITEMS = tag("entity_deliver_items");
     public static final TagKey<Item> ENTITY_PICKABLE_ITEMS = tag("entity_pickable_items");
+    /**
+     * What money is: slips pay in it, shops price in it, boards are bought with it. Any item
+     * a pack puts here, each worth one; the first is what is paid out and pictured.
+     */
+    public static final TagKey<Item> CURRENCY = tag("currency");
 
     public static final TagKey<EntityType<?>> ENTITY_HOSTILE_ENTITY = tagEntity("entity_hostile_entity");
 
