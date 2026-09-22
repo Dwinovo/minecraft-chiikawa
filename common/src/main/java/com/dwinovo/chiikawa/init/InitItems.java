@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.item.BagItem;
 import com.dwinovo.chiikawa.item.ChiikawaWeapon;
 import com.dwinovo.chiikawa.item.HachiwareWeapon;
+import com.dwinovo.chiikawa.item.HandbookItem;
 import com.dwinovo.chiikawa.item.MusicBoxItem;
 import com.dwinovo.chiikawa.item.PetBellItem;
 import com.dwinovo.chiikawa.item.PetDollItem;
@@ -64,13 +65,15 @@ public final class InitItems {
         registerBag("whale_pouch", BagItem.Wear.SLUNG);
     public static final Supplier<Item> STAR_POUCH =
         registerBag("star_pouch", BagItem.Wear.SLUNG);
+    public static final Supplier<Item> HANDBOOK =
+        registerHandbook("handbook");
     /**
      * Everything drawn from a Bedrock model of its own, by {@code PropRenderer}: the bags,
-     * the labor board and the shop. Each loader gives these their built-in item renderer, and their
+     * the labor board, the shop and the handbook. Each loader gives these their built-in item renderer, and their
      * item models are generated from this list.
      */
     public static final List<Supplier<? extends Item>> PROPS =
-        List.of(BACKPACK, BEAR_POUCH, WHALE_POUCH, STAR_POUCH, LABOR_BOARD, SHOP);
+        List.of(BACKPACK, BEAR_POUCH, WHALE_POUCH, STAR_POUCH, LABOR_BOARD, SHOP, HANDBOOK);
 
     public static final Supplier<Item> USAGI_DOLL =
         registerItem("usagi_doll", () -> new PetDollItem(new Item.Properties(), InitEntity.USAGI_PET));
@@ -117,6 +120,11 @@ public final class InitItems {
     private static Supplier<Item> registerBag(String name, BagItem.Wear wear) {
         ResourceLocation id = new ResourceLocation(Constants.MOD_ID, name);
         return Services.REGISTRY.registerBag(id, wear, new Item.Properties());
+    }
+
+    private static Supplier<Item> registerHandbook(String name) {
+        ResourceLocation id = new ResourceLocation(Constants.MOD_ID, name);
+        return Services.REGISTRY.registerHandbook(id, new Item.Properties());
     }
 
     private static Supplier<BlockItem> registerPropBlock(String name, Supplier<? extends Block> block) {

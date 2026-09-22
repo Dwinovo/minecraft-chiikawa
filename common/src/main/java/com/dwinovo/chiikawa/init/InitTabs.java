@@ -29,7 +29,9 @@ public final class InitTabs {
                 .build()
         );
 
+    /** Everything the mod adds, the handbook first: it is where a newcomer starts. */
     private static final List<Supplier<? extends ItemLike>> MAIN_ITEMS = List.of(
+        InitItems.HANDBOOK,
         InitItems.USAGI_SPAWN_EGG,
         InitItems.HACHIWARE_SPAWN_EGG,
         InitItems.CHIIKAWA_SPAWN_EGG,

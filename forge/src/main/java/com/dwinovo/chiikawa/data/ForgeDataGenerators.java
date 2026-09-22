@@ -40,6 +40,7 @@ public class ForgeDataGenerators {
         generator.addProvider(event.includeClient(), new ForgeModItemModelProvider(output, existingFileHelper));
         generator.addProvider(event.includeClient(), new ModBlockModelProvider(output));
         generator.addProvider(event.includeClient(), new PropItemModelProvider(output));
+        generator.addProvider(event.includeClient(), new ManualProvider(output));
         
         // Tag providers
         ForgeModBlockTagsProvider blockTagsProvider = new ForgeModBlockTagsProvider(output, lookupProvider, existingFileHelper);
@@ -55,6 +56,7 @@ public class ForgeDataGenerators {
         generator.addProvider(event.includeServer(), new ShopCatalogProvider(output));
         generator.addProvider(event.includeServer(), new LaborBoardLevelProvider(output));
         generator.addProvider(event.includeServer(), new PetSpawnProvider(output));
+        generator.addProvider(event.includeServer(), new ModAdvancementProvider(output, lookupProvider));
         generator.addProvider(event.includeServer(), new ModLootTableProvider(output, lookupProvider));
         
         // Sound provider

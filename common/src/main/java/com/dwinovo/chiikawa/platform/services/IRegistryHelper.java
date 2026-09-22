@@ -57,6 +57,12 @@ public interface IRegistryHelper {
         net.minecraft.world.item.Item.Properties properties
     );
 
+    /** Registers the handbook, a prop; see {@link #registerBag}. */
+    java.util.function.Supplier<net.minecraft.world.item.Item> registerHandbook(
+        ResourceLocation id,
+        net.minecraft.world.item.Item.Properties properties
+    );
+
     /** Registers the item of a block that is a prop; see {@link #registerBag}. */
     java.util.function.Supplier<net.minecraft.world.item.BlockItem> registerPropBlockItem(
         ResourceLocation id,
