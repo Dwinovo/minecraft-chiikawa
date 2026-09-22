@@ -46,25 +46,51 @@ public final class BoardPayloads {
     }
 
     /**
+     * The next level of a board, as its screen offers it. The levels are server data, so the
+     * screen is told rather than working it out.
+     *
+     * @param price what it costs, or 0 when there is none left to buy
+     * @param daily how many slips a day it puts up
+     * @param unlocks the kinds of work a board first puts up at it
+     */
+    public record NextLevel(int price, int daily, List<ResourceLocation> unlocks) {
+        /** A board at the top: nothing left to buy. */
+        public static final NextLevel NONE = new NextLevel(0, 0, List.of());
+
+        public static NextLevel read(FriendlyByteBuf buffer) {
+            return new NextLevel(buffer.readVarInt(), buffer.readVarInt(),
+                buffer.readList(FriendlyByteBuf::readResourceLocation));
+        }
+
+        public void write(FriendlyByteBuf buffer) {
+            buffer.writeVarInt(price);
+            buffer.writeVarInt(daily);
+            buffer.writeCollection(unlocks, FriendlyByteBuf::writeResourceLocation);
+        }
+    }
+
+    /**
      * Opens the labor board screen with the day's slips, and sends it again after an
      * upgrade so the screen shows what was just paid for.
      *
      * @param board which board; the screen sends it back when the owner buys a level
      * @param level how far the board has been paid up
-     * @param price what the next level costs, or 0 when there is none left to buy
+     * @param daily how many slips a day it puts up at that level
+     * @param next what the level after it costs and gives
      */
-    public record BoardSlipsPayload(BlockPos board, int level, int price, List<SlipView> slips)
+    public record BoardSlipsPayload(BlockPos board, int level, int daily, NextLevel next, List<SlipView> slips)
             implements MusicPayloads.Payload {
         public static BoardSlipsPayload read(FriendlyByteBuf buffer) {
             BlockPos board = buffer.readBlockPos();
             int level = buffer.readVarInt();
-            int price = buffer.readVarInt();
+            int daily = buffer.readVarInt();
+            NextLevel next = NextLevel.read(buffer);
             int size = buffer.readVarInt();
             List<SlipView> slips = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
                 slips.add(SlipView.read(buffer));
             }
-            return new BoardSlipsPayload(board, level, price, slips);
+            return new BoardSlipsPayload(board, level, daily, next, slips);
         }
 
         @Override
@@ -76,7 +102,8 @@ public final class BoardPayloads {
         public void write(FriendlyByteBuf buffer) {
             buffer.writeBlockPos(board);
             buffer.writeVarInt(level);
-            buffer.writeVarInt(price);
+            buffer.writeVarInt(daily);
+            next.write(buffer);
             buffer.writeVarInt(slips.size());
             for (SlipView slip : slips) {
                 slip.write(buffer);
