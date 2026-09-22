@@ -19,6 +19,9 @@ import com.dwinovo.chiikawa.entity.PetFollowKeeper;
 import com.dwinovo.chiikawa.entity.PetRecall;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalityLoader;
 import com.dwinovo.chiikawa.shop.ShopCatalogLoader;
+import com.dwinovo.chiikawa.spawn.PetSpawnLoader;
+import com.dwinovo.chiikawa.spawn.PetSpawnsBiomeModifier;
+import com.dwinovo.chiikawa.task.BoardLevelsLoader;
 import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
 import com.dwinovo.chiikawa.entity.brain.task.farmer.crop.FarmRegistry;
 import com.dwinovo.chiikawa.item.PetDollItem;
@@ -64,6 +67,7 @@ public class ChiikawaForge {
         FarmRegistry.init();
         Services.REGISTRY.registerToEventBus(modEventBus);
         Services.ENTITY.registerToEventBus(modEventBus);
+        PetSpawnsBiomeModifier.register(modEventBus);
         ForgeModNetworking.register();
 
         MinecraftForge.EVENT_BUS.addListener(ChiikawaForge::onRightClickBlock);
@@ -74,6 +78,8 @@ public class ChiikawaForge {
             event.addListener(new PetPersonalityLoader());
             event.addListener(new PetTaskTypeLoader());
             event.addListener(new ShopCatalogLoader());
+            event.addListener(new BoardLevelsLoader());
+            event.addListener(new PetSpawnLoader());
         });
 
         InitCapabilities.register(modEventBus);

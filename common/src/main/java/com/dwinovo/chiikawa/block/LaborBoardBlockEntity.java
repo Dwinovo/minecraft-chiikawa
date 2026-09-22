@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.network.BoardPayloads;
+import com.dwinovo.chiikawa.task.BoardLevels;
 import com.dwinovo.chiikawa.task.BoardSlips;
 import com.dwinovo.chiikawa.task.BoardSlot;
 import com.dwinovo.chiikawa.task.PetTask;
@@ -45,10 +46,10 @@ public class LaborBoardBlockEntity extends BlockEntity {
     private long day = NOT_ROLLED;
     private List<BoardSlot> slots = List.of();
     /**
-     * How far the owner has paid the board up; see {@link BoardSlips#slipsAt}. Spelt out
+     * How far the owner has paid the board up, as saved; see {@link BoardLevels}. Spelt out
      * rather than called a level, because a block entity already has a level: the world.
      */
-    private int boardLevel = BoardSlips.FIRST_LEVEL;
+    private int boardLevel = BoardLevels.FIRST_LEVEL;
     /**
      * Which of the day's plates still hang on the board, as {@link BoardSlips#hanging}
      * reckons it: worked out here and sent to the players nearby, who see only this.
@@ -112,9 +113,9 @@ public class LaborBoardBlockEntity extends BlockEntity {
         return hanging;
     }
 
-    /** @return how far the board has been paid up */
+    /** @return how far the board has been paid up, within the levels boards have today */
     public int boardLevel() {
-        return boardLevel;
+        return BoardLevels.current().clamp(boardLevel);
     }
 
     /**
@@ -124,10 +125,12 @@ public class LaborBoardBlockEntity extends BlockEntity {
      * @return whether there was a level left to buy
      */
     public boolean upgrade() {
-        if (boardLevel >= BoardSlips.MAX_LEVEL) {
+        BoardLevels levels = BoardLevels.current();
+        int at = levels.clamp(boardLevel);
+        if (at >= levels.top()) {
             return false;
         }
-        boardLevel++;
+        boardLevel = at + 1;
         setChanged();
         return true;
     }
@@ -147,12 +150,12 @@ public class LaborBoardBlockEntity extends BlockEntity {
         long seed = BoardSlips.seed(world.getSeed(), today, worldPosition);
         if (today != day) {
             day = today;
-            slots = BoardSlips.roll(seed, PetTaskTypes.all(), boardLevel);
+            slots = BoardSlips.roll(seed, PetTaskTypes.all(), BoardLevels.current(), boardLevel);
             markUpdated();
             return slots;
         }
         // A board upgraded partway through the day puts the slip it just bought up now.
-        List<BoardSlot> grown = BoardSlips.topUp(slots, seed, PetTaskTypes.all(), boardLevel);
+        List<BoardSlot> grown = BoardSlips.topUp(slots, seed, PetTaskTypes.all(), BoardLevels.current(), boardLevel);
         if (grown != slots) {
             slots = grown;
             markUpdated();
@@ -240,9 +243,11 @@ public class LaborBoardBlockEntity extends BlockEntity {
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         day = tag.contains("Day", Tag.TAG_LONG) ? tag.getLong("Day") : NOT_ROLLED;
+        // Kept as saved and read within the levels there are when it is used: a pack that
+        // takes levels away for a while does not cost the board the ones it paid for.
         boardLevel = tag.contains("Level", Tag.TAG_INT)
-            ? BoardSlips.clampLevel(tag.getInt("Level"))
-            : BoardSlips.FIRST_LEVEL;
+            ? Math.max(BoardLevels.FIRST_LEVEL, tag.getInt("Level"))
+            : BoardLevels.FIRST_LEVEL;
         slots = tag.contains("Slots", Tag.TAG_LIST)
             ? SLOTS_CODEC.parse(NbtOps.INSTANCE, tag.get("Slots")).result().orElse(List.of())
             : List.of();
