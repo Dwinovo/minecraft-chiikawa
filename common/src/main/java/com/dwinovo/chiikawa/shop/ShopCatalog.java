@@ -12,9 +12,9 @@ import net.minecraft.world.item.Item;
  * What one shop sells and what it takes in, loaded from
  * {@code data/<namespace>/shop_catalog/<id>.json} by {@link ShopCatalogLoader}.
  *
- * <p>Prices are in emeralds, which is the only money in this world: a pet earns them off a
- * labor board and spends them here, and nothing else in the mod converts one thing into
- * another.
+ * <p>Prices are in money — whatever the {@code chiikawa:currency} tag says that is, emeralds
+ * unless a pack changes it: a pet earns it off a labor board and spends it here, and nothing
+ * else in the mod converts one thing into another.
  *
  * @param entries what the shop will deal in, in the order a screen lists them
  */
@@ -49,8 +49,8 @@ public record ShopCatalog(List<Entry> entries) {
      * One line of the price list.
      *
      * @param item what is being priced
-     * @param buy what a customer pays for one, in emeralds; 0 means the shop does not sell it
-     * @param sell what the shop pays for one, in emeralds; 0 means it does not want any
+     * @param buy what a customer pays for one; 0 means the shop does not sell it
+     * @param sell what the shop pays for one; 0 means it does not want any
      */
     public record Entry(Item item, int buy, int sell) {
         public static final Codec<Entry> CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.create(instance -> instance.group(
