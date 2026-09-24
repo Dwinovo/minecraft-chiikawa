@@ -14,8 +14,10 @@ import net.minecraft.client.renderer.block.model.ItemTransform;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SwordItem;
 import org.joml.Vector3f;
 
 /**
@@ -28,8 +30,12 @@ import org.joml.Vector3f;
  * ({@link com.dwinovo.chiikawa.anim.render.layer.BagLayer}), standing in the world, and as
  * an item. As an item it is put where vanilla would put one of its own of the same kind:
  * a block's item with {@code block/block}'s transforms, standing on the floor of its block;
- * anything else with {@code item/generated}'s, turned to face the way a sprite does and
- * sized to fill as much of a slot as a sprite does.
+ * a sword or a tool with {@code item/handheld}'s, laid corner to corner as a sword's sprite
+ * is drawn; anything else with {@code item/generated}'s. Either of the last two is turned to
+ * face the way a sprite does and sized to fill as much of a slot as a sprite does.
+ *
+ * <p>A sword or a tool is modelled standing up, the end it is held by at the bottom and its
+ * front towards {@code -Z} like any prop's.
  */
 public final class PropRenderer {
     /** A sprite's fourteen pixels of the sixteen, in blocks. */
@@ -45,6 +51,21 @@ public final class PropRenderer {
         ItemDisplayContext.FIRST_PERSON_RIGHT_HAND, transform(0, -90, 25, 1.13F, 3.2F, 1.13F, 0.68F),
         ItemDisplayContext.FIRST_PERSON_LEFT_HAND, transform(0, -90, 25, 1.13F, 3.2F, 1.13F, 0.68F),
         ItemDisplayContext.FIXED, transform(0, 180, 0, 0, 0, 0, 1.0F));
+    /**
+     * {@code item/handheld}'s display: {@code item/generated}'s but for the hands, which are
+     * written as vanilla writes them, left hands and all, since the left ones are not the
+     * right ones mirrored.
+     */
+    private static final Map<ItemDisplayContext, ItemTransform> HANDHELD_ITEM = Map.of(
+        ItemDisplayContext.GROUND, FLAT_ITEM.get(ItemDisplayContext.GROUND),
+        ItemDisplayContext.HEAD, FLAT_ITEM.get(ItemDisplayContext.HEAD),
+        ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, transform(0, -90, 55, 0, 4, 0.5F, 0.85F),
+        ItemDisplayContext.THIRD_PERSON_LEFT_HAND, transform(0, 90, -55, 0, 4, 0.5F, 0.85F),
+        ItemDisplayContext.FIRST_PERSON_RIGHT_HAND, transform(0, -90, 25, 1.13F, 3.2F, 1.13F, 0.68F),
+        ItemDisplayContext.FIRST_PERSON_LEFT_HAND, transform(0, 90, -25, 1.13F, 3.2F, 1.13F, 0.68F),
+        ItemDisplayContext.FIXED, FLAT_ITEM.get(ItemDisplayContext.FIXED));
+    /** How far a sword's sprite leans: its blade runs from the bottom left corner to the top right. */
+    private static final float HANDHELD_LEAN = 45.0F;
     /** {@code block/block}'s display, the same way. */
     private static final Map<ItemDisplayContext, ItemTransform> BLOCK_ITEM = Map.of(
         ItemDisplayContext.GUI, transform(30, 225, 0, 0, 0, 0, 0.625F),
@@ -87,9 +108,11 @@ public final class PropRenderer {
             return;
         }
         boolean block = stack.getItem() instanceof BlockItem;
+        // What vanilla draws with its handheld model: its swords and its tools.
+        boolean handheld = stack.getItem() instanceof SwordItem || stack.getItem() instanceof DiggerItem;
         pose.pushPose();
         pose.translate(0.5F, 0.5F, 0.5F);
-        ItemTransform transform = (block ? BLOCK_ITEM : FLAT_ITEM).get(context);
+        ItemTransform transform = (block ? BLOCK_ITEM : handheld ? HANDHELD_ITEM : FLAT_ITEM).get(context);
         if (transform != null) {
             transform.apply(context == ItemDisplayContext.THIRD_PERSON_LEFT_HAND
                 || context == ItemDisplayContext.FIRST_PERSON_LEFT_HAND, pose.last());
@@ -102,16 +125,27 @@ public final class PropRenderer {
             pose.translate(0.0F, -0.5F, 0.0F);
             pose.scale(PIXEL, PIXEL, PIXEL);
         } else {
-            // A sprite shows its south face; a prop's face is on its north.
-            pose.mulPose(Axis.YP.rotationDegrees(180.0F));
-            fitToSprite(model, pose);
+            intoSprite(model, handheld ? HANDHELD_LEAN : 0.0F, pose);
         }
         draw(id, model, pose, buffers, light, overlay, bone -> true);
         pose.popPose();
     }
 
-    /** Scales and centres the model to span what a sprite spans. */
-    private static void fitToSprite(BakedModel model, PoseStack pose) {
+    /**
+     * From a flat item's frame to the model's: facing the way a sprite faces, leaning
+     * {@code lean} degrees clockwise as the viewer sees it, and scaled and centred so that,
+     * leaning so, it spans what a sprite spans.
+     */
+    static void intoSprite(BakedModel model, float lean, PoseStack pose) {
+        // A sprite shows its south face; a prop's face is on its north.
+        pose.mulPose(Axis.YP.rotationDegrees(180.0F));
+        // Anticlockwise about the model's Z, which the viewer, on its other side, sees as clockwise.
+        pose.mulPose(Axis.ZP.rotationDegrees(lean));
+        fitToSprite(model, lean, pose);
+    }
+
+    /** Scales and centres the model to span what a sprite spans, leaning {@code lean} degrees. */
+    private static void fitToSprite(BakedModel model, float lean, PoseStack pose) {
         float minX = Float.MAX_VALUE, minY = Float.MAX_VALUE, minZ = Float.MAX_VALUE;
         float maxX = -Float.MAX_VALUE, maxY = -Float.MAX_VALUE, maxZ = -Float.MAX_VALUE;
         for (BakedCube cube : model.cubes) {
@@ -122,7 +156,12 @@ public final class PropRenderer {
             maxY = Math.max(maxY, cube.maxY);
             maxZ = Math.max(maxZ, cube.maxZ);
         }
-        float fit = ITEM_SPAN / Math.max(maxX - minX, maxY - minY);
+        float cos = (float) Math.abs(Math.cos(Math.toRadians(lean)));
+        float sin = (float) Math.abs(Math.sin(Math.toRadians(lean)));
+        float width = maxX - minX;
+        float height = maxY - minY;
+        // How wide and how tall the model stands once it leans.
+        float fit = ITEM_SPAN / Math.max(width * cos + height * sin, width * sin + height * cos);
         pose.scale(fit, fit, fit);
         pose.translate(-(minX + maxX) / 2.0F, -(minY + maxY) / 2.0F, -(minZ + maxZ) / 2.0F);
     }
