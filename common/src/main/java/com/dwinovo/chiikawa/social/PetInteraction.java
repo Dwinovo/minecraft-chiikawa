@@ -105,7 +105,7 @@ public record PetInteraction(
 
     /** Whether this is what the initiator hands over, when it hands anything over. */
     public boolean handsOver(ItemStack stack) {
-        return handsOver.filter(item -> names(item, stack.getItemHolder(), Registries.ITEM)).isPresent();
+        return handsOver.filter(item -> names(item, stack.typeHolder(), Registries.ITEM)).isPresent();
     }
 
     private static <T> boolean names(ExtraCodecs.TagOrElementLocation entry, Holder<T> holder,
