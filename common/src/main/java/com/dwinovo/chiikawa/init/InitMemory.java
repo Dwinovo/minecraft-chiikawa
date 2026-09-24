@@ -4,6 +4,10 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSwitchLog;
 import com.dwinovo.chiikawa.entity.brain.intent.RunningIntent;
 import com.dwinovo.chiikawa.platform.Services;
+import com.dwinovo.chiikawa.social.InteractionPlan;
+import com.dwinovo.chiikawa.social.InteractionReservation;
+import com.dwinovo.chiikawa.social.SocialCooldowns;
+import com.dwinovo.chiikawa.task.FinishedSlip;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -93,6 +97,38 @@ public final class InitMemory {
         Services.REGISTRY.<MemoryModuleType<Unit>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
             Identifier.fromNamespaceAndPath(Constants.MOD_ID, "take_task_cooldown"),
+            () -> new MemoryModuleType<>(Optional.empty())
+        );
+
+    /** The last slip the pet was paid for, and when. */
+    public static final Supplier<MemoryModuleType<FinishedSlip>> LAST_FINISHED_SLIP =
+        Services.REGISTRY.<MemoryModuleType<FinishedSlip>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "last_finished_slip"),
+            () -> new MemoryModuleType<>(Optional.empty())
+        );
+
+    /** A scene the pet means to play with another pet, see {@link InteractionPlan}. */
+    public static final Supplier<MemoryModuleType<InteractionPlan>> INTERACTION_PLAN =
+        Services.REGISTRY.<MemoryModuleType<InteractionPlan>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "interaction_plan"),
+            () -> new MemoryModuleType<>(Optional.empty())
+        );
+
+    /** Present, with an expiry, while another pet is on its way to play a scene with this one. */
+    public static final Supplier<MemoryModuleType<InteractionReservation>> INTERACTION_RESERVATION =
+        Services.REGISTRY.<MemoryModuleType<InteractionReservation>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "interaction_reservation"),
+            () -> new MemoryModuleType<>(Optional.empty())
+        );
+
+    /** Which scenes the pet has lately played with whom. */
+    public static final Supplier<MemoryModuleType<SocialCooldowns>> SOCIAL_COOLDOWNS =
+        Services.REGISTRY.<MemoryModuleType<SocialCooldowns>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "social_cooldowns"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 

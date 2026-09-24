@@ -14,7 +14,8 @@ class LanguageDataTagTranslationTest {
         "tag.item.chiikawa.entity_tame_foods",
         "tag.item.chiikawa.entity_plant_crops",
         "tag.item.chiikawa.entity_deliver_items",
-        "tag.item.chiikawa.entity_pickable_items"
+        "tag.item.chiikawa.entity_pickable_items",
+        "tag.item.chiikawa.pet_treats"
     };
 
     @Test
