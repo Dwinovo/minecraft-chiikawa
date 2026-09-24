@@ -71,4 +71,13 @@ public interface IRegistryHelper {
     );
 
     <T> Iterable<T> getRegistry(ResourceKey<Registry<T>> key);
+
+    /**
+     * The id of an entry in one of the mod's own registries. Forge 1.20.1 creates those
+     * registries after {@link #createRegistry} returns, so they are looked up by key.
+     */
+    <T> ResourceLocation getKey(ResourceKey<Registry<T>> key, T value);
+
+    /** Whether one of the mod's own registries has an entry by this id; see {@link #getKey}. */
+    <T> boolean containsKey(ResourceKey<Registry<T>> key, ResourceLocation id);
 }

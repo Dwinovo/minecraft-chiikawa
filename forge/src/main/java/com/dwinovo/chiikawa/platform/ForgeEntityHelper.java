@@ -10,10 +10,16 @@ import com.dwinovo.chiikawa.entity.impl.ShisaPet;
 import com.dwinovo.chiikawa.entity.impl.UsagiPet;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.platform.services.IEntityHelper;
+import java.util.function.Function;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.portal.PortalInfo;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -61,5 +67,22 @@ public class ForgeEntityHelper implements IEntityHelper {
     private static <T extends Animal> void registerSpawnPlacement(SpawnPlacementRegisterEvent event, EntityType<T> entity) {
         event.register(entity, SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
             Animal::checkAnimalSpawnRules, SpawnPlacementRegisterEvent.Operation.OR);
+    }
+
+    @Override
+    public Entity changeDimension(Entity entity, ServerLevel destination, Vec3 position, float yRot, float xRot) {
+        return entity.changeDimension(destination, new ITeleporter() {
+            @Override
+            public PortalInfo getPortalInfo(Entity moving, ServerLevel level, Function<ServerLevel, PortalInfo> defaultPortalInfo) {
+                return new PortalInfo(position, Vec3.ZERO, yRot, xRot);
+            }
+
+            @Override
+            public Entity placeEntity(Entity moving, ServerLevel from, ServerLevel to, float yaw,
+                    Function<Boolean, Entity> repositionEntity) {
+                // Placed where asked, with no portal or platform built around it.
+                return repositionEntity.apply(false);
+            }
+        });
     }
 }

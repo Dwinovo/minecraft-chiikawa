@@ -172,4 +172,14 @@ public class ForgeRegistryHelper implements IRegistryHelper {
     public <T> Iterable<T> getRegistry(ResourceKey<Registry<T>> key) {
         return (Iterable<T>) net.minecraftforge.registries.RegistryManager.ACTIVE.getRegistry(key.location());
     }
+
+    @Override
+    public <T> ResourceLocation getKey(ResourceKey<Registry<T>> key, T value) {
+        return net.minecraftforge.registries.RegistryManager.ACTIVE.<T>getRegistry(key.location()).getKey(value);
+    }
+
+    @Override
+    public <T> boolean containsKey(ResourceKey<Registry<T>> key, ResourceLocation id) {
+        return net.minecraftforge.registries.RegistryManager.ACTIVE.getRegistry(key.location()).containsKey(id);
+    }
 }

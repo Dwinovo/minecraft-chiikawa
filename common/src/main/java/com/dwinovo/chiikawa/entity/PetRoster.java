@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
@@ -45,7 +44,7 @@ public class PetRoster extends SavedData {
     public static PetRoster of(ServerLevel level) {
         // The overworld's storage, so one roster covers a server rather than one per level.
         return level.getServer().overworld().getDataStorage()
-            .computeIfAbsent(new SavedData.Factory<>(PetRoster::new, PetRoster::load, null), FILE);
+            .computeIfAbsent(PetRoster::load, PetRoster::new, FILE);
     }
 
     /** Remembers where this pet is now. */
@@ -80,7 +79,7 @@ public class PetRoster extends SavedData {
         return List.copyOf(byOwner.getOrDefault(owner, Map.of()).values());
     }
 
-    static PetRoster load(CompoundTag tag, HolderLookup.Provider registries) {
+    static PetRoster load(CompoundTag tag) {
         PetRoster roster = new PetRoster();
         ListTag owners = tag.getList("Owners", Tag.TAG_COMPOUND);
         for (int i = 0; i < owners.size(); i++) {
@@ -94,7 +93,7 @@ public class PetRoster extends SavedData {
                 pets.put(pet, new Entry(pet, petTag.getString("Name"),
                     ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION,
                         new ResourceLocation(petTag.getString("Dimension"))),
-                    NbtUtils.readBlockPos(petTag, "Pos").orElse(BlockPos.ZERO)));
+                    NbtUtils.readBlockPos(petTag.getCompound("Pos"))));
             }
             if (!pets.isEmpty()) {
                 roster.byOwner.put(owner, pets);
@@ -104,7 +103,7 @@ public class PetRoster extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+    public CompoundTag save(CompoundTag tag) {
         ListTag owners = new ListTag();
         byOwner.forEach((owner, pets) -> {
             CompoundTag ownerTag = new CompoundTag();
