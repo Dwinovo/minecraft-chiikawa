@@ -19,12 +19,11 @@ import com.dwinovo.chiikawa.ui.widget.TitledPanel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -61,7 +60,7 @@ public class MusicBoxScreen extends Screen {
     public void replaceTracks(List<MusicTrackView> nextTracks) {
         this.tracks = List.copyOf(nextTracks);
         clampPage();
-        init(this.minecraft, this.width, this.height);
+        init(this.width, this.height);
     }
 
     @Override
@@ -126,12 +125,11 @@ public class MusicBoxScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        // Screen.render() runs renderBackground() — which blurs the whole framebuffer via
-        // GameRenderer.processBlurEffect() — at its START. Draw the panel HERE, right after
-        // that blur, so the panel isn't smeared. (Widgets render later in super.render() and
-        // already stayed sharp, which is why only the panel looked fuzzy before.)
-        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        // The screen draws its background — the blur over the world behind it — on a layer of
+        // its own, before anything else. Draw the panel HERE, on that layer after the blur, so
+        // the panel isn't smeared. (Widgets go on a later layer and stay sharp either way.)
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
         DrawSurface surface = new GuiSurface(graphics, this.font);
         int contentY = TitledPanel.draw(surface, leftPos, topPos, PANEL_W, panelHeight, this.title.getString());
         Ui.textRight(surface, (page + 1) + "/" + pages(), leftPos + PANEL_W - UiStyle.PAD,
@@ -147,8 +145,6 @@ public class MusicBoxScreen extends Screen {
             Ui.emptyState(surface, Component.translatable("screen.chiikawa.music_box.format_hint").getString(),
                 leftPos + PANEL_W / 2, footerY - UiStyle.GAP - UiStyle.LINE);
         }
-
-        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
     }
 
     private void openMusicFolder() {
@@ -210,7 +206,7 @@ public class MusicBoxScreen extends Screen {
         }
 
         @Override
-        protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
             DrawSurface surface = new GuiSurface(graphics, MusicBoxScreen.this.font);
             Rect area = new Rect(getX(), getY(), getWidth(), getHeight());
             if (active && isHoveredOrFocused()) {

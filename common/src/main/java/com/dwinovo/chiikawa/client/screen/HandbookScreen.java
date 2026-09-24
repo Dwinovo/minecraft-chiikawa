@@ -14,7 +14,7 @@ import com.dwinovo.chiikawa.ui.widget.Arrow;
 import com.dwinovo.chiikawa.ui.widget.TitledPanel;
 import java.util.List;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -107,8 +107,8 @@ public class HandbookScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
         GuiSurface surface = new GuiSurface(graphics, this.font);
         if (pages.isEmpty()) {
             TitledPanel.draw(surface, leftPos, topPos, WIDTH, panelHeight, this.title.getString());
@@ -123,7 +123,7 @@ public class HandbookScreen extends Screen {
 
         // The screen is handed the time since the last frame, not how far into the tick
         // this frame is; the pets move by the tick, so they ask the game's own clock.
-        float sceneTick = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
+        float sceneTick = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true);
         List<ManualPage.Panel> panels = current().panels();
         for (int i = 0; i < panels.size(); i++) {
             Rect scene = sceneAt(i);

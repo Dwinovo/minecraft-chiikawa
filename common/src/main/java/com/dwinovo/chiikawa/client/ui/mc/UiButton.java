@@ -4,9 +4,10 @@ import com.dwinovo.chiikawa.ui.DrawSurface;
 import com.dwinovo.chiikawa.ui.Rect;
 import com.dwinovo.chiikawa.ui.Ui;
 import com.dwinovo.chiikawa.ui.UiTheme;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -64,13 +65,13 @@ public final class UiButton extends AbstractButton {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         DrawSurface surface = new GuiSurface(graphics, net.minecraft.client.Minecraft.getInstance().font);
         painter.paint(surface, new Rect(getX(), getY(), getWidth(), getHeight()), isHoveredOrFocused(), active);
     }
 
     @Override
-    public void onPress() {
+    public void onPress(InputWithModifiers input) {
         action.run();
     }
 

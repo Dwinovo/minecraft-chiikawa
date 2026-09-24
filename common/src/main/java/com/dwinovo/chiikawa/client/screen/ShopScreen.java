@@ -21,7 +21,7 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
@@ -138,8 +138,8 @@ public class ShopScreen extends Screen {
      * cover them.
      */
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
         GuiSurface surface = new GuiSurface(graphics, this.font);
         TitledPanel.draw(surface, leftPos, topPos, PANEL_W, panelHeight, this.title.getString());
         // What the customer has to spend, where a shopper looks first.
@@ -187,11 +187,11 @@ public class ShopScreen extends Screen {
     }
 
     private static Component name(PriceView price) {
-        return item(price).getDescription();
+        return new ItemStack(item(price)).getItemName();
     }
 
     private static Item item(PriceView price) {
-        return BuiltInRegistries.ITEM.get(price.item());
+        return BuiltInRegistries.ITEM.getValue(price.item());
     }
 
     private void turnTo(int wanted) {

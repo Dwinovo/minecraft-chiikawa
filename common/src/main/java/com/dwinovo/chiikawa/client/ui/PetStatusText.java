@@ -6,7 +6,7 @@ import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.ui.widget.Chip;
 import java.util.Optional;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * What a pet is doing, in words. One place builds these, so the backpack screen, the label
@@ -56,21 +56,21 @@ public final class PetStatusText {
     }
 
     /** What a slip type is called. */
-    public static Component taskName(ResourceLocation type) {
+    public static Component taskName(Identifier type) {
         return Component.translatable("pet_task." + type.getNamespace() + "." + type.getPath());
     }
 
     /** How much work a slip asks for, in that type's own unit: "12 weeds", "180s". */
-    public static Component taskAmount(ResourceLocation type, int amount) {
+    public static Component taskAmount(Identifier type, int amount) {
         return Component.translatable("pet_task." + type.getNamespace() + "." + type.getPath() + ".amount", amount);
     }
 
     /** What a job is called; the same name the backpack tooltip uses. */
-    public static Component jobName(ResourceLocation capability) {
+    public static Component jobName(Identifier capability) {
         return Component.translatable("tooltip." + capability.getNamespace() + ".pet_job." + capability.getPath());
     }
 
-    private static Component intentName(ResourceLocation intent) {
+    private static Component intentName(Identifier intent) {
         return Component.translatable("intent." + intent.getNamespace() + "." + intent.getPath());
     }
 }

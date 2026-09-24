@@ -33,6 +33,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -99,6 +100,11 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
         (surface, x, y) -> PixelArt.SPEECH.drawCentered(surface, x, y, UiStyle.ICON));
 
     private Page page = Page.BACKPACK;
+    /**
+     * How tall the panel is for the page on it. The screen's own size stays the tallest
+     * page's, the one the top edge is placed for.
+     */
+    private int panelHeight = BACKPACK_HEIGHT;
     /** Where the chips on the status page ended up, for their tooltips. */
     private final List<HoverNote> notes = new ArrayList<>();
 
@@ -107,9 +113,7 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     }
 
     public PetBackpackScreen(PetBackpackMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title);
-        this.imageWidth = PANEL_WIDTH;
-        this.imageHeight = BACKPACK_HEIGHT;
+        super(menu, inventory, title, PANEL_WIDTH, BACKPACK_HEIGHT);
     }
 
     @Override
@@ -124,7 +128,7 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     private void showPage(Page shown) {
         this.page = shown;
         this.menu.showSlots(shown == Page.BACKPACK);
-        this.imageHeight = shown == Page.BACKPACK ? BACKPACK_HEIGHT : shown == Page.ORDERS ? ORDERS_HEIGHT : statusHeight();
+        this.panelHeight = shown == Page.BACKPACK ? BACKPACK_HEIGHT : shown == Page.ORDERS ? ORDERS_HEIGHT : statusHeight();
         clearWidgets();
         if (shown == Page.ORDERS) {
             PetDirective[] orders = PetDirective.values();
@@ -137,23 +141,24 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     // ---- drawing -------------------------------------------------------------------
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        if (page == Page.STATUS) {
-            this.imageHeight = statusHeight();
-        }
-        notes.clear();
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
         renderNotes(graphics, mouseX, mouseY);
-        this.renderTooltip(graphics, mouseX, mouseY);
     }
 
+    /** The first of a frame's drawing, so the page is measured and its notes start over here. */
     @Override
-    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        if (page == Page.STATUS) {
+            this.panelHeight = statusHeight();
+        }
+        notes.clear();
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
         GuiSurface surface = new GuiSurface(graphics, this.font);
         int x = this.leftPos;
         int y = this.topPos;
         Tabs.drawBehind(surface, x, y, tabFaces, TAB_TINTS, page.ordinal());
-        Ui.card(surface, x, y, this.imageWidth, this.imageHeight);
+        Ui.card(surface, x, y, this.imageWidth, this.panelHeight);
         Tabs.drawFront(surface, x, y, tabFaces.get(page.ordinal()), page.ordinal());
 
         AbstractPet pet = this.menu.getPet(Minecraft.getInstance().level);
@@ -176,14 +181,14 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     }
 
     @Override
-    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         // The name board and the pages stand in for the default title and "Inventory" labels.
     }
 
-    private void drawPortrait(GuiGraphics graphics, DrawSurface surface, AbstractPet pet, int mouseX, int mouseY) {
+    private void drawPortrait(GuiGraphicsExtractor graphics, DrawSurface surface, AbstractPet pet, int mouseX, int mouseY) {
         Rect at = PORTRAIT.offset(this.leftPos, this.topPos);
         Ui.sticker(surface, at.x(), at.y(), at.width(), at.height(), Ui.CARD_RADIUS, UiTheme.SKY_PALE);
-        ChiikawaEntityRenderer.drawPortrait(() -> InventoryScreen.renderEntityInInventoryFollowsMouse(graphics,
+        ChiikawaEntityRenderer.drawPortrait(() -> InventoryScreen.extractEntityInInventoryFollowsMouse(graphics,
             at.x() + 2, at.y() + 2, at.right() - 2, at.bottom() - 2,
             PORTRAIT_SCALE, PORTRAIT_Y_OFFSET, mouseX, mouseY, pet));
     }
@@ -192,7 +197,7 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
      * The pet's things: its hand and bag beside its picture, its pockets, and the bag's
      * rows — or, with no bag worn, a dashed space that says what goes there.
      */
-    private void drawBackpack(GuiGraphics graphics, GuiSurface surface, AbstractPet pet, int mouseX, int mouseY) {
+    private void drawBackpack(GuiGraphicsExtractor graphics, GuiSurface surface, AbstractPet pet, int mouseX, int mouseY) {
         drawPortrait(graphics, surface, pet, mouseX, mouseY);
         // A well behind every slot, each one asked where it is — the menu owns the layout.
         for (net.minecraft.world.inventory.Slot slot : this.menu.slots) {
@@ -235,7 +240,7 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
      * How the pet is keeping: the slip in full, its mood and its money as two chips, the
      * present it is carrying for its owner, and its job.
      */
-    private void drawStatus(GuiGraphics graphics, GuiSurface surface, AbstractPet pet, int mouseX, int mouseY) {
+    private void drawStatus(GuiGraphicsExtractor graphics, GuiSurface surface, AbstractPet pet, int mouseX, int mouseY) {
         drawPortrait(graphics, surface, pet, mouseX, mouseY);
         Rect card = WORK_CARD.offset(this.leftPos, this.topPos);
         Ui.sticker(surface, card.x(), card.y(), card.width(), card.height(), Ui.CARD_RADIUS, UiTheme.LEAF_PALE);
@@ -375,7 +380,7 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
 
     // ---- what waits under the cursor ---------------------------------------------------
 
-    private void renderNotes(GuiGraphics graphics, int mouseX, int mouseY) {
+    private void renderNotes(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         GuiSurface surface = new GuiSurface(graphics, this.font);
         int tab = Tabs.at(this.leftPos, this.topPos, Page.values().length, mouseX, mouseY);
         List<String> lines = null;
@@ -406,22 +411,24 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     // ---- input -------------------------------------------------------------------------
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        int tab = Tabs.at(this.leftPos, this.topPos, Page.values().length, (int) mouseX, (int) mouseY);
-        if (tab >= 0 && button == 0) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        int tab = Tabs.at(this.leftPos, this.topPos, Page.values().length, (int) event.x(), (int) event.y());
+        if (tab >= 0 && event.button() == 0) {
             if (tab != page.ordinal()) {
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 showPage(Page.values()[tab]);
             }
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    protected boolean hasClickedOutside(double mouseX, double mouseY, int left, int top, int button) {
+    protected boolean hasClickedOutside(double mouseX, double mouseY, int left, int top) {
         // The tabs and the name board stand above the panel; a click there is not a drop.
-        return super.hasClickedOutside(mouseX, mouseY, left, top, button)
-            && Tabs.at(this.leftPos, this.topPos, Page.values().length, (int) mouseX, (int) mouseY) < 0;
+        // Outside is outside the page there is, not the tallest one.
+        boolean offPanel = mouseX < left || mouseY < top || mouseX >= left + this.imageWidth
+            || mouseY >= top + this.panelHeight;
+        return offPanel && Tabs.at(this.leftPos, this.topPos, Page.values().length, (int) mouseX, (int) mouseY) < 0;
     }
 }
