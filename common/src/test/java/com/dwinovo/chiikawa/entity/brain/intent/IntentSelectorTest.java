@@ -23,16 +23,16 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import org.junit.jupiter.api.Test;
 
 class IntentSelectorTest {
-    private static final ResourceLocation WANDER = id("wander");
-    private static final ResourceLocation HARVEST = id("harvest");
-    private static final ResourceLocation PLANT = id("plant");
-    private static final ResourceLocation FIGHT = id("fight");
+    private static final Identifier WANDER = id("wander");
+    private static final Identifier HARVEST = id("harvest");
+    private static final Identifier PLANT = id("plant");
+    private static final Identifier FIGHT = id("fight");
     private static final long NOW = 1000L;
     /** No noise and no hold margin unless a test asks for them. */
     private static final SelectorParams PLAIN = new SelectorParams(0.0F, 0.0F);
@@ -246,8 +246,8 @@ class IntentSelectorTest {
     // ---- helpers ---------------------------------------------------------------
 
     private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
-        ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
-        ResourceLocation.withDefaultNamespace("overworld"));
+        ResourceKey.createRegistryKey(Identifier.withDefaultNamespace("dimension")),
+        Identifier.withDefaultNamespace("overworld"));
     private static final GlobalPos PET = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
 
     /** A free pet with a crop in sight, either freshly fed or not. */
@@ -260,7 +260,7 @@ class IntentSelectorTest {
 
     /** Wander, harvest, plant and deliver, as a free farmer sees them. */
     private static List<Candidate> farmCandidates(Personality personality, DayPhase phase, PerceivedTargets targets,
-            ResourceLocation running) {
+            Identifier running) {
         IntentContext ctx = TestContext.at(PET, new PetAnchor(PET, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, false, true))
             .phase(phase)
             .personality(personality)
@@ -288,11 +288,11 @@ class IntentSelectorTest {
         return IntentSelector.choose(candidates, current, params, random);
     }
 
-    private static Candidate ok(ResourceLocation id, float score) {
+    private static Candidate ok(Identifier id, float score) {
         return new Candidate(id, true, IntentCheck.OK, score);
     }
 
-    private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath("chiikawa", path);
+    private static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath("chiikawa", path);
     }
 }

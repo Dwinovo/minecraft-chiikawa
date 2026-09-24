@@ -5,7 +5,7 @@ import com.dwinovo.chiikawa.entity.PetDirective;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /** What an owner asks of a pet from its screen. */
 public final class PetPayloads {
@@ -20,7 +20,7 @@ public final class PetPayloads {
      */
     public record PetDirectivePayload(int pet, PetDirective directive) implements CustomPacketPayload {
         public static final Type<PetDirectivePayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "pet_directive"));
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "pet_directive"));
         public static final StreamCodec<RegistryFriendlyByteBuf, PetDirectivePayload> STREAM_CODEC = StreamCodec.of(
             (buffer, value) -> {
                 buffer.writeVarInt(value.pet);

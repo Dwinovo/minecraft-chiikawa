@@ -9,8 +9,9 @@ import java.util.TreeMap;
 import java.util.function.Predicate;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.random.Weighted;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 
@@ -20,13 +21,13 @@ import net.minecraft.world.level.biome.MobSpawnSettings;
  * fills in its biomes.
  */
 public final class PetSpawns {
-    private static volatile SortedMap<ResourceLocation, PetSpawn> byId = Collections.emptySortedMap();
+    private static volatile SortedMap<Identifier, PetSpawn> byId = Collections.emptySortedMap();
 
     private PetSpawns() {
     }
 
     /** @return every loaded spawn list by id */
-    public static SortedMap<ResourceLocation, PetSpawn> all() {
+    public static SortedMap<Identifier, PetSpawn> all() {
         return byId;
     }
 
@@ -36,19 +37,19 @@ public final class PetSpawns {
      * @param biome the biome's key
      * @param hasTag whether the biome is in a tag, as the loader asking can tell
      */
-    public static List<MobSpawnSettings.SpawnerData> in(ResourceKey<Biome> biome, Predicate<TagKey<Biome>> hasTag) {
-        List<MobSpawnSettings.SpawnerData> found = byId.values().stream()
+    public static List<Weighted<MobSpawnSettings.SpawnerData>> in(ResourceKey<Biome> biome, Predicate<TagKey<Biome>> hasTag) {
+        List<Weighted<MobSpawnSettings.SpawnerData>> found = byId.values().stream()
             .filter(spawn -> spawn.covers(biome, hasTag))
             .flatMap(spawn -> spawn.spawners().stream())
             .toList();
         if (!found.isEmpty()) {
-            Constants.LOG.debug("[chiikawa-spawn] {} spawns {}", biome.location(),
-                found.stream().map(spawner -> BuiltInRegistries.ENTITY_TYPE.getKey(spawner.type)).toList());
+            Constants.LOG.debug("[chiikawa-spawn] {} spawns {}", biome.identifier(),
+                found.stream().map(spawner -> BuiltInRegistries.ENTITY_TYPE.getKey(spawner.value().type())).toList());
         }
         return found;
     }
 
-    static void replaceAll(Map<ResourceLocation, PetSpawn> spawns) {
+    static void replaceAll(Map<Identifier, PetSpawn> spawns) {
         byId = Collections.unmodifiableSortedMap(new TreeMap<>(spawns));
     }
 }

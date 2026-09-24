@@ -27,7 +27,7 @@ public final class Wallet {
      *         left the tag empty and there is no money in this world at all
      */
     public static ItemStack coins(int amount) {
-        return BuiltInRegistries.ITEM.getTag(InitTag.CURRENCY)
+        return BuiltInRegistries.ITEM.get(InitTag.CURRENCY)
             .flatMap(tag -> tag.stream().findFirst())
             .map(item -> new ItemStack(item, amount))
             .orElse(ItemStack.EMPTY);

@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.entity.job.api;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import java.util.List;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * What a pet is able to do, assumed from the tool in its main hand (its job).
@@ -21,5 +21,5 @@ public interface PetCapability {
     boolean canAssume(AbstractPet pet);
 
     /** Ids of the intents this capability offers, see {@code PetIntents}. */
-    List<ResourceLocation> intents();
+    List<Identifier> intents();
 }

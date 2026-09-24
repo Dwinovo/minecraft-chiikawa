@@ -2,16 +2,17 @@ package com.dwinovo.chiikawa.entity.brain.personality;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.FileToIdConverter;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 /**
@@ -20,19 +21,20 @@ import net.minecraft.util.profiling.ProfilerFiller;
  * so that pet falls back to {@link Personality#DEFAULT}; intent ids that no intent is
  * registered under are only warned about.
  */
-public final class PetPersonalityLoader extends SimpleJsonResourceReloadListener {
+public final class PetPersonalityLoader extends SimpleJsonResourceReloadListener<JsonElement> {
     public static final String DIRECTORY = "pet_personality";
     /** Id for loaders that register reload listeners by id. */
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
 
     private static final String LOG_PREFIX = "[chiikawa-personality] ";
 
     public PetPersonalityLoader() {
-        super(new Gson(), DIRECTORY);
+        // Read as plain JSON, so each file is decoded here and a bad one is reported by name.
+        super(ExtraCodecs.JSON, FileToIdConverter.json(DIRECTORY));
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
+    protected void apply(Map<Identifier, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
         Loaded loaded = load(files);
         loaded.errors().forEach(Constants.LOG::error);
         loaded.warnings().forEach(Constants.LOG::warn);
@@ -44,8 +46,8 @@ public final class PetPersonalityLoader extends SimpleJsonResourceReloadListener
      * @param files parsed JSON by file id
      * @return the personalities that decoded, and what went wrong with the rest
      */
-    static Loaded load(Map<ResourceLocation, JsonElement> files) {
-        Map<ResourceLocation, Personality> personalities = new HashMap<>();
+    static Loaded load(Map<Identifier, JsonElement> files) {
+        Map<Identifier, Personality> personalities = new HashMap<>();
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
         files.forEach((entityId, json) -> Personality.CODEC.parse(JsonOps.INSTANCE, json)
@@ -66,6 +68,6 @@ public final class PetPersonalityLoader extends SimpleJsonResourceReloadListener
      * @param errors one message per file that could not be decoded
      * @param warnings one message per unknown intent id
      */
-    record Loaded(Map<ResourceLocation, Personality> personalities, List<String> errors, List<String> warnings) {
+    record Loaded(Map<Identifier, Personality> personalities, List<String> errors, List<String> warnings) {
     }
 }

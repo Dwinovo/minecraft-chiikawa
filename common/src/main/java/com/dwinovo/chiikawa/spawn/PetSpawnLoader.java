@@ -1,16 +1,17 @@
 package com.dwinovo.chiikawa.spawn;
 
 import com.dwinovo.chiikawa.Constants;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.FileToIdConverter;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 /**
@@ -18,19 +19,20 @@ import net.minecraft.util.profiling.ProfilerFiller;
  * fails to parse is skipped with a message: the pets in it stop turning up, and the rest
  * carry on.
  */
-public final class PetSpawnLoader extends SimpleJsonResourceReloadListener {
+public final class PetSpawnLoader extends SimpleJsonResourceReloadListener<JsonElement> {
     public static final String DIRECTORY = "pet_spawn";
     /** Id for loaders that register reload listeners by id. */
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
 
     private static final String LOG_PREFIX = "[chiikawa-spawn] ";
 
     public PetSpawnLoader() {
-        super(new Gson(), DIRECTORY);
+        // Read as plain JSON, so each file is decoded here and a bad one is reported by name.
+        super(ExtraCodecs.JSON, FileToIdConverter.json(DIRECTORY));
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
+    protected void apply(Map<Identifier, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
         Loaded loaded = load(files);
         loaded.errors().forEach(Constants.LOG::error);
         PetSpawns.replaceAll(loaded.spawns());
@@ -41,8 +43,8 @@ public final class PetSpawnLoader extends SimpleJsonResourceReloadListener {
      * @param files parsed JSON by file id
      * @return the spawn lists that decoded, and what went wrong with the rest
      */
-    static Loaded load(Map<ResourceLocation, JsonElement> files) {
-        Map<ResourceLocation, PetSpawn> spawns = new HashMap<>();
+    static Loaded load(Map<Identifier, JsonElement> files) {
+        Map<Identifier, PetSpawn> spawns = new HashMap<>();
         List<String> errors = new ArrayList<>();
         files.forEach((id, json) -> PetSpawn.CODEC.parse(JsonOps.INSTANCE, json)
             .ifSuccess(spawn -> spawns.put(id, spawn))
@@ -54,6 +56,6 @@ public final class PetSpawnLoader extends SimpleJsonResourceReloadListener {
      * @param spawns decoded spawn lists by id
      * @param errors one message per file that could not be decoded
      */
-    record Loaded(Map<ResourceLocation, PetSpawn> spawns, List<String> errors) {
+    record Loaded(Map<Identifier, PetSpawn> spawns, List<String> errors) {
     }
 }

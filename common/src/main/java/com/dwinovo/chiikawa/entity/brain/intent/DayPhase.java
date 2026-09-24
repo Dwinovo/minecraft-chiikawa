@@ -1,8 +1,8 @@
 package com.dwinovo.chiikawa.entity.brain.intent;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.SharedConstants;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.level.Level;
 
 /**
  * Part of the Minecraft day, from the time of day in ticks (0 is sunrise). Serialized
@@ -30,7 +30,7 @@ public enum DayPhase implements StringRepresentable {
      * @return the phase of the day at that time
      */
     public static DayPhase of(long dayTime) {
-        int time = Math.floorMod(dayTime, Level.TICKS_PER_DAY);
+        int time = Math.floorMod(dayTime, SharedConstants.TICKS_PER_GAME_DAY);
         if (time >= MORNING_START || time < DAY_START) {
             return MORNING;
         }

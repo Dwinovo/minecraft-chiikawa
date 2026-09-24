@@ -5,7 +5,7 @@ import com.dwinovo.chiikawa.entity.brain.intent.IntentCheck;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentContext;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntent;
 import java.util.function.Supplier;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.schedule.Activity;
 
 /**
@@ -13,12 +13,12 @@ import net.minecraft.world.entity.schedule.Activity;
  * whether it applies is left entirely to the permission table.
  */
 public final class ConstantIntent implements PetIntent {
-    private final ResourceLocation id;
+    private final Identifier id;
     private final IntentCategory category;
     private final Supplier<Activity> activity;
     private final float score;
 
-    public ConstantIntent(ResourceLocation id, IntentCategory category, Supplier<Activity> activity, float score) {
+    public ConstantIntent(Identifier id, IntentCategory category, Supplier<Activity> activity, float score) {
         this.id = id;
         this.category = category;
         this.activity = activity;
@@ -26,7 +26,7 @@ public final class ConstantIntent implements PetIntent {
     }
 
     @Override
-    public ResourceLocation id() {
+    public Identifier id() {
         return id;
     }
 

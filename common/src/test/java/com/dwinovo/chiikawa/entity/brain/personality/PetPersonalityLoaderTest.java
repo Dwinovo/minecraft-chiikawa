@@ -10,16 +10,16 @@ import com.google.gson.JsonParser;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.SharedConstants;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class PetPersonalityLoaderTest {
-    private static final ResourceLocation CHIIKAWA = ResourceLocation.fromNamespaceAndPath("chiikawa", "chiikawa");
-    private static final ResourceLocation USAGI = ResourceLocation.fromNamespaceAndPath("chiikawa", "usagi");
-    private static final ResourceLocation HACHIWARE = ResourceLocation.fromNamespaceAndPath("chiikawa", "hachiware");
+    private static final Identifier CHIIKAWA = Identifier.fromNamespaceAndPath("chiikawa", "chiikawa");
+    private static final Identifier USAGI = Identifier.fromNamespaceAndPath("chiikawa", "usagi");
+    private static final Identifier HACHIWARE = Identifier.fromNamespaceAndPath("chiikawa", "hachiware");
 
     @BeforeAll
     static void bootstrap() {

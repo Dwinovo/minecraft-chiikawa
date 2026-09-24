@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -39,7 +39,7 @@ public final class BoardServerPacketHandler {
     }
 
     /** The kinds of work a board first puts up at this level: what buying it adds besides slips. */
-    private static List<ResourceLocation> firstPutUpAt(int level) {
+    private static List<Identifier> firstPutUpAt(int level) {
         return PetTaskTypes.all().entrySet().stream()
             .filter(entry -> entry.getValue().minLevel() == level)
             .map(Map.Entry::getKey)

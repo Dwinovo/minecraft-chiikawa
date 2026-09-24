@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.personality;
 
 import java.util.Map;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 
 /**
@@ -10,7 +10,7 @@ import net.minecraft.world.entity.EntityType;
  * only; replaced as a whole on every data pack (re)load.
  */
 public final class PetPersonalities {
-    private static volatile Map<ResourceLocation, Personality> byEntity = Map.of();
+    private static volatile Map<Identifier, Personality> byEntity = Map.of();
 
     private PetPersonalities() {
     }
@@ -23,11 +23,11 @@ public final class PetPersonalities {
         return get(BuiltInRegistries.ENTITY_TYPE.getKey(type));
     }
 
-    static Personality get(ResourceLocation entityId) {
+    static Personality get(Identifier entityId) {
         return byEntity.getOrDefault(entityId, Personality.DEFAULT);
     }
 
-    static void replaceAll(Map<ResourceLocation, Personality> personalities) {
+    static void replaceAll(Map<Identifier, Personality> personalities) {
         byEntity = Map.copyOf(personalities);
     }
 }

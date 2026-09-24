@@ -7,7 +7,7 @@ import java.util.OptionalInt;
 import java.util.SortedMap;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 
 /**
@@ -44,7 +44,7 @@ public final class BoardSlips {
      * @param level the board's level, which decides how many slips and which kinds
      * @return the day's slips, none when no types are loaded
      */
-    public static List<BoardSlot> roll(long seed, SortedMap<ResourceLocation, PetTaskType> types, BoardLevels levels,
+    public static List<BoardSlot> roll(long seed, SortedMap<Identifier, PetTaskType> types, BoardLevels levels,
             int level) {
         return topUp(List.of(), seed, types, levels, level);
     }
@@ -59,12 +59,12 @@ public final class BoardSlips {
      * @return the board's slips, the old ones first
      */
     public static List<BoardSlot> topUp(List<BoardSlot> slots, long seed,
-            SortedMap<ResourceLocation, PetTaskType> types, BoardLevels levels, int level) {
+            SortedMap<Identifier, PetTaskType> types, BoardLevels levels, int level) {
         int wanted = levels.slipsAt(level);
         if (slots.size() >= wanted) {
             return slots;
         }
-        List<Map.Entry<ResourceLocation, PetTaskType>> offered = types.entrySet().stream()
+        List<Map.Entry<Identifier, PetTaskType>> offered = types.entrySet().stream()
             .filter(entry -> entry.getValue().minLevel() <= levels.clamp(level))
             .toList();
         int totalWeight = offered.stream().mapToInt(entry -> entry.getValue().weight()).sum();
@@ -95,10 +95,10 @@ public final class BoardSlips {
 
     /** The slip at one place on the board: the same one every time it is worked out. */
     private static BoardSlot rollOne(long seed, int index,
-            List<Map.Entry<ResourceLocation, PetTaskType>> offered, int totalWeight) {
+            List<Map.Entry<Identifier, PetTaskType>> offered, int totalWeight) {
         RandomSource random = RandomSource.create(seed + index * SLIP_SEED_STEP);
         int pick = random.nextInt(totalWeight);
-        for (Map.Entry<ResourceLocation, PetTaskType> entry : offered) {
+        for (Map.Entry<Identifier, PetTaskType> entry : offered) {
             pick -= entry.getValue().weight();
             if (pick < 0) {
                 return BoardSlot.open(entry.getValue().roll(entry.getKey(), random));
@@ -119,7 +119,7 @@ public final class BoardSlips {
      * @param gameTime the current game time, for reservations
      * @return the slip's index
      */
-    public static OptionalInt find(List<BoardSlot> slots, ResourceLocation capability, UUID pet, boolean wild,
+    public static OptionalInt find(List<BoardSlot> slots, Identifier capability, UUID pet, boolean wild,
             long timeOfDay, long gameTime) {
         for (int i = 0; i < slots.size(); i++) {
             BoardSlot slot = slots.get(i);

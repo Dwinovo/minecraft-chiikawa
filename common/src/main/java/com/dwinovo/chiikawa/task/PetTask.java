@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.storage.loot.LootTable;
 
@@ -23,22 +23,22 @@ import net.minecraft.world.level.storage.loot.LootTable;
  * @param progress work done so far
  */
 public record PetTask(
-    ResourceLocation type,
-    ResourceLocation capability,
-    ResourceLocation counter,
-    ResourceLocation icon,
+    Identifier type,
+    Identifier capability,
+    Identifier counter,
+    Identifier icon,
     int target,
     ResourceKey<LootTable> reward,
     int progress
 ) {
     /** What a slip written before slips had a picture, or one naming no item, shows: nothing. */
-    public static final ResourceLocation NO_ICON = ResourceLocation.withDefaultNamespace("air");
+    public static final Identifier NO_ICON = Identifier.withDefaultNamespace("air");
 
     public static final Codec<PetTask> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        ResourceLocation.CODEC.fieldOf("type").forGetter(PetTask::type),
-        ResourceLocation.CODEC.fieldOf("capability").forGetter(PetTask::capability),
-        ResourceLocation.CODEC.fieldOf("counter").forGetter(PetTask::counter),
-        ResourceLocation.CODEC.optionalFieldOf("icon", NO_ICON).forGetter(PetTask::icon),
+        Identifier.CODEC.fieldOf("type").forGetter(PetTask::type),
+        Identifier.CODEC.fieldOf("capability").forGetter(PetTask::capability),
+        Identifier.CODEC.fieldOf("counter").forGetter(PetTask::counter),
+        Identifier.CODEC.optionalFieldOf("icon", NO_ICON).forGetter(PetTask::icon),
         ExtraCodecs.POSITIVE_INT.fieldOf("target").forGetter(PetTask::target),
         ResourceKey.codec(Registries.LOOT_TABLE).fieldOf("reward").forGetter(PetTask::reward),
         ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("progress", 0).forGetter(PetTask::progress)

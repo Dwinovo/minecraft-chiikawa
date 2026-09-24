@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.schedule.Activity;
 
 /**
@@ -20,14 +20,14 @@ import net.minecraft.world.entity.schedule.Activity;
  * reach.
  */
 public final class TargetIntent implements PetIntent {
-    private final ResourceLocation id;
+    private final Identifier id;
     private final IntentCategory category;
     private final Supplier<Activity> activity;
     private final Function<PerceivedTargets, Optional<GlobalPos>> target;
     private final float score;
     private final String missingReason;
     private final List<IntentRequirement> requirements;
-    private final Optional<ResourceLocation> workCounter;
+    private final Optional<Identifier> workCounter;
 
     /**
      * @param target which remembered target this intent acts on
@@ -35,9 +35,9 @@ public final class TargetIntent implements PetIntent {
      * @param requirements further conditions, checked in order before the target
      * @param workCounter the work counter its behaviors report, see {@link PetIntent#workCounter}
      */
-    public TargetIntent(ResourceLocation id, IntentCategory category, Supplier<Activity> activity,
+    public TargetIntent(Identifier id, IntentCategory category, Supplier<Activity> activity,
             Function<PerceivedTargets, Optional<GlobalPos>> target, float score, String missingReason,
-            List<IntentRequirement> requirements, Optional<ResourceLocation> workCounter) {
+            List<IntentRequirement> requirements, Optional<Identifier> workCounter) {
         this.id = id;
         this.category = category;
         this.activity = activity;
@@ -49,7 +49,7 @@ public final class TargetIntent implements PetIntent {
     }
 
     @Override
-    public ResourceLocation id() {
+    public Identifier id() {
         return id;
     }
 
@@ -82,7 +82,7 @@ public final class TargetIntent implements PetIntent {
     }
 
     @Override
-    public Optional<ResourceLocation> workCounter() {
+    public Optional<Identifier> workCounter() {
         return workCounter;
     }
 }

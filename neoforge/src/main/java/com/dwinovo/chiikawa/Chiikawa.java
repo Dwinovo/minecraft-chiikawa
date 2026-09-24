@@ -24,6 +24,7 @@ import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalityLoader;
 import com.dwinovo.chiikawa.shop.ShopCatalogLoader;
 import com.dwinovo.chiikawa.spawn.PetSpawnLoader;
 import com.dwinovo.chiikawa.spawn.PetSpawnsBiomeModifier;
+import com.dwinovo.chiikawa.gametest.GameTestRegistration;
 import com.dwinovo.chiikawa.task.BoardLevelsLoader;
 import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
 import com.dwinovo.chiikawa.entity.brain.task.farmer.crop.FarmRegistry;
@@ -37,7 +38,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -71,6 +72,7 @@ public class Chiikawa {
         Services.REGISTRY.registerToEventBus(modEventBus);
         Services.ENTITY.registerToEventBus(modEventBus);
         PetSpawnsBiomeModifier.register(modEventBus);
+        GameTestRegistration.register(modEventBus);
         modEventBus.addListener(NeoForgeModNetworking::registerPayloads);
         NeoForge.EVENT_BUS.addListener(Chiikawa::onRightClickBlock);
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> PetReviveRitualManager.tickServer(event.getServer()));
@@ -80,12 +82,12 @@ public class Chiikawa {
         NeoForge.EVENT_BUS.addListener((ServerStoppingEvent event) -> ServerMusicSystem.stopServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener(Chiikawa::registerCommands);
         modEventBus.addListener(Chiikawa::buildCreativeTabContents);
-        NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> {
-            event.addListener(new PetPersonalityLoader());
-            event.addListener(new PetTaskTypeLoader());
-            event.addListener(new ShopCatalogLoader());
-            event.addListener(new BoardLevelsLoader());
-            event.addListener(new PetSpawnLoader());
+        NeoForge.EVENT_BUS.addListener((AddServerReloadListenersEvent event) -> {
+            event.addListener(PetPersonalityLoader.ID, new PetPersonalityLoader());
+            event.addListener(PetTaskTypeLoader.ID, new PetTaskTypeLoader());
+            event.addListener(ShopCatalogLoader.ID, new ShopCatalogLoader());
+            event.addListener(BoardLevelsLoader.ID, new BoardLevelsLoader());
+            event.addListener(PetSpawnLoader.ID, new PetSpawnLoader());
         });
 
         InitCapabilities.register(modEventBus);

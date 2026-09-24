@@ -14,17 +14,17 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import org.junit.jupiter.api.Test;
 
 class PetConstraintsTest {
     private static final ResourceKey<Registry<Level>> DIMENSION_REGISTRY =
-        ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension"));
+        ResourceKey.createRegistryKey(Identifier.withDefaultNamespace("dimension"));
     private static final ResourceKey<Level> OVERWORLD =
-        ResourceKey.create(DIMENSION_REGISTRY, ResourceLocation.withDefaultNamespace("overworld"));
+        ResourceKey.create(DIMENSION_REGISTRY, Identifier.withDefaultNamespace("overworld"));
     private static final ResourceKey<Level> NETHER =
-        ResourceKey.create(DIMENSION_REGISTRY, ResourceLocation.withDefaultNamespace("the_nether"));
+        ResourceKey.create(DIMENSION_REGISTRY, Identifier.withDefaultNamespace("the_nether"));
 
     private static final PetOwnership OWNED = new PetOwnership.Owned(UUID.fromString("00000000-0000-0000-0000-000000000001"));
     private static final GlobalPos PET = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));

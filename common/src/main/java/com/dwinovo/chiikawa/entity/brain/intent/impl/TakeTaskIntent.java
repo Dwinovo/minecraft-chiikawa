@@ -9,7 +9,7 @@ import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import com.dwinovo.chiikawa.init.InitActivity;
 import java.util.function.BiPredicate;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.schedule.Activity;
 
 /**
@@ -24,7 +24,7 @@ public final class TakeTaskIntent implements PetIntent {
     private static final float SCORE = 0.7F;
 
     @Override
-    public ResourceLocation id() {
+    public Identifier id() {
         return PetIntents.TAKE_TASK;
     }
 

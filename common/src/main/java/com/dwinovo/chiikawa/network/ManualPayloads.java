@@ -4,7 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /** What the server tells a player about the handbook. */
 public final class ManualPayloads {
@@ -15,7 +15,7 @@ public final class ManualPayloads {
     public record OpenHandbookPayload() implements CustomPacketPayload {
         public static final OpenHandbookPayload INSTANCE = new OpenHandbookPayload();
         public static final Type<OpenHandbookPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "open_handbook"));
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "open_handbook"));
         public static final StreamCodec<RegistryFriendlyByteBuf, OpenHandbookPayload> STREAM_CODEC =
             StreamCodec.unit(INSTANCE);
 

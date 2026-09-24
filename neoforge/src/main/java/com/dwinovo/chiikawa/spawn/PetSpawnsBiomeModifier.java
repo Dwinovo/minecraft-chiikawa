@@ -41,7 +41,8 @@ public final class PetSpawnsBiomeModifier implements BiomeModifier {
             return;
         }
         biome.unwrapKey().ifPresent(key -> PetSpawns.in(key, biome::is)
-            .forEach(spawner -> builder.getMobSpawnSettings().addSpawn(spawner.type.getCategory(), spawner)));
+            .forEach(spawner -> builder.getMobSpawnSettings()
+                .addSpawn(spawner.value().type().getCategory(), spawner.weight(), spawner.value())));
     }
 
     @Override

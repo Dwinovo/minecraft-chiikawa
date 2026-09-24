@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.intent;
 
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.task.PetTask;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * An extra start condition an intent is built with, checked before its own.
@@ -17,7 +17,7 @@ public interface IntentRequirement {
      * @param counter the work counter of the intent's work
      * @return the requirement
      */
-    static IntentRequirement wildOrCarrying(ResourceLocation counter) {
+    static IntentRequirement wildOrCarrying(Identifier counter) {
         return ctx -> ctx.ownership() instanceof PetOwnership.Wild
                 || ctx.task().map(PetTask::counter).filter(counter::equals).isPresent()
             ? IntentCheck.OK
