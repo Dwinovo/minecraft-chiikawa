@@ -15,6 +15,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Catching up. A pet that is told to follow and then left far behind is fetched by the
@@ -99,7 +100,7 @@ public final class FollowGameTests {
     /** Somebody standing in the test area for a pet to belong to and fall behind. */
     private static ServerPlayer owner(GameTestHelper helper) {
         ServerPlayer owner = player(helper);
-        owner.setPos(helper.absoluteVec(HERE.getCenter()));
+        owner.setPos(helper.absoluteVec(Vec3.atCenterOf(HERE)));
         return owner;
     }
 

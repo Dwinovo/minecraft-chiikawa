@@ -18,6 +18,7 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * What a right click does. Every instruction an owner can give a pet goes through one
@@ -68,7 +69,7 @@ public final class InteractGameTests {
         ServerPlayer owner = player(helper);
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
-        owner.setPos(helper.absoluteVec(new BlockPos(3, STAND, 5).getCenter()));
+        owner.setPos(helper.absoluteVec(Vec3.atCenterOf(new BlockPos(3, STAND, 5))));
 
         helper.assertTrue(PetServerPacketHandler.order(owner, pet, PetDirective.STAY), "the owner's order was refused");
         helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, "the pet did not take its owner's order");
@@ -83,7 +84,7 @@ public final class InteractGameTests {
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         pet.setPetDirective(PetDirective.FOLLOW);
-        stranger.setPos(helper.absoluteVec(new BlockPos(3, STAND, 5).getCenter()));
+        stranger.setPos(helper.absoluteVec(Vec3.atCenterOf(new BlockPos(3, STAND, 5))));
 
         helper.assertFalse(PetServerPacketHandler.order(stranger, pet, PetDirective.FREE),
             "a stranger's order was heard");
@@ -98,7 +99,7 @@ public final class InteractGameTests {
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         pet.setPetDirective(PetDirective.FOLLOW);
-        owner.setPos(helper.absoluteVec(new BlockPos(3, STAND, 3).getCenter()).add(40.0, 0.0, 0.0));
+        owner.setPos(helper.absoluteVec(Vec3.atCenterOf(new BlockPos(3, STAND, 3))).add(40.0, 0.0, 0.0));
 
         helper.assertFalse(PetServerPacketHandler.order(owner, pet, PetDirective.STAY), "an order carried forty blocks");
         helper.assertTrue(pet.getPetDirective() == PetDirective.FOLLOW, "the pet heard its owner from forty blocks off");

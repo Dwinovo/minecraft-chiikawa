@@ -11,7 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.animal.cow.Cow;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.item.ItemStack;
@@ -54,7 +54,7 @@ public final class CombatGameTests {
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = FIGHT_TICKS)
     public static void a_fencer_strikes_what_comes_at_it(GameTestHelper helper) {
         holding(ownedPet(helper, new BlockPos(4, STAND, 4)), Items.IRON_SWORD);
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(8, STAND, 4));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(8, STAND, 4));
 
         helper.succeedWhen(() -> helper.assertTrue(zombie.isDeadOrDying() || zombie.getHealth() < zombie.getMaxHealth(),
             "the fencer never landed a hit"));
@@ -67,7 +67,7 @@ public final class CombatGameTests {
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = LEAVE_IT_TICKS + 100)
     public static void a_fencer_leaves_the_livestock_alone(GameTestHelper helper) {
         holding(ownedPet(helper, new BlockPos(4, STAND, 4)), Items.IRON_SWORD);
-        Cow cow = helper.spawn(EntityType.COW, new BlockPos(7, STAND, 4));
+        Cow cow = helper.spawn(EntityTypes.COW, new BlockPos(7, STAND, 4));
         float health = cow.getHealth();
 
         helper.runAtTickTime(LEAVE_IT_TICKS, () -> {
@@ -82,7 +82,7 @@ public final class CombatGameTests {
         AbstractPet pet = holding(ownedPet(helper, new BlockPos(3, STAND, 4)), Items.BOW);
         pet.getBackpack().addItem(new ItemStack(Items.ARROW, 16));
         // Well inside what a pet can see, and still far enough that this is a bow shot.
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(10, STAND, 4));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(10, STAND, 4));
         // Standing still. A zombie left to close the distance turns this into a scuffle,
         // and whether the archer got a shot off first comes down to the day it is having.
         zombie.setNoAi(true);
@@ -98,7 +98,7 @@ public final class CombatGameTests {
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = LEAVE_IT_TICKS + 100)
     public static void an_archer_without_arrows_holds_its_fire(GameTestHelper helper) {
         holding(ownedPet(helper, new BlockPos(3, STAND, 4)), Items.BOW);
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(12, STAND, 4));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(12, STAND, 4));
         float health = zombie.getHealth();
 
         helper.runAtTickTime(LEAVE_IT_TICKS, () -> {

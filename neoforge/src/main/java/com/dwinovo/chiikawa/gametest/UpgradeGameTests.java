@@ -30,6 +30,7 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * What an owner's emeralds buy a labor board. A level is the one thing on that screen an
@@ -154,7 +155,7 @@ public final class UpgradeGameTests {
     public static void a_board_is_not_upgraded_from_across_the_field(GameTestHelper helper) {
         LaborBoardBlockEntity board = board(helper);
         ServerPlayer owner = customer(helper, PLENTY);
-        owner.setPos(helper.absoluteVec(BOARD.getCenter()).add(64.0, 0.0, 0.0));
+        owner.setPos(helper.absoluteVec(Vec3.atCenterOf(BOARD)).add(64.0, 0.0, 0.0));
 
         helper.assertFalse(BoardServerPacketHandler.buyLevel(helper.absolutePos(BOARD), owner),
             "a board sold a level to somebody nowhere near it");
@@ -221,7 +222,7 @@ public final class UpgradeGameTests {
     private static ServerPlayer customer(GameTestHelper helper, int emeralds) {
         ServerPlayer owner = player(helper);
         owner.setGameMode(GameType.SURVIVAL);
-        owner.setPos(helper.absoluteVec(BOARD.getCenter()));
+        owner.setPos(helper.absoluteVec(Vec3.atCenterOf(BOARD)));
         if (emeralds > 0) {
             owner.getInventory().add(new ItemStack(Items.EMERALD, emeralds));
         }

@@ -188,7 +188,7 @@ public final class RecallGameTests {
     /** Somebody to own the pets, standing in the test area. */
     private static ServerPlayer owner(GameTestHelper helper) {
         ServerPlayer owner = player(helper);
-        owner.setPos(helper.absoluteVec(HERE.getCenter()));
+        owner.setPos(helper.absoluteVec(Vec3.atCenterOf(HERE)));
         return owner;
     }
 

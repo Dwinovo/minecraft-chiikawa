@@ -17,7 +17,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.Creeper;
@@ -25,6 +25,7 @@ import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Standing up for its owner, and knowing when not to stand anywhere near something.
@@ -61,7 +62,7 @@ public final class GuardGameTests {
     public static void a_pet_at_heel_fights_what_goes_for_its_owner(GameTestHelper helper) {
         ServerPlayer owner = owner(helper);
         AbstractPet pet = heeling(helper, owner);
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(9, STAND, 4));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(9, STAND, 4));
         zombie.setTarget(owner);
 
         helper.succeedWhen(() -> helper.assertTrue(hurt(zombie),
@@ -73,7 +74,7 @@ public final class GuardGameTests {
     public static void a_pet_joins_the_fight_its_owner_started(GameTestHelper helper) {
         ServerPlayer owner = owner(helper);
         AbstractPet pet = heeling(helper, owner);
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(9, STAND, 4));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(9, STAND, 4));
         zombie.setNoAi(true);
         zombie.hurt(owner.damageSources().playerAttack(owner), 1.0F);
         float afterOwner = zombie.getHealth();
@@ -91,7 +92,7 @@ public final class GuardGameTests {
     public static void a_pet_with_a_sword_keeps_away_from_a_creeper(GameTestHelper helper) {
         ServerPlayer owner = owner(helper, MIDDLE);
         AbstractPet pet = heeling(helper, owner, MIDDLE);
-        Creeper creeper = helper.spawn(EntityType.CREEPER, MIDDLE.offset(2, 0, 0));
+        Creeper creeper = helper.spawn(EntityTypes.CREEPER, MIDDLE.offset(2, 0, 0));
         creeper.setNoAi(true);
 
         helper.runAtTickTime(BACK_OFF_TICKS, () -> {
@@ -110,7 +111,7 @@ public final class GuardGameTests {
     public static void a_badly_hurt_pet_breaks_off(GameTestHelper helper) {
         ServerPlayer owner = owner(helper, MIDDLE);
         AbstractPet pet = heeling(helper, owner, MIDDLE);
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, MIDDLE.offset(2, 0, 0));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, MIDDLE.offset(2, 0, 0));
         zombie.setNoAi(true);
         zombie.setTarget(owner);
         pet.setHealth(pet.getMaxHealth() * 0.2F);
@@ -130,7 +131,7 @@ public final class GuardGameTests {
         ServerPlayer owner = owner(helper, MIDDLE);
         AbstractPet pet = holding(heeling(helper, owner, MIDDLE), Items.BOW);
         pet.getBackpack().addItem(new ItemStack(Items.ARROW, 16));
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, MIDDLE.offset(1, 0, 0));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, MIDDLE.offset(1, 0, 0));
         zombie.setNoAi(true);
         zombie.setTarget(owner);
 
@@ -151,7 +152,7 @@ public final class GuardGameTests {
         ServerPlayer owner = owner(helper);
         AbstractPet pet = heeling(helper, owner);
         pet.setPetDirective(PetDirective.STAY);
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(7, STAND, 4));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(7, STAND, 4));
         zombie.setNoAi(true);
         zombie.setTarget(owner);
 
@@ -205,7 +206,7 @@ public final class GuardGameTests {
     public static void a_pet_finishes_the_one_it_started_on(GameTestHelper helper) {
         ServerPlayer owner = owner(helper);
         AbstractPet pet = heeling(helper, owner);
-        Zombie first = helper.spawn(EntityType.ZOMBIE, new BlockPos(8, STAND, 4));
+        Zombie first = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(8, STAND, 4));
         first.setNoAi(true);
         // Neither of them can be killed: this case is about which one the pet chooses, and
         // a zombie that falls over mid-case would answer that question for it.
@@ -213,7 +214,7 @@ public final class GuardGameTests {
 
         helper.runAtTickTime(40, () -> {
             helper.assertTrue(fighting(pet, first), "the pet never took an interest in the first zombie");
-            Zombie nearer = helper.spawn(EntityType.ZOMBIE, new BlockPos(5, STAND, 4));
+            Zombie nearer = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(5, STAND, 4));
             nearer.setNoAi(true);
             nearer.setInvulnerable(true);
             helper.runAtTickTime(100, () -> {
@@ -230,7 +231,7 @@ public final class GuardGameTests {
         ServerPlayer owner = owner(helper, MIDDLE);
         AbstractPet pet = holding(heeling(helper, owner, MIDDLE), Items.BOW);
         pet.getBackpack().addItem(new ItemStack(Items.ARROW, 16));
-        Creeper creeper = helper.spawn(EntityType.CREEPER, MIDDLE.offset(8, 0, 0));
+        Creeper creeper = helper.spawn(EntityTypes.CREEPER, MIDDLE.offset(8, 0, 0));
         creeper.setNoAi(true);
 
         helper.succeedWhen(() -> {
@@ -248,7 +249,7 @@ public final class GuardGameTests {
     public static void a_pet_backing_off_still_hits_what_is_on_top_of_it(GameTestHelper helper) {
         ServerPlayer owner = owner(helper, MIDDLE);
         AbstractPet pet = heeling(helper, owner, MIDDLE);
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, MIDDLE.offset(1, 0, 0));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, MIDDLE.offset(1, 0, 0));
         zombie.setNoAi(true);
         zombie.setTarget(owner);
         pet.setHealth(pet.getMaxHealth() * 0.2F);
@@ -273,7 +274,7 @@ public final class GuardGameTests {
     public static void a_pet_that_has_healed_goes_back_in(GameTestHelper helper) {
         ServerPlayer owner = owner(helper, MIDDLE);
         AbstractPet pet = heeling(helper, owner, MIDDLE);
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, MIDDLE.offset(2, 0, 0));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, MIDDLE.offset(2, 0, 0));
         zombie.setNoAi(true);
         zombie.setTarget(owner);
         pet.setHealth(pet.getMaxHealth() * 0.2F);
@@ -306,7 +307,7 @@ public final class GuardGameTests {
     private static ServerPlayer owner(GameTestHelper helper, BlockPos where) {
         ServerPlayer owner = player(helper);
         owner.setGameMode(GameType.SURVIVAL);
-        owner.setPos(helper.absoluteVec(where.getCenter()));
+        owner.setPos(helper.absoluteVec(Vec3.atCenterOf(where)));
         return owner;
     }
 

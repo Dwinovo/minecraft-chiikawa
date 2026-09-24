@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.level.biome.Biome;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ class PetSpawnTest {
         assertTrue(spawn.covers(PLAINS, tag -> false), "named by id");
         assertTrue(spawn.covers(FOREST, IS_FOREST::equals), "named by tag");
         assertFalse(spawn.covers(biome("desert"), tag -> false));
-        assertEquals(EntityType.PIG, spawn.spawners().get(0).value().type());
+        assertEquals(EntityTypes.PIG, spawn.spawners().get(0).value().type());
         assertEquals(2, spawn.spawners().get(0).value().maxCount());
     }
 

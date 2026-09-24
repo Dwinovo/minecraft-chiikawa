@@ -19,7 +19,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -70,7 +70,7 @@ public final class HuntGameTests {
         AbstractPet pet = hunter(helper);
         pet.tame(owner);
 
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(5, STAND, 5));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(5, STAND, 5));
         zombie.hurt(owner.damageSources().playerAttack(owner), SCRATCH);
         zombie.hurt(pet.damageSources().mobAttack(pet), zombie.getMaxHealth() * 2.0F);
 
@@ -84,7 +84,7 @@ public final class HuntGameTests {
     public static void a_monster_the_pets_arrow_puts_down_counts(GameTestHelper helper) {
         AbstractPet pet = holding(hunter(helper), Items.BOW);
         pet.getBackpack().addItem(new ItemStack(Items.ARROW, 8));
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(5, STAND, 5));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(5, STAND, 5));
         zombie.setHealth(1.0F);
 
         pet.performRangedAttack(zombie, 1.0F);
@@ -110,7 +110,7 @@ public final class HuntGameTests {
     public static void a_harmless_animal_does_not_count(GameTestHelper helper) {
         AbstractPet pet = hunter(helper);
 
-        helper.spawn(EntityType.COW, new BlockPos(5, STAND, 5))
+        helper.spawn(EntityTypes.COW, new BlockPos(5, STAND, 5))
             .hurt(pet.damageSources().mobAttack(pet), 100.0F);
 
         helper.assertTrue(progress(pet) == 0, "a cow counted towards a hunting slip");
@@ -121,7 +121,7 @@ public final class HuntGameTests {
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 200)
     public static void a_monster_that_dies_of_something_else_does_not_count(GameTestHelper helper) {
         AbstractPet pet = hunter(helper);
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(5, STAND, 5));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(5, STAND, 5));
 
         zombie.hurt(zombie.damageSources().fall(), zombie.getMaxHealth() * 2.0F);
 
@@ -138,7 +138,7 @@ public final class HuntGameTests {
 
     /** One monster, put down by this pet and nobody else. */
     private static void felledBy(GameTestHelper helper, AbstractPet pet, int offset) {
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(5 + offset, STAND, 5));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(5 + offset, STAND, 5));
         zombie.hurt(pet.damageSources().mobAttack(pet), zombie.getMaxHealth() * 2.0F);
     }
 
