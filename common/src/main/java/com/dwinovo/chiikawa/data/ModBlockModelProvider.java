@@ -4,16 +4,18 @@ import com.dwinovo.chiikawa.init.InitBlocks;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.concurrent.CompletableFuture;
+import net.minecraft.client.data.models.MultiVariant;
+import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
+import net.minecraft.client.data.models.model.ModelLocationUtils;
+import net.minecraft.client.data.models.model.TextureMapping;
+import net.minecraft.client.renderer.block.model.BlockModelDefinition;
+import net.minecraft.client.renderer.block.model.Variant;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.client.data.models.blockstates.MultiVariantGenerator;
-import net.minecraft.client.data.models.blockstates.Variant;
-import net.minecraft.client.data.models.blockstates.VariantProperties;
-import net.minecraft.client.data.models.model.ModelLocationUtils;
-import net.minecraft.client.data.models.model.TextureMapping;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
@@ -48,8 +50,8 @@ public final class ModBlockModelProvider implements DataProvider {
     private CompletableFuture<?> drawnByItsRenderer(CachedOutput cache, Block block, Block like) {
         ResourceLocation model = ModelLocationUtils.getModelLocation(block);
         return CompletableFuture.allOf(
-            DataProvider.saveStable(cache,
-                MultiVariantGenerator.multiVariant(block, Variant.variant().with(VariantProperties.MODEL, model)).get(),
+            DataProvider.saveStable(cache, BlockModelDefinition.CODEC,
+                MultiVariantGenerator.dispatch(block, new MultiVariant(WeightedList.of(new Variant(model)))).create(),
                 blockStates.json(BuiltInRegistries.BLOCK.getKey(block))),
             DataProvider.saveStable(cache, particlesOnly(like), models.json(model))
         );

@@ -92,7 +92,10 @@ public final class PropRenderer {
         ItemTransform transform = (block ? BLOCK_ITEM : FLAT_ITEM).get(context);
         if (transform != null) {
             transform.apply(context == ItemDisplayContext.THIRD_PERSON_LEFT_HAND
-                || context == ItemDisplayContext.FIRST_PERSON_LEFT_HAND, pose);
+                || context == ItemDisplayContext.FIRST_PERSON_LEFT_HAND, pose.last());
+            // A transform ends at the corner of the item's block, where the game draws an
+            // item's own shapes; a prop is drawn about its middle.
+            pose.translate(0.5F, 0.5F, 0.5F);
         }
         if (block) {
             // Standing on the floor of its block, as it stands in the world.
