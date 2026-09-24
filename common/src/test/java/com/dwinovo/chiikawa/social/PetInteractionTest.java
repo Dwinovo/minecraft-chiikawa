@@ -26,9 +26,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class PetInteractionTest {
-    private static final ResourceLocation CLING = ResourceLocation.fromNamespaceAndPath("chiikawa", "cling");
-    private static final ResourceLocation GREETING = ResourceLocation.fromNamespaceAndPath("chiikawa", "crab_greeting");
-    private static final ResourceLocation WEEDING = ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding");
+    private static final ResourceLocation CLING = new ResourceLocation("chiikawa", "cling");
+    private static final ResourceLocation GREETING = new ResourceLocation("chiikawa", "crab_greeting");
+    private static final ResourceLocation WEEDING = new ResourceLocation("chiikawa", "weeding");
 
     @BeforeAll
     static void bootstrap() {
@@ -83,14 +83,14 @@ class PetInteractionTest {
     void aBeatThatComesRoundEveryTickOrNeverIsRejected() {
         assertTrue(PetInteraction.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(minimal().replace(
             "{ \"pets\": [ \"minecraft:fox\" ] }",
-            "{ \"pets\": [ \"minecraft:fox\" ], \"now_and_then\": { \"every_ticks\": 0, \"animation\": \"clap\" } }"))).isError());
+            "{ \"pets\": [ \"minecraft:fox\" ], \"now_and_then\": { \"every_ticks\": 0, \"animation\": \"clap\" } }"))).error().isPresent());
         assertTrue(PetInteraction.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(minimal().replace(
             "{ \"pets\": [ \"minecraft:fox\" ] }",
-            "{ \"pets\": [ \"minecraft:fox\" ], \"now_and_then\": { \"animation\": \"clap\" } }"))).isError());
+            "{ \"pets\": [ \"minecraft:fox\" ], \"now_and_then\": { \"animation\": \"clap\" } }"))).error().isPresent());
         assertTrue(PetInteraction.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(minimal().replace(
             "{ \"pets\": [ \"minecraft:fox\" ] }",
             "{ \"pets\": [ \"minecraft:fox\" ], \"now_and_then\": { \"every_ticks\": 100, \"animation\": \"clap\" } }")))
-            .isSuccess(), "a steady beat is a plain number");
+            .result().isPresent(), "a steady beat is a plain number");
     }
 
     @Test
@@ -118,7 +118,7 @@ class PetInteractionTest {
 
         assertTrue(justWeeded.metBy(Optional.of(new FinishedSlip(WEEDING, 1000)), 3400));
         assertFalse(justWeeded.metBy(Optional.of(new FinishedSlip(WEEDING, 1000)), 3401), "too long ago");
-        assertFalse(justWeeded.metBy(Optional.of(new FinishedSlip(ResourceLocation.fromNamespaceAndPath("chiikawa",
+        assertFalse(justWeeded.metBy(Optional.of(new FinishedSlip(new ResourceLocation("chiikawa",
             "street_performance"), 1000)), 1200), "another job");
         assertFalse(justWeeded.metBy(Optional.empty(), 1200), "never finished one");
     }
@@ -126,12 +126,12 @@ class PetInteractionTest {
     @Test
     void aFileWithoutAPartnerOrWithAnImpossibleChanceIsRejected() {
         assertTrue(PetInteraction.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            minimal().replace("[ { \"pets\": [ \"minecraft:cow\" ] } ]", "[]"))).isError());
+            minimal().replace("[ { \"pets\": [ \"minecraft:cow\" ] } ]", "[]"))).error().isPresent());
         assertTrue(PetInteraction.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            minimal().replace("0.5", "1.5"))).isError());
+            minimal().replace("0.5", "1.5"))).error().isPresent());
         assertTrue(PetInteraction.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
             minimal().replace("{ \"pets\": [ \"minecraft:cow\" ] }",
-                "{ \"pets\": [ \"minecraft:cow\" ], \"begin\": { \"reaction\": \"sulk\" } }"))).isError());
+                "{ \"pets\": [ \"minecraft:cow\" ], \"begin\": { \"reaction\": \"sulk\" } }"))).error().isPresent());
     }
 
     @Test
@@ -178,7 +178,7 @@ class PetInteractionTest {
     }
 
     private static PetInteraction parse(String json) {
-        return PetInteraction.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(json)).getOrThrow();
+        return PetInteraction.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(json)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
     }
 
     private static Holder<EntityType<?>> type(EntityType<?> type) {

@@ -12,7 +12,6 @@ import net.minecraft.world.item.Tiers;
  */
 public class RakkoSword extends SwordItem {
     public RakkoSword() {
-        super(Tiers.DIAMOND,
-                new Item.Properties().attributes(SwordItem.createAttributes(Tiers.DIAMOND, 3, -2.4F)));
+        super(Tiers.DIAMOND, 3, -2.4F, new Item.Properties());
     }
 }

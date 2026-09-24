@@ -15,9 +15,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class PetVoiceLoaderTest {
-    private static final ResourceLocation CHIIKAWA = ResourceLocation.fromNamespaceAndPath("chiikawa", "chiikawa");
-    private static final ResourceLocation USAGI = ResourceLocation.fromNamespaceAndPath("chiikawa", "usagi");
-    private static final ResourceLocation RAKKO = ResourceLocation.fromNamespaceAndPath("chiikawa", "rakko");
+    private static final ResourceLocation CHIIKAWA = new ResourceLocation("chiikawa", "chiikawa");
+    private static final ResourceLocation USAGI = new ResourceLocation("chiikawa", "usagi");
+    private static final ResourceLocation RAKKO = new ResourceLocation("chiikawa", "rakko");
 
     @BeforeAll
     static void bootstrap() {
