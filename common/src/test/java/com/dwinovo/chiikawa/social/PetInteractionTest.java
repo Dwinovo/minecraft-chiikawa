@@ -16,7 +16,7 @@ import java.util.UUID;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
@@ -26,9 +26,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class PetInteractionTest {
-    private static final ResourceLocation CLING = ResourceLocation.fromNamespaceAndPath("chiikawa", "cling");
-    private static final ResourceLocation GREETING = ResourceLocation.fromNamespaceAndPath("chiikawa", "crab_greeting");
-    private static final ResourceLocation WEEDING = ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding");
+    private static final Identifier CLING = Identifier.fromNamespaceAndPath("chiikawa", "cling");
+    private static final Identifier GREETING = Identifier.fromNamespaceAndPath("chiikawa", "crab_greeting");
+    private static final Identifier WEEDING = Identifier.fromNamespaceAndPath("chiikawa", "weeding");
 
     @BeforeAll
     static void bootstrap() {
@@ -118,7 +118,7 @@ class PetInteractionTest {
 
         assertTrue(justWeeded.metBy(Optional.of(new FinishedSlip(WEEDING, 1000)), 3400));
         assertFalse(justWeeded.metBy(Optional.of(new FinishedSlip(WEEDING, 1000)), 3401), "too long ago");
-        assertFalse(justWeeded.metBy(Optional.of(new FinishedSlip(ResourceLocation.fromNamespaceAndPath("chiikawa",
+        assertFalse(justWeeded.metBy(Optional.of(new FinishedSlip(Identifier.fromNamespaceAndPath("chiikawa",
             "street_performance"), 1000)), 1200), "another job");
         assertFalse(justWeeded.metBy(Optional.empty(), 1200), "never finished one");
     }

@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.voice;
 
 import java.util.Map;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 
 /**
@@ -10,7 +10,7 @@ import net.minecraft.world.entity.EntityType;
  * replaced as a whole on every data pack (re)load.
  */
 public final class PetVoices {
-    private static volatile Map<ResourceLocation, PetVoice> byEntity = Map.of();
+    private static volatile Map<Identifier, PetVoice> byEntity = Map.of();
 
     private PetVoices() {
     }
@@ -23,11 +23,11 @@ public final class PetVoices {
         return get(BuiltInRegistries.ENTITY_TYPE.getKey(type));
     }
 
-    static PetVoice get(ResourceLocation entityId) {
+    static PetVoice get(Identifier entityId) {
         return byEntity.getOrDefault(entityId, PetVoice.SILENT);
     }
 
-    static void replaceAll(Map<ResourceLocation, PetVoice> voices) {
+    static void replaceAll(Map<Identifier, PetVoice> voices) {
         byEntity = Map.copyOf(voices);
     }
 }

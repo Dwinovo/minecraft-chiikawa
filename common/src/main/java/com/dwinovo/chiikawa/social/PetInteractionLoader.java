@@ -11,7 +11,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.ExtraCodecs;
@@ -25,7 +25,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 public final class PetInteractionLoader extends SimpleJsonResourceReloadListener<JsonElement> {
     public static final String DIRECTORY = "pet_interaction";
     /** Id for loaders that register reload listeners by id. */
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
 
     private static final String LOG_PREFIX = "[chiikawa-social] ";
 
@@ -34,7 +34,7 @@ public final class PetInteractionLoader extends SimpleJsonResourceReloadListener
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
+    protected void apply(Map<Identifier, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
         Loaded loaded = load(files, BuiltInRegistries.ENTITY_TYPE::containsKey);
         loaded.errors().forEach(Constants.LOG::error);
         loaded.warnings().forEach(Constants.LOG::warn);
@@ -47,8 +47,8 @@ public final class PetInteractionLoader extends SimpleJsonResourceReloadListener
      * @param knownEntity whether an entity type id is registered
      * @return the scenes that decoded, and what went wrong with the rest
      */
-    static Loaded load(Map<ResourceLocation, JsonElement> files, Predicate<ResourceLocation> knownEntity) {
-        Map<ResourceLocation, PetInteraction> interactions = new HashMap<>();
+    static Loaded load(Map<Identifier, JsonElement> files, Predicate<Identifier> knownEntity) {
+        Map<Identifier, PetInteraction> interactions = new HashMap<>();
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
         files.forEach((id, json) -> PetInteraction.CODEC.parse(JsonOps.INSTANCE, json)
@@ -71,6 +71,6 @@ public final class PetInteractionLoader extends SimpleJsonResourceReloadListener
      * @param errors one message per file that could not be decoded
      * @param warnings one message per unknown pet
      */
-    record Loaded(Map<ResourceLocation, PetInteraction> interactions, List<String> errors, List<String> warnings) {
+    record Loaded(Map<Identifier, PetInteraction> interactions, List<String> errors, List<String> warnings) {
     }
 }

@@ -3,7 +3,7 @@ package com.dwinovo.chiikawa.social;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * The {@code SOCIAL_COOLDOWNS} memory: which scenes a pet has lately played with whom, so
@@ -25,7 +25,7 @@ public record SocialCooldowns(Map<Pair, Long> until) {
      * @param gameTime the current game time
      * @return whether this pet has played that scene with that pet too recently
      */
-    public boolean coolingDown(ResourceLocation interaction, UUID other, long gameTime) {
+    public boolean coolingDown(Identifier interaction, UUID other, long gameTime) {
         Long end = until.get(new Pair(interaction, other));
         return end != null && gameTime < end;
     }
@@ -34,7 +34,7 @@ public record SocialCooldowns(Map<Pair, Long> until) {
      * @param gameTime the current game time
      * @return these cooldowns and one more, those already over left out
      */
-    public SocialCooldowns with(ResourceLocation interaction, UUID other, long end, long gameTime) {
+    public SocialCooldowns with(Identifier interaction, UUID other, long end, long gameTime) {
         Map<Pair, Long> next = new HashMap<>();
         until.forEach((pair, time) -> {
             if (gameTime < time) {
@@ -49,6 +49,6 @@ public record SocialCooldowns(Map<Pair, Long> until) {
      * @param interaction the scene
      * @param other the other pet in it
      */
-    public record Pair(ResourceLocation interaction, UUID other) {
+    public record Pair(Identifier interaction, UUID other) {
     }
 }

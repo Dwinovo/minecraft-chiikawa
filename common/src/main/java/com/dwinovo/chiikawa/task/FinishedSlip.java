@@ -1,6 +1,6 @@
 package com.dwinovo.chiikawa.task;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * The {@code LAST_FINISHED_SLIP} memory: the last slip a pet was paid for and when, so
@@ -9,5 +9,5 @@ import net.minecraft.resources.ResourceLocation;
  * @param type the slip's type
  * @param gameTime when it was finished
  */
-public record FinishedSlip(ResourceLocation type, long gameTime) {
+public record FinishedSlip(Identifier type, long gameTime) {
 }

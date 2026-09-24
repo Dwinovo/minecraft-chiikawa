@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.social;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * The {@code INTERACTION_PLAN} memory: a scene a pet has thought of playing with another.
@@ -18,7 +18,7 @@ import net.minecraft.resources.ResourceLocation;
  * @param partnerSide the part the other pet plays
  * @param engaged whether the pet has set off
  */
-public record InteractionPlan(ResourceLocation id, PetInteraction interaction, PetInteraction.Side self,
+public record InteractionPlan(Identifier id, PetInteraction interaction, PetInteraction.Side self,
         AbstractPet partner, PetInteraction.Side partnerSide, boolean engaged) {
     /** @return this plan, now under way */
     public InteractionPlan engage() {

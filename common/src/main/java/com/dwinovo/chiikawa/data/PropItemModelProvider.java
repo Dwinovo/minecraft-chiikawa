@@ -36,7 +36,7 @@ import net.minecraft.world.item.Item;
  * says.
  */
 public final class PropItemModelProvider implements DataProvider {
-    private static final ResourceLocation BLOCK_ATLAS = ResourceLocation.withDefaultNamespace("blocks");
+    private static final Identifier BLOCK_ATLAS = Identifier.withDefaultNamespace("blocks");
     private final PackOutput.PathProvider models;
     private final PackOutput.PathProvider items;
     private final PackOutput.PathProvider atlases;
@@ -101,7 +101,7 @@ public final class PropItemModelProvider implements DataProvider {
     }
 
     /** The prop's own texture, as a sprite: {@code textures/entities/<id>.png}. */
-    private static ResourceLocation texture(Item item) {
+    private static Identifier texture(Item item) {
         return BuiltInRegistries.ITEM.getKey(item).withPrefix("entities/");
     }
 

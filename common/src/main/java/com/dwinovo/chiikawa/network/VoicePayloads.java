@@ -5,7 +5,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /** What the server tells the players nearby that a pet says. */
 public final class VoicePayloads {
@@ -22,7 +22,7 @@ public final class VoicePayloads {
      */
     public record PetSpeechPayload(int pet, String line, int ticks) implements CustomPacketPayload {
         public static final Type<PetSpeechPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "pet_speech"));
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "pet_speech"));
         public static final StreamCodec<RegistryFriendlyByteBuf, PetSpeechPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT, PetSpeechPayload::pet,
             ByteBufCodecs.STRING_UTF8, PetSpeechPayload::line,

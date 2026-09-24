@@ -10,7 +10,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
@@ -180,9 +180,9 @@ public record PetInteraction(
      * @param slip the slip type the partner finished
      * @param withinTicks how long ago it may have finished it
      */
-    public record SlipCondition(ResourceLocation slip, int withinTicks) {
+    public record SlipCondition(Identifier slip, int withinTicks) {
         public static final Codec<SlipCondition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.fieldOf("slip").forGetter(SlipCondition::slip),
+            Identifier.CODEC.fieldOf("slip").forGetter(SlipCondition::slip),
             ExtraCodecs.POSITIVE_INT.fieldOf("within_ticks").forGetter(SlipCondition::withinTicks)
         ).apply(instance, SlipCondition::new));
 

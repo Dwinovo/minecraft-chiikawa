@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.EntityType;
@@ -32,15 +32,15 @@ import net.minecraft.world.entity.EntityType;
  */
 public final class PetInteractionData {
     /** Momonga pesters someone, Chiikawa above all, clinging on and demanding praise. */
-    public static final ResourceLocation CLING = id("cling");
+    public static final Identifier CLING = id("cling");
     /** Furuhonya and a friend greet each other the crab way, face to face. */
-    public static final ResourceLocation CRAB_GREETING = id("crab_greeting");
+    public static final Identifier CRAB_GREETING = id("crab_greeting");
     /** Rakko treats Chiikawa or Hachiware to something to eat out of its own backpack. */
-    public static final ResourceLocation TREAT = id("treat");
+    public static final Identifier TREAT = id("treat");
     /** Kurimanju brings a coffee to someone who has just finished weeding. */
-    public static final ResourceLocation COFFEE = id("coffee");
+    public static final Identifier COFFEE = id("coffee");
     /** Anyone sits down by Hachiware busking, listens for a while and claps along. */
-    public static final ResourceLocation LISTEN_TO_MUSIC = id("listen_to_music");
+    public static final Identifier LISTEN_TO_MUSIC = id("listen_to_music");
 
     /** A listener claps every three to eight seconds: now and then, not in time. */
     private static final UniformInt CLAPS = UniformInt.of(60, 160);
@@ -49,7 +49,7 @@ public final class PetInteractionData {
     }
 
     /** @return scenes by id */
-    public static Map<ResourceLocation, PetInteraction> all() {
+    public static Map<Identifier, PetInteraction> all() {
         return Map.of(
             // Momonga clings on and wants to be praised; the one clung to minds. Chiikawa,
             // whom it has bitten more than once, cries; the rest are put out each in its own
@@ -133,8 +133,8 @@ public final class PetInteractionData {
             .toList());
     }
 
-    private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path);
+    private static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(Constants.MOD_ID, path);
     }
 
     /** One part, said the way a stage direction is. */

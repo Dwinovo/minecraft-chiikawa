@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import net.minecraft.SharedConstants;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -53,7 +53,7 @@ class LanguageDataVoiceTranslationTest {
     @Test
     void everyVoiceBelongsToAPetTheGameKnowsByName() {
         Map<String, String> english = collect("en_us");
-        for (ResourceLocation pet : PetVoiceData.all().keySet()) {
+        for (Identifier pet : PetVoiceData.all().keySet()) {
             String key = "entity." + pet.getNamespace() + "." + pet.getPath();
             assertTrue(english.containsKey(key), () -> pet + " is not a pet");
         }

@@ -8,7 +8,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * The generated pet voices (design 0.1.1, section 3): which moments each character speaks
@@ -38,8 +38,8 @@ public final class PetVoiceData {
     }
 
     /** @return voices by pet entity type id */
-    public static Map<ResourceLocation, PetVoice> all() {
-        Map<ResourceLocation, PetVoice> all = new HashMap<>();
+    public static Map<Identifier, PetVoice> all() {
+        Map<Identifier, PetVoice> all = new HashMap<>();
         // Hardly a word, and tears whenever something goes wrong.
         add(all, voice("chiikawa")
             .says(VoiceMoment.TAME, 1)
@@ -157,8 +157,8 @@ public final class PetVoiceData {
         return "voice." + Constants.MOD_ID + "." + pet + "." + moment.getSerializedName() + "." + line;
     }
 
-    private static void add(Map<ResourceLocation, PetVoice> all, Builder builder) {
-        all.put(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, builder.pet), builder.build());
+    private static void add(Map<Identifier, PetVoice> all, Builder builder) {
+        all.put(Identifier.fromNamespaceAndPath(Constants.MOD_ID, builder.pet), builder.build());
     }
 
     private static Builder voice(String pet) {

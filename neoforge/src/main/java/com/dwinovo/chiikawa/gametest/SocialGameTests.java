@@ -52,7 +52,7 @@ import javax.sound.sampled.AudioSystem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
@@ -450,7 +450,7 @@ public final class SocialGameTests {
      * Gives a pet the idea its sensor would have had: this scene, with this partner. A pet
      * that has already set off on it by itself is left to get on with it.
      */
-    private static void thinkOf(AbstractPet pet, ResourceLocation id, AbstractPet partner) {
+    private static void thinkOf(AbstractPet pet, Identifier id, AbstractPet partner) {
         if (pet.getBrain().getMemory(InitMemory.INTERACTION_PLAN.get()).filter(InteractionPlan::engaged).isPresent()) {
             return;
         }
@@ -461,7 +461,7 @@ public final class SocialGameTests {
             false));
     }
 
-    private static PetInteraction scene(ResourceLocation id) {
+    private static PetInteraction scene(Identifier id) {
         PetInteraction interaction = PetInteractions.all().get(id);
         if (interaction == null) {
             throw new AssertionError("the data pack has no " + id);
@@ -481,14 +481,14 @@ public final class SocialGameTests {
             .isPresent();
     }
 
-    private static boolean runs(AbstractPet pet, ResourceLocation intent) {
+    private static boolean runs(AbstractPet pet, Identifier intent) {
         return pet.getBrain().getMemory(InitMemory.CURRENT_INTENT.get())
             .map(RunningIntent::id)
             .filter(intent::equals)
             .isPresent();
     }
 
-    private static boolean coolingDown(AbstractPet pet, ResourceLocation id, AbstractPet other, GameTestHelper helper) {
+    private static boolean coolingDown(AbstractPet pet, Identifier id, AbstractPet other, GameTestHelper helper) {
         return pet.getBrain().getMemory(InitMemory.SOCIAL_COOLDOWNS.get())
             .orElse(SocialCooldowns.NONE)
             .coolingDown(id, other.getUUID(), helper.getLevel().getGameTime());

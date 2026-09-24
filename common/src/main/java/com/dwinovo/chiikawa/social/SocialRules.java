@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.UUID;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -40,7 +40,7 @@ public final class SocialRules {
      */
     public static Optional<InteractionPlan> find(AbstractPet pet, long gameTime) {
         Holder<EntityType<?>> type = typeOf(pet);
-        for (Map.Entry<ResourceLocation, PetInteraction> entry : PetInteractions.all().entrySet()) {
+        for (Map.Entry<Identifier, PetInteraction> entry : PetInteractions.all().entrySet()) {
             PetInteraction interaction = entry.getValue();
             Optional<PetInteraction.Side> self = interaction.initiatorSide(type);
             if (self.isEmpty() || !hasToHandOver(pet, interaction) || pet.getRandom().nextFloat() >= interaction.chance()) {
@@ -63,7 +63,7 @@ public final class SocialRules {
      *
      * @return the partner's place among the scene's partners, empty if it would not
      */
-    public static OptionalInt accepts(ResourceLocation id, PetInteraction interaction, AbstractPet pet,
+    public static OptionalInt accepts(Identifier id, PetInteraction interaction, AbstractPet pet,
             AbstractPet partner, long gameTime) {
         if (partner == pet || !partner.isAlive() || partner.level() != pet.level()
                 || pet.distanceToSqr(partner) > interaction.noticeDistance() * interaction.noticeDistance()) {
@@ -106,14 +106,14 @@ public final class SocialRules {
      * Notes on both pets that they have played this scene together, so neither starts it
      * with the other again before the scene's cooldown is over.
      */
-    public static void rememberPlayed(ResourceLocation id, PetInteraction interaction, AbstractPet one, AbstractPet other,
+    public static void rememberPlayed(Identifier id, PetInteraction interaction, AbstractPet one, AbstractPet other,
             long gameTime) {
         long end = gameTime + interaction.cooldownTicks();
         note(one, id, other.getUUID(), end, gameTime);
         note(other, id, one.getUUID(), end, gameTime);
     }
 
-    private static void note(AbstractPet pet, ResourceLocation id, UUID other, long end, long gameTime) {
+    private static void note(AbstractPet pet, Identifier id, UUID other, long end, long gameTime) {
         pet.getBrain().setMemory(InitMemory.SOCIAL_COOLDOWNS.get(), cooldowns(pet).with(id, other, end, gameTime));
     }
 
@@ -121,7 +121,7 @@ public final class SocialRules {
         return pet.getBrain().getMemory(InitMemory.SOCIAL_COOLDOWNS.get()).orElse(SocialCooldowns.NONE);
     }
 
-    private static Optional<Partner> bestPartner(AbstractPet pet, ResourceLocation id, PetInteraction interaction,
+    private static Optional<Partner> bestPartner(AbstractPet pet, Identifier id, PetInteraction interaction,
             long gameTime) {
         Partner best = null;
         // Nearest first, so the first of each kind found is the nearest of that kind.
