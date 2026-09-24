@@ -12,6 +12,7 @@ import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.shop.ShopBasket;
 import com.dwinovo.chiikawa.shop.Wallet;
+import com.dwinovo.chiikawa.social.InteractionPlan;
 import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.utils.Utils;
 import java.util.Optional;
@@ -35,6 +36,8 @@ import net.minecraft.world.level.Level;
  * @param offeringBoard the nearest labor board, while it has a slip the pet would take
  * @param shopWorthVisiting the nearest shop, while it sells something the pet likes and can afford
  * @param shopCoolingDown whether the pet has just bought something
+ * @param socialPartner the pet this one has thought of playing a scene with
+ * @param playingAlong whether another pet is on its way to play a scene with this one
  * @param carryingGift whether the pet has something for its owner that it has not handed over
  * @param eager whether the pet is still in the mood after a proper meal
  * @param takeTaskCoolingDown whether the pet recently failed to take a slip
@@ -55,6 +58,8 @@ public record IntentContext(
     Optional<GlobalPos> shopWorthVisiting,
     boolean takeTaskCoolingDown,
     boolean shopCoolingDown,
+    Optional<GlobalPos> socialPartner,
+    boolean playingAlong,
     boolean carryingGift,
     boolean eager,
     boolean attackCoolingDown,
@@ -78,6 +83,11 @@ public record IntentContext(
             shopWorthVisiting(pet),
             pet.getBrain().hasMemoryValue(InitMemory.TAKE_TASK_COOLDOWN.get()),
             pet.getBrain().hasMemoryValue(InitMemory.SHOP_COOLDOWN.get()),
+            pet.getBrain().getMemory(InitMemory.INTERACTION_PLAN.get())
+                .map(InteractionPlan::partner)
+                .filter(AbstractPet::isAlive)
+                .map(partner -> GlobalPos.of(partner.level().dimension(), partner.blockPosition())),
+            pet.getBrain().hasMemoryValue(InitMemory.INTERACTION_RESERVATION.get()),
             !pet.getPendingGift().isEmpty(),
             pet.isEager(),
             pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_COOLING_DOWN),

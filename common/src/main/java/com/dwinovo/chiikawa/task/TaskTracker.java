@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.task;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
+import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import net.minecraft.core.particles.ParticleTypes;
@@ -45,6 +46,7 @@ public final class TaskTracker {
     private static void complete(AbstractPet pet, PetTask task) {
         ServerLevel level = (ServerLevel) pet.level();
         pet.setTask(null);
+        pet.getBrain().setMemory(InitMemory.LAST_FINISHED_SLIP.get(), new FinishedSlip(task.type(), level.getGameTime()));
         LootTable reward = level.getServer().reloadableRegistries().getLootTable(task.reward());
         LootParams params = new LootParams.Builder(level)
             .withParameter(LootContextParams.ORIGIN, pet.position())

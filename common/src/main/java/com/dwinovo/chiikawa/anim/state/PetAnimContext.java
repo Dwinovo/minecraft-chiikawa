@@ -15,6 +15,8 @@ import com.dwinovo.chiikawa.entity.PetDirective;
  *                 highest-priority candidate when non-{@code NONE} —
  *                 short-circuits the rest of the resolver. Driven by Brain
  *                 behaviors via {@code AbstractPet.setActivity}.
+ * @param performance the animation the pet holds while playing its part in a scene with
+ *                    another pet, named by data; empty when not in one
  */
 public record PetAnimContext(
         PetDirective directive,
@@ -23,7 +25,8 @@ public record PetAnimContext(
         PetAction action,
         PetReaction reaction,
         PetAttention attention,
-        PetActivity activity
+        PetActivity activity,
+        String performance
 ) {
     public PetAnimContext {
         directive = directive == null ? PetDirective.FOLLOW : directive;
@@ -33,14 +36,16 @@ public record PetAnimContext(
         reaction = reaction == null ? PetReaction.NONE : reaction;
         attention = attention == null ? PetAttention.NONE : attention;
         activity = activity == null ? PetActivity.NONE : activity;
+        performance = performance == null ? "" : performance;
     }
 
     /**
      * Common factory that builds a context from the pet's directive, job id, walk
-     * speed, and code-bounded activity. Reaction/action/attention default to
-     * {@code NONE} (these are vestigial in the resolver's current logic).
+     * speed, code-bounded activity and the part it plays in a scene. Reaction/action/
+     * attention default to {@code NONE} (these are vestigial in the resolver's current logic).
      */
-    public static PetAnimContext base(PetDirective directive, int jobId, float walkSpeed, PetActivity activity) {
+    public static PetAnimContext base(PetDirective directive, int jobId, float walkSpeed, PetActivity activity,
+            String performance) {
         return new PetAnimContext(
                 directive,
                 PetJobRole.fromId(jobId),
@@ -48,7 +53,13 @@ public record PetAnimContext(
                 PetAction.NONE,
                 PetReaction.NONE,
                 PetAttention.NONE,
-                activity);
+                activity,
+                performance);
+    }
+
+    /** Shorthand for a pet not in a scene. */
+    public static PetAnimContext base(PetDirective directive, int jobId, float walkSpeed, PetActivity activity) {
+        return base(directive, jobId, walkSpeed, activity, "");
     }
 
     /** Backwards-compatible shorthand defaulting activity to {@link PetActivity#NONE}. */
