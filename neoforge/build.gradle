@@ -41,6 +41,8 @@ neoForge {
         gameTestServer {
             type = 'gameTestServer'
             gameDirectory = mkdir(file('runs/gametestserver'))
+            // Only the mod's own cases: the game counts its built-in ones among the tests too.
+            programArguments.addAll '--tests', "${mod_id}:*"
         }
     }
     mods {

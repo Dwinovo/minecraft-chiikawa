@@ -24,12 +24,12 @@ import net.minecraft.world.phys.AABB;
  * one, given a tool, and left to get on with it while the case watches the world tick by.
  * The exit code is the number of failures, so this reads straight into CI.
  *
- * <p>The cases live here rather than in {@code common} because the game decides which
- * namespace a test belongs to from {@code @GameTestHolder}, which is NeoForge's own
- * annotation — a case declared in common would be filed under {@code minecraft} and
- * dropped by the namespace filter. Nearly everything they exercise is common code all the
- * same; what is loader-shaped — services, networking, registration — is covered by the
- * smoke runs on both loaders.
+ * <p>The cases live here rather than in {@code common} because they reach the game
+ * through NeoForge's own test registration ({@link GameTestCatalog}), filed under the
+ * namespace of their {@code @GameTestHolder} — the one namespace the test server is told
+ * to run. Nearly everything they exercise is common code all the same; what is
+ * loader-shaped — services, networking, registration — is covered by the smoke runs on
+ * both loaders.
  *
  * <p>The floors come from the data pack ({@code chiikawa:floor16}, {@code chiikawa:floor8},
  * written by {@code GameTestStructureProvider}), so there is no folder of SNBT beside the
@@ -112,7 +112,11 @@ public final class GameTestKit {
         AbstractPet pet = helper.spawn(type, rel);
         pet.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
         if (owned) {
-            pet.tame(owner(helper));
+            Player owner = owner(helper);
+            pet.tame(owner);
+            // A pet holds on to the owner it was handed and would hand back a player who is
+            // nowhere in the world; one that has gone it looks up by name, as it always did.
+            owner.discard();
         }
         pet.setPetDirective(PetDirective.FREE);
         return pet;

@@ -14,17 +14,14 @@ import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Jobs: what a pet takes up, from the tool in its hand, and whether it then does the work.
@@ -34,7 +31,6 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
  * makes something else and the crop is left standing.
  */
 @GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class JobGameTests {
     private static final String BATCH = "chiikawa_jobs";
     /** Long enough to walk a few blocks, take a swing and be paid for it. */
@@ -57,29 +53,29 @@ public final class JobGameTests {
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
 
         helper.assertTrue(pet.getPetJobId() == InitRegistry.NONE.get().id(),
-            "a pet holding nothing already had a job");
+            Component.literal("a pet holding nothing already had a job"));
 
         holding(pet, Items.WOODEN_HOE);
         helper.assertTrue(pet.getPetJobId() == InitRegistry.FARMER_ID,
-            "a hoe did not make a farmer");
+            Component.literal("a hoe did not make a farmer"));
 
         holding(pet, Items.IRON_SWORD);
         helper.assertTrue(pet.getPetJobId() == InitRegistry.FENCER_ID,
-            "a sword did not make a fencer");
+            Component.literal("a sword did not make a fencer"));
 
         holding(pet, Items.BOW);
         helper.assertTrue(pet.getPetJobId() == InitRegistry.ARCHER_ID,
-            "a bow did not make an archer");
+            Component.literal("a bow did not make an archer"));
 
         // A music box in a rabbit's hands is just a music box: playing is Hachiware's,
         // and a job nobody else can take is the sort of rule that gets lost in a refactor.
         holding(pet, InitItems.MUSIC_BOX.get());
         helper.assertTrue(pet.getPetJobId() == InitRegistry.NONE.get().id(),
-            "a pet who cannot play took the musician's job anyway");
+            Component.literal("a pet who cannot play took the musician's job anyway"));
 
         holding(pet, Items.AIR);
         helper.assertTrue(pet.getPetJobId() == InitRegistry.NONE.get().id(),
-            "an emptied hand left the pet with its old job");
+            Component.literal("an emptied hand left the pet with its old job"));
         helper.succeed();
     }
 
@@ -90,7 +86,7 @@ public final class JobGameTests {
 
         holding(hachiware, InitItems.MUSIC_BOX.get());
         helper.assertTrue(hachiware.getPetJobId() == InitRegistry.MUSICIAN_ID,
-            "Hachiware with a music box is not a musician");
+            Component.literal("Hachiware with a music box is not a musician"));
         helper.succeed();
     }
 
@@ -104,7 +100,7 @@ public final class JobGameTests {
         helper.succeedWhen(() -> {
             helper.assertBlockPresent(Blocks.WHEAT, crop);
             helper.assertBlockProperty(crop, CropBlock.AGE, 0);
-            helper.assertTrue(carries(pet, Items.WHEAT), "the farmer harvested nothing it kept");
+            helper.assertTrue(carries(pet, Items.WHEAT), Component.literal("the farmer harvested nothing it kept"));
         });
     }
 

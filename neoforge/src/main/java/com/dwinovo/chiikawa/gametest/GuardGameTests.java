@@ -13,9 +13,8 @@ import com.dwinovo.chiikawa.entity.brain.combat.PetCombat;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
 import com.dwinovo.chiikawa.init.InitMemory;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
@@ -27,8 +26,6 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Standing up for its owner, and knowing when not to stand anywhere near something.
@@ -38,7 +35,6 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
  * pet, and some of what turns up is not worth walking towards at all.
  */
 @GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class GuardGameTests {
     private static final String BATCH = "chiikawa_guard";
     private static final int STAND = 2;
@@ -69,7 +65,7 @@ public final class GuardGameTests {
         zombie.setTarget(owner);
 
         helper.succeedWhen(() -> helper.assertTrue(hurt(zombie),
-            "the pet walked at its owner's heel while a zombie went for them"));
+            Component.literal("the pet walked at its owner's heel while a zombie went for them")));
     }
 
     /** And it weighs in on a fight the owner picked, rather than waiting to be hit. */
@@ -83,7 +79,7 @@ public final class GuardGameTests {
         float afterOwner = zombie.getHealth();
 
         helper.succeedWhen(() -> helper.assertTrue(zombie.getHealth() < afterOwner,
-            "the pet left its owner to it"));
+            Component.literal("the pet left its owner to it")));
     }
 
     /**
@@ -99,12 +95,12 @@ public final class GuardGameTests {
         creeper.setNoAi(true);
 
         helper.runAtTickTime(BACK_OFF_TICKS, () -> {
-            helper.assertTrue(pet.isAlive(), "the pet did not live through standing next to a creeper");
+            helper.assertTrue(pet.isAlive(), Component.literal("the pet did not live through standing next to a creeper"));
             helper.assertTrue(pet.distanceTo(creeper) >= PetCombat.FUSE_RADIUS - 1.0,
-                "the pet stood " + (int) pet.distanceTo(creeper) + " blocks from a creeper"
-                    + ", doing " + doing(pet));
+                Component.literal("the pet stood " + (int) pet.distanceTo(creeper) + " blocks from a creeper"
+                    + ", doing " + doing(pet)));
             helper.assertTrue(creeper.getHealth() == creeper.getMaxHealth(),
-                "the pet picked a fight with a creeper, which is how a pet stops being a pet");
+                Component.literal("the pet picked a fight with a creeper, which is how a pet stops being a pet"));
             helper.succeed();
         });
     }
@@ -122,8 +118,8 @@ public final class GuardGameTests {
 
         helper.runAtTickTime(BACK_OFF_TICKS, () -> {
             helper.assertTrue(pet.distanceTo(zombie) > before + 2.0,
-                "a pet on its last few hearts stayed " + (int) pet.distanceTo(zombie)
-                    + " blocks from the zombie, doing " + doing(pet));
+                Component.literal("a pet on its last few hearts stayed " + (int) pet.distanceTo(zombie)
+                    + " blocks from the zombie, doing " + doing(pet)));
             helper.succeed();
         });
     }
@@ -140,8 +136,8 @@ public final class GuardGameTests {
 
         helper.runAtTickTime(BACK_OFF_TICKS, () -> {
             helper.assertTrue(pet.distanceTo(zombie) >= PetCombat.BOW_NEAR - 1.0,
-                "the archer kept drawing with a zombie " + (int) pet.distanceTo(zombie)
-                    + " blocks away, doing " + doing(pet));
+                Component.literal("the archer kept drawing with a zombie " + (int) pet.distanceTo(zombie)
+                    + " blocks away, doing " + doing(pet)));
             helper.succeed();
         });
     }
@@ -161,7 +157,7 @@ public final class GuardGameTests {
 
         helper.runAtTickTime(WATCH_TICKS, () -> {
             helper.assertTrue(zombie.getHealth() == zombie.getMaxHealth(),
-                "a pet that was told to sit went for the zombie anyway");
+                Component.literal("a pet that was told to sit went for the zombie anyway"));
             helper.succeed();
         });
     }
@@ -179,8 +175,8 @@ public final class GuardGameTests {
         pet.hurt(owner.damageSources().playerAttack(owner), 1.0F);
 
         helper.runAtTickTime(WATCH_TICKS, () -> {
-            helper.assertFalse(fighting(pet, owner), "the pet squared up to its own owner");
-            helper.assertTrue(owner.getHealth() == owner.getMaxHealth(), "the pet hit its owner");
+            helper.assertFalse(fighting(pet, owner), Component.literal("the pet squared up to its own owner"));
+            helper.assertTrue(owner.getHealth() == owner.getMaxHealth(), Component.literal("the pet hit its owner"));
             helper.succeed();
         });
     }
@@ -195,8 +191,8 @@ public final class GuardGameTests {
         pet.hurt(sibling.damageSources().mobAttack(sibling), 1.0F);
 
         helper.runAtTickTime(WATCH_TICKS, () -> {
-            helper.assertFalse(fighting(pet, sibling), "the pet squared up to its own housemate");
-            helper.assertTrue(sibling.getHealth() == sibling.getMaxHealth(), "the pet hit its own housemate");
+            helper.assertFalse(fighting(pet, sibling), Component.literal("the pet squared up to its own housemate"));
+            helper.assertTrue(sibling.getHealth() == sibling.getMaxHealth(), Component.literal("the pet hit its own housemate"));
             helper.succeed();
         });
     }
@@ -216,13 +212,13 @@ public final class GuardGameTests {
         first.setInvulnerable(true);
 
         helper.runAtTickTime(40, () -> {
-            helper.assertTrue(fighting(pet, first), "the pet never took an interest in the first zombie");
+            helper.assertTrue(fighting(pet, first), Component.literal("the pet never took an interest in the first zombie"));
             Zombie nearer = helper.spawn(EntityType.ZOMBIE, new BlockPos(5, STAND, 4));
             nearer.setNoAi(true);
             nearer.setInvulnerable(true);
             helper.runAtTickTime(100, () -> {
                 helper.assertTrue(fighting(pet, first),
-                    "the pet dropped what it was fighting for whatever wandered closer");
+                    Component.literal("the pet dropped what it was fighting for whatever wandered closer"));
                 helper.succeed();
             });
         });
@@ -238,9 +234,9 @@ public final class GuardGameTests {
         creeper.setNoAi(true);
 
         helper.succeedWhen(() -> {
-            helper.assertTrue(creeper.getHealth() < creeper.getMaxHealth(), "the archer never shot the creeper");
+            helper.assertTrue(creeper.getHealth() < creeper.getMaxHealth(), Component.literal("the archer never shot the creeper"));
             helper.assertTrue(pet.distanceTo(creeper) >= PetCombat.FUSE_RADIUS - 1.0,
-                "the archer walked up to the creeper it was shooting");
+                Component.literal("the archer walked up to the creeper it was shooting"));
         });
     }
 
@@ -266,8 +262,8 @@ public final class GuardGameTests {
 
         helper.runAtTickTime(BACK_OFF_TICKS, () -> {
             helper.assertTrue(zombie.getHealth() < zombie.getMaxHealth(),
-                "the pet backed away without so much as a swing at what was on top of it, "
-                    + (int) pet.distanceTo(zombie) + " blocks out, doing " + doing(pet));
+                Component.literal("the pet backed away without so much as a swing at what was on top of it, "
+                    + (int) pet.distanceTo(zombie) + " blocks out, doing " + doing(pet)));
             helper.succeed();
         });
     }
@@ -284,12 +280,12 @@ public final class GuardGameTests {
 
         helper.runAtTickTime(BACK_OFF_TICKS, () -> {
             double away = pet.distanceTo(zombie);
-            helper.assertTrue(away > 3.0, "the pet never broke off to begin with, so there is nothing to come back from");
+            helper.assertTrue(away > 3.0, Component.literal("the pet never broke off to begin with, so there is nothing to come back from"));
             pet.setHealth(pet.getMaxHealth());
             helper.runAtTickTime(300, () -> {
                 helper.assertTrue(pet.distanceTo(zombie) < away - 1.0,
-                    "a healed pet stayed out of a fight it had broken off, " + (int) pet.distanceTo(zombie)
-                        + " blocks out, doing " + doing(pet));
+                    Component.literal("a healed pet stayed out of a fight it had broken off, " + (int) pet.distanceTo(zombie)
+                        + " blocks out, doing " + doing(pet)));
                 helper.succeed();
             });
         });
