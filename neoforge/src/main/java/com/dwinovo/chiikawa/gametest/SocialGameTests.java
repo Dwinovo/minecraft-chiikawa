@@ -420,10 +420,10 @@ public final class SocialGameTests {
         AtomicLong started = new AtomicLong();
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(song(library).isPresent(), "the song was never imported"))
+            .thenWaitUntil(() -> helper.assertTrue(song(library).isPresent(), Component.literal("the song was never imported")))
             .thenExecute(() -> {
                 ServerPlayer bystander = player(helper);
-                bystander.moveTo(helper.absoluteVec(new Vec3(9.5, STAND, 8.5)));
+                bystander.snapTo(helper.absoluteVec(new Vec3(9.5, STAND, 8.5)));
                 ItemStack box = new ItemStack(InitItems.MUSIC_BOX.get());
                 box.set(InitDataComponents.MUSIC_BOX_SELECTION.get(),
                     new MusicBoxSelection(song(library).orElseThrow().trackId(), SONG, 0));
@@ -432,13 +432,13 @@ public final class SocialGameTests {
                 hachiware.set(busker);
             })
             .thenWaitUntil(() -> {
-                helper.assertTrue(hachiware.get().getActivity() == PetActivity.PLAY_GUITAR, "Hachiware never started playing");
+                helper.assertTrue(hachiware.get().getActivity() == PetActivity.PLAY_GUITAR, Component.literal("Hachiware never started playing"));
                 started.set(helper.getLevel().getGameTime());
             })
             .thenWaitUntil(() -> helper.assertTrue(helper.getLevel().getGameTime() - started.get() >= 40,
-                "the song has not been playing a while yet"))
+                Component.literal("the song has not been playing a while yet")))
             .thenExecute(() -> helper.assertTrue(hachiware.get().getActivity() == PetActivity.PLAY_GUITAR,
-                "the music stopped with somebody standing by"))
+                Component.literal("the music stopped with somebody standing by")))
             .thenSucceed();
     }
 
