@@ -40,13 +40,15 @@ class FaceAnimationsTest {
     }
 
     @Test
-    void chiikawaBlinksAndTalks() throws IOException {
-        JsonObject animations = read(ASSETS.resolve("animations/chiikawa.json")).getAsJsonObject("animations");
-        for (String face : FACE) {
-            assertTrue(animations.has(face), "Chiikawa has no " + face);
+    void facesBuiltFromBonesBlinkAndTalk() throws IOException {
+        for (String pet : List.of("chiikawa", "kurimanju")) {
+            JsonObject animations = read(ASSETS.resolve("animations/" + pet + ".json")).getAsJsonObject("animations");
+            for (String face : FACE) {
+                assertTrue(animations.has(face), pet + " has no " + face);
+            }
+            assertTrue(modelBones(pet).containsAll(List.of("LeftEyelid", "RightEyelid", "Mouth", "Mouth3")),
+                pet + "'s eyes and mouth are painted on again");
         }
-        assertTrue(modelBones("chiikawa").containsAll(List.of("LeftEyelid", "RightEyelid", "Mouth", "Mouth3")),
-            "Chiikawa's eyes and mouth are painted on again");
     }
 
     private static List<String> pets() throws IOException {
