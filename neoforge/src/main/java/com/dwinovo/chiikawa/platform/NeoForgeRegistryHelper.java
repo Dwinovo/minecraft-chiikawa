@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.platform.services.IRegistryHelper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.Map;
 import com.google.common.collect.ImmutableSet;
 import java.util.function.BiFunction;
@@ -48,7 +49,7 @@ public class NeoForgeRegistryHelper implements IRegistryHelper {
     public <T extends BlockEntity> Supplier<BlockEntityType<T>> registerBlockEntity(ResourceLocation id,
             BiFunction<BlockPos, BlockState, T> factory, Supplier<? extends Block> block) {
         return register(BuiltInRegistries.BLOCK_ENTITY_TYPE, id,
-            () -> BlockEntityType.Builder.of(factory::apply, block.get()).build(null));
+            () -> new BlockEntityType<>(factory::apply, Set.of(block.get())));
     }
 
     @Override

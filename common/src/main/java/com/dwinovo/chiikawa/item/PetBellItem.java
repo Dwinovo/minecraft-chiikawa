@@ -8,7 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -30,17 +30,17 @@ public class PetBellItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (level.isClientSide() || !(player instanceof ServerPlayer owner)) {
-            return InteractionResultHolder.success(stack);
+            return InteractionResult.SUCCESS;
         }
         // What the ring turned up is said by the recall itself: pets in chunks nobody has
         // loaded take a few seconds to be read back, and the answer waits for them.
         PetRecall.ring(owner);
         level.playSound(null, player.blockPosition(), SoundEvents.BELL_BLOCK, SoundSource.PLAYERS, 1.0F, 1.4F);
-        player.getCooldowns().addCooldown(stack.getItem(), COOLDOWN_TICKS);
-        return InteractionResultHolder.consume(stack);
+        player.getCooldowns().addCooldown(stack, COOLDOWN_TICKS);
+        return InteractionResult.CONSUME;
     }
 
     @Override

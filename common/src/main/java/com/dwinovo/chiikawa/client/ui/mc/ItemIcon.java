@@ -16,7 +16,7 @@ public record ItemIcon(ItemStack stack) implements Icon {
      *         a data pack naming an item that is not there leaves an empty box, not a crash
      */
     public static Icon of(ResourceLocation item) {
-        ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.get(item));
+        ItemStack stack = new ItemStack(BuiltInRegistries.ITEM.getValue(item));
         return stack.isEmpty() ? Icon.NONE : new ItemIcon(stack);
     }
 }
