@@ -96,6 +96,15 @@ public final class TagData {
         // Emeralds, as the villagers have it; a pack can make money of anything.
         tags.tag(InitTag.CURRENCY)
             .add(Items.EMERALD);
+        // Something to share, starting with the hamburg steak Rakko treats the others to in
+        // the series; the sweets it buys for itself are among them.
+        tags.tag(InitTag.PET_TREATS)
+            .add(Items.COOKED_BEEF)
+            .add(Items.PUMPKIN_PIE)
+            .add(Items.SWEET_BERRIES)
+            .add(Items.COOKIE)
+            .add(Items.BREAD)
+            .add(Items.BAKED_POTATO);
         tags.tag(InitTag.ENTITY_PICKABLE_ITEMS)
             .add(Items.WHEAT, Items.WHEAT_SEEDS)
             .add(Items.POTATO)

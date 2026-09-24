@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPlacesSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetFarmerWorkSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetSocialSensor;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.platform.services.IPlatformRegistryAccess;
 import java.util.function.Supplier;
@@ -33,6 +34,8 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
         SENSOR_TYPES.register("pet_item_entity_sensor", () -> new SensorType<>(PetPickableItemSensor::new));
     private static final DeferredHolder<SensorType<?>, SensorType<PetPlacesSensor>> PET_PLACES_SENSOR =
         SENSOR_TYPES.register("pet_places_sensor", () -> new SensorType<>(PetPlacesSensor::new));
+    private static final DeferredHolder<SensorType<?>, SensorType<PetSocialSensor>> PET_SOCIAL_SENSOR =
+        SENSOR_TYPES.register("pet_social_sensor", () -> new SensorType<>(PetSocialSensor::new));
 
     private static final DeferredHolder<Activity, Activity> FARMER_HARVEST =
         ACTIVITIES.register("farmer_harvest", () -> new Activity("farmer_harvest"));
@@ -62,6 +65,10 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
         ACTIVITIES.register("shop", () -> new Activity("shop"));
     private static final DeferredHolder<Activity, Activity> GIFT_OWNER =
         ACTIVITIES.register("gift_owner", () -> new Activity("gift_owner"));
+    private static final DeferredHolder<Activity, Activity> SOCIALIZE =
+        ACTIVITIES.register("socialize", () -> new Activity("socialize"));
+    private static final DeferredHolder<Activity, Activity> COOPERATE =
+        ACTIVITIES.register("cooperate", () -> new Activity("cooperate"));
 
     private static final DeferredHolder<MenuType<?>, MenuType<PetBackpackMenu>> PET_BACKPACK =
         MENUS.register("pet_backpack", () -> IMenuTypeExtension.create((containerId, inventory, buf) ->
@@ -92,6 +99,11 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
     @Override
     public Supplier<SensorType<PetPlacesSensor>> petPlacesSensor() {
         return PET_PLACES_SENSOR;
+    }
+
+    @Override
+    public Supplier<SensorType<PetSocialSensor>> petSocialSensor() {
+        return PET_SOCIAL_SENSOR;
     }
 
     @Override
@@ -162,6 +174,16 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
     @Override
     public Supplier<Activity> giftOwnerActivity() {
         return GIFT_OWNER;
+    }
+
+    @Override
+    public Supplier<Activity> socializeActivity() {
+        return SOCIALIZE;
+    }
+
+    @Override
+    public Supplier<Activity> cooperateActivity() {
+        return COOPERATE;
     }
 
     @Override
