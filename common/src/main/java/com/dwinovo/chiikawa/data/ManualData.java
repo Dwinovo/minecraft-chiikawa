@@ -2,11 +2,13 @@ package com.dwinovo.chiikawa.data;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.anim.state.PetAction;
+import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
 import com.dwinovo.chiikawa.manual.ManualPage;
+import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +26,10 @@ import net.minecraft.world.level.ItemLike;
 /**
  * The generated handbook pages (gameplay doc, "the handbook"): each a four-panel strip the
  * pets act out, one page for each thing there is to know.
+ *
+ * <p>A pet in a panel says one of its own lines, the words it says in the world at that
+ * moment ({@link PetVoiceData}): the handbook never puts words in a pet's mouth that the
+ * pet would not say. Usagi says "ウラ", not "here you are"; Rakko does not cry out.
  */
 public final class ManualData {
     private ManualData() {
@@ -38,7 +44,8 @@ public final class ManualData {
             id("presents"), presents(),
             id("supplies"), supplies(),
             id("upgrade"), upgrade(),
-            id("safety"), safety());
+            id("safety"), safety(),
+            id("friends"), friends());
     }
 
     /** A page's title, by the page's name: shared with the wording, which is written to it. */
@@ -56,7 +63,7 @@ public final class ManualData {
         return page("meet", 5,
             panel(pet(InitEntity.CHIIKAWA_PET).at(0.3F).facing(60.0F).hold(Items.WOODEN_HOE).walk(),
                 pet(InitEntity.HACHIWARE_PET).at(0.72F).facing(-40.0F).hold(InitItems.HACHIWARE_WEAPON.get()).walk()),
-            panel(pet(InitEntity.CHIIKAWA_PET).at(0.42F).facing(-20.0F).play("tame", "eat").say("manual.chiikawa.say.yum"),
+            panel(pet(InitEntity.CHIIKAWA_PET).at(0.42F).facing(-20.0F).play("tame", "eat").say(VoiceMoment.TAME),
                 item(Items.BREAD).at(0.72F).up(0.35F).bob()),
             panel(pet(InitEntity.CHIIKAWA_PET).at(0.2F).facing(60.0F).walk(),
                 pet(InitEntity.USAGI_PET).at(0.5F).sit(),
@@ -70,7 +77,7 @@ public final class ManualData {
     private static ManualPage work() {
         return page("work", 10,
             panel(prop(InitBlocks.LABOR_BOARD.get()).at(0.66F).facing(-25.0F),
-                pet(InitEntity.CHIIKAWA_PET).at(0.26F).facing(30.0F).hold(Items.WOODEN_HOE).say("manual.chiikawa.say.wa")),
+                pet(InitEntity.CHIIKAWA_PET).at(0.26F).facing(30.0F).hold(Items.WOODEN_HOE).say(VoiceMoment.IDLE)),
             panel(prop(InitBlocks.LABOR_BOARD.get()).at(0.74F).facing(-30.0F).scale(0.85F),
                 pet(InitEntity.CHIIKAWA_PET).at(0.47F).facing(60.0F).hold(Items.WOODEN_HOE).action(PetAction.PICKUP),
                 pet(InitEntity.USAGI_PET).at(0.17F).facing(50.0F).hold(InitItems.USAGI_WEAPON.get()).walk()),
@@ -83,7 +90,7 @@ public final class ManualData {
                 item(Items.GRASS).at(0.6F),
                 item(Items.GRASS).at(0.7F).scale(0.8F)),
             panel(pet(InitEntity.CHIIKAWA_PET).at(0.42F).facing(15.0F).hold(Items.WOODEN_HOE)
-                    .play("jump", "tame").every(30).say("manual.chiikawa.say.yay"),
+                    .play("jump", "tame").every(30).say(VoiceMoment.PAID),
                 money().at(0.72F).up(0.45F).bob()));
     }
 
@@ -98,7 +105,7 @@ public final class ManualData {
             panel(item(Items.WHEAT).at(0.18F).up(0.35F),
                 prop(InitBlocks.SHOP.get()).at(0.5F),
                 money().at(0.82F).up(0.35F).bob()),
-            panel(pet(InitEntity.CHIIKAWA_PET).at(0.42F).play("tame", "jump").every(30).say("manual.chiikawa.say.yay"),
+            panel(pet(InitEntity.CHIIKAWA_PET).at(0.42F).play("tame", "jump").every(30).say(VoiceMoment.PAID),
                 money().at(0.72F).up(0.4F).bob()));
     }
 
@@ -109,7 +116,7 @@ public final class ManualData {
                 pet(InitEntity.USAGI_PET).at(0.34F).facing(45.0F).action(PetAction.PICKUP),
                 item(Items.POPPY).at(0.5F).up(0.55F).bob()),
             panel(pet(InitEntity.USAGI_PET).at(0.5F).facing(-70.0F).hold(Items.POPPY).walk()),
-            panel(pet(InitEntity.USAGI_PET).at(0.5F).hold(Items.POPPY).play("open_mouth1").say("manual.chiikawa.say.present")),
+            panel(pet(InitEntity.USAGI_PET).at(0.5F).hold(Items.POPPY).play("open_mouth1").say(VoiceMoment.GIFT)),
             panel(pet(InitEntity.CHIIKAWA_PET).at(0.3F).facing(20.0F).hold(Items.COOKIE),
                 pet(InitEntity.USAGI_PET).at(0.7F).facing(-20.0F).hold(Items.POPPY)));
     }
@@ -136,9 +143,11 @@ public final class ManualData {
             panel(prop(InitBlocks.LABOR_BOARD.get()).at(0.72F).facing(-30.0F).scale(0.85F),
                 pet(InitEntity.RAKKO_PET).at(0.38F).facing(50.0F).hold(Items.IRON_SWORD).walk()),
             panel(pet(InitEntity.RAKKO_PET).at(0.3F).facing(40.0F).hold(Items.IRON_SWORD).action(PetAction.SLASH).every(20),
-                pet(InitEntity.MOMONGA_PET).at(0.72F).facing(-40.0F).hold(Items.BOW).action(PetAction.BOW_DRAW).every(30)),
-            panel(pet(InitEntity.RAKKO_PET).at(0.5F).hold(Items.IRON_SWORD).play("attacked").every(30)
-                .say("manual.chiikawa.say.ouch")));
+                // Usagi, not Momonga, at the bow: Momonga has never been one for a fight.
+                pet(InitEntity.USAGI_PET).at(0.72F).facing(-40.0F).hold(Items.BOW).action(PetAction.BOW_DRAW).every(30)),
+            // Chiikawa takes the hit, not Rakko: Rakko never cries out, and Chiikawa cries.
+            panel(pet(InitEntity.CHIIKAWA_PET).at(0.5F).hold(InitItems.CHIIKAWA_WEAPON.get()).play("attacked").every(30)
+                .say(VoiceMoment.HURT, 2)));
     }
 
     /** Falling and coming back: the doll, the cake, backing off, and the bell. */
@@ -148,11 +157,32 @@ public final class ManualData {
             panel(item(Items.CAKE).at(0.3F).scale(1.4F),
                 item(InitItems.CHIIKAWA_DOLL.get()).at(0.3F).up(0.45F).bob(),
                 pet(InitEntity.CHIIKAWA_PET).at(0.7F).facing(-20.0F).play("tame", "jump").every(30)
-                    .say("manual.chiikawa.say.yay")),
+                    .say(VoiceMoment.REVIVE)),
             panel(pet(InitEntity.CHIIKAWA_PET).at(0.45F).facing(-70.0F).hold(Items.WOODEN_SWORD).walk()),
             panel(item(InitItems.PET_BELL.get()).at(0.2F).up(0.5F).bob(),
                 pet(InitEntity.CHIIKAWA_PET).at(0.55F).facing(-60.0F).walk(),
                 pet(InitEntity.USAGI_PET).at(0.82F).facing(-60.0F).walk()));
+    }
+
+    /**
+     * Among friends (0.1.1): catchphrases in a bubble, and pets meeting pets — Momonga
+     * clinging on, a treat, coffee and the crab greeting, and an audience for a busker.
+     */
+    private static ManualPage friends() {
+        return page("friends", 70,
+            panel(pet(InitEntity.HACHIWARE_PET).at(0.5F).facing(10.0F).hold(InitItems.HACHIWARE_WEAPON.get())
+                .play("open_mouth1").say(VoiceMoment.HUNT)),
+            panel(pet(InitEntity.MOMONGA_PET).at(0.36F).facing(60.0F).play("cling").every(60),
+                pet(InitEntity.CHIIKAWA_PET).at(0.64F).facing(-40.0F).reaction(PetReaction.HURT).every(60)
+                    .say(VoiceMoment.CLUNG_TO)),
+            panel(pet(InitEntity.RAKKO_PET).at(0.34F).facing(60.0F).hold(Items.COOKIE),
+                pet(InitEntity.CHIIKAWA_PET).at(0.66F).facing(-40.0F).reaction(PetReaction.HAPPY)
+                    .say(VoiceMoment.TREATED)),
+            panel(pet(InitEntity.CHIIKAWA_PET).at(0.2F).facing(50.0F).sit().play("clap").every(30)
+                    .say(VoiceMoment.LISTEN),
+                pet(InitEntity.USAGI_PET).at(0.43F).facing(40.0F).sit().play("clap").every(37),
+                pet(InitEntity.HACHIWARE_PET).at(0.75F).facing(-30.0F).hold(InitItems.MUSIC_BOX.get())
+                    .play("guitar").every(200)));
     }
 
     private static ManualPage page(String name, int order, Actor[]... panels) {
@@ -206,6 +236,7 @@ public final class ManualData {
         private boolean sit;
         private boolean walk;
         private Optional<PetAction> action = Optional.empty();
+        private Optional<PetReaction> reaction = Optional.empty();
         private List<String> play = List.of();
         private int every = ManualPage.Actor.EVERY;
         private Optional<String> say = Optional.empty();
@@ -281,8 +312,19 @@ public final class ManualData {
             return this;
         }
 
-        Actor say(String key) {
-            say = Optional.of(key);
+        Actor reaction(PetReaction face) {
+            reaction = Optional.of(face);
+            return this;
+        }
+
+        /** The pet's first line for the moment: what it says in the world then, in its own words. */
+        Actor say(VoiceMoment moment) {
+            return say(moment, 1);
+        }
+
+        /** One of the pet's own lines for the moment, counted from 1. */
+        Actor say(VoiceMoment moment, int line) {
+            say = Optional.of(PetVoiceData.lineKey(pet.orElseThrow().getPath(), moment, line));
             return this;
         }
 
@@ -293,7 +335,7 @@ public final class ManualData {
 
         ManualPage.Actor build() {
             return new ManualPage.Actor(pet, prop, item, x, y, scale, facing, hold, bag, sit, walk,
-                action, Optional.empty(), new ManualPage.Motion(play, every, say, bob));
+                action, reaction, new ManualPage.Motion(play, every, say, bob));
         }
     }
 }
