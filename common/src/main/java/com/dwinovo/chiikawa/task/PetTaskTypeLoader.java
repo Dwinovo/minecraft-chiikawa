@@ -2,7 +2,6 @@ package com.dwinovo.chiikawa.task;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.init.InitRegistry;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
@@ -10,9 +9,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 /**
@@ -20,7 +21,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
  * that fails to parse is skipped; a type naming a capability or work counter that does
  * not exist is kept but warned about, since no pet could ever take or finish it.
  */
-public final class PetTaskTypeLoader extends SimpleJsonResourceReloadListener {
+public final class PetTaskTypeLoader extends SimpleJsonResourceReloadListener<JsonElement> {
     public static final String DIRECTORY = "pet_task";
     /** Id for loaders that register reload listeners by id. */
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
@@ -28,7 +29,7 @@ public final class PetTaskTypeLoader extends SimpleJsonResourceReloadListener {
     private static final String LOG_PREFIX = "[chiikawa-task] ";
 
     public PetTaskTypeLoader() {
-        super(new Gson(), DIRECTORY);
+        super(ExtraCodecs.JSON, FileToIdConverter.json(DIRECTORY));
     }
 
     @Override

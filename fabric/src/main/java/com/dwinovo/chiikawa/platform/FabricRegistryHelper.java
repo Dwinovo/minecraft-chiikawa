@@ -6,10 +6,12 @@ import java.util.function.Supplier;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricTrackedDataRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.world.poi.PointOfInterestHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -37,6 +39,12 @@ public class FabricRegistryHelper implements IRegistryHelper {
         BlockEntityType<T> type = FabricBlockEntityTypeBuilder.create(factory::apply, block.get()).build();
         Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, id, type);
         return () -> type;
+    }
+
+    @Override
+    public <T> EntityDataSerializer<T> registerEntityDataSerializer(ResourceLocation id, EntityDataSerializer<T> serializer) {
+        FabricTrackedDataRegistry.register(id, serializer);
+        return serializer;
     }
 
     @Override

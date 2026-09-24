@@ -4,6 +4,7 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -31,6 +32,14 @@ public interface IRegistryHelper {
      */
     <T extends BlockEntity> Supplier<BlockEntityType<T>> registerBlockEntity(ResourceLocation id,
         BiFunction<BlockPos, BlockState, T> factory, Supplier<? extends Block> block);
+
+    /**
+     * Registers an entity data serializer the game does not have. Vanilla keeps its own in
+     * a fixed id map, so each loader adds to it its own way.
+     *
+     * @return {@code serializer}, for a {@code defineId} to use
+     */
+    <T> EntityDataSerializer<T> registerEntityDataSerializer(ResourceLocation id, EntityDataSerializer<T> serializer);
 
     <T> Registry<T> createRegistry(ResourceKey<Registry<T>> key, ResourceLocation defaultId, boolean sync);
 

@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.entity;
 
+import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import java.util.List;
@@ -39,7 +40,7 @@ public final class PetUnloadFollow {
                 }
                 // Whether or not it followed, this is the last anyone will see of it until
                 // somebody loads the chunk again, which is exactly what a bell is rung for.
-                if (pet.getOwnerUUID() != null) {
+                if (PetTargeting.ownerId(pet) != null) {
                     PetRoster.of(level).note(pet);
                 }
             }

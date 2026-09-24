@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.constraint;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import java.util.UUID;
 
 /**
@@ -17,7 +18,7 @@ public sealed interface PetOwnership {
     }
 
     static PetOwnership of(AbstractPet pet) {
-        UUID ownerId = pet.getOwnerUUID();
+        UUID ownerId = PetTargeting.ownerId(pet);
         return pet.isTame() && ownerId != null ? new Owned(ownerId) : WILD;
     }
 }

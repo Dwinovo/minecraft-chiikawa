@@ -19,8 +19,6 @@ import java.util.function.UnaryOperator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -30,6 +28,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 /**
  * Holds a labor board's slips for the current day. The day's slips are rolled the first
@@ -232,27 +232,25 @@ public class LaborBoardBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.putLong("Day", day);
-        tag.putInt("Level", boardLevel);
-        tag.put("Slots", SLOTS_CODEC.encodeStart(NbtOps.INSTANCE, slots).getOrThrow());
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        output.putLong("Day", day);
+        output.putInt("Level", boardLevel);
+        output.store("Slots", SLOTS_CODEC, slots);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        day = tag.contains("Day", Tag.TAG_LONG) ? tag.getLong("Day") : NOT_ROLLED;
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        day = input.getLongOr("Day", NOT_ROLLED);
         // Kept as saved and read within the levels there are when it is used: a pack that
         // takes levels away for a while does not cost the board the ones it paid for.
-        boardLevel = tag.contains("Level", Tag.TAG_INT)
-            ? Math.max(BoardLevels.FIRST_LEVEL, tag.getInt("Level"))
-            : BoardLevels.FIRST_LEVEL;
-        slots = tag.contains("Slots", Tag.TAG_LIST)
-            ? SLOTS_CODEC.parse(NbtOps.INSTANCE, tag.get("Slots")).result().orElse(List.of())
-            : List.of();
+        boardLevel = input.getInt("Level")
+            .map(saved -> Math.max(BoardLevels.FIRST_LEVEL, saved))
+            .orElse(BoardLevels.FIRST_LEVEL);
+        slots = input.read("Slots", SLOTS_CODEC).orElse(List.of());
         // A save holds the slips and the plates follow from them; a player's game is sent
         // the plates alone.
-        hanging = tag.contains("Hanging", Tag.TAG_INT) ? tag.getInt("Hanging") : BoardSlips.hanging(slots);
+        hanging = input.getInt("Hanging").orElseGet(() -> BoardSlips.hanging(slots));
     }
 }

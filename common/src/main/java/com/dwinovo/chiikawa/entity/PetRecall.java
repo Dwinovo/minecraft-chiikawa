@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.entity;
 
+import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,7 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.entity.EntityTypeTest;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -76,11 +77,11 @@ public final class PetRecall {
      * their chance to turn up.
      */
     public static void ring(ServerPlayer owner) {
-        MinecraftServer server = owner.server;
+        MinecraftServer server = owner.level().getServer();
         Set<UUID> answered = new HashSet<>();
         for (ServerLevel level : server.getAllLevels()) {
             for (AbstractPet pet : level.getEntities(EntityTypeTest.forClass(AbstractPet.class),
-                    candidate -> candidate.isAlive() && owner.getUUID().equals(candidate.getOwnerUUID()))) {
+                    candidate -> candidate.isAlive() && owner.getUUID().equals(PetTargeting.ownerId(candidate)))) {
                 if (bring(pet, owner)) {
                     answered.add(pet.getUUID());
                 }
@@ -89,7 +90,7 @@ public final class PetRecall {
 
         List<Awaited> awaited = new ArrayList<>();
         List<String> missing = new ArrayList<>();
-        for (PetRoster.Entry entry : PetRoster.of(owner.serverLevel()).pets(owner.getUUID())) {
+        for (PetRoster.Entry entry : PetRoster.of(owner.level()).pets(owner.getUUID())) {
             if (answered.contains(entry.pet())) {
                 continue;
             }
@@ -188,11 +189,11 @@ public final class PetRecall {
      * @return whether the pet is now beside the owner
      */
     private static boolean bring(AbstractPet pet, ServerPlayer owner) {
-        ServerLevel home = owner.serverLevel();
+        ServerLevel home = owner.level();
         AbstractPet arrived = pet;
         if (pet.level() != home) {
-            Entity moved = pet.changeDimension(new DimensionTransition(home, owner.position(), Vec3.ZERO,
-                pet.getYRot(), pet.getXRot(), DimensionTransition.DO_NOTHING));
+            Entity moved = pet.teleport(new TeleportTransition(home, owner.position(), Vec3.ZERO,
+                pet.getYRot(), pet.getXRot(), TeleportTransition.DO_NOTHING));
             if (!(moved instanceof AbstractPet crossed)) {
                 return false;
             }
