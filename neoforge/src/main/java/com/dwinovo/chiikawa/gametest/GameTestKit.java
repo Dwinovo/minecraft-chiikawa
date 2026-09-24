@@ -24,10 +24,10 @@ import net.minecraft.world.phys.AABB;
  * one, given a tool, and left to get on with it while the case watches the world tick by.
  * The exit code is the number of failures, so this reads straight into CI.
  *
- * <p>The cases live here rather than in {@code common} because the game decides which
- * namespace a test belongs to from {@code @GameTestHolder}, which is NeoForge's own
- * annotation — a case declared in common would be filed under {@code minecraft} and
- * dropped by the namespace filter. Nearly everything they exercise is common code all the
+ * <p>The cases live here rather than in {@code common} because the game is handed them
+ * through NeoForge's own {@code RegisterGameTestsEvent}, by {@code GameTestRegistration}
+ * from their {@code @GameTestHolder} — a case declared in common would have nothing to
+ * hand it over. Nearly everything they exercise is common code all the
  * same; what is loader-shaped — services, networking, registration — is covered by the
  * smoke runs on both loaders.
  *

@@ -14,28 +14,26 @@ import com.dwinovo.chiikawa.item.PetDollItem;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Where a pet comes from and what happens after it is gone: the tool a wild one is born
@@ -64,18 +62,18 @@ public final class LifeGameTests {
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 200)
     public static void a_wild_pet_is_born_with_a_tool(GameTestHelper helper) {
         BlockPos at = helper.absolutePos(new BlockPos(3, STAND, 3));
-        AbstractPet pet = InitEntity.USAGI_PET.get().spawn(helper.getLevel(), at, MobSpawnType.NATURAL);
+        AbstractPet pet = InitEntity.USAGI_PET.get().spawn(helper.getLevel(), at, EntitySpawnReason.NATURAL);
 
-        helper.assertTrue(pet != null, "nothing spawned");
-        helper.assertFalse(pet.getMainHandItem().isEmpty(), "a wild pet turned up empty-handed");
+        helper.assertTrue(pet != null, Component.literal("nothing spawned"));
+        helper.assertFalse(pet.getMainHandItem().isEmpty(), Component.literal("a wild pet turned up empty-handed"));
         // Usagi's personality deals a weapon or a hoe and nothing else; a third thing in its
         // hands means the draw stopped reading the personality it belongs to.
         helper.assertTrue(pet.getMainHandItem().is(InitItems.USAGI_WEAPON.get())
                 || pet.getMainHandItem().is(Items.WOODEN_HOE),
-            "a wild rabbit turned up with something its personality never deals: "
-                + pet.getMainHandItem());
+            Component.literal("a wild rabbit turned up with something its personality never deals: "
+                + pet.getMainHandItem()));
         helper.assertTrue(pet.getPetDirective() == PetDirective.FREE,
-            "a wild pet was not left to its own devices");
+            Component.literal("a wild pet was not left to its own devices"));
         helper.succeed();
     }
 
@@ -108,11 +106,11 @@ public final class LifeGameTests {
                 .filter(AbstractPet::isAlive)
                 .findFirst()
                 .orElse(null);
-            helper.assertTrue(revived != null, "nothing came back from the cake");
+            helper.assertTrue(revived != null, Component.literal("nothing came back from the cake"));
             helper.assertTrue(revived.getMainHandItem().is(Items.WOODEN_HOE),
-                "the pet came back without the hoe it died with");
+                Component.literal("the pet came back without the hoe it died with"));
             helper.assertTrue(GameTestKit.carries(revived, Items.WHEAT),
-                "the pet came back without what was in its bag");
+                Component.literal("the pet came back without what was in its bag"));
         });
     }
 
@@ -138,11 +136,11 @@ public final class LifeGameTests {
                 .filter(AbstractPet::isAlive)
                 .findFirst()
                 .orElse(null);
-            helper.assertTrue(pet != null, "nothing came from the cake");
-            helper.assertTrue(pet.getType() == InitEntity.MOMONGA_PET.get(), "the doll brought the wrong friend: " + pet.getType());
-            helper.assertFalse(pet.isTame(), "a blank doll handed over a pet already tamed");
+            helper.assertTrue(pet != null, Component.literal("nothing came from the cake"));
+            helper.assertTrue(pet.getType() == InitEntity.MOMONGA_PET.get(), Component.literal("the doll brought the wrong friend: " + pet.getType()));
+            helper.assertFalse(pet.isTame(), Component.literal("a blank doll handed over a pet already tamed"));
             helper.assertTrue(pet.getPetDirective() == PetDirective.FREE,
-                "a pet nobody owns is waiting to follow someone");
+                Component.literal("a pet nobody owns is waiting to follow someone"));
         });
     }
 
@@ -153,17 +151,17 @@ public final class LifeGameTests {
      */
     @GameTest(template = "floor8", batch = BATCH)
     public static void wild_pets_spawn_where_the_data_pack_says(GameTestHelper helper) {
-        Registry<Biome> biomes = helper.getLevel().registryAccess().registryOrThrow(Registries.BIOME);
+        Registry<Biome> biomes = helper.getLevel().registryAccess().lookupOrThrow(Registries.BIOME);
         EntityType<?> usagi = InitEntity.USAGI_PET.get();
 
-        helper.assertTrue(spawns(biomes.getOrThrow(Biomes.PLAINS), usagi), "no Usagi turns up on the plains");
-        helper.assertFalse(spawns(biomes.getOrThrow(Biomes.OCEAN), usagi), "Usagi turns up at sea, where no list puts it");
+        helper.assertTrue(spawns(biomes.getOrThrow(Biomes.PLAINS).value(), usagi), Component.literal("no Usagi turns up on the plains"));
+        helper.assertFalse(spawns(biomes.getOrThrow(Biomes.OCEAN).value(), usagi), Component.literal("Usagi turns up at sea, where no list puts it"));
         helper.succeed();
     }
 
     private static boolean spawns(Biome biome, EntityType<?> type) {
         return biome.getMobSettings().getMobs(type.getCategory()).unwrap().stream()
-            .anyMatch(spawner -> spawner.type == type);
+            .anyMatch(spawner -> spawner.value().type() == type);
     }
 
     /**
@@ -172,12 +170,13 @@ public final class LifeGameTests {
      */
     @GameTest(template = "floor8", batch = BATCH)
     public static void no_doll_can_be_made(GameTestHelper helper) {
-        RegistryAccess registries = helper.getLevel().registryAccess();
-        List<RecipeHolder<?>> recipes = List.copyOf(helper.getLevel().getRecipeManager().getRecipes());
+        ContextMap context = SlotDisplayContext.fromLevel(helper.getLevel());
+        List<RecipeHolder<?>> recipes = List.copyOf(helper.getLevel().recipeAccess().getRecipes());
         for (Item item : BuiltInRegistries.ITEM) {
             if (item instanceof PetDollItem) {
-                helper.assertFalse(recipes.stream().anyMatch(recipe -> recipe.value().getResultItem(registries).is(item)),
-                    BuiltInRegistries.ITEM.getKey(item) + " can be made, which turns it into a spawn egg");
+                helper.assertFalse(recipes.stream().anyMatch(recipe -> recipe.value().display().stream()
+                    .anyMatch(display -> display.result().resolveForStacks(context).stream().anyMatch(stack -> stack.is(item)))),
+                    Component.literal(BuiltInRegistries.ITEM.getKey(item) + " can be made, which turns it into a spawn egg"));
             }
         }
         helper.succeed();

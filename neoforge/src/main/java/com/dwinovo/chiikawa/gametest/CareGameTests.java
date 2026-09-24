@@ -9,10 +9,10 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
+import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
@@ -20,8 +20,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * How a pet and a person come to belong together: feeding one until it trusts you, it
@@ -61,12 +59,12 @@ public final class CareGameTests {
             pet.mobInteract(player, InteractionHand.MAIN_HAND);
         }
 
-        helper.assertTrue(pet.isTame(), "a wild pet ate " + COOKIES + " cookies and still would not be tamed");
+        helper.assertTrue(pet.isTame(), Component.literal("a wild pet ate " + COOKIES + " cookies and still would not be tamed"));
         // By name on the tag, not by the owner standing there: this one never entered the
         // world, and a pet asked who its owner is looks them up among the players present.
-        helper.assertTrue(player.getUUID().equals(pet.getOwnerUUID()), "the pet was tamed by somebody else");
+        helper.assertTrue(player.getUUID().equals(PetTargeting.ownerId(pet)), Component.literal("the pet was tamed by somebody else"));
         helper.assertTrue(pet.getPetDirective() == PetDirective.FOLLOW,
-            "a freshly tamed pet did not come to heel");
+            Component.literal("a freshly tamed pet did not come to heel"));
         helper.succeed();
     }
 
@@ -82,7 +80,7 @@ public final class CareGameTests {
         owner.teleportTo(away.getX() + 0.5, away.getY(), away.getZ() + 0.5);
 
         helper.succeedWhen(() -> helper.assertTrue(pet.distanceToSqr(owner) < AT_HEEL * AT_HEEL,
-            "the pet stayed where it was while its owner walked off"));
+            Component.literal("the pet stayed where it was while its owner walked off")));
     }
 
     /**
@@ -103,7 +101,7 @@ public final class CareGameTests {
 
         helper.runAtTickTime(LEAVE_IT_TICKS, () -> {
             helper.assertTrue(pet.blockPosition().distSqr(seat) < AT_HEEL * AT_HEEL,
-                "a sitting pet got up and went after its owner");
+                Component.literal("a sitting pet got up and went after its owner"));
             helper.succeed();
         });
     }
@@ -121,7 +119,7 @@ public final class CareGameTests {
 
         float health = bystander.getHealth();
         helper.runAtTickTime(LEAVE_IT_TICKS, () -> {
-            helper.assertTrue(bystander.getHealth() >= health, "a wild pet went for the player");
+            helper.assertTrue(bystander.getHealth() >= health, Component.literal("a wild pet went for the player"));
             helper.succeed();
         });
     }

@@ -21,10 +21,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
@@ -32,8 +31,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The labor board, end to end: a pet that may not weed for free walks over, takes the
@@ -71,7 +68,7 @@ public final class BoardGameTests {
 
         AbstractPet pet = holding(worker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
         helper.succeedWhen(() -> helper.assertTrue(count(pet, Items.EMERALD) > 0,
-            "the farmer never came away with anything for its trouble"));
+            Component.literal("the farmer never came away with anything for its trouble")));
     }
 
     /**
@@ -91,9 +88,9 @@ public final class BoardGameTests {
             if (count(pet, Items.EMERALD) > 0) {
                 paid.set(true);
             }
-            helper.assertTrue(paid.get(), "the farmer has not been paid for the first slip yet");
+            helper.assertTrue(paid.get(), Component.literal("the farmer has not been paid for the first slip yet"));
             // Being paid clears the slip, so one in hand afterwards is a second one.
-            helper.assertTrue(pet.getTask().isPresent(), "the farmer stopped after one job");
+            helper.assertTrue(pet.getTask().isPresent(), Component.literal("the farmer stopped after one job"));
         });
     }
 
@@ -147,12 +144,12 @@ public final class BoardGameTests {
                 boolean firstHasOne = first.getTask().isPresent();
                 boolean secondHasOne = second.getTask().isPresent();
                 helper.assertFalse(firstHasOne && secondHasOne,
-                    "both farmers walked away with the day's only slip");
+                    Component.literal("both farmers walked away with the day's only slip"));
                 if (firstHasOne || secondHasOne) {
                     taken.set(true);
                 }
             })
-            .thenExecute(() -> helper.assertTrue(taken.get(), "neither farmer ever took the slip"))
+            .thenExecute(() -> helper.assertTrue(taken.get(), Component.literal("neither farmer ever took the slip")))
             .thenSucceed();
     }
 
@@ -171,14 +168,14 @@ public final class BoardGameTests {
     public static void sending_a_board_to_players_changes_nothing(GameTestHelper helper) {
         BlockPos at = new BlockPos(3, STAND, 3);
         helper.setBlock(at, InitBlocks.LABOR_BOARD.get());
-        LaborBoardBlockEntity board = (LaborBoardBlockEntity) helper.getBlockEntity(at);
+        LaborBoardBlockEntity board = helper.getBlockEntity(at, LaborBoardBlockEntity.class);
         HolderLookup.Provider registries = helper.getLevel().registryAccess();
         CompoundTag before = board.saveWithoutMetadata(registries);
 
         board.getUpdateTag(registries);
 
         helper.assertTrue(before.equals(board.saveWithoutMetadata(registries)),
-            "asking for what players see changed the board: " + before + " became " + board.saveWithoutMetadata(registries));
+            Component.literal("asking for what players see changed the board: " + before + " became " + board.saveWithoutMetadata(registries)));
         helper.succeed();
     }
 
@@ -186,29 +183,29 @@ public final class BoardGameTests {
     public static void a_board_puts_its_plates_up_by_itself(GameTestHelper helper) {
         BlockPos at = new BlockPos(3, STAND, 3);
         helper.setBlock(at, InitBlocks.LABOR_BOARD.get());
-        LaborBoardBlockEntity board = (LaborBoardBlockEntity) helper.getBlockEntity(at);
+        LaborBoardBlockEntity board = helper.getBlockEntity(at, LaborBoardBlockEntity.class);
 
         // Nothing asks it: no pet about, no player at it.
         helper.succeedWhen(() -> helper.assertTrue(
             board.hanging() == (1 << BoardLevels.current().slipsAt(board.boardLevel())) - 1,
-            "a board nobody has looked at still hangs no plates: " + Integer.toBinaryString(board.hanging())));
+            Component.literal("a board nobody has looked at still hangs no plates: " + Integer.toBinaryString(board.hanging()))));
     }
 
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WATCH_TICKS + 200)
     public static void a_plate_comes_down_when_a_pet_takes_its_slip(GameTestHelper helper) {
         BlockPos at = weedingBoard(helper);
         helper.setBlock(at, InitBlocks.LABOR_BOARD.get());
-        LaborBoardBlockEntity board = (LaborBoardBlockEntity) helper.getBlockEntity(at);
+        LaborBoardBlockEntity board = helper.getBlockEntity(at, LaborBoardBlockEntity.class);
         int all = (1 << board.today().size()) - 1;
-        helper.assertTrue(board.hanging() == all, "a new day's board does not hang all its plates: " + board.hanging());
+        helper.assertTrue(board.hanging() == all, Component.literal("a new day's board does not hang all its plates: " + board.hanging()));
         weedPatch(helper);
 
         AbstractPet farmer = holding(worker(helper, new BlockPos(3, STAND, 4)), Items.WOODEN_HOE);
 
         helper.succeedWhen(() -> {
-            helper.assertTrue(farmer.getTask().isPresent(), "the farmer has not taken a slip yet");
+            helper.assertTrue(farmer.getTask().isPresent(), Component.literal("the farmer has not taken a slip yet"));
             helper.assertTrue(Integer.bitCount(board.hanging()) == Integer.bitCount(all) - 1,
-                "the farmer took a slip and its plate is still up: " + Integer.toBinaryString(board.hanging()));
+                Component.literal("the farmer took a slip and its plate is still up: " + Integer.toBinaryString(board.hanging())));
         });
     }
 

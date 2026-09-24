@@ -17,17 +17,14 @@ import com.dwinovo.chiikawa.item.PetDollData;
 import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The rules around a slip that are easy to state and easy to break: who may take one and
@@ -64,7 +61,7 @@ public final class SlipGameTests {
         helper.setBlock(new BlockPos(7, STAND, 4), InitBlocks.LABOR_BOARD.get());
 
         helper.runAtTickTime(LEAVE_IT_TICKS, () -> {
-            helper.assertTrue(pet.getTask().isEmpty(), "a wild pet took a slip before the afternoon");
+            helper.assertTrue(pet.getTask().isEmpty(), Component.literal("a wild pet took a slip before the afternoon"));
             helper.succeed();
         });
     }
@@ -96,7 +93,7 @@ public final class SlipGameTests {
     public static void a_slip_does_not_go_into_the_doll(GameTestHelper helper) {
         AbstractPet pet = holding(worker(helper, new BlockPos(3, STAND, 3)), Items.WOODEN_HOE);
         pet.setTask(weeding());
-        helper.assertTrue(pet.getTask().isPresent(), "the pet would not take the slip it was handed");
+        helper.assertTrue(pet.getTask().isPresent(), Component.literal("the pet would not take the slip it was handed"));
         pet.hurt(pet.damageSources().generic(), pet.getMaxHealth() * 2.0F);
 
         helper.runAtTickTime(DEATH_TICKS / 2, () -> {
@@ -104,7 +101,7 @@ public final class SlipGameTests {
             boolean carriesSlip = PetDollData.readPetData(doll)
                 .map(data -> data.contains("Task"))
                 .orElse(false);
-            helper.assertFalse(carriesSlip, "the doll came away with the slip still on it");
+            helper.assertFalse(carriesSlip, Component.literal("the doll came away with the slip still on it"));
             helper.succeed();
         });
     }

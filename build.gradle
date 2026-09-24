@@ -39,8 +39,8 @@ subprojects {
 }
 
 /**
- * 游戏内用例的统一入口。只在 NeoForge 上跑：原版把测试的命名空间定在 {@code @GameTestHolder}
- * 上，而那是 NeoForge 专有注解；宠物逻辑几乎全在 common，跑一个 loader 照样测得到。
+ * 游戏内用例的统一入口。只在 NeoForge 上跑：用例经 NeoForge 专有的 {@code RegisterGameTestsEvent}
+ * 交给原版；宠物逻辑几乎全在 common，跑一个 loader 照样测得到。
  * 退出码是失败用例数，CI 不用解日志。
  */
 tasks.register('gameTest') {

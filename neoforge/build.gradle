@@ -41,6 +41,8 @@ neoForge {
         gameTestServer {
             type = 'gameTestServer'
             gameDirectory = mkdir(file('runs/gametestserver'))
+            // Only the mod's own cases: the game's own always_pass would run beside them otherwise.
+            programArguments.addAll '--tests', "${mod_id}:*"
         }
     }
     mods {
