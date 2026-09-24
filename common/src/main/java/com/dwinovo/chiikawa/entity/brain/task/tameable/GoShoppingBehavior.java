@@ -13,7 +13,6 @@ import com.dwinovo.chiikawa.shop.Wallet;
 import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -151,7 +150,7 @@ public class GoShoppingBehavior extends Behavior<AbstractPet> {
      * @return whether it was eaten rather than kept
      */
     private static boolean keep(AbstractPet pet, ItemStack goods) {
-        if (pet.getHealth() < pet.getMaxHealth() && goods.has(DataComponents.FOOD)) {
+        if (pet.getHealth() < pet.getMaxHealth() && goods.isEdible()) {
             pet.heal(PetInteractHandler.FEED_HEAL);
             return true;
         }

@@ -10,10 +10,15 @@ import com.dwinovo.chiikawa.entity.impl.ShisaPet;
 import com.dwinovo.chiikawa.entity.impl.UsagiPet;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.platform.services.IEntityHelper;
+import net.fabricmc.fabric.api.dimension.v1.FabricDimensions;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.portal.PortalInfo;
+import net.minecraft.world.phys.Vec3;
 
 public class FabricEntityHelper implements IEntityHelper {
     @Override
@@ -49,5 +54,10 @@ public class FabricEntityHelper implements IEntityHelper {
         // 1.20.1: use SpawnPlacements.Type enum instead of SpawnPlacementTypes
         SpawnPlacements.register(type, SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
             Animal::checkAnimalSpawnRules);
+    }
+
+    @Override
+    public Entity changeDimension(Entity entity, ServerLevel destination, Vec3 position, float yRot, float xRot) {
+        return FabricDimensions.teleport(entity, destination, new PortalInfo(position, Vec3.ZERO, yRot, xRot));
     }
 }

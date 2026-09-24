@@ -67,6 +67,17 @@ public class FabricRegistryHelper implements IRegistryHelper {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
+    public <T> ResourceLocation getKey(ResourceKey<Registry<T>> key, T value) {
+        return ((Registry<T>) net.minecraft.core.registries.BuiltInRegistries.REGISTRY.get(key.location())).getKey(value);
+    }
+
+    @Override
+    public <T> boolean containsKey(ResourceKey<Registry<T>> key, ResourceLocation id) {
+        return net.minecraft.core.registries.BuiltInRegistries.REGISTRY.get(key.location()).containsKey(id);
+    }
+
+    @Override
     public void registerToEventBus(Object eventBus) {
         // Fabric doesn't use a mod event bus for registry entries.
     }

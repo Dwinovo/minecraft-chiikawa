@@ -79,7 +79,6 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
@@ -89,11 +88,11 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -125,8 +124,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     /** How much quicker an eager pet moves. */
     private static final double EAGER_SPEED_BONUS = 0.3;
-    private static final ResourceLocation EAGER_SPEED_ID =
-        new ResourceLocation(Constants.MOD_ID, "eager");
+    /** 1.20.1 names an attribute modifier by a UUID, as vanilla's own do. */
+    private static final UUID EAGER_SPEED_ID = UUID.fromString("d23339ca-ef17-3397-8014-84e6b890d0a4");
 
     /** Slot the held tool lives in; see {@link #getItemBySlot}. */
     public static final int MAINHAND_SLOT = 0;
@@ -449,7 +448,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     public void setTask(@Nullable PetTask task) {
         this.entityData.set(TASK, task == null
             ? new CompoundTag()
-            : (CompoundTag) PetTask.CODEC.encodeStart(NbtOps.INSTANCE, task).getOrThrow());
+            : (CompoundTag) PetTask.CODEC.encodeStart(NbtOps.INSTANCE, task).getOrThrow(false, Constants.LOG::error));
     }
 
     /**
@@ -504,7 +503,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * @return the registry id of the pet's current capability, such as {@code chiikawa:farmer}
      */
     public ResourceLocation getCapabilityId() {
-        return InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.getCapabilityFromId(getPetJobId()));
+        return Services.REGISTRY.getKey(InitRegistry.PET_JOB_KEY, InitRegistry.getCapabilityFromId(getPetJobId()));
     }
 
     /**
@@ -595,8 +594,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * there: a pet led through a portal and left behind is exactly what a bell is for.
      */
     @Override
-    public Entity changeDimension(DimensionTransition transition) {
-        Entity moved = super.changeDimension(transition);
+    public Entity changeDimension(ServerLevel destination) {
+        Entity moved = super.changeDimension(destination);
         if (moved instanceof AbstractPet crossed && crossed.isTame()
                 && crossed.level() instanceof ServerLevel server) {
             PetRoster.of(server).note(crossed);
@@ -768,8 +767,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         }
         boolean applied = speed.getModifier(EAGER_SPEED_ID) != null;
         if (isEager() && !applied) {
-            speed.addTransientModifier(new AttributeModifier(EAGER_SPEED_ID, EAGER_SPEED_BONUS,
-                AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
+            speed.addTransientModifier(new AttributeModifier(EAGER_SPEED_ID, Constants.MOD_ID + ":eager",
+                EAGER_SPEED_BONUS, AttributeModifier.Operation.MULTIPLY_BASE));
         } else if (!isEager() && applied) {
             speed.removeModifier(EAGER_SPEED_ID);
         }
@@ -1007,7 +1006,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         }
         ItemStack gift = getPendingGift();
         if (!gift.isEmpty()) {
-            tag.put("Gift", gift.save(level().registryAccess()));
+            tag.put("Gift", gift.save(new CompoundTag()));
         }
         if (isEager()) {
             tag.putLong("EagerUntil", this.entityData.get(EAGER_UNTIL));
@@ -1031,7 +1030,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         }
         this.entityData.set(TASK, tag.contains("Task", Tag.TAG_COMPOUND) ? tag.getCompound("Task") : new CompoundTag());
         setPendingGift(tag.contains("Gift", Tag.TAG_COMPOUND)
-            ? ItemStack.parse(level().registryAccess(), tag.getCompound("Gift")).orElse(ItemStack.EMPTY)
+            ? ItemStack.of(tag.getCompound("Gift"))
             : ItemStack.EMPTY);
         this.entityData.set(EAGER_UNTIL, tag.getLong("EagerUntil"));
         applyEagerness();
@@ -1044,14 +1043,14 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      */
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType,
-            @Nullable SpawnGroupData spawnGroupData) {
+            @Nullable SpawnGroupData spawnGroupData, @Nullable CompoundTag dataTag) {
         // One the world found for itself comes with a tool, as a pet met in the wild does.
         if (spawnType == MobSpawnType.NATURAL || spawnType == MobSpawnType.CHUNK_GENERATION) {
             setItemSlot(EquipmentSlot.MAINHAND, PetPersonalities.of(getType()).drawWildTool(level.getRandom()));
         }
         // However it came, a new pet is nobody's yet, and goes its own way until it is tamed.
         setPetDirective(PetDirective.FREE);
-        return super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
+        return super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData, dataTag);
     }
 
     /** A newly tamed pet follows its owner, keeping everything it carries. */

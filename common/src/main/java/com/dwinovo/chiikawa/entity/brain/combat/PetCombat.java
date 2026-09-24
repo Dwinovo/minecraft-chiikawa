@@ -144,7 +144,7 @@ public final class PetCombat {
         if (attackSpeed <= 0.0) {
             return SLOWEST_SWING;
         }
-        return (int) Math.clamp(Math.round(20.0 / attackSpeed), FASTEST_SWING, SLOWEST_SWING);
+        return (int) Math.max(FASTEST_SWING, Math.min(SLOWEST_SWING, Math.round(20.0 / attackSpeed)));
     }
 
     /**
