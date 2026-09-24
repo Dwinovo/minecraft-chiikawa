@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.IntProviderType;
@@ -33,12 +34,16 @@ import net.minecraft.world.item.Item;
  * </ul>
  */
 public final class ModCodecs {
-    /** An item by id, failing on an id nobody registered rather than turning it into air. */
-    public static final Codec<Item> ITEM = ResourceLocation.CODEC.comapFlatMap(
+    /**
+     * An item by id, failing on an id nobody registered rather than turning it into air.
+     * Lazy, as the codecs here are, because the registries only exist once the game has
+     * bootstrapped, and reading a board's levels must not need them.
+     */
+    public static final Codec<Item> ITEM = ExtraCodecs.lazyInitializedCodec(() -> ResourceLocation.CODEC.comapFlatMap(
         id -> BuiltInRegistries.ITEM.getOptional(id)
             .map(DataResult::success)
             .orElseGet(() -> DataResult.error(() -> "Unknown registry key in minecraft:item: " + id)),
-        BuiltInRegistries.ITEM::getKey);
+        item -> BuiltInRegistries.ITEM.getKey(item)));
 
     /** A whole number: a plain number for a constant, otherwise its fields beside its type. */
     public static final Codec<IntProvider> INT_PROVIDER = Codec.either(Codec.INT, new InlineIntProvider()).xmap(
@@ -48,7 +53,8 @@ public final class ModCodecs {
             : Either.right(provider));
 
     /** As {@link #INT_PROVIDER}, never below one. */
-    public static final Codec<IntProvider> POSITIVE_INT_PROVIDER = IntProvider.codec(1, Integer.MAX_VALUE, INT_PROVIDER);
+    public static final Codec<IntProvider> POSITIVE_INT_PROVIDER =
+        ExtraCodecs.lazyInitializedCodec(() -> IntProvider.codec(1, Integer.MAX_VALUE, INT_PROVIDER));
 
     private ModCodecs() {
     }
