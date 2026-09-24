@@ -79,12 +79,12 @@ public final class SupplyGameTests {
     }
 
     /**
-     * Every word the handbook's own pages show is written in both languages: a title, a
+     * Every word the handbook's own pages show is written in every language: a title, a
      * caption or a bubble left out shows its raw key on the page.
      */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
-    public static void every_handbook_word_is_written_in_both_languages(GameTestHelper helper) {
-        for (String locale : List.of("zh_cn", "en_us")) {
+    public static void every_handbook_word_is_written_in_every_language(GameTestHelper helper) {
+        for (String locale : LanguageData.LOCALES) {
             Set<String> written = new HashSet<>();
             LanguageData.addTranslations(locale, (key, value) -> written.add(key));
             ManualData.all().forEach((id, page) -> {

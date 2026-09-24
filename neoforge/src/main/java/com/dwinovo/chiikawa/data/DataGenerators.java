@@ -31,10 +31,9 @@ public final class DataGenerators {
         event.getGenerator().addProvider(client, new ModBlockModelProvider(output));
         event.getGenerator().addProvider(client, new PropItemModelProvider(output));
         event.getGenerator().addProvider(client, new ManualProvider(output));
-        event.getGenerator().addProvider(client,
-                new ModLanguageProvider(output, "en_us"));
-        event.getGenerator().addProvider(client,
-                new ModLanguageProvider(output, "zh_cn"));
+        for (String locale : LanguageData.LOCALES) {
+            event.getGenerator().addProvider(client, new ModLanguageProvider(output, locale));
+        }
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
 
         event.getGenerator().addProvider(server,
