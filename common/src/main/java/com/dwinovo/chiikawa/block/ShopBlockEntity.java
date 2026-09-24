@@ -5,7 +5,6 @@ import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.shop.ShopCatalog;
 import com.dwinovo.chiikawa.shop.ShopCatalogs;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -41,8 +40,8 @@ public class ShopBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(CompoundTag tag) {
+        super.load(tag);
         if (tag.contains(CATALOG_KEY)) {
             ResourceLocation saved = ResourceLocation.tryParse(tag.getString(CATALOG_KEY));
             catalogId = saved == null ? ShopCatalogData.GENERAL : saved;
@@ -50,8 +49,8 @@ public class ShopBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(CompoundTag tag) {
+        super.saveAdditional(tag);
         tag.putString(CATALOG_KEY, catalogId.toString());
     }
 }
