@@ -500,7 +500,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     /** The mod's own label, drawn where a name tag goes, with the same widgets its screens use. */
     private void drawLabel(T entity, Chip chip, PoseStack poseStack, MultiBufferSource bufferSource,
                            float extraHeight) {
-        // 1.20.1 puts a name tag at a height of its own rather than at an attachment point.
+        // 1.20.2 puts a name tag at a height of its own rather than at an attachment point.
         float nameTag = entity.getNameTagOffsetY();
         poseStack.pushPose();
         poseStack.translate(0.0F, nameTag + extraHeight, 0.0F);

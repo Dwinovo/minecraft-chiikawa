@@ -124,7 +124,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     /** How much quicker an eager pet moves. */
     private static final double EAGER_SPEED_BONUS = 0.3;
-    /** 1.20.1 names an attribute modifier by a UUID, as vanilla's own do. */
+    /** 1.20.2 names an attribute modifier by a UUID, as vanilla's own do. */
     private static final UUID EAGER_SPEED_ID = UUID.fromString("d23339ca-ef17-3397-8014-84e6b890d0a4");
 
     /** Slot the held tool lives in; see {@link #getItemBySlot}. */
@@ -601,7 +601,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     /**
      * Writes the note for whatever arrived from a crossing. Forge's teleport with a
      * teleporter of its own does not come through {@link #changeDimension(ServerLevel)} on
-     * 1.20.1, so the loader's own dimension change calls this itself.
+     * 1.20.2, so the loader's own dimension change calls this itself.
      */
     public static Entity noteCrossing(Entity moved) {
         if (moved instanceof AbstractPet crossed && crossed.isTame()

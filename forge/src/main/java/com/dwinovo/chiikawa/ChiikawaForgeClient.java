@@ -40,7 +40,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 public class ChiikawaForgeClient {
     /**
      * Props are drawn from their own Bedrock models, as items as everywhere else. Forge
-     * 1.20.1 has no event to hand an item its client extensions; each prop takes these from
+     * 1.20.2 has no event to hand an item its client extensions; each prop takes these from
      * its own {@code initializeClient} (see {@code ForgeRegistryHelper}).
      */
     public static final IClientItemExtensions PROP_ITEM_EXTENSIONS = new IClientItemExtensions() {

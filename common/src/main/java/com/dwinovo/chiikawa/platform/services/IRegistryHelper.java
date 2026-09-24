@@ -48,7 +48,7 @@ public interface IRegistryHelper {
 
     /**
      * Registers a bag, one of the props. Props are drawn by a built-in item renderer, and
-     * Forge 1.20.1 hands an item its client renderer only through the item's own
+     * Forge 1.20.2 hands an item its client renderer only through the item's own
      * {@code initializeClient}, so each loader builds a prop its own way.
      */
     java.util.function.Supplier<net.minecraft.world.item.Item> registerBag(
@@ -73,7 +73,7 @@ public interface IRegistryHelper {
     <T> Iterable<T> getRegistry(ResourceKey<Registry<T>> key);
 
     /**
-     * The id of an entry in one of the mod's own registries. Forge 1.20.1 creates those
+     * The id of an entry in one of the mod's own registries. Forge 1.20.2 creates those
      * registries after {@link #createRegistry} returns, so they are looked up by key.
      */
     <T> ResourceLocation getKey(ResourceKey<Registry<T>> key, T value);

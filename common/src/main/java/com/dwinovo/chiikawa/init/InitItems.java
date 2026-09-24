@@ -115,7 +115,7 @@ public final class InitItems {
         );
     }
 
-    // Props are drawn by a built-in item renderer, and Forge 1.20.1 hands an item its client
+    // Props are drawn by a built-in item renderer, and Forge 1.20.2 hands an item its client
     // renderer only through the item itself, so the loader makes these.
     private static Supplier<Item> registerBag(String name, BagItem.Wear wear) {
         ResourceLocation id = new ResourceLocation(Constants.MOD_ID, name);
