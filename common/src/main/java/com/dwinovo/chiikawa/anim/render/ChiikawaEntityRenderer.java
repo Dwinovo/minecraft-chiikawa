@@ -509,8 +509,11 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         poseStack.pushPose();
         poseStack.translate(attachment.x, attachment.y + 0.5 + extraHeight, attachment.z);
         poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
-        // Text pixels from here on, with y running down as on a screen.
-        poseStack.scale(LABEL_SCALE, -LABEL_SCALE, LABEL_SCALE);
+        // Text pixels from here on, with y running down as on a screen and z towards the
+        // camera. Before 1.21 the camera's rotation is a half turn about y short of the later
+        // one, so every axis is flipped to land in the same frame; flipping x alone, as this
+        // version's own name tag does, would leave z pointing away and bury the text in its card.
+        poseStack.scale(-LABEL_SCALE, -LABEL_SCALE, -LABEL_SCALE);
         DrawSurface surface = new WorldSurface(poseStack, bufferSource, getFont());
         chip.draw(surface, 0, 0);
         poseStack.popPose();
