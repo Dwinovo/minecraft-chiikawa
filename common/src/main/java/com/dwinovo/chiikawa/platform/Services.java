@@ -22,7 +22,7 @@ public class Services {
     public static final IPlatformRegistryAccess PLATFORM_REGISTRY = load(IPlatformRegistryAccess.class);
     public static final INetworkHelper NETWORK = load(INetworkHelper.class);
 
-    private static <T> T load(Class<T> clazz) {
+    static <T> T load(Class<T> clazz) {
         var loadedService = ServiceLoader.load(clazz)
             .findFirst()
             .orElseThrow(() -> new NullPointerException("Failed to load service for " + clazz.getName()));

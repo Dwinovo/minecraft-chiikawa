@@ -71,7 +71,7 @@ public final class InitItems {
         registerItem("handbook", HandbookItem::new);
     /**
      * Everything drawn from a Bedrock model of its own, by {@code PropRenderer}: the bags,
-     * the labor board, the shop and the handbook. Each loader gives these their built-in item renderer, and their
+     * the labor board, the shop and the handbook. Each loader registers the special model renderer their item definitions name, and their
      * item models are generated from this list.
      */
     public static final List<Supplier<? extends Item>> PROPS =

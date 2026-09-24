@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.client.screen;
 
 import com.dwinovo.chiikawa.client.manual.ManualScene;
+import com.dwinovo.chiikawa.client.manual.ManualStageRenderState;
 import com.dwinovo.chiikawa.client.ui.mc.GuiSurface;
 import com.dwinovo.chiikawa.client.ui.mc.UiButton;
 import com.dwinovo.chiikawa.manual.ManualPage;
@@ -12,6 +13,7 @@ import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.UiTheme;
 import com.dwinovo.chiikawa.ui.widget.Arrow;
 import com.dwinovo.chiikawa.ui.widget.TitledPanel;
+import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -123,13 +125,20 @@ public class HandbookScreen extends Screen {
 
         // The screen is handed the time since the last frame, not how far into the tick
         // this frame is; the pets move by the tick, so they ask the game's own clock.
-        float sceneTick = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
+        float sceneTick = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true);
         List<ManualPage.Panel> panels = current().panels();
+        List<ManualStageRenderState.Panel> staged = new ArrayList<>();
         for (int i = 0; i < panels.size(); i++) {
             Rect scene = sceneAt(i);
             drawFrame(surface, scene);
-            scenes.get(i).draw(graphics, surface, scene, sceneTick);
+            staged.add(scenes.get(i).stage(scene, sceneTick));
             drawCaption(surface, Component.translatable(panels.get(i).caption()).getString(), scene);
+        }
+        // The pets and props of every panel go in one picture, over the frames and under
+        // what the panels draw on top of them.
+        ManualStageRenderState.submit(graphics, staged);
+        for (int i = 0; i < panels.size(); i++) {
+            scenes.get(i).draw(graphics, surface, sceneAt(i), sceneTick);
         }
     }
 
