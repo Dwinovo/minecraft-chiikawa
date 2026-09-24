@@ -32445,6 +32445,32 @@
           }
         }
       }
+    },
+    "clung_to": {
+      "loop": true,
+      "animation_length": 1.0,
+      "bones": {
+        "UpBody": {
+          "rotation": [
+            -3,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    "hand_over": {
+      "loop": true,
+      "animation_length": 1.0,
+      "bones": {
+        "RightArm": {
+          "rotation": [
+            -80,
+            0,
+            0
+          ]
+        }
+      }
     }
   }
 }
