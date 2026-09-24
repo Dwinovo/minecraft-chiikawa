@@ -70,6 +70,9 @@ public final class PropRenderer {
             return;
         }
         pose.pushPose();
+        // The item model's display leaves the pose at the corner of the item's block, where
+        // the game draws an item's own shapes; a prop is drawn about its middle.
+        pose.translate(0.5F, 0.5F, 0.5F);
         if (item instanceof BlockItem) {
             // Standing on the floor of its block, as it stands in the world.
             pose.translate(0.0F, -0.5F, 0.0F);
