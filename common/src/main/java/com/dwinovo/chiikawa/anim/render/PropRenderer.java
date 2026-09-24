@@ -76,7 +76,7 @@ public final class PropRenderer {
     }
 
     /**
-     * As an item, from a built-in item renderer: the pose is at the corner of the item's
+     * As an item, from its special item renderer: the pose is at the corner of the item's
      * block, as every such renderer is handed it.
      */
     public static void drawItem(ItemStack stack, ItemDisplayContext context, PoseStack pose,

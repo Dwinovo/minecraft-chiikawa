@@ -12,7 +12,6 @@ import com.dwinovo.chiikawa.ui.Ui;
 import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.UiTheme;
 import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Axis;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +27,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -86,7 +86,7 @@ public final class ManualScene {
     private static Optional<Staged> stage(ManualPage.Actor actor) {
         if (actor.pet().isPresent()) {
             var type = BuiltInRegistries.ENTITY_TYPE.getOptional(actor.pet().get());
-            if (type.isPresent() && type.get().create(Minecraft.getInstance().level) instanceof AbstractPet pet) {
+            if (type.isPresent() && type.get().create(Minecraft.getInstance().level, EntitySpawnReason.LOAD) instanceof AbstractPet pet) {
                 return Optional.of(new StagedPet(actor, dress(pet, actor)));
             }
             Constants.LOG.warn("[chiikawa-manual] {} is not a pet, so it is left out of its panel", actor.pet().get());
@@ -112,12 +112,12 @@ public final class ManualScene {
     /** An item by id, or the first item of a tag — {@code #chiikawa:currency} being whatever money is. */
     static ItemStack resolve(ExtraCodecs.TagOrElementLocation ref) {
         if (ref.tag()) {
-            return BuiltInRegistries.ITEM.getTag(TagKey.create(Registries.ITEM, ref.id()))
+            return BuiltInRegistries.ITEM.get(TagKey.create(Registries.ITEM, ref.id()))
                 .flatMap(tag -> tag.stream().findFirst())
                 .map(ItemStack::new)
                 .orElse(ItemStack.EMPTY);
         }
-        Item item = BuiltInRegistries.ITEM.get(ref.id());
+        Item item = BuiltInRegistries.ITEM.getValue(ref.id());
         return new ItemStack(item);
     }
 
@@ -158,7 +158,7 @@ public final class ManualScene {
         void tick(int ticks) {
             pet.tickCount++;
             if (actor.walk()) {
-                pet.walkAnimation.update(WALK_SPEED, 1.0F);
+                pet.walkAnimation.update(WALK_SPEED, 1.0F, 1.0F);
             }
             // Halfway into the first round, so a move is under way by the time anyone looks.
             if ((ticks + actor.motion().every() / 2) % actor.motion().every() == 0) {
@@ -191,8 +191,8 @@ public final class ManualScene {
             EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
             dispatcher.setRenderShadow(false);
             float partialTick = time - (float) Math.floor(time);
-            ChiikawaEntityRenderer.drawPortrait(() -> RenderSystem.runAsFancy(() -> dispatcher.render(pet,
-                0.0, 0.0, 0.0, 0.0F, partialTick, graphics.pose(), graphics.bufferSource(), LightTexture.FULL_BRIGHT)));
+            ChiikawaEntityRenderer.drawPortrait(() -> graphics.drawSpecial(buffers -> dispatcher.render(pet,
+                0.0, 0.0, 0.0, partialTick, graphics.pose(), buffers, LightTexture.FULL_BRIGHT)));
             graphics.flush();
             dispatcher.setRenderShadow(true);
             graphics.pose().popPose();
@@ -238,8 +238,8 @@ public final class ManualScene {
             graphics.pose().mulPose(Axis.YP.rotationDegrees(actor.facing()));
             graphics.pose().scale(PIXEL, PIXEL, PIXEL);
             Lighting.setupForEntityInInventory();
-            PropRenderer.draw(actor.prop().orElseThrow(), graphics.pose(), graphics.bufferSource(),
-                LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
+            graphics.drawSpecial(buffers -> PropRenderer.draw(actor.prop().orElseThrow(), graphics.pose(), buffers,
+                LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY));
             graphics.flush();
             graphics.pose().popPose();
             Lighting.setupFor3DItems();
