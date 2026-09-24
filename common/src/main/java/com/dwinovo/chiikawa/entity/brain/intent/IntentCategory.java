@@ -18,5 +18,10 @@ public enum IntentCategory {
     /** Walking to a shop to spend what the pet has earned. */
     SHOP,
     /** Taking the owner something the pet bought for them. */
-    GIFT
+    GIFT,
+    /**
+     * Playing a little scene with another pet, either side of it. Only where a pet may
+     * wander, so a following pet only does it while its owner is close by.
+     */
+    SOCIAL
 }

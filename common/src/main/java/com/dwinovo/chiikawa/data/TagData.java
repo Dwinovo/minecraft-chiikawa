@@ -66,6 +66,10 @@ public final class TagData {
             Items.WHEAT, Items.BEETROOT, Items.POTATO, Items.CARROT, Items.MELON_SLICE, Items.PUMPKIN);
         // Emeralds, as the villagers have it; a pack can make money of anything.
         tags.add(InitTag.CURRENCY, Items.EMERALD);
+        // Something to share, starting with the hamburg steak Rakko treats the others to in
+        // the series; the sweets it buys for itself are among them.
+        tags.add(InitTag.PET_TREATS,
+            Items.COOKED_BEEF, Items.PUMPKIN_PIE, Items.SWEET_BERRIES, Items.COOKIE, Items.BREAD, Items.BAKED_POTATO);
         tags.add(InitTag.ENTITY_PICKABLE_ITEMS,
             Items.WHEAT, Items.WHEAT_SEEDS, Items.POTATO, Items.CARROT, Items.BEETROOT, Items.MELON_SLICE, Items.PUMPKIN);
     }
