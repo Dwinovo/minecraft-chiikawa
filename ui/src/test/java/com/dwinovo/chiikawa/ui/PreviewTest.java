@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.ui.widget.Badge;
 import com.dwinovo.chiikawa.ui.widget.Bar;
-import com.dwinovo.chiikawa.ui.widget.Chip;
 import com.dwinovo.chiikawa.ui.widget.Hearts;
 import com.dwinovo.chiikawa.ui.widget.Price;
 import com.dwinovo.chiikawa.ui.widget.Sign;
@@ -99,7 +98,6 @@ class PreviewTest {
         Bar.draw(surface, px + 76, py + 64, 80, UiStyle.BAR_H, 5, 12);
         Badge.draw(surface, "open", px + 8, py + 96, UiTheme.TEXT_MUTED);
         Badge.draw(surface, "taken", px + 50, py + 96, UiTheme.SUCCESS);
-        Chip.of("Idle").draw(surface, px + 150, py + 110);
         Ui.divider(surface, px, py + 120, 200);
         Ui.sticker(surface, px + 8, py + 124, 184, 12, Ui.CARD_RADIUS, UiTheme.ACCENT_SOFT);
         PixelArt.CHECK.draw(surface, px + 175, py + 126);
