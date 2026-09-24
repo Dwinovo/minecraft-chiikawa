@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
 import com.dwinovo.chiikawa.client.manual.ClientManualPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
 import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
+import com.dwinovo.chiikawa.client.voice.ClientVoicePacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
 import com.dwinovo.chiikawa.network.BoardServerPacketHandler;
 import com.dwinovo.chiikawa.network.ManualPayloads;
@@ -14,6 +15,7 @@ import com.dwinovo.chiikawa.network.ShopPayloads;
 import com.dwinovo.chiikawa.network.ShopServerPacketHandler;
 import com.dwinovo.chiikawa.network.MusicPayloads;
 import com.dwinovo.chiikawa.network.MusicServerPacketHandler;
+import com.dwinovo.chiikawa.network.VoicePayloads;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import net.minecraft.network.FriendlyByteBuf;
@@ -86,6 +88,8 @@ public final class ForgeModNetworking {
                     MusicServerPacketHandler.handleSelectTrack(payload, player);
                 }
             });
+        clientbound(VoicePayloads.PetSpeechPayload.class, VoicePayloads.PetSpeechPayload::read,
+            (payload, context) -> ClientVoicePacketHandler.handleSpeech(payload));
     }
 
     public static void sendToClient(ServerPlayer player, MusicPayloads.Payload payload) {
@@ -94,6 +98,10 @@ public final class ForgeModNetworking {
 
     public static void sendToServer(MusicPayloads.Payload payload) {
         CHANNEL.send(payload, PacketDistributor.SERVER.noArg());
+    }
+
+    public static boolean canReceive(ServerPlayer player) {
+        return CHANNEL.isRemotePresent(player.connection.getConnection());
     }
 
     private static <T extends MusicPayloads.Payload> void clientbound(
