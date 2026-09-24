@@ -48,7 +48,7 @@ public class NeoForgeRegistryHelper implements IRegistryHelper {
     public <T extends BlockEntity> Supplier<BlockEntityType<T>> registerBlockEntity(ResourceLocation id,
             BiFunction<BlockPos, BlockState, T> factory, Supplier<? extends Block> block) {
         return register(BuiltInRegistries.BLOCK_ENTITY_TYPE, id,
-            () -> BlockEntityType.Builder.of(factory::apply, block.get()).build(null));
+            () -> new BlockEntityType<>(factory::apply, block.get()));
     }
 
     @Override

@@ -80,7 +80,7 @@ class PersonalityTest {
         assertEquals(personality.routine(), decoded.routine());
         assertEquals(personality.randomness(), decoded.randomness());
         assertEquals(Items.STONE_SWORD, decoded.wildTools().get(0).item());
-        assertEquals(4, decoded.wildTools().get(0).weight().asInt());
+        assertEquals(4, decoded.wildTools().get(0).weight());
     }
 
     @Test

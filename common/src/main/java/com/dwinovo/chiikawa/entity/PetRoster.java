@@ -1,21 +1,20 @@
 package com.dwinovo.chiikawa.entity;
 
+import com.dwinovo.chiikawa.entity.brain.PetTargeting;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.nbt.Tag;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
 
 /**
  * Where each owner's pets were last seen. Kept on the server rather than read off the
@@ -38,19 +37,37 @@ public class PetRoster extends SavedData {
      * @param pos where it stood
      */
     public record Entry(UUID pet, String name, ResourceKey<Level> dimension, BlockPos pos) {
+        private static final Codec<Entry> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            UUIDUtil.CODEC.fieldOf("Pet").forGetter(Entry::pet),
+            Codec.STRING.fieldOf("Name").forGetter(Entry::name),
+            Level.RESOURCE_KEY_CODEC.fieldOf("Dimension").forGetter(Entry::dimension),
+            BlockPos.CODEC.fieldOf("Pos").forGetter(Entry::pos)
+        ).apply(instance, Entry::new));
     }
+
+    /** One owner's pets, the way the file lists them. */
+    private record Owner(UUID owner, List<Entry> pets) {
+        private static final Codec<Owner> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            UUIDUtil.CODEC.fieldOf("Owner").forGetter(Owner::owner),
+            Entry.CODEC.listOf().fieldOf("Pets").forGetter(Owner::pets)
+        ).apply(instance, Owner::new));
+    }
+
+    /** The roster as it is saved: every owner, with where each of their pets was last seen. */
+    static final Codec<PetRoster> CODEC = Owner.CODEC.listOf().optionalFieldOf("Owners", List.of()).codec()
+        .xmap(PetRoster::load, PetRoster::save);
+    private static final SavedDataType<PetRoster> TYPE = new SavedDataType<>(FILE, PetRoster::new, CODEC, null);
 
     private final Map<UUID, Map<UUID, Entry>> byOwner = new HashMap<>();
 
     public static PetRoster of(ServerLevel level) {
         // The overworld's storage, so one roster covers a server rather than one per level.
-        return level.getServer().overworld().getDataStorage()
-            .computeIfAbsent(new SavedData.Factory<>(PetRoster::new, PetRoster::load, null), FILE);
+        return level.getServer().overworld().getDataStorage().computeIfAbsent(TYPE);
     }
 
     /** Remembers where this pet is now. */
     public void note(AbstractPet pet) {
-        UUID owner = pet.getOwnerUUID();
+        UUID owner = PetTargeting.ownerId(pet);
         if (owner == null) {
             return;
         }
@@ -80,49 +97,24 @@ public class PetRoster extends SavedData {
         return List.copyOf(byOwner.getOrDefault(owner, Map.of()).values());
     }
 
-    static PetRoster load(CompoundTag tag, HolderLookup.Provider registries) {
+    private static PetRoster load(List<Owner> owners) {
         PetRoster roster = new PetRoster();
-        ListTag owners = tag.getList("Owners", Tag.TAG_COMPOUND);
-        for (int i = 0; i < owners.size(); i++) {
-            CompoundTag ownerTag = owners.getCompound(i);
-            UUID owner = ownerTag.getUUID("Owner");
+        for (Owner owner : owners) {
             Map<UUID, Entry> pets = new HashMap<>();
-            ListTag petTags = ownerTag.getList("Pets", Tag.TAG_COMPOUND);
-            for (int p = 0; p < petTags.size(); p++) {
-                CompoundTag petTag = petTags.getCompound(p);
-                UUID pet = petTag.getUUID("Pet");
-                pets.put(pet, new Entry(pet, petTag.getString("Name"),
-                    ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION,
-                        ResourceLocation.parse(petTag.getString("Dimension"))),
-                    NbtUtils.readBlockPos(petTag, "Pos").orElse(BlockPos.ZERO)));
+            for (Entry entry : owner.pets()) {
+                pets.put(entry.pet(), entry);
             }
             if (!pets.isEmpty()) {
-                roster.byOwner.put(owner, pets);
+                roster.byOwner.put(owner.owner(), pets);
             }
         }
         return roster;
     }
 
-    @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
-        ListTag owners = new ListTag();
-        byOwner.forEach((owner, pets) -> {
-            CompoundTag ownerTag = new CompoundTag();
-            ownerTag.putUUID("Owner", owner);
-            ListTag petTags = new ListTag();
-            for (Entry entry : pets.values()) {
-                CompoundTag petTag = new CompoundTag();
-                petTag.putUUID("Pet", entry.pet());
-                petTag.putString("Name", entry.name());
-                petTag.putString("Dimension", entry.dimension().location().toString());
-                petTag.put("Pos", NbtUtils.writeBlockPos(entry.pos()));
-                petTags.add(petTag);
-            }
-            ownerTag.put("Pets", petTags);
-            owners.add(ownerTag);
-        });
-        tag.put("Owners", owners);
-        return tag;
+    private List<Owner> save() {
+        List<Owner> owners = new ArrayList<>();
+        byOwner.forEach((owner, pets) -> owners.add(new Owner(owner, List.copyOf(pets.values()))));
+        return owners;
     }
 
     /** @return the owners this roster knows anything about, for tests and commands */
