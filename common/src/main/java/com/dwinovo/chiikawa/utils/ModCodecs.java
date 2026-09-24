@@ -5,12 +5,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.MapLike;
 import com.mojang.serialization.RecordBuilder;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Stream;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
@@ -21,13 +16,10 @@ import net.minecraft.world.item.Item;
 
 /**
  * The mod's data read and written the way later versions of the game read and write it, so
- * a data pack is the same files on every version the mod is built for. 1.20.1's own codecs
- * differ in three places the mod's data goes through:
+ * a data pack is the same files on every version the mod is built for. 1.20.2's own codecs
+ * differ in two places the mod's data goes through:
  *
  * <ul>
- *   <li>{@code optionalFieldOf} quietly falls back to the default when a value is there
- *       but wrong, so a typo would load as if the line were not there. The mod's loaders
- *       report it instead; this is the {@code strictOptionalField} vanilla gains in 1.20.2.
  *   <li>An item named by an id nobody registered decodes as air rather than failing.
  *   <li>A value provider writes its fields under {@code "value"} instead of beside its
  *       {@code "type"}.
@@ -57,42 +49,6 @@ public final class ModCodecs {
         ExtraCodecs.lazyInitializedCodec(() -> IntProvider.codec(1, Integer.MAX_VALUE, INT_PROVIDER));
 
     private ModCodecs() {
-    }
-
-    public static <A> MapCodec<Optional<A>> strictOptionalField(Codec<A> codec, String name) {
-        return new StrictOptionalFieldCodec<>(name, codec);
-    }
-
-    public static <A> MapCodec<A> strictOptionalField(Codec<A> codec, String name, A defaultValue) {
-        return strictOptionalField(codec, name).xmap(
-            value -> value.orElse(defaultValue),
-            value -> Objects.equals(value, defaultValue) ? Optional.empty() : Optional.of(value));
-    }
-
-    private static final class StrictOptionalFieldCodec<A> extends MapCodec<Optional<A>> {
-        private final String name;
-        private final Codec<A> elementCodec;
-
-        private StrictOptionalFieldCodec(String name, Codec<A> elementCodec) {
-            this.name = name;
-            this.elementCodec = elementCodec;
-        }
-
-        @Override
-        public <T> DataResult<Optional<A>> decode(DynamicOps<T> ops, MapLike<T> input) {
-            T value = input.get(name);
-            return value == null ? DataResult.success(Optional.empty()) : elementCodec.parse(ops, value).map(Optional::of);
-        }
-
-        @Override
-        public <T> RecordBuilder<T> encode(Optional<A> input, DynamicOps<T> ops, RecordBuilder<T> prefix) {
-            return input.isPresent() ? prefix.add(name, elementCodec.encodeStart(ops, input.get())) : prefix;
-        }
-
-        @Override
-        public <T> Stream<T> keys(DynamicOps<T> ops) {
-            return Stream.of(ops.createString(name));
-        }
     }
 
     /** A value provider's own fields in the same object as its {@code "type"}. */

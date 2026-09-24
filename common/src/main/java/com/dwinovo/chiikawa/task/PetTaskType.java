@@ -37,8 +37,8 @@ public record PetTaskType(
         ResourceLocation.CODEC.fieldOf("icon").forGetter(PetTaskType::icon),
         ModCodecs.POSITIVE_INT_PROVIDER.fieldOf("amount").forGetter(PetTaskType::amount),
         ResourceLocation.CODEC.fieldOf("reward").forGetter(PetTaskType::reward),
-        ModCodecs.strictOptionalField(ExtraCodecs.POSITIVE_INT, "weight", 1).forGetter(PetTaskType::weight),
-        ModCodecs.strictOptionalField(ExtraCodecs.POSITIVE_INT, "min_level", BoardLevels.FIRST_LEVEL).forGetter(PetTaskType::minLevel)
+        ExtraCodecs.strictOptionalField(ExtraCodecs.POSITIVE_INT, "weight", 1).forGetter(PetTaskType::weight),
+        ExtraCodecs.strictOptionalField(ExtraCodecs.POSITIVE_INT, "min_level", BoardLevels.FIRST_LEVEL).forGetter(PetTaskType::minLevel)
     ).apply(instance, PetTaskType::new));
 
     /**

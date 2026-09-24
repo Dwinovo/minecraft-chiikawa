@@ -2,7 +2,6 @@ package com.dwinovo.chiikawa.manual;
 
 import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
-import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
@@ -32,7 +31,7 @@ public record ManualPage(int order, String title, List<Panel> panels) {
     public static final int PANELS = 4;
 
     public static final Codec<ManualPage> CODEC = ExtraCodecs.validate(RecordCodecBuilder.<ManualPage>create(instance -> instance.group(
-        ModCodecs.strictOptionalField(Codec.INT, "order", 0).forGetter(ManualPage::order),
+        ExtraCodecs.strictOptionalField(Codec.INT, "order", 0).forGetter(ManualPage::order),
         Codec.STRING.fieldOf("title").forGetter(ManualPage::title),
         ExtraCodecs.nonEmptyList(Panel.CODEC.listOf()).fieldOf("panels").forGetter(ManualPage::panels)
     ).apply(instance, ManualPage::new)), page -> page.panels.size() <= PANELS
@@ -50,7 +49,7 @@ public record ManualPage(int order, String title, List<Panel> panels) {
     public record Panel(String caption, List<Actor> actors) {
         public static final Codec<Panel> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("caption").forGetter(Panel::caption),
-            ModCodecs.strictOptionalField(Actor.CODEC.listOf(), "actors", List.of()).forGetter(Panel::actors)
+            ExtraCodecs.strictOptionalField(Actor.CODEC.listOf(), "actors", List.of()).forGetter(Panel::actors)
         ).apply(instance, Panel::new));
 
         public Panel {
@@ -90,19 +89,19 @@ public record ManualPage(int order, String title, List<Panel> panels) {
         private static final Codec<PetReaction> REACTION = named(PetReaction.values(), PetReaction.NONE);
 
         public static final Codec<Actor> CODEC = ExtraCodecs.validate(RecordCodecBuilder.<Actor>create(instance -> instance.group(
-            ModCodecs.strictOptionalField(ResourceLocation.CODEC, "pet").forGetter(Actor::pet),
-            ModCodecs.strictOptionalField(ResourceLocation.CODEC, "prop").forGetter(Actor::prop),
-            ModCodecs.strictOptionalField(ExtraCodecs.TAG_OR_ELEMENT_ID, "item").forGetter(Actor::item),
-            ModCodecs.strictOptionalField(Codec.floatRange(0.0F, 1.0F), "x", 0.5F).forGetter(Actor::x),
-            ModCodecs.strictOptionalField(Codec.FLOAT, "y", 0.0F).forGetter(Actor::y),
-            ModCodecs.strictOptionalField(Codec.floatRange(0.0F, 4.0F), "scale", 1.0F).forGetter(Actor::scale),
-            ModCodecs.strictOptionalField(Codec.FLOAT, "facing", 0.0F).forGetter(Actor::facing),
-            ModCodecs.strictOptionalField(ExtraCodecs.TAG_OR_ELEMENT_ID, "hold").forGetter(Actor::hold),
-            ModCodecs.strictOptionalField(ExtraCodecs.TAG_OR_ELEMENT_ID, "bag").forGetter(Actor::bag),
-            ModCodecs.strictOptionalField(Codec.BOOL, "sit", false).forGetter(Actor::sit),
-            ModCodecs.strictOptionalField(Codec.BOOL, "walk", false).forGetter(Actor::walk),
-            ModCodecs.strictOptionalField(ACTION, "action").forGetter(Actor::action),
-            ModCodecs.strictOptionalField(REACTION, "reaction").forGetter(Actor::reaction),
+            ExtraCodecs.strictOptionalField(ResourceLocation.CODEC, "pet").forGetter(Actor::pet),
+            ExtraCodecs.strictOptionalField(ResourceLocation.CODEC, "prop").forGetter(Actor::prop),
+            ExtraCodecs.strictOptionalField(ExtraCodecs.TAG_OR_ELEMENT_ID, "item").forGetter(Actor::item),
+            ExtraCodecs.strictOptionalField(Codec.floatRange(0.0F, 1.0F), "x", 0.5F).forGetter(Actor::x),
+            ExtraCodecs.strictOptionalField(Codec.FLOAT, "y", 0.0F).forGetter(Actor::y),
+            ExtraCodecs.strictOptionalField(Codec.floatRange(0.0F, 4.0F), "scale", 1.0F).forGetter(Actor::scale),
+            ExtraCodecs.strictOptionalField(Codec.FLOAT, "facing", 0.0F).forGetter(Actor::facing),
+            ExtraCodecs.strictOptionalField(ExtraCodecs.TAG_OR_ELEMENT_ID, "hold").forGetter(Actor::hold),
+            ExtraCodecs.strictOptionalField(ExtraCodecs.TAG_OR_ELEMENT_ID, "bag").forGetter(Actor::bag),
+            ExtraCodecs.strictOptionalField(Codec.BOOL, "sit", false).forGetter(Actor::sit),
+            ExtraCodecs.strictOptionalField(Codec.BOOL, "walk", false).forGetter(Actor::walk),
+            ExtraCodecs.strictOptionalField(ACTION, "action").forGetter(Actor::action),
+            ExtraCodecs.strictOptionalField(REACTION, "reaction").forGetter(Actor::reaction),
             Motion.CODEC.forGetter(Actor::motion)
         ).apply(instance, Actor::new)), Actor::oneThing);
 
@@ -134,10 +133,10 @@ public record ManualPage(int order, String title, List<Panel> panels) {
      */
     public record Motion(List<String> play, int every, Optional<String> say, boolean bob) {
         public static final MapCodec<Motion> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            ModCodecs.strictOptionalField(Codec.STRING.listOf(), "play", List.of()).forGetter(Motion::play),
-            ModCodecs.strictOptionalField(ExtraCodecs.POSITIVE_INT, "every", Actor.EVERY).forGetter(Motion::every),
-            ModCodecs.strictOptionalField(Codec.STRING, "say").forGetter(Motion::say),
-            ModCodecs.strictOptionalField(Codec.BOOL, "bob", false).forGetter(Motion::bob)
+            ExtraCodecs.strictOptionalField(Codec.STRING.listOf(), "play", List.of()).forGetter(Motion::play),
+            ExtraCodecs.strictOptionalField(ExtraCodecs.POSITIVE_INT, "every", Actor.EVERY).forGetter(Motion::every),
+            ExtraCodecs.strictOptionalField(Codec.STRING, "say").forGetter(Motion::say),
+            ExtraCodecs.strictOptionalField(Codec.BOOL, "bob", false).forGetter(Motion::bob)
         ).apply(instance, Motion::new));
 
         public Motion {

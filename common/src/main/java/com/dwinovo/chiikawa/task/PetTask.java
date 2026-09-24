@@ -1,6 +1,5 @@
 package com.dwinovo.chiikawa.task;
 
-import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
@@ -36,10 +35,10 @@ public record PetTask(
         ResourceLocation.CODEC.fieldOf("type").forGetter(PetTask::type),
         ResourceLocation.CODEC.fieldOf("capability").forGetter(PetTask::capability),
         ResourceLocation.CODEC.fieldOf("counter").forGetter(PetTask::counter),
-        ModCodecs.strictOptionalField(ResourceLocation.CODEC, "icon", NO_ICON).forGetter(PetTask::icon),
+        ExtraCodecs.strictOptionalField(ResourceLocation.CODEC, "icon", NO_ICON).forGetter(PetTask::icon),
         ExtraCodecs.POSITIVE_INT.fieldOf("target").forGetter(PetTask::target),
         ResourceLocation.CODEC.fieldOf("reward").forGetter(PetTask::reward),
-        ModCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "progress", 0).forGetter(PetTask::progress)
+        ExtraCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "progress", 0).forGetter(PetTask::progress)
     ).apply(instance, PetTask::new));
 
     /**

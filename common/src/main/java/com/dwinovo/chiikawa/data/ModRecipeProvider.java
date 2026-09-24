@@ -129,7 +129,7 @@ public class ModRecipeProvider extends RecipeProvider {
     }
 
     /** A pouch: a string over the top, three of its wool for the body. */
-    private static void pouch(Consumer<FinishedRecipe> recipeOutput, ItemLike pouch, ItemLike wool) {
+    private static void pouch(RecipeOutput recipeOutput, ItemLike pouch, ItemLike wool) {
         ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, pouch)
                 .define('W', wool)
                 .define('S', Items.STRING)
