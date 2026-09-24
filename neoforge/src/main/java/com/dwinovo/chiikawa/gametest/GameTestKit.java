@@ -3,6 +3,13 @@ package com.dwinovo.chiikawa.gametest;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitEntity;
+import com.dwinovo.chiikawa.init.InitMemory;
+import com.dwinovo.chiikawa.voice.PetSpeech;
+import com.dwinovo.chiikawa.voice.PetVoice;
+import com.dwinovo.chiikawa.voice.PetVoices;
+import com.dwinovo.chiikawa.voice.VoiceMoment;
+import java.util.List;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
@@ -169,6 +176,47 @@ public final class GameTestKit {
             .filter(stack -> stack.is(doll))
             .findFirst()
             .orElseThrow(() -> new AssertionError("the pet died without leaving a doll"));
+    }
+
+    /**
+     * Settles the world as a batch would, and has every pet earlier batches left within
+     * earshot forget it was talking: those cases are over, and their chatter is not this
+     * one's business. For a case that listens to what pets say, in a batch of its own.
+     */
+    static void quietYard(GameTestHelper helper, long dayTime) {
+        settleWorld(helper.getLevel(), Difficulty.NORMAL, dayTime);
+        double range = PetVoices.of(InitEntity.CHIIKAWA_PET.get()).hearingRange();
+        helper.getLevel().getEntitiesOfClass(AbstractPet.class, helper.getBounds().inflate(range))
+            .forEach(pet -> pet.getBrain().eraseMemory(InitMemory.LAST_SAID.get()));
+    }
+
+    /**
+     * What the pet said last, read back from its memory of it — the same memory that keeps
+     * it quiet afterwards — because the stand-in players a case makes cannot be sent a mod's
+     * own packets.
+     */
+    static Optional<PetSpeech.Said> lastSaid(AbstractPet pet) {
+        return pet.getBrain().getMemory(InitMemory.LAST_SAID.get());
+    }
+
+    /** The translation key of what the pet said last. */
+    static Optional<String> said(AbstractPet pet) {
+        return lastSaid(pet).map(PetSpeech.Said::line);
+    }
+
+    /** Whether a line is one of the pet's own for this moment. */
+    static boolean isLine(AbstractPet pet, VoiceMoment moment, String line) {
+        return PetVoices.of(pet.getType()).lines().getOrDefault(moment, List.of()).stream()
+            .map(PetVoice.Line::text)
+            .anyMatch(line::equals);
+    }
+
+    /** That the pet's last words were one of its own lines for this moment. */
+    static void assertSaid(GameTestHelper helper, AbstractPet pet, VoiceMoment moment) {
+        String name = pet.getType().toShortString() + " at " + moment.getSerializedName();
+        Optional<String> line = said(pet);
+        helper.assertTrue(line.isPresent(), name + " said nothing");
+        helper.assertTrue(isLine(pet, moment, line.get()), name + " said " + line.get() + ", not one of its lines");
     }
 
     /** How many of an item the pet has, for a case that cares whether it got paid twice. */
