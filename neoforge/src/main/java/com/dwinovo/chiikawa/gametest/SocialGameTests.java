@@ -423,7 +423,7 @@ public final class SocialGameTests {
             .thenWaitUntil(() -> helper.assertTrue(song(library).isPresent(), "the song was never imported"))
             .thenExecute(() -> {
                 ServerPlayer bystander = player(helper);
-                bystander.moveTo(helper.absoluteVec(new Vec3(9.5, STAND, 8.5)));
+                bystander.snapTo(helper.absoluteVec(new Vec3(9.5, STAND, 8.5)));
                 ItemStack box = new ItemStack(InitItems.MUSIC_BOX.get());
                 box.set(InitDataComponents.MUSIC_BOX_SELECTION.get(),
                     new MusicBoxSelection(song(library).orElseThrow().trackId(), SONG, 0));
