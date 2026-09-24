@@ -62,7 +62,10 @@ tasks.matching { it.name == 'runGameTestServer' }.configureEach {
         def runDir = file('runs/gametestserver')
         delete new File(runDir, 'world')
         runDir.mkdirs()
-        new File(runDir, 'server.properties').text = 'level-type=minecraft\\:flat\n'
+        // The world vanilla's own test server makes: flat, seed 0, no structures. A case that
+        // reads the day's roll of slips needs the same seed every run to find its spot.
+        new File(runDir, 'server.properties').text =
+            'level-type=minecraft\\:flat\nlevel-seed=0\ngenerate-structures=false\n'
     }
 }
 
