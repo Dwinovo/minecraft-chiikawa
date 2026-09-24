@@ -14,16 +14,20 @@ import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
 import com.dwinovo.chiikawa.client.render.LaborBoardRenderer;
 import com.dwinovo.chiikawa.client.render.PropBlockRenderer;
 import com.dwinovo.chiikawa.client.screen.PetBackpackScreen;
+import com.dwinovo.chiikawa.forge.mixin.ItemAccessor;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitEntity;
+import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMenu;
 import com.dwinovo.chiikawa.manual.ManualLoader;
 import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.function.Supplier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
@@ -38,23 +42,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 @Mod.EventBusSubscriber(modid = ChiikawaForge.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ChiikawaForgeClient {
-    /**
-     * Props are drawn from their own Bedrock models, as items as everywhere else. Forge
-     * 1.20.4 has no event to hand an item its client extensions; each prop takes these from
-     * its own {@code initializeClient} (see {@code ForgeRegistryHelper}).
-     */
-    public static final IClientItemExtensions PROP_ITEM_EXTENSIONS = new IClientItemExtensions() {
-        private BlockEntityWithoutLevelRenderer renderer;
-
-        @Override
-        public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-            if (renderer == null) {
-                renderer = new PropItemRenderer();
-            }
-            return renderer;
-        }
-    };
-
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
@@ -67,6 +54,7 @@ public class ChiikawaForgeClient {
             EntityRenderers.register(InitEntity.RAKKO_PET.get(), RakkoRenderer::new);
             EntityRenderers.register(InitEntity.FURUHONYA_PET.get(), FuruhonyaRenderer::new);
             MenuScreens.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);
+            registerItemExtensions();
         });
         MinecraftForge.EVENT_BUS.addListener(ChiikawaForgeClient::onClientTick);
     }
@@ -74,6 +62,29 @@ public class ChiikawaForgeClient {
     private static void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
             ClientMusicStreamManager.tick();
+        }
+    }
+
+    /**
+     * Props are drawn from their own Bedrock models, as items as everywhere else. Forge
+     * 1.20.4 has no event to give an item its client extensions, only the item's own
+     * {@code initializeClient}; common items cannot override that, so they are handed
+     * theirs here, where the event would have done it.
+     */
+    private static void registerItemExtensions() {
+        IClientItemExtensions extensions = new IClientItemExtensions() {
+            private BlockEntityWithoutLevelRenderer renderer;
+
+            @Override
+            public BlockEntityWithoutLevelRenderer getCustomRenderer() {
+                if (renderer == null) {
+                    renderer = new PropItemRenderer();
+                }
+                return renderer;
+            }
+        };
+        for (Supplier<? extends Item> prop : InitItems.PROPS) {
+            ((ItemAccessor) prop.get()).chiikawa$setRenderProperties(extensions);
         }
     }
 
