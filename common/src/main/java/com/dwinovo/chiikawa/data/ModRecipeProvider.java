@@ -124,16 +124,16 @@ public final class ModRecipeProvider extends RecipeProvider {
             .unlockedBy(getHasName(Items.LEATHER), has(Items.LEATHER))
             .save(this.output);
         // The pouches: fleece in the friend's own colour, on a string.
-        pouch(recipeOutput, InitItems.BEAR_POUCH.get(), Items.PINK_WOOL);
-        pouch(recipeOutput, InitItems.WHALE_POUCH.get(), Items.LIGHT_BLUE_WOOL);
-        pouch(recipeOutput, InitItems.STAR_POUCH.get(), Items.YELLOW_WOOL);
+        pouch(itemLookup, InitItems.BEAR_POUCH.get(), Items.PINK_WOOL);
+        pouch(itemLookup, InitItems.WHALE_POUCH.get(), Items.LIGHT_BLUE_WOOL);
+        pouch(itemLookup, InitItems.STAR_POUCH.get(), Items.YELLOW_WOOL);
 
         // Another handbook, for one lost or given away: a book with a pink cover.
-        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, InitItems.HANDBOOK.get())
-                .requires(Items.BOOK)
-                .requires(Items.PINK_DYE)
-                .unlockedBy(getHasName(Items.BOOK), has(Items.BOOK))
-                .save(recipeOutput);
+        ShapelessRecipeBuilder.shapeless(itemLookup, RecipeCategory.MISC, InitItems.HANDBOOK.get())
+            .requires(Items.BOOK)
+            .requires(Items.PINK_DYE)
+            .unlockedBy(getHasName(Items.BOOK), has(Items.BOOK))
+            .save(this.output);
 
         // A counter: a slab of planks over a chest, with an emerald on the till.
         ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.DECORATIONS, InitItems.SHOP.get())
@@ -148,7 +148,7 @@ public final class ModRecipeProvider extends RecipeProvider {
     }
 
     /** A pouch: a string over the top, three of its wool for the body. */
-    private static void pouch(RecipeOutput recipeOutput, ItemLike pouch, ItemLike wool) {
+    private void pouch(HolderGetter<Item> itemLookup, ItemLike pouch, ItemLike wool) {
         ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.TOOLS, pouch)
             .define('W', wool)
             .define('S', Items.STRING)
