@@ -64,7 +64,7 @@ public final class ModLootTableProvider extends LootTableProvider {
         }
 
         private static void dropSelf(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output, Block block) {
-            output.accept(block.getLootTable(), LootTable.lootTable().withPool(LootPool.lootPool()
+            output.accept(block.getLootTable().orElseThrow(), LootTable.lootTable().withPool(LootPool.lootPool()
                 .setRolls(ConstantValue.exactly(1))
                 .add(LootItem.lootTableItem(block))
                 .when(ExplosionCondition.survivesExplosion())));
