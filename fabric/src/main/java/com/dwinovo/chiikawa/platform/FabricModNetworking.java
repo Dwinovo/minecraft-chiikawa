@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.platform;
 import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
 import com.dwinovo.chiikawa.client.manual.ClientManualPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
+import com.dwinovo.chiikawa.client.pet.ClientPetPacketHandler;
 import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.client.voice.ClientVoicePacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
@@ -93,6 +94,11 @@ public final class FabricModNetworking {
             (client, handler, buffer, responseSender) -> {
                 VoicePayloads.PetSpeechPayload payload = VoicePayloads.PetSpeechPayload.read(buffer);
                 client.execute(() -> ClientVoicePacketHandler.handleSpeech(payload));
+            });
+        ClientPlayNetworking.registerGlobalReceiver(PetPayloads.PET_GESTURE,
+            (client, handler, buffer, responseSender) -> {
+                PetPayloads.PetGesturePayload payload = PetPayloads.PetGesturePayload.read(buffer);
+                client.execute(() -> ClientPetPacketHandler.handleGesture(payload));
             });
     }
 

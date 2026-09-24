@@ -5,9 +5,10 @@ import com.dwinovo.chiikawa.entity.PetDirective;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
-/** What an owner asks of a pet from its screen. */
+/** What an owner asks of a pet from its screen, and what the players who can see a pet are told it does. */
 public final class PetPayloads {
     public static final ResourceLocation PET_DIRECTIVE = new ResourceLocation(Constants.MOD_ID, "pet_directive");
+    public static final ResourceLocation PET_GESTURE = new ResourceLocation(Constants.MOD_ID, "pet_gesture");
 
     private PetPayloads() {
     }
@@ -32,6 +33,31 @@ public final class PetPayloads {
         public void write(FriendlyByteBuf buffer) {
             buffer.writeVarInt(pet);
             buffer.writeByte(directive.ordinal());
+        }
+    }
+
+    /**
+     * A pet made a move once, one named by data rather than by code — a clap as it listens
+     * to music, say. A player's game plays it if the pet has an animation by that name, and
+     * otherwise shows nothing.
+     *
+     * @param pet the pet's entity id
+     * @param animation the move's animation name
+     */
+    public record PetGesturePayload(int pet, String animation) implements MusicPayloads.Payload {
+        public static PetGesturePayload read(FriendlyByteBuf buffer) {
+            return new PetGesturePayload(buffer.readVarInt(), buffer.readUtf());
+        }
+
+        @Override
+        public ResourceLocation id() {
+            return PET_GESTURE;
+        }
+
+        @Override
+        public void write(FriendlyByteBuf buffer) {
+            buffer.writeVarInt(pet);
+            buffer.writeUtf(animation);
         }
     }
 }

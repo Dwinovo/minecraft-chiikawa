@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
 import com.dwinovo.chiikawa.client.manual.ClientManualPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
+import com.dwinovo.chiikawa.client.pet.ClientPetPacketHandler;
 import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.client.voice.ClientVoicePacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
@@ -93,6 +94,8 @@ public final class ForgeModNetworking {
             });
         clientbound(VoicePayloads.PetSpeechPayload.class, VoicePayloads.PetSpeechPayload::read,
             (payload, context) -> ClientVoicePacketHandler.handleSpeech(payload));
+        clientbound(PetPayloads.PetGesturePayload.class, PetPayloads.PetGesturePayload::read,
+            (payload, context) -> ClientPetPacketHandler.handleGesture(payload));
     }
 
     public static void sendToClient(ServerPlayer player, MusicPayloads.Payload payload) {

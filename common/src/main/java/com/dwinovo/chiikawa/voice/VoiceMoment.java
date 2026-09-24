@@ -30,6 +30,8 @@ public enum VoiceMoment implements StringRepresentable {
     CLING,
     /** Being clung on to. */
     CLUNG_TO,
+    /** Let go of at the end of a scene without what it wanted — Momonga, never praised, wants comforting. */
+    TURNED_DOWN,
     /** Greeting a friend the crab way. */
     CRAB_GREETING,
     /** Handing another pet something to eat. */
@@ -38,7 +40,7 @@ public enum VoiceMoment implements StringRepresentable {
     TREATED,
     /** Being brought a coffee after the weeding. */
     GIVEN_COFFEE,
-    /** Sitting down to listen to Hachiware play. */
+    /** Listening to Hachiware play: as it sits down, and now and then as it claps along. */
     LISTEN;
 
     public static final Codec<VoiceMoment> CODEC = StringRepresentable.fromEnum(VoiceMoment::values);
