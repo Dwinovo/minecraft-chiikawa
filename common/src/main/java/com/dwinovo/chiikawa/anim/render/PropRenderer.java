@@ -7,6 +7,7 @@ import com.dwinovo.chiikawa.anim.runtime.PoseSampler;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -14,8 +15,8 @@ import net.minecraft.client.renderer.block.model.ItemTransform;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.ItemStack;
 import org.joml.Vector3f;
 
 /**
@@ -76,23 +77,52 @@ public final class PropRenderer {
     }
 
     /**
-     * As an item, from a built-in item renderer: the pose is at the corner of the item's
+     * As an item, from its special model renderer: the pose is at the corner of the item's
      * block, as every such renderer is handed it.
      */
-    public static void drawItem(ItemStack stack, ItemDisplayContext context, PoseStack pose,
+    public static void drawItem(Item item, ItemDisplayContext context, PoseStack pose,
             MultiBufferSource buffers, int light, int overlay) {
-        ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
         BakedModel model = ModelLibrary.get(id);
         if (model == null) {
             return;
         }
-        boolean block = stack.getItem() instanceof BlockItem;
         pose.pushPose();
+        placeItem(item, model, context, pose);
+        draw(id, model, pose, buffers, light, overlay, bone -> true);
+        pose.popPose();
+    }
+
+    /**
+     * The corners of what the item takes up lying on the ground, from the corner of its
+     * block, as {@link #drawItem} puts it there: the game stands a dropped item on its
+     * lowest point.
+     */
+    public static void groundExtents(Item item, Set<Vector3f> output) {
+        BakedModel model = ModelLibrary.get(BuiltInRegistries.ITEM.getKey(item));
+        if (model == null) {
+            return;
+        }
+        PoseStack pose = new PoseStack();
+        placeItem(item, model, ItemDisplayContext.GROUND, pose);
+        float[] box = bounds(model);
+        for (int corner = 0; corner < 8; corner++) {
+            output.add(pose.last().pose().transformPosition(box[(corner & 1) == 0 ? 0 : 3],
+                box[(corner & 2) == 0 ? 1 : 4], box[(corner & 4) == 0 ? 2 : 5], new Vector3f()));
+        }
+    }
+
+    /** From the corner of the item's block to the prop's own origin, for this way of showing it. */
+    private static void placeItem(Item item, BakedModel model, ItemDisplayContext context, PoseStack pose) {
+        boolean block = item instanceof BlockItem;
         pose.translate(0.5F, 0.5F, 0.5F);
         ItemTransform transform = (block ? BLOCK_ITEM : FLAT_ITEM).get(context);
         if (transform != null) {
             transform.apply(context == ItemDisplayContext.THIRD_PERSON_LEFT_HAND
-                || context == ItemDisplayContext.FIRST_PERSON_LEFT_HAND, pose);
+                || context == ItemDisplayContext.FIRST_PERSON_LEFT_HAND, pose.last());
+            // A transform ends at the corner of the item's block, where the game draws an
+            // item's own shapes; a prop is drawn about its middle.
+            pose.translate(0.5F, 0.5F, 0.5F);
         }
         if (block) {
             // Standing on the floor of its block, as it stands in the world.
@@ -103,12 +133,19 @@ public final class PropRenderer {
             pose.mulPose(Axis.YP.rotationDegrees(180.0F));
             fitToSprite(model, pose);
         }
-        draw(id, model, pose, buffers, light, overlay, bone -> true);
-        pose.popPose();
     }
 
     /** Scales and centres the model to span what a sprite spans. */
     private static void fitToSprite(BakedModel model, PoseStack pose) {
+        float[] box = bounds(model);
+        float minX = box[0], minY = box[1], minZ = box[2], maxX = box[3], maxY = box[4], maxZ = box[5];
+        float fit = ITEM_SPAN / Math.max(maxX - minX, maxY - minY);
+        pose.scale(fit, fit, fit);
+        pose.translate(-(minX + maxX) / 2.0F, -(minY + maxY) / 2.0F, -(minZ + maxZ) / 2.0F);
+    }
+
+    /** The box every cube of the model fits in: its low corner, then its high one. */
+    private static float[] bounds(BakedModel model) {
         float minX = Float.MAX_VALUE, minY = Float.MAX_VALUE, minZ = Float.MAX_VALUE;
         float maxX = -Float.MAX_VALUE, maxY = -Float.MAX_VALUE, maxZ = -Float.MAX_VALUE;
         for (BakedCube cube : model.cubes) {
@@ -119,9 +156,7 @@ public final class PropRenderer {
             maxY = Math.max(maxY, cube.maxY);
             maxZ = Math.max(maxZ, cube.maxZ);
         }
-        float fit = ITEM_SPAN / Math.max(maxX - minX, maxY - minY);
-        pose.scale(fit, fit, fit);
-        pose.translate(-(minX + maxX) / 2.0F, -(minY + maxY) / 2.0F, -(minZ + maxZ) / 2.0F);
+        return new float[] {minX, minY, minZ, maxX, maxY, maxZ};
     }
 
     private static void draw(ResourceLocation id, BakedModel model, PoseStack pose, MultiBufferSource buffers,

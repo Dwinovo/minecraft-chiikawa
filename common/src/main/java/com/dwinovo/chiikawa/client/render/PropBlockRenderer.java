@@ -10,6 +10,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Draws a block from a Bedrock model of its own, named after the block, turned the way the
@@ -21,7 +22,8 @@ public class PropBlockRenderer<T extends BlockEntity> implements BlockEntityRend
     private static final float PIXEL = 1.0F / 16.0F;
 
     @Override
-    public void render(T block, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
+    public void render(T block, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay,
+            Vec3 cameraPos) {
         BlockState state = block.getBlockState();
         pose.pushPose();
         pose.translate(0.5F, 0.0F, 0.5F);

@@ -34,8 +34,8 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -366,6 +366,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         if (entity instanceof AbstractPet pet) {
             state.put(PetData.WORN_BAG, pet.getItemBySlot(EquipmentSlot.CHEST));
         }
+        extractLabel(entity, state, partialTick);
 
         if (entity instanceof ChiikawaAnimated animated) {
             PetAnimator animator = animated.getPetAnimator();
@@ -456,24 +457,38 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     }
 
     /**
+     * A pet as a picture in a screen, for a screen that draws it into a picture of its own:
+     * its state taken the way the game takes the player's for the inventory, and so, like a
+     * {@link #drawPortrait portrait}, with nothing over its head.
+     */
+    public static EntityRenderState portraitOf(Entity entity, float partialTick) {
+        EntityRenderer<? super Entity, ?> renderer = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(entity);
+        drawingPortrait = true;
+        try {
+            EntityRenderState state = renderer.createRenderState(entity, partialTick);
+            state.hitboxesRenderState = null;
+            return state;
+        } finally {
+            drawingPortrait = false;
+        }
+    }
+
+    /** A pet drawn as a picture in a screen has no name tag over its head either. */
+    @Override
+    protected boolean shouldShowName(T entity, double distanceToCameraSq) {
+        return !drawingPortrait && super.shouldShowName(entity, distanceToCameraSq);
+    }
+
+    /**
      * A working pet says so over its head when its owner asks, even when it has no name to
      * show. Like a name tag, the label is there or it is not: it comes up the frame the
      * crosshair lands and goes the frame it leaves, the way everything in the game does.
+     * What it says is taken with the rest of the pet's state, as a name tag's text is.
      */
-    @Override
-    protected boolean shouldShowName(T entity) {
-        return !drawingPortrait && (super.shouldShowName(entity) || answer(entity).isPresent());
-    }
-
-    @Override
-    protected void renderNameTag(T entity, Component displayName, PoseStack poseStack, MultiBufferSource bufferSource,
-                                 int packedLight, float partialTick) {
-        boolean named = super.shouldShowName(entity);
-        if (named) {
-            super.renderNameTag(entity, displayName, poseStack, bufferSource, packedLight, partialTick);
-        }
-        answer(entity).ifPresent(chip -> drawLabel(entity, chip, poseStack, bufferSource, partialTick,
-            named ? LABEL_LINE : 0.0F));
+    private void extractLabel(T entity, ChiikawaRenderState state, float partialTick) {
+        state.label = drawingPortrait ? null : answer(entity).orElse(null);
+        state.labelAttachment = state.label == null ? null
+            : entity.getAttachments().getNullable(EntityAttachment.NAME_TAG, 0, entity.getViewYRot(partialTick));
     }
 
     /** What the pet says over its head right now: its status, if its owner is asking. */
@@ -508,9 +523,9 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     }
 
     /** The mod's own label, drawn where a name tag goes, with the same widgets its screens use. */
-    private void drawLabel(T entity, Chip chip, PoseStack poseStack, MultiBufferSource bufferSource,
-                           float partialTick, float extraHeight) {
-        Vec3 attachment = entity.getAttachments().getNullable(EntityAttachment.NAME_TAG, 0, entity.getViewYRot(partialTick));
+    private void drawLabel(ChiikawaRenderState state, PoseStack poseStack, MultiBufferSource bufferSource,
+                           float extraHeight) {
+        Vec3 attachment = state.labelAttachment;
         if (attachment == null) {
             return;
         }
@@ -520,7 +535,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         // Text pixels from here on, with y running down as on a screen.
         poseStack.scale(LABEL_SCALE, -LABEL_SCALE, LABEL_SCALE);
         DrawSurface surface = new WorldSurface(poseStack, bufferSource, getFont());
-        chip.draw(surface, 0, 0);
+        state.label.draw(surface, 0, 0);
         poseStack.popPose();
     }
 
@@ -529,7 +544,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
                        MultiBufferSource bufferSource, int packedLight) {
         BakedModel model = ModelLibrary.get(state.modelKey);
         if (model == null) {
-            super.render(state, poseStack, bufferSource, packedLight);
+            renderOverHead(state, poseStack, bufferSource, packedLight);
             return;
         }
 
@@ -585,7 +600,16 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         }
 
         poseStack.popPose();
+        renderOverHead(state, poseStack, bufferSource, packedLight);
+    }
+
+    /** The name tag, as vanilla draws it, and the pet's own label above or in place of it. */
+    private void renderOverHead(ChiikawaRenderState state, PoseStack poseStack, MultiBufferSource bufferSource,
+                                int packedLight) {
         super.render(state, poseStack, bufferSource, packedLight);
+        if (state.label != null) {
+            drawLabel(state, poseStack, bufferSource, state.nameTag != null ? LABEL_LINE : 0.0F);
+        }
     }
 
     /**
