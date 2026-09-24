@@ -23,6 +23,7 @@ public final class InitBlocks {
         BuiltInRegistries.BLOCK,
         LABOR_BOARD_ID,
         () -> new LaborBoardBlock(BlockBehaviour.Properties.of()
+            .setId(ResourceKey.create(Registries.BLOCK, LABOR_BOARD_ID))
             .mapColor(MapColor.WOOD)
             .instrument(NoteBlockInstrument.BASS)
             .strength(2.5F)
@@ -35,6 +36,7 @@ public final class InitBlocks {
         BuiltInRegistries.BLOCK,
         SHOP_ID,
         () -> new ShopBlock(BlockBehaviour.Properties.of()
+            .setId(ResourceKey.create(Registries.BLOCK, SHOP_ID))
             .mapColor(MapColor.WOOD)
             .instrument(NoteBlockInstrument.BASS)
             .strength(2.5F)

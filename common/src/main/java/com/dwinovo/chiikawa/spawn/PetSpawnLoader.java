@@ -1,16 +1,17 @@
 package com.dwinovo.chiikawa.spawn;
 
 import com.dwinovo.chiikawa.Constants;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 /**
@@ -18,7 +19,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
  * fails to parse is skipped with a message: the pets in it stop turning up, and the rest
  * carry on.
  */
-public final class PetSpawnLoader extends SimpleJsonResourceReloadListener {
+public final class PetSpawnLoader extends SimpleJsonResourceReloadListener<JsonElement> {
     public static final String DIRECTORY = "pet_spawn";
     /** Id for loaders that register reload listeners by id. */
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
@@ -26,7 +27,7 @@ public final class PetSpawnLoader extends SimpleJsonResourceReloadListener {
     private static final String LOG_PREFIX = "[chiikawa-spawn] ";
 
     public PetSpawnLoader() {
-        super(new Gson(), DIRECTORY);
+        super(ExtraCodecs.JSON, FileToIdConverter.json(DIRECTORY));
     }
 
     @Override

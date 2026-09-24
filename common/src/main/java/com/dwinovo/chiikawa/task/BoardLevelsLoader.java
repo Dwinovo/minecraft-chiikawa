@@ -1,16 +1,17 @@
 package com.dwinovo.chiikawa.task;
 
 import com.dwinovo.chiikawa.Constants;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 /**
@@ -20,7 +21,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
  * nothing up, with a message saying why — as a shop whose price list is gone deals in
  * nothing.
  */
-public final class BoardLevelsLoader extends SimpleJsonResourceReloadListener {
+public final class BoardLevelsLoader extends SimpleJsonResourceReloadListener<JsonElement> {
     public static final String DIRECTORY = "labor_board";
     /** Id for loaders that register reload listeners by id. */
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
@@ -30,7 +31,7 @@ public final class BoardLevelsLoader extends SimpleJsonResourceReloadListener {
     private static final String LOG_PREFIX = "[chiikawa-board] ";
 
     public BoardLevelsLoader() {
-        super(new Gson(), DIRECTORY);
+        super(ExtraCodecs.JSON, FileToIdConverter.json(DIRECTORY));
     }
 
     @Override

@@ -1,16 +1,17 @@
 package com.dwinovo.chiikawa.manual;
 
 import com.dwinovo.chiikawa.Constants;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 /**
@@ -18,7 +19,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
  * handbook's pages. A page that fails to parse is left out with a message, and the rest of
  * the book is still there to read.
  */
-public final class ManualLoader extends SimpleJsonResourceReloadListener {
+public final class ManualLoader extends SimpleJsonResourceReloadListener<JsonElement> {
     public static final String DIRECTORY = "manual";
     /** Id for loaders that register reload listeners by id. */
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
@@ -26,7 +27,7 @@ public final class ManualLoader extends SimpleJsonResourceReloadListener {
     private static final String LOG_PREFIX = "[chiikawa-manual] ";
 
     public ManualLoader() {
-        super(new Gson(), DIRECTORY);
+        super(ExtraCodecs.JSON, FileToIdConverter.json(DIRECTORY));
     }
 
     @Override

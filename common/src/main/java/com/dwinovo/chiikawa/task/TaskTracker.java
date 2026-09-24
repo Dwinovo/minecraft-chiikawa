@@ -51,7 +51,7 @@ public final class TaskTracker {
         for (ItemStack stack : reward.getRandomItems(params)) {
             ItemStack remainder = pet.getBackpack().addItem(stack);
             if (!remainder.isEmpty()) {
-                pet.spawnAtLocation(remainder);
+                pet.spawnAtLocation(level, remainder);
             }
         }
         level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pet.getX(), pet.getY() + pet.getBbHeight() * 0.8, pet.getZ(),

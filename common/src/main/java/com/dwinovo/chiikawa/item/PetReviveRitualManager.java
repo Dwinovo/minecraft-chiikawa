@@ -17,7 +17,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -136,7 +135,7 @@ public final class PetReviveRitualManager {
             // A doll nobody died in, which only creative mode hands out: a new pet, brought
             // into the world the way any other is.
             pet.finalizeSpawn(level, level.getCurrentDifficultyAt(BlockPos.containing(revive.spawnPos)),
-                MobSpawnType.MOB_SUMMONED, null);
+                EntitySpawnReason.MOB_SUMMONED, null);
         }
 
         pet.teleportTo(revive.spawnPos.x, revive.spawnPos.y, revive.spawnPos.z);

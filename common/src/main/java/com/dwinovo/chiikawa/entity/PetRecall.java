@@ -17,7 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.entity.EntityTypeTest;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -191,8 +191,8 @@ public final class PetRecall {
         ServerLevel home = owner.serverLevel();
         AbstractPet arrived = pet;
         if (pet.level() != home) {
-            Entity moved = pet.changeDimension(new DimensionTransition(home, owner.position(), Vec3.ZERO,
-                pet.getYRot(), pet.getXRot(), DimensionTransition.DO_NOTHING));
+            Entity moved = pet.teleport(new TeleportTransition(home, owner.position(), Vec3.ZERO,
+                pet.getYRot(), pet.getXRot(), TeleportTransition.DO_NOTHING));
             if (!(moved instanceof AbstractPet crossed)) {
                 return false;
             }

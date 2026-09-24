@@ -8,7 +8,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.profiling.ProfilerFiller;
 
 /** Fabric only takes reload listeners that name themselves; this names the mod's. */
 public final class FabricReloadListeners {
@@ -29,8 +28,8 @@ public final class FabricReloadListeners {
 
             @Override
             public CompletableFuture<Void> reload(PreparableReloadListener.PreparationBarrier barrier, ResourceManager manager,
-                    ProfilerFiller prepareProfiler, ProfilerFiller applyProfiler, Executor backgroundExecutor, Executor gameExecutor) {
-                return listener.reload(barrier, manager, prepareProfiler, applyProfiler, backgroundExecutor, gameExecutor);
+                    Executor backgroundExecutor, Executor gameExecutor) {
+                return listener.reload(barrier, manager, backgroundExecutor, gameExecutor);
             }
         });
     }
