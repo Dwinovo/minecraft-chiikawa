@@ -595,7 +595,15 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      */
     @Override
     public Entity changeDimension(ServerLevel destination) {
-        Entity moved = super.changeDimension(destination);
+        return noteCrossing(super.changeDimension(destination));
+    }
+
+    /**
+     * Writes the note for whatever arrived from a crossing. Forge's teleport with a
+     * teleporter of its own does not come through {@link #changeDimension(ServerLevel)} on
+     * 1.20.1, so the loader's own dimension change calls this itself.
+     */
+    public static Entity noteCrossing(Entity moved) {
         if (moved instanceof AbstractPet crossed && crossed.isTame()
                 && crossed.level() instanceof ServerLevel server) {
             PetRoster.of(server).note(crossed);
