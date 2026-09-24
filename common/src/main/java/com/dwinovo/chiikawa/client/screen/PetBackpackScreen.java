@@ -33,6 +33,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -406,22 +407,22 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     // ---- input -------------------------------------------------------------------------
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        int tab = Tabs.at(this.leftPos, this.topPos, Page.values().length, (int) mouseX, (int) mouseY);
-        if (tab >= 0 && button == 0) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        int tab = Tabs.at(this.leftPos, this.topPos, Page.values().length, (int) event.x(), (int) event.y());
+        if (tab >= 0 && event.button() == 0) {
             if (tab != page.ordinal()) {
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 showPage(Page.values()[tab]);
             }
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    protected boolean hasClickedOutside(double mouseX, double mouseY, int left, int top, int button) {
+    protected boolean hasClickedOutside(double mouseX, double mouseY, int left, int top) {
         // The tabs and the name board stand above the panel; a click there is not a drop.
-        return super.hasClickedOutside(mouseX, mouseY, left, top, button)
+        return super.hasClickedOutside(mouseX, mouseY, left, top)
             && Tabs.at(this.leftPos, this.topPos, Page.values().length, (int) mouseX, (int) mouseY) < 0;
     }
 }

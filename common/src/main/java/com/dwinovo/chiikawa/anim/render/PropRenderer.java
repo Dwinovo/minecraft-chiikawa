@@ -1,21 +1,25 @@
 package com.dwinovo.chiikawa.anim.render;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.anim.api.ModelLibrary;
 import com.dwinovo.chiikawa.anim.baked.BakedCube;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
 import com.dwinovo.chiikawa.anim.runtime.PoseSampler;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import java.util.Map;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.Set;
 import java.util.function.Predicate;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.ItemTransform;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.special.NoDataSpecialModelRenderer;
+import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.ItemStack;
 import org.joml.Vector3f;
 
 /**
@@ -27,74 +31,76 @@ import org.joml.Vector3f;
  * <p>That one model is the thing everywhere: on a pet
  * ({@link com.dwinovo.chiikawa.anim.render.layer.BagLayer}), standing in the world, and as
  * an item. As an item it is put where vanilla would put one of its own of the same kind:
- * a block's item with {@code block/block}'s transforms, standing on the floor of its block;
- * anything else with {@code item/generated}'s, turned to face the way a sprite does and
- * sized to fill as much of a slot as a sprite does.
+ * its item model borrows {@code block/block}'s transforms for a block's item, standing it
+ * on the floor of its block, and {@code item/generated}'s for anything else, turned to face
+ * the way a sprite does and sized to fill as much of a slot as a sprite does.
  */
 public final class PropRenderer {
     /** A sprite's fourteen pixels of the sixteen, in blocks. */
     private static final float ITEM_SPAN = 14.0F / 16.0F;
     private static final float PIXEL = 1.0F / 16.0F;
     private static final ModelRenderer MESH = new ModelRenderer();
-    /** {@code item/generated}'s display, left hands mirrored the way vanilla mirrors them. */
-    private static final Map<ItemDisplayContext, ItemTransform> FLAT_ITEM = Map.of(
-        ItemDisplayContext.GROUND, transform(0, 0, 0, 0, 2, 0, 0.5F),
-        ItemDisplayContext.HEAD, transform(0, 180, 0, 0, 13, 7, 1.0F),
-        ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, transform(0, 0, 0, 0, 3, 1, 0.55F),
-        ItemDisplayContext.THIRD_PERSON_LEFT_HAND, transform(0, 0, 0, 0, 3, 1, 0.55F),
-        ItemDisplayContext.FIRST_PERSON_RIGHT_HAND, transform(0, -90, 25, 1.13F, 3.2F, 1.13F, 0.68F),
-        ItemDisplayContext.FIRST_PERSON_LEFT_HAND, transform(0, -90, 25, 1.13F, 3.2F, 1.13F, 0.68F),
-        ItemDisplayContext.FIXED, transform(0, 180, 0, 0, 0, 0, 1.0F));
-    /** {@code block/block}'s display, the same way. */
-    private static final Map<ItemDisplayContext, ItemTransform> BLOCK_ITEM = Map.of(
-        ItemDisplayContext.GUI, transform(30, 225, 0, 0, 0, 0, 0.625F),
-        ItemDisplayContext.GROUND, transform(0, 0, 0, 0, 3, 0, 0.25F),
-        ItemDisplayContext.FIXED, transform(0, 0, 0, 0, 0, 0, 0.5F),
-        ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, transform(75, 45, 0, 0, 2.5F, 0, 0.375F),
-        ItemDisplayContext.THIRD_PERSON_LEFT_HAND, transform(75, 45, 0, 0, 2.5F, 0, 0.375F),
-        ItemDisplayContext.FIRST_PERSON_RIGHT_HAND, transform(0, 45, 0, 0, 0, 0, 0.4F),
-        ItemDisplayContext.FIRST_PERSON_LEFT_HAND, transform(0, 225, 0, 0, 0, 0, 0.4F));
 
     private PropRenderer() {
     }
 
     /** The whole prop, with the pose at its origin, in model pixels. */
-    public static void draw(ResourceLocation id, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
-        draw(id, pose, buffers, light, overlay, bone -> true);
+    public static void draw(ResourceLocation id, PoseStack pose, SubmitNodeCollector collector, int light, int overlay) {
+        draw(id, pose, collector, light, overlay, bone -> true);
     }
 
     /**
      * The prop with only some of its bones: those {@code shown} says yes to, and none of
      * what hangs from the others.
      */
-    public static void draw(ResourceLocation id, PoseStack pose, MultiBufferSource buffers, int light, int overlay,
+    public static void draw(ResourceLocation id, PoseStack pose, SubmitNodeCollector collector, int light, int overlay,
             Predicate<String> shown) {
         BakedModel model = ModelLibrary.get(id);
         if (model != null) {
-            draw(id, model, pose, buffers, light, overlay, shown);
+            draw(id, model, pose, collector, light, overlay, shown);
         }
     }
 
     /**
-     * As an item, from a built-in item renderer: the pose is at the corner of the item's
-     * block, as every such renderer is handed it.
+     * As an item, from its special item renderer: the pose is at the corner of the item's
+     * block, already carried by the item model's transforms, as every such renderer is
+     * handed it.
      */
-    public static void drawItem(ItemStack stack, ItemDisplayContext context, PoseStack pose,
-            MultiBufferSource buffers, int light, int overlay) {
-        ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+    public static void drawItem(Item item, PoseStack pose, SubmitNodeCollector collector, int light, int overlay) {
+        ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
         BakedModel model = ModelLibrary.get(id);
         if (model == null) {
             return;
         }
-        boolean block = stack.getItem() instanceof BlockItem;
         pose.pushPose();
-        pose.translate(0.5F, 0.5F, 0.5F);
-        ItemTransform transform = (block ? BLOCK_ITEM : FLAT_ITEM).get(context);
-        if (transform != null) {
-            transform.apply(context == ItemDisplayContext.THIRD_PERSON_LEFT_HAND
-                || context == ItemDisplayContext.FIRST_PERSON_LEFT_HAND, pose);
+        placeItem(item, model, pose);
+        draw(id, model, pose, collector, light, overlay, bone -> true);
+        pose.popPose();
+    }
+
+    /** Where the item's model reaches, for the game to fit it into a slot or onto the ground. */
+    public static void itemExtents(Item item, Set<Vector3f> output) {
+        BakedModel model = ModelLibrary.get(BuiltInRegistries.ITEM.getKey(item));
+        if (model == null) {
+            return;
         }
-        if (block) {
+        PoseStack pose = new PoseStack();
+        placeItem(item, model, pose);
+        for (BakedCube cube : model.cubes) {
+            for (int corner = 0; corner < 8; corner++) {
+                output.add(pose.last().pose().transformPosition(
+                    (corner & 1) == 0 ? cube.minX : cube.maxX,
+                    (corner & 2) == 0 ? cube.minY : cube.maxY,
+                    (corner & 4) == 0 ? cube.minZ : cube.maxZ,
+                    new Vector3f()));
+            }
+        }
+    }
+
+    /** From the corner of the item's block to the prop's origin, in model pixels. */
+    private static void placeItem(Item item, BakedModel model, PoseStack pose) {
+        pose.translate(0.5F, 0.5F, 0.5F);
+        if (item instanceof BlockItem) {
             // Standing on the floor of its block, as it stands in the world.
             pose.translate(0.0F, -0.5F, 0.0F);
             pose.scale(PIXEL, PIXEL, PIXEL);
@@ -103,8 +109,6 @@ public final class PropRenderer {
             pose.mulPose(Axis.YP.rotationDegrees(180.0F));
             fitToSprite(model, pose);
         }
-        draw(id, model, pose, buffers, light, overlay, bone -> true);
-        pose.popPose();
     }
 
     /** Scales and centres the model to span what a sprite spans. */
@@ -124,7 +128,7 @@ public final class PropRenderer {
         pose.translate(-(minX + maxX) / 2.0F, -(minY + maxY) / 2.0F, -(minZ + maxZ) / 2.0F);
     }
 
-    private static void draw(ResourceLocation id, BakedModel model, PoseStack pose, MultiBufferSource buffers,
+    private static void draw(ResourceLocation id, BakedModel model, PoseStack pose, SubmitNodeCollector collector,
             int light, int overlay, Predicate<String> shown) {
         // A prop is not animated: every bone at rest.
         float[] rest = new float[model.bones.length * PoseSampler.FLOATS_PER_BONE];
@@ -135,12 +139,51 @@ public final class PropRenderer {
         }
         ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(id.getNamespace(),
             "textures/entities/" + id.getPath() + ".png");
-        MESH.render(model, pose, buffers.getBuffer(RenderType.entityCutoutNoCull(texture)), light, overlay, rest, hidden);
+        collector.submitCustomGeometry(pose, RenderType.entityCutoutNoCull(texture),
+            (drawPose, consumer) -> MESH.render(model, drawPose, consumer, light, overlay, rest, hidden));
     }
 
-    /** One display entry as a model file would give it: degrees, model pixels, a scale. */
-    private static ItemTransform transform(float rotX, float rotY, float rotZ, float x, float y, float z, float scale) {
-        return new ItemTransform(new Vector3f(rotX, rotY, rotZ), new Vector3f(x * PIXEL, y * PIXEL, z * PIXEL),
-            new Vector3f(scale, scale, scale));
+    /**
+     * A prop's item, as the game draws an item it has no flat picture of: a special item
+     * model of type {@code chiikawa:prop} naming the prop, over a base model that carries
+     * the transforms. Each loader registers the type its own way.
+     */
+    public static final class ItemRenderer implements NoDataSpecialModelRenderer {
+        /** What the item models call this renderer. */
+        public static final ResourceLocation TYPE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "prop");
+
+        private final Item item;
+
+        private ItemRenderer(Item item) {
+            this.item = item;
+        }
+
+        @Override
+        public void submit(ItemDisplayContext context, PoseStack pose, SubmitNodeCollector collector, int light,
+                int overlay, boolean hasFoil, int outlineColor) {
+            drawItem(item, pose, collector, light, overlay);
+        }
+
+        @Override
+        public void getExtents(Set<Vector3f> output) {
+            itemExtents(item, output);
+        }
+
+        /** @param prop the prop's id, its item's */
+        public record Unbaked(ResourceLocation prop) implements SpecialModelRenderer.Unbaked {
+            public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                ResourceLocation.CODEC.fieldOf("prop").forGetter(Unbaked::prop)
+            ).apply(instance, Unbaked::new));
+
+            @Override
+            public SpecialModelRenderer<?> bake(SpecialModelRenderer.BakingContext context) {
+                return new ItemRenderer(BuiltInRegistries.ITEM.getValue(prop));
+            }
+
+            @Override
+            public MapCodec<Unbaked> type() {
+                return MAP_CODEC;
+            }
+        }
     }
 }

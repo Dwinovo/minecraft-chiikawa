@@ -39,7 +39,7 @@ public final class BagLayer implements RenderLayer {
         ctx.poseStack().pushPose();
         walker.transformToBone(ctx.model(), ctx.poseBuf(), locator, ctx.poseStack());
         PropRenderer.draw(BuiltInRegistries.ITEM.getKey(bag.getItem()),
-            ctx.poseStack(), ctx.bufferSource(), ctx.packedLight(), ctx.packedOverlay());
+            ctx.poseStack(), ctx.collector(), ctx.packedLight(), ctx.packedOverlay());
         ctx.poseStack().popPose();
     }
 }

@@ -123,7 +123,7 @@ public class HandbookScreen extends Screen {
 
         // The screen is handed the time since the last frame, not how far into the tick
         // this frame is; the pets move by the tick, so they ask the game's own clock.
-        float sceneTick = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
+        float sceneTick = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true);
         List<ManualPage.Panel> panels = current().panels();
         for (int i = 0; i < panels.size(); i++) {
             Rect scene = sceneAt(i);

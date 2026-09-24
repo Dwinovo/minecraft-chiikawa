@@ -13,26 +13,24 @@ import com.dwinovo.chiikawa.anim.render.impl.UsagiRenderer;
 import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
 import com.dwinovo.chiikawa.client.render.LaborBoardRenderer;
 import com.dwinovo.chiikawa.client.render.PropBlockRenderer;
+import com.dwinovo.chiikawa.client.render.PropPictureRenderer;
 import com.dwinovo.chiikawa.client.screen.PetBackpackScreen;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitEntity;
-import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMenu;
 import com.dwinovo.chiikawa.manual.ManualLoader;
+import com.dwinovo.chiikawa.fabric.mixin.SpecialModelRenderersAccessor;
 import com.dwinovo.chiikawa.platform.FabricModNetworking;
 import com.dwinovo.chiikawa.platform.FabricReloadListeners;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.SpecialGuiElementRegistry;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.world.item.Item;
-
-import java.util.function.Supplier;
 
 public class ChiikawaFabricClient implements ClientModInitializer {
     @Override
@@ -48,9 +46,10 @@ public class ChiikawaFabricClient implements ClientModInitializer {
         EntityRendererRegistry.register(InitEntity.FURUHONYA_PET.get(), FuruhonyaRenderer::new);
 
         // Props are drawn from their own Bedrock models, as items as everywhere else.
-        for (Supplier<? extends Item> prop : InitItems.PROPS) {
-            BuiltinItemRendererRegistry.INSTANCE.register(prop.get(), PropRenderer::drawItem);
-        }
+        SpecialModelRenderersAccessor.chiikawa$getIdMapper()
+            .put(PropRenderer.ItemRenderer.TYPE, PropRenderer.ItemRenderer.Unbaked.MAP_CODEC);
+        // The handbook's props, drawn in a screen the way the game draws an entity there.
+        SpecialGuiElementRegistry.register(context -> new PropPictureRenderer(context.vertexConsumers()));
         BlockEntityRenderers.register(InitBlockEntities.LABOR_BOARD.get(), context -> new LaborBoardRenderer());
         BlockEntityRenderers.register(InitBlockEntities.SHOP.get(), context -> new PropBlockRenderer<>());
 

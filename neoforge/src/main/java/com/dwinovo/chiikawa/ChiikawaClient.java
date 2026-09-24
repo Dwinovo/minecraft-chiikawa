@@ -1,15 +1,7 @@
 package com.dwinovo.chiikawa;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.function.Supplier;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -20,8 +12,8 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
-import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
+import net.neoforged.neoforge.client.event.RegisterPictureInPictureRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
 import com.dwinovo.chiikawa.anim.compile.BedrockResourceLoader;
 import com.dwinovo.chiikawa.anim.render.PropRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.ChiikawaRenderer;
@@ -35,10 +27,10 @@ import com.dwinovo.chiikawa.anim.render.impl.UsagiRenderer;
 import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
 import com.dwinovo.chiikawa.client.render.LaborBoardRenderer;
 import com.dwinovo.chiikawa.client.render.PropBlockRenderer;
+import com.dwinovo.chiikawa.client.render.PropPictureRenderer;
 import com.dwinovo.chiikawa.client.screen.PetBackpackScreen;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitEntity;
-import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMenu;
 import com.dwinovo.chiikawa.manual.ManualLoader;
 import com.dwinovo.chiikawa.platform.NeoForgeModNetworking;
@@ -76,32 +68,15 @@ public class ChiikawaClient {
     }
 
     @SubscribeEvent
-    static void registerItemExtensions(RegisterClientExtensionsEvent event) {
+    static void registerSpecialModelRenderers(RegisterSpecialModelRendererEvent event) {
         // Props are drawn from their own Bedrock models, as items as everywhere else.
-        event.registerItem(new IClientItemExtensions() {
-            private BlockEntityWithoutLevelRenderer renderer;
-
-            @Override
-            public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-                if (renderer == null) {
-                    renderer = new PropItemRenderer();
-                }
-                return renderer;
-            }
-        }, InitItems.PROPS.stream().map(Supplier::get).toArray(Item[]::new));
+        event.register(PropRenderer.ItemRenderer.TYPE, PropRenderer.ItemRenderer.Unbaked.MAP_CODEC);
     }
 
-    /** The built-in item renderer NeoForge wants, handing each prop to {@link PropRenderer}. */
-    private static final class PropItemRenderer extends BlockEntityWithoutLevelRenderer {
-        private PropItemRenderer() {
-            super(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
-        }
-
-        @Override
-        public void renderByItem(ItemStack stack, ItemDisplayContext context, PoseStack pose,
-                MultiBufferSource buffers, int light, int overlay) {
-            PropRenderer.drawItem(stack, context, pose, buffers, light, overlay);
-        }
+    @SubscribeEvent
+    static void registerPictureInPictureRenderers(RegisterPictureInPictureRenderersEvent event) {
+        // The handbook's props, drawn in a screen the way the game draws an entity there.
+        event.register(PropPictureRenderer.State.class, PropPictureRenderer::new);
     }
 
     @SubscribeEvent
