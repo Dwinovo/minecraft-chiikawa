@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
 import com.dwinovo.chiikawa.client.manual.ClientManualPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
 import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
+import com.dwinovo.chiikawa.client.voice.ClientVoicePacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
 import com.dwinovo.chiikawa.network.BoardServerPacketHandler;
 import com.dwinovo.chiikawa.network.ManualPayloads;
@@ -13,6 +14,7 @@ import com.dwinovo.chiikawa.network.ShopPayloads;
 import com.dwinovo.chiikawa.network.ShopServerPacketHandler;
 import com.dwinovo.chiikawa.network.MusicPayloads;
 import com.dwinovo.chiikawa.network.MusicServerPacketHandler;
+import com.dwinovo.chiikawa.network.VoicePayloads;
 import java.util.function.Function;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -86,6 +88,11 @@ public final class FabricModNetworking {
             (client, handler, buffer, responseSender) -> {
                 MusicPayloads.MusicStreamStopPayload payload = MusicPayloads.MusicStreamStopPayload.read(buffer);
                 client.execute(() -> ClientMusicPacketHandler.handleStreamStop(payload));
+            });
+        ClientPlayNetworking.registerGlobalReceiver(VoicePayloads.PET_SPEECH,
+            (client, handler, buffer, responseSender) -> {
+                VoicePayloads.PetSpeechPayload payload = VoicePayloads.PetSpeechPayload.read(buffer);
+                client.execute(() -> ClientVoicePacketHandler.handleSpeech(payload));
             });
     }
 

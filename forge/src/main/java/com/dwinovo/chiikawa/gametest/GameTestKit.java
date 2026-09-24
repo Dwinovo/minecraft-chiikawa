@@ -127,7 +127,7 @@ public final class GameTestKit {
      * roaming rather than at heel, because there is no owner walking about to follow, and a
      * pet at heel does not go looking for work.
      */
-    private static AbstractPet pet(GameTestHelper helper, EntityType<? extends AbstractPet> type,
+    static AbstractPet pet(GameTestHelper helper, EntityType<? extends AbstractPet> type,
                                    BlockPos rel, boolean owned) {
         AbstractPet pet = helper.spawn(type, rel);
         pet.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);

@@ -10,6 +10,8 @@ import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.shop.ShopBasket;
 import com.dwinovo.chiikawa.shop.ShopCatalog;
 import com.dwinovo.chiikawa.shop.Wallet;
+import com.dwinovo.chiikawa.voice.PetSpeech;
+import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
@@ -128,6 +130,7 @@ public class GoShoppingBehavior extends Behavior<AbstractPet> {
         level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pet.getX(), pet.getY() + pet.getBbHeight() * 0.8, pet.getZ(),
             HAPPY_PARTICLES, 0.35, 0.3, 0.35, 0.0);
         pet.triggerReaction(PetReaction.HAPPY);
+        PetSpeech.say(pet, VoiceMoment.SHOP);
     }
 
     /**
