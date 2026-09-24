@@ -10,16 +10,13 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitItems;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * What an owner's word is worth, and what is left when a pet is gone.
@@ -29,7 +26,6 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
  * pet you can put somewhere.
  */
 @GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class DirectiveGameTests {
     private static final String BATCH = "chiikawa_directive";
     /** How long a sitting pet is watched sitting before we believe it will keep sitting. */
@@ -59,7 +55,7 @@ public final class DirectiveGameTests {
         helper.runAtTickTime(SIT_TICKS, () -> {
             helper.assertBlockProperty(crop, CropBlock.AGE, CropBlock.MAX_AGE);
             helper.assertTrue(pet.blockPosition().distSqr(seat) < WANDERED * WANDERED,
-                "a sitting pet got up and went to work");
+                Component.literal("a sitting pet got up and went to work"));
             helper.succeed();
         });
     }
@@ -75,7 +71,7 @@ public final class DirectiveGameTests {
         pet.hurt(pet.damageSources().generic(), pet.getMaxHealth() * 2.0F);
 
         helper.runAtTickTime(DEATH_TICKS / 2, () -> {
-            helper.assertTrue(pet.isDeadOrDying(), "the pet shrugged off a killing blow");
+            helper.assertTrue(pet.isDeadOrDying(), Component.literal("the pet shrugged off a killing blow"));
             helper.assertItemEntityNotPresent(Items.WOODEN_HOE, new BlockPos(3, STAND, 3), 6.0);
             helper.assertItemEntityPresent(InitItems.USAGI_DOLL.get(), new BlockPos(3, STAND, 3), 6.0);
             helper.succeed();

@@ -11,24 +11,20 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.shop.Wallet;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Presents, and pocket money: the two ways things pass between a pet and the person it
  * belongs to without either of them going near a shop counter.
  */
 @GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class GiftGameTests {
     private static final String BATCH = "chiikawa_gift";
     private static final int WALK_TICKS = 1200;
@@ -55,9 +51,9 @@ public final class GiftGameTests {
 
         helper.succeedWhen(() -> {
             helper.assertTrue(owner.getInventory().contains(new ItemStack(Items.CAKE)),
-                "the owner never got the cake");
+                Component.literal("the owner never got the cake"));
             helper.assertTrue(pet.getPendingGift().isEmpty(),
-                "the pet handed the cake over and kept hold of it too");
+                Component.literal("the pet handed the cake over and kept hold of it too"));
         });
     }
 
@@ -73,8 +69,8 @@ public final class GiftGameTests {
         pet.mobInteract(owner, InteractionHand.MAIN_HAND);
 
         helper.assertTrue(Wallet.count(pet.getBackpack()) == POCKET_MONEY,
-            "the pet did not take the money it was handed");
-        helper.assertTrue(carries(pet, Items.EMERALD), "the money went somewhere other than its bag");
+            Component.literal("the pet did not take the money it was handed"));
+        helper.assertTrue(carries(pet, Items.EMERALD), Component.literal("the money went somewhere other than its bag"));
         helper.succeed();
     }
 
@@ -91,7 +87,7 @@ public final class GiftGameTests {
         pet.mobInteract(stranger, InteractionHand.MAIN_HAND);
 
         helper.assertTrue(Wallet.count(pet.getBackpack()) == 0,
-            "somebody else's pet took money from a stranger");
+            Component.literal("somebody else's pet took money from a stranger"));
         helper.succeed();
     }
 }

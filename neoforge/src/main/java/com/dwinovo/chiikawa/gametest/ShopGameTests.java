@@ -16,16 +16,13 @@ import com.dwinovo.chiikawa.network.ShopServerPacketHandler;
 import com.dwinovo.chiikawa.shop.Wallet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Spending. A pet that earns and never spends is a pet with a growing pile of emeralds
@@ -33,7 +30,6 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
  * of its own.
  */
 @GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class ShopGameTests {
     private static final String BATCH = "chiikawa_shop";
     private static final int SHOP_TICKS = 3600;
@@ -56,10 +52,10 @@ public final class ShopGameTests {
         pet.getBackpack().addItem(new ItemStack(Items.EMERALD, WAGES));
 
         helper.succeedWhen(() -> {
-            helper.assertTrue(Wallet.count(pet.getBackpack()) < WAGES, "the pet never spent a thing");
+            helper.assertTrue(Wallet.count(pet.getBackpack()) < WAGES, Component.literal("the pet never spent a thing"));
             // What a Shisa fancies: something bottled to drink.
             helper.assertTrue(carries(pet, Items.HONEY_BOTTLE) || carries(pet, Items.MILK_BUCKET),
-                "the pet came away from the counter with money gone and nothing in its bag");
+                Component.literal("the pet came away from the counter with money gone and nothing in its bag"));
         });
     }
 
@@ -70,10 +66,10 @@ public final class ShopGameTests {
      */
     @GameTest(template = "floor8", batch = BATCH)
     public static void money_is_what_the_currency_tag_holds(GameTestHelper helper) {
-        helper.assertTrue(Wallet.isMoney(new ItemStack(Items.EMERALD)), "an emerald is not money");
-        helper.assertFalse(Wallet.isMoney(new ItemStack(Items.DIAMOND)), "a diamond is money though no tag says so");
+        helper.assertTrue(Wallet.isMoney(new ItemStack(Items.EMERALD)), Component.literal("an emerald is not money"));
+        helper.assertFalse(Wallet.isMoney(new ItemStack(Items.DIAMOND)), Component.literal("a diamond is money though no tag says so"));
         helper.assertTrue(Wallet.coins(3).is(Items.EMERALD) && Wallet.coins(3).getCount() == 3,
-            "the shop pays out in " + Wallet.coins(3));
+            Component.literal("the shop pays out in " + Wallet.coins(3)));
         helper.succeed();
     }
 
@@ -89,8 +85,8 @@ public final class ShopGameTests {
             new ShopTradePayload(helper.absolutePos(counter), BuiltInRegistries.ITEM.getKey(Items.COOKIE), true),
             customer);
 
-        helper.assertTrue(customer.getInventory().contains(new ItemStack(Items.COOKIE)), "no cookie");
-        helper.assertTrue(Wallet.count(customer.getInventory()) == WAGES - 1, "the price was not what it said");
+        helper.assertTrue(customer.getInventory().contains(new ItemStack(Items.COOKIE)), Component.literal("no cookie"));
+        helper.assertTrue(Wallet.count(customer.getInventory()) == WAGES - 1, Component.literal("the price was not what it said"));
         helper.succeed();
     }
 
@@ -106,7 +102,7 @@ public final class ShopGameTests {
             new ShopTradePayload(helper.absolutePos(counter), BuiltInRegistries.ITEM.getKey(Items.WHEAT), false),
             customer);
 
-        helper.assertTrue(Wallet.count(customer.getInventory()) > 0, "the shop paid nothing for the wheat");
+        helper.assertTrue(Wallet.count(customer.getInventory()) > 0, Component.literal("the shop paid nothing for the wheat"));
         helper.succeed();
     }
 
@@ -127,7 +123,7 @@ public final class ShopGameTests {
             new ShopTradePayload(helper.absolutePos(counter), BuiltInRegistries.ITEM.getKey(Items.COOKIE), true),
             customer);
 
-        helper.assertTrue(Wallet.count(customer.getInventory()) == WAGES, "the shop served someone out of reach");
+        helper.assertTrue(Wallet.count(customer.getInventory()) == WAGES, Component.literal("the shop served someone out of reach"));
         helper.succeed();
     }
 
@@ -150,7 +146,7 @@ public final class ShopGameTests {
         pet.getBackpack().addItem(new ItemStack(Items.EMERALD, WAGES));
 
         helper.runAtTickTime(LEAVE_IT_TICKS, () -> {
-            helper.assertTrue(Wallet.count(pet.getBackpack()) == WAGES, "a wild pet went shopping");
+            helper.assertTrue(Wallet.count(pet.getBackpack()) == WAGES, Component.literal("a wild pet went shopping"));
             helper.succeed();
         });
     }

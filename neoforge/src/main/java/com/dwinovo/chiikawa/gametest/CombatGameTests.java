@@ -8,9 +8,8 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
@@ -18,8 +17,6 @@ import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Fighting: a pet with a weapon defends its patch, and one without the means to use it
@@ -30,7 +27,6 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
  * makes the case longer and flakier.
  */
 @GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class CombatGameTests {
     private static final String BATCH = "chiikawa_combat";
     /**
@@ -61,7 +57,7 @@ public final class CombatGameTests {
         Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(8, STAND, 4));
 
         helper.succeedWhen(() -> helper.assertTrue(zombie.isDeadOrDying() || zombie.getHealth() < zombie.getMaxHealth(),
-            "the fencer never landed a hit"));
+            Component.literal("the fencer never landed a hit")));
     }
 
     /**
@@ -75,7 +71,7 @@ public final class CombatGameTests {
         float health = cow.getHealth();
 
         helper.runAtTickTime(LEAVE_IT_TICKS, () -> {
-            helper.assertTrue(cow.isAlive() && cow.getHealth() >= health, "the fencer went for the cow");
+            helper.assertTrue(cow.isAlive() && cow.getHealth() >= health, Component.literal("the fencer went for the cow"));
             helper.succeed();
         });
     }
@@ -92,7 +88,7 @@ public final class CombatGameTests {
         zombie.setNoAi(true);
 
         helper.succeedWhen(() -> helper.assertTrue(zombie.isDeadOrDying() || zombie.getHealth() < zombie.getMaxHealth(),
-            "the archer never hit anything"));
+            Component.literal("the archer never hit anything")));
     }
 
     /**
@@ -107,7 +103,7 @@ public final class CombatGameTests {
 
         helper.runAtTickTime(LEAVE_IT_TICKS, () -> {
             helper.assertTrue(zombie.isAlive() && zombie.getHealth() >= health,
-                "an archer with an empty quiver hurt something anyway");
+                Component.literal("an archer with an empty quiver hurt something anyway"));
             helper.succeed();
         });
     }
