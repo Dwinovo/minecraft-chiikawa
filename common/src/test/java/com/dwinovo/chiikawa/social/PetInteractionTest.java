@@ -20,6 +20,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.junit.jupiter.api.BeforeAll;
@@ -47,11 +48,11 @@ class PetInteractionTest {
               "notice_distance": 8, "approach_distance": 1, "reservation_ticks": 300, "duration_ticks": 80,
               "cooldown_ticks": 12000, "chance": 0.05 }""");
 
-        assertEquals(Optional.of("cling"), interaction.initiatorSide(type(EntityType.FOX)).orElseThrow().pose());
-        assertTrue(interaction.initiatorSide(type(EntityType.PIG)).isEmpty(), "a pig does not start it");
-        assertEquals(OptionalInt.of(0), interaction.partnerRank(type(EntityType.PIG)), "the first entry wins");
-        assertEquals(OptionalInt.of(1), interaction.partnerRank(type(EntityType.COW)));
-        assertTrue(interaction.partnerRank(type(EntityType.FOX)).isEmpty());
+        assertEquals(Optional.of("cling"), interaction.initiatorSide(type(EntityTypes.FOX)).orElseThrow().pose());
+        assertTrue(interaction.initiatorSide(type(EntityTypes.PIG)).isEmpty(), "a pig does not start it");
+        assertEquals(OptionalInt.of(0), interaction.partnerRank(type(EntityTypes.PIG)), "the first entry wins");
+        assertEquals(OptionalInt.of(1), interaction.partnerRank(type(EntityTypes.COW)));
+        assertTrue(interaction.partnerRank(type(EntityTypes.FOX)).isEmpty());
         assertEquals(Optional.of(PetReaction.HURT), interaction.partners().get(0).begin().orElseThrow().reaction());
         assertEquals(Optional.empty(), interaction.partners().get(1).pose(), "a part may be only a face");
         assertEquals(Optional.of(VoiceMoment.CLING), interaction.initiators().get(0).begin().orElseThrow().voice());

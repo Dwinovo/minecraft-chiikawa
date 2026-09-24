@@ -26,9 +26,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * What the pets say, and when: each at a moment the game already reacts to, in its own
@@ -59,7 +60,7 @@ public final class VoiceGameTests {
     @GameTest(template = "floor8", batch = "chiikawa_voice_hurt", timeoutTicks = 100)
     public static void a_hurt_chiikawa_cries_out(GameTestHelper helper) {
         quietYard(helper, NOON);
-        player(helper).setPos(helper.absoluteVec(new BlockPos(3, STAND, 5).getCenter()));
+        player(helper).setPos(helper.absoluteVec(Vec3.atCenterOf(new BlockPos(3, STAND, 5))));
         AbstractPet pet = still(pet(helper, InitEntity.CHIIKAWA_PET.get(), new BlockPos(3, STAND, 3), false));
 
         pet.hurt(pet.damageSources().generic(), 1.0F);
@@ -86,7 +87,7 @@ public final class VoiceGameTests {
     public static void a_pet_says_something_when_it_is_tamed(GameTestHelper helper) {
         quietYard(helper, NOON);
         ServerPlayer tamer = player(helper);
-        tamer.setPos(helper.absoluteVec(new BlockPos(3, STAND, 5).getCenter()));
+        tamer.setPos(helper.absoluteVec(Vec3.atCenterOf(new BlockPos(3, STAND, 5))));
         tamer.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.COOKIE));
         AbstractPet pet = still(pet(helper, InitEntity.SHISA_PET.get(), new BlockPos(3, STAND, 3), false));
 
@@ -125,7 +126,7 @@ public final class VoiceGameTests {
         quietYard(helper, MIDNIGHT);
         AbstractPet pet = holding(pet(helper, InitEntity.RAKKO_PET.get(), new BlockPos(4, STAND, 4), true),
             Items.IRON_SWORD);
-        helper.spawn(EntityType.ZOMBIE, new BlockPos(8, STAND, 4));
+        helper.spawn(EntityTypes.ZOMBIE, new BlockPos(8, STAND, 4));
 
         helper.succeedWhen(() -> assertSaid(helper, pet, VoiceMoment.HUNT));
     }
