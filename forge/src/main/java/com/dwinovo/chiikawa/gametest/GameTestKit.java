@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.gametest;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
+import com.dwinovo.chiikawa.gametest.mixin.GameTestHelperAccessor;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.voice.PetSpeech;
@@ -177,7 +178,8 @@ public final class GameTestKit {
     static void quietYard(GameTestHelper helper, long dayTime) {
         settleWorld(helper.getLevel(), Difficulty.NORMAL, dayTime);
         double range = PetVoices.of(InitEntity.CHIIKAWA_PET.get()).hearingRange();
-        helper.getLevel().getEntitiesOfClass(AbstractPet.class, helper.getBounds().inflate(range))
+        helper.getLevel().getEntitiesOfClass(AbstractPet.class,
+                ((GameTestHelperAccessor) helper).chiikawa$getBounds().inflate(range))
             .forEach(pet -> pet.getBrain().eraseMemory(InitMemory.LAST_SAID.get()));
     }
 

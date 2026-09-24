@@ -19,7 +19,6 @@ import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import com.dwinovo.chiikawa.entity.brain.intent.RunningIntent;
-import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMemory;
@@ -62,8 +61,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestDontPrefix;
+import net.minecraftforge.gametest.GameTestHolder;
 
 /**
  * Pets meeting pets: one walks over to another and the two play a little scene, then go
@@ -74,8 +73,8 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
  * would, and watch what it does with it. Which scenes there are and who plays which part
  * comes from the generated data pack, the same files a player gets.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class SocialGameTests {
     private static final String BATCH = "chiikawa_social";
     /** Long enough for every pet to have settled into pottering about. */
@@ -380,8 +379,7 @@ public final class SocialGameTests {
             .thenWaitUntil(() -> helper.assertTrue(song(library).isPresent(), "the song was never imported"))
             .thenExecute(() -> {
                 ItemStack box = new ItemStack(InitItems.MUSIC_BOX.get());
-                box.set(InitDataComponents.MUSIC_BOX_SELECTION.get(),
-                    new MusicBoxSelection(song(library).orElseThrow().trackId(), SONG, 0));
+                MusicBoxSelection.set(box, new MusicBoxSelection(song(library).orElseThrow().trackId(), SONG, 0));
                 // Somebody's, and let loose: playing is work, which a wild pet does not do.
                 AbstractPet busker = owned(helper, InitEntity.HACHIWARE_PET.get(), new BlockPos(8, STAND, 8));
                 busker.setItemSlot(EquipmentSlot.MAINHAND, box);

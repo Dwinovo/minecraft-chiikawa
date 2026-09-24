@@ -39,7 +39,7 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
         SENSOR_TYPES.register("pet_item_entity_sensor", () -> new SensorType<>(PetPickableItemSensor::new));
     private static final RegistryObject<SensorType<PetPlacesSensor>> PET_PLACES_SENSOR =
         SENSOR_TYPES.register("pet_places_sensor", () -> new SensorType<>(PetPlacesSensor::new));
-    private static final DeferredHolder<SensorType<?>, SensorType<PetSocialSensor>> PET_SOCIAL_SENSOR =
+    private static final RegistryObject<SensorType<PetSocialSensor>> PET_SOCIAL_SENSOR =
         SENSOR_TYPES.register("pet_social_sensor", () -> new SensorType<>(PetSocialSensor::new));
 
     // Activity registrations
@@ -71,9 +71,9 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
         ACTIVITIES.register("shop", () -> new Activity("shop"));
     private static final RegistryObject<Activity> GIFT_OWNER =
         ACTIVITIES.register("gift_owner", () -> new Activity("gift_owner"));
-    private static final DeferredHolder<Activity, Activity> SOCIALIZE =
+    private static final RegistryObject<Activity> SOCIALIZE =
         ACTIVITIES.register("socialize", () -> new Activity("socialize"));
-    private static final DeferredHolder<Activity, Activity> COOPERATE =
+    private static final RegistryObject<Activity> COOPERATE =
         ACTIVITIES.register("cooperate", () -> new Activity("cooperate"));
 
     // Menu registrations

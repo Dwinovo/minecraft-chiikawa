@@ -14,6 +14,7 @@ import com.dwinovo.chiikawa.data.PetTaskTypeData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitRegistry;
+import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.dwinovo.chiikawa.task.TaskTracker;
@@ -30,8 +31,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestDontPrefix;
+import net.minecraftforge.gametest.GameTestHolder;
 
 /**
  * What the pets say, and when: each at a moment the game already reacts to, in its own
@@ -44,8 +45,8 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
  * own, and starts by hushing whatever pets earlier batches left about: a case next door
  * talking at the same moment would otherwise count against the crowd this one is allowed.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class VoiceGameTests {
     private static final int STAND = 2;
     /** Long enough for a pet to notice a zombie and set off after it. */
@@ -109,7 +110,7 @@ public final class VoiceGameTests {
         quietYard(helper, NOON);
         AbstractPet pet = still(pet(helper, InitEntity.RAKKO_PET.get(), new BlockPos(3, STAND, 3), true));
         pet.setTask(new PetTask(PetTaskTypeData.MELEE_HUNTING,
-            InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FENCER.get()), PetWorkCounters.SLAY, PetTask.NO_ICON,
+            Services.REGISTRY.getKey(InitRegistry.PET_JOB_KEY, InitRegistry.FENCER.get()), PetWorkCounters.SLAY, PetTask.NO_ICON,
             QUARRY, PetTaskTypeData.reward(PetTaskTypeData.MELEE_HUNTING), 0));
 
         TaskTracker.advance(pet, PetWorkCounters.SLAY, QUARRY);

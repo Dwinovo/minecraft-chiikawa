@@ -23,15 +23,15 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestDontPrefix;
+import net.minecraftforge.gametest.GameTestHolder;
 
 /**
  * The pets' own weapons, from the series. Rakko's sword is a fencer's like the others, and
  * the one way to come by it is to meet a Rakko: nobody makes one and no shop sells one.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class WeaponGameTests {
     private static final String BATCH = "chiikawa_weapons";
 
