@@ -15,7 +15,10 @@ import com.dwinovo.chiikawa.anim.render.layer.HeldItemLayer;
 import com.dwinovo.chiikawa.client.ui.PetStatusText;
 import com.dwinovo.chiikawa.client.ui.mc.WorldSurface;
 import com.dwinovo.chiikawa.ui.DrawSurface;
+import com.dwinovo.chiikawa.ui.UiStyle;
+import com.dwinovo.chiikawa.ui.widget.Bubble;
 import com.dwinovo.chiikawa.ui.widget.Chip;
+import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.item.BagItem;
 import com.dwinovo.chiikawa.anim.render.layer.BagLayer;
@@ -36,7 +39,9 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EntityAttachment;
@@ -60,7 +65,7 @@ import java.util.Optional;
  * Subclasses register {@link ControllerConfig}s in their constructor. The
  * base class registers a single state-driven {@code "main"} controller that
  * resolves a base loop via {@link PetAnimationResolver}, plus the
- * {@code "action"} and {@code "reaction"} dummy controllers that
+ * {@code "action"}, {@code "reaction"} and {@code "talk"} dummy controllers that
  * {@link com.dwinovo.chiikawa.entity.AbstractPet} dispatches one-shot
  * animations to. Subclasses append decorative controllers (blink, breath, ...)
  * via {@link #addController}.
@@ -86,6 +91,8 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     public static final String CONTROLLER_ACTION = "action";
     /** Controller name receiving one-shot reaction triggers. */
     public static final String CONTROLLER_REACTION = "reaction";
+    /** Controller name the pet opens its mouth on while it says something. */
+    public static final String CONTROLLER_TALK = "talk";
     /**
      * Controller name driving the ambient blink loop. Plays the {@code blink}
      * animation from each pet's animation file as a constant decorative loop.
@@ -185,6 +192,10 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         //              any) override ambient blinking
         //   "reaction" externally-triggered one-shot emotional reactions —
         //              same priority rationale as action
+        //   "talk"     the mouth opening while the pet says a line — after
+        //              reaction, whose face arrives in the same tick and would
+        //              otherwise replace it; it keys only the mouth, so the rest
+        //              of the face stays as the reaction left it
         // Sub-classes append further decorative or override controllers on top.
         addController(new ControllerConfig(
                 CONTROLLER_MAIN,
@@ -199,6 +210,11 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
                 ControllerHandler::neverPlay));
         addController(new ControllerConfig(
                 CONTROLLER_REACTION,
+                BlendMode.OVERRIDE,
+                TRIGGER_STOP_FADE_SEC,
+                ControllerHandler::neverPlay));
+        addController(new ControllerConfig(
+                CONTROLLER_TALK,
                 BlendMode.OVERRIDE,
                 TRIGGER_STOP_FADE_SEC,
                 ControllerHandler::neverPlay));
@@ -328,11 +344,16 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
 
     /**
      * Visibility-rule helper: whether the pet is talking, i.e. one of the
-     * {@code open_mouth} animations is playing. A face whose mouth opens as
+     * {@link PetSpeech#MOUTHS} animations is playing. A face whose mouth opens as
      * Chiikawa's does shows its opening ({@code Mouth3}) only then.
      */
     public static boolean isTalking(ChiikawaRenderState state) {
-        return isAnyControllerPlaying(state, "open_mouth1") || isAnyControllerPlaying(state, "open_mouth2");
+        for (String mouth : PetSpeech.MOUTHS) {
+            if (isAnyControllerPlaying(state, mouth)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -376,6 +397,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             state.put(PetData.WORN_BAG, pet.getItemBySlot(EquipmentSlot.CHEST));
         }
         extractLabel(entity, state, partialTick);
+        extractSpeech(entity, state, partialTick);
 
         if (entity instanceof ChiikawaAnimated animated) {
             PetAnimator animator = animated.getPetAnimator();
@@ -447,6 +469,8 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     /** One line of label text, in blocks at the name-tag scale. */
     private static final float LABEL_LINE = 0.28F;
     private static final float LABEL_SCALE = 0.025F;
+    /** How long a line takes to fade at the end of its time over a pet's head, in ticks. */
+    private static final float SPEECH_FADE_TICKS = 10.0F;
 
     /** Whether a pet is being drawn as a picture in a screen rather than in the world. */
     private static boolean drawingPortrait;
@@ -500,7 +524,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             : entity.getAttachments().getNullable(EntityAttachment.NAME_TAG, 0, entity.getViewYRot(partialTick));
     }
 
-    /** What the pet says over its head right now: its status, if its owner is asking. */
+    /** What the pet shows over its head right now: its status, if its owner is asking. */
     private Optional<Chip> answer(T entity) {
         return isAsked(entity) ? statusChip(entity) : Optional.empty();
     }
@@ -534,18 +558,66 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     /** The mod's own label, drawn where a name tag goes, with the same widgets its screens use. */
     private void drawLabel(ChiikawaRenderState state, PoseStack poseStack, MultiBufferSource bufferSource,
                            float extraHeight) {
-        Vec3 attachment = state.labelAttachment;
-        if (attachment == null) {
+        if (!overHead(state.labelAttachment, poseStack, extraHeight)) {
             return;
+        }
+        state.label.draw(new WorldSurface(poseStack, bufferSource, getFont()), 0, 0);
+        poseStack.popPose();
+    }
+
+    /**
+     * What the pet is saying, taken with the rest of its state for everyone near enough to
+     * have heard it — whoever the pet belongs to. F1 hides it with the rest of the HUD.
+     */
+    private void extractSpeech(T entity, ChiikawaRenderState state, float partialTick) {
+        state.speech = null;
+        state.speechAttachment = null;
+        if (drawingPortrait || Minecraft.getInstance().options.hideGui || !(entity instanceof AbstractPet pet)) {
+            return;
+        }
+        pet.getSpeech().ifPresent(speech -> {
+            float left = PetSpeech.TALK_TICKS - (pet.tickCount - speech.since() + partialTick);
+            state.speech = Component.translatable(speech.line()).getString();
+            state.speechAlpha = Mth.clamp(left / SPEECH_FADE_TICKS, 0.0F, 1.0F);
+            state.speechAttachment = entity.getAttachments().getNullable(EntityAttachment.NAME_TAG, 0, entity.getViewYRot(partialTick));
+        });
+    }
+
+    /**
+     * What the pet is saying, in a bubble over its head. It sits above the name and the
+     * label rather than over them, and fades at the end.
+     */
+    private void drawSpeech(ChiikawaRenderState state, PoseStack poseStack, MultiBufferSource bufferSource) {
+        if (state.speech == null) {
+            return;
+        }
+        DrawSurface surface = new WorldSurface(poseStack, bufferSource, getFont(), state.speechAlpha);
+        float below = (state.nameTag != null ? LABEL_LINE : 0.0F)
+            + (state.label != null ? (state.label.height(surface) + UiStyle.GAP) * LABEL_SCALE : 0.0F);
+        if (!overHead(state.speechAttachment, poseStack, below)) {
+            return;
+        }
+        Bubble bubble = new Bubble(state.speech);
+        bubble.draw(surface, -bubble.width(surface) / 2, -bubble.height(surface) - Bubble.TAIL, 0);
+        poseStack.popPose();
+    }
+
+    /**
+     * Pushes a pose at the name-tag spot, {@code extraHeight} blocks higher, turned to the
+     * camera and scaled to text pixels with y running down as on a screen. The caller pops
+     * it.
+     *
+     * @return whether the pet has a name-tag spot; nothing is pushed when it has none
+     */
+    private boolean overHead(Vec3 attachment, PoseStack poseStack, float extraHeight) {
+        if (attachment == null) {
+            return false;
         }
         poseStack.pushPose();
         poseStack.translate(attachment.x, attachment.y + 0.5 + extraHeight, attachment.z);
         poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
-        // Text pixels from here on, with y running down as on a screen.
         poseStack.scale(LABEL_SCALE, -LABEL_SCALE, LABEL_SCALE);
-        DrawSurface surface = new WorldSurface(poseStack, bufferSource, getFont());
-        state.label.draw(surface, 0, 0);
-        poseStack.popPose();
+        return true;
     }
 
     @Override
@@ -619,6 +691,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         if (state.label != null) {
             drawLabel(state, poseStack, bufferSource, state.nameTag != null ? LABEL_LINE : 0.0F);
         }
+        drawSpeech(state, poseStack, bufferSource);
     }
 
     /**
