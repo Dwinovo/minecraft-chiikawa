@@ -14,6 +14,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Levels bought for a labor board. The screen shows a price and the server charges it:
@@ -60,7 +61,7 @@ public final class BoardServerPacketHandler {
      * @return whether the board went up a level
      */
     public static boolean buyLevel(BlockPos pos, ServerPlayer player) {
-        if (player.distanceToSqr(pos.getCenter()) > REACH_SQR) {
+        if (player.distanceToSqr(Vec3.atCenterOf(pos)) > REACH_SQR) {
             return false;
         }
         Optional<LaborBoardBlockEntity> found = player.level()

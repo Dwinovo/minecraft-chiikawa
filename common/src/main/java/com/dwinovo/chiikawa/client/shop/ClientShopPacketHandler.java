@@ -10,6 +10,6 @@ public final class ClientShopPacketHandler {
     }
 
     public static void handlePrices(ShopPricesPayload payload) {
-        Minecraft.getInstance().setScreen(new ShopScreen(payload.shop(), payload.prices()));
+        Minecraft.getInstance().setScreenAndShow(new ShopScreen(payload.shop(), payload.prices()));
     }
 }

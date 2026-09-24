@@ -9,6 +9,6 @@ public final class ClientManualPacketHandler {
     }
 
     public static void open() {
-        Minecraft.getInstance().setScreen(new HandbookScreen());
+        Minecraft.getInstance().setScreenAndShow(new HandbookScreen());
     }
 }

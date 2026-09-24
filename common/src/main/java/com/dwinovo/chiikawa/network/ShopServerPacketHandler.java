@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Trades asked for from a shop screen. Everything the screen says is checked again here:
@@ -24,7 +25,7 @@ public final class ShopServerPacketHandler {
     }
 
     public static void handleTrade(ShopPayloads.ShopTradePayload payload, ServerPlayer player) {
-        if (player.distanceToSqr(payload.shop().getCenter()) > REACH_SQR) {
+        if (player.distanceToSqr(Vec3.atCenterOf(payload.shop())) > REACH_SQR) {
             return;
         }
         Optional<ShopCatalog> catalog = player.level()

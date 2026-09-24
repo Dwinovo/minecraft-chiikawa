@@ -50,7 +50,7 @@ public class ChiikawaFabricClient implements ClientModInitializer {
         BlockEntityRendererRegistry.register(InitBlockEntities.LABOR_BOARD.get(), context -> new LaborBoardRenderer());
         BlockEntityRendererRegistry.register(InitBlockEntities.SHOP.get(), context -> new PropBlockRenderer<>());
         // The handbook's props, pasted into its panels as the game pastes in a pet.
-        PictureInPictureRendererRegistry.register(context -> new GuiPropRenderer(context.bufferSource()));
+        PictureInPictureRendererRegistry.register(context -> new GuiPropRenderer());
 
         MenuScreens.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);
         FabricModNetworking.registerClient();

@@ -10,6 +10,6 @@ public final class ClientBoardPacketHandler {
     }
 
     public static void handleSlips(BoardSlipsPayload payload) {
-        Minecraft.getInstance().setScreen(new LaborBoardScreen(payload));
+        Minecraft.getInstance().setScreenAndShow(new LaborBoardScreen(payload));
     }
 }

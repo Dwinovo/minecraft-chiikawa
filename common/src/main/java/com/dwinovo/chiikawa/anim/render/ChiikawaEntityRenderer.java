@@ -507,7 +507,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
      */
     private Optional<Chip> statusChip(T entity) {
         Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.options.hideGui || minecraft.player == null || !(entity instanceof AbstractPet pet)) {
+        if (minecraft.gui.hud.isHidden() || minecraft.player == null || !(entity instanceof AbstractPet pet)) {
             return Optional.empty();
         }
         if (!pet.isOwnedBy(minecraft.player)) {

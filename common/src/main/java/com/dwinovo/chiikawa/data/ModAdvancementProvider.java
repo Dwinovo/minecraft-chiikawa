@@ -4,7 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
-import net.minecraft.advancements.criterion.PlayerTrigger;
+import net.minecraft.advancements.triggers.PlayerTrigger;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.CachedOutput;

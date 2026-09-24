@@ -99,7 +99,7 @@ public final class ModRecipeProvider extends RecipeProvider {
         // a string for each shoulder.
         ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.TOOLS, InitItems.BACKPACK.get())
             .define('L', Items.LEATHER)
-            .define('W', Items.GRAY_WOOL)
+            .define('W', Items.WOOL.gray())
             .define('S', Items.STRING)
             .pattern("S S")
             .pattern("LWL")
@@ -107,14 +107,14 @@ public final class ModRecipeProvider extends RecipeProvider {
             .unlockedBy(getHasName(Items.LEATHER), has(Items.LEATHER))
             .save(this.output);
         // The pouches: fleece in the friend's own colour, on a string.
-        pouch(itemLookup, InitItems.BEAR_POUCH.get(), Items.PINK_WOOL);
-        pouch(itemLookup, InitItems.WHALE_POUCH.get(), Items.LIGHT_BLUE_WOOL);
-        pouch(itemLookup, InitItems.STAR_POUCH.get(), Items.YELLOW_WOOL);
+        pouch(itemLookup, InitItems.BEAR_POUCH.get(), Items.WOOL.pink());
+        pouch(itemLookup, InitItems.WHALE_POUCH.get(), Items.WOOL.lightBlue());
+        pouch(itemLookup, InitItems.STAR_POUCH.get(), Items.WOOL.yellow());
 
         // Another handbook, for one lost or given away: a book with a pink cover.
         ShapelessRecipeBuilder.shapeless(itemLookup, RecipeCategory.MISC, InitItems.HANDBOOK.get())
             .requires(Items.BOOK)
-            .requires(Items.PINK_DYE)
+            .requires(Items.DYE.pink())
             .unlockedBy(getHasName(Items.BOOK), has(Items.BOOK))
             .save(this.output);
 
