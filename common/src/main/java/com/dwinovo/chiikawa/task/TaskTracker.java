@@ -3,6 +3,8 @@ package com.dwinovo.chiikawa.task;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
+import com.dwinovo.chiikawa.voice.PetSpeech;
+import com.dwinovo.chiikawa.voice.VoiceMoment;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -58,6 +60,7 @@ public final class TaskTracker {
             REWARD_PARTICLES, 0.35, 0.3, 0.35, 0.0);
         pet.triggerReaction(PetReaction.HAPPY);
         pet.playTameSound();
+        PetSpeech.say(pet, VoiceMoment.PAID);
         IntentSelector.requestReevaluate(pet);
     }
 }

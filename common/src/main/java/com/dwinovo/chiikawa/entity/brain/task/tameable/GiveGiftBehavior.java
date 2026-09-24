@@ -2,6 +2,8 @@ package com.dwinovo.chiikawa.entity.brain.task.tameable;
 
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.voice.PetSpeech;
+import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -87,6 +89,7 @@ public class GiveGiftBehavior extends Behavior<AbstractPet> {
             HAPPY_PARTICLES, 0.35, 0.3, 0.35, 0.0);
         pet.triggerReaction(PetReaction.HAPPY);
         pet.playTameSound();
+        PetSpeech.say(pet, VoiceMoment.GIFT);
     }
 
     private static void walkToOwner(AbstractPet pet) {
