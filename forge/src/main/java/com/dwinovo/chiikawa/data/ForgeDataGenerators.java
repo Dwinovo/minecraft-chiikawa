@@ -47,6 +47,7 @@ public class ForgeDataGenerators {
         generator.addProvider(event.includeServer(), new ShopCatalogProvider(output));
         generator.addProvider(event.includeServer(), new LaborBoardLevelProvider(output));
         generator.addProvider(event.includeServer(), new PetSpawnProvider(output));
+        generator.addProvider(event.includeServer(), new PetInteractionProvider(output));
         generator.addProvider(event.includeServer(), new ModAdvancementProvider(output, lookupProvider));
         generator.addProvider(event.includeServer(), new ModLootTableProvider(output));
         

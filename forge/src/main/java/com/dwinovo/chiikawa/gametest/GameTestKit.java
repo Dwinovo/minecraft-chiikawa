@@ -85,6 +85,16 @@ public final class GameTestKit {
         return pet(helper, InitEntity.USAGI_PET.get(), rel, true);
     }
 
+    /** A wild pet of a particular character, for a case about who that character is. */
+    static AbstractPet wild(GameTestHelper helper, EntityType<? extends AbstractPet> type, BlockPos rel) {
+        return pet(helper, type, rel, false);
+    }
+
+    /** A tamed pet of a particular character, likewise. */
+    static AbstractPet owned(GameTestHelper helper, EntityType<? extends AbstractPet> type, BlockPos rel) {
+        return pet(helper, type, rel, true);
+    }
+
     /**
      * A player in the case's level, as the server sees one: an owner, a customer, a
      * stranger. Vanilla marks the only way to make one for removal and gives this version

@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.anim.state;
 
 import com.dwinovo.chiikawa.entity.PetDirective;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -41,6 +42,20 @@ public final class PetAnimationResolver {
             return anim == null ? List.of("idle") : List.of(anim, "idle");
         }
 
+        // A part in a scene with another pet, named by data: first if this pet has it,
+        // otherwise whatever it would be doing anyway.
+        if (!safe.performance().isEmpty()) {
+            List<String> candidates = new ArrayList<>();
+            candidates.add(safe.performance());
+            candidates.addAll(resolveLoop(safe));
+            return candidates;
+        }
+
+        return resolveLoop(safe);
+    }
+
+    /** The base loop from directive, movement and job. */
+    private static List<String> resolveLoop(PetAnimContext safe) {
         if (safe.directive() == PetDirective.STAY) {
             return List.of("sit", "idle");
         }

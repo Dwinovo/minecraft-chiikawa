@@ -174,6 +174,12 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * and the client works out how long is left against its own clock.
      */
     private static final EntityDataAccessor<Long> EAGER_UNTIL = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.LONG);
+    /**
+     * The animation the pet holds while it plays its part in a scene with another pet,
+     * empty when it is not in one; see {@link #setPerformance}. A level state like
+     * {@link #ACTIVITY}, but named by data rather than by code.
+     */
+    private static final EntityDataAccessor<String> PERFORMANCE = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.STRING);
 
     /** Legacy animation-id namespace for {@link #ANIM_TRIGGER}'s low byte. */
     public static final int TRIGGER_NONE         = 0;
@@ -208,6 +214,10 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitMemory.TAKE_TASK_COOLDOWN.get(),
         InitMemory.NEAREST_SHOP.get(),
         InitMemory.SHOP_COOLDOWN.get(),
+        InitMemory.LAST_FINISHED_SLIP.get(),
+        InitMemory.INTERACTION_PLAN.get(),
+        InitMemory.INTERACTION_RESERVATION.get(),
+        InitMemory.SOCIAL_COOLDOWNS.get(),
         InitMemory.CURRENT_INTENT.get(),
         InitMemory.INTENT_REEVALUATE.get(),
         InitMemory.INTENT_SWITCH_LOG.get(),
@@ -219,7 +229,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitSensor.PET_ATTACKBLE_ENTITY_SENSOR.get(),
         InitSensor.PET_FARMER_WORK_SENSOR.get(),
         InitSensor.PET_ITEM_ENTITY_SENSOR.get(),
-        InitSensor.PET_PLACES_SENSOR.get()
+        InitSensor.PET_PLACES_SENSOR.get(),
+        InitSensor.PET_SOCIAL_SENSOR.get()
     );
     /** Lazily allocated on first client-side read; server instances pay nothing. */
     private PetAnimator petAnimator;
@@ -583,6 +594,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         BrainUtils.addTakeTaskTasks(brain);
         BrainUtils.addShopTasks(brain);
         BrainUtils.addGiftTasks(brain);
+        BrainUtils.addSocialTasks(brain);
 
         // Each job's activities — registered once, dormant until the intent
         // selector picks one of that job's intents.
@@ -830,7 +842,22 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     @Override
     public PetAnimContext getAnimContext(float walkSpeed) {
-        return PetAnimContext.base(getPetDirective(), getPetJobId(), walkSpeed, getActivity());
+        return PetAnimContext.base(getPetDirective(), getPetJobId(), walkSpeed, getActivity(), getPerformance());
+    }
+
+    /** The animation the pet holds for its part in a scene, empty when not in one. Synced. */
+    public String getPerformance() {
+        return this.entityData.get(PERFORMANCE);
+    }
+
+    /**
+     * Holds an animation for as long as the pet plays its part in a scene with another pet,
+     * {@code ""} to stop. Server side. A pet whose model lacks the animation just looks as
+     * it otherwise would.
+     */
+    public void setPerformance(String animation) {
+        if (level().isClientSide()) return;
+        this.entityData.set(PERFORMANCE, animation);
     }
 
     /** Current code-bounded loop activity (level state). Synced both directions. */
@@ -865,6 +892,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         this.entityData.define(INTENT, "");
         this.entityData.define(GIFT, ItemStack.EMPTY);
         this.entityData.define(EAGER_UNTIL, 0L);
+        this.entityData.define(PERFORMANCE, "");
     }
 
     /**
