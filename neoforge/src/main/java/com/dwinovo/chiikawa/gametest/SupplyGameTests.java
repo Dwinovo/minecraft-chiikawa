@@ -14,6 +14,7 @@ import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTabs;
 import com.dwinovo.chiikawa.item.BagItem;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
+import com.dwinovo.chiikawa.voice.PetVoices;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -92,6 +93,22 @@ public final class SupplyGameTests {
                 });
             });
         }
+        helper.succeed();
+    }
+
+    /**
+     * A pet in the handbook says only what it says in the world: one of its own lines, so
+     * the handbook never puts a word in Usagi's mouth or a cry in Rakko's.
+     */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void every_pet_in_the_handbook_speaks_in_its_own_words(GameTestHelper helper) {
+        ManualData.all().forEach((id, page) -> page.panels().forEach(panel -> panel.actors().forEach(actor ->
+            actor.pet().ifPresent(pet -> actor.motion().say().ifPresent(say -> {
+                Set<String> own = new HashSet<>();
+                PetVoices.of(BuiltInRegistries.ENTITY_TYPE.get(pet)).lines().values()
+                    .forEach(lines -> lines.forEach(line -> own.add(line.text())));
+                helper.assertTrue(own.contains(say), pet + " says " + say + " on " + id + ", not a line of its own");
+            })))));
         helper.succeed();
     }
 
