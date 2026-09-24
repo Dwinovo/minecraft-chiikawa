@@ -427,8 +427,7 @@ public final class SocialGameTests {
                 ServerPlayer bystander = player(helper);
                 bystander.moveTo(helper.absoluteVec(new Vec3(9.5, STAND, 8.5)));
                 ItemStack box = new ItemStack(InitItems.MUSIC_BOX.get());
-                box.set(InitDataComponents.MUSIC_BOX_SELECTION.get(),
-                    new MusicBoxSelection(song(library).orElseThrow().trackId(), SONG, 0));
+                MusicBoxSelection.set(box, new MusicBoxSelection(song(library).orElseThrow().trackId(), SONG, 0));
                 AbstractPet busker = owned(helper, InitEntity.HACHIWARE_PET.get(), new BlockPos(8, STAND, 8));
                 busker.setItemSlot(EquipmentSlot.MAINHAND, box);
                 hachiware.set(busker);
