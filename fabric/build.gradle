@@ -41,16 +41,14 @@ loom {
             ideConfigGenerated(true)
             runDir('runs/server')
         }
-        datagen {
-            inherit client
-            setConfigName('Fabric Data Generation')
-            ideConfigGenerated(true)
-            runDir('runs/datagen')
-            vmArg("-Dfabric-api.datagen")
-            vmArg("-Dfabric-api.datagen.output-dir=${file('src/generated/resources')}")
-            vmArg("-Dfabric-api.datagen.modid=${mod_id}")
-        }
+        
     }
+}
+
+fabricApi {
+	configureDataGeneration {
+		client = true
+	}
 }
 
 // Implement mcgradleconventions loader attribute
@@ -79,4 +77,3 @@ loom.remapConfigurations.configureEach {
     }
 }
 
-sourceSets.main.resources { srcDir 'src/generated/resources' }
