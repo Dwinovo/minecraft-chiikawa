@@ -1,7 +1,6 @@
 package com.dwinovo.chiikawa.anim.render.impl;
 
 import com.dwinovo.chiikawa.anim.render.ChiikawaEntityRenderer;
-import com.dwinovo.chiikawa.anim.render.ChiikawaRenderState;
 import com.dwinovo.chiikawa.entity.impl.ChiikawaPet;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 
@@ -14,10 +13,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 public class ChiikawaRenderer extends ChiikawaEntityRenderer<ChiikawaPet> {
     public ChiikawaRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, "chiikawa");
-        addBoneVisibilityRule("Mouth3", (state, animCtx) -> talking(state));
-    }
-
-    private static boolean talking(ChiikawaRenderState state) {
-        return isAnyControllerPlaying(state, "open_mouth1") || isAnyControllerPlaying(state, "open_mouth2");
+        addBoneVisibilityRule("Mouth3", (state, animCtx) -> isTalking(state));
     }
 }
