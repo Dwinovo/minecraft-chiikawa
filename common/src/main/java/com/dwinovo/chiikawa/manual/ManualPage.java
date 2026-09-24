@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Function;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 
 /**
@@ -78,7 +78,7 @@ public record ManualPage(int order, String title, List<Panel> panels) {
      * @param reaction a pet's reaction, played over and over
      * @param motion what it does over and over, and how often
      */
-    public record Actor(Optional<ResourceLocation> pet, Optional<ResourceLocation> prop,
+    public record Actor(Optional<Identifier> pet, Optional<Identifier> prop,
                         Optional<ExtraCodecs.TagOrElementLocation> item, float x, float y, float scale, float facing,
                         Optional<ExtraCodecs.TagOrElementLocation> hold, Optional<ExtraCodecs.TagOrElementLocation> bag,
                         boolean sit, boolean walk, Optional<PetAction> action, Optional<PetReaction> reaction,
@@ -89,8 +89,8 @@ public record ManualPage(int order, String title, List<Panel> panels) {
         private static final Codec<PetReaction> REACTION = named(PetReaction.values(), PetReaction.NONE);
 
         public static final Codec<Actor> CODEC = RecordCodecBuilder.<Actor>create(instance -> instance.group(
-            ResourceLocation.CODEC.optionalFieldOf("pet").forGetter(Actor::pet),
-            ResourceLocation.CODEC.optionalFieldOf("prop").forGetter(Actor::prop),
+            Identifier.CODEC.optionalFieldOf("pet").forGetter(Actor::pet),
+            Identifier.CODEC.optionalFieldOf("prop").forGetter(Actor::prop),
             ExtraCodecs.TAG_OR_ELEMENT_ID.optionalFieldOf("item").forGetter(Actor::item),
             Codec.floatRange(0.0F, 1.0F).optionalFieldOf("x", 0.5F).forGetter(Actor::x),
             Codec.FLOAT.optionalFieldOf("y", 0.0F).forGetter(Actor::y),

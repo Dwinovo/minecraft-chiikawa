@@ -37,7 +37,7 @@ public final class PetActivities {
         ImmutableList<? extends Pair<Integer, ? extends BehaviorControl<? super AbstractPet>>> behaviors,
         Set<MemoryModuleType<?>> erasedOnStop
     ) {
-        brain.addActivityAndRemoveMemoriesWhenStopped(activity, behaviors, ImmutableSet.of(), erasedOnStop);
+        brain.addActivity(activity, behaviors, ImmutableSet.of(), erasedOnStop);
     }
 
     /**

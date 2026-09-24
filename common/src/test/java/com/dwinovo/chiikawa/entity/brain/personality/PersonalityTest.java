@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.entity.brain.intent.DayPhase;
 import com.dwinovo.chiikawa.testing.FixedRandom;
+import com.dwinovo.chiikawa.testing.ItemComponents;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
@@ -12,20 +13,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.SharedConstants;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.item.Items;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class PersonalityTest {
-    private static final ResourceLocation WANDER = ResourceLocation.fromNamespaceAndPath("chiikawa", "wander");
-    private static final ResourceLocation HARVEST = ResourceLocation.fromNamespaceAndPath("chiikawa", "harvest");
+    private static final Identifier WANDER = Identifier.fromNamespaceAndPath("chiikawa", "wander");
+    private static final Identifier HARVEST = Identifier.fromNamespaceAndPath("chiikawa", "harvest");
 
     @BeforeAll
     static void bootstrap() {
         SharedConstants.tryDetectVersion();
         Bootstrap.bootStrap();
+        ItemComponents.bind();
     }
 
     @Test
@@ -80,7 +82,7 @@ class PersonalityTest {
         assertEquals(personality.routine(), decoded.routine());
         assertEquals(personality.randomness(), decoded.randomness());
         assertEquals(Items.STONE_SWORD, decoded.wildTools().get(0).item());
-        assertEquals(4, decoded.wildTools().get(0).weight().asInt());
+        assertEquals(4, decoded.wildTools().get(0).weight());
     }
 
     @Test

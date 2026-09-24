@@ -16,6 +16,7 @@ import com.dwinovo.chiikawa.entity.brain.handler.FencerJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.MusicianJobHandler;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
+import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import com.dwinovo.chiikawa.utils.BrainUtils;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
 import com.dwinovo.chiikawa.entity.job.api.PetCapability;
@@ -47,10 +48,10 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.Brain;
@@ -119,8 +120,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     /** How much quicker an eager pet moves. */
     private static final double EAGER_SPEED_BONUS = 0.3;
-    private static final ResourceLocation EAGER_SPEED_ID =
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "eager");
+    private static final Identifier EAGER_SPEED_ID =
+        Identifier.fromNamespaceAndPath(Constants.MOD_ID, "eager");
 
     /** Slot the held tool lives in; see {@link #getItemBySlot}. */
     public static final int MAINHAND_SLOT = 0;
@@ -463,7 +464,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      */
     public void tellOwner(Component message) {
         if (getOwner() instanceof ServerPlayer owner) {
-            owner.displayClientMessage(message.copy().withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), false);
+            owner.sendSystemMessage(message.copy().withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
         }
     }
 
@@ -708,7 +709,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
                 return;
             }
         }
-        spawnAtLocation(inBagSlot);
+        if (level() instanceof ServerLevel server) {
+            spawnAtLocation(server, inBagSlot);
+        }
     }
 
     /**
@@ -761,8 +764,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     public void dropBagContents() {
         for (int slot = BACKPACK_SIZE; slot < backpack.getContainerSize(); slot++) {
             ItemStack stack = backpack.removeItemNoUpdate(slot);
-            if (!stack.isEmpty()) {
-                spawnAtLocation(stack);
+            if (!stack.isEmpty() && level() instanceof ServerLevel server) {
+                spawnAtLocation(server, stack);
             }
         }
     }
@@ -984,10 +987,10 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * decides its job, and roams freely around where it spawned.
      */
     @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType,
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnType,
             @Nullable SpawnGroupData spawnGroupData) {
         // One the world found for itself comes with a tool, as a pet met in the wild does.
-        if (spawnType == MobSpawnType.NATURAL || spawnType == MobSpawnType.CHUNK_GENERATION) {
+        if (spawnType == EntitySpawnReason.NATURAL || spawnType == EntitySpawnReason.CHUNK_GENERATION) {
             setItemSlot(EquipmentSlot.MAINHAND, PetPersonalities.of(getType()).drawWildTool(level.getRandom()));
         }
         // However it came, a new pet is nobody's yet, and goes its own way until it is tamed.
@@ -1020,9 +1023,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     @Override
     public void die(DamageSource source) {
         setTask(null);
-        if (level() instanceof ServerLevel server && getOwnerUUID() != null) {
+        if (level() instanceof ServerLevel server && PetTargeting.ownerId(this) != null) {
             // Its doll is what is left to find now, and that is on the floor, not in a roster.
-            PetRoster.of(server).forget(getOwnerUUID(), getUUID());
+            PetRoster.of(server).forget(PetTargeting.ownerId(this), getUUID());
         }
         super.die(source);
     }

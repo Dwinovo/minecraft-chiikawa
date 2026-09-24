@@ -5,11 +5,11 @@ import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.shop.ShopCatalog;
 import com.dwinovo.chiikawa.shop.ShopCatalogs;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 /**
  * Which price list a shop quotes from. That is all a shop is, for now: the prices live in
@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class ShopBlockEntity extends BlockEntity {
     private static final String CATALOG_KEY = "Catalog";
 
-    private ResourceLocation catalogId = ShopCatalogData.GENERAL;
+    private Identifier catalogId = ShopCatalogData.GENERAL;
 
     public ShopBlockEntity(BlockPos pos, BlockState state) {
         super(InitBlockEntities.SHOP.get(), pos, state);
@@ -30,28 +30,28 @@ public class ShopBlockEntity extends BlockEntity {
         return ShopCatalogs.get(catalogId);
     }
 
-    public ResourceLocation catalogId() {
+    public Identifier catalogId() {
         return catalogId;
     }
 
     /** Points the shop at another price list, for a map maker putting up a themed stall. */
-    public void setCatalogId(ResourceLocation catalogId) {
+    public void setCatalogId(Identifier catalogId) {
         this.catalogId = catalogId;
         setChanged();
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        if (tag.contains(CATALOG_KEY)) {
-            ResourceLocation saved = ResourceLocation.tryParse(tag.getString(CATALOG_KEY));
-            catalogId = saved == null ? ShopCatalogData.GENERAL : saved;
-        }
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        input.getString(CATALOG_KEY).ifPresent(saved -> {
+            Identifier id = Identifier.tryParse(saved);
+            catalogId = id == null ? ShopCatalogData.GENERAL : id;
+        });
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.putString(CATALOG_KEY, catalogId.toString());
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        output.putString(CATALOG_KEY, catalogId.toString());
     }
 }

@@ -16,7 +16,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -24,7 +23,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -34,10 +33,14 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * The labor board (労働掲示板): a standing notice board that puts up the day's slips.
  * Anyone's pets may take them; the slips themselves live in its
  * {@link LaborBoardBlockEntity}.
+ *
+ * <p>Drawn by its block entity's renderer from the board's own model, so the plates on it
+ * can come down as pets take them; see {@code LaborBoardRenderer}. Its block model, as
+ * vanilla's chest's, only gives the bits that fly off it when it breaks.
  */
 public class LaborBoardBlock extends BaseEntityBlock {
     public static final MapCodec<LaborBoardBlock> CODEC = simpleCodec(LaborBoardBlock::new);
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     /**
      * Posts, board and the plates on it, which stand the same depth either side of the
      * middle of the block whichever way the board faces.
@@ -59,15 +62,6 @@ public class LaborBoardBlock extends BaseEntityBlock {
     @Override
     protected MapCodec<? extends BaseEntityBlock> codec() {
         return CODEC;
-    }
-
-    /**
-     * Drawn by its block entity's renderer from the board's own model, so the plates on it
-     * can come down as pets take them; see {@code LaborBoardRenderer}.
-     */
-    @Override
-    protected RenderShape getRenderShape(BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
     }
 
     @Override
@@ -104,7 +98,7 @@ public class LaborBoardBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null
+        return level.isClientSide() ? null
             : createTickerHelper(type, InitBlockEntities.LABOR_BOARD.get(), LaborBoardBlockEntity::serverTick);
     }
 

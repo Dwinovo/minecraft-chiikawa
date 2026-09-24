@@ -10,7 +10,7 @@ import java.util.Map;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 class PetSpawnTest {
     private static final ResourceKey<Biome> PLAINS = biome("plains");
     private static final ResourceKey<Biome> FOREST = biome("forest");
-    private static final TagKey<Biome> IS_FOREST = TagKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("is_forest"));
+    private static final TagKey<Biome> IS_FOREST = TagKey.create(Registries.BIOME, Identifier.withDefaultNamespace("is_forest"));
 
     @BeforeAll
     static void bootstrap() {
@@ -38,8 +38,8 @@ class PetSpawnTest {
         assertTrue(spawn.covers(PLAINS, tag -> false), "named by id");
         assertTrue(spawn.covers(FOREST, IS_FOREST::equals), "named by tag");
         assertFalse(spawn.covers(biome("desert"), tag -> false));
-        assertEquals(EntityType.PIG, spawn.spawners().get(0).type);
-        assertEquals(2, spawn.spawners().get(0).maxCount);
+        assertEquals(EntityType.PIG, spawn.spawners().get(0).value().type());
+        assertEquals(2, spawn.spawners().get(0).value().maxCount());
     }
 
     @Test
@@ -77,10 +77,10 @@ class PetSpawnTest {
     }
 
     private static ResourceKey<Biome> biome(String path) {
-        return ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace(path));
+        return ResourceKey.create(Registries.BIOME, Identifier.withDefaultNamespace(path));
     }
 
-    private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath("chiikawa", path);
+    private static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath("chiikawa", path);
     }
 }

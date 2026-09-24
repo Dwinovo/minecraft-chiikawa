@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.network;
 
+import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,7 +29,7 @@ public final class PetServerPacketHandler {
      * @return whether the pet took it
      */
     public static boolean order(ServerPlayer player, AbstractPet pet, PetDirective directive) {
-        if (!pet.isAlive() || !player.getUUID().equals(pet.getOwnerUUID())
+        if (!pet.isAlive() || !player.getUUID().equals(PetTargeting.ownerId(pet))
                 || player.distanceToSqr(pet) > REACH_SQR) {
             return false;
         }

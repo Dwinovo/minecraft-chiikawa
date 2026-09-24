@@ -3,7 +3,7 @@ package com.dwinovo.chiikawa.entity.job.impl;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.job.api.PetCapability;
 import java.util.List;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Fallback pet job — pet is holding nothing recognised. Always assumable,
@@ -32,7 +32,7 @@ public class NoneJob implements PetCapability {
     }
 
     @Override
-    public List<ResourceLocation> intents() {
+    public List<Identifier> intents() {
         return List.of();
     }
 }

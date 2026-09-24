@@ -8,15 +8,15 @@ import java.util.List;
 import java.util.UUID;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.level.Level;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
- * The roster is written by hand into NBT, and everything it is for happens after a
- * restart: a pet nobody has loaded since is exactly the pet a bell is rung for.
+ * The roster is written into NBT through its codec, and everything it is for happens
+ * after a restart: a pet nobody has loaded since is exactly the pet a bell is rung for.
  */
 class PetRosterTest {
     private static final UUID OWNER = UUID.fromString("00000000-0000-0000-0000-000000000001");
@@ -82,6 +82,7 @@ class PetRosterTest {
 
     /** Through NBT and back, which is the only trip that counts. */
     private static PetRoster reloaded(PetRoster roster) {
-        return PetRoster.load(roster.save(new CompoundTag(), null), null);
+        return PetRoster.CODEC.parse(NbtOps.INSTANCE, PetRoster.CODEC.encodeStart(NbtOps.INSTANCE, roster).getOrThrow())
+            .getOrThrow();
     }
 }

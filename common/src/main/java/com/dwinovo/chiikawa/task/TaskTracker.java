@@ -4,7 +4,7 @@ import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -29,7 +29,7 @@ public final class TaskTracker {
      * @param counter the kind of work, see {@link PetWorkCounters}
      * @param amount how much of it
      */
-    public static void advance(AbstractPet pet, ResourceLocation counter, int amount) {
+    public static void advance(AbstractPet pet, Identifier counter, int amount) {
         pet.getTask().filter(task -> task.counter().equals(counter)).ifPresent(task -> {
             PetTask advanced = task.advance(amount);
             if (advanced.isDone()) {
@@ -51,7 +51,7 @@ public final class TaskTracker {
         for (ItemStack stack : reward.getRandomItems(params)) {
             ItemStack remainder = pet.getBackpack().addItem(stack);
             if (!remainder.isEmpty()) {
-                pet.spawnAtLocation(remainder);
+                pet.spawnAtLocation(level, remainder);
             }
         }
         level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pet.getX(), pet.getY() + pet.getBbHeight() * 0.8, pet.getZ(),

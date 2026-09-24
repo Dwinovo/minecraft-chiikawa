@@ -8,7 +8,7 @@ import com.dwinovo.chiikawa.utils.Utils;
 import com.google.common.collect.ImmutableMap;
 import java.util.function.BiPredicate;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -21,7 +21,7 @@ import net.minecraft.world.phys.Vec3;
 public class CollectBlockBehavior extends Behavior<AbstractPet> {
     private final MemoryModuleType<BlockPos> target;
     private final BiPredicate<ServerLevel, BlockPos> qualifies;
-    private final ResourceLocation workCounter;
+    private final Identifier workCounter;
 
     /**
      * Creates the task.
@@ -30,7 +30,7 @@ public class CollectBlockBehavior extends Behavior<AbstractPet> {
      * @param workCounter the work each collected block reports, see {@link PetWorkCounters}
      */
     public CollectBlockBehavior(MemoryModuleType<BlockPos> target, BiPredicate<ServerLevel, BlockPos> qualifies,
-            ResourceLocation workCounter) {
+            Identifier workCounter) {
         super(ImmutableMap.of(target, MemoryStatus.VALUE_PRESENT));
         this.target = target;
         this.qualifies = qualifies;

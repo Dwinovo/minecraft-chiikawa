@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.SharedConstants;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -64,7 +64,7 @@ class LanguageDataUiTranslationTest {
     void everySlipTypeHasAName() {
         for (String locale : LOCALES) {
             Map<String, String> translations = collect(locale);
-            for (ResourceLocation type : List.of(PetTaskTypeData.WEEDING, PetTaskTypeData.STREET_PERFORMANCE,
+            for (Identifier type : List.of(PetTaskTypeData.WEEDING, PetTaskTypeData.STREET_PERFORMANCE,
                     PetTaskTypeData.MELEE_HUNTING, PetTaskTypeData.RANGED_HUNTING)) {
                 String key = "pet_task." + type.getNamespace() + "." + type.getPath();
                 assertTrue(translations.containsKey(key), () -> locale + " is missing " + key);

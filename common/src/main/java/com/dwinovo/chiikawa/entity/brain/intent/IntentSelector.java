@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Unit;
@@ -171,7 +171,7 @@ public final class IntentSelector {
      * @param running id of the running intent, or {@code null}
      * @param allows the directive's permission table
      */
-    static List<Candidate> candidates(List<PetIntent> offered, IntentContext ctx, @Nullable ResourceLocation running,
+    static List<Candidate> candidates(List<PetIntent> offered, IntentContext ctx, @Nullable Identifier running,
             Predicate<IntentCategory> allows) {
         List<Candidate> candidates = new ArrayList<>(offered.size());
         for (PetIntent intent : offered) {
@@ -215,10 +215,10 @@ public final class IntentSelector {
         PetOwnership ownership = PetOwnership.of(pet);
         IntentContext ctx = IntentContext.capture(pet, ownership);
         List<PetIntent> offered = new ArrayList<>(PetIntents.GENERIC);
-        for (ResourceLocation id : InitRegistry.getCapabilityFromId(pet.getPetJobId()).intents()) {
+        for (Identifier id : InitRegistry.getCapabilityFromId(pet.getPetJobId()).intents()) {
             offered.add(PetIntents.get(id));
         }
-        ResourceLocation running = pet.getBrain().getMemory(InitMemory.CURRENT_INTENT.get()).map(RunningIntent::id).orElse(null);
+        Identifier running = pet.getBrain().getMemory(InitMemory.CURRENT_INTENT.get()).map(RunningIntent::id).orElse(null);
         return new Evaluation(ctx, offered,
             candidates(offered, ctx, running, category -> PetConstraints.allows(pet, ownership, category)));
     }
@@ -293,7 +293,7 @@ public final class IntentSelector {
      * @param check start condition, or continue condition for the running intent
      * @param score base score weighted by personality
      */
-    record Candidate(ResourceLocation id, boolean allowed, IntentCheck check, float score) {
+    record Candidate(Identifier id, boolean allowed, IntentCheck check, float score) {
         boolean eligible() {
             return allowed && check.ok();
         }
@@ -306,7 +306,7 @@ public final class IntentSelector {
     record SelectorParams(float holdMargin, float randomness) {
     }
 
-    public record Scored(ResourceLocation id, float score) {
+    public record Scored(Identifier id, float score) {
     }
 
     /**
@@ -315,7 +315,7 @@ public final class IntentSelector {
      * @param ranking acceptable candidates with their noisy scores, best first; empty
      *                when the running intent is kept
      */
-    record Decision(@Nullable ResourceLocation next, @Nullable EndReason ended, List<Scored> ranking) {
+    record Decision(@Nullable Identifier next, @Nullable EndReason ended, List<Scored> ranking) {
         boolean keeps(@Nullable RunningIntent current) {
             return ended == null && Objects.equals(current == null ? null : current.id(), next);
         }

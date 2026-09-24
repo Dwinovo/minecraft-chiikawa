@@ -6,12 +6,12 @@ import java.util.function.Supplier;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
-import net.fabricmc.fabric.api.object.builder.v1.world.poi.PointOfInterestHelper;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityDataRegistry;
+import net.fabricmc.fabric.api.object.builder.v1.world.poi.PoiHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.syncher.EntityDataSerializer;
-import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
@@ -30,7 +30,7 @@ public class FabricRegistryHelper implements IRegistryHelper {
     @Override
     public void registerPoi(Identifier id, Supplier<? extends Block> block) {
         // Fabric ties the block's states to the type; a plain registry entry would not.
-        PointOfInterestHelper.register(id, 0, 1, block.get());
+        PoiHelper.register(id, 0, 1, block.get());
     }
 
     @Override
@@ -43,9 +43,8 @@ public class FabricRegistryHelper implements IRegistryHelper {
 
     @Override
     public void registerEntityDataSerializer(Identifier id, EntityDataSerializer<?> serializer) {
-        // Fabric has no registry for these: a serializer's id is its place in vanilla's own
-        // list, the same on both sides because both run the same mods' init in the same order.
-        EntityDataSerializers.registerSerializer(serializer);
+        // Fabric syncs a mod's serializers by id, as NeoForge does with its registry.
+        FabricEntityDataRegistry.register(id, serializer);
     }
 
     @Override

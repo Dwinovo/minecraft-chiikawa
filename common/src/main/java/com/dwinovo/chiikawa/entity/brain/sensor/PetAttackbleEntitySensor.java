@@ -146,7 +146,7 @@ public class PetAttackbleEntitySensor extends Sensor<AbstractPet> {
     }
 
     private static boolean hostile(LivingEntity entity) {
-        return entity.getType().is(InitTag.ENTITY_HOSTILE_ENTITY);
+        return entity.typeHolder().is(InitTag.ENTITY_HOSTILE_ENTITY);
     }
 
     /** Whether this thing has picked somebody out — the pet itself, or its owner. */

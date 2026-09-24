@@ -10,11 +10,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
-import net.minecraft.util.random.Weight;
-import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.util.random.WeightedRandom;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -39,8 +37,8 @@ import net.minecraft.world.item.ItemStack;
  *              something, not a chore it performs
  */
 public record Personality(
-    Map<ResourceLocation, Float> intentMultipliers,
-    Map<DayPhase, Map<ResourceLocation, Float>> routine,
+    Map<Identifier, Float> intentMultipliers,
+    Map<DayPhase, Map<Identifier, Float>> routine,
     float randomness,
     List<WeightedItem> wildTools,
     List<WeightedItem> likes
@@ -48,8 +46,8 @@ public record Personality(
     /** No leanings: every multiplier 1, no randomness, nothing held and nothing wanted. */
     public static final Personality DEFAULT = new Personality(Map.of(), Map.of(), 0.0F, List.of(), List.of());
 
-    private static final Codec<Map<ResourceLocation, Float>> MULTIPLIERS_CODEC =
-        Codec.unboundedMap(ResourceLocation.CODEC, Codec.floatRange(0.0F, Float.MAX_VALUE));
+    private static final Codec<Map<Identifier, Float>> MULTIPLIERS_CODEC =
+        Codec.unboundedMap(Identifier.CODEC, Codec.floatRange(0.0F, Float.MAX_VALUE));
 
     public static final Codec<Personality> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         MULTIPLIERS_CODEC.optionalFieldOf("intent_multipliers", Map.of()).forGetter(Personality::intentMultipliers),
@@ -72,14 +70,14 @@ public record Personality(
      * @param phase the current part of the day
      * @return the factor this pet's base score for {@code intent} is multiplied by
      */
-    public float multiplier(ResourceLocation intent, DayPhase phase) {
+    public float multiplier(Identifier intent, DayPhase phase) {
         return intentMultipliers.getOrDefault(intent, 1.0F)
             * routine.getOrDefault(phase, Map.of()).getOrDefault(intent, 1.0F);
     }
 
     /** @return every intent id this personality weighs, for validation */
-    public Set<ResourceLocation> intentIds() {
-        Set<ResourceLocation> ids = new HashSet<>(intentMultipliers.keySet());
+    public Set<Identifier> intentIds() {
+        Set<Identifier> ids = new HashSet<>(intentMultipliers.keySet());
         routine.values().forEach(multipliers -> ids.addAll(multipliers.keySet()));
         return ids;
     }
@@ -89,7 +87,7 @@ public record Personality(
      * @return the tool a wild pet of this kind spawns holding, empty when it spawns empty-handed
      */
     public ItemStack drawWildTool(RandomSource random) {
-        return WeightedRandom.getRandomItem(random, wildTools)
+        return WeightedRandom.getRandomItem(random, wildTools, WeightedItem::weight)
             .map(tool -> new ItemStack(tool.item()))
             .orElse(ItemStack.EMPTY);
     }
@@ -101,7 +99,7 @@ public record Personality(
      * @return one of its likings, or nothing when this kind of pet wants for nothing
      */
     public Optional<Item> drawLiking(RandomSource random) {
-        return WeightedRandom.getRandomItem(random, likes).map(WeightedItem::item);
+        return WeightedRandom.getRandomItem(random, likes, WeightedItem::weight).map(WeightedItem::item);
     }
 
     /**
@@ -109,20 +107,11 @@ public record Personality(
      * pet turns up holding and the things it would buy are drawn the same way, so they are
      * the same shape.
      */
-    public record WeightedItem(Item item, Weight weight) implements WeightedEntry {
+    public record WeightedItem(Item item, int weight) {
         /** Lazy because the item registry only exists once the game has bootstrapped. */
         public static final Codec<WeightedItem> CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.create(instance -> instance.group(
             BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(WeightedItem::item),
-            ExtraCodecs.POSITIVE_INT.xmap(Weight::of, Weight::asInt).fieldOf("weight").forGetter(WeightedItem::weight)
+            ExtraCodecs.POSITIVE_INT.fieldOf("weight").forGetter(WeightedItem::weight)
         ).apply(instance, WeightedItem::new)));
-
-        public WeightedItem(Item item, int weight) {
-            this(item, Weight.of(weight));
-        }
-
-        @Override
-        public Weight getWeight() {
-            return weight;
-        }
     }
 }

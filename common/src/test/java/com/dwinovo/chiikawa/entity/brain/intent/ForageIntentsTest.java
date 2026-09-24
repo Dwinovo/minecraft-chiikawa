@@ -14,14 +14,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import org.junit.jupiter.api.Test;
 
 class ForageIntentsTest {
     private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
-        ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
-        ResourceLocation.withDefaultNamespace("overworld"));
+        ResourceKey.createRegistryKey(Identifier.withDefaultNamespace("dimension")),
+        Identifier.withDefaultNamespace("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     private static final PetAnchor WILD_ANCHOR = new PetAnchor(HOME, AnchorDistances.WILD_REACH, AnchorDistances.WILD_LEASH, false, true);
 
@@ -74,8 +74,8 @@ class ForageIntentsTest {
         return TestContext.at(HOME, WILD_ANCHOR).ownership(ownership).phase(phase).targets(targets);
     }
 
-    private static PetTask slip(ResourceLocation counter) {
-        return new PetTask(ResourceLocation.fromNamespaceAndPath("chiikawa", "test"), ResourceLocation.fromNamespaceAndPath("chiikawa", "farmer"),
-            counter, PetTask.NO_ICON, 10, ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath("chiikawa", "pet_task/test")), 0);
+    private static PetTask slip(Identifier counter) {
+        return new PetTask(Identifier.fromNamespaceAndPath("chiikawa", "test"), Identifier.fromNamespaceAndPath("chiikawa", "farmer"),
+            counter, PetTask.NO_ICON, 10, ResourceKey.create(Registries.LOOT_TABLE, Identifier.fromNamespaceAndPath("chiikawa", "pet_task/test")), 0);
     }
 }

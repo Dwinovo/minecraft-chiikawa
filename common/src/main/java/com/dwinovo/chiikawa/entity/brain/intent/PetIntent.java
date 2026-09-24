@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.intent;
 
 import java.util.Optional;
 import java.util.Set;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.schedule.Activity;
 
@@ -15,7 +15,7 @@ import net.minecraft.world.entity.schedule.Activity;
  * directive's permission table before any condition is checked.
  */
 public interface PetIntent {
-    ResourceLocation id();
+    Identifier id();
 
     IntentCategory category();
 
@@ -38,7 +38,7 @@ public interface PetIntent {
      * {@link com.dwinovo.chiikawa.task.PetWorkCounters}. A pet carrying a slip that
      * counts it prefers this intent.
      */
-    default Optional<ResourceLocation> workCounter() {
+    default Optional<Identifier> workCounter() {
         return Optional.empty();
     }
 
