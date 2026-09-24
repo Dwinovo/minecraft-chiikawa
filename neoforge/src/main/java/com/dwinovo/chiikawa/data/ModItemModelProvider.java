@@ -7,7 +7,15 @@ import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.ModelProvider;
 import net.minecraft.client.data.models.model.ModelTemplates;
+import net.minecraft.core.Holder;
 import net.minecraft.data.PackOutput;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+
+import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class ModItemModelProvider extends ModelProvider {
     public ModItemModelProvider(PackOutput output) {
@@ -27,6 +35,19 @@ public final class ModItemModelProvider extends ModelProvider {
         itemModels.generateFlatItem(InitItems.SIMPLE_DISH.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(InitItems.PET_BELL.get(), ModelTemplates.FLAT_ITEM);
         // The props' item models come from PropItemModelProvider, shared with Fabric.
+    }
+
+    /** The mod's block states all come from ModBlockModelProvider, shared with Fabric. */
+    @Override
+    protected Stream<? extends Holder<Block>> getKnownBlocks() {
+        return Stream.empty();
+    }
+
+    /** Every item of the mod but the props, whose item models PropItemModelProvider makes. */
+    @Override
+    protected Stream<? extends Holder<Item>> getKnownItems() {
+        Set<Item> props = InitItems.PROPS.stream().map(Supplier::get).collect(Collectors.toSet());
+        return super.getKnownItems().filter(item -> !props.contains(item.value()));
     }
 
     private static void generateSpawnEggs(ItemModelGenerators itemModels) {
