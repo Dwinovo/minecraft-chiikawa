@@ -3,7 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.task.social;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.social.InteractionReservation;
-import com.dwinovo.chiikawa.social.PetInteraction;
+import com.dwinovo.chiikawa.social.PartPlayer;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.Brain;
@@ -11,6 +11,7 @@ import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * The partner's side of a scene: stays where it is, keeps turned towards the pet coming
@@ -20,7 +21,8 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
  * away — frees the other pet as well.
  */
 public class CooperateBehavior extends Behavior<AbstractPet> {
-    private boolean performing;
+    /** The pet's part, once the one coming over has arrived. */
+    private @Nullable PartPlayer part;
 
     public CooperateBehavior() {
         super(ImmutableMap.of(
@@ -32,7 +34,7 @@ public class CooperateBehavior extends Behavior<AbstractPet> {
 
     @Override
     protected void start(ServerLevel level, AbstractPet pet, long gameTime) {
-        performing = false;
+        part = null;
     }
 
     @Override
@@ -54,15 +56,19 @@ public class CooperateBehavior extends Behavior<AbstractPet> {
         InteractionReservation reservation = brain.getMemory(InitMemory.INTERACTION_RESERVATION.get()).orElseThrow();
         brain.eraseMemory(MemoryModuleType.WALK_TARGET);
         BehaviorUtils.lookAtEntity(pet, reservation.initiator());
-        if (reservation.performing() && !performing) {
-            reservation.side().begin(pet);
-            performing = true;
+        if (part != null) {
+            part.tick(pet, gameTime);
+        } else if (reservation.performing()) {
+            part = PartPlayer.begin(pet, reservation.side(), gameTime);
         }
     }
 
     @Override
     protected void stop(ServerLevel level, AbstractPet pet, long gameTime) {
-        PetInteraction.Side.end(pet);
+        if (part != null) {
+            part.end(pet);
+            part = null;
+        }
         pet.getBrain().eraseMemory(InitMemory.INTERACTION_RESERVATION.get());
     }
 }
