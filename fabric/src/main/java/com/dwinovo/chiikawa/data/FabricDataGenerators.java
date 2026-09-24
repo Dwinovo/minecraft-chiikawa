@@ -8,8 +8,9 @@ public class FabricDataGenerators implements DataGeneratorEntrypoint {
     public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator) {
         FabricDataGenerator.Pack pack = fabricDataGenerator.createPack();
         // 1.20.1: Use explicit Factory cast to avoid ambiguous method call
-        pack.addProvider((FabricDataGenerator.Pack.Factory<FabricModLanguageProvider>) output -> new FabricModLanguageProvider(output, "en_us"));
-        pack.addProvider((FabricDataGenerator.Pack.Factory<FabricModLanguageProvider>) output -> new FabricModLanguageProvider(output, "zh_cn"));
+        for (String locale : LanguageData.LOCALES) {
+            pack.addProvider((FabricDataGenerator.Pack.Factory<FabricModLanguageProvider>) output -> new FabricModLanguageProvider(output, locale));
+        }
         pack.addProvider(FabricModItemModelProvider::new);
         pack.addProvider((net.minecraft.data.DataProvider.Factory<ModBlockModelProvider>) ModBlockModelProvider::new);
         pack.addProvider((net.minecraft.data.DataProvider.Factory<PropItemModelProvider>) PropItemModelProvider::new);

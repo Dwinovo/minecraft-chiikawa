@@ -22,8 +22,9 @@ public class ForgeDataGenerators {
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
 
         // Language providers
-        generator.addProvider(event.includeClient(), new ForgeModLanguageProvider(output, "en_us"));
-        generator.addProvider(event.includeClient(), new ForgeModLanguageProvider(output, "zh_cn"));
+        for (String locale : LanguageData.LOCALES) {
+            generator.addProvider(event.includeClient(), new ForgeModLanguageProvider(output, locale));
+        }
         
         // Item model provider
         generator.addProvider(event.includeClient(), new ForgeModItemModelProvider(output, existingFileHelper));
