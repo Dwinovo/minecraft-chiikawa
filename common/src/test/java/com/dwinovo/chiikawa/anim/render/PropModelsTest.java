@@ -77,7 +77,8 @@ class PropModelsTest {
                 prop + " is a model nothing draws");
             assertTrue(Files.exists(ASSETS.resolve("textures/entities/" + prop + ".png")), prop + " has no texture");
         }
-        assertTrue(props.containsAll(BAGS) && props.containsAll(BLOCKS) && props.containsAll(ITEMS),
+        assertTrue(props.containsAll(BAGS) && props.containsAll(BLOCKS) && props.containsAll(ITEMS)
+                && props.containsAll(WEAPONS),
             "a prop the code draws has no model: " + props);
     }
 
