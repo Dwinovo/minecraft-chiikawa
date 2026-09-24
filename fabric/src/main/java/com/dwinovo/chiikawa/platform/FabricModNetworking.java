@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.platform;
 import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
 import com.dwinovo.chiikawa.client.manual.ClientManualPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
+import com.dwinovo.chiikawa.client.pet.ClientPetPacketHandler;
 import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.client.voice.ClientVoicePacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
@@ -38,6 +39,7 @@ public final class FabricModNetworking {
         PayloadTypeRegistry.playC2S().register(MusicPayloads.MusicBoxSelectTrackPayload.TYPE, MusicPayloads.MusicBoxSelectTrackPayload.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(MusicPayloads.MusicCatalogRequestPayload.TYPE, MusicPayloads.MusicCatalogRequestPayload.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(VoicePayloads.PetSpeechPayload.TYPE, VoicePayloads.PetSpeechPayload.STREAM_CODEC);
+        PayloadTypeRegistry.playS2C().register(PetPayloads.PetGesturePayload.TYPE, PetPayloads.PetGesturePayload.STREAM_CODEC);
         ServerPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicBoxSelectTrackPayload.TYPE,
             (payload, context) -> context.server().execute(() -> MusicServerPacketHandler.handleSelectTrack(payload, context.player())));
         ServerPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicCatalogRequestPayload.TYPE,
@@ -67,5 +69,7 @@ public final class FabricModNetworking {
             (payload, context) -> context.client().execute(() -> ClientMusicPacketHandler.handleStreamStop(payload)));
         ClientPlayNetworking.registerGlobalReceiver(VoicePayloads.PetSpeechPayload.TYPE,
             (payload, context) -> context.client().execute(() -> ClientVoicePacketHandler.handleSpeech(payload)));
+        ClientPlayNetworking.registerGlobalReceiver(PetPayloads.PetGesturePayload.TYPE,
+            (payload, context) -> context.client().execute(() -> ClientPetPacketHandler.handleGesture(payload)));
     }
 }
