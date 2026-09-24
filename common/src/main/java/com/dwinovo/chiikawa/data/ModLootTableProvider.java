@@ -40,16 +40,16 @@ public final class ModLootTableProvider extends LootTableProvider {
 
     public ModLootTableProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
         super(output, Set.of(), List.of(
-            new SubProviderEntry(lookup -> new BlockDrops(), LootContextParamSets.BLOCK),
-            new SubProviderEntry(lookup -> new SlipRewards(), LootContextParamSets.GIFT),
-            new SubProviderEntry(lookup -> new Gifts(), LootContextParamSets.ADVANCEMENT_REWARD)
+            new SubProviderEntry(BlockDrops::new, LootContextParamSets.BLOCK),
+            new SubProviderEntry(SlipRewards::new, LootContextParamSets.GIFT),
+            new SubProviderEntry(Gifts::new, LootContextParamSets.ADVANCEMENT_REWARD)
         ), registries);
     }
 
     /** What advancements hand out. */
     private static final class Gifts implements LootTableSubProvider {
         @Override
-        public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
+        public void generate(HolderLookup.Provider registries, BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
             output.accept(HANDBOOK_GIFT, LootTable.lootTable().withPool(LootPool.lootPool()
                 .setRolls(ConstantValue.exactly(1))
                 .add(LootItem.lootTableItem(InitItems.HANDBOOK.get()))));
@@ -58,7 +58,7 @@ public final class ModLootTableProvider extends LootTableProvider {
 
     private static final class BlockDrops implements LootTableSubProvider {
         @Override
-        public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
+        public void generate(HolderLookup.Provider registries, BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
             dropSelf(output, InitBlocks.LABOR_BOARD.get());
             dropSelf(output, InitBlocks.SHOP.get());
         }
@@ -80,7 +80,7 @@ public final class ModLootTableProvider extends LootTableProvider {
         private static final float EXTRA_CHANCE = 0.3F;
 
         @Override
-        public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
+        public void generate(HolderLookup.Provider registries, BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
             reward(output, PetTaskTypeData.WEEDING, 1, 2, Items.BREAD, 1, 1);
             reward(output, PetTaskTypeData.STREET_PERFORMANCE, 2, 4, Items.COOKIE, 2, 4);
             // Hunting pays most: it is the only work a pet can fail by falling.

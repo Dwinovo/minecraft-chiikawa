@@ -19,7 +19,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * Writes the in-game cases' floors to {@code data/chiikawa/structure/<id>.nbt}.
+ * Writes the in-game cases' floors to {@code data/chiikawa/structures/<id>.nbt}.
  *
  * <p>Generated rather than saved out of a world with a structure block: a floor is a size
  * and a block, and a file nobody can read in a diff is a file that quietly rots. This way
@@ -31,7 +31,7 @@ import net.minecraft.resources.ResourceLocation;
  * for a test's template before it falls back to anything else.
  */
 public final class GameTestStructureProvider implements DataProvider {
-    private static final String STRUCTURE_DIRECTORY = "structure";
+    private static final String STRUCTURE_DIRECTORY = "structures";
 
     private final PackOutput.PathProvider pathProvider;
 
