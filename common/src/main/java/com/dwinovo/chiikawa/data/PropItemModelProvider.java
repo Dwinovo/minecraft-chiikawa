@@ -64,8 +64,9 @@ public final class PropItemModelProvider {
         }
     }
 
+    /** Whether a prop wears out: the pets' weapons ({@link InitItems#WEAPONS}) do. */
     static boolean wearsOut(Item item) {
-        return item.getDefaultInstance().isDamageableItem();
+        return InitItems.WEAPONS.stream().anyMatch(weapon -> weapon.get() == item);
     }
 
     /** The prop's own texture, as a sprite: {@code textures/entities/<id>.png}. */
