@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.anim.render.impl;
 
 import com.dwinovo.chiikawa.anim.render.ChiikawaEntityRenderer;
+import com.dwinovo.chiikawa.anim.render.ShownDuring;
 import com.dwinovo.chiikawa.entity.impl.HachiwarePet;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 
@@ -12,6 +13,10 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
  * to the guitar and while it talks. The main-hand locator does the inverse of
  * the guitar so the music box item disappears during the performance instead
  * of clipping through the authored guitar prop.
+ *
+ * <p>Its faces: pleased, a big open-mouthed laugh with its eyes shut in arcs; hurt, no
+ * tears — it grits its teeth and shouts, mouth open; brought back, moved to tears, the one
+ * time it cries.
  *
  * <p>The animator originally shipped a companion {@code noguitar} animation
  * whose only keyframe is {@code guitar.scale = 0} — a hand-rolled "hide
@@ -36,6 +41,9 @@ public class HachiwareRenderer extends ChiikawaEntityRenderer<HachiwarePet> {
                 (state, animCtx) -> isAnyControllerPlaying(state, GUITAR_ANIMATION));
         addBoneVisibilityRule("Mouth3",
                 (state, animCtx) -> isAnyControllerPlaying(state, GUITAR_ANIMATION) || isTalking(state));
+        addBoneVisibilityRule("Mouth3", ShownDuring.any("happy", "hurt"));
+        addBoneVisibilityRule("HappyEyes", ShownDuring.any("happy", "revive"));
+        addBoneVisibilityRule("Tears", ShownDuring.any("revive"));
         addBoneVisibilityRule("RightHandLocator",
                 (state, animCtx) -> !isAnyControllerPlaying(state, GUITAR_ANIMATION));
     }
