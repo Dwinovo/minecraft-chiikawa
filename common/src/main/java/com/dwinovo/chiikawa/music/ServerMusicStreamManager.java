@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.music;
 
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.network.MusicPayloads;
 import com.dwinovo.chiikawa.network.MusicPayloads.MusicStreamChunkPayload;
 import com.dwinovo.chiikawa.network.MusicPayloads.MusicStreamStartPayload;
 import com.dwinovo.chiikawa.network.MusicPayloads.MusicStreamStopPayload;
@@ -114,7 +115,7 @@ public final class ServerMusicStreamManager {
             // level whose game cannot take the mod's packets (a stand-in player, another
             // mod's) is not an audience, and sending to it would throw.
             if (player.isSpectator() || player.distanceToSqr(session.source()) > radiusSq
-                    || !Services.NETWORK.canReceive(player, MusicStreamStartPayload.TYPE)) {
+                    || !Services.NETWORK.canReceive(player, MusicPayloads.MUSIC_STREAM_START)) {
                 continue;
             }
             if (session.listeners().add(player)) {
