@@ -1,8 +1,7 @@
 package com.dwinovo.chiikawa.item;
 
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.SwordItem;
-import net.minecraft.world.item.Tiers;
+import net.minecraft.world.item.ToolMaterial;
 
 /**
  * Rakko's sword, its hilt carved with a face as the top four of the subjugation ranking
@@ -10,9 +9,8 @@ import net.minecraft.world.item.Tiers;
  * should be, over Usagi's iron stick; nobody makes one and no shop sells one, so it comes
  * only with a wild Rakko.
  */
-public class RakkoSword extends SwordItem {
-    public RakkoSword() {
-        super(Tiers.DIAMOND,
-                new Item.Properties().attributes(SwordItem.createAttributes(Tiers.DIAMOND, 3, -2.4F)));
+public class RakkoSword extends Item {
+    public RakkoSword(Item.Properties properties) {
+        super(properties.sword(ToolMaterial.DIAMOND, 3.0F, -2.4F));
     }
 }

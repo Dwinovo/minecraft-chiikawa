@@ -1,7 +1,6 @@
 package com.dwinovo.chiikawa.social;
 
 import com.dwinovo.chiikawa.Constants;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
@@ -11,6 +10,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -22,7 +22,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
  * file that fails to parse is skipped; a scene naming a pet that does not exist is kept
  * but warned about, since that part can never be played.
  */
-public final class PetInteractionLoader extends SimpleJsonResourceReloadListener {
+public final class PetInteractionLoader extends SimpleJsonResourceReloadListener<JsonElement> {
     public static final String DIRECTORY = "pet_interaction";
     /** Id for loaders that register reload listeners by id. */
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
@@ -30,7 +30,7 @@ public final class PetInteractionLoader extends SimpleJsonResourceReloadListener
     private static final String LOG_PREFIX = "[chiikawa-social] ";
 
     public PetInteractionLoader() {
-        super(new Gson(), DIRECTORY);
+        super(ExtraCodecs.JSON, FileToIdConverter.json(DIRECTORY));
     }
 
     @Override
