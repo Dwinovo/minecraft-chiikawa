@@ -15,6 +15,8 @@ public class FabricModItemModelProvider extends FabricModelProvider {
 
     @Override
     public void generateBlockStateModels(BlockModelGenerators blockStateModelGenerator) {
+        // The blocks' states and models are shared with NeoForge.
+        ModBlockModelProvider.generate(blockStateModelGenerator);
     }
 
     @Override
@@ -31,6 +33,7 @@ public class FabricModItemModelProvider extends FabricModelProvider {
         itemModelGenerator.declareCustomModelItem(InitItems.CHIIKAWA_WEAPON.get());
         itemModelGenerator.generateFlatItem(InitItems.MUSIC_BOX.get(), ModelTemplates.FLAT_ITEM);
         // The props' item models come from PropItemModelProvider, shared with NeoForge.
+        PropItemModelProvider.generate(itemModelGenerator.itemModelOutput, itemModelGenerator.modelOutput);
     }
 
     private static void generateSpawnEggs(ItemModelGenerators itemModelGenerator) {
