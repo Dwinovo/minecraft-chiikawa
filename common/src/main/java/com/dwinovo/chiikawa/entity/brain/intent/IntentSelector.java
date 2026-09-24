@@ -8,6 +8,8 @@ import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.task.PetTask;
+import com.dwinovo.chiikawa.voice.PetSpeech;
+import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -274,6 +276,12 @@ public final class IntentSelector {
         pet.setIntent(next == null ? null : next.id());
         brain.getMemory(InitMemory.INTENT_SWITCH_LOG.get()).ifPresent(log -> log.record(
             now, previous == null ? null : previous.id(), next == null ? null : next.id(), cause, ranking));
+        // Setting off to fight, rather than turning from one way of fighting to another, is
+        // when a pet shouts its battle cry.
+        if (next != null && next.category() == IntentCategory.COMBAT
+                && (previous == null || previous.category() != IntentCategory.COMBAT)) {
+            PetSpeech.say(pet, VoiceMoment.HUNT);
+        }
     }
 
     private enum Trigger {

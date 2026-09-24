@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
 import com.dwinovo.chiikawa.client.manual.ClientManualPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
 import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
+import com.dwinovo.chiikawa.client.voice.ClientVoicePacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
 import com.dwinovo.chiikawa.network.BoardServerPacketHandler;
 import com.dwinovo.chiikawa.network.ManualPayloads;
@@ -13,6 +14,7 @@ import com.dwinovo.chiikawa.network.ShopPayloads;
 import com.dwinovo.chiikawa.network.ShopServerPacketHandler;
 import com.dwinovo.chiikawa.network.MusicPayloads;
 import com.dwinovo.chiikawa.network.MusicServerPacketHandler;
+import com.dwinovo.chiikawa.network.VoicePayloads;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -35,6 +37,7 @@ public final class FabricModNetworking {
         PayloadTypeRegistry.clientboundPlay().register(MusicPayloads.MusicStreamStopPayload.TYPE, MusicPayloads.MusicStreamStopPayload.STREAM_CODEC);
         PayloadTypeRegistry.serverboundPlay().register(MusicPayloads.MusicBoxSelectTrackPayload.TYPE, MusicPayloads.MusicBoxSelectTrackPayload.STREAM_CODEC);
         PayloadTypeRegistry.serverboundPlay().register(MusicPayloads.MusicCatalogRequestPayload.TYPE, MusicPayloads.MusicCatalogRequestPayload.STREAM_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(VoicePayloads.PetSpeechPayload.TYPE, VoicePayloads.PetSpeechPayload.STREAM_CODEC);
         ServerPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicBoxSelectTrackPayload.TYPE,
             (payload, context) -> context.server().execute(() -> MusicServerPacketHandler.handleSelectTrack(payload, context.player())));
         ServerPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicCatalogRequestPayload.TYPE,
@@ -62,5 +65,7 @@ public final class FabricModNetworking {
             (payload, context) -> context.client().execute(() -> ClientMusicPacketHandler.handleStreamChunk(payload)));
         ClientPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicStreamStopPayload.TYPE,
             (payload, context) -> context.client().execute(() -> ClientMusicPacketHandler.handleStreamStop(payload)));
+        ClientPlayNetworking.registerGlobalReceiver(VoicePayloads.PetSpeechPayload.TYPE,
+            (payload, context) -> context.client().execute(() -> ClientVoicePacketHandler.handleSpeech(payload)));
     }
 }
