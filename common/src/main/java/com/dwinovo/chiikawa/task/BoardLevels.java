@@ -1,6 +1,5 @@
 package com.dwinovo.chiikawa.task;
 
-import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -96,7 +95,7 @@ public record BoardLevels(List<Level> levels) {
     public record Level(int slips, int price) {
         static final Codec<Level> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.intRange(1, MOST_SLIPS).fieldOf("slips").forGetter(Level::slips),
-            ModCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "price", 0).forGetter(Level::price)
+            ExtraCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "price", 0).forGetter(Level::price)
         ).apply(instance, Level::new));
     }
 }

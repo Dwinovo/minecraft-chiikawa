@@ -52,11 +52,11 @@ public record Personality(
         Codec.unboundedMap(ResourceLocation.CODEC, Codec.floatRange(0.0F, Float.MAX_VALUE));
 
     public static final Codec<Personality> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        ModCodecs.strictOptionalField(MULTIPLIERS_CODEC, "intent_multipliers", Map.of()).forGetter(Personality::intentMultipliers),
-        ModCodecs.strictOptionalField(Codec.unboundedMap(DayPhase.CODEC, MULTIPLIERS_CODEC), "routine", Map.of()).forGetter(Personality::routine),
-        ModCodecs.strictOptionalField(Codec.floatRange(0.0F, 1.0F), "randomness", DEFAULT.randomness()).forGetter(Personality::randomness),
-        ModCodecs.strictOptionalField(WeightedItem.CODEC.listOf(), "wild_tools", List.of()).forGetter(Personality::wildTools),
-        ModCodecs.strictOptionalField(WeightedItem.CODEC.listOf(), "likes", List.of()).forGetter(Personality::likes)
+        ExtraCodecs.strictOptionalField(MULTIPLIERS_CODEC, "intent_multipliers", Map.of()).forGetter(Personality::intentMultipliers),
+        ExtraCodecs.strictOptionalField(Codec.unboundedMap(DayPhase.CODEC, MULTIPLIERS_CODEC), "routine", Map.of()).forGetter(Personality::routine),
+        ExtraCodecs.strictOptionalField(Codec.floatRange(0.0F, 1.0F), "randomness", DEFAULT.randomness()).forGetter(Personality::randomness),
+        ExtraCodecs.strictOptionalField(WeightedItem.CODEC.listOf(), "wild_tools", List.of()).forGetter(Personality::wildTools),
+        ExtraCodecs.strictOptionalField(WeightedItem.CODEC.listOf(), "likes", List.of()).forGetter(Personality::likes)
     ).apply(instance, Personality::new));
 
     public Personality {

@@ -55,8 +55,8 @@ public record ShopCatalog(List<Entry> entries) {
     public record Entry(Item item, int buy, int sell) {
         public static final Codec<Entry> CODEC = ExtraCodecs.lazyInitializedCodec(() -> RecordCodecBuilder.create(instance -> instance.group(
             ModCodecs.ITEM.fieldOf("item").forGetter(Entry::item),
-            ModCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "buy", 0).forGetter(Entry::buy),
-            ModCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "sell", 0).forGetter(Entry::sell)
+            ExtraCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "buy", 0).forGetter(Entry::buy),
+            ExtraCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "sell", 0).forGetter(Entry::sell)
         ).apply(instance, Entry::new)));
 
         public boolean sells(Item wanted) {

@@ -33,9 +33,11 @@ public final class ModAdvancementProvider implements DataProvider {
         return registries.thenCompose(lookup -> {
             // Vanilla's plain builder, named for recipes: the other one reports every
             // advancement earned to Mojang's telemetry, which a hidden gift has no business in.
-            Advancement.Builder handbook = Advancement.Builder.recipeAdvancement()
+            Advancement handbook = Advancement.Builder.recipeAdvancement()
                 .addCriterion("arrived", PlayerTrigger.TriggerInstance.tick())
-                .rewards(AdvancementRewards.Builder.loot(ModLootTableProvider.HANDBOOK_GIFT));
+                .rewards(AdvancementRewards.Builder.loot(ModLootTableProvider.HANDBOOK_GIFT))
+                .build(HANDBOOK)
+                .value();
             return DataProvider.saveStable(cache, handbook.serializeToJson(), pathProvider.json(HANDBOOK));
         });
     }

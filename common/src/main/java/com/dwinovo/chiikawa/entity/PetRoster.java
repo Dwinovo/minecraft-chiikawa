@@ -44,7 +44,7 @@ public class PetRoster extends SavedData {
     public static PetRoster of(ServerLevel level) {
         // The overworld's storage, so one roster covers a server rather than one per level.
         return level.getServer().overworld().getDataStorage()
-            .computeIfAbsent(PetRoster::load, PetRoster::new, FILE);
+            .computeIfAbsent(new SavedData.Factory<>(PetRoster::new, PetRoster::load, null), FILE);
     }
 
     /** Remembers where this pet is now. */

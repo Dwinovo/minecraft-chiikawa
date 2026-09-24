@@ -1,11 +1,11 @@
 package com.dwinovo.chiikawa.task;
 
-import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.util.ExtraCodecs;
 
 /**
  * One slip on a labor board and who has it.
@@ -17,8 +17,8 @@ import net.minecraft.core.UUIDUtil;
 public record BoardSlot(PetTask slip, Optional<Reservation> reservation, Optional<Claim> claim) {
     public static final Codec<BoardSlot> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         PetTask.CODEC.fieldOf("slip").forGetter(BoardSlot::slip),
-        ModCodecs.strictOptionalField(Reservation.CODEC, "reservation").forGetter(BoardSlot::reservation),
-        ModCodecs.strictOptionalField(Claim.CODEC, "claim").forGetter(BoardSlot::claim)
+        ExtraCodecs.strictOptionalField(Reservation.CODEC, "reservation").forGetter(BoardSlot::reservation),
+        ExtraCodecs.strictOptionalField(Claim.CODEC, "claim").forGetter(BoardSlot::claim)
     ).apply(instance, BoardSlot::new));
 
     public static BoardSlot open(PetTask slip) {
@@ -45,7 +45,7 @@ public record BoardSlot(PetTask slip, Optional<Reservation> reservation, Optiona
     public record Claim(String pet, String owner) {
         public static final Codec<Claim> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("pet").forGetter(Claim::pet),
-            ModCodecs.strictOptionalField(Codec.STRING, "owner", "").forGetter(Claim::owner)
+            ExtraCodecs.strictOptionalField(Codec.STRING, "owner", "").forGetter(Claim::owner)
         ).apply(instance, Claim::new));
 
         /** @return {@code "<pet> (<owner>)"}, or just the pet's name when it has no owner */
