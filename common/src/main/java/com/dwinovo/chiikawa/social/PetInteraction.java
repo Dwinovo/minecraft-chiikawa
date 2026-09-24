@@ -3,6 +3,8 @@ package com.dwinovo.chiikawa.social;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.task.FinishedSlip;
+import com.dwinovo.chiikawa.voice.PetSpeech;
+import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
@@ -128,13 +130,13 @@ public record PetInteraction(
         List<ExtraCodecs.TagOrElementLocation> pets,
         Optional<String> animation,
         Optional<PetReaction> reaction,
-        Optional<String> voice
+        Optional<VoiceMoment> voice
     ) {
         public static final Codec<Side> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ExtraCodecs.nonEmptyList(ExtraCodecs.TAG_OR_ELEMENT_ID.listOf()).fieldOf("pets").forGetter(Side::pets),
             Codec.STRING.optionalFieldOf("animation").forGetter(Side::animation),
             PetReaction.CODEC.optionalFieldOf("reaction").forGetter(Side::reaction),
-            Codec.STRING.optionalFieldOf("voice").forGetter(Side::voice)
+            VoiceMoment.CODEC.optionalFieldOf("voice").forGetter(Side::voice)
         ).apply(instance, Side::new));
 
         public Side {
@@ -146,10 +148,14 @@ public record PetInteraction(
             return pets.stream().anyMatch(entry -> PetInteraction.names(entry, type, Registries.ENTITY_TYPE));
         }
 
-        /** Starts playing the part: the pose held for as long as the scene lasts, and the face pulled at once. */
+        /**
+         * Starts playing the part: the pose held for as long as the scene lasts, and the face
+         * pulled and the line said at once.
+         */
         public void begin(AbstractPet pet) {
             pet.setPerformance(animation.orElse(""));
             reaction.ifPresent(pet::triggerReaction);
+            voice.ifPresent(moment -> PetSpeech.say(pet, moment));
         }
 
         /** Stops playing the part. */
