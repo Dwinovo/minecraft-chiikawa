@@ -12,7 +12,7 @@ public final class ClientVoicePacketHandler {
     public static void handleSpeech(PetSpeechPayload payload) {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.level != null && minecraft.level.getEntity(payload.pet()) instanceof AbstractPet pet) {
-            pet.speak(payload.line());
+            pet.speak(payload.line(), payload.ticks());
         }
     }
 }
