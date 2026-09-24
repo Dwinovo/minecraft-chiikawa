@@ -106,9 +106,18 @@ public class HandbookScreen extends Screen {
         scenes.forEach(ManualScene::tick);
     }
 
+    /**
+     * 1.20.1's {@code Screen.render} draws only the widgets, so the background, with the
+     * panel on it, goes first here, as vanilla's own screens draw theirs.
+     */
     @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        renderBackground(graphics, mouseX, mouseY, partialTick);
+        super.render(graphics, mouseX, mouseY, partialTick);
+    }
+
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+        super.renderBackground(graphics);
         GuiSurface surface = new GuiSurface(graphics, this.font);
         if (pages.isEmpty()) {
             TitledPanel.draw(surface, leftPos, topPos, WIDTH, panelHeight, this.title.getString());
@@ -123,7 +132,7 @@ public class HandbookScreen extends Screen {
 
         // The screen is handed the time since the last frame, not how far into the tick
         // this frame is; the pets move by the tick, so they ask the game's own clock.
-        float sceneTick = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
+        float sceneTick = Minecraft.getInstance().getFrameTime();
         List<ManualPage.Panel> panels = current().panels();
         for (int i = 0; i < panels.size(); i++) {
             Rect scene = sceneAt(i);

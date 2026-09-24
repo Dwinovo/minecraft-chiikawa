@@ -3,11 +3,11 @@ package com.dwinovo.chiikawa.block;
 import com.dwinovo.chiikawa.network.ShopPayloads.PriceView;
 import com.dwinovo.chiikawa.network.ShopPayloads.ShopPricesPayload;
 import com.dwinovo.chiikawa.platform.Services;
-import com.mojang.serialization.MapCodec;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -38,7 +38,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * could walk through it would be serving itself from the wrong side.
  */
 public class ShopBlock extends BaseEntityBlock {
-    public static final MapCodec<ShopBlock> CODEC = simpleCodec(ShopBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     /** The stall up to its awning, the counter's top and the awning overhanging the customer's side. */
     private static final Map<Direction, VoxelShape> SHAPES = Map.of(
@@ -54,17 +53,12 @@ public class ShopBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
-    }
-
-    @Override
-    protected RenderShape getRenderShape(BlockState state) {
+    public RenderShape getRenderShape(BlockState state) {
         return RenderShape.ENTITYBLOCK_ANIMATED;
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return SHAPES.get(state.getValue(FACING));
     }
 
@@ -75,12 +69,12 @@ public class ShopBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected BlockState rotate(BlockState state, Rotation rotation) {
+    public BlockState rotate(BlockState state, Rotation rotation) {
         return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState state, Mirror mirror) {
+    public BlockState mirror(BlockState state, Mirror mirror) {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 
@@ -96,7 +90,8 @@ public class ShopBlock extends BaseEntityBlock {
 
     /** Shows the price list: what is on the shelf, and what the shop will take off you. */
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
+            BlockHitResult hit) {
         if (level.isClientSide()) {
             return InteractionResult.SUCCESS;
         }
