@@ -60,8 +60,6 @@ public final class TagData {
         // Pull in the cross-loader seeds convention tag so well-behaved farming mods
         // are recognised without per-mod work (see DefaultCropHandler#isSeed).
         tags.addOptionalTag(InitTag.ENTITY_PLANT_CROPS, new ResourceLocation("c", "seeds"));
-        // 1.20.6-era Forge/NeoForge mods commonly tag seeds under forge:seeds instead.
-        tags.addOptionalTag(InitTag.ENTITY_PLANT_CROPS, new ResourceLocation("forge", "seeds"));
         tags.add(InitTag.ENTITY_DELIVER_ITEMS,
             Items.WHEAT, Items.BEETROOT, Items.POTATO, Items.CARROT, Items.MELON_SLICE, Items.PUMPKIN);
         // Emeralds, as the villagers have it; a pack can make money of anything.
