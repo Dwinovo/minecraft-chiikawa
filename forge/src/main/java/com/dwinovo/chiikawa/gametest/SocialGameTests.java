@@ -6,6 +6,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.count;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.isLine;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.lastSaid;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.owned;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.quietYard;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.wild;
@@ -58,6 +59,7 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
@@ -403,6 +405,42 @@ public final class SocialGameTests {
                 "Chiikawa never got up again"))
             .thenExecute(() -> helper.assertTrue(hachiware.get().getActivity() == PetActivity.PLAY_GUITAR,
                 "the audience leaving stopped the music"))
+            .thenSucceed();
+    }
+
+    /**
+     * Someone whose game cannot take the mod's packets stands right by the busker: the song
+     * goes on, and nothing is sent to them — the stand-in player a case makes is just such
+     * a game.
+     */
+    @GameTest(template = "floor16", batch = "chiikawa_social_listen", timeoutTicks = LISTEN_TICKS)
+    public static void the_busker_plays_on_beside_a_game_that_cannot_hear_it(GameTestHelper helper) {
+        quietYard(helper, NOON);
+        ServerMusicLibrary library = ServerMusicSystem.library(helper.getLevel().getServer());
+        addSong(library);
+        AtomicReference<AbstractPet> hachiware = new AtomicReference<>();
+        AtomicLong started = new AtomicLong();
+
+        helper.startSequence()
+            .thenWaitUntil(() -> helper.assertTrue(song(library).isPresent(), "the song was never imported"))
+            .thenExecute(() -> {
+                ServerPlayer bystander = player(helper);
+                bystander.moveTo(helper.absoluteVec(new Vec3(9.5, STAND, 8.5)));
+                ItemStack box = new ItemStack(InitItems.MUSIC_BOX.get());
+                box.set(InitDataComponents.MUSIC_BOX_SELECTION.get(),
+                    new MusicBoxSelection(song(library).orElseThrow().trackId(), SONG, 0));
+                AbstractPet busker = owned(helper, InitEntity.HACHIWARE_PET.get(), new BlockPos(8, STAND, 8));
+                busker.setItemSlot(EquipmentSlot.MAINHAND, box);
+                hachiware.set(busker);
+            })
+            .thenWaitUntil(() -> {
+                helper.assertTrue(hachiware.get().getActivity() == PetActivity.PLAY_GUITAR, "Hachiware never started playing");
+                started.set(helper.getLevel().getGameTime());
+            })
+            .thenWaitUntil(() -> helper.assertTrue(helper.getLevel().getGameTime() - started.get() >= 40,
+                "the song has not been playing a while yet"))
+            .thenExecute(() -> helper.assertTrue(hachiware.get().getActivity() == PetActivity.PLAY_GUITAR,
+                "the music stopped with somebody standing by"))
             .thenSucceed();
     }
 
