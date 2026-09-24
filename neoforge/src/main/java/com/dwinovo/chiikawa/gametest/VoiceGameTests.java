@@ -23,15 +23,13 @@ import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * What the pets say, and when: each at a moment the game already reacts to, in its own
@@ -79,8 +77,8 @@ public final class VoiceGameTests {
 
         pet.hurt(pet.damageSources().generic(), 1.0F);
 
-        helper.assertTrue(pet.getHealth() < pet.getMaxHealth(), "Rakko was not hurt at all");
-        helper.assertFalse(said(pet).isPresent(), "Rakko cried out");
+        helper.assertTrue(pet.getHealth() < pet.getMaxHealth(), Component.literal("Rakko was not hurt at all"));
+        helper.assertFalse(said(pet).isPresent(), Component.literal("Rakko cried out"));
         helper.succeed();
     }
 
@@ -98,7 +96,7 @@ public final class VoiceGameTests {
             pet.mobInteract(tamer, InteractionHand.MAIN_HAND);
         }
 
-        helper.assertTrue(pet.isTame(), "a hundred cookies did not tame Shisa");
+        helper.assertTrue(pet.isTame(), Component.literal("a hundred cookies did not tame Shisa"));
         assertSaid(helper, pet, VoiceMoment.TAME);
         helper.succeed();
     }
@@ -114,7 +112,7 @@ public final class VoiceGameTests {
 
         TaskTracker.advance(pet, PetWorkCounters.SLAY, QUARRY);
 
-        helper.assertTrue(pet.getTask().isEmpty(), "the slip was not finished");
+        helper.assertTrue(pet.getTask().isEmpty(), Component.literal("the slip was not finished"));
         assertSaid(helper, pet, VoiceMoment.PAID);
         helper.succeed();
     }
@@ -149,13 +147,13 @@ public final class VoiceGameTests {
         AbstractPet pet = still(pet(helper, InitEntity.CHIIKAWA_PET.get(), new BlockPos(3, STAND, 3), false));
         int cooldown = PetVoices.of(pet.getType()).cooldownTicks();
 
-        helper.assertTrue(PetSpeech.say(pet, VoiceMoment.HURT).isPresent(), "Chiikawa said nothing the first time");
-        helper.assertFalse(PetSpeech.say(pet, VoiceMoment.HURT).isPresent(), "Chiikawa spoke again straight away");
+        helper.assertTrue(PetSpeech.say(pet, VoiceMoment.HURT).isPresent(), Component.literal("Chiikawa said nothing the first time"));
+        helper.assertFalse(PetSpeech.say(pet, VoiceMoment.HURT).isPresent(), Component.literal("Chiikawa spoke again straight away"));
         helper.runAfterDelay(cooldown - 1, () -> helper.assertFalse(PetSpeech.say(pet, VoiceMoment.HURT).isPresent(),
-            "Chiikawa spoke before its cooldown was over"));
+            Component.literal("Chiikawa spoke before its cooldown was over")));
         helper.runAfterDelay(cooldown, () -> {
             helper.assertTrue(PetSpeech.say(pet, VoiceMoment.HURT).isPresent(),
-                "Chiikawa was still quiet once its cooldown was over");
+                Component.literal("Chiikawa was still quiet once its cooldown was over"));
             helper.succeed();
         });
     }
@@ -175,12 +173,12 @@ public final class VoiceGameTests {
         AbstractPet last = still(pet(helper, InitEntity.CHIIKAWA_PET.get(), new BlockPos(3, STAND, 5), false));
 
         for (AbstractPet pet : talking) {
-            helper.assertTrue(PetSpeech.say(pet, VoiceMoment.HURT).isPresent(), "a pet in a quiet yard said nothing");
+            helper.assertTrue(PetSpeech.say(pet, VoiceMoment.HURT).isPresent(), Component.literal("a pet in a quiet yard said nothing"));
         }
-        helper.assertFalse(PetSpeech.say(last, VoiceMoment.HURT).isPresent(), "one pet too many talked at once");
+        helper.assertFalse(PetSpeech.say(last, VoiceMoment.HURT).isPresent(), Component.literal("one pet too many talked at once"));
         helper.runAfterDelay(PetVoices.of(InitEntity.CHIIKAWA_PET.get()).talkTicks(), () -> {
             helper.assertTrue(PetSpeech.say(last, VoiceMoment.HURT).isPresent(),
-                "the last pet was still waiting after the others had finished");
+                Component.literal("the last pet was still waiting after the others had finished"));
             helper.succeed();
         });
     }
