@@ -20,8 +20,7 @@ public class ForgeModItemModelProvider extends ItemModelProvider {
         generatedItem(InitItems.MUSIC_BOX.get());
         generatedItem(InitItems.SIMPLE_DISH.get());
         generatedItem(InitItems.PET_BELL.get());
-        // The props' item models come from PropItemModelProvider, shared with Fabric.
-        // Weapons have prebuilt models under resources; no datagen needed.
+        // The props' item models, the weapons' among them, come from PropItemModelProvider, shared with Fabric.
     }
 
     private void generateSpawnEggs() {

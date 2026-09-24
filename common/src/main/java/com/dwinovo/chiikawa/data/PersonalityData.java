@@ -119,9 +119,8 @@ public final class PersonalityData {
             .weigh(1.3F, FIGHTING)
             .at(DayPhase.NIGHT, 1.2F, FIGHTING)
             .randomness(0.05F)
-            .wildTool(Items.STONE_SWORD, 5)
-            .wildTool(Items.WOODEN_SWORD, 3)
-            .wildTool(Items.AIR, 1)
+            // Never without its own sword, the only way anyone comes by one.
+            .wildTool(InitItems.RAKKO_SWORD.get(), 1)
             // Sweet things.
             .likes(Items.CAKE, 3)
             .likes(Items.PUMPKIN_PIE, 2)
