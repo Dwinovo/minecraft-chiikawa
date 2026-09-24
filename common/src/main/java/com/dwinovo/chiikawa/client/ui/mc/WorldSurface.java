@@ -29,6 +29,10 @@ import net.minecraft.world.item.ItemDisplayContext;
  *
  * <p>One surface is made per label, so the layers start over every time and a label never
  * climbs away from the pet it belongs to.
+ *
+ * <p>A surface can be drawn faded, for something on its way out, such as a line a pet has
+ * finished saying. Every colour keeps that share of its alpha; the item icons, which carry
+ * their own colours, are left as they are.
  */
 public final class WorldSurface implements DrawSurface {
     /** Labels read the same at night as by day. */
@@ -43,6 +47,7 @@ public final class WorldSurface implements DrawSurface {
     private final PoseStack pose;
     private final SubmitNodeCollector collector;
     private final Font font;
+    private final float alpha;
     private float layer;
 
     /**
@@ -50,13 +55,22 @@ public final class WorldSurface implements DrawSurface {
      *             to text pixels, with y running down as on a screen and z towards the camera
      */
     public WorldSurface(PoseStack pose, SubmitNodeCollector collector, Font font) {
+        this(pose, collector, font, 1.0F);
+    }
+
+    /**
+     * @param alpha how much of everything drawn shows, from 0 for none of it to 1 for all
+     */
+    public WorldSurface(PoseStack pose, SubmitNodeCollector collector, Font font, float alpha) {
         this.pose = pose;
         this.collector = collector;
         this.font = font;
+        this.alpha = alpha;
     }
 
     @Override
     public void fillRect(int x, int y, int width, int height, int argb) {
+        argb = faded(argb);
         float z = nextLayer();
         collector.submitCustomGeometry(pose, RenderType.textBackground(), (drawPose, consumer) -> {
             // Wound as the game winds its own name-tag backdrop, which this render type culls by.
@@ -69,6 +83,7 @@ public final class WorldSurface implements DrawSurface {
 
     @Override
     public void drawText(String text, int x, int y, int argb) {
+        argb = faded(argb);
         // Text takes no z, so the layer goes through the matrix.
         pose.pushPose();
         pose.translate(0.0F, 0.0F, nextLayer());
@@ -110,6 +125,14 @@ public final class WorldSurface implements DrawSurface {
     @Override
     public int lineHeight() {
         return font.lineHeight;
+    }
+
+    private int faded(int argb) {
+        if (alpha >= 1.0F) {
+            return argb;
+        }
+        int faded = Math.round((argb >>> 24) * Math.max(0.0F, alpha));
+        return faded << 24 | argb & 0xFFFFFF;
     }
 
     private float nextLayer() {
