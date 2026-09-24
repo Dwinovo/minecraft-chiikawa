@@ -134,7 +134,7 @@ public final class PetInteractionData {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path);
+        return new ResourceLocation(Constants.MOD_ID, path);
     }
 
     /** One part, said the way a stage direction is. */

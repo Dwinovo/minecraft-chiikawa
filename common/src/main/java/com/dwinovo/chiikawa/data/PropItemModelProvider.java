@@ -31,7 +31,7 @@ import net.minecraft.world.item.Item;
  * adds to).
  */
 public final class PropItemModelProvider implements DataProvider {
-    private static final ResourceLocation BLOCK_ATLAS = ResourceLocation.withDefaultNamespace("blocks");
+    private static final ResourceLocation BLOCK_ATLAS = new ResourceLocation("blocks");
     private final PackOutput.PathProvider models;
     private final PackOutput.PathProvider atlases;
 

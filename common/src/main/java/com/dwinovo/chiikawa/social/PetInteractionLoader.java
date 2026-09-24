@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.social;
 import com.dwinovo.chiikawa.Constants;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,7 +26,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 public final class PetInteractionLoader extends SimpleJsonResourceReloadListener {
     public static final String DIRECTORY = "pet_interaction";
     /** Id for loaders that register reload listeners by id. */
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
+    public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, DIRECTORY);
 
     private static final String LOG_PREFIX = "[chiikawa-social] ";
 
@@ -51,8 +52,9 @@ public final class PetInteractionLoader extends SimpleJsonResourceReloadListener
         Map<ResourceLocation, PetInteraction> interactions = new HashMap<>();
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
-        files.forEach((id, json) -> PetInteraction.CODEC.parse(JsonOps.INSTANCE, json)
-            .ifSuccess(interaction -> {
+        files.forEach((id, json) -> {
+            DataResult<PetInteraction> parsed = PetInteraction.CODEC.parse(JsonOps.INSTANCE, json);
+            parsed.result().ifPresent(interaction -> {
                 interactions.put(id, interaction);
                 Stream.concat(interaction.initiators().stream(), interaction.partners().stream())
                     .flatMap(side -> side.pets().stream())
@@ -61,8 +63,9 @@ public final class PetInteractionLoader extends SimpleJsonResourceReloadListener
                     .filter(pet -> !knownEntity.test(pet))
                     .distinct()
                     .forEach(pet -> warnings.add(LOG_PREFIX + id + " names unknown pet " + pet));
-            })
-            .ifError(error -> errors.add(LOG_PREFIX + id + " is skipped, failed to parse: " + error.message())));
+            });
+            parsed.error().ifPresent(error -> errors.add(LOG_PREFIX + id + " is skipped, failed to parse: " + error.message()));
+        });
         return new Loaded(interactions, errors, warnings);
     }
 

@@ -158,7 +158,7 @@ public final class PetVoiceData {
     }
 
     private static void add(Map<ResourceLocation, PetVoice> all, Builder builder) {
-        all.put(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, builder.pet), builder.build());
+        all.put(new ResourceLocation(Constants.MOD_ID, builder.pet), builder.build());
     }
 
     private static Builder voice(String pet) {
