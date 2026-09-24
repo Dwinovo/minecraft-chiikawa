@@ -24,9 +24,8 @@ public class FabricModItemModelProvider extends FabricModelProvider {
         itemModelGenerator.generateFlatItem(InitItems.SIMPLE_DISH.get(), ModelTemplates.FLAT_ITEM);
         itemModelGenerator.generateFlatItem(InitItems.PET_BELL.get(), ModelTemplates.FLAT_ITEM);
 
-        // Weapons have prebuilt models under resources; no datagen needed.
         itemModelGenerator.generateFlatItem(InitItems.MUSIC_BOX.get(), ModelTemplates.FLAT_ITEM);
-        // The props' item models come from PropItemModelProvider, shared with NeoForge.
+        // The props' item models, the weapons' among them, come from PropItemModelProvider, shared with NeoForge.
     }
 
     private static void generateSpawnEggs(ItemModelGenerators itemModelGenerator) {

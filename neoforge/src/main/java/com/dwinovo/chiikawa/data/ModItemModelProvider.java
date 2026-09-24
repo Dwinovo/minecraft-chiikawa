@@ -31,10 +31,9 @@ public final class ModItemModelProvider extends ItemModelProvider {
         basicItem(InitItems.RAKKO_DOLL.get());
         basicItem(InitItems.FURUHONYA_DOLL.get());
 
-        // Weapons have prebuilt models under resources; no datagen needed.
         basicItem(InitItems.MUSIC_BOX.get());
         basicItem(InitItems.SIMPLE_DISH.get());
         basicItem(InitItems.PET_BELL.get());
-        // The props' item models come from PropItemModelProvider, shared with Fabric.
+        // The props' item models, the weapons' among them, come from PropItemModelProvider, shared with Fabric.
     }
 }

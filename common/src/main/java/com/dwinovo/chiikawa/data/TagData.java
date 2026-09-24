@@ -47,7 +47,8 @@ public final class TagData {
             Items.WOODEN_HOE, Items.STONE_HOE, Items.IRON_HOE, Items.GOLDEN_HOE, Items.DIAMOND_HOE, Items.NETHERITE_HOE);
         tags.add(InitTag.ENTITY_FENCER_TOOLS,
             Items.WOODEN_SWORD, Items.STONE_SWORD, Items.IRON_SWORD, Items.GOLDEN_SWORD, Items.DIAMOND_SWORD, Items.NETHERITE_SWORD,
-            InitItems.USAGI_WEAPON.get(), InitItems.HACHIWARE_WEAPON.get(), InitItems.CHIIKAWA_WEAPON.get());
+            InitItems.USAGI_WEAPON.get(), InitItems.HACHIWARE_WEAPON.get(), InitItems.CHIIKAWA_WEAPON.get(),
+            InitItems.RAKKO_SWORD.get());
         tags.add(InitTag.ENTITY_ARCHER_TOOLS, Items.BOW);
         tags.add(InitTag.ENTITY_MUSICIAN_TOOLS, InitItems.MUSIC_BOX.get());
         tags.add(InitTag.ENTITY_TAME_FOODS,
