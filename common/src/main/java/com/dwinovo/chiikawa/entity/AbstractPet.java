@@ -87,11 +87,12 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -123,8 +124,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     /** How much quicker an eager pet moves. */
     private static final double EAGER_SPEED_BONUS = 0.3;
-    private static final ResourceLocation EAGER_SPEED_ID =
-        new ResourceLocation(Constants.MOD_ID, "eager");
+    private static final UUID EAGER_SPEED_ID = UUID.fromString("7c0f3e52-9b1d-4a86-b5e2-3d4a6f0c8e17");
 
     /** Slot the held tool lives in; see {@link #getItemBySlot}. */
     public static final int MAINHAND_SLOT = 0;
@@ -222,6 +222,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     private int lastSeenTriggerSeq;
     /** Last {@link #REACTION_TRIGGER} sequence number this client handled. Server copy is unused. */
     private int lastSeenReactionSeq;
+    /** Where {@link #changeDimension(ServerLevel, PortalInfo)} is taking the pet, while it does. */
+    @Nullable
+    private PortalInfo crossingTo;
 
     private final SimpleContainer backpack = new SimpleContainer(FULL_BACKPACK_SIZE) {
         @Override
@@ -593,13 +596,37 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * there: a pet led through a portal and left behind is exactly what a bell is for.
      */
     @Override
-    public Entity changeDimension(DimensionTransition transition) {
-        Entity moved = super.changeDimension(transition);
+    public Entity changeDimension(ServerLevel destination) {
+        Entity moved = super.changeDimension(destination);
         if (moved instanceof AbstractPet crossed && crossed.isTame()
                 && crossed.level() instanceof ServerLevel server) {
             PetRoster.of(server).note(crossed);
         }
         return moved;
+    }
+
+    /**
+     * Takes the pet to a spot in another world, as a {@code DimensionTransition} does on later
+     * versions. Vanilla here only crosses by portal and works out itself where the pet comes
+     * out, so for this one crossing that step is handed the spot instead — the way the
+     * loaders' own teleport helpers do it on this version.
+     *
+     * @return the pet in the new world, or {@code null} if it did not go
+     */
+    @Nullable
+    public Entity changeDimension(ServerLevel destination, PortalInfo arrival) {
+        crossingTo = arrival;
+        try {
+            return changeDimension(destination);
+        } finally {
+            crossingTo = null;
+        }
+    }
+
+    @Override
+    @Nullable
+    protected PortalInfo findDimensionEntryPoint(ServerLevel destination) {
+        return crossingTo != null ? crossingTo : super.findDimensionEntryPoint(destination);
     }
 
     /**
@@ -766,7 +793,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         }
         boolean applied = speed.getModifier(EAGER_SPEED_ID) != null;
         if (isEager() && !applied) {
-            speed.addTransientModifier(new AttributeModifier(EAGER_SPEED_ID, EAGER_SPEED_BONUS,
+            speed.addTransientModifier(new AttributeModifier(EAGER_SPEED_ID, "chiikawa:eager", EAGER_SPEED_BONUS,
                 AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
         } else if (!isEager() && applied) {
             speed.removeModifier(EAGER_SPEED_ID);
