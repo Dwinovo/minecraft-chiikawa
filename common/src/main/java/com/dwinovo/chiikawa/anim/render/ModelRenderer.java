@@ -119,7 +119,7 @@ public final class ModelRenderer {
             if (hasRot || hasScale) {
                 stack.translate(bone.pivotX + dPosX, bone.pivotY + dPosY, bone.pivotZ + dPosZ);
                 if (hasRot) {
-                    rotBuf.identity().rotationXYZ(rotX, rotY, rotZ);
+                    BedrockRotation.of(rotBuf, rotX, rotY, rotZ);
                     stack.last().rotate(rotBuf);
                 }
                 if (hasScale) {
@@ -147,7 +147,7 @@ public final class ModelRenderer {
                             int packedLight, int packedOverlay) {
         stack.pushPose();
         if (cube.hasRotation) {
-            rotBuf.identity().rotationXYZ(cube.rotX, cube.rotY, cube.rotZ);
+            BedrockRotation.of(rotBuf, cube.rotX, cube.rotY, cube.rotZ);
             stack.last().rotateAround(rotBuf, cube.pivotX, cube.pivotY, cube.pivotZ);
         }
 
