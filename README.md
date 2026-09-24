@@ -49,7 +49,7 @@
 - 🔊 **Per-character sounds** — Usagi's signature squeaks, plus tame/hurt voices for the cast, to make them feel alive.
 - 🎒 **Pet backpack** — right-click a pet with an empty hand to open its inventory and manage its tools and gear.
 - 🪆 **Dolls & spawn eggs** — a doll for every character (try placing one on a cake 🎂), and spawn eggs in Creative.
-- ⚔️ **Character weapons** — craftable signature "discipline sticks" for Chiikawa, Hachiware, and Usagi.
+- ⚔️ **Character weapons** — from the series: Chiikawa's and Hachiware's sasumata and Usagi's subjugation stick, craftable; Rakko's sword comes only with a wild Rakko.
 
 ## 📥 Download
 
@@ -82,7 +82,7 @@ A pet's job is decided by the **tool it holds**. Open its backpack (right-click 
 | Job | Give it… | What it does |
 | --- | --- | --- |
 | **Farmer** | a Hoe | plants and harvests nearby crops (modded seeds supported) |
-| **Fencer** | a Sword (or a character's discipline stick) | attacks hostile mobs in melee |
+| **Fencer** | a Sword (or a character's weapon) | attacks hostile mobs in melee |
 | **Archer** | a Bow (keep arrows in the backpack) | attacks hostile mobs at range |
 | **Musician** | a Music Box | plays your imported music |
 
@@ -98,7 +98,7 @@ A pet's job is decided by the **tool it holds**. Open its backpack (right-click 
 Pets appear naturally in **Plains, Sunflower Plains, Savanna, Savanna Plateau, Desert, Swamp, and Snowy Plains**. In Creative, use the spawn eggs.
 
 ### 🎁 Getting items
-- **Weapons** (discipline sticks) are **craftable** — check the recipe book (wool + stick + flint).
+- **Weapons** (the sasumata and the subjugation stick) are **craftable** — check the recipe book (wool + stick + flint). Rakko's sword is not.
 - The **Music Box** is **craftable** too (note block + planks + gold ingot).
 - **Dolls** and **spawn eggs** are in the Creative inventory. A pet also **drops its doll when it dies**, preserving its backpack and data.
 
