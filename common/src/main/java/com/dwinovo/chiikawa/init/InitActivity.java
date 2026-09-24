@@ -47,6 +47,12 @@ public final class InitActivity {
     // Taking the owner a present.
     public static final Supplier<Activity> GIFT_OWNER =
         Services.PLATFORM_REGISTRY.giftOwnerActivity();
+    // Going over to another pet to play a scene with it.
+    public static final Supplier<Activity> SOCIALIZE =
+        Services.PLATFORM_REGISTRY.socializeActivity();
+    // Playing along while another pet comes over.
+    public static final Supplier<Activity> COOPERATE =
+        Services.PLATFORM_REGISTRY.cooperateActivity();
 
     private InitActivity() {
     }

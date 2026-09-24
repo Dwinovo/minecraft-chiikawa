@@ -2,6 +2,8 @@ package com.dwinovo.chiikawa.utils;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.PetActivities;
+import com.dwinovo.chiikawa.entity.brain.task.social.CooperateBehavior;
+import com.dwinovo.chiikawa.entity.brain.task.social.SocializeBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.AnchorLeashBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.FloatBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.FollowOwnerBehavior;
@@ -85,6 +87,17 @@ public final class BrainUtils {
     public static void addTakeTaskTasks(Brain<AbstractPet> brain) {
         PetActivities.register(brain, InitActivity.TAKE_TASK.get(),
             ImmutableList.of(Pair.of(2, new TakeTaskBehavior())), Set.of());
+    }
+
+    /**
+     * {@code socialize}: go over to another pet and play a scene with it; {@code cooperate}:
+     * play along while another pet comes over.
+     */
+    public static void addSocialTasks(Brain<AbstractPet> brain) {
+        PetActivities.register(brain, InitActivity.SOCIALIZE.get(),
+            ImmutableList.of(Pair.of(2, new SocializeBehavior())), Set.of());
+        PetActivities.register(brain, InitActivity.COOPERATE.get(),
+            ImmutableList.of(Pair.of(2, new CooperateBehavior())), Set.of());
     }
 
     private static Pair<BehaviorControl<? super AbstractPet>, Integer> lookAtPlayer() {

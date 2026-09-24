@@ -44,6 +44,22 @@ class PetAnimationResolverTest {
     }
 
     @Test
+    void aPartInASceneComesFirstAndFallsBackToWhatThePetWouldDoAnyway() {
+        PetAnimContext context = PetAnimContext.base(
+                PetDirective.FREE, /*jobId=*/1, /*walkSpeed=*/0.0f, PetActivity.NONE, "cling");
+
+        assertEquals(List.of("cling", "work_idle_farmer", "idle"), PetAnimationResolver.resolve(context));
+    }
+
+    @Test
+    void activityOverridesAPartInAScene() {
+        PetAnimContext context = PetAnimContext.base(
+                PetDirective.FREE, /*jobId=*/4, /*walkSpeed=*/0.0f, PetActivity.PLAY_GUITAR, "sit");
+
+        assertEquals(List.of("guitar", "idle"), PetAnimationResolver.resolve(context));
+    }
+
+    @Test
     void semanticActionsKeepLegacyAnimationFallbacks() {
         assertEquals(PetAction.HARVEST, PetAction.fromNetworkId(PetAction.HARVEST.networkId()));
         assertEquals(PetAction.GENERIC_USE_MAINHAND, PetAction.fromLegacyAnimationName("use_mainhand"));
