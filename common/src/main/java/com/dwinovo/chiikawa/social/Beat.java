@@ -11,6 +11,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
+import net.minecraft.util.valueproviders.IntProviders;
 
 /**
  * One moment of a pet's part in a scene: a move it makes once, the face it pulls and the
@@ -48,7 +49,7 @@ public record Beat(Optional<String> animation, Optional<PetReaction> reaction, O
      */
     public record Recurring(IntProvider everyTicks, Beat beat) {
         public static final Codec<Recurring> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            IntProvider.POSITIVE_CODEC.fieldOf("every_ticks").forGetter(Recurring::everyTicks),
+            IntProviders.POSITIVE_CODEC.fieldOf("every_ticks").forGetter(Recurring::everyTicks),
             MAP_CODEC.forGetter(Recurring::beat)
         ).apply(instance, Recurring::new));
 
