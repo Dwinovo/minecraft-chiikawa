@@ -37,11 +37,8 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.LivingEntity;
 import org.joml.Quaternionf;
@@ -387,6 +384,8 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             state.controllerSnapshots = animator.snapshot();
             evaluateVisibilityRules(state, ctx, currentModel);
         }
+
+        extractLabel(entity, state);
     }
 
     @Override
@@ -463,19 +462,38 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
      * crosshair lands and goes the frame it leaves, the way everything in the game does.
      */
     @Override
-    protected boolean shouldShowName(T entity) {
-        return !drawingPortrait && (super.shouldShowName(entity) || answer(entity).isPresent());
+    protected boolean shouldShowName(T entity, double distanceToCameraSq) {
+        return !drawingPortrait && (super.shouldShowName(entity, distanceToCameraSq) || answer(entity).isPresent());
     }
 
+    /**
+     * The name tag, if the pet has one to show, and the label over it. Both were decided
+     * with the pet at hand, when its render state was taken; see {@link #extractLabel}.
+     */
     @Override
-    protected void renderNameTag(T entity, Component displayName, PoseStack poseStack, MultiBufferSource bufferSource,
-                                 int packedLight, float partialTick) {
-        boolean named = super.shouldShowName(entity);
-        if (named) {
-            super.renderNameTag(entity, displayName, poseStack, bufferSource, packedLight, partialTick);
+    protected void submitNameDisplay(ChiikawaRenderState state, PoseStack poseStack, SubmitNodeCollector collector,
+                                     CameraRenderState camera) {
+        super.submitNameDisplay(state, poseStack, collector, camera);
+        Chip label = state.get(PetData.STATUS_LABEL);
+        if (label != null) {
+            drawLabel(state, label, poseStack, collector, camera, state.nameTag != null ? LABEL_LINE : 0.0F);
         }
-        answer(entity).ifPresent(chip -> drawLabel(entity, chip, poseStack, bufferSource, partialTick,
-            named ? LABEL_LINE : 0.0F));
+    }
+
+    /**
+     * Takes down what goes over the pet's head this frame. The game has put the pet's name
+     * down whenever there is anything to show; it stays only if the pet would show it
+     * anyway, and the label goes beside it.
+     */
+    private void extractLabel(T entity, ChiikawaRenderState state) {
+        Chip label = null;
+        if (state.nameTag != null) {
+            label = answer(entity).orElse(null);
+            if (!super.shouldShowName(entity, state.distanceToCameraSq)) {
+                state.nameTag = null;
+            }
+        }
+        state.put(PetData.STATUS_LABEL, label);
     }
 
     /** What the pet says over its head right now: its status, if its owner is asking. */
@@ -510,18 +528,18 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     }
 
     /** The mod's own label, drawn where a name tag goes, with the same widgets its screens use. */
-    private void drawLabel(T entity, Chip chip, PoseStack poseStack, MultiBufferSource bufferSource,
-                           float partialTick, float extraHeight) {
-        Vec3 attachment = entity.getAttachments().getNullable(EntityAttachment.NAME_TAG, 0, entity.getViewYRot(partialTick));
+    private void drawLabel(ChiikawaRenderState state, Chip chip, PoseStack poseStack, SubmitNodeCollector collector,
+                           CameraRenderState camera, float extraHeight) {
+        Vec3 attachment = state.nameTagAttachment;
         if (attachment == null) {
             return;
         }
         poseStack.pushPose();
         poseStack.translate(attachment.x, attachment.y + 0.5 + extraHeight, attachment.z);
-        poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
+        poseStack.mulPose(camera.orientation);
         // Text pixels from here on, with y running down as on a screen.
         poseStack.scale(LABEL_SCALE, -LABEL_SCALE, LABEL_SCALE);
-        DrawSurface surface = new WorldSurface(poseStack, bufferSource, getFont());
+        DrawSurface surface = new WorldSurface(poseStack, collector, getFont());
         chip.draw(surface, 0, 0);
         poseStack.popPose();
     }
@@ -589,6 +607,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         }
 
         poseStack.popPose();
+        super.submit(state, poseStack, collector, camera);
     }
 
     /**

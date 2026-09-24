@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.platform;
 
+import com.dwinovo.chiikawa.platform.services.IClientHelper;
 import com.dwinovo.chiikawa.platform.services.IItemTransferHelper;
 import com.dwinovo.chiikawa.platform.services.IPlatformHelper;
 import com.dwinovo.chiikawa.platform.services.IRegistryHelper;
@@ -21,6 +22,7 @@ public class Services {
     public static final ICapabilityHelper CAPABILITY = load(ICapabilityHelper.class);
     public static final IPlatformRegistryAccess PLATFORM_REGISTRY = load(IPlatformRegistryAccess.class);
     public static final INetworkHelper NETWORK = load(INetworkHelper.class);
+    public static final IClientHelper CLIENT = load(IClientHelper.class);
 
     private static <T> T load(Class<T> clazz) {
         var loadedService = ServiceLoader.load(clazz)
