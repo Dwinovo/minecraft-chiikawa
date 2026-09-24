@@ -37,14 +37,14 @@ subprojects {
 }
 
 /**
- * 游戏内用例的统一入口。只在 NeoForge 上跑：原版把测试的命名空间定在 {@code @GameTestHolder}
- * 上，而那是 NeoForge 专有注解；宠物逻辑几乎全在 common，跑一个 loader 照样测得到。
+ * 游戏内用例的统一入口。只在 Forge 上跑：原版把测试的命名空间定在 {@code @GameTestHolder}
+ * 上，而那是 Forge 专有注解；宠物逻辑几乎全在 common，跑一个 loader 照样测得到。
  * 退出码是失败用例数，CI 不用解日志。
  */
 tasks.register('gameTest') {
     group = 'verification'
     description = '无头跑完游戏内用例(职业、干活、工作牌、驯服与复活)'
-    dependsOn ':neoforge:runGameTestServer'
+    dependsOn ':forge:runGameTestServer'
 }
 
 /** 数据生成的统一入口:本分支两个 loader 各跑一遍。CI 与发版都只调它,不点名 loader。 */

@@ -13,6 +13,7 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
+import com.dwinovo.chiikawa.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
@@ -153,7 +154,7 @@ public final class HuntGameTests {
 
     /** The slip an upgraded board puts up for a fencer. */
     private static PetTask hunting() {
-        ResourceLocation fencer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FENCER.get());
+        ResourceLocation fencer = Services.REGISTRY.getKey(InitRegistry.PET_JOB_KEY, InitRegistry.FENCER.get());
         return new PetTask(PetTaskTypeData.MELEE_HUNTING, fencer, PetWorkCounters.SLAY, PetTask.NO_ICON, QUARRY,
             PetTaskTypeData.reward(PetTaskTypeData.MELEE_HUNTING), 0);
     }

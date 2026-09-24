@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
-import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.BeforeBatch;
@@ -107,7 +107,7 @@ public final class SupplyGameTests {
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void a_newcomer_is_handed_the_handbook(GameTestHelper helper) {
         ServerPlayer newcomer = player(helper);
-        AdvancementHolder arrival = helper.getLevel().getServer().getAdvancements().get(ModAdvancementProvider.HANDBOOK);
+        Advancement arrival = helper.getLevel().getServer().getAdvancements().getAdvancement(ModAdvancementProvider.HANDBOOK);
         helper.assertTrue(arrival != null, "there is no advancement to hand the handbook out");
 
         newcomer.getAdvancements().award(arrival, "arrived");
