@@ -110,7 +110,11 @@ public final class ServerMusicStreamManager {
         double radius = library.config().streamRadius();
         double radiusSq = radius * radius;
         for (ServerPlayer player : level.players()) {
-            if (player.isSpectator() || player.distanceToSqr(session.source()) > radiusSq) {
+            // As the game sends a sound: only to a game that can play it. A player in the
+            // level whose game cannot take the mod's packets (a stand-in player, another
+            // mod's) is not an audience, and sending to it would throw.
+            if (player.isSpectator() || player.distanceToSqr(session.source()) > radiusSq
+                    || !Services.NETWORK.canReceive(player, MusicStreamStartPayload.TYPE)) {
                 continue;
             }
             if (session.listeners().add(player)) {
