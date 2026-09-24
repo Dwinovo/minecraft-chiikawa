@@ -80,6 +80,14 @@ public final class InitItems {
     public static final List<Supplier<? extends Item>> PROPS =
         List.of(BACKPACK, BEAR_POUCH, WHALE_POUCH, STAR_POUCH, LABOR_BOARD, SHOP, HANDBOOK,
             CHIIKAWA_WEAPON, HACHIWARE_WEAPON, USAGI_WEAPON, RAKKO_SWORD);
+    /**
+     * The props that are the pets' weapons: swords, held as vanilla holds its swords and worn
+     * out by use. Named here rather than told from the items, since what an item is — a
+     * tool, how long it lasts — is only bound to it once a world's data is loaded, and their
+     * item models are generated before any is.
+     */
+    public static final List<Supplier<? extends Item>> WEAPONS =
+        List.of(CHIIKAWA_WEAPON, HACHIWARE_WEAPON, USAGI_WEAPON, RAKKO_SWORD);
 
     public static final Supplier<Item> USAGI_DOLL =
         registerItem("usagi_doll", properties -> new PetDollItem(properties, InitEntity.USAGI_PET));

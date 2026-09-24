@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.anim.api.ModelLibrary;
 import com.dwinovo.chiikawa.anim.baked.BakedCube;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
 import com.dwinovo.chiikawa.anim.runtime.PoseSampler;
+import com.dwinovo.chiikawa.init.InitItems;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.math.Axis;
@@ -12,7 +13,6 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.resources.model.ModelBakery;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
@@ -94,11 +94,10 @@ public final class PropRenderer {
 
     /**
      * Whether a prop's item is held as vanilla holds its swords and its tools, which vanilla
-     * draws with its handheld model: an item that comes with a tool's rules for mining, as
-     * every sword and tool does.
+     * draws with its handheld model: the pets' weapons ({@link InitItems#WEAPONS}).
      */
     public static boolean isHandheld(Item item) {
-        return item.components().has(DataComponents.TOOL);
+        return InitItems.WEAPONS.stream().anyMatch(weapon -> weapon.get() == item);
     }
 
     /**
