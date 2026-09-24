@@ -13,7 +13,7 @@ public interface IEntityHelper {
 
     /**
      * Moves an entity to a spot in another level, as a portal would but without one, and
-     * returns what arrived there, or null if nothing did. 1.20.2 has no transition to hand
+     * returns what arrived there, or null if nothing did. 1.20.4 has no transition to hand
      * {@code changeDimension}; each loader has its own way to say where the entity lands.
      */
     Entity changeDimension(Entity entity, ServerLevel destination, Vec3 position, float yRot, float xRot);

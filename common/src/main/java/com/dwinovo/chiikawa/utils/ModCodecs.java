@@ -16,7 +16,7 @@ import net.minecraft.world.item.Item;
 
 /**
  * The mod's data read and written the way later versions of the game read and write it, so
- * a data pack is the same files on every version the mod is built for. 1.20.2's own codecs
+ * a data pack is the same files on every version the mod is built for. 1.20.4's own codecs
  * differ in two places the mod's data goes through:
  *
  * <ul>
