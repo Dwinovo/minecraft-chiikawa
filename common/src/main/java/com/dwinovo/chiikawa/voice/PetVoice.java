@@ -8,8 +8,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
-import net.minecraft.util.random.Weight;
-import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.util.random.WeightedRandom;
 
 /**
@@ -73,7 +71,7 @@ public record PetVoice(
         if (likely < 1.0F && random.nextFloat() >= likely) {
             return Optional.empty();
         }
-        return WeightedRandom.getRandomItem(random, said).map(Line::text);
+        return WeightedRandom.getRandomItem(random, said, Line::weight).map(Line::text);
     }
 
     /**
@@ -81,19 +79,10 @@ public record PetVoice(
      *
      * @param text the translation key of the words
      */
-    public record Line(String text, Weight weight) implements WeightedEntry {
+    public record Line(String text, int weight) {
         public static final Codec<Line> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("text").forGetter(Line::text),
-            ExtraCodecs.POSITIVE_INT.xmap(Weight::of, Weight::asInt).fieldOf("weight").forGetter(Line::weight)
+            ExtraCodecs.POSITIVE_INT.fieldOf("weight").forGetter(Line::weight)
         ).apply(instance, Line::new));
-
-        public Line(String text, int weight) {
-            this(text, Weight.of(weight));
-        }
-
-        @Override
-        public Weight getWeight() {
-            return weight;
-        }
     }
 }

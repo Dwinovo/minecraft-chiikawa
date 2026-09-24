@@ -45,7 +45,7 @@ class PetVoiceTest {
             """);
 
         assertEquals(List.of(YADA, SOB), voice.lines().get(VoiceMoment.HURT).stream().map(PetVoice.Line::text).toList());
-        assertEquals(3, voice.lines().get(VoiceMoment.HURT).get(0).weight().asInt());
+        assertEquals(3, voice.lines().get(VoiceMoment.HURT).get(0).weight());
         assertEquals(0.02F, voice.chance().get(VoiceMoment.IDLE), 1.0E-6F);
         assertEquals(200, voice.cooldownTicks());
         assertEquals(3, voice.crowdLimit());
