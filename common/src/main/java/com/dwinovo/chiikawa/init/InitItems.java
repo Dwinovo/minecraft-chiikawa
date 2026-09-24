@@ -20,7 +20,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
-import net.minecraft.world.level.block.Block;
 
 public final class InitItems {
     public static final Supplier<SpawnEggItem> USAGI_SPAWN_EGG =
@@ -50,9 +49,9 @@ public final class InitItems {
     public static final Supplier<Item> MUSIC_BOX =
         registerItem("music_box", MusicBoxItem::new);
     public static final Supplier<BlockItem> LABOR_BOARD =
-        registerPropBlock("labor_board", InitBlocks.LABOR_BOARD);
+        registerItem("labor_board", () -> new BlockItem(InitBlocks.LABOR_BOARD.get(), new Item.Properties()));
     public static final Supplier<BlockItem> SHOP =
-        registerPropBlock("shop", InitBlocks.SHOP);
+        registerItem("shop", () -> new BlockItem(InitBlocks.SHOP.get(), new Item.Properties()));
 
     public static final Supplier<Item> SIMPLE_DISH =
         registerItem("simple_dish", () -> new Item(new Item.Properties()));
@@ -61,15 +60,15 @@ public final class InitItems {
         registerItem("pet_bell", () -> new PetBellItem(new Item.Properties()));
 
     public static final Supplier<Item> BACKPACK =
-        registerBag("backpack", BagItem.Wear.ON_BACK);
+        registerItem("backpack", () -> new BagItem(new Item.Properties(), BagItem.Wear.ON_BACK));
     public static final Supplier<Item> BEAR_POUCH =
-        registerBag("bear_pouch", BagItem.Wear.SLUNG);
+        registerItem("bear_pouch", () -> new BagItem(new Item.Properties(), BagItem.Wear.SLUNG));
     public static final Supplier<Item> WHALE_POUCH =
-        registerBag("whale_pouch", BagItem.Wear.SLUNG);
+        registerItem("whale_pouch", () -> new BagItem(new Item.Properties(), BagItem.Wear.SLUNG));
     public static final Supplier<Item> STAR_POUCH =
-        registerBag("star_pouch", BagItem.Wear.SLUNG);
+        registerItem("star_pouch", () -> new BagItem(new Item.Properties(), BagItem.Wear.SLUNG));
     public static final Supplier<Item> HANDBOOK =
-        registerHandbook("handbook");
+        registerItem("handbook", () -> new HandbookItem(new Item.Properties()));
     /**
      * Everything drawn from a Bedrock model of its own, by {@code PropRenderer}: the bags,
      * the labor board, the shop, the handbook and the pets' weapons. Each loader gives these their built-in item
@@ -117,23 +116,6 @@ public final class InitItems {
             secondaryColor,
             new Item.Properties()
         );
-    }
-
-    // Props are drawn by a built-in item renderer, and Forge 1.20.1 hands an item its client
-    // renderer only through the item itself, so the loader makes these.
-    private static Supplier<Item> registerBag(String name, BagItem.Wear wear) {
-        ResourceLocation id = new ResourceLocation(Constants.MOD_ID, name);
-        return Services.REGISTRY.registerBag(id, wear, new Item.Properties());
-    }
-
-    private static Supplier<Item> registerHandbook(String name) {
-        ResourceLocation id = new ResourceLocation(Constants.MOD_ID, name);
-        return Services.REGISTRY.registerHandbook(id, new Item.Properties());
-    }
-
-    private static Supplier<BlockItem> registerPropBlock(String name, Supplier<? extends Block> block) {
-        ResourceLocation id = new ResourceLocation(Constants.MOD_ID, name);
-        return Services.REGISTRY.registerPropBlockItem(id, block, new Item.Properties());
     }
 
     private static <T extends Item> Supplier<T> registerItem(String name, Supplier<T> factory) {
