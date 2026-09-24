@@ -3,7 +3,7 @@ package com.dwinovo.chiikawa.entity.job.impl;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.job.api.PetCapability;
 import java.util.List;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -16,9 +16,9 @@ public class BasicJob implements PetCapability {
     private final int id;
     private final int priority;
     private final TagKey<Item> toolTag;
-    private final List<ResourceLocation> intents;
+    private final List<Identifier> intents;
 
-    public BasicJob(int id, int priority, TagKey<Item> toolTag, List<ResourceLocation> intents) {
+    public BasicJob(int id, int priority, TagKey<Item> toolTag, List<Identifier> intents) {
         this.id = id;
         this.priority = priority;
         this.toolTag = toolTag;
@@ -42,7 +42,7 @@ public class BasicJob implements PetCapability {
     }
 
     @Override
-    public List<ResourceLocation> intents() {
+    public List<Identifier> intents() {
         return intents;
     }
 }

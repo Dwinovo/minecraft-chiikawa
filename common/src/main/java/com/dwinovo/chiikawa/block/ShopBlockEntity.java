@@ -5,7 +5,7 @@ import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.shop.ShopCatalog;
 import com.dwinovo.chiikawa.shop.ShopCatalogs;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
@@ -19,7 +19,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 public class ShopBlockEntity extends BlockEntity {
     private static final String CATALOG_KEY = "Catalog";
 
-    private ResourceLocation catalogId = ShopCatalogData.GENERAL;
+    private Identifier catalogId = ShopCatalogData.GENERAL;
 
     public ShopBlockEntity(BlockPos pos, BlockState state) {
         super(InitBlockEntities.SHOP.get(), pos, state);
@@ -30,12 +30,12 @@ public class ShopBlockEntity extends BlockEntity {
         return ShopCatalogs.get(catalogId);
     }
 
-    public ResourceLocation catalogId() {
+    public Identifier catalogId() {
         return catalogId;
     }
 
     /** Points the shop at another price list, for a map maker putting up a themed stall. */
-    public void setCatalogId(ResourceLocation catalogId) {
+    public void setCatalogId(Identifier catalogId) {
         this.catalogId = catalogId;
         setChanged();
     }
@@ -44,7 +44,7 @@ public class ShopBlockEntity extends BlockEntity {
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
         input.getString(CATALOG_KEY).ifPresent(id -> {
-            ResourceLocation saved = ResourceLocation.tryParse(id);
+            Identifier saved = Identifier.tryParse(id);
             catalogId = saved == null ? ShopCatalogData.GENERAL : saved;
         });
     }

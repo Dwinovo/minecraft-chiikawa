@@ -16,7 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.schedule.Activity;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,23 +33,23 @@ import org.jetbrains.annotations.Nullable;
  * close.
  */
 public final class PetIntents {
-    public static final ResourceLocation FOLLOW_OWNER = id("follow_owner");
-    public static final ResourceLocation STAY = id("stay");
-    public static final ResourceLocation WANDER = id("wander");
-    public static final ResourceLocation PICK_UP_ITEM = id("pick_up_item");
-    public static final ResourceLocation HARVEST = id("harvest");
-    public static final ResourceLocation PLANT = id("plant");
-    public static final ResourceLocation DELIVER = id("deliver");
-    public static final ResourceLocation WEED = id("weed");
-    public static final ResourceLocation PICK_MUSHROOM = id("pick_mushroom");
-    public static final ResourceLocation MELEE = id("melee");
-    public static final ResourceLocation RANGED = id("ranged");
-    public static final ResourceLocation PLAY_MUSIC = id("play_music");
-    public static final ResourceLocation TAKE_TASK = id("take_task");
-    public static final ResourceLocation SHOP = id("shop");
-    public static final ResourceLocation GIFT_OWNER = id("gift_owner");
+    public static final Identifier FOLLOW_OWNER = id("follow_owner");
+    public static final Identifier STAY = id("stay");
+    public static final Identifier WANDER = id("wander");
+    public static final Identifier PICK_UP_ITEM = id("pick_up_item");
+    public static final Identifier HARVEST = id("harvest");
+    public static final Identifier PLANT = id("plant");
+    public static final Identifier DELIVER = id("deliver");
+    public static final Identifier WEED = id("weed");
+    public static final Identifier PICK_MUSHROOM = id("pick_mushroom");
+    public static final Identifier MELEE = id("melee");
+    public static final Identifier RANGED = id("ranged");
+    public static final Identifier PLAY_MUSIC = id("play_music");
+    public static final Identifier TAKE_TASK = id("take_task");
+    public static final Identifier SHOP = id("shop");
+    public static final Identifier GIFT_OWNER = id("gift_owner");
 
-    private static final Map<ResourceLocation, PetIntent> BY_ID = new LinkedHashMap<>();
+    private static final Map<Identifier, PetIntent> BY_ID = new LinkedHashMap<>();
 
     /** Intents every pet considers, whatever its capability. */
     public static final List<PetIntent> GENERIC = List.of(
@@ -86,7 +86,7 @@ public final class PetIntents {
     private PetIntents() {
     }
 
-    public static @Nullable PetIntent get(ResourceLocation id) {
+    public static @Nullable PetIntent get(Identifier id) {
         return BY_ID.get(id);
     }
 
@@ -101,7 +101,7 @@ public final class PetIntents {
         return intent;
     }
 
-    private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path);
+    private static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(Constants.MOD_ID, path);
     }
 }

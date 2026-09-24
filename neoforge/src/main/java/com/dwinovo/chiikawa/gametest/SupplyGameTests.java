@@ -23,7 +23,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
@@ -67,7 +67,7 @@ public final class SupplyGameTests {
         Set<Item> listed = new HashSet<>();
         InitTabs.addMainItems(item -> listed.add(item.asItem()));
         for (Item item : BuiltInRegistries.ITEM) {
-            ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+            Identifier id = BuiltInRegistries.ITEM.getKey(item);
             if (id.getNamespace().equals(Constants.MOD_ID)) {
                 helper.assertTrue(listed.contains(item), Component.literal(id + " is not in the creative tab"));
             }

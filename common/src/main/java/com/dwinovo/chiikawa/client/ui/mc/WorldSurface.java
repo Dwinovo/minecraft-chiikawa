@@ -7,9 +7,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
@@ -58,7 +58,7 @@ public final class WorldSurface implements DrawSurface {
     @Override
     public void fillRect(int x, int y, int width, int height, int argb) {
         float z = nextLayer();
-        collector.submitCustomGeometry(pose, RenderType.textBackground(), (drawPose, consumer) -> {
+        collector.submitCustomGeometry(pose, RenderTypes.textBackground(), (drawPose, consumer) -> {
             // Wound as the game winds its own name-tag backdrop, which this render type culls by.
             consumer.addVertex(drawPose, x, y + height, z).setColor(argb).setLight(FULL_BRIGHT);
             consumer.addVertex(drawPose, x + width, y + height, z).setColor(argb).setLight(FULL_BRIGHT);

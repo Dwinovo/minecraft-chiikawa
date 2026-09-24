@@ -17,7 +17,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.phys.BlockHitResult;
@@ -44,7 +44,7 @@ public final class ChiikawaDebugCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("chiikawa")
             .then(Commands.literal("debug")
-                .requires(source -> source.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("intent")
                     .executes(context -> showCandidates(context.getSource()))
                     .then(Commands.literal("log")
@@ -153,7 +153,7 @@ public final class ChiikawaDebugCommand {
             .withStyle(value ? ChatFormatting.GREEN : ChatFormatting.RED);
     }
 
-    private static String name(ResourceLocation id) {
+    private static String name(Identifier id) {
         return id == null ? "none" : id.toString();
     }
 }

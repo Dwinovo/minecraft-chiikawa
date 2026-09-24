@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
@@ -25,18 +25,18 @@ import net.minecraft.world.level.storage.loot.LootTable;
  *                 upgrade is worth paying for rather than only worth counting
  */
 public record PetTaskType(
-    ResourceLocation capability,
-    ResourceLocation counter,
-    ResourceLocation icon,
+    Identifier capability,
+    Identifier counter,
+    Identifier icon,
     IntProvider amount,
     ResourceKey<LootTable> reward,
     int weight,
     int minLevel
 ) {
     public static final Codec<PetTaskType> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        ResourceLocation.CODEC.fieldOf("capability").forGetter(PetTaskType::capability),
-        ResourceLocation.CODEC.fieldOf("counter").forGetter(PetTaskType::counter),
-        ResourceLocation.CODEC.fieldOf("icon").forGetter(PetTaskType::icon),
+        Identifier.CODEC.fieldOf("capability").forGetter(PetTaskType::capability),
+        Identifier.CODEC.fieldOf("counter").forGetter(PetTaskType::counter),
+        Identifier.CODEC.fieldOf("icon").forGetter(PetTaskType::icon),
         IntProvider.POSITIVE_CODEC.fieldOf("amount").forGetter(PetTaskType::amount),
         ResourceKey.codec(Registries.LOOT_TABLE).fieldOf("reward").forGetter(PetTaskType::reward),
         ExtraCodecs.POSITIVE_INT.optionalFieldOf("weight", 1).forGetter(PetTaskType::weight),
@@ -48,7 +48,7 @@ public record PetTaskType(
      * @param random the board's roll
      * @return a fresh slip of this type
      */
-    public PetTask roll(ResourceLocation id, RandomSource random) {
+    public PetTask roll(Identifier id, RandomSource random) {
         return new PetTask(id, capability, counter, icon, amount.sample(random), reward, 0);
     }
 }

@@ -12,11 +12,11 @@ import java.util.concurrent.CompletableFuture;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class FabricModSoundsProvider implements DataProvider {
     private final PackOutput output;
-    private final Map<String, List<ResourceLocation>> variants;
+    private final Map<String, List<Identifier>> variants;
 
     public FabricModSoundsProvider(PackOutput output) {
         this.output = output;
@@ -33,7 +33,7 @@ public class FabricModSoundsProvider implements DataProvider {
             }
             JsonArray soundList = new JsonArray();
             sounds.stream()
-                .sorted(Comparator.comparing(ResourceLocation::toString))
+                .sorted(Comparator.comparing(Identifier::toString))
                 .forEach(sound -> {
                     JsonObject soundEntry = new JsonObject();
                     soundEntry.addProperty("name", sound.toString());
@@ -46,7 +46,7 @@ public class FabricModSoundsProvider implements DataProvider {
         }
         PackOutput.PathProvider pathProvider = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "");
         return DataProvider.saveStable(cache, root,
-            pathProvider.json(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "sounds")));
+            pathProvider.json(Identifier.fromNamespaceAndPath(Constants.MOD_ID, "sounds")));
     }
 
     private static void addSoundMetadata(JsonObject soundEntry, InitSounds.SoundEntry entry) {

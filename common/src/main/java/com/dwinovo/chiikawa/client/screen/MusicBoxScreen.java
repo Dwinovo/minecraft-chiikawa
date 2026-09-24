@@ -19,12 +19,12 @@ import com.dwinovo.chiikawa.ui.widget.TitledPanel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Util;
 
 /**
  * The music box: the tracks found in the player's own music folder, one to a row, picked
@@ -60,7 +60,7 @@ public class MusicBoxScreen extends Screen {
     public void replaceTracks(List<MusicTrackView> nextTracks) {
         this.tracks = List.copyOf(nextTracks);
         clampPage();
-        init(this.minecraft, this.width, this.height);
+        init(this.width, this.height);
     }
 
     @Override
@@ -207,7 +207,7 @@ public class MusicBoxScreen extends Screen {
         }
 
         @Override
-        protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
             DrawSurface surface = new GuiSurface(graphics, MusicBoxScreen.this.font);
             Rect area = new Rect(getX(), getY(), getWidth(), getHeight());
             if (active && isHoveredOrFocused()) {

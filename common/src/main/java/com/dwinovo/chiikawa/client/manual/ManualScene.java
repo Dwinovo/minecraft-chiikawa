@@ -201,7 +201,6 @@ public final class ManualScene {
                 EntityRenderer<? super AbstractPet, ?> renderer = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(pet);
                 EntityRenderState state = renderer.createRenderState(pet, partialTick);
                 state.lightCoords = LightTexture.FULL_BRIGHT;
-                state.hitboxesRenderState = null;
                 state.shadowPieces.clear();
                 state.outlineColor = 0;
                 graphics.submitEntityRenderState(state, size, offset(area, groundY, size),

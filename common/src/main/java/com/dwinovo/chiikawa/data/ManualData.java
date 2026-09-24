@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -30,7 +30,7 @@ public final class ManualData {
     }
 
     /** @return pages by id */
-    public static Map<ResourceLocation, ManualPage> all() {
+    public static Map<Identifier, ManualPage> all() {
         return Map.of(
             id("meet"), meet(),
             id("work"), work(),
@@ -188,14 +188,14 @@ public final class ManualData {
         return new ExtraCodecs.TagOrElementLocation(BuiltInRegistries.ITEM.getKey(item), false);
     }
 
-    private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path);
+    private static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(Constants.MOD_ID, path);
     }
 
     /** One actor, said the way a stage direction is. */
     private static final class Actor {
-        private Optional<ResourceLocation> pet = Optional.empty();
-        private Optional<ResourceLocation> prop = Optional.empty();
+        private Optional<Identifier> pet = Optional.empty();
+        private Optional<Identifier> prop = Optional.empty();
         private Optional<ExtraCodecs.TagOrElementLocation> item = Optional.empty();
         private float x = 0.5F;
         private float y;
@@ -211,12 +211,12 @@ public final class ManualData {
         private Optional<String> say = Optional.empty();
         private boolean bob;
 
-        Actor pet(ResourceLocation id) {
+        Actor pet(Identifier id) {
             pet = Optional.of(id);
             return this;
         }
 
-        Actor prop(ResourceLocation id) {
+        Actor prop(Identifier id) {
             prop = Optional.of(id);
             return this;
         }

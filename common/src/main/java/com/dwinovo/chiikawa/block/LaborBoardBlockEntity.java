@@ -16,6 +16,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.UnaryOperator;
+import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -146,7 +147,7 @@ public class LaborBoardBlockEntity extends BlockEntity {
     /** @return today's slips */
     public List<BoardSlot> today() {
         ServerLevel world = level();
-        long today = world.getDayTime() / Level.TICKS_PER_DAY;
+        long today = world.getDayTime() / SharedConstants.TICKS_PER_GAME_DAY;
         long seed = BoardSlips.seed(world.getSeed(), today, worldPosition);
         if (today != day) {
             day = today;
@@ -173,7 +174,7 @@ public class LaborBoardBlockEntity extends BlockEntity {
         ServerLevel level = level();
         return BoardSlips.find(today(), pet.getCapabilityId(), pet.getUUID(),
             PetOwnership.of(pet) instanceof PetOwnership.Wild,
-            level.getDayTime() % Level.TICKS_PER_DAY, level.getGameTime());
+            level.getDayTime() % SharedConstants.TICKS_PER_GAME_DAY, level.getGameTime());
     }
 
     private void update(int index, UnaryOperator<BoardSlot> change) {

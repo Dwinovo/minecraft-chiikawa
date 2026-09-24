@@ -3,7 +3,7 @@ package com.dwinovo.chiikawa.data;
 import com.dwinovo.chiikawa.Constants;
 import java.util.Map;
 import net.minecraft.core.Vec3i;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -16,9 +16,9 @@ import net.minecraft.world.level.block.state.BlockState;
  * pet cannot wander out of sight of what it is meant to be doing.
  */
 public final class GameTestStructureData {
-    public static final ResourceLocation FLOOR_32 = id("floor32");
-    public static final ResourceLocation FLOOR_16 = id("floor16");
-    public static final ResourceLocation FLOOR_8 = id("floor8");
+    public static final Identifier FLOOR_32 = id("floor32");
+    public static final Identifier FLOOR_16 = id("floor16");
+    public static final Identifier FLOOR_8 = id("floor8");
 
     /** Stone rather than grass: nothing grows on it, so nothing a case did not ask for happens. */
     public static final BlockState GROUND = Blocks.SMOOTH_STONE.defaultBlockState();
@@ -30,7 +30,7 @@ public final class GameTestStructureData {
      * @return the floors to write, by id. The height is room for a pet to stand, jump and be
      *         looked at, and for a case to stack a wall or a tree on the floor.
      */
-    public static Map<ResourceLocation, Vec3i> all() {
+    public static Map<Identifier, Vec3i> all() {
         return Map.of(
             // Wide enough to walk a pet past the distance it is allowed to stray from home.
             FLOOR_32, new Vec3i(32, 8, 32),
@@ -38,7 +38,7 @@ public final class GameTestStructureData {
             FLOOR_8, new Vec3i(8, 8, 8));
     }
 
-    private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path);
+    private static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(Constants.MOD_ID, path);
     }
 }

@@ -16,7 +16,7 @@ import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Writes the in-game cases' floors to {@code data/chiikawa/structure/<id>.nbt}.
@@ -46,7 +46,7 @@ public final class GameTestStructureProvider implements DataProvider {
             .toArray(CompletableFuture[]::new));
     }
 
-    private CompletableFuture<?> save(CachedOutput cache, ResourceLocation id, Vec3i size) {
+    private CompletableFuture<?> save(CachedOutput cache, Identifier id, Vec3i size) {
         byte[] bytes = compressed(floor(size));
         return CompletableFuture.runAsync(() -> {
             try {
@@ -112,7 +112,7 @@ public final class GameTestStructureProvider implements DataProvider {
     }
 
     /** @return the floors this writes, for a loader that wants to log or check them */
-    public static Map<ResourceLocation, Vec3i> floors() {
+    public static Map<Identifier, Vec3i> floors() {
         return GameTestStructureData.all();
     }
 }

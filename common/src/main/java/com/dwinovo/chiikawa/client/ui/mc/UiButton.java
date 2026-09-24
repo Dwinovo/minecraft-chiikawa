@@ -65,7 +65,7 @@ public final class UiButton extends AbstractButton {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         DrawSurface surface = new GuiSurface(graphics, net.minecraft.client.Minecraft.getInstance().font);
         painter.paint(surface, new Rect(getX(), getY(), getWidth(), getHeight()), isHoveredOrFocused(), active);
     }

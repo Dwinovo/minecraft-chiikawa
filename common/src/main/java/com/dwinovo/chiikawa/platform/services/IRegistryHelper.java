@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -22,7 +22,7 @@ public interface IRegistryHelper {
      *
      * @param block a block registered earlier through {@link #register}
      */
-    void registerPoi(ResourceLocation id, Supplier<? extends Block> block);
+    void registerPoi(Identifier id, Supplier<? extends Block> block);
 
     /**
      * Registers a block entity type placed by {@code block}. Vanilla keeps its block entity
@@ -30,7 +30,7 @@ public interface IRegistryHelper {
      *
      * @param block a block registered earlier through {@link #register}
      */
-    <T extends BlockEntity> Supplier<BlockEntityType<T>> registerBlockEntity(ResourceLocation id,
+    <T extends BlockEntity> Supplier<BlockEntityType<T>> registerBlockEntity(Identifier id,
         BiFunction<BlockPos, BlockState, T> factory, Supplier<? extends Block> block);
 
     /**
@@ -39,9 +39,9 @@ public interface IRegistryHelper {
      *
      * @return {@code serializer}, for a {@code defineId} to use
      */
-    <T> EntityDataSerializer<T> registerEntityDataSerializer(ResourceLocation id, EntityDataSerializer<T> serializer);
+    <T> EntityDataSerializer<T> registerEntityDataSerializer(Identifier id, EntityDataSerializer<T> serializer);
 
-    <T> Registry<T> createRegistry(ResourceKey<Registry<T>> key, ResourceLocation defaultId, boolean sync);
+    <T> Registry<T> createRegistry(ResourceKey<Registry<T>> key, Identifier defaultId, boolean sync);
 
     void registerToEventBus(Object eventBus);
 }

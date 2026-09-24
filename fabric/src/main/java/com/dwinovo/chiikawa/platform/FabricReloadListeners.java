@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.platform;
 
 import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 
@@ -15,7 +15,7 @@ public final class FabricReloadListeners {
      * @param id the listener's name
      * @param listener the vanilla listener to run under it
      */
-    public static void register(PackType type, ResourceLocation id, PreparableReloadListener listener) {
+    public static void register(PackType type, Identifier id, PreparableReloadListener listener) {
         ResourceLoader.get(type).registerReloader(id, listener);
     }
 }

@@ -64,7 +64,7 @@ public final class ModRecipeProvider extends RecipeProvider {
             .pattern("PNP")
             .pattern(" G ")
             .unlockedBy(getHasName(Items.NOTE_BLOCK), has(Items.NOTE_BLOCK))
-            .save(this.output, ResourceKey.create(Registries.RECIPE, ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "music_box")));
+            .save(this.output, ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(Constants.MOD_ID, "music_box")));
 
         ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.DECORATIONS, InitItems.LABOR_BOARD.get())
             .define('P', Items.PAPER)

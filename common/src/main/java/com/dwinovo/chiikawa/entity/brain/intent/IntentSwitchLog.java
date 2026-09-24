@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.intent;
 
 import java.util.ArrayDeque;
 import java.util.List;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -20,13 +20,13 @@ public final class IntentSwitchLog {
      * @param cause why the pet evaluated or why the previous intent ended
      * @param top the best scores of the evaluation, highest first
      */
-    public record Entry(long gameTime, @Nullable ResourceLocation from, @Nullable ResourceLocation to,
+    public record Entry(long gameTime, @Nullable Identifier from, @Nullable Identifier to,
             String cause, List<IntentSelector.Scored> top) {
     }
 
     private final ArrayDeque<Entry> entries = new ArrayDeque<>(CAPACITY);
 
-    void record(long gameTime, @Nullable ResourceLocation from, @Nullable ResourceLocation to, String cause,
+    void record(long gameTime, @Nullable Identifier from, @Nullable Identifier to, String cause,
             List<IntentSelector.Scored> ranking) {
         if (entries.size() == CAPACITY) {
             entries.removeFirst();

@@ -15,8 +15,8 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.phys.AABB;
 
 /**
@@ -58,7 +58,7 @@ public final class GameTestKit {
     static void settleWorld(ServerLevel level, Difficulty difficulty, long dayTime) {
         level.getServer().setDifficulty(difficulty, true);
         level.setDayTime(dayTime);
-        level.getGameRules().getRule(GameRules.RULE_DOMOBSPAWNING).set(false, level.getServer());
+        level.getGameRules().set(GameRules.SPAWN_MOBS, false, level.getServer());
         level.setWeatherParameters(CLEAR_WEATHER_TICKS, 0, false, false);
     }
 

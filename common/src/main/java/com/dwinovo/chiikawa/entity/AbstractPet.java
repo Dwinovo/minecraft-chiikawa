@@ -39,7 +39,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -123,8 +123,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     /** How much quicker an eager pet moves. */
     private static final double EAGER_SPEED_BONUS = 0.3;
-    private static final ResourceLocation EAGER_SPEED_ID =
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "eager");
+    private static final Identifier EAGER_SPEED_ID =
+        Identifier.fromNamespaceAndPath(Constants.MOD_ID, "eager");
 
     /** Slot the held tool lives in; see {@link #getItemBySlot}. */
     public static final int MAINHAND_SLOT = 0;
@@ -476,22 +476,22 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     /**
      * @return the id of the intent the pet is following; readable on both sides
      */
-    public Optional<ResourceLocation> getIntent() {
+    public Optional<Identifier> getIntent() {
         String id = this.entityData.get(INTENT);
-        return id.isEmpty() ? Optional.empty() : Optional.ofNullable(ResourceLocation.tryParse(id));
+        return id.isEmpty() ? Optional.empty() : Optional.ofNullable(Identifier.tryParse(id));
     }
 
     /**
      * @param intent the intent the pet now follows, {@code null} for none
      */
-    public void setIntent(@Nullable ResourceLocation intent) {
+    public void setIntent(@Nullable Identifier intent) {
         this.entityData.set(INTENT, intent == null ? "" : intent.toString());
     }
 
     /**
      * @return the registry id of the pet's current capability, such as {@code chiikawa:farmer}
      */
-    public ResourceLocation getCapabilityId() {
+    public Identifier getCapabilityId() {
         return InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.getCapabilityFromId(getPetJobId()));
     }
 
@@ -943,7 +943,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     }
 
     private boolean playOnce(String controller, List<String> candidates) {
-        ResourceLocation typeId = BuiltInRegistries.ENTITY_TYPE.getKey(getType());
+        Identifier typeId = BuiltInRegistries.ENTITY_TYPE.getKey(getType());
         for (String name : candidates) {
             BakedAnimation anim = AnimationLibrary.get(
                     Identifier.fromNamespaceAndPath(typeId.getNamespace(), typeId.getPath() + "/" + name));

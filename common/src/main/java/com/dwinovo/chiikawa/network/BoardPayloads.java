@@ -7,7 +7,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /** What a player sees on a labor board, sent when they open one. */
 public final class BoardPayloads {
@@ -23,20 +23,20 @@ public final class BoardPayloads {
      * @param target how much work it asks for
      * @param taker who took it; empty while it is still up
      */
-    public record SlipView(ResourceLocation type, ResourceLocation icon, ResourceLocation capability,
+    public record SlipView(Identifier type, Identifier icon, Identifier capability,
                            int target, String taker) {
         public static final StreamCodec<FriendlyByteBuf, SlipView> STREAM_CODEC = StreamCodec.of(
             (buffer, value) -> {
-                buffer.writeResourceLocation(value.type);
-                buffer.writeResourceLocation(value.icon);
-                buffer.writeResourceLocation(value.capability);
+                buffer.writeIdentifier(value.type);
+                buffer.writeIdentifier(value.icon);
+                buffer.writeIdentifier(value.capability);
                 buffer.writeVarInt(value.target);
                 buffer.writeUtf(value.taker);
             },
             buffer -> new SlipView(
-                buffer.readResourceLocation(),
-                buffer.readResourceLocation(),
-                buffer.readResourceLocation(),
+                buffer.readIdentifier(),
+                buffer.readIdentifier(),
+                buffer.readIdentifier(),
                 buffer.readVarInt(),
                 buffer.readUtf()
             )
@@ -51,7 +51,7 @@ public final class BoardPayloads {
      * @param daily how many slips a day it puts up
      * @param unlocks the kinds of work a board first puts up at it
      */
-    public record NextLevel(int price, int daily, List<ResourceLocation> unlocks) {
+    public record NextLevel(int price, int daily, List<Identifier> unlocks) {
         /** A board at the top: nothing left to buy. */
         public static final NextLevel NONE = new NextLevel(0, 0, List.of());
 
@@ -59,10 +59,10 @@ public final class BoardPayloads {
             (buffer, value) -> {
                 buffer.writeVarInt(value.price);
                 buffer.writeVarInt(value.daily);
-                buffer.writeCollection(value.unlocks, FriendlyByteBuf::writeResourceLocation);
+                buffer.writeCollection(value.unlocks, FriendlyByteBuf::writeIdentifier);
             },
             buffer -> new NextLevel(buffer.readVarInt(), buffer.readVarInt(),
-                buffer.readList(FriendlyByteBuf::readResourceLocation))
+                buffer.readList(FriendlyByteBuf::readIdentifier))
         );
     }
 
@@ -78,7 +78,7 @@ public final class BoardPayloads {
     public record BoardSlipsPayload(BlockPos board, int level, int daily, NextLevel next, List<SlipView> slips)
             implements CustomPacketPayload {
         public static final Type<BoardSlipsPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "board_slips"));
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "board_slips"));
         public static final StreamCodec<RegistryFriendlyByteBuf, BoardSlipsPayload> STREAM_CODEC = StreamCodec.of(
             (buffer, value) -> {
                 buffer.writeBlockPos(value.board);
@@ -105,7 +105,7 @@ public final class BoardPayloads {
      */
     public record BoardUpgradePayload(BlockPos board) implements CustomPacketPayload {
         public static final Type<BoardUpgradePayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "board_upgrade"));
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "board_upgrade"));
         public static final StreamCodec<RegistryFriendlyByteBuf, BoardUpgradePayload> STREAM_CODEC = StreamCodec.of(
             (buffer, value) -> buffer.writeBlockPos(value.board),
             buffer -> new BoardUpgradePayload(buffer.readBlockPos())

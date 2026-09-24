@@ -4,7 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.biome.v1.ModificationPhase;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Adds the wild pet spawns in the loaded {@code pet_spawn} data to the biomes they name
@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
  * for spawns of its own, so it reads the same files NeoForge does.
  */
 public final class FabricPetSpawns {
-    private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "pet_spawns");
+    private static final Identifier ID = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "pet_spawns");
 
     private FabricPetSpawns() {
     }

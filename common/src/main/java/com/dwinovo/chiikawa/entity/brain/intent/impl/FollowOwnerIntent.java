@@ -7,7 +7,7 @@ import com.dwinovo.chiikawa.entity.brain.intent.IntentContext;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import com.dwinovo.chiikawa.init.InitActivity;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.schedule.Activity;
 
 /**
@@ -24,7 +24,7 @@ public final class FollowOwnerIntent implements PetIntent {
     private static final float MAX_SCORE = 1.0F;
 
     @Override
-    public ResourceLocation id() {
+    public Identifier id() {
         return PetIntents.FOLLOW_OWNER;
     }
 

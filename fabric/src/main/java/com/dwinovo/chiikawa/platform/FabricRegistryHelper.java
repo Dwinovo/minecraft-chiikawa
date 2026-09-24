@@ -13,7 +13,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -28,13 +28,13 @@ public class FabricRegistryHelper implements IRegistryHelper {
     }
 
     @Override
-    public void registerPoi(ResourceLocation id, Supplier<? extends Block> block) {
+    public void registerPoi(Identifier id, Supplier<? extends Block> block) {
         // Fabric ties the block's states to the type; a plain registry entry would not.
         PointOfInterestHelper.register(id, 0, 1, block.get());
     }
 
     @Override
-    public <T extends BlockEntity> Supplier<BlockEntityType<T>> registerBlockEntity(ResourceLocation id,
+    public <T extends BlockEntity> Supplier<BlockEntityType<T>> registerBlockEntity(Identifier id,
             BiFunction<BlockPos, BlockState, T> factory, Supplier<? extends Block> block) {
         BlockEntityType<T> type = FabricBlockEntityTypeBuilder.create(factory::apply, block.get()).build();
         Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, id, type);
@@ -42,13 +42,13 @@ public class FabricRegistryHelper implements IRegistryHelper {
     }
 
     @Override
-    public <T> EntityDataSerializer<T> registerEntityDataSerializer(ResourceLocation id, EntityDataSerializer<T> serializer) {
+    public <T> EntityDataSerializer<T> registerEntityDataSerializer(Identifier id, EntityDataSerializer<T> serializer) {
         FabricTrackedDataRegistry.register(id, serializer);
         return serializer;
     }
 
     @Override
-    public <T> Registry<T> createRegistry(ResourceKey<Registry<T>> key, ResourceLocation defaultId, boolean sync) {
+    public <T> Registry<T> createRegistry(ResourceKey<Registry<T>> key, Identifier defaultId, boolean sync) {
         var builder = defaultId == null
             ? FabricRegistryBuilder.createSimple(key)
             : FabricRegistryBuilder.createDefaulted(key, defaultId);

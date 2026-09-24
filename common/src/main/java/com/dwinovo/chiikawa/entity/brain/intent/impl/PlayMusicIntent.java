@@ -13,7 +13,7 @@ import com.dwinovo.chiikawa.music.ServerMusicSystem;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
 import java.util.Optional;
 import java.util.Set;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.schedule.Activity;
 
@@ -29,7 +29,7 @@ public final class PlayMusicIntent implements PetIntent {
     private static final float SCORE = 0.6F;
 
     @Override
-    public ResourceLocation id() {
+    public Identifier id() {
         return PetIntents.PLAY_MUSIC;
     }
 
@@ -59,7 +59,7 @@ public final class PlayMusicIntent implements PetIntent {
     }
 
     @Override
-    public Optional<ResourceLocation> workCounter() {
+    public Optional<Identifier> workCounter() {
         return Optional.of(PetWorkCounters.PLAY_MUSIC_SECOND);
     }
 

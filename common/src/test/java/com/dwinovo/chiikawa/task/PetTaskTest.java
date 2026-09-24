@@ -12,7 +12,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.UniformInt;
@@ -20,8 +20,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class PetTaskTest {
-    private static final ResourceLocation FARMER = id("farmer");
-    private static final ResourceLocation GRASS = ResourceLocation.withDefaultNamespace("short_grass");
+    private static final Identifier FARMER = id("farmer");
+    private static final Identifier GRASS = Identifier.withDefaultNamespace("short_grass");
     private static final PetTask WEEDING = new PetTask(id("weeding"), FARMER, PetWorkCounters.WEED, GRASS, 3,
         ResourceKey.create(Registries.LOOT_TABLE, id("pet_task/weeding")), 0);
 
@@ -86,7 +86,7 @@ class PetTaskTest {
         assertEquals(2, loaded.warnings().size());
     }
 
-    private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath("chiikawa", path);
+    private static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath("chiikawa", path);
     }
 }

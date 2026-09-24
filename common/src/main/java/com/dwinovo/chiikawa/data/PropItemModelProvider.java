@@ -10,7 +10,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 
@@ -54,7 +54,7 @@ public final class PropItemModelProvider implements DataProvider {
     }
 
     private static JsonObject itemInfo(Item item) {
-        ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+        Identifier id = BuiltInRegistries.ITEM.getKey(item);
         JsonObject renderer = new JsonObject();
         renderer.addProperty("type", PropRenderer.ItemRenderer.TYPE.toString());
         renderer.addProperty("prop", id.toString());

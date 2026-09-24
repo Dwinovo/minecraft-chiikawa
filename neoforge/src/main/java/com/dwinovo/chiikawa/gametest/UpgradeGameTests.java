@@ -20,17 +20,17 @@ import com.dwinovo.chiikawa.task.BoardSlot;
 import com.dwinovo.chiikawa.task.PetTaskTypes;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
 import java.util.List;
+import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.Level;
 
 /**
  * What an owner's emeralds buy a labor board. A level is the one thing on that screen an
@@ -201,8 +201,8 @@ public final class UpgradeGameTests {
      */
     private static BlockPos boardOfferingHunting(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
-        long day = level.getDayTime() / Level.TICKS_PER_DAY;
-        ResourceLocation fencer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FENCER.get());
+        long day = level.getDayTime() / SharedConstants.TICKS_PER_GAME_DAY;
+        Identifier fencer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FENCER.get());
         for (int x = 8; x < 15; x++) {
             for (int z = 2; z < 15; z++) {
                 BlockPos rel = new BlockPos(x, STAND, z);

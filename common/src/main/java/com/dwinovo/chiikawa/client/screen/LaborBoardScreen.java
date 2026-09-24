@@ -29,7 +29,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -162,7 +162,7 @@ public class LaborBoardScreen extends Screen {
         if (price > 0) {
             lines.add(Component.translatable("screen.chiikawa.labor_board.upgrade_hint", level + 1, next.daily())
                 .getString());
-            for (ResourceLocation type : next.unlocks()) {
+            for (Identifier type : next.unlocks()) {
                 lines.add(Component.translatable("screen.chiikawa.labor_board.unlocks", PetStatusText.taskName(type))
                     .getString());
             }

@@ -1,6 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain.intent;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * The {@code CURRENT_INTENT} memory. Not saved; a loaded pet picks again.
@@ -8,5 +8,5 @@ import net.minecraft.resources.ResourceLocation;
  * @param id the running intent
  * @param startTick game time the intent was chosen
  */
-public record RunningIntent(ResourceLocation id, long startTick) {
+public record RunningIntent(Identifier id, long startTick) {
 }

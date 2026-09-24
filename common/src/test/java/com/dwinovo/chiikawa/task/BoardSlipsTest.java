@@ -16,7 +16,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -24,8 +24,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class BoardSlipsTest {
-    private static final ResourceLocation FARMER = id("farmer");
-    private static final ResourceLocation MUSICIAN = id("musician");
+    private static final Identifier FARMER = id("farmer");
+    private static final Identifier MUSICIAN = id("musician");
     private static final UUID PET = UUID.fromString("00000000-0000-0000-0000-00000000000a");
     private static final UUID OTHER = UUID.fromString("00000000-0000-0000-0000-00000000000b");
     private static final long NOON = 6000L;
@@ -116,7 +116,7 @@ class BoardSlipsTest {
 
     @Test
     void workATooLowBoardCannotPutUpStaysOff() {
-        SortedMap<ResourceLocation, PetTaskType> types = types();
+        SortedMap<Identifier, PetTaskType> types = types();
         types.put(id("melee_hunting"), new PetTaskType(id("fencer"), PetWorkCounters.SLAY, PetTask.NO_ICON,
             UniformInt.of(3, 6), reward("melee_hunting"), 50, 2));
 
@@ -201,8 +201,8 @@ class BoardSlipsTest {
         assertEquals(0, BoardSlips.hanging(List.of()), "an empty board hangs something");
     }
 
-    private static SortedMap<ResourceLocation, PetTaskType> types() {
-        SortedMap<ResourceLocation, PetTaskType> types = new TreeMap<>();
+    private static SortedMap<Identifier, PetTaskType> types() {
+        SortedMap<Identifier, PetTaskType> types = new TreeMap<>();
         types.put(id("weeding"), new PetTaskType(FARMER, PetWorkCounters.WEED, PetTask.NO_ICON,
             UniformInt.of(8, 16), reward("weeding"), 3, BoardLevels.FIRST_LEVEL));
         types.put(id("mushroom_picking"), new PetTaskType(FARMER, PetWorkCounters.PICK_MUSHROOM, PetTask.NO_ICON,
@@ -210,11 +210,11 @@ class BoardSlipsTest {
         return types;
     }
 
-    private static BoardSlot taken(ResourceLocation capability) {
+    private static BoardSlot taken(Identifier capability) {
         return slot(capability).claim(TAKER);
     }
 
-    private static BoardSlot slot(ResourceLocation capability) {
+    private static BoardSlot slot(Identifier capability) {
         return BoardSlot.open(new PetTask(id("test"), capability, PetWorkCounters.WEED, PetTask.NO_ICON, 10,
             reward("test"), 0));
     }
@@ -223,7 +223,7 @@ class BoardSlipsTest {
         return ResourceKey.create(Registries.LOOT_TABLE, id("pet_task/" + path));
     }
 
-    private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath("chiikawa", path);
+    private static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath("chiikawa", path);
     }
 }

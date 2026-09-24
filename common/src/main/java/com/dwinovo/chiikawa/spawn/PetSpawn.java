@@ -44,7 +44,7 @@ public record PetSpawn(List<ExtraCodecs.TagOrElementLocation> biomes, List<Weigh
         for (ExtraCodecs.TagOrElementLocation entry : biomes) {
             boolean named = entry.tag()
                 ? hasTag.test(TagKey.create(Registries.BIOME, entry.id()))
-                : entry.id().equals(biome.location());
+                : entry.id().equals(biome.identifier());
             if (named) {
                 return true;
             }

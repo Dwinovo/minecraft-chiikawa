@@ -21,7 +21,7 @@ public final class InitRegistry {
     public static final int MUSICIAN_ID = 4;
 
     public static final ResourceKey<Registry<PetCapability>> PET_JOB_KEY = ResourceKey.createRegistryKey(
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "pet_jobs")
+        Identifier.fromNamespaceAndPath(Constants.MOD_ID, "pet_jobs")
     );
 
     public static final Registry<PetCapability> PET_JOB_REGISTRY = Services.REGISTRY.createRegistry(

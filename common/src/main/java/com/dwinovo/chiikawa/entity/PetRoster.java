@@ -12,7 +12,7 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -98,7 +98,7 @@ public class PetRoster extends SavedData {
                 UUID pet = petTag.read("Pet", UUIDUtil.CODEC).orElseThrow();
                 pets.put(pet, new Entry(pet, petTag.getStringOr("Name", ""),
                     ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION,
-                        ResourceLocation.parse(petTag.getStringOr("Dimension", ""))),
+                        Identifier.parse(petTag.getStringOr("Dimension", ""))),
                     petTag.read("Pos", BlockPos.CODEC).orElse(BlockPos.ZERO)));
             }
             if (!pets.isEmpty()) {
@@ -119,7 +119,7 @@ public class PetRoster extends SavedData {
                 CompoundTag petTag = new CompoundTag();
                 petTag.store("Pet", UUIDUtil.CODEC, entry.pet());
                 petTag.putString("Name", entry.name());
-                petTag.putString("Dimension", entry.dimension().location().toString());
+                petTag.putString("Dimension", entry.dimension().identifier().toString());
                 petTag.store("Pos", BlockPos.CODEC, entry.pos());
                 petTags.add(petTag);
             }

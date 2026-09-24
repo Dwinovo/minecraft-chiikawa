@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
@@ -65,7 +65,7 @@ public final class PropPictureRenderer extends PictureInPictureRenderer<PropPict
      * @param scale screen pixels a block
      */
     public record State(
-        ResourceLocation prop,
+        Identifier prop,
         float facing,
         Vector3f translation,
         int x0,
@@ -76,7 +76,7 @@ public final class PropPictureRenderer extends PictureInPictureRenderer<PropPict
         @Nullable ScreenRectangle scissorArea,
         @Nullable ScreenRectangle bounds
     ) implements PictureInPictureRenderState {
-        public State(ResourceLocation prop, float facing, Vector3f translation, int x0, int y0, int x1, int y1,
+        public State(Identifier prop, float facing, Vector3f translation, int x0, int y0, int x1, int y1,
                 float scale, @Nullable ScreenRectangle scissorArea) {
             this(prop, facing, translation, x0, y0, x1, y1, scale, scissorArea,
                 PictureInPictureRenderState.getBounds(x0, y0, x1, y1, scissorArea));

@@ -10,7 +10,7 @@ import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.junit.jupiter.api.Test;
 
 class BoardLevelsTest {
@@ -81,7 +81,7 @@ class BoardLevelsTest {
     void anotherFileBesideTheLevelsIsNotReadAndSaysSo() {
         BoardLevelsLoader.Loaded loaded = BoardLevelsLoader.load(Map.of(
             BoardLevelsLoader.FILE, json("{ \"levels\": [ { \"slips\": 3 } ] }"),
-            ResourceLocation.fromNamespaceAndPath("mypack", "levels"), json("{ \"levels\": [ { \"slips\": 9 } ] }")));
+            Identifier.fromNamespaceAndPath("mypack", "levels"), json("{ \"levels\": [ { \"slips\": 9 } ] }")));
 
         assertEquals(3, loaded.levels().slipsAt(BoardLevels.FIRST_LEVEL));
         assertTrue(loaded.errors().isEmpty());

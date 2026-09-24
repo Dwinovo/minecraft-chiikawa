@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -16,8 +16,8 @@ import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 
 public final class InitBlocks {
-    private static final ResourceLocation LABOR_BOARD_ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "labor_board");
-    private static final ResourceLocation SHOP_ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "shop");
+    private static final Identifier LABOR_BOARD_ID = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "labor_board");
+    private static final Identifier SHOP_ID = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "shop");
 
     public static final Supplier<LaborBoardBlock> LABOR_BOARD = Services.REGISTRY.<LaborBoardBlock>register(
         BuiltInRegistries.BLOCK,

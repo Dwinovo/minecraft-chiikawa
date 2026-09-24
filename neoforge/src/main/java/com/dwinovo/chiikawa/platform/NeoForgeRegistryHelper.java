@@ -14,7 +14,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -40,27 +40,27 @@ public class NeoForgeRegistryHelper implements IRegistryHelper {
     }
 
     @Override
-    public void registerPoi(ResourceLocation id, Supplier<? extends Block> block) {
+    public void registerPoi(Identifier id, Supplier<? extends Block> block) {
         // NeoForge ties the listed block states to the type when the entry is registered.
         register(BuiltInRegistries.POINT_OF_INTEREST_TYPE, id,
             () -> new PoiType(ImmutableSet.copyOf(block.get().getStateDefinition().getPossibleStates()), 0, 1));
     }
 
     @Override
-    public <T extends BlockEntity> Supplier<BlockEntityType<T>> registerBlockEntity(ResourceLocation id,
+    public <T extends BlockEntity> Supplier<BlockEntityType<T>> registerBlockEntity(Identifier id,
             BiFunction<BlockPos, BlockState, T> factory, Supplier<? extends Block> block) {
         return register(BuiltInRegistries.BLOCK_ENTITY_TYPE, id,
             () -> new BlockEntityType<>(factory::apply, block.get()));
     }
 
     @Override
-    public <T> EntityDataSerializer<T> registerEntityDataSerializer(ResourceLocation id, EntityDataSerializer<T> serializer) {
+    public <T> EntityDataSerializer<T> registerEntityDataSerializer(Identifier id, EntityDataSerializer<T> serializer) {
         register(NeoForgeRegistries.ENTITY_DATA_SERIALIZERS, id, () -> serializer);
         return serializer;
     }
 
     @Override
-    public <T> Registry<T> createRegistry(ResourceKey<Registry<T>> key, ResourceLocation defaultId, boolean sync) {
+    public <T> Registry<T> createRegistry(ResourceKey<Registry<T>> key, Identifier defaultId, boolean sync) {
         RegistryBuilder<T> builder = new RegistryBuilder<>(key);
         if (sync) {
             builder.sync(true);

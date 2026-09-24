@@ -20,7 +20,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.TestData;
 import net.minecraft.gametest.framework.TestEnvironmentDefinition;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
@@ -87,8 +87,8 @@ public final class GameTestRegistration {
                 String name = className + "." + method.getName().toLowerCase(Locale.ROOT);
                 String template = prefix == null || prefix.value() ? className + "." + test.template() : test.template();
                 FUNCTIONS.register(name, () -> helper -> invoke(method, helper));
-                CASES.add(new Case(ResourceLocation.fromNamespaceAndPath(namespace, name),
-                    ResourceLocation.fromNamespaceAndPath(namespace, template), test.batch(), test.timeoutTicks()));
+                CASES.add(new Case(Identifier.fromNamespaceAndPath(namespace, name),
+                    Identifier.fromNamespaceAndPath(namespace, template), test.batch(), test.timeoutTicks()));
             }
             BeforeBatch before = method.getAnnotation(BeforeBatch.class);
             if (before != null) {
@@ -102,7 +102,7 @@ public final class GameTestRegistration {
         Map<String, Holder<TestEnvironmentDefinition>> environments = new HashMap<>();
         for (Case test : CASES) {
             Holder<TestEnvironmentDefinition> environment = environments.computeIfAbsent(test.batch(), batch ->
-                event.registerEnvironment(ResourceLocation.fromNamespaceAndPath(test.id().getNamespace(), batch),
+                event.registerEnvironment(Identifier.fromNamespaceAndPath(test.id().getNamespace(), batch),
                     new Batch(batch)));
             event.registerTest(test.id(), new FunctionGameTestInstance(
                 ResourceKey.create(Registries.TEST_FUNCTION, test.id()),
@@ -137,7 +137,7 @@ public final class GameTestRegistration {
      * @param id the case's name, which is its test function's name too
      * @param template the structure it runs on
      */
-    private record Case(ResourceLocation id, ResourceLocation template, String batch, int timeoutTicks) {
+    private record Case(Identifier id, Identifier template, String batch, int timeoutTicks) {
     }
 
     /** A batch's world, settled by its {@link BeforeBatch} when the batch starts. */

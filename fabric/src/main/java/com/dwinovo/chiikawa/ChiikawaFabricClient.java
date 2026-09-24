@@ -29,7 +29,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.SpecialGuiElementRegistry;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 
 public class ChiikawaFabricClient implements ClientModInitializer {
@@ -58,7 +58,7 @@ public class ChiikawaFabricClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> ClientMusicStreamManager.tick());
 
         FabricReloadListeners.register(PackType.CLIENT_RESOURCES,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "anim_loader"), new BedrockResourceLoader());
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "anim_loader"), new BedrockResourceLoader());
         FabricReloadListeners.register(PackType.CLIENT_RESOURCES, ManualLoader.ID, new ManualLoader());
     }
 }

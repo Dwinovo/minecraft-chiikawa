@@ -19,17 +19,17 @@ import com.dwinovo.chiikawa.task.PetTaskTypes;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
+import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 
 /**
@@ -254,8 +254,8 @@ public final class BoardGameTests {
      */
     private static BlockPos boardWhere(GameTestHelper helper, Predicate<List<BoardSlot>> wanted, String what) {
         ServerLevel level = helper.getLevel();
-        long day = level.getDayTime() / Level.TICKS_PER_DAY;
-        ResourceLocation farmer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FARMER.get());
+        long day = level.getDayTime() / SharedConstants.TICKS_PER_GAME_DAY;
+        Identifier farmer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FARMER.get());
         for (int x = 8; x < 15; x++) {
             for (int z = 2; z < 15; z++) {
                 BlockPos rel = new BlockPos(x, STAND, z);

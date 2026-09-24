@@ -6,7 +6,7 @@ import com.dwinovo.chiikawa.entity.brain.intent.IntentContext;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntent;
 import java.util.function.Supplier;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.schedule.Activity;
 
 /**
@@ -20,18 +20,18 @@ import net.minecraft.world.entity.schedule.Activity;
 public final class CombatIntent implements PetIntent {
     private static final float SCORE = 0.8F;
 
-    private final ResourceLocation id;
+    private final Identifier id;
     private final Supplier<Activity> activity;
     private final boolean needsArrows;
 
-    public CombatIntent(ResourceLocation id, Supplier<Activity> activity, boolean needsArrows) {
+    public CombatIntent(Identifier id, Supplier<Activity> activity, boolean needsArrows) {
         this.id = id;
         this.activity = activity;
         this.needsArrows = needsArrows;
     }
 
     @Override
-    public ResourceLocation id() {
+    public Identifier id() {
         return id;
     }
 

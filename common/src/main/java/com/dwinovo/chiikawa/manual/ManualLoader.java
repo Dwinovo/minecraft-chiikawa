@@ -8,7 +8,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.ExtraCodecs;
@@ -22,7 +22,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 public final class ManualLoader extends SimpleJsonResourceReloadListener<JsonElement> {
     public static final String DIRECTORY = "manual";
     /** Id for loaders that register reload listeners by id. */
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
 
     private static final String LOG_PREFIX = "[chiikawa-manual] ";
 
@@ -31,7 +31,7 @@ public final class ManualLoader extends SimpleJsonResourceReloadListener<JsonEle
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
+    protected void apply(Map<Identifier, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
         Loaded loaded = load(files);
         loaded.errors().forEach(Constants.LOG::error);
         ManualPages.replaceAll(loaded.pages());
@@ -43,13 +43,13 @@ public final class ManualLoader extends SimpleJsonResourceReloadListener<JsonEle
      * @return the pages that decoded, in reading order (by {@code order}, then by id), and
      *         what went wrong with the rest
      */
-    static Loaded load(Map<ResourceLocation, JsonElement> files) {
-        List<Map.Entry<ResourceLocation, ManualPage>> pages = new ArrayList<>();
+    static Loaded load(Map<Identifier, JsonElement> files) {
+        List<Map.Entry<Identifier, ManualPage>> pages = new ArrayList<>();
         List<String> errors = new ArrayList<>();
         files.forEach((id, json) -> ManualPage.CODEC.parse(JsonOps.INSTANCE, json)
             .ifSuccess(page -> pages.add(Map.entry(id, page)))
             .ifError(error -> errors.add(LOG_PREFIX + id + " is left out, failed to parse: " + error.message())));
-        pages.sort(Comparator.<Map.Entry<ResourceLocation, ManualPage>>comparingInt(entry -> entry.getValue().order())
+        pages.sort(Comparator.<Map.Entry<Identifier, ManualPage>>comparingInt(entry -> entry.getValue().order())
             .thenComparing(Map.Entry::getKey));
         return new Loaded(pages.stream().map(Map.Entry::getValue).toList(), errors);
     }

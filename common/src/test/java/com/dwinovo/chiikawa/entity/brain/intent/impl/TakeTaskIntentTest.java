@@ -13,14 +13,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import org.junit.jupiter.api.Test;
 
 class TakeTaskIntentTest {
     private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
-        ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
-        ResourceLocation.withDefaultNamespace("overworld"));
+        ResourceKey.createRegistryKey(Identifier.withDefaultNamespace("dimension")),
+        Identifier.withDefaultNamespace("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     private static final PetAnchor FREE = new PetAnchor(HOME, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, false, true);
 
@@ -41,9 +41,9 @@ class TakeTaskIntentTest {
 
     @Test
     void carriesOneSlipAtATime() {
-        PetTask slip = new PetTask(ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding"),
-            ResourceLocation.fromNamespaceAndPath("chiikawa", "farmer"), PetWorkCounters.WEED, PetTask.NO_ICON, 8,
-            ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath("chiikawa", "pet_task/weeding")), 0);
+        PetTask slip = new PetTask(Identifier.fromNamespaceAndPath("chiikawa", "weeding"),
+            Identifier.fromNamespaceAndPath("chiikawa", "farmer"), PetWorkCounters.WEED, PetTask.NO_ICON, 8,
+            ResourceKey.create(Registries.LOOT_TABLE, Identifier.fromNamespaceAndPath("chiikawa", "pet_task/weeding")), 0);
 
         assertEquals("intent.chiikawa.fail.has_slip", intent.canRun(boardAt(1).task(slip).build()).reasonKey());
         // Having taken it ends the walk to the board.

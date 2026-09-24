@@ -12,15 +12,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.SharedConstants;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.item.Items;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class PersonalityTest {
-    private static final ResourceLocation WANDER = ResourceLocation.fromNamespaceAndPath("chiikawa", "wander");
-    private static final ResourceLocation HARVEST = ResourceLocation.fromNamespaceAndPath("chiikawa", "harvest");
+    private static final Identifier WANDER = Identifier.fromNamespaceAndPath("chiikawa", "wander");
+    private static final Identifier HARVEST = Identifier.fromNamespaceAndPath("chiikawa", "harvest");
 
     @BeforeAll
     static void bootstrap() {

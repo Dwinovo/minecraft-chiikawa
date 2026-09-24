@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 import net.minecraft.SharedConstants;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.Item;
@@ -126,7 +126,7 @@ class ShopTest {
             List.of(new Personality.WeightedItem(item, 1)));
     }
 
-    private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath("chiikawa", path);
+    private static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath("chiikawa", path);
     }
 }

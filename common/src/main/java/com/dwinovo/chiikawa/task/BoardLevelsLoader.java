@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.ExtraCodecs;
@@ -24,9 +24,9 @@ import net.minecraft.util.profiling.ProfilerFiller;
 public final class BoardLevelsLoader extends SimpleJsonResourceReloadListener<JsonElement> {
     public static final String DIRECTORY = "labor_board";
     /** Id for loaders that register reload listeners by id. */
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
     /** The file the levels are in. */
-    public static final ResourceLocation FILE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "levels");
+    public static final Identifier FILE = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "levels");
 
     private static final String LOG_PREFIX = "[chiikawa-board] ";
 
@@ -35,7 +35,7 @@ public final class BoardLevelsLoader extends SimpleJsonResourceReloadListener<Js
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
+    protected void apply(Map<Identifier, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
         Loaded loaded = load(files);
         loaded.errors().forEach(Constants.LOG::error);
         loaded.warnings().forEach(Constants.LOG::warn);
@@ -47,7 +47,7 @@ public final class BoardLevelsLoader extends SimpleJsonResourceReloadListener<Js
      * @param files parsed JSON by file id
      * @return the levels, or {@link BoardLevels#NONE} with the reason in the errors
      */
-    static Loaded load(Map<ResourceLocation, JsonElement> files) {
+    static Loaded load(Map<Identifier, JsonElement> files) {
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
         files.keySet().stream()

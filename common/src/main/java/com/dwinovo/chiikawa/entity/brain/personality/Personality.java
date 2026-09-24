@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.WeightedRandom;
@@ -37,8 +37,8 @@ import net.minecraft.world.item.ItemStack;
  *              something, not a chore it performs
  */
 public record Personality(
-    Map<ResourceLocation, Float> intentMultipliers,
-    Map<DayPhase, Map<ResourceLocation, Float>> routine,
+    Map<Identifier, Float> intentMultipliers,
+    Map<DayPhase, Map<Identifier, Float>> routine,
     float randomness,
     List<WeightedItem> wildTools,
     List<WeightedItem> likes
@@ -46,8 +46,8 @@ public record Personality(
     /** No leanings: every multiplier 1, no randomness, nothing held and nothing wanted. */
     public static final Personality DEFAULT = new Personality(Map.of(), Map.of(), 0.0F, List.of(), List.of());
 
-    private static final Codec<Map<ResourceLocation, Float>> MULTIPLIERS_CODEC =
-        Codec.unboundedMap(ResourceLocation.CODEC, Codec.floatRange(0.0F, Float.MAX_VALUE));
+    private static final Codec<Map<Identifier, Float>> MULTIPLIERS_CODEC =
+        Codec.unboundedMap(Identifier.CODEC, Codec.floatRange(0.0F, Float.MAX_VALUE));
 
     public static final Codec<Personality> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         MULTIPLIERS_CODEC.optionalFieldOf("intent_multipliers", Map.of()).forGetter(Personality::intentMultipliers),
@@ -70,14 +70,14 @@ public record Personality(
      * @param phase the current part of the day
      * @return the factor this pet's base score for {@code intent} is multiplied by
      */
-    public float multiplier(ResourceLocation intent, DayPhase phase) {
+    public float multiplier(Identifier intent, DayPhase phase) {
         return intentMultipliers.getOrDefault(intent, 1.0F)
             * routine.getOrDefault(phase, Map.of()).getOrDefault(intent, 1.0F);
     }
 
     /** @return every intent id this personality weighs, for validation */
-    public Set<ResourceLocation> intentIds() {
-        Set<ResourceLocation> ids = new HashSet<>(intentMultipliers.keySet());
+    public Set<Identifier> intentIds() {
+        Set<Identifier> ids = new HashSet<>(intentMultipliers.keySet());
         routine.values().forEach(multipliers -> ids.addAll(multipliers.keySet()));
         return ids;
     }

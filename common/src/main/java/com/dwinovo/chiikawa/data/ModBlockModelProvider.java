@@ -14,7 +14,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -48,7 +48,7 @@ public final class ModBlockModelProvider implements DataProvider {
      * the block when it breaks. Which way the block faces is the renderer's business.
      */
     private CompletableFuture<?> drawnByItsRenderer(CachedOutput cache, Block block, Block like) {
-        ResourceLocation model = ModelLocationUtils.getModelLocation(block);
+        Identifier model = ModelLocationUtils.getModelLocation(block);
         return CompletableFuture.allOf(
             DataProvider.saveStable(cache, BlockModelDefinition.CODEC,
                 MultiVariantGenerator.dispatch(block, new MultiVariant(WeightedList.of(new Variant(model)))).create(),

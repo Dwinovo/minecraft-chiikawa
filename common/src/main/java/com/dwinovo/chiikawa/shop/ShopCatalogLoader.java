@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.ExtraCodecs;
@@ -22,7 +22,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 public final class ShopCatalogLoader extends SimpleJsonResourceReloadListener<JsonElement> {
     public static final String DIRECTORY = "shop_catalog";
     /** Id for loaders that register reload listeners by id. */
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
 
     private static final String LOG_PREFIX = "[chiikawa-shop] ";
 
@@ -31,7 +31,7 @@ public final class ShopCatalogLoader extends SimpleJsonResourceReloadListener<Js
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
+    protected void apply(Map<Identifier, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
         Loaded loaded = load(files);
         loaded.errors().forEach(Constants.LOG::error);
         ShopCatalogs.replaceAll(loaded.catalogs());
@@ -42,8 +42,8 @@ public final class ShopCatalogLoader extends SimpleJsonResourceReloadListener<Js
      * @param files parsed JSON by file id
      * @return the price lists that decoded, and what went wrong with the rest
      */
-    static Loaded load(Map<ResourceLocation, JsonElement> files) {
-        Map<ResourceLocation, ShopCatalog> catalogs = new HashMap<>();
+    static Loaded load(Map<Identifier, JsonElement> files) {
+        Map<Identifier, ShopCatalog> catalogs = new HashMap<>();
         List<String> errors = new ArrayList<>();
         files.forEach((id, json) -> ShopCatalog.CODEC.parse(JsonOps.INSTANCE, json)
             .ifSuccess(catalog -> catalogs.put(id, catalog))
@@ -55,6 +55,6 @@ public final class ShopCatalogLoader extends SimpleJsonResourceReloadListener<Js
      * @param catalogs decoded price lists by id
      * @param errors one message per file that could not be decoded
      */
-    record Loaded(Map<ResourceLocation, ShopCatalog> catalogs, List<String> errors) {
+    record Loaded(Map<Identifier, ShopCatalog> catalogs, List<String> errors) {
     }
 }

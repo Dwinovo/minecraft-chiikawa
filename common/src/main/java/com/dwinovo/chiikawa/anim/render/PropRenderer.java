@@ -9,18 +9,19 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.special.NoDataSpecialModelRenderer;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 /**
  * Draws a prop: something with a Bedrock model of its own that does not move by itself — a
@@ -45,7 +46,7 @@ public final class PropRenderer {
     }
 
     /** The whole prop, with the pose at its origin, in model pixels. */
-    public static void draw(ResourceLocation id, PoseStack pose, SubmitNodeCollector collector, int light, int overlay) {
+    public static void draw(Identifier id, PoseStack pose, SubmitNodeCollector collector, int light, int overlay) {
         draw(id, pose, collector, light, overlay, bone -> true);
     }
 
@@ -53,7 +54,7 @@ public final class PropRenderer {
      * The prop with only some of its bones: those {@code shown} says yes to, and none of
      * what hangs from the others.
      */
-    public static void draw(ResourceLocation id, PoseStack pose, SubmitNodeCollector collector, int light, int overlay,
+    public static void draw(Identifier id, PoseStack pose, SubmitNodeCollector collector, int light, int overlay,
             Predicate<String> shown) {
         BakedModel model = ModelLibrary.get(id);
         if (model != null) {
@@ -67,7 +68,7 @@ public final class PropRenderer {
      * handed it.
      */
     public static void drawItem(Item item, PoseStack pose, SubmitNodeCollector collector, int light, int overlay) {
-        ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+        Identifier id = BuiltInRegistries.ITEM.getKey(item);
         BakedModel model = ModelLibrary.get(id);
         if (model == null) {
             return;
@@ -79,7 +80,7 @@ public final class PropRenderer {
     }
 
     /** Where the item's model reaches, for the game to fit it into a slot or onto the ground. */
-    public static void itemExtents(Item item, Set<Vector3f> output) {
+    public static void itemExtents(Item item, Consumer<Vector3fc> output) {
         BakedModel model = ModelLibrary.get(BuiltInRegistries.ITEM.getKey(item));
         if (model == null) {
             return;
@@ -88,7 +89,7 @@ public final class PropRenderer {
         placeItem(item, model, pose);
         for (BakedCube cube : model.cubes) {
             for (int corner = 0; corner < 8; corner++) {
-                output.add(pose.last().pose().transformPosition(
+                output.accept(pose.last().pose().transformPosition(
                     (corner & 1) == 0 ? cube.minX : cube.maxX,
                     (corner & 2) == 0 ? cube.minY : cube.maxY,
                     (corner & 4) == 0 ? cube.minZ : cube.maxZ,
@@ -128,7 +129,7 @@ public final class PropRenderer {
         pose.translate(-(minX + maxX) / 2.0F, -(minY + maxY) / 2.0F, -(minZ + maxZ) / 2.0F);
     }
 
-    private static void draw(ResourceLocation id, BakedModel model, PoseStack pose, SubmitNodeCollector collector,
+    private static void draw(Identifier id, BakedModel model, PoseStack pose, SubmitNodeCollector collector,
             int light, int overlay, Predicate<String> shown) {
         // A prop is not animated: every bone at rest.
         float[] rest = new float[model.bones.length * PoseSampler.FLOATS_PER_BONE];
@@ -137,9 +138,9 @@ public final class PropRenderer {
         for (int i = 0; i < hidden.length; i++) {
             hidden[i] = !shown.test(model.bones[i].name);
         }
-        ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(id.getNamespace(),
+        Identifier texture = Identifier.fromNamespaceAndPath(id.getNamespace(),
             "textures/entities/" + id.getPath() + ".png");
-        collector.submitCustomGeometry(pose, RenderType.entityCutoutNoCull(texture),
+        collector.submitCustomGeometry(pose, RenderTypes.entityCutoutNoCull(texture),
             (drawPose, consumer) -> MESH.render(model, drawPose, consumer, light, overlay, rest, hidden));
     }
 
@@ -150,7 +151,7 @@ public final class PropRenderer {
      */
     public static final class ItemRenderer implements NoDataSpecialModelRenderer {
         /** What the item models call this renderer. */
-        public static final ResourceLocation TYPE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "prop");
+        public static final Identifier TYPE = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "prop");
 
         private final Item item;
 
@@ -165,14 +166,14 @@ public final class PropRenderer {
         }
 
         @Override
-        public void getExtents(Set<Vector3f> output) {
+        public void getExtents(Consumer<Vector3fc> output) {
             itemExtents(item, output);
         }
 
         /** @param prop the prop's id, its item's */
-        public record Unbaked(ResourceLocation prop) implements SpecialModelRenderer.Unbaked {
+        public record Unbaked(Identifier prop) implements SpecialModelRenderer.Unbaked {
             public static final MapCodec<Unbaked> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-                ResourceLocation.CODEC.fieldOf("prop").forGetter(Unbaked::prop)
+                Identifier.CODEC.fieldOf("prop").forGetter(Unbaked::prop)
             ).apply(instance, Unbaked::new));
 
             @Override

@@ -5,7 +5,7 @@ import com.dwinovo.chiikawa.platform.Services;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.syncher.EntityDataSerializer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Entity data serializers the game no longer has one of. A compound tag stopped being
@@ -14,7 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 public final class InitDataSerializers {
     public static final EntityDataSerializer<CompoundTag> COMPOUND_TAG =
         Services.REGISTRY.registerEntityDataSerializer(
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "compound_tag"),
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "compound_tag"),
             EntityDataSerializer.forValueType(ByteBufCodecs.COMPOUND_TAG)
         );
 
