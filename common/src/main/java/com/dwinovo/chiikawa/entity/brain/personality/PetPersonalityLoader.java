@@ -2,16 +2,17 @@ package com.dwinovo.chiikawa.entity.brain.personality;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 /**
@@ -20,7 +21,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
  * so that pet falls back to {@link Personality#DEFAULT}; intent ids that no intent is
  * registered under are only warned about.
  */
-public final class PetPersonalityLoader extends SimpleJsonResourceReloadListener {
+public final class PetPersonalityLoader extends SimpleJsonResourceReloadListener<JsonElement> {
     public static final String DIRECTORY = "pet_personality";
     /** Id for loaders that register reload listeners by id. */
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
@@ -28,7 +29,7 @@ public final class PetPersonalityLoader extends SimpleJsonResourceReloadListener
     private static final String LOG_PREFIX = "[chiikawa-personality] ";
 
     public PetPersonalityLoader() {
-        super(new Gson(), DIRECTORY);
+        super(ExtraCodecs.JSON, FileToIdConverter.json(DIRECTORY));
     }
 
     @Override

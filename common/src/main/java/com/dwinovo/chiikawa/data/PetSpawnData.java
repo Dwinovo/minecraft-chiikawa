@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.random.Weighted;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 
@@ -30,10 +31,10 @@ public final class PetSpawnData {
         List<ExtraCodecs.TagOrElementLocation> biomes = BIOMES.stream()
             .map(path -> new ExtraCodecs.TagOrElementLocation(ResourceLocation.withDefaultNamespace(path), false))
             .toList();
-        List<MobSpawnSettings.SpawnerData> spawners = Stream.<Supplier<? extends EntityType<?>>>of(
+        List<Weighted<MobSpawnSettings.SpawnerData>> spawners = Stream.<Supplier<? extends EntityType<?>>>of(
                 InitEntity.USAGI_PET, InitEntity.HACHIWARE_PET, InitEntity.CHIIKAWA_PET, InitEntity.SHISA_PET,
                 InitEntity.MOMONGA_PET, InitEntity.KURIMANJU_PET, InitEntity.RAKKO_PET, InitEntity.FURUHONYA_PET)
-            .map(type -> new MobSpawnSettings.SpawnerData(type.get(), WEIGHT, 1, 1))
+            .map(type -> new Weighted<>(new MobSpawnSettings.SpawnerData(type.get(), 1, 1), WEIGHT))
             .toList();
         return Map.of(WILD_PETS, new PetSpawn(biomes, spawners));
     }
