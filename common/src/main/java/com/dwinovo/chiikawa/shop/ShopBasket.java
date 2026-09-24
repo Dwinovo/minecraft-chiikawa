@@ -32,7 +32,7 @@ public final class ShopBasket {
         List<Personality.WeightedItem> affordable = personality.likes().stream()
             .filter(liking -> catalog.sale(liking.item()).filter(entry -> entry.buy() <= money).isPresent())
             .toList();
-        return WeightedRandom.getRandomItem(random, affordable)
+        return WeightedRandom.getRandomItem(random, affordable, Personality.WeightedItem::weight)
             .flatMap(liking -> catalog.sale(liking.item()));
     }
 

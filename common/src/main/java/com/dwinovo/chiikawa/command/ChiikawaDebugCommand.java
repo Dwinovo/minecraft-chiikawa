@@ -118,10 +118,10 @@ public final class ChiikawaDebugCommand {
     private static int showBoard(CommandSourceStack source) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
         if (!(player.pick(TARGET_RANGE, 1.0F, false) instanceof BlockHitResult hit)
-                || !(player.serverLevel().getBlockEntity(hit.getBlockPos()) instanceof LaborBoardBlockEntity board)) {
+                || !(player.level().getBlockEntity(hit.getBlockPos()) instanceof LaborBoardBlockEntity board)) {
             throw NO_BOARD.create();
         }
-        long gameTime = player.serverLevel().getGameTime();
+        long gameTime = player.level().getGameTime();
         List<BoardSlot> slots = board.today();
         source.sendSuccess(() -> Component.literal("[chiikawa-board] " + slots.size() + " slips today:"), false);
         for (BoardSlot slot : slots) {

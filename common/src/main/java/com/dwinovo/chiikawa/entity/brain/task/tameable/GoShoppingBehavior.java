@@ -156,8 +156,8 @@ public class GoShoppingBehavior extends Behavior<AbstractPet> {
             return true;
         }
         ItemStack remainder = pet.getBackpack().addItem(goods);
-        if (!remainder.isEmpty()) {
-            pet.spawnAtLocation(remainder);
+        if (!remainder.isEmpty() && pet.level() instanceof ServerLevel server) {
+            pet.spawnAtLocation(server, remainder);
         }
         return false;
     }

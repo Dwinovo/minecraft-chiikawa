@@ -13,8 +13,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
-import net.minecraft.util.random.Weight;
-import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.util.random.WeightedRandom;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -89,7 +87,7 @@ public record Personality(
      * @return the tool a wild pet of this kind spawns holding, empty when it spawns empty-handed
      */
     public ItemStack drawWildTool(RandomSource random) {
-        return WeightedRandom.getRandomItem(random, wildTools)
+        return WeightedRandom.getRandomItem(random, wildTools, WeightedItem::weight)
             .map(tool -> new ItemStack(tool.item()))
             .orElse(ItemStack.EMPTY);
     }
@@ -101,7 +99,7 @@ public record Personality(
      * @return one of its likings, or nothing when this kind of pet wants for nothing
      */
     public Optional<Item> drawLiking(RandomSource random) {
-        return WeightedRandom.getRandomItem(random, likes).map(WeightedItem::item);
+        return WeightedRandom.getRandomItem(random, likes, WeightedItem::weight).map(WeightedItem::item);
     }
 
     /**
@@ -109,20 +107,11 @@ public record Personality(
      * pet turns up holding and the things it would buy are drawn the same way, so they are
      * the same shape.
      */
-    public record WeightedItem(Item item, Weight weight) implements WeightedEntry {
+    public record WeightedItem(Item item, int weight) {
         /** Lazy because the item registry only exists once the game has bootstrapped. */
         public static final Codec<WeightedItem> CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.create(instance -> instance.group(
             BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(WeightedItem::item),
-            ExtraCodecs.POSITIVE_INT.xmap(Weight::of, Weight::asInt).fieldOf("weight").forGetter(WeightedItem::weight)
+            ExtraCodecs.POSITIVE_INT.fieldOf("weight").forGetter(WeightedItem::weight)
         ).apply(instance, WeightedItem::new)));
-
-        public WeightedItem(Item item, int weight) {
-            this(item, Weight.of(weight));
-        }
-
-        @Override
-        public Weight getWeight() {
-            return weight;
-        }
     }
 }

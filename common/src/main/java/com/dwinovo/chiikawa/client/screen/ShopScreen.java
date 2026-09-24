@@ -187,11 +187,11 @@ public class ShopScreen extends Screen {
     }
 
     private static Component name(PriceView price) {
-        return item(price).getDescription();
+        return item(price).getName();
     }
 
     private static Item item(PriceView price) {
-        return BuiltInRegistries.ITEM.get(price.item());
+        return BuiltInRegistries.ITEM.getValue(price.item());
     }
 
     private void turnTo(int wanted) {
