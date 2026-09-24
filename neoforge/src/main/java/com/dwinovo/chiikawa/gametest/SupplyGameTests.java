@@ -105,9 +105,9 @@ public final class SupplyGameTests {
         ManualData.all().forEach((id, page) -> page.panels().forEach(panel -> panel.actors().forEach(actor ->
             actor.pet().ifPresent(pet -> actor.motion().say().ifPresent(say -> {
                 Set<String> own = new HashSet<>();
-                PetVoices.of(BuiltInRegistries.ENTITY_TYPE.get(pet)).lines().values()
+                PetVoices.of(BuiltInRegistries.ENTITY_TYPE.getValue(pet)).lines().values()
                     .forEach(lines -> lines.forEach(line -> own.add(line.text())));
-                helper.assertTrue(own.contains(say), pet + " says " + say + " on " + id + ", not a line of its own");
+                helper.assertTrue(own.contains(say), Component.literal(pet + " says " + say + " on " + id + ", not a line of its own"));
             })))));
         helper.succeed();
     }
