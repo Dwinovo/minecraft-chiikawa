@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitTag;
 import com.dwinovo.chiikawa.social.PetInteraction;
+import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -49,27 +50,27 @@ public final class PetInteractionData {
             // whom it has bitten more than once, cries; the rest are put out each in its own
             // way, and Rakko and Kurimanju hardly let it show.
             CLING, new PetInteraction(
-                List.of(side("cling", PetReaction.HAPPY, "cling", pets(InitEntity.MOMONGA_PET.get()))),
+                List.of(side("cling", PetReaction.HAPPY, VoiceMoment.CLING, pets(InitEntity.MOMONGA_PET.get()))),
                 List.of(
-                    side("clung_to", PetReaction.HURT, "clung_to", pets(InitEntity.CHIIKAWA_PET.get())),
-                    side("clung_to", PetReaction.CONFUSED, "clung_to", pets(InitEntity.HACHIWARE_PET.get(),
+                    side("clung_to", PetReaction.HURT, VoiceMoment.CLUNG_TO, pets(InitEntity.CHIIKAWA_PET.get())),
+                    side("clung_to", PetReaction.CONFUSED, VoiceMoment.CLUNG_TO, pets(InitEntity.HACHIWARE_PET.get(),
                         InitEntity.USAGI_PET.get(), InitEntity.SHISA_PET.get(), InitEntity.FURUHONYA_PET.get())),
-                    side("clung_to", null, "clung_to", pets(InitEntity.RAKKO_PET.get(), InitEntity.KURIMANJU_PET.get()))),
+                    side("clung_to", null, VoiceMoment.CLUNG_TO, pets(InitEntity.RAKKO_PET.get(), InitEntity.KURIMANJU_PET.get()))),
                 PetInteraction.PartnerState.IDLE, Optional.empty(), Optional.empty(), 0,
                 8.0, 1, 300, 80, 12000, 0.05F),
             // Furuhonya greets the friends who greet it back the crab way, Momonga first: the
             // crab headband was Momonga's present.
             CRAB_GREETING, new PetInteraction(
-                List.of(side("crab_greeting", PetReaction.HAPPY, "crab_greeting", pets(InitEntity.FURUHONYA_PET.get()))),
-                List.of(side("crab_greeting", PetReaction.HAPPY, "crab_greeting", pets(InitEntity.MOMONGA_PET.get(),
+                List.of(side("crab_greeting", PetReaction.HAPPY, VoiceMoment.CRAB_GREETING, pets(InitEntity.FURUHONYA_PET.get()))),
+                List.of(side("crab_greeting", PetReaction.HAPPY, VoiceMoment.CRAB_GREETING, pets(InitEntity.MOMONGA_PET.get(),
                     InitEntity.CHIIKAWA_PET.get(), InitEntity.HACHIWARE_PET.get()))),
                 PetInteraction.PartnerState.IDLE, Optional.empty(), Optional.empty(), 0,
                 10.0, 2, 300, 60, 12000, 0.05F),
             // The big brother of the two with the least money: it hands something over
             // without a word or a smile, and they eat it on the spot, delighted.
             TREAT, new PetInteraction(
-                List.of(side("hand_over", null, "treat", pets(InitEntity.RAKKO_PET.get()))),
-                List.of(side("eat", PetReaction.HAPPY, "treated", pets(InitEntity.CHIIKAWA_PET.get(),
+                List.of(side("hand_over", null, VoiceMoment.TREAT, pets(InitEntity.RAKKO_PET.get()))),
+                List.of(side("eat", PetReaction.HAPPY, VoiceMoment.TREATED, pets(InitEntity.CHIIKAWA_PET.get(),
                     InitEntity.HACHIWARE_PET.get()))),
                 PetInteraction.PartnerState.IDLE, Optional.empty(),
                 Optional.of(new ExtraCodecs.TagOrElementLocation(InitTag.PET_TREATS.location(), true)), 0,
@@ -79,11 +80,11 @@ public final class PetInteractionData {
             COFFEE, new PetInteraction(
                 List.of(side("hand_over", null, null, pets(InitEntity.KURIMANJU_PET.get()))),
                 List.of(
-                    side("drink", PetReaction.HAPPY, "given_coffee", pets(InitEntity.CHIIKAWA_PET.get())),
-                    side("drink", PetReaction.HAPPY, "given_coffee", pets(InitEntity.HACHIWARE_PET.get(),
+                    side("drink", PetReaction.HAPPY, VoiceMoment.GIVEN_COFFEE, pets(InitEntity.CHIIKAWA_PET.get())),
+                    side("drink", PetReaction.HAPPY, VoiceMoment.GIVEN_COFFEE, pets(InitEntity.HACHIWARE_PET.get(),
                         InitEntity.USAGI_PET.get(), InitEntity.SHISA_PET.get(), InitEntity.MOMONGA_PET.get(),
                         InitEntity.FURUHONYA_PET.get())),
-                    side("drink", null, "given_coffee", pets(InitEntity.RAKKO_PET.get()))),
+                    side("drink", null, VoiceMoment.GIVEN_COFFEE, pets(InitEntity.RAKKO_PET.get()))),
                 PetInteraction.PartnerState.IDLE,
                 Optional.of(new PetInteraction.SlipCondition(PetTaskTypeData.WEEDING, 2400)), Optional.empty(), 1200,
                 12.0, 1, 400, 80, 24000, 0.25F),
@@ -91,17 +92,17 @@ public final class PetInteractionData {
             // listen without a fuss.
             LISTEN_TO_MUSIC, new PetInteraction(
                 List.of(
-                    side("sit", PetReaction.HAPPY, "listen", pets(InitEntity.CHIIKAWA_PET.get(),
+                    side("sit", PetReaction.HAPPY, VoiceMoment.LISTEN, pets(InitEntity.CHIIKAWA_PET.get(),
                         InitEntity.HACHIWARE_PET.get(), InitEntity.USAGI_PET.get(), InitEntity.SHISA_PET.get(),
                         InitEntity.MOMONGA_PET.get(), InitEntity.FURUHONYA_PET.get())),
-                    side("sit", null, "listen", pets(InitEntity.RAKKO_PET.get(), InitEntity.KURIMANJU_PET.get()))),
+                    side("sit", null, VoiceMoment.LISTEN, pets(InitEntity.RAKKO_PET.get(), InitEntity.KURIMANJU_PET.get()))),
                 List.of(side(null, null, null, pets(InitEntity.HACHIWARE_PET.get()))),
                 PetInteraction.PartnerState.PLAYING_MUSIC, Optional.empty(), Optional.empty(), 0,
                 12.0, 3, 400, 400, 6000, 0.1F)
         );
     }
 
-    private static PetInteraction.Side side(String animation, PetReaction reaction, String voice,
+    private static PetInteraction.Side side(String animation, PetReaction reaction, VoiceMoment voice,
             List<ExtraCodecs.TagOrElementLocation> pets) {
         return new PetInteraction.Side(pets, Optional.ofNullable(animation), Optional.ofNullable(reaction),
             Optional.ofNullable(voice));

@@ -25,22 +25,29 @@ import net.minecraft.util.random.WeightedRandom;
  * @param crowdLimit how many pets within earshot may already be talking for this one to
  *                   speak as well; a yard full of pets takes turns rather than all talking
  *                   over each other
+ * @param talkTicks how long a line stays up over the pet's head
+ * @param hearingRange how far away, in blocks, a player still hears the pet, and other pets
+ *                     count as talking over it
  */
 public record PetVoice(
     Map<VoiceMoment, List<Line>> lines,
     Map<VoiceMoment, Float> chance,
     int cooldownTicks,
-    int crowdLimit
+    int crowdLimit,
+    int talkTicks,
+    double hearingRange
 ) {
     /** Nothing to say: what a pet with no voice file goes by. */
-    public static final PetVoice SILENT = new PetVoice(Map.of(), Map.of(), 0, 1);
+    public static final PetVoice SILENT = new PetVoice(Map.of(), Map.of(), 0, 1, 1, 0.0);
 
     public static final Codec<PetVoice> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         Codec.unboundedMap(VoiceMoment.CODEC, Line.CODEC.listOf()).fieldOf("lines").forGetter(PetVoice::lines),
         Codec.unboundedMap(VoiceMoment.CODEC, Codec.floatRange(0.0F, 1.0F))
             .optionalFieldOf("chance", Map.of()).forGetter(PetVoice::chance),
         ExtraCodecs.NON_NEGATIVE_INT.fieldOf("cooldown_ticks").forGetter(PetVoice::cooldownTicks),
-        ExtraCodecs.POSITIVE_INT.fieldOf("crowd_limit").forGetter(PetVoice::crowdLimit)
+        ExtraCodecs.POSITIVE_INT.fieldOf("crowd_limit").forGetter(PetVoice::crowdLimit),
+        ExtraCodecs.POSITIVE_INT.fieldOf("talk_ticks").forGetter(PetVoice::talkTicks),
+        Codec.doubleRange(0.0, 128.0).fieldOf("hearing_range").forGetter(PetVoice::hearingRange)
     ).apply(instance, PetVoice::new));
 
     public PetVoice {

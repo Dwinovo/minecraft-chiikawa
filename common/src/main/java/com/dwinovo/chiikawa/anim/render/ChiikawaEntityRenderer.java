@@ -579,7 +579,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         Speech said = null;
         if (!drawingPortrait && !Minecraft.getInstance().options.hideGui && entity instanceof AbstractPet pet) {
             said = pet.getSpeech().map(speech -> new Speech(speech.line(),
-                Mth.clamp((PetSpeech.TALK_TICKS - (pet.tickCount - speech.since() + partialTick)) / SPEECH_FADE_TICKS, 0.0F, 1.0F),
+                Mth.clamp(speech.left(pet.tickCount, partialTick) / SPEECH_FADE_TICKS, 0.0F, 1.0F),
                 pet.getAttachments().getNullable(EntityAttachment.NAME_TAG, 0, pet.getYRot(partialTick)))).orElse(null);
         }
         state.put(PetData.SPEECH, said);

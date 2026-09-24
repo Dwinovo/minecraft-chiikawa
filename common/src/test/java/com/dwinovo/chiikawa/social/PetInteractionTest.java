@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.task.FinishedSlip;
+import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import java.util.Map;
@@ -51,7 +52,7 @@ class PetInteractionTest {
         assertTrue(interaction.partnerRank(type(EntityType.FOX)).isEmpty());
         assertEquals(Optional.of(PetReaction.HURT), interaction.partners().get(0).reaction());
         assertEquals(Optional.empty(), interaction.partners().get(1).animation(), "a part may be only a face");
-        assertEquals(Optional.of("cling"), interaction.initiators().get(0).voice());
+        assertEquals(Optional.of(VoiceMoment.CLING), interaction.initiators().get(0).voice());
     }
 
     @Test
