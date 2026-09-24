@@ -12,6 +12,8 @@ import com.dwinovo.chiikawa.entity.brain.task.tameable.GiveGiftBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.GoShoppingBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.TakeTaskBehavior;
 import com.dwinovo.chiikawa.init.InitActivity;
+import com.dwinovo.chiikawa.voice.PetSpeech;
+import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import java.util.Set;
@@ -19,6 +21,7 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.behavior.DoNothing;
 import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
@@ -55,12 +58,14 @@ public final class BrainUtils {
         PetActivities.register(brain, InitActivity.STAY.get(), ImmutableList.of(sit, lookAround), Set.of());
     }
 
-    /** {@code wander}: look around and stroll. */
+    /** {@code wander}: look around, stroll, and now and then say something. */
     public static void addIdleTasks(Brain<AbstractPet> brain) {
         Pair<Integer, BehaviorControl<? super AbstractPet>> randomTask = Pair.of(99, new RunOne<AbstractPet>(ImmutableList.of(
             lookAtPlayer(), lookAtCreature(), Pair.of(new RandomWalkTask(), 2), doNothing()
         )));
-        PetActivities.register(brain, Activity.IDLE, ImmutableList.of(randomTask), Set.of());
+        Pair<Integer, BehaviorControl<? super AbstractPet>> chatter = Pair.of(99, BehaviorBuilder.create(instance ->
+            instance.point((level, pet, gameTime) -> PetSpeech.say(pet, VoiceMoment.IDLE).isPresent())));
+        PetActivities.register(brain, Activity.IDLE, ImmutableList.of(randomTask, chatter), Set.of());
     }
 
     /** {@code pick_up_item}: walk to the remembered item and take it. */

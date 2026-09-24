@@ -40,6 +40,7 @@ public final class DataGenerators {
         event.getGenerator().addProvider(true,
                 new ModRecipeProvider.Runner(output, lookupProvider));
         event.getGenerator().addProvider(true, new PetPersonalityProvider(output));
+        event.getGenerator().addProvider(true, new PetVoiceProvider(output));
         event.getGenerator().addProvider(true, new PetTaskTypeProvider(output));
         event.getGenerator().addProvider(true, new GameTestStructureProvider(output));
         event.getGenerator().addProvider(true, new ShopCatalogProvider(output));

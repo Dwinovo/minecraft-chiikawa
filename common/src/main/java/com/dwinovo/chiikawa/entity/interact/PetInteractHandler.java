@@ -8,6 +8,8 @@ import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.shop.Wallet;
+import com.dwinovo.chiikawa.voice.PetSpeech;
+import com.dwinovo.chiikawa.voice.VoiceMoment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -69,6 +71,7 @@ public final class PetInteractHandler {
                 pet.tame(player);
                 pet.playTameSound();
                 pet.triggerReaction(PetReaction.HAPPY);
+                PetSpeech.say(pet, VoiceMoment.TAME);
                 level.broadcastEntityEvent(pet, (byte) 7);
             }
             else {
