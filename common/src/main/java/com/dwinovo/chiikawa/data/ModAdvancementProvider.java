@@ -4,13 +4,13 @@ import com.dwinovo.chiikawa.Constants;
 import java.util.concurrent.CompletableFuture;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
-import net.minecraft.advancements.critereon.PlayerTrigger;
+import net.minecraft.advancements.criterion.PlayerTrigger;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * The mod's advancements. Only one so far, and shown nowhere: a player is handed the
@@ -19,7 +19,7 @@ import net.minecraft.resources.ResourceLocation;
  * data generators.
  */
 public final class ModAdvancementProvider implements DataProvider {
-    public static final ResourceLocation HANDBOOK = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "handbook");
+    public static final Identifier HANDBOOK = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "handbook");
 
     private final PackOutput.PathProvider pathProvider;
     private final CompletableFuture<HolderLookup.Provider> registries;

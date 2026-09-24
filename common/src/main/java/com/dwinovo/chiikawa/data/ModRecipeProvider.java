@@ -77,15 +77,15 @@ public final class ModRecipeProvider extends RecipeProvider {
             .save(this.output);
 
         // A little bell on a stick: gold for the ring, an emerald for the pets to hear.
-        ShapedRecipeBuilder.shaped(RecipeCategory.TOOLS, InitItems.PET_BELL.get())
-                .pattern(" G ")
-                .pattern("GEG")
-                .pattern(" S ")
-                .define('G', Items.GOLD_INGOT)
-                .define('E', Items.EMERALD)
-                .define('S', Items.STICK)
-                .unlockedBy(getHasName(Items.EMERALD), has(Items.EMERALD))
-                .save(recipeOutput);
+        ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.TOOLS, InitItems.PET_BELL.get())
+            .pattern(" G ")
+            .pattern("GEG")
+            .pattern(" S ")
+            .define('G', Items.GOLD_INGOT)
+            .define('E', Items.EMERALD)
+            .define('S', Items.STICK)
+            .unlockedBy(getHasName(Items.EMERALD), has(Items.EMERALD))
+            .save(this.output);
 
         // A plate of something hot: bread, a vegetable, and something cooked.
         ShapelessRecipeBuilder.shapeless(itemLookup, RecipeCategory.FOOD, InitItems.SIMPLE_DISH.get())
@@ -112,11 +112,11 @@ public final class ModRecipeProvider extends RecipeProvider {
         pouch(itemLookup, InitItems.STAR_POUCH.get(), Items.YELLOW_WOOL);
 
         // Another handbook, for one lost or given away: a book with a pink cover.
-        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, InitItems.HANDBOOK.get())
-                .requires(Items.BOOK)
-                .requires(Items.PINK_DYE)
-                .unlockedBy(getHasName(Items.BOOK), has(Items.BOOK))
-                .save(recipeOutput);
+        ShapelessRecipeBuilder.shapeless(itemLookup, RecipeCategory.MISC, InitItems.HANDBOOK.get())
+            .requires(Items.BOOK)
+            .requires(Items.PINK_DYE)
+            .unlockedBy(getHasName(Items.BOOK), has(Items.BOOK))
+            .save(this.output);
 
         // A counter: a slab of planks over a chest, with an emerald on the till.
         ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.DECORATIONS, InitItems.SHOP.get())

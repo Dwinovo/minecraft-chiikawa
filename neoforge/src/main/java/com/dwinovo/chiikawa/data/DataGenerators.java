@@ -24,8 +24,6 @@ public final class DataGenerators {
                 new ModSoundDefinitionsProvider(output));
         event.getGenerator().addProvider(true,
                 new ModItemModelProvider(output));
-        event.getGenerator().addProvider(true, new ModBlockModelProvider(output));
-        event.getGenerator().addProvider(true, new PropItemModelProvider(output));
         event.getGenerator().addProvider(true, new ManualProvider(output));
         event.getGenerator().addProvider(true,
                 new ModLanguageProvider(output, "en_us"));

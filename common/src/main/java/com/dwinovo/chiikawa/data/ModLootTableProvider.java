@@ -14,7 +14,7 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.data.loot.LootTableSubProvider;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
@@ -36,7 +36,7 @@ import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 public final class ModLootTableProvider extends LootTableProvider {
     /** What a newcomer is handed: the handbook, by the advancement that marks their arrival. */
     public static final ResourceKey<LootTable> HANDBOOK_GIFT = ResourceKey.create(Registries.LOOT_TABLE,
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "gifts/handbook"));
+        Identifier.fromNamespaceAndPath(Constants.MOD_ID, "gifts/handbook"));
 
     public ModLootTableProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
         super(output, Set.of(), List.of(
@@ -64,7 +64,7 @@ public final class ModLootTableProvider extends LootTableProvider {
         }
 
         private static void dropSelf(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output, Block block) {
-            output.accept(block.getLootTable(), LootTable.lootTable().withPool(LootPool.lootPool()
+            output.accept(block.getLootTable().orElseThrow(), LootTable.lootTable().withPool(LootPool.lootPool()
                 .setRolls(ConstantValue.exactly(1))
                 .add(LootItem.lootTableItem(block))
                 .when(ExplosionCondition.survivesExplosion())));
@@ -88,7 +88,7 @@ public final class ModLootTableProvider extends LootTableProvider {
             reward(output, PetTaskTypeData.RANGED_HUNTING, 4, 7, Items.ARROW, 4, 8);
         }
 
-        private static void reward(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output, ResourceLocation type,
+        private static void reward(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output, Identifier type,
                 int minPay, int maxPay, Item extra, int minExtra, int maxExtra) {
             output.accept(PetTaskTypeData.reward(type), LootTable.lootTable()
                 .withPool(LootPool.lootPool()

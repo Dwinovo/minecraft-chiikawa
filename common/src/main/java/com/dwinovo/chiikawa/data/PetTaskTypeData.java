@@ -8,7 +8,7 @@ import com.dwinovo.chiikawa.task.PetWorkCounters;
 import java.util.Map;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.storage.loot.LootTable;
 
@@ -17,10 +17,10 @@ import net.minecraft.world.level.storage.loot.LootTable;
  * upgrade; everything else goes up from the day the board is placed.
  */
 public final class PetTaskTypeData {
-    public static final ResourceLocation WEEDING = id("weeding");
-    public static final ResourceLocation STREET_PERFORMANCE = id("street_performance");
-    public static final ResourceLocation MELEE_HUNTING = id("melee_hunting");
-    public static final ResourceLocation RANGED_HUNTING = id("ranged_hunting");
+    public static final Identifier WEEDING = id("weeding");
+    public static final Identifier STREET_PERFORMANCE = id("street_performance");
+    public static final Identifier MELEE_HUNTING = id("melee_hunting");
+    public static final Identifier RANGED_HUNTING = id("ranged_hunting");
     /** The level a board reaches before it dares put hunting up. */
     private static final int HUNTING_LEVEL = 2;
 
@@ -28,11 +28,11 @@ public final class PetTaskTypeData {
     }
 
     /** @return slip types by id */
-    public static Map<ResourceLocation, PetTaskType> all() {
-        ResourceLocation farmer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FARMER.get());
-        ResourceLocation musician = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.MUSICIAN.get());
-        ResourceLocation fencer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FENCER.get());
-        ResourceLocation archer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.ARCHER.get());
+    public static Map<Identifier, PetTaskType> all() {
+        Identifier farmer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FARMER.get());
+        Identifier musician = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.MUSICIAN.get());
+        Identifier fencer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FENCER.get());
+        Identifier archer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.ARCHER.get());
         return Map.of(
             // Farmers are the most common job, so their slips come up the most. Picking
             // mushrooms is not among them: mushrooms are only there to pick at night, so a
@@ -53,16 +53,16 @@ public final class PetTaskTypeData {
     }
 
     /** @return the reward loot table of a slip type, {@code <namespace>:pet_task/<path>} */
-    public static ResourceKey<LootTable> reward(ResourceLocation type) {
+    public static ResourceKey<LootTable> reward(Identifier type) {
         return ResourceKey.create(Registries.LOOT_TABLE, type.withPrefix("pet_task/"));
     }
 
     /** What a slip is pictured as: the work it is about, not what it pays. */
-    private static ResourceLocation vanilla(String path) {
-        return ResourceLocation.withDefaultNamespace(path);
+    private static Identifier vanilla(String path) {
+        return Identifier.withDefaultNamespace(path);
     }
 
-    private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path);
+    private static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(Constants.MOD_ID, path);
     }
 }

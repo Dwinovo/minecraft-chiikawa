@@ -5,7 +5,7 @@ import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.shop.ShopCatalog;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
@@ -20,13 +20,13 @@ import net.minecraft.world.item.Items;
  */
 public final class ShopCatalogData {
     /** The shop every {@code chiikawa:shop} block quotes from unless it is told otherwise. */
-    public static final ResourceLocation GENERAL = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "general");
+    public static final Identifier GENERAL = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "general");
 
     private ShopCatalogData() {
     }
 
     /** @return price lists by id */
-    public static Map<ResourceLocation, ShopCatalog> all() {
+    public static Map<Identifier, ShopCatalog> all() {
         return Map.of(GENERAL, new ShopCatalog(List.of(
             // Snacks and suppers: what most pets want, and what an owner feeds them.
             sells(Items.COOKIE, 1),

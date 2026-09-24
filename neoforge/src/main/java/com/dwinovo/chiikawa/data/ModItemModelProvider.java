@@ -26,6 +26,10 @@ public final class ModItemModelProvider extends ModelProvider {
         itemModels.generateFlatItem(InitItems.MUSIC_BOX.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(InitItems.SIMPLE_DISH.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(InitItems.PET_BELL.get(), ModelTemplates.FLAT_ITEM);
+        // The props' item models come from PropItemModelProvider, shared with Fabric.
+        PropItemModelProvider.generate(itemModels.itemModelOutput, itemModels.modelOutput);
+        // The blocks' states and models are shared with Fabric.
+        ModBlockModelProvider.generate(blockModels);
     }
 
     private static void generateSpawnEggs(ItemModelGenerators itemModels) {

@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
@@ -24,16 +24,16 @@ import net.minecraft.world.level.ItemLike;
  * items, so a wandering pet still reacts to those whatever its randomness.
  */
 public final class PersonalityData {
-    private static final List<ResourceLocation> FARMING = List.of(PetIntents.HARVEST, PetIntents.PLANT, PetIntents.DELIVER,
+    private static final List<Identifier> FARMING = List.of(PetIntents.HARVEST, PetIntents.PLANT, PetIntents.DELIVER,
         PetIntents.WEED, PetIntents.PICK_MUSHROOM);
-    private static final List<ResourceLocation> FIGHTING = List.of(PetIntents.MELEE, PetIntents.RANGED);
+    private static final List<Identifier> FIGHTING = List.of(PetIntents.MELEE, PetIntents.RANGED);
 
     private PersonalityData() {
     }
 
     /** @return personalities by pet entity type id */
-    public static Map<ResourceLocation, Personality> all() {
-        Map<ResourceLocation, Personality> all = new HashMap<>();
+    public static Map<Identifier, Personality> all() {
+        Map<Identifier, Personality> all = new HashMap<>();
         // Diligent.
         all.put(id(InitEntity.CHIIKAWA_PET.get()), personality()
             .weigh(1.2F, FARMING)
@@ -139,7 +139,7 @@ public final class PersonalityData {
         return all;
     }
 
-    private static ResourceLocation id(EntityType<?> type) {
+    private static Identifier id(EntityType<?> type) {
         return BuiltInRegistries.ENTITY_TYPE.getKey(type);
     }
 
@@ -148,27 +148,27 @@ public final class PersonalityData {
     }
 
     private static final class Builder {
-        private final Map<ResourceLocation, Float> multipliers = new HashMap<>();
-        private final Map<DayPhase, Map<ResourceLocation, Float>> routine = new EnumMap<>(DayPhase.class);
+        private final Map<Identifier, Float> multipliers = new HashMap<>();
+        private final Map<DayPhase, Map<Identifier, Float>> routine = new EnumMap<>(DayPhase.class);
         private final List<Personality.WeightedItem> wildTools = new ArrayList<>();
         private final List<Personality.WeightedItem> likes = new ArrayList<>();
         private float randomness;
 
-        Builder weigh(float factor, ResourceLocation intent) {
+        Builder weigh(float factor, Identifier intent) {
             return weigh(factor, List.of(intent));
         }
 
-        Builder weigh(float factor, List<ResourceLocation> intents) {
+        Builder weigh(float factor, List<Identifier> intents) {
             intents.forEach(intent -> multipliers.put(intent, factor));
             return this;
         }
 
-        Builder at(DayPhase phase, float factor, ResourceLocation intent) {
+        Builder at(DayPhase phase, float factor, Identifier intent) {
             return at(phase, factor, List.of(intent));
         }
 
-        Builder at(DayPhase phase, float factor, List<ResourceLocation> intents) {
-            Map<ResourceLocation, Float> multipliersAt = routine.computeIfAbsent(phase, ignored -> new HashMap<>());
+        Builder at(DayPhase phase, float factor, List<Identifier> intents) {
+            Map<Identifier, Float> multipliersAt = routine.computeIfAbsent(phase, ignored -> new HashMap<>());
             intents.forEach(intent -> multipliersAt.put(intent, factor));
             return this;
         }
