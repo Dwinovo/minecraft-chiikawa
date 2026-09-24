@@ -9,8 +9,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.EntityAttachment;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 
 /**
@@ -36,14 +34,14 @@ public final class SpeechBubbleRenderer {
             return;
         }
         pet.getSpeech().ifPresent(speech -> {
-            Vec3 nameTag = pet.getAttachments().getNullable(EntityAttachment.NAME_TAG, 0, pet.getViewYRot(partialTick));
-            if (nameTag == null) {
-                return;
-            }
+            // 1.20.1 puts a name tag at a height of its own rather than at an attachment point.
             poseStack.pushPose();
-            poseStack.translate(nameTag.x, nameTag.y + 0.5 + ABOVE_NAME, nameTag.z);
+            poseStack.translate(0.0F, pet.getNameTagOffsetY() + ABOVE_NAME, 0.0F);
             poseStack.mulPose(cameraOrientation);
-            poseStack.scale(SCALE, -SCALE, SCALE);
+            // Before 1.21 the camera's rotation is a half turn about y short of the later one,
+            // so every axis is flipped to land in the same frame; flipping x alone, as this
+            // version's own name tag does, would leave z pointing away and bury the text in its card.
+            poseStack.scale(-SCALE, -SCALE, -SCALE);
             float left = speech.left(pet.tickCount, partialTick);
             WorldSurface surface = new WorldSurface(poseStack, bufferSource, font, Mth.clamp(left / FADE_TICKS, 0.0F, 1.0F));
             Bubble bubble = new Bubble(Component.translatable(speech.line()).getString());
