@@ -1,10 +1,12 @@
 package com.dwinovo.chiikawa.task;
 
+import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.Mth;
 
 /**
  * How far an owner can pay a labor board up, and what each level gives: the slips it puts
@@ -28,9 +30,9 @@ public record BoardLevels(List<Level> levels) {
     /** What boards go by with no levels loaded: a single level that puts nothing up. */
     public static final BoardLevels NONE = new BoardLevels(List.of(new Level(0, 0)));
 
-    public static final Codec<BoardLevels> CODEC = RecordCodecBuilder.<BoardLevels>create(instance -> instance.group(
+    public static final Codec<BoardLevels> CODEC = ExtraCodecs.validate(RecordCodecBuilder.<BoardLevels>create(instance -> instance.group(
         ExtraCodecs.nonEmptyList(Level.CODEC.listOf()).fieldOf("levels").forGetter(BoardLevels::levels)
-    ).apply(instance, BoardLevels::new)).validate(BoardLevels::priced);
+    ).apply(instance, BoardLevels::new)), BoardLevels::priced);
 
     private static volatile BoardLevels current = NONE;
 
@@ -58,7 +60,7 @@ public record BoardLevels(List<Level> levels) {
      * puts them back.
      */
     public int clamp(int level) {
-        return Math.clamp(level, FIRST_LEVEL, top());
+        return Mth.clamp(level, FIRST_LEVEL, top());
     }
 
     /** How many slips a board of this level puts up a day. */
@@ -94,7 +96,7 @@ public record BoardLevels(List<Level> levels) {
     public record Level(int slips, int price) {
         static final Codec<Level> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.intRange(1, MOST_SLIPS).fieldOf("slips").forGetter(Level::slips),
-            ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("price", 0).forGetter(Level::price)
+            ModCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "price", 0).forGetter(Level::price)
         ).apply(instance, Level::new));
     }
 }

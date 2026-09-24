@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.data;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.shop.ShopCatalog;
 import com.dwinovo.chiikawa.shop.ShopCatalogLoader;
 import com.mojang.serialization.JsonOps;
@@ -23,7 +24,7 @@ public final class ShopCatalogProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cache) {
         return CompletableFuture.allOf(ShopCatalogData.all().entrySet().stream()
             .map(entry -> DataProvider.saveStable(cache,
-                ShopCatalog.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(),
+                ShopCatalog.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(false, Constants.LOG::error),
                 pathProvider.json(entry.getKey())))
             .toArray(CompletableFuture[]::new));
     }

@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.data;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.task.BoardLevels;
 import com.dwinovo.chiikawa.task.BoardLevelsLoader;
 import com.mojang.serialization.JsonOps;
@@ -22,7 +23,7 @@ public final class LaborBoardLevelProvider implements DataProvider {
     @Override
     public CompletableFuture<?> run(CachedOutput cache) {
         return DataProvider.saveStable(cache,
-            BoardLevels.CODEC.encodeStart(JsonOps.INSTANCE, LaborBoardLevelData.LEVELS).getOrThrow(),
+            BoardLevels.CODEC.encodeStart(JsonOps.INSTANCE, LaborBoardLevelData.LEVELS).getOrThrow(false, Constants.LOG::error),
             pathProvider.json(BoardLevelsLoader.FILE));
     }
 

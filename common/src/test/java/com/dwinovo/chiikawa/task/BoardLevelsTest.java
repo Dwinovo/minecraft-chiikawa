@@ -45,16 +45,16 @@ class BoardLevelsTest {
     @Test
     void aLevelPastTheFirstWithoutAPriceIsRefused() {
         assertFalse(BoardLevels.CODEC.parse(JsonOps.INSTANCE, json("""
-            { "levels": [ { "slips": 3 }, { "slips": 4 } ] }""")).isSuccess(),
+            { "levels": [ { "slips": 3 }, { "slips": 4 } ] }""")).result().isPresent(),
             "a free level reads as the top one: the screen would say there is nothing left to buy");
     }
 
     @Test
     void aBoardWithNoLevelsOrTooManySlipsIsRefused() {
         assertFalse(BoardLevels.CODEC.parse(JsonOps.INSTANCE, json("""
-            { "levels": [] }""")).isSuccess());
+            { "levels": [] }""")).result().isPresent());
         assertFalse(BoardLevels.CODEC.parse(JsonOps.INSTANCE, json(
-            "{ \"levels\": [ { \"slips\": " + (BoardLevels.MOST_SLIPS + 1) + " } ] }")).isSuccess(),
+            "{ \"levels\": [ { \"slips\": " + (BoardLevels.MOST_SLIPS + 1) + " } ] }")).result().isPresent(),
             "more slips than the plates sent to players have bits for");
     }
 
@@ -90,15 +90,15 @@ class BoardLevelsTest {
 
     @Test
     void theModsOwnLevelsSurviveBeingWrittenOutAndReadBack() {
-        JsonElement written = BoardLevels.CODEC.encodeStart(JsonOps.INSTANCE, LaborBoardLevelData.LEVELS).getOrThrow();
+        JsonElement written = BoardLevels.CODEC.encodeStart(JsonOps.INSTANCE, LaborBoardLevelData.LEVELS).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
-        assertEquals(LaborBoardLevelData.LEVELS, BoardLevels.CODEC.parse(JsonOps.INSTANCE, written).getOrThrow());
+        assertEquals(LaborBoardLevelData.LEVELS, BoardLevels.CODEC.parse(JsonOps.INSTANCE, written).getOrThrow(false, org.junit.jupiter.api.Assertions::fail));
         assertFalse(written.getAsJsonObject().getAsJsonArray("levels").get(0).getAsJsonObject().has("price"),
             "the first level is written without a price nobody pays");
     }
 
     private static BoardLevels parse(String text) {
-        return BoardLevels.CODEC.parse(JsonOps.INSTANCE, json(text)).getOrThrow();
+        return BoardLevels.CODEC.parse(JsonOps.INSTANCE, json(text)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
     }
 
     private static JsonElement json(String text) {

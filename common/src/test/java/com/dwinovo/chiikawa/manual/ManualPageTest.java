@@ -37,19 +37,19 @@ class ManualPageTest {
     void anActorIsExactlyOneThing() {
         assertFalse(ManualPage.CODEC.parse(JsonOps.INSTANCE, json("""
             { "title": "t", "panels": [ { "caption": "c", "actors": [
-                { "pet": "chiikawa:usagi", "prop": "chiikawa:shop" } ] } ] }""")).isSuccess());
+                { "pet": "chiikawa:usagi", "prop": "chiikawa:shop" } ] } ] }""")).result().isPresent());
         assertFalse(ManualPage.CODEC.parse(JsonOps.INSTANCE, json("""
-            { "title": "t", "panels": [ { "caption": "c", "actors": [ { "x": 0.2 } ] } ] }""")).isSuccess());
+            { "title": "t", "panels": [ { "caption": "c", "actors": [ { "x": 0.2 } ] } ] }""")).result().isPresent());
     }
 
     @Test
     void aMoveNobodyKnowsAndAFifthPanelAreRefused() {
         assertFalse(ManualPage.CODEC.parse(JsonOps.INSTANCE, json("""
             { "title": "t", "panels": [ { "caption": "c", "actors": [
-                { "pet": "chiikawa:usagi", "action": "moonwalk" } ] } ] }""")).isSuccess());
+                { "pet": "chiikawa:usagi", "action": "moonwalk" } ] } ] }""")).result().isPresent());
         assertFalse(ManualPage.CODEC.parse(JsonOps.INSTANCE, json("""
             { "title": "t", "panels": [ { "caption": "1" }, { "caption": "2" }, { "caption": "3" },
-                { "caption": "4" }, { "caption": "5" } ] }""")).isSuccess(),
+                { "caption": "4" }, { "caption": "5" } ] }""")).result().isPresent(),
             "a page is a four-panel strip");
     }
 
@@ -65,7 +65,7 @@ class ManualPageTest {
     }
 
     private static ManualPage parse(String text) {
-        return ManualPage.CODEC.parse(JsonOps.INSTANCE, json(text)).getOrThrow();
+        return ManualPage.CODEC.parse(JsonOps.INSTANCE, json(text)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
     }
 
     private static JsonElement json(String text) {

@@ -29,7 +29,7 @@ class DayPhaseTest {
 
     @Test
     void serializesByConstantName() {
-        assertEquals(new JsonPrimitive("NIGHT"), DayPhase.CODEC.encodeStart(JsonOps.INSTANCE, DayPhase.NIGHT).getOrThrow());
-        assertEquals(DayPhase.MORNING, DayPhase.CODEC.parse(JsonOps.INSTANCE, new JsonPrimitive("MORNING")).getOrThrow());
+        assertEquals(new JsonPrimitive("NIGHT"), DayPhase.CODEC.encodeStart(JsonOps.INSTANCE, DayPhase.NIGHT).getOrThrow(false, org.junit.jupiter.api.Assertions::fail));
+        assertEquals(DayPhase.MORNING, DayPhase.CODEC.parse(JsonOps.INSTANCE, new JsonPrimitive("MORNING")).getOrThrow(false, org.junit.jupiter.api.Assertions::fail));
     }
 }

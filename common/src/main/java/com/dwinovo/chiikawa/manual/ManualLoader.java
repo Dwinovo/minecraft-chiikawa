@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.manual;
 import com.dwinovo.chiikawa.Constants;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -45,9 +46,11 @@ public final class ManualLoader extends SimpleJsonResourceReloadListener {
     static Loaded load(Map<ResourceLocation, JsonElement> files) {
         List<Map.Entry<ResourceLocation, ManualPage>> pages = new ArrayList<>();
         List<String> errors = new ArrayList<>();
-        files.forEach((id, json) -> ManualPage.CODEC.parse(JsonOps.INSTANCE, json)
-            .ifSuccess(page -> pages.add(Map.entry(id, page)))
-            .ifError(error -> errors.add(LOG_PREFIX + id + " is left out, failed to parse: " + error.message())));
+        files.forEach((id, json) -> {
+            DataResult<ManualPage> parsed = ManualPage.CODEC.parse(JsonOps.INSTANCE, json);
+            parsed.result().ifPresent(page -> pages.add(Map.entry(id, page)));
+            parsed.error().ifPresent(error -> errors.add(LOG_PREFIX + id + " is left out, failed to parse: " + error.message()));
+        });
         pages.sort(Comparator.<Map.Entry<ResourceLocation, ManualPage>>comparingInt(entry -> entry.getValue().order())
             .thenComparing(Map.Entry::getKey));
         return new Loaded(pages.stream().map(Map.Entry::getValue).toList(), errors);

@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.data;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.task.PetTaskType;
 import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
 import com.mojang.serialization.JsonOps;
@@ -23,7 +24,7 @@ public final class PetTaskTypeProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cache) {
         return CompletableFuture.allOf(PetTaskTypeData.all().entrySet().stream()
             .map(entry -> DataProvider.saveStable(cache,
-                PetTaskType.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(),
+                PetTaskType.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(false, Constants.LOG::error),
                 pathProvider.json(entry.getKey())))
             .toArray(CompletableFuture[]::new));
     }
