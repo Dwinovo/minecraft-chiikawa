@@ -74,7 +74,7 @@ public final class TagData {
         // Creepers are in the list now. They are not something a pet with a sword walks
         // up to — a pet's reach is a block and a half, well inside the distance at which a
         // creeper starts swelling — but a pet has to be able to see one to keep away from
-        // it, and an archer can answer one from outside the blast. (1.20.1 has no bogged
+        // it, and an archer can answer one from outside the blast. (1.20.2 has no bogged
         // or breeze yet.)
         tags.add(InitTag.ENTITY_HOSTILE_ENTITY,
             EntityType.BLAZE, EntityType.CAVE_SPIDER, EntityType.CREEPER,
