@@ -19,7 +19,6 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
-import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import com.dwinovo.chiikawa.anim.compile.BedrockResourceLoader;
 import com.dwinovo.chiikawa.anim.render.PropRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.ChiikawaRenderer;
@@ -39,6 +38,7 @@ import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMenu;
 import com.dwinovo.chiikawa.manual.ManualLoader;
+import com.dwinovo.chiikawa.neoforge.mixin.ItemAccessor;
 import net.neoforged.neoforge.common.NeoForge;
 
 // Client-only mod entry.
@@ -59,6 +59,7 @@ public class ChiikawaClient {
             EntityRenderers.register(InitEntity.RAKKO_PET.get(), RakkoRenderer::new);
             EntityRenderers.register(InitEntity.FURUHONYA_PET.get(), FuruhonyaRenderer::new);
             NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post tick) -> ClientMusicStreamManager.tick());
+            registerItemExtensions();
         });
     }
 
@@ -67,10 +68,14 @@ public class ChiikawaClient {
         event.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);
     }
 
-    @SubscribeEvent
-    static void registerItemExtensions(RegisterClientExtensionsEvent event) {
-        // Props are drawn from their own Bedrock models, as items as everywhere else.
-        event.registerItem(new IClientItemExtensions() {
+    /**
+     * Props are drawn from their own Bedrock models, as items as everywhere else. This
+     * NeoForge has no event to give an item its client extensions, only the item's own
+     * {@code initializeClient}; common items cannot override that, so they are handed
+     * theirs here, where the event would have done it.
+     */
+    private static void registerItemExtensions() {
+        IClientItemExtensions extensions = new IClientItemExtensions() {
             private BlockEntityWithoutLevelRenderer renderer;
 
             @Override
@@ -80,7 +85,10 @@ public class ChiikawaClient {
                 }
                 return renderer;
             }
-        }, InitItems.PROPS.stream().map(Supplier::get).toArray(Item[]::new));
+        };
+        for (Supplier<? extends Item> prop : InitItems.PROPS) {
+            ((ItemAccessor) prop.get()).chiikawa$setRenderProperties(extensions);
+        }
     }
 
     /** The built-in item renderer NeoForge wants, handing each prop to {@link PropRenderer}. */
