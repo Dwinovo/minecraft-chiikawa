@@ -4,6 +4,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import com.dwinovo.chiikawa.command.ChiikawaDebugCommand;
 import com.dwinovo.chiikawa.command.ChiikawaMusicCommand;
+import com.dwinovo.chiikawa.gametest.GameTestRegistration;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitBlocks;
@@ -70,6 +71,7 @@ public class Chiikawa {
         Services.REGISTRY.registerToEventBus(modEventBus);
         Services.ENTITY.registerToEventBus(modEventBus);
         PetSpawnsBiomeModifier.register(modEventBus);
+        GameTestRegistration.register(modEventBus);
         modEventBus.addListener(NeoForgeModNetworking::registerPayloads);
         NeoForge.EVENT_BUS.addListener(Chiikawa::onRightClickBlock);
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> PetReviveRitualManager.tickServer(event.getServer()));

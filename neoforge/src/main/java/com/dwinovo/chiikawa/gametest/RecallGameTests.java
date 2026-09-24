@@ -15,9 +15,8 @@ import com.dwinovo.chiikawa.init.InitItems;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
@@ -25,10 +24,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The bell, and the note of where each pet was that lets it ring for one nobody has
@@ -67,9 +64,9 @@ public final class RecallGameTests {
 
         PetRecall.ring(owner);
 
-        helper.assertTrue(pet.distanceToSqr(owner) < ARRIVED_SQR, "the pet did not come when it was called");
+        helper.assertTrue(pet.distanceToSqr(owner) < ARRIVED_SQR, Component.literal("the pet did not come when it was called"));
         helper.assertTrue(pet.getPetDirective() == PetDirective.STAY,
-            "being called changed what the pet had been told to do");
+            Component.literal("being called changed what the pet had been told to do"));
         helper.succeed();
     }
 
@@ -86,7 +83,7 @@ public final class RecallGameTests {
         PetRecall.ring(stranger);
 
         helper.runAtTickTime(RUNG_OUT, () -> {
-            helper.assertTrue(pet.blockPosition().equals(before), "the pet moved for somebody it does not know");
+            helper.assertTrue(pet.blockPosition().equals(before), Component.literal("the pet moved for somebody it does not know"));
             helper.succeed();
         });
     }
@@ -95,19 +92,19 @@ public final class RecallGameTests {
     @GameTest(template = "floor32", batch = BATCH, timeoutTicks = 600)
     public static void a_bell_reaches_into_another_dimension(GameTestHelper helper) {
         ServerLevel nether = helper.getLevel().getServer().getLevel(Level.NETHER);
-        helper.assertTrue(nether != null, "this server has no nether to call a pet out of");
+        helper.assertTrue(nether != null, Component.literal("this server has no nether to call a pet out of"));
         ServerPlayer owner = owner(helper);
         AbstractPet pet = pet(helper, owner);
         UUID id = pet.getUUID();
-        Entity moved = pet.changeDimension(new DimensionTransition(nether, new Vec3(8.5, 70.0, 8.5), Vec3.ZERO,
-            0.0F, 0.0F, DimensionTransition.DO_NOTHING));
-        helper.assertTrue(moved instanceof AbstractPet, "the pet would not go to the nether to begin with");
+        Entity moved = pet.teleport(new TeleportTransition(nether, new Vec3(8.5, 70.0, 8.5), Vec3.ZERO,
+            0.0F, 0.0F, TeleportTransition.DO_NOTHING));
+        helper.assertTrue(moved instanceof AbstractPet, Component.literal("the pet would not go to the nether to begin with"));
 
         PetRecall.ring(owner);
 
         helper.succeedWhen(() -> helper.assertTrue(
             helper.getLevel().getEntity(id) instanceof AbstractPet back && back.distanceToSqr(owner) < ARRIVED_SQR,
-            "the bell did not reach into the nether"));
+            Component.literal("the bell did not reach into the nether")));
     }
 
     /** A pet writes down where it is while it goes about its day. */
@@ -119,9 +116,9 @@ public final class RecallGameTests {
 
         helper.runAtTickTime(NOTE_TICKS, () -> {
             List<PetRoster.Entry> noted = PetRoster.of(helper.getLevel()).pets(owner.getUUID());
-            helper.assertTrue(noted.size() == 1, "the roster has " + noted.size() + " of this owner's pets, not one");
+            helper.assertTrue(noted.size() == 1, Component.literal("the roster has " + noted.size() + " of this owner's pets, not one"));
             helper.assertTrue(noted.get(0).pos().closerThan(pet.blockPosition(), 2.0),
-                "the roster has the pet somewhere it has not been");
+                Component.literal("the roster has the pet somewhere it has not been"));
             helper.succeed();
         });
     }
@@ -141,9 +138,9 @@ public final class RecallGameTests {
         PetUnloadFollow.onChunkPreUnload(List.of(pet));
 
         List<PetRoster.Entry> noted = PetRoster.of(helper.getLevel()).pets(owner.getUUID());
-        helper.assertTrue(noted.size() == 1, "the roster has " + noted.size() + " of this owner's pets, not one");
+        helper.assertTrue(noted.size() == 1, Component.literal("the roster has " + noted.size() + " of this owner's pets, not one"));
         helper.assertTrue(noted.get(0).pos().equals(pet.blockPosition()),
-            "the note says " + noted.get(0).pos() + ", and the pet went away from " + pet.blockPosition());
+            Component.literal("the note says " + noted.get(0).pos() + ", and the pet went away from " + pet.blockPosition()));
         helper.succeed();
     }
 
@@ -163,7 +160,7 @@ public final class RecallGameTests {
         PetRecall.ring(owner);
 
         helper.runAtTickTime(RUNG_OUT, () -> {
-            helper.assertTrue(roster.pets(owner.getUUID()).isEmpty(), "the roster kept a pet that is not there");
+            helper.assertTrue(roster.pets(owner.getUUID()).isEmpty(), Component.literal("the roster kept a pet that is not there"));
             helper.succeed();
         });
     }
@@ -182,10 +179,10 @@ public final class RecallGameTests {
 
         bell.use(helper.getLevel(), owner, InteractionHand.MAIN_HAND);
 
-        helper.assertTrue(owner.getCooldowns().isOnCooldown(InitItems.PET_BELL.get()),
-            "the bell can be rung again on the next tick");
+        helper.assertTrue(owner.getCooldowns().isOnCooldown(bell),
+            Component.literal("the bell can be rung again on the next tick"));
         helper.assertTrue(owner.getItemInHand(InteractionHand.MAIN_HAND).getCount() == 1,
-            "ringing the bell used it up");
+            Component.literal("ringing the bell used it up"));
         helper.succeed();
     }
 

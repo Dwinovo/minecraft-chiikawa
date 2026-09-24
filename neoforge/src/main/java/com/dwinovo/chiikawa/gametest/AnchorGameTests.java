@@ -10,16 +10,13 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.constraint.AnchorDistances;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * How far a pet may go, and what it may do when it gets there.
@@ -56,7 +53,7 @@ public final class AnchorGameTests {
 
         helper.succeedWhen(() -> helper.assertTrue(
             pet.blockPosition().distSqr(home) < AnchorDistances.FREE_REACH * AnchorDistances.FREE_REACH,
-            "the pet stayed out at the far corner instead of going home"));
+            Component.literal("the pet stayed out at the far corner instead of going home")));
     }
 
     /**

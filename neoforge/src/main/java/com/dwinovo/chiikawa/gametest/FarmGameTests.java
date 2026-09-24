@@ -10,9 +10,8 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitMemory;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.Difficulty;
@@ -20,8 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FarmBlock;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
 
 /**
  * The rest of a farmer's round: sowing what it has, putting the crop away, and picking up
@@ -75,11 +73,11 @@ public final class FarmGameTests {
         helper.setBlock(chest, Blocks.CHEST);
 
         helper.succeedWhen(() -> {
-            Container container = (Container) helper.getBlockEntity(chest);
-            helper.assertTrue(!container.isEmpty(), "the chest is still empty; the pet was "
+            Container container = helper.getBlockEntity(chest, ChestBlockEntity.class);
+            helper.assertTrue(!container.isEmpty(), Component.literal("the chest is still empty; the pet was "
                 + pet.getIntent().map(Object::toString).orElse("doing nothing")
                 + " and had been told about a container at "
-                + pet.getBrain().getMemory(InitMemory.CONTAINER_POS.get()).map(Object::toString).orElse("nowhere"));
+                + pet.getBrain().getMemory(InitMemory.CONTAINER_POS.get()).map(Object::toString).orElse("nowhere")));
         });
     }
 
@@ -93,7 +91,7 @@ public final class FarmGameTests {
         helper.spawnItem(Items.COBBLESTONE, new BlockPos(7, STAND, 4));
 
         helper.runAtTickTime(LEAVE_IT_TICKS, () -> {
-            helper.assertFalse(carries(pet, Items.COBBLESTONE), "the pet pocketed somebody's cobblestone");
+            helper.assertFalse(carries(pet, Items.COBBLESTONE), Component.literal("the pet pocketed somebody's cobblestone"));
             helper.succeed();
         });
     }
@@ -105,6 +103,6 @@ public final class FarmGameTests {
         helper.spawnItem(Items.WHEAT, new BlockPos(7, STAND, 4));
 
         helper.succeedWhen(() -> helper.assertTrue(carries(pet, Items.WHEAT),
-            "the wheat is still on the floor"));
+            Component.literal("the wheat is still on the floor")));
     }
 }

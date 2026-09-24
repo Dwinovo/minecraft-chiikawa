@@ -14,9 +14,8 @@ import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -26,8 +25,6 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * What counts towards a hunting slip. A kill in a real fight is rarely a clean one —
@@ -57,8 +54,8 @@ public final class HuntGameTests {
         felledBy(helper, pet, 0);
         felledBy(helper, pet, 1);
 
-        helper.assertTrue(pet.getTask().isEmpty(), "the slip was not finished by the monsters it asked for");
-        helper.assertTrue(count(pet, Items.EMERALD) > 0, "a finished hunting slip paid nothing");
+        helper.assertTrue(pet.getTask().isEmpty(), Component.literal("the slip was not finished by the monsters it asked for"));
+        helper.assertTrue(count(pet, Items.EMERALD) > 0, Component.literal("a finished hunting slip paid nothing"));
         helper.succeed();
     }
 
@@ -79,7 +76,7 @@ public final class HuntGameTests {
         zombie.hurt(pet.damageSources().mobAttack(pet), zombie.getMaxHealth() * 2.0F);
 
         helper.assertTrue(progress(pet) == 1,
-            "the pet finished off a monster its owner had hit and the slip counted " + progress(pet));
+            Component.literal("the pet finished off a monster its owner had hit and the slip counted " + progress(pet)));
         helper.succeed();
     }
 
@@ -94,7 +91,7 @@ public final class HuntGameTests {
         pet.performRangedAttack(zombie, 1.0F);
 
         helper.succeedWhen(() -> helper.assertTrue(progress(pet) == 1 || pet.getTask().isEmpty(),
-            "an arrow of the pet's own killed a monster and the slip counted " + progress(pet)));
+            Component.literal("an arrow of the pet's own killed a monster and the slip counted " + progress(pet))));
     }
 
     /** Somebody else's kill is somebody else's: a pet counts what it put down itself. */
@@ -105,7 +102,7 @@ public final class HuntGameTests {
 
         felledBy(helper, other, 0);
 
-        helper.assertTrue(progress(pet) == 0, "another pet's kill counted towards this pet's slip");
+        helper.assertTrue(progress(pet) == 0, Component.literal("another pet's kill counted towards this pet's slip"));
         helper.succeed();
     }
 
@@ -117,7 +114,7 @@ public final class HuntGameTests {
         helper.spawn(EntityType.COW, new BlockPos(5, STAND, 5))
             .hurt(pet.damageSources().mobAttack(pet), 100.0F);
 
-        helper.assertTrue(progress(pet) == 0, "a cow counted towards a hunting slip");
+        helper.assertTrue(progress(pet) == 0, Component.literal("a cow counted towards a hunting slip"));
         helper.succeed();
     }
 
@@ -129,7 +126,7 @@ public final class HuntGameTests {
 
         zombie.hurt(zombie.damageSources().fall(), zombie.getMaxHealth() * 2.0F);
 
-        helper.assertTrue(progress(pet) == 0, "a monster nobody killed counted towards the slip");
+        helper.assertTrue(progress(pet) == 0, Component.literal("a monster nobody killed counted towards the slip"));
         helper.succeed();
     }
 
