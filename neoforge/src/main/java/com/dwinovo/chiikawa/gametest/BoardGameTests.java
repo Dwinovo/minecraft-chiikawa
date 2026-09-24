@@ -19,21 +19,17 @@ import com.dwinovo.chiikawa.task.PetTaskTypes;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
+import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The labor board, end to end: a pet that may not weed for free walks over, takes the
@@ -171,7 +167,7 @@ public final class BoardGameTests {
     public static void sending_a_board_to_players_changes_nothing(GameTestHelper helper) {
         BlockPos at = new BlockPos(3, STAND, 3);
         helper.setBlock(at, InitBlocks.LABOR_BOARD.get());
-        LaborBoardBlockEntity board = (LaborBoardBlockEntity) helper.getBlockEntity(at);
+        LaborBoardBlockEntity board = helper.getBlockEntity(at, LaborBoardBlockEntity.class);
         HolderLookup.Provider registries = helper.getLevel().registryAccess();
         CompoundTag before = board.saveWithoutMetadata(registries);
 
@@ -186,7 +182,7 @@ public final class BoardGameTests {
     public static void a_board_puts_its_plates_up_by_itself(GameTestHelper helper) {
         BlockPos at = new BlockPos(3, STAND, 3);
         helper.setBlock(at, InitBlocks.LABOR_BOARD.get());
-        LaborBoardBlockEntity board = (LaborBoardBlockEntity) helper.getBlockEntity(at);
+        LaborBoardBlockEntity board = helper.getBlockEntity(at, LaborBoardBlockEntity.class);
 
         // Nothing asks it: no pet about, no player at it.
         helper.succeedWhen(() -> helper.assertTrue(
@@ -198,7 +194,7 @@ public final class BoardGameTests {
     public static void a_plate_comes_down_when_a_pet_takes_its_slip(GameTestHelper helper) {
         BlockPos at = weedingBoard(helper);
         helper.setBlock(at, InitBlocks.LABOR_BOARD.get());
-        LaborBoardBlockEntity board = (LaborBoardBlockEntity) helper.getBlockEntity(at);
+        LaborBoardBlockEntity board = helper.getBlockEntity(at, LaborBoardBlockEntity.class);
         int all = (1 << board.today().size()) - 1;
         helper.assertTrue(board.hanging() == all, "a new day's board does not hang all its plates: " + board.hanging());
         weedPatch(helper);
@@ -257,8 +253,8 @@ public final class BoardGameTests {
      */
     private static BlockPos boardWhere(GameTestHelper helper, Predicate<List<BoardSlot>> wanted, String what) {
         ServerLevel level = helper.getLevel();
-        long day = level.getDayTime() / Level.TICKS_PER_DAY;
-        ResourceLocation farmer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FARMER.get());
+        long day = level.getOverworldClockTime() / SharedConstants.TICKS_PER_GAME_DAY;
+        Identifier farmer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FARMER.get());
         for (int x = 8; x < 15; x++) {
             for (int z = 2; z < 15; z++) {
                 BlockPos rel = new BlockPos(x, STAND, z);

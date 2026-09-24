@@ -14,20 +14,16 @@ import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * What counts towards a hunting slip. A kill in a real fight is rarely a clean one —
@@ -153,7 +149,7 @@ public final class HuntGameTests {
 
     /** The slip an upgraded board puts up for a fencer. */
     private static PetTask hunting() {
-        ResourceLocation fencer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FENCER.get());
+        Identifier fencer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FENCER.get());
         return new PetTask(PetTaskTypeData.MELEE_HUNTING, fencer, PetWorkCounters.SLAY, PetTask.NO_ICON, QUARRY,
             PetTaskTypeData.reward(PetTaskTypeData.MELEE_HUNTING), 0);
     }

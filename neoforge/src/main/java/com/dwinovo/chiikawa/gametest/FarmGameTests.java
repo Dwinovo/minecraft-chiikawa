@@ -10,8 +10,6 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitMemory;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
@@ -19,9 +17,8 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.FarmBlock;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraft.world.level.block.FarmlandBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
  * The rest of a farmer's round: sowing what it has, putting the crop away, and picking up
@@ -60,7 +57,7 @@ public final class FarmGameTests {
 
         BlockPos bed = new BlockPos(7, STAND - 1, 4);
         // Watered, or the farmland dries out and turns back to dirt mid-case.
-        helper.setBlock(bed, Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE));
+        helper.setBlock(bed, Blocks.FARMLAND.defaultBlockState().setValue(FarmlandBlock.MOISTURE, FarmlandBlock.MAX_MOISTURE));
 
         helper.succeedWhen(() -> helper.assertBlockPresent(Blocks.WHEAT, bed.above()));
     }
@@ -75,7 +72,7 @@ public final class FarmGameTests {
         helper.setBlock(chest, Blocks.CHEST);
 
         helper.succeedWhen(() -> {
-            Container container = (Container) helper.getBlockEntity(chest);
+            Container container = (Container) helper.getBlockEntity(chest, BlockEntity.class);
             helper.assertTrue(!container.isEmpty(), "the chest is still empty; the pet was "
                 + pet.getIntent().map(Object::toString).orElse("doing nothing")
                 + " and had been told about a container at "

@@ -20,20 +20,16 @@ import com.dwinovo.chiikawa.task.BoardSlot;
 import com.dwinovo.chiikawa.task.PetTaskTypes;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
 import java.util.List;
+import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * What an owner's emeralds buy a labor board. A level is the one thing on that screen an
@@ -175,7 +171,7 @@ public final class UpgradeGameTests {
     public static void a_fencer_takes_a_hunting_slip_off_a_paid_up_board(GameTestHelper helper) {
         BlockPos where = boardOfferingHunting(helper);
         helper.setBlock(where, InitBlocks.LABOR_BOARD.get());
-        if (helper.getBlockEntity(where) instanceof LaborBoardBlockEntity board) {
+        if (helper.getBlockEntity(where, LaborBoardBlockEntity.class) instanceof LaborBoardBlockEntity board) {
             while (board.upgrade()) {
                 // paid up to the top, which is where hunting comes from
             }
@@ -190,7 +186,7 @@ public final class UpgradeGameTests {
     /** A board on the floor, at the level it is placed at. */
     private static LaborBoardBlockEntity board(GameTestHelper helper) {
         helper.setBlock(BOARD, InitBlocks.LABOR_BOARD.get());
-        if (helper.getBlockEntity(BOARD) instanceof LaborBoardBlockEntity board) {
+        if (helper.getBlockEntity(BOARD, LaborBoardBlockEntity.class) instanceof LaborBoardBlockEntity board) {
             return board;
         }
         throw new AssertionError("the labor board was placed without its block entity");
@@ -204,8 +200,8 @@ public final class UpgradeGameTests {
      */
     private static BlockPos boardOfferingHunting(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
-        long day = level.getDayTime() / Level.TICKS_PER_DAY;
-        ResourceLocation fencer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FENCER.get());
+        long day = level.getOverworldClockTime() / SharedConstants.TICKS_PER_GAME_DAY;
+        Identifier fencer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FENCER.get());
         for (int x = 8; x < 15; x++) {
             for (int z = 2; z < 15; z++) {
                 BlockPos rel = new BlockPos(x, STAND, z);

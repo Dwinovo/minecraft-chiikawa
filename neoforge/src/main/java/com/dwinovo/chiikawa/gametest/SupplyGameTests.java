@@ -21,24 +21,20 @@ import java.util.function.Supplier;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The things a pet can be given: what it carries, what happens when that is taken away
@@ -70,7 +66,7 @@ public final class SupplyGameTests {
         Set<Item> listed = new HashSet<>();
         InitTabs.addMainItems(item -> listed.add(item.asItem()));
         for (Item item : BuiltInRegistries.ITEM) {
-            ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+            Identifier id = BuiltInRegistries.ITEM.getKey(item);
             if (id.getNamespace().equals(Constants.MOD_ID)) {
                 helper.assertTrue(listed.contains(item), id + " is not in the creative tab");
             }
@@ -150,7 +146,7 @@ public final class SupplyGameTests {
         PetBackpackMenu menu = new PetBackpackMenu(1, owner.getInventory(), pet);
 
         menu.setCarried(new ItemStack(InitItems.STAR_POUCH.get()));
-        menu.clicked(AbstractPet.BAG_SLOT, 0, ClickType.PICKUP, owner);
+        menu.clicked(AbstractPet.BAG_SLOT, 0, ContainerInput.PICKUP, owner);
 
         helper.assertTrue(pet.getItemBySlot(EquipmentSlot.CHEST).is(InitItems.STAR_POUCH.get()),
             "the star pouch did not go on");
