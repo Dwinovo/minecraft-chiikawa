@@ -30172,6 +30172,52 @@
           }
         }
       }
+    },
+    "clung_to": {
+      "loop": true,
+      "animation_length": 1.0,
+      "bones": {
+        "UpBody": {
+          "rotation": [
+            -3,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    "hand_over": {
+      "loop": true,
+      "animation_length": 1.0,
+      "bones": {
+        "RightArm": {
+          "rotation": [
+            -80,
+            0,
+            0
+          ]
+        }
+      }
+    },
+    "drink": {
+      "loop": true,
+      "animation_length": 1.2,
+      "bones": {
+        "RightArm": {
+          "rotation": [
+            -110,
+            0,
+            -25
+          ]
+        },
+        "Head": {
+          "rotation": [
+            -15,
+            0,
+            0
+          ]
+        }
+      }
     }
   }
 }
