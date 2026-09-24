@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.dwinovo.chiikawa.gametest.mixin",
+  "refmap": "${mod_id}.refmap.json",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "GameTestInfoMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
