@@ -10,6 +10,7 @@ import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.anim.state.PetAnimContext;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
+import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import com.dwinovo.chiikawa.entity.brain.handler.ArcherJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.FarmerJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.FencerJobHandler;
@@ -31,10 +32,12 @@ import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.utils.Utils;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -47,10 +50,10 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.Brain;
@@ -736,7 +739,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
                 return;
             }
         }
-        spawnAtLocation(inBagSlot);
+        if (level() instanceof ServerLevel server) {
+            spawnAtLocation(server, inBagSlot);
+        }
     }
 
     /**
@@ -789,8 +794,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     public void dropBagContents() {
         for (int slot = BACKPACK_SIZE; slot < backpack.getContainerSize(); slot++) {
             ItemStack stack = backpack.removeItemNoUpdate(slot);
-            if (!stack.isEmpty()) {
-                spawnAtLocation(stack);
+            if (!stack.isEmpty() && level() instanceof ServerLevel server) {
+                spawnAtLocation(server, stack);
             }
         }
     }
@@ -1015,10 +1020,10 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * decides its job, and roams freely around where it spawned.
      */
     @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType,
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnType,
             @Nullable SpawnGroupData spawnGroupData) {
         // One the world found for itself comes with a tool, as a pet met in the wild does.
-        if (spawnType == MobSpawnType.NATURAL || spawnType == MobSpawnType.CHUNK_GENERATION) {
+        if (spawnType == EntitySpawnReason.NATURAL || spawnType == EntitySpawnReason.CHUNK_GENERATION) {
             setItemSlot(EquipmentSlot.MAINHAND, PetPersonalities.of(getType()).drawWildTool(level.getRandom()));
         }
         // However it came, a new pet is nobody's yet, and goes its own way until it is tamed.
@@ -1051,15 +1056,16 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     @Override
     public void die(DamageSource source) {
         setTask(null);
-        if (level() instanceof ServerLevel server && getOwnerUUID() != null) {
+        if (level() instanceof ServerLevel server && PetTargeting.ownerId(this) != null) {
             // Its doll is what is left to find now, and that is on the floor, not in a roster.
-            PetRoster.of(server).forget(getOwnerUUID(), getUUID());
+            PetRoster.of(server).forget(PetTargeting.ownerId(this), getUUID());
         }
         super.die(source);
     }
 
     @Override
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
+        keepEquipment();
         super.dropCustomDeathLoot(level, source, recentlyHit);
 
         Item dollItem = getReviveDollItem();
@@ -1075,11 +1081,13 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     /**
      * Nothing a pet carries falls out when it dies; it all stays in the doll. Vanilla
      * would otherwise drop each equipment slot by chance, including the main hand tool,
-     * which is the first backpack slot.
+     * which is the first backpack slot. The chances are the mob's own saved state, so every
+     * slot's is set to 0 right before vanilla rolls them, whatever was saved on the pet.
      */
-    @Override
-    protected float getEquipmentDropChance(EquipmentSlot slot) {
-        return 0.0F;
+    private void keepEquipment() {
+        for (EquipmentSlot slot : EquipmentSlot.VALUES) {
+            setDropChance(slot, 0.0F);
+        }
     }
 
     protected Item getReviveDollItem() {
