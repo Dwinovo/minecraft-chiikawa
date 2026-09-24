@@ -16,6 +16,7 @@ import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.item.PetDollData;
 import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
+import com.dwinovo.chiikawa.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
@@ -111,7 +112,7 @@ public final class SlipGameTests {
 
     /** A weeding slip as a board would hand one out. */
     private static PetTask weeding() {
-        ResourceLocation farmer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FARMER.get());
+        ResourceLocation farmer = Services.REGISTRY.getKey(InitRegistry.PET_JOB_KEY, InitRegistry.FARMER.get());
         return new PetTask(PetTaskTypeData.WEEDING, farmer, PetWorkCounters.WEED, PetTask.NO_ICON, 8,
             PetTaskTypeData.reward(PetTaskTypeData.WEEDING), 0);
     }

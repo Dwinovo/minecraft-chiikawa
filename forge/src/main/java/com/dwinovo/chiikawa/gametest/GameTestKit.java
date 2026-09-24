@@ -15,7 +15,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.AABB;
 
 /**
@@ -120,7 +119,7 @@ public final class GameTestKit {
 
     /** Somebody for a pet to belong to. Never spawned: a pet only needs the name on its tag. */
     static Player owner(GameTestHelper helper) {
-        return helper.makeMockPlayer(GameType.SURVIVAL);
+        return helper.makeMockSurvivalPlayer();
     }
 
     /** Puts a tool in the pet's hand, which is what decides the job it takes. */
