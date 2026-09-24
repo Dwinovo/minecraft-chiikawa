@@ -34,11 +34,9 @@ public class ForgeModSoundsProvider implements DataProvider {
             JsonArray soundList = new JsonArray();
             sounds.stream()
                 .sorted(Comparator.comparing(ResourceLocation::toString))
-                .forEach(sound -> {
-                    JsonObject soundEntry = new JsonObject();
-                    soundEntry.addProperty("name", sound.toString());
-                    soundList.add(soundEntry);
-                });
+                // A sound with nothing but its name is written as the name alone, the short
+                // form vanilla's and NeoForge's providers write, so sounds.json reads the same.
+                .forEach(sound -> soundList.add(sound.toString()));
             JsonObject definition = new JsonObject();
             definition.add("sounds", soundList);
             root.add(entry.path(), definition);
