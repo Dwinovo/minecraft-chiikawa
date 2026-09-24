@@ -14,6 +14,7 @@ import com.dwinovo.chiikawa.data.PetTaskTypeData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitRegistry;
+import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.dwinovo.chiikawa.task.TaskTracker;
@@ -30,8 +31,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * What the pets say, and when: each at a moment the game already reacts to, in its own
@@ -109,7 +110,7 @@ public final class VoiceGameTests {
         quietYard(helper, NOON);
         AbstractPet pet = still(pet(helper, InitEntity.RAKKO_PET.get(), new BlockPos(3, STAND, 3), true));
         pet.setTask(new PetTask(PetTaskTypeData.MELEE_HUNTING,
-            InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FENCER.get()), PetWorkCounters.SLAY, PetTask.NO_ICON,
+            Services.REGISTRY.getKey(InitRegistry.PET_JOB_KEY, InitRegistry.FENCER.get()), PetWorkCounters.SLAY, PetTask.NO_ICON,
             QUARRY, PetTaskTypeData.reward(PetTaskTypeData.MELEE_HUNTING), 0));
 
         TaskTracker.advance(pet, PetWorkCounters.SLAY, QUARRY);

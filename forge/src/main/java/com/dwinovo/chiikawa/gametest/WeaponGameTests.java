@@ -23,8 +23,8 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The pets' own weapons, from the series. Rakko's sword is a fencer's like the others, and
@@ -69,7 +69,7 @@ public final class WeaponGameTests {
     public static void nobody_makes_rakkos_sword(GameTestHelper helper) {
         RegistryAccess registries = helper.getLevel().registryAccess();
         helper.assertFalse(helper.getLevel().getRecipeManager().getRecipes().stream()
-                .anyMatch(recipe -> recipe.value().getResultItem(registries).is(InitItems.RAKKO_SWORD.get())),
+                .anyMatch(recipe -> recipe.getResultItem(registries).is(InitItems.RAKKO_SWORD.get())),
             "Rakko's sword can be made");
         helper.succeed();
     }
