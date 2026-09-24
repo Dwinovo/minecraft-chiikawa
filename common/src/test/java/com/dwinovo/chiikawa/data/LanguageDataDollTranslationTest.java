@@ -19,18 +19,12 @@ class LanguageDataDollTranslationTest {
     };
 
     @Test
-    void englishLocaleIncludesAllDollTranslations() {
-        Map<String, String> translations = collect("en_us");
-        for (String key : DOLL_KEYS) {
-            assertTrue(translations.containsKey(key), () -> "missing translation key: " + key);
-        }
-    }
-
-    @Test
-    void chineseLocaleIncludesAllDollTranslations() {
-        Map<String, String> translations = collect("zh_cn");
-        for (String key : DOLL_KEYS) {
-            assertTrue(translations.containsKey(key), () -> "missing translation key: " + key);
+    void everyLocaleIncludesAllDollTranslations() {
+        for (String locale : LanguageData.LOCALES) {
+            Map<String, String> translations = collect(locale);
+            for (String key : DOLL_KEYS) {
+                assertTrue(translations.containsKey(key), () -> locale + " is missing " + key);
+            }
         }
     }
 
