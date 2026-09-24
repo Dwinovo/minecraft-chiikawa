@@ -51,6 +51,7 @@ public final class DataGenerators {
         event.getGenerator().addProvider(server, new ShopCatalogProvider(output));
         event.getGenerator().addProvider(server, new LaborBoardLevelProvider(output));
         event.getGenerator().addProvider(server, new PetSpawnProvider(output));
+        event.getGenerator().addProvider(server, new PetInteractionProvider(output));
         event.getGenerator().addProvider(server, new ModAdvancementProvider(output, lookupProvider));
         event.getGenerator().addProvider(server, new ModLootTableProvider(output, lookupProvider));
         // Entity tags.
