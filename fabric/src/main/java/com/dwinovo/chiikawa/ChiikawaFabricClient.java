@@ -1,7 +1,6 @@
 package com.dwinovo.chiikawa;
 
 import com.dwinovo.chiikawa.anim.compile.BedrockResourceLoader;
-import com.dwinovo.chiikawa.anim.render.PropRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.ChiikawaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.FuruhonyaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.HachiwareRenderer;
@@ -10,13 +9,14 @@ import com.dwinovo.chiikawa.anim.render.impl.MomongaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.RakkoRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.ShisaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.UsagiRenderer;
+import com.dwinovo.chiikawa.client.manual.GuiPropRenderer;
 import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
 import com.dwinovo.chiikawa.client.render.LaborBoardRenderer;
 import com.dwinovo.chiikawa.client.render.PropBlockRenderer;
+import com.dwinovo.chiikawa.client.render.PropItemRenderer;
 import com.dwinovo.chiikawa.client.screen.PetBackpackScreen;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitEntity;
-import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMenu;
 import com.dwinovo.chiikawa.manual.ManualLoader;
 import com.dwinovo.chiikawa.platform.FabricModNetworking;
@@ -24,15 +24,13 @@ import com.dwinovo.chiikawa.platform.FabricReloadListeners;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.PictureInPictureRendererRegistry;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.special.SpecialModelRenderers;
 import net.minecraft.resources.Identifier;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.world.item.Item;
-
-import java.util.function.Supplier;
 
 public class ChiikawaFabricClient implements ClientModInitializer {
     @Override
@@ -48,11 +46,11 @@ public class ChiikawaFabricClient implements ClientModInitializer {
         EntityRendererRegistry.register(InitEntity.FURUHONYA_PET.get(), FuruhonyaRenderer::new);
 
         // Props are drawn from their own Bedrock models, as items as everywhere else.
-        for (Supplier<? extends Item> prop : InitItems.PROPS) {
-            BuiltinItemRendererRegistry.INSTANCE.register(prop.get(), PropRenderer::drawItem);
-        }
-        BlockEntityRenderers.register(InitBlockEntities.LABOR_BOARD.get(), context -> new LaborBoardRenderer());
-        BlockEntityRenderers.register(InitBlockEntities.SHOP.get(), context -> new PropBlockRenderer<>());
+        SpecialModelRenderers.ID_MAPPER.put(PropItemRenderer.ID, PropItemRenderer.Unbaked.MAP_CODEC);
+        BlockEntityRendererRegistry.register(InitBlockEntities.LABOR_BOARD.get(), context -> new LaborBoardRenderer());
+        BlockEntityRendererRegistry.register(InitBlockEntities.SHOP.get(), context -> new PropBlockRenderer<>());
+        // The handbook's props, pasted into its panels as the game pastes in a pet.
+        PictureInPictureRendererRegistry.register(context -> new GuiPropRenderer(context.bufferSource()));
 
         MenuScreens.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);
         FabricModNetworking.registerClient();
