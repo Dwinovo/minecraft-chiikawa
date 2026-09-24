@@ -25,7 +25,21 @@ public enum VoiceMoment implements StringRepresentable {
     /** Back from a doll on a cake. */
     REVIVE,
     /** Pottering about with nothing to do; rolled every tick, as vanilla rolls an ambient sound. */
-    IDLE;
+    IDLE,
+    /** Clinging on to another pet (the scenes of pets meeting pets, design 0.1.1, section 5). */
+    CLING,
+    /** Being clung on to. */
+    CLUNG_TO,
+    /** Greeting a friend the crab way. */
+    CRAB_GREETING,
+    /** Handing another pet something to eat. */
+    TREAT,
+    /** Being handed something to eat. */
+    TREATED,
+    /** Being brought a coffee after the weeding. */
+    GIVEN_COFFEE,
+    /** Sitting down to listen to Hachiware play. */
+    LISTEN;
 
     public static final Codec<VoiceMoment> CODEC = StringRepresentable.fromEnum(VoiceMoment::values);
 

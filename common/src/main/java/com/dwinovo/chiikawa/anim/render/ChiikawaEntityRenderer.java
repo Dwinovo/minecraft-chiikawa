@@ -549,7 +549,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             return;
         }
         pet.getSpeech().ifPresent(speech -> {
-            float left = PetSpeech.TALK_TICKS - (pet.tickCount - speech.since() + partialTick);
+            float left = speech.left(pet.tickCount, partialTick);
             DrawSurface surface = new WorldSurface(poseStack, bufferSource, getFont(),
                 Mth.clamp(left / SPEECH_FADE_TICKS, 0.0F, 1.0F));
             float below = (super.shouldShowName(entity) ? LABEL_LINE : 0.0F)

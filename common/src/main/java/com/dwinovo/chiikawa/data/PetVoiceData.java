@@ -29,6 +29,10 @@ public final class PetVoiceData {
     private static final int COOLDOWN = 200;
     /** How many pets in earshot may already be talking for one more to join in. */
     private static final int CROWD = 3;
+    /** How long a line stays up, long enough to read a few words. */
+    private static final int TALK = 60;
+    /** How far a pet is heard: as far as the game carries a sound at full volume. */
+    private static final double HEARING = 16.0;
 
     private PetVoiceData() {
     }
@@ -46,6 +50,10 @@ public final class PetVoiceData {
             .says(VoiceMoment.GIFT, 1)
             .says(VoiceMoment.REVIVE, 1)
             .says(VoiceMoment.IDLE, 1, 1)
+            .says(VoiceMoment.CLUNG_TO, 1)
+            .says(VoiceMoment.TREATED, 1)
+            .says(VoiceMoment.GIVEN_COFFEE, 1)
+            .says(VoiceMoment.LISTEN, 1)
             .chance(VoiceMoment.IDLE, 0.001F));
         // Cheerful, and one of the few who speak in words.
         add(all, voice("hachiware")
@@ -57,6 +65,11 @@ public final class PetVoiceData {
             .says(VoiceMoment.GIFT, 1)
             .says(VoiceMoment.REVIVE, 1)
             .says(VoiceMoment.IDLE, 1)
+            .says(VoiceMoment.CLUNG_TO, 1)
+            .says(VoiceMoment.CRAB_GREETING, 1)
+            .says(VoiceMoment.TREATED, 1)
+            .says(VoiceMoment.GIVEN_COFFEE, 1)
+            .says(VoiceMoment.LISTEN, 1)
             .chance(VoiceMoment.IDLE, 0.002F));
         // Nothing but its own noises, and never a tear.
         add(all, voice("usagi")
@@ -68,6 +81,9 @@ public final class PetVoiceData {
             .says(VoiceMoment.GIFT, 1)
             .says(VoiceMoment.REVIVE, 1)
             .says(VoiceMoment.IDLE, 1, 1, 1)
+            .says(VoiceMoment.CLUNG_TO, 1)
+            .says(VoiceMoment.GIVEN_COFFEE, 1)
+            .says(VoiceMoment.LISTEN, 1)
             .chance(VoiceMoment.IDLE, 0.002F));
         // Wants praise for everything, and comfort for the rest; no fighter.
         add(all, voice("momonga")
@@ -78,6 +94,10 @@ public final class PetVoiceData {
             .says(VoiceMoment.GIFT, 1)
             .says(VoiceMoment.REVIVE, 1)
             .says(VoiceMoment.IDLE, 2, 1)
+            .says(VoiceMoment.CLING, 1)
+            .says(VoiceMoment.CRAB_GREETING, 1)
+            .says(VoiceMoment.GIVEN_COFFEE, 1)
+            .says(VoiceMoment.LISTEN, 1)
             .chance(VoiceMoment.IDLE, 0.002F));
         // A grown-up of few words: a sigh over something good, and that is all.
         add(all, voice("kurimanju")
@@ -91,6 +111,8 @@ public final class PetVoiceData {
             .says(VoiceMoment.SHOP, 1)
             .says(VoiceMoment.GIFT, 1)
             .says(VoiceMoment.REVIVE, 1)
+            .says(VoiceMoment.TREAT, 1)
+            .says(VoiceMoment.GIVEN_COFFEE, 1)
             .cooldown(2 * COOLDOWN));
         // Polite and earnest, with a touch of Okinawa.
         add(all, voice("shisa")
@@ -102,12 +124,17 @@ public final class PetVoiceData {
             .says(VoiceMoment.GIFT, 1)
             .says(VoiceMoment.REVIVE, 1)
             .says(VoiceMoment.IDLE, 1, 1)
+            .says(VoiceMoment.CLUNG_TO, 1)
+            .says(VoiceMoment.GIVEN_COFFEE, 1)
+            .says(VoiceMoment.LISTEN, 1)
             .chance(VoiceMoment.IDLE, 0.0015F));
         // Quiet and kind: the crab greeting, and a word when it gives something.
         add(all, voice("furuhonya")
             .says(VoiceMoment.TAME, 1)
             .says(VoiceMoment.GIFT, 1)
             .says(VoiceMoment.IDLE, 1)
+            .says(VoiceMoment.CRAB_GREETING, 1)
+            .says(VoiceMoment.GIVEN_COFFEE, 1)
             .chance(VoiceMoment.IDLE, 0.0005F)
             .cooldown(2 * COOLDOWN));
         return all;
@@ -163,7 +190,7 @@ public final class PetVoiceData {
         }
 
         PetVoice build() {
-            return new PetVoice(lines, chance, cooldown, CROWD);
+            return new PetVoice(lines, chance, cooldown, CROWD, TALK, HEARING);
         }
     }
 }

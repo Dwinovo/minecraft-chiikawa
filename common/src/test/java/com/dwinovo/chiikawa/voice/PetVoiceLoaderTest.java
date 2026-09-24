@@ -35,7 +35,7 @@ class PetVoiceLoaderTest {
         PetVoiceLoader.Loaded loaded = PetVoiceLoader.load(Map.of(
             CHIIKAWA, JsonParser.parseString("""
                 { "lines": { "hurt": [ { "text": "voice.chiikawa.chiikawa.hurt.1", "weight": 1 } ] },
-                  "cooldown_ticks": 200, "crowd_limit": 3 }"""),
+                  "cooldown_ticks": 200, "crowd_limit": 3, "talk_ticks": 60, "hearing_range": 16.0 }"""),
             USAGI, JsonParser.parseString("{ \"lines\": { \"cry\": [] }, \"cooldown_ticks\": 200, \"crowd_limit\": 3 }")));
         PetVoices.replaceAll(loaded.voices());
 
