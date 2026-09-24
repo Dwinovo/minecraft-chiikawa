@@ -85,7 +85,10 @@ public final class PetVoiceData {
             .says(VoiceMoment.GIVEN_COFFEE, 1)
             .says(VoiceMoment.LISTEN, 1)
             .chance(VoiceMoment.IDLE, 0.002F));
-        // Wants praise for everything, and comfort for the rest; no fighter.
+        // Wants praise for everything, and comfort for the rest; no fighter. It never lets
+        // up: quiet only while its last demand is still over its head, so a demand for
+        // praise can be followed by one for comfort within the same little scene. Someone
+        // else's music gets a word only now and then.
         add(all, voice("momonga")
             .says(VoiceMoment.TAME, 1)
             .says(VoiceMoment.HURT, 1)
@@ -95,10 +98,13 @@ public final class PetVoiceData {
             .says(VoiceMoment.REVIVE, 1)
             .says(VoiceMoment.IDLE, 2, 1)
             .says(VoiceMoment.CLING, 1)
+            .says(VoiceMoment.TURNED_DOWN, 1)
             .says(VoiceMoment.CRAB_GREETING, 1)
             .says(VoiceMoment.GIVEN_COFFEE, 1)
             .says(VoiceMoment.LISTEN, 1)
-            .chance(VoiceMoment.IDLE, 0.002F));
+            .chance(VoiceMoment.IDLE, 0.002F)
+            .chance(VoiceMoment.LISTEN, 0.5F)
+            .cooldown(TALK));
         // A grown-up of few words: a sigh over something good, and that is all.
         add(all, voice("kurimanju")
             .says(VoiceMoment.SHOP, 1)

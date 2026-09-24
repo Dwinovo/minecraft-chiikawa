@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitTag;
+import com.dwinovo.chiikawa.social.Beat;
 import com.dwinovo.chiikawa.social.PetInteraction;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.Arrays;
@@ -13,6 +14,7 @@ import java.util.Optional;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.EntityType;
 
 /**
@@ -37,8 +39,11 @@ public final class PetInteractionData {
     public static final ResourceLocation TREAT = id("treat");
     /** Kurimanju brings a coffee to someone who has just finished weeding. */
     public static final ResourceLocation COFFEE = id("coffee");
-    /** Anyone sits down by Hachiware busking and listens for a while. */
+    /** Anyone sits down by Hachiware busking, listens for a while and claps along. */
     public static final ResourceLocation LISTEN_TO_MUSIC = id("listen_to_music");
+
+    /** A listener claps every three to eight seconds: now and then, not in time. */
+    private static final UniformInt CLAPS = UniformInt.of(60, 160);
 
     private PetInteractionData() {
     }
@@ -48,73 +53,124 @@ public final class PetInteractionData {
         return Map.of(
             // Momonga clings on and wants to be praised; the one clung to minds. Chiikawa,
             // whom it has bitten more than once, cries; the rest are put out each in its own
-            // way, and Rakko and Kurimanju hardly let it show.
+            // way, and Rakko and Kurimanju hardly let it show. Nobody praises it, so as it
+            // lets go it bursts into its fake tears and wants comforting instead.
             CLING, new PetInteraction(
-                List.of(side("cling", PetReaction.HAPPY, VoiceMoment.CLING, pets(InitEntity.MOMONGA_PET.get()))),
+                List.of(part(InitEntity.MOMONGA_PET.get()).pose("cling")
+                    .begin(beat(PetReaction.HAPPY, VoiceMoment.CLING))
+                    .end(beat(PetReaction.HURT, VoiceMoment.TURNED_DOWN))
+                    .build()),
                 List.of(
-                    side("clung_to", PetReaction.HURT, VoiceMoment.CLUNG_TO, pets(InitEntity.CHIIKAWA_PET.get())),
-                    side("clung_to", PetReaction.CONFUSED, VoiceMoment.CLUNG_TO, pets(InitEntity.HACHIWARE_PET.get(),
-                        InitEntity.USAGI_PET.get(), InitEntity.SHISA_PET.get(), InitEntity.FURUHONYA_PET.get())),
-                    side("clung_to", null, VoiceMoment.CLUNG_TO, pets(InitEntity.RAKKO_PET.get(), InitEntity.KURIMANJU_PET.get()))),
+                    part(InitEntity.CHIIKAWA_PET.get()).pose("clung_to")
+                        .begin(beat(PetReaction.HURT, VoiceMoment.CLUNG_TO)).build(),
+                    part(InitEntity.HACHIWARE_PET.get(), InitEntity.USAGI_PET.get(), InitEntity.SHISA_PET.get(),
+                        InitEntity.FURUHONYA_PET.get()).pose("clung_to")
+                        .begin(beat(PetReaction.CONFUSED, VoiceMoment.CLUNG_TO)).build(),
+                    part(InitEntity.RAKKO_PET.get(), InitEntity.KURIMANJU_PET.get()).pose("clung_to")
+                        .begin(beat(null, VoiceMoment.CLUNG_TO)).build()),
                 PetInteraction.PartnerState.IDLE, Optional.empty(), Optional.empty(), 0,
                 8.0, 1, 300, 80, 12000, 0.05F),
             // Furuhonya greets the friends who greet it back the crab way, Momonga first: the
             // crab headband was Momonga's present.
             CRAB_GREETING, new PetInteraction(
-                List.of(side("crab_greeting", PetReaction.HAPPY, VoiceMoment.CRAB_GREETING, pets(InitEntity.FURUHONYA_PET.get()))),
-                List.of(side("crab_greeting", PetReaction.HAPPY, VoiceMoment.CRAB_GREETING, pets(InitEntity.MOMONGA_PET.get(),
-                    InitEntity.CHIIKAWA_PET.get(), InitEntity.HACHIWARE_PET.get()))),
+                List.of(part(InitEntity.FURUHONYA_PET.get()).pose("crab_greeting")
+                    .begin(beat(PetReaction.HAPPY, VoiceMoment.CRAB_GREETING)).build()),
+                List.of(part(InitEntity.MOMONGA_PET.get(), InitEntity.CHIIKAWA_PET.get(), InitEntity.HACHIWARE_PET.get())
+                    .pose("crab_greeting").begin(beat(PetReaction.HAPPY, VoiceMoment.CRAB_GREETING)).build()),
                 PetInteraction.PartnerState.IDLE, Optional.empty(), Optional.empty(), 0,
                 10.0, 2, 300, 60, 12000, 0.05F),
             // The big brother of the two with the least money: it hands something over
             // without a word or a smile, and they eat it on the spot, delighted.
             TREAT, new PetInteraction(
-                List.of(side("hand_over", null, VoiceMoment.TREAT, pets(InitEntity.RAKKO_PET.get()))),
-                List.of(side("eat", PetReaction.HAPPY, VoiceMoment.TREATED, pets(InitEntity.CHIIKAWA_PET.get(),
-                    InitEntity.HACHIWARE_PET.get()))),
+                List.of(part(InitEntity.RAKKO_PET.get()).pose("hand_over").begin(beat(null, VoiceMoment.TREAT)).build()),
+                List.of(part(InitEntity.CHIIKAWA_PET.get(), InitEntity.HACHIWARE_PET.get()).pose("eat")
+                    .begin(beat(PetReaction.HAPPY, VoiceMoment.TREATED)).build()),
                 PetInteraction.PartnerState.IDLE, Optional.empty(),
                 Optional.of(new ExtraCodecs.TagOrElementLocation(InitTag.PET_TREATS.location(), true)), 0,
                 12.0, 1, 400, 80, 24000, 0.03F),
             // As it did for Chiikawa after the weeding: a quiet coffee, and the one who gets
             // it is keener for a while. Chiikawa first, anyone else who weeds after.
             COFFEE, new PetInteraction(
-                List.of(side("hand_over", null, null, pets(InitEntity.KURIMANJU_PET.get()))),
+                List.of(part(InitEntity.KURIMANJU_PET.get()).pose("hand_over").build()),
                 List.of(
-                    side("drink", PetReaction.HAPPY, VoiceMoment.GIVEN_COFFEE, pets(InitEntity.CHIIKAWA_PET.get())),
-                    side("drink", PetReaction.HAPPY, VoiceMoment.GIVEN_COFFEE, pets(InitEntity.HACHIWARE_PET.get(),
-                        InitEntity.USAGI_PET.get(), InitEntity.SHISA_PET.get(), InitEntity.MOMONGA_PET.get(),
-                        InitEntity.FURUHONYA_PET.get())),
-                    side("drink", null, VoiceMoment.GIVEN_COFFEE, pets(InitEntity.RAKKO_PET.get()))),
+                    part(InitEntity.CHIIKAWA_PET.get()).pose("drink")
+                        .begin(beat(PetReaction.HAPPY, VoiceMoment.GIVEN_COFFEE)).build(),
+                    part(InitEntity.HACHIWARE_PET.get(), InitEntity.USAGI_PET.get(), InitEntity.SHISA_PET.get(),
+                        InitEntity.MOMONGA_PET.get(), InitEntity.FURUHONYA_PET.get()).pose("drink")
+                        .begin(beat(PetReaction.HAPPY, VoiceMoment.GIVEN_COFFEE)).build(),
+                    part(InitEntity.RAKKO_PET.get()).pose("drink").begin(beat(null, VoiceMoment.GIVEN_COFFEE)).build()),
                 PetInteraction.PartnerState.IDLE,
                 Optional.of(new PetInteraction.SlipCondition(PetTaskTypeData.WEEDING, 2400)), Optional.empty(), 1200,
                 12.0, 1, 400, 80, 24000, 0.25F),
-            // Hachiware plays on; whoever comes by sits down to listen. Rakko and Kurimanju
-            // listen without a fuss.
+            // Hachiware plays on; whoever comes by sits down to listen and now and then
+            // claps along, with a word when it has one. Rakko and Kurimanju listen without a
+            // fuss, and never clap.
             LISTEN_TO_MUSIC, new PetInteraction(
                 List.of(
-                    side("sit", PetReaction.HAPPY, VoiceMoment.LISTEN, pets(InitEntity.CHIIKAWA_PET.get(),
-                        InitEntity.HACHIWARE_PET.get(), InitEntity.USAGI_PET.get(), InitEntity.SHISA_PET.get(),
-                        InitEntity.MOMONGA_PET.get(), InitEntity.FURUHONYA_PET.get())),
-                    side("sit", null, VoiceMoment.LISTEN, pets(InitEntity.RAKKO_PET.get(), InitEntity.KURIMANJU_PET.get()))),
-                List.of(side(null, null, null, pets(InitEntity.HACHIWARE_PET.get()))),
+                    part(InitEntity.CHIIKAWA_PET.get(), InitEntity.HACHIWARE_PET.get(), InitEntity.USAGI_PET.get(),
+                        InitEntity.SHISA_PET.get(), InitEntity.MOMONGA_PET.get(), InitEntity.FURUHONYA_PET.get())
+                        .pose("sit")
+                        .begin(beat(PetReaction.HAPPY, VoiceMoment.LISTEN))
+                        .nowAndThen(new Beat.Recurring(CLAPS,
+                            new Beat(Optional.of("clap"), Optional.empty(), Optional.of(VoiceMoment.LISTEN))))
+                        .build(),
+                    part(InitEntity.RAKKO_PET.get(), InitEntity.KURIMANJU_PET.get()).pose("sit")
+                        .begin(beat(null, VoiceMoment.LISTEN)).build()),
+                List.of(part(InitEntity.HACHIWARE_PET.get()).build()),
                 PetInteraction.PartnerState.PLAYING_MUSIC, Optional.empty(), Optional.empty(), 0,
                 12.0, 3, 400, 400, 6000, 0.1F)
         );
     }
 
-    private static PetInteraction.Side side(String animation, PetReaction reaction, VoiceMoment voice,
-            List<ExtraCodecs.TagOrElementLocation> pets) {
-        return new PetInteraction.Side(pets, Optional.ofNullable(animation), Optional.ofNullable(reaction),
-            Optional.ofNullable(voice));
+    /** A face and a line, without a move of its own. */
+    private static Beat beat(PetReaction reaction, VoiceMoment voice) {
+        return new Beat(Optional.empty(), Optional.ofNullable(reaction), Optional.ofNullable(voice));
     }
 
-    private static List<ExtraCodecs.TagOrElementLocation> pets(EntityType<?>... types) {
-        return Arrays.stream(types)
+    private static Part part(EntityType<?>... types) {
+        return new Part(Arrays.stream(types)
             .map(type -> new ExtraCodecs.TagOrElementLocation(BuiltInRegistries.ENTITY_TYPE.getKey(type), false))
-            .toList();
+            .toList());
     }
 
     private static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path);
+    }
+
+    /** One part, said the way a stage direction is. */
+    private static final class Part {
+        private final List<ExtraCodecs.TagOrElementLocation> pets;
+        private Optional<String> pose = Optional.empty();
+        private Optional<Beat> begin = Optional.empty();
+        private Optional<Beat.Recurring> nowAndThen = Optional.empty();
+        private Optional<Beat> end = Optional.empty();
+
+        Part(List<ExtraCodecs.TagOrElementLocation> pets) {
+            this.pets = pets;
+        }
+
+        Part pose(String animation) {
+            pose = Optional.of(animation);
+            return this;
+        }
+
+        Part begin(Beat beat) {
+            begin = Optional.of(beat);
+            return this;
+        }
+
+        Part nowAndThen(Beat.Recurring recurring) {
+            nowAndThen = Optional.of(recurring);
+            return this;
+        }
+
+        Part end(Beat beat) {
+            end = Optional.of(beat);
+            return this;
+        }
+
+        PetInteraction.Side build() {
+            return new PetInteraction.Side(pets, pose, begin, nowAndThen, end);
+        }
     }
 }
