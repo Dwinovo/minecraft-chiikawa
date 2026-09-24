@@ -30,6 +30,8 @@ public final class TestContext {
     private boolean takeTaskCoolingDown;
     private boolean shopCoolingDown;
     private boolean carryingGift;
+    private Optional<GlobalPos> socialPartner = Optional.empty();
+    private boolean playingAlong;
     private boolean eager;
 
     private TestContext(GlobalPos petPos, PetAnchor anchor) {
@@ -93,6 +95,18 @@ public final class TestContext {
         return this;
     }
 
+    /** The pet has thought of playing a scene with a pet standing here. */
+    public TestContext socialPartner(GlobalPos partner) {
+        this.socialPartner = Optional.of(partner);
+        return this;
+    }
+
+    /** Another pet is on its way over to play a scene with this one. */
+    public TestContext playingAlong() {
+        this.playingAlong = true;
+        return this;
+    }
+
     /** The pet has been fed something worth working off. */
     public TestContext eager() {
         this.eager = true;
@@ -101,7 +115,7 @@ public final class TestContext {
 
     public IntentContext build() {
         return new IntentContext(petPos, phase, ownership, personality, anchor, targets, task, offeringBoard,
-            shopWorthVisiting, takeTaskCoolingDown, shopCoolingDown, carryingGift, eager,
+            shopWorthVisiting, takeTaskCoolingDown, shopCoolingDown, socialPartner, playingAlong, carryingGift, eager,
             false, false, false, false);
     }
 }
