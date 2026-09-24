@@ -22,6 +22,8 @@ public final class InitTag {
      * a pack puts here, each worth one; the first is what is paid out and pictured.
      */
     public static final TagKey<Item> CURRENCY = tag("currency");
+    /** What a pet treats another to out of its own backpack, see {@code pet_interaction}. */
+    public static final TagKey<Item> PET_TREATS = tag("pet_treats");
 
     public static final TagKey<EntityType<?>> ENTITY_HOSTILE_ENTITY = tagEntity("entity_hostile_entity");
 

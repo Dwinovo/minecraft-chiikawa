@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPlacesSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetFarmerWorkSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetSocialSensor;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import java.util.function.Supplier;
 import net.minecraft.world.entity.ai.sensing.SensorType;
@@ -19,6 +20,9 @@ public interface IPlatformRegistryAccess {
 
     /** Finds the places a pet's day is built around: the nearest board and the nearest shop. */
     Supplier<SensorType<PetPlacesSensor>> petPlacesSensor();
+
+    /** Notices the other pets a pet could play a scene with. */
+    Supplier<SensorType<PetSocialSensor>> petSocialSensor();
 
     Supplier<Activity> farmerHarvestActivity();
 
@@ -58,6 +62,10 @@ public interface IPlatformRegistryAccess {
     Supplier<Activity> shopActivity();
 
     Supplier<Activity> giftOwnerActivity();
+
+    Supplier<Activity> socializeActivity();
+
+    Supplier<Activity> cooperateActivity();
 
     Supplier<MenuType<PetBackpackMenu>> petBackpackMenu();
 }
