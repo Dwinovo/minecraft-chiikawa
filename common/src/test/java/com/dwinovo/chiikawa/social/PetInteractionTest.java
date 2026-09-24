@@ -26,9 +26,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class PetInteractionTest {
-    private static final ResourceLocation CLING = ResourceLocation.fromNamespaceAndPath("chiikawa", "cling");
-    private static final ResourceLocation GREETING = ResourceLocation.fromNamespaceAndPath("chiikawa", "crab_greeting");
-    private static final ResourceLocation WEEDING = ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding");
+    private static final ResourceLocation CLING = new ResourceLocation("chiikawa", "cling");
+    private static final ResourceLocation GREETING = new ResourceLocation("chiikawa", "crab_greeting");
+    private static final ResourceLocation WEEDING = new ResourceLocation("chiikawa", "weeding");
 
     @BeforeAll
     static void bootstrap() {
@@ -118,7 +118,7 @@ class PetInteractionTest {
 
         assertTrue(justWeeded.metBy(Optional.of(new FinishedSlip(WEEDING, 1000)), 3400));
         assertFalse(justWeeded.metBy(Optional.of(new FinishedSlip(WEEDING, 1000)), 3401), "too long ago");
-        assertFalse(justWeeded.metBy(Optional.of(new FinishedSlip(ResourceLocation.fromNamespaceAndPath("chiikawa",
+        assertFalse(justWeeded.metBy(Optional.of(new FinishedSlip(new ResourceLocation("chiikawa",
             "street_performance"), 1000)), 1200), "another job");
         assertFalse(justWeeded.metBy(Optional.empty(), 1200), "never finished one");
     }

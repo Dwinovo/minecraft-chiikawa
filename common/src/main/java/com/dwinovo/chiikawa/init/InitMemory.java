@@ -104,7 +104,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<FinishedSlip>> LAST_FINISHED_SLIP =
         Services.REGISTRY.<MemoryModuleType<FinishedSlip>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "last_finished_slip"),
+            new ResourceLocation(Constants.MOD_ID, "last_finished_slip"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -112,7 +112,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<InteractionPlan>> INTERACTION_PLAN =
         Services.REGISTRY.<MemoryModuleType<InteractionPlan>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "interaction_plan"),
+            new ResourceLocation(Constants.MOD_ID, "interaction_plan"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -120,7 +120,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<InteractionReservation>> INTERACTION_RESERVATION =
         Services.REGISTRY.<MemoryModuleType<InteractionReservation>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "interaction_reservation"),
+            new ResourceLocation(Constants.MOD_ID, "interaction_reservation"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -128,7 +128,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<SocialCooldowns>> SOCIAL_COOLDOWNS =
         Services.REGISTRY.<MemoryModuleType<SocialCooldowns>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "social_cooldowns"),
+            new ResourceLocation(Constants.MOD_ID, "social_cooldowns"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -160,7 +160,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<PetSpeech.Said>> LAST_SAID =
         Services.REGISTRY.<MemoryModuleType<PetSpeech.Said>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "last_said"),
+            new ResourceLocation(Constants.MOD_ID, "last_said"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 

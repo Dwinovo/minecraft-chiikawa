@@ -46,7 +46,7 @@ public final class PetPayloads {
      */
     public record PetGesturePayload(int pet, String animation) implements CustomPacketPayload {
         public static final Type<PetGesturePayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "pet_gesture"));
+            new ResourceLocation(Constants.MOD_ID, "pet_gesture"));
         public static final StreamCodec<RegistryFriendlyByteBuf, PetGesturePayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT, PetGesturePayload::pet,
             ByteBufCodecs.STRING_UTF8, PetGesturePayload::animation,

@@ -22,7 +22,7 @@ public final class VoicePayloads {
      */
     public record PetSpeechPayload(int pet, String line, int ticks) implements CustomPacketPayload {
         public static final Type<PetSpeechPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "pet_speech"));
+            new ResourceLocation(Constants.MOD_ID, "pet_speech"));
         public static final StreamCodec<RegistryFriendlyByteBuf, PetSpeechPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT, PetSpeechPayload::pet,
             ByteBufCodecs.STRING_UTF8, PetSpeechPayload::line,
