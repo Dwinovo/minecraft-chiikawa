@@ -8,6 +8,7 @@ import com.dwinovo.chiikawa.entity.impl.MomongaPet;
 import com.dwinovo.chiikawa.entity.impl.RakkoPet;
 import com.dwinovo.chiikawa.entity.impl.ShisaPet;
 import com.dwinovo.chiikawa.entity.impl.UsagiPet;
+import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.platform.services.IEntityHelper;
 import java.util.function.Function;
@@ -71,7 +72,8 @@ public class ForgeEntityHelper implements IEntityHelper {
 
     @Override
     public Entity changeDimension(Entity entity, ServerLevel destination, Vec3 position, float yRot, float xRot) {
-        return entity.changeDimension(destination, new ITeleporter() {
+        // Not through changeDimension(ServerLevel), where a pet notes where it crossed to.
+        return AbstractPet.noteCrossing(entity.changeDimension(destination, new ITeleporter() {
             @Override
             public PortalInfo getPortalInfo(Entity moving, ServerLevel level, Function<ServerLevel, PortalInfo> defaultPortalInfo) {
                 return new PortalInfo(position, Vec3.ZERO, yRot, xRot);
@@ -83,6 +85,6 @@ public class ForgeEntityHelper implements IEntityHelper {
                 // Placed where asked, with no portal or platform built around it.
                 return repositionEntity.apply(false);
             }
-        });
+        }));
     }
 }
