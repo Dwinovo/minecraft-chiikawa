@@ -9,9 +9,7 @@ import com.mojang.serialization.JsonOps;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.SharedConstants;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.RandomSource;
@@ -23,7 +21,7 @@ class PetTaskTest {
     private static final ResourceLocation FARMER = id("farmer");
     private static final ResourceLocation GRASS = new ResourceLocation("short_grass");
     private static final PetTask WEEDING = new PetTask(id("weeding"), FARMER, PetWorkCounters.WEED, GRASS, 3,
-        ResourceKey.create(Registries.LOOT_TABLE, id("pet_task/weeding")), 0);
+        id("pet_task/weeding"), 0);
 
     @BeforeAll
     static void bootstrap() {
@@ -45,8 +43,8 @@ class PetTaskTest {
     @Test
     void aSlipSurvivesSavingWithItsProgress() {
         PetTask saved = WEEDING.advance(1);
-        assertEquals(saved, PetTask.CODEC.parse(NbtOps.INSTANCE, PetTask.CODEC.encodeStart(NbtOps.INSTANCE, saved).getOrThrow())
-            .getOrThrow());
+        assertEquals(saved, PetTask.CODEC.parse(NbtOps.INSTANCE, PetTask.CODEC.encodeStart(NbtOps.INSTANCE, saved).getOrThrow(false, org.junit.jupiter.api.Assertions::fail))
+            .getOrThrow(false, org.junit.jupiter.api.Assertions::fail));
     }
 
     @Test
@@ -63,7 +61,7 @@ class PetTaskTest {
         PetTaskType type = PetTaskType.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("""
             { "capability": "chiikawa:farmer", "counter": "chiikawa:weed", "icon": "minecraft:short_grass",
               "amount": { "type": "minecraft:uniform", "min_inclusive": 8, "max_inclusive": 16 },
-              "reward": "chiikawa:pet_task/weeding" }""")).getOrThrow();
+              "reward": "chiikawa:pet_task/weeding" }""")).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
         assertEquals(1, type.weight());
         assertEquals(FARMER, type.capability());

@@ -43,7 +43,7 @@ public final class TaskTracker {
     private static void complete(AbstractPet pet, PetTask task) {
         ServerLevel level = (ServerLevel) pet.level();
         pet.setTask(null);
-        LootTable reward = level.getServer().reloadableRegistries().getLootTable(task.reward());
+        LootTable reward = level.getServer().getLootData().getLootTable(task.reward());
         LootParams params = new LootParams.Builder(level)
             .withParameter(LootContextParams.ORIGIN, pet.position())
             .withParameter(LootContextParams.THIS_ENTITY, pet)

@@ -82,6 +82,6 @@ class PetRosterTest {
 
     /** Through NBT and back, which is the only trip that counts. */
     private static PetRoster reloaded(PetRoster roster) {
-        return PetRoster.load(roster.save(new CompoundTag(), null), null);
+        return PetRoster.load(roster.save(new CompoundTag()));
     }
 }

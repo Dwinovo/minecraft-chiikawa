@@ -57,7 +57,7 @@ public class ForgeDataGenerators {
         generator.addProvider(event.includeServer(), new LaborBoardLevelProvider(output));
         generator.addProvider(event.includeServer(), new PetSpawnProvider(output));
         generator.addProvider(event.includeServer(), new ModAdvancementProvider(output, lookupProvider));
-        generator.addProvider(event.includeServer(), new ModLootTableProvider(output, lookupProvider));
+        generator.addProvider(event.includeServer(), new ModLootTableProvider(output));
         
         // Sound provider
         generator.addProvider(event.includeClient(), new ForgeModSoundsProvider(output));

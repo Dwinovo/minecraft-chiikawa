@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.shop;
 import com.dwinovo.chiikawa.Constants;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,9 +45,11 @@ public final class ShopCatalogLoader extends SimpleJsonResourceReloadListener {
     static Loaded load(Map<ResourceLocation, JsonElement> files) {
         Map<ResourceLocation, ShopCatalog> catalogs = new HashMap<>();
         List<String> errors = new ArrayList<>();
-        files.forEach((id, json) -> ShopCatalog.CODEC.parse(JsonOps.INSTANCE, json)
-            .ifSuccess(catalog -> catalogs.put(id, catalog))
-            .ifError(error -> errors.add(LOG_PREFIX + id + " is skipped, failed to parse: " + error.message())));
+        files.forEach((id, json) -> {
+            DataResult<ShopCatalog> parsed = ShopCatalog.CODEC.parse(JsonOps.INSTANCE, json);
+            parsed.result().ifPresent(catalog -> catalogs.put(id, catalog));
+            parsed.error().ifPresent(error -> errors.add(LOG_PREFIX + id + " is skipped, failed to parse: " + error.message()));
+        });
         return new Loaded(catalogs, errors);
     }
 

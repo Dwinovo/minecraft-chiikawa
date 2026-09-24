@@ -60,11 +60,11 @@ class PersonalityTest {
 
     @Test
     void rejectsOutOfRangeValues() {
-        assertTrue(decode("{ \"intent_multipliers\": { \"chiikawa:wander\": -1 } }").isError());
-        assertTrue(decode("{ \"randomness\": 1.5 }").isError());
-        assertTrue(decode("{ \"wild_tools\": [ { \"item\": \"minecraft:stone_hoe\", \"weight\": 0 } ] }").isError());
-        assertTrue(decode("{ \"wild_tools\": [ { \"item\": \"minecraft:no_such_item\", \"weight\": 1 } ] }").isError());
-        assertTrue(decode("{ \"routine\": { \"NOON\": {} } }").isError());
+        assertTrue(decode("{ \"intent_multipliers\": { \"chiikawa:wander\": -1 } }").error().isPresent());
+        assertTrue(decode("{ \"randomness\": 1.5 }").error().isPresent());
+        assertTrue(decode("{ \"wild_tools\": [ { \"item\": \"minecraft:stone_hoe\", \"weight\": 0 } ] }").error().isPresent());
+        assertTrue(decode("{ \"wild_tools\": [ { \"item\": \"minecraft:no_such_item\", \"weight\": 1 } ] }").error().isPresent());
+        assertTrue(decode("{ \"routine\": { \"NOON\": {} } }").error().isPresent());
     }
 
     @Test
@@ -73,8 +73,8 @@ class PersonalityTest {
             0.05F, List.of(new Personality.WeightedItem(Items.STONE_SWORD, 4)),
             List.of(new Personality.WeightedItem(Items.COOKIE, 2)));
 
-        JsonElement json = Personality.CODEC.encodeStart(JsonOps.INSTANCE, personality).getOrThrow();
-        Personality decoded = Personality.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
+        JsonElement json = Personality.CODEC.encodeStart(JsonOps.INSTANCE, personality).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
+        Personality decoded = Personality.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
         assertEquals(personality.intentMultipliers(), decoded.intentMultipliers());
         assertEquals(personality.routine(), decoded.routine());
@@ -104,7 +104,7 @@ class PersonalityTest {
     }
 
     private static Personality parse(String json) {
-        return decode(json).getOrThrow();
+        return decode(json).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
     }
 
     private static com.mojang.serialization.DataResult<Personality> decode(String json) {

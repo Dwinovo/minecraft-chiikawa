@@ -103,7 +103,7 @@ class ShopTest {
     void aPriceListParsesAndLeavesOutPricesItDoesNotSet() {
         ShopCatalog parsed = ShopCatalog.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("""
             { "entries": [ { "item": "minecraft:cookie", "buy": 1 }, { "item": "minecraft:wheat", "sell": 1 } ] }"""))
-            .getOrThrow();
+            .getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
         assertEquals(1, parsed.onSale().size());
         assertTrue(parsed.purchase(Items.WHEAT).isPresent());
