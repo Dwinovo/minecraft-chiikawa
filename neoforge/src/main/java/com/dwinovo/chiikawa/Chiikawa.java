@@ -35,7 +35,7 @@ import com.dwinovo.chiikawa.platform.Services;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -76,12 +76,12 @@ public class Chiikawa {
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> PetRecall.tickServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener((ServerStoppingEvent event) -> ServerMusicSystem.stopServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener(Chiikawa::registerCommands);
-        NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> {
-            event.addListener(new PetPersonalityLoader());
-            event.addListener(new PetTaskTypeLoader());
-            event.addListener(new ShopCatalogLoader());
-            event.addListener(new BoardLevelsLoader());
-            event.addListener(new PetSpawnLoader());
+        NeoForge.EVENT_BUS.addListener((AddServerReloadListenersEvent event) -> {
+            event.addListener(PetPersonalityLoader.ID, new PetPersonalityLoader());
+            event.addListener(PetTaskTypeLoader.ID, new PetTaskTypeLoader());
+            event.addListener(ShopCatalogLoader.ID, new ShopCatalogLoader());
+            event.addListener(BoardLevelsLoader.ID, new BoardLevelsLoader());
+            event.addListener(PetSpawnLoader.ID, new PetSpawnLoader());
         });
 
         InitCapabilities.register(modEventBus);
