@@ -13,9 +13,8 @@ import net.minecraft.server.Bootstrap;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-/** Everything the player reads about a pet's work has a name in both languages. */
+/** Everything the player reads about a pet's work has a name in every language. */
 class LanguageDataUiTranslationTest {
-    private static final String[] LOCALES = {"en_us", "zh_cn"};
     private static final String[] SCREEN_KEYS = {
         "screen.chiikawa.labor_board",
         "screen.chiikawa.labor_board.count",
@@ -51,7 +50,7 @@ class LanguageDataUiTranslationTest {
 
     @Test
     void everyIntentHasAName() {
-        for (String locale : LOCALES) {
+        for (String locale : LanguageData.LOCALES) {
             Map<String, String> translations = collect(locale);
             for (PetIntent intent : PetIntents.all()) {
                 String key = "intent." + intent.id().getNamespace() + "." + intent.id().getPath();
@@ -62,7 +61,7 @@ class LanguageDataUiTranslationTest {
 
     @Test
     void everySlipTypeHasAName() {
-        for (String locale : LOCALES) {
+        for (String locale : LanguageData.LOCALES) {
             Map<String, String> translations = collect(locale);
             for (ResourceLocation type : List.of(PetTaskTypeData.WEEDING, PetTaskTypeData.STREET_PERFORMANCE,
                     PetTaskTypeData.MELEE_HUNTING, PetTaskTypeData.RANGED_HUNTING)) {
@@ -75,7 +74,7 @@ class LanguageDataUiTranslationTest {
 
     @Test
     void everyScreenLineHasATranslation() {
-        for (String locale : LOCALES) {
+        for (String locale : LanguageData.LOCALES) {
             Map<String, String> translations = collect(locale);
             for (String key : SCREEN_KEYS) {
                 assertTrue(translations.containsKey(key), () -> locale + " is missing " + key);
