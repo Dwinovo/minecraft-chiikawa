@@ -70,14 +70,14 @@ public final class WorldSurface implements DrawSurface {
 
     @Override
     public void fillRect(int x, int y, int width, int height, int argb) {
-        argb = faded(argb);
+        int color = faded(argb);
         float z = nextLayer();
         collector.submitCustomGeometry(pose, RenderType.textBackground(), (drawPose, consumer) -> {
             // Wound as the game winds its own name-tag backdrop, which this render type culls by.
-            consumer.addVertex(drawPose, x, y + height, z).setColor(argb).setLight(FULL_BRIGHT);
-            consumer.addVertex(drawPose, x + width, y + height, z).setColor(argb).setLight(FULL_BRIGHT);
-            consumer.addVertex(drawPose, x + width, y, z).setColor(argb).setLight(FULL_BRIGHT);
-            consumer.addVertex(drawPose, x, y, z).setColor(argb).setLight(FULL_BRIGHT);
+            consumer.addVertex(drawPose, x, y + height, z).setColor(color).setLight(FULL_BRIGHT);
+            consumer.addVertex(drawPose, x + width, y + height, z).setColor(color).setLight(FULL_BRIGHT);
+            consumer.addVertex(drawPose, x + width, y, z).setColor(color).setLight(FULL_BRIGHT);
+            consumer.addVertex(drawPose, x, y, z).setColor(color).setLight(FULL_BRIGHT);
         });
     }
 
