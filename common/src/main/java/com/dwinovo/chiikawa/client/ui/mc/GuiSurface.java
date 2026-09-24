@@ -12,18 +12,14 @@ import net.minecraft.client.gui.GuiGraphics;
  */
 public record GuiSurface(GuiGraphics graphics, Font font) implements DrawSurface {
     /**
-     * How far in front of the screen a tooltip is drawn. The game puts item icons a long
-     * way forward so they stand off their slots, and a card drawn flat would have those
-     * icons poke straight through it; this is the depth the game's own tooltips use.
+     * Draws above everything already on the screen — where a tooltip belongs. The game puts
+     * a screen together a layer at a time, item icons over the flat drawing of their layer,
+     * so a card drawn in the same layer would have those icons poke straight through it;
+     * this starts the next layer, as the game's own tooltips do.
      */
-    private static final int TOOLTIP_Z = 400;
-
-    /** Draws above everything already on the screen — where a tooltip belongs. */
     public void onTop(Runnable drawing) {
-        graphics.pose().pushPose();
-        graphics.pose().translate(0.0F, 0.0F, TOOLTIP_Z);
+        graphics.nextStratum();
         drawing.run();
-        graphics.pose().popPose();
     }
 
     @Override

@@ -2,35 +2,37 @@ package com.dwinovo.chiikawa.client.manual;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.anim.render.ChiikawaEntityRenderer;
-import com.dwinovo.chiikawa.anim.render.PropRenderer;
+import com.dwinovo.chiikawa.client.render.PropPictureRenderer;
 import com.dwinovo.chiikawa.client.ui.mc.GuiSurface;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.manual.ManualPage;
+import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.ui.Rect;
 import com.dwinovo.chiikawa.ui.Ui;
 import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.UiTheme;
-import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.math.Axis;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 /**
  * One panel of the handbook, put on stage: the pets in it made and dressed once, then
@@ -86,7 +88,7 @@ public final class ManualScene {
     private static Optional<Staged> stage(ManualPage.Actor actor) {
         if (actor.pet().isPresent()) {
             var type = BuiltInRegistries.ENTITY_TYPE.getOptional(actor.pet().get());
-            if (type.isPresent() && type.get().create(Minecraft.getInstance().level) instanceof AbstractPet pet) {
+            if (type.isPresent() && type.get().create(Minecraft.getInstance().level, EntitySpawnReason.LOAD) instanceof AbstractPet pet) {
                 return Optional.of(new StagedPet(actor, dress(pet, actor)));
             }
             Constants.LOG.warn("[chiikawa-manual] {} is not a pet, so it is left out of its panel", actor.pet().get());
@@ -112,12 +114,12 @@ public final class ManualScene {
     /** An item by id, or the first item of a tag — {@code #chiikawa:currency} being whatever money is. */
     static ItemStack resolve(ExtraCodecs.TagOrElementLocation ref) {
         if (ref.tag()) {
-            return BuiltInRegistries.ITEM.getTag(TagKey.create(Registries.ITEM, ref.id()))
+            return BuiltInRegistries.ITEM.get(TagKey.create(Registries.ITEM, ref.id()))
                 .flatMap(tag -> tag.stream().findFirst())
                 .map(ItemStack::new)
                 .orElse(ItemStack.EMPTY);
         }
-        Item item = BuiltInRegistries.ITEM.get(ref.id());
+        Item item = BuiltInRegistries.ITEM.getValue(ref.id());
         return new ItemStack(item);
     }
 
@@ -144,6 +146,15 @@ public final class ManualScene {
         float screenY(Rect area, int groundY) {
             return groundY - actor.y() * area.height();
         }
+
+        /**
+         * From the middle of the area to where this stands, in blocks of {@code size} screen
+         * pixels: the game draws a thing in a screen from the middle of the area it is given.
+         */
+        Vector3f offset(Rect area, int groundY, float size) {
+            return new Vector3f((screenX(area) - (area.x() + area.right()) / 2.0F) / size,
+                (screenY(area, groundY) - (area.y() + area.bottom()) / 2.0F) / size, 0.0F);
+        }
     }
 
     private static final class StagedPet extends Staged {
@@ -158,7 +169,7 @@ public final class ManualScene {
         void tick(int ticks) {
             pet.tickCount++;
             if (actor.walk()) {
-                pet.walkAnimation.update(WALK_SPEED, 1.0F);
+                pet.walkAnimation.update(WALK_SPEED, 1.0F, 1.0F);
             }
             // Halfway into the first round, so a move is under way by the time anyone looks.
             if ((ticks + actor.motion().every() / 2) % actor.motion().every() == 0) {
@@ -183,20 +194,19 @@ public final class ManualScene {
             pet.yHeadRotO = yaw;
             pet.setXRot(0.0F);
             float size = blockPixels * actor.scale();
-            graphics.pose().pushPose();
-            graphics.pose().translate(screenX(area), screenY(area, groundY), 50.0F);
-            graphics.pose().scale(size, size, -size);
-            graphics.pose().mulPose(Axis.ZP.rotationDegrees(180.0F));
-            Lighting.setupForEntityInInventory();
-            EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
-            dispatcher.setRenderShadow(false);
             float partialTick = time - (float) Math.floor(time);
-            ChiikawaEntityRenderer.drawPortrait(() -> RenderSystem.runAsFancy(() -> dispatcher.render(pet,
-                0.0, 0.0, 0.0, 0.0F, partialTick, graphics.pose(), graphics.bufferSource(), LightTexture.FULL_BRIGHT)));
-            graphics.flush();
-            dispatcher.setRenderShadow(true);
-            graphics.pose().popPose();
-            Lighting.setupFor3DItems();
+            // What the game's inventory hands a screen for an entity, at the game clock's
+            // partial tick rather than its fixed 1.0.
+            ChiikawaEntityRenderer.drawPortrait(() -> {
+                EntityRenderer<? super AbstractPet, ?> renderer = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(pet);
+                EntityRenderState state = renderer.createRenderState(pet, partialTick);
+                state.lightCoords = LightTexture.FULL_BRIGHT;
+                state.hitboxesRenderState = null;
+                state.shadowPieces.clear();
+                state.outlineColor = 0;
+                graphics.submitEntityRenderState(state, size, offset(area, groundY, size),
+                    new Quaternionf().rotateZ((float) Math.PI), null, area.x(), area.y(), area.right(), area.bottom());
+            });
         }
 
         /** What the pet says, in a bubble near the top of the panel above it. */
@@ -221,8 +231,6 @@ public final class ManualScene {
     }
 
     private static final class StagedProp extends Staged {
-        private static final float PIXEL = 1.0F / 16.0F;
-
         StagedProp(ManualPage.Actor actor) {
             super(actor);
         }
@@ -230,19 +238,9 @@ public final class ManualScene {
         @Override
         void draw(GuiGraphics graphics, Rect area, int groundY, float blockPixels, float time) {
             float size = blockPixels * actor.scale();
-            graphics.pose().pushPose();
-            graphics.pose().translate(screenX(area), screenY(area, groundY), 50.0F);
-            graphics.pose().scale(size, size, -size);
-            graphics.pose().mulPose(Axis.ZP.rotationDegrees(180.0F));
-            // Turned the way a pet is, so a prop and a pet given the same facing face alike.
-            graphics.pose().mulPose(Axis.YP.rotationDegrees(actor.facing()));
-            graphics.pose().scale(PIXEL, PIXEL, PIXEL);
-            Lighting.setupForEntityInInventory();
-            PropRenderer.draw(actor.prop().orElseThrow(), graphics.pose(), graphics.bufferSource(),
-                LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
-            graphics.flush();
-            graphics.pose().popPose();
-            Lighting.setupFor3DItems();
+            Services.PLATFORM.submitPictureInPicture(graphics, new PropPictureRenderer.State(actor.prop().orElseThrow(),
+                actor.facing(), offset(area, groundY, size), area.x(), area.y(), area.right(), area.bottom(), size,
+                new ScreenRectangle(area.x(), area.y(), area.width(), area.height())));
         }
     }
 
@@ -259,11 +257,11 @@ public final class ManualScene {
         void draw(GuiGraphics graphics, Rect area, int groundY, float blockPixels, float time) {
             float bob = actor.motion().bob() ? Mth.sin(time * 0.2F) * BOB_PIXELS : 0.0F;
             float scale = actor.scale();
-            graphics.pose().pushPose();
-            graphics.pose().translate(screenX(area), screenY(area, groundY) - UiStyle.ICON * scale / 2.0F + bob, 150.0F);
-            graphics.pose().scale(scale, scale, 1.0F);
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(screenX(area), screenY(area, groundY) - UiStyle.ICON * scale / 2.0F + bob);
+            graphics.pose().scale(scale, scale);
             graphics.renderItem(stack, -UiStyle.ICON / 2, -UiStyle.ICON / 2);
-            graphics.pose().popPose();
+            graphics.pose().popMatrix();
         }
     }
 }

@@ -1,5 +1,8 @@
 package com.dwinovo.chiikawa.platform.services;
 
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.render.state.pip.PictureInPictureRenderState;
+
 public interface IPlatformHelper {
 
     /**
@@ -32,4 +35,10 @@ public interface IPlatformHelper {
     default String getEnvironmentName() {
         return isDevelopmentEnvironment() ? "development" : "production";
     }
+
+    /**
+     * Hands a screen a picture of the mod's own to draw, as the game hands it an entity.
+     * Vanilla keeps what a screen is drawing to itself, so each loader opens it its own way.
+     */
+    void submitPictureInPicture(GuiGraphics graphics, PictureInPictureRenderState state);
 }

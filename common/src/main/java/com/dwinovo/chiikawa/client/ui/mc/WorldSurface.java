@@ -4,15 +4,16 @@ import com.dwinovo.chiikawa.ui.DrawSurface;
 import com.dwinovo.chiikawa.ui.Icon;
 import com.dwinovo.chiikawa.ui.UiStyle;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemDisplayContext;
-import org.joml.Matrix4f;
 
 /**
  * Draws the {@code chiikawa-ui} library in the world, on a surface already turned to face
@@ -40,7 +41,7 @@ public final class WorldSurface implements DrawSurface {
     private static final float LAYER_STEP = 0.1F;
 
     private final PoseStack pose;
-    private final MultiBufferSource bufferSource;
+    private final SubmitNodeCollector collector;
     private final Font font;
     private float layer;
 
@@ -48,31 +49,31 @@ public final class WorldSurface implements DrawSurface {
      * @param pose already translated to the label's spot, turned to the camera and scaled
      *             to text pixels, with y running down as on a screen and z towards the camera
      */
-    public WorldSurface(PoseStack pose, MultiBufferSource bufferSource, Font font) {
+    public WorldSurface(PoseStack pose, SubmitNodeCollector collector, Font font) {
         this.pose = pose;
-        this.bufferSource = bufferSource;
+        this.collector = collector;
         this.font = font;
     }
 
     @Override
     public void fillRect(int x, int y, int width, int height, int argb) {
         float z = nextLayer();
-        Matrix4f matrix = pose.last().pose();
-        VertexConsumer consumer = bufferSource.getBuffer(RenderType.textBackground());
-        // Wound as the game winds its own name-tag backdrop, which this render type culls by.
-        consumer.addVertex(matrix, x, y + height, z).setColor(argb).setLight(FULL_BRIGHT);
-        consumer.addVertex(matrix, x + width, y + height, z).setColor(argb).setLight(FULL_BRIGHT);
-        consumer.addVertex(matrix, x + width, y, z).setColor(argb).setLight(FULL_BRIGHT);
-        consumer.addVertex(matrix, x, y, z).setColor(argb).setLight(FULL_BRIGHT);
+        collector.submitCustomGeometry(pose, RenderType.textBackground(), (drawPose, consumer) -> {
+            // Wound as the game winds its own name-tag backdrop, which this render type culls by.
+            consumer.addVertex(drawPose, x, y + height, z).setColor(argb).setLight(FULL_BRIGHT);
+            consumer.addVertex(drawPose, x + width, y + height, z).setColor(argb).setLight(FULL_BRIGHT);
+            consumer.addVertex(drawPose, x + width, y, z).setColor(argb).setLight(FULL_BRIGHT);
+            consumer.addVertex(drawPose, x, y, z).setColor(argb).setLight(FULL_BRIGHT);
+        });
     }
 
     @Override
     public void drawText(String text, int x, int y, int argb) {
-        // drawInBatch takes no z, so the layer goes through the matrix.
+        // Text takes no z, so the layer goes through the matrix.
         pose.pushPose();
         pose.translate(0.0F, 0.0F, nextLayer());
-        font.drawInBatch(text, x, y, argb, false, pose.last().pose(), bufferSource,
-            Font.DisplayMode.NORMAL, 0, FULL_BRIGHT);
+        collector.submitText(pose, x, y, FormattedCharSequence.forward(text, Style.EMPTY), false,
+            Font.DisplayMode.NORMAL, FULL_BRIGHT, argb, 0, 0);
         pose.popPose();
     }
 
@@ -87,12 +88,14 @@ public final class WorldSurface implements DrawSurface {
             return;
         }
         Minecraft minecraft = Minecraft.getInstance();
+        ItemStackRenderState state = new ItemStackRenderState();
+        minecraft.getItemModelResolver().updateForTopItem(state, item.stack(), ItemDisplayContext.GUI, minecraft.level,
+            null, 0);
         pose.pushPose();
         pose.translate(x + UiStyle.ICON / 2.0F, y + UiStyle.ICON / 2.0F, nextLayer() + UiStyle.ICON / 2.0F);
         // The game hands an item a block-wide space with y up; this one is icon-wide with y down.
         pose.scale(UiStyle.ICON, -UiStyle.ICON, UiStyle.ICON);
-        minecraft.getItemRenderer().renderStatic(item.stack(), ItemDisplayContext.GUI, FULL_BRIGHT,
-            OverlayTexture.NO_OVERLAY, pose, bufferSource, minecraft.level, 0);
+        state.submit(pose, collector, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
         pose.popPose();
     }
 

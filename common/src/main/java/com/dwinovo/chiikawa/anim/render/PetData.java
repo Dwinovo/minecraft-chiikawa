@@ -22,7 +22,13 @@ public enum PetData {
     /** Mainhand {@link net.minecraft.world.item.ItemStack} snapshot consumed by {@code HeldItemLayer}. */
     HELD_ITEM_STACK,
     /** Worn {@link net.minecraft.world.item.ItemStack} snapshot consumed by {@code BagLayer} and the strap rules. */
-    WORN_BAG;
+    WORN_BAG,
+    /**
+     * The {@link com.dwinovo.chiikawa.ui.widget.Chip} a pet answers its owner with, drawn
+     * over its head; set only while it is being asked. Worked out at extract time, as
+     * vanilla works out a name tag.
+     */
+    STATUS_LABEL;
 
     /** Cached values() to avoid per-frame allocation; treat as immutable. */
     public static final PetData[] VALUES = values();
