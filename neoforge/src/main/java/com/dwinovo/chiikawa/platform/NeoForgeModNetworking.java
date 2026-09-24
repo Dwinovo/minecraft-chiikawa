@@ -65,10 +65,8 @@ public final class NeoForgeModNetworking {
                     MusicServerPacketHandler.handleSelectTrack(payload, player);
                 }
             });
-        registrar.playToClient(VoicePayloads.PetSpeechPayload.TYPE, VoicePayloads.PetSpeechPayload.STREAM_CODEC,
-            (payload, context) -> ClientVoicePacketHandler.handleSpeech(payload));
-        registrar.playToClient(PetPayloads.PetGesturePayload.TYPE, PetPayloads.PetGesturePayload.STREAM_CODEC,
-            (payload, context) -> ClientPetPacketHandler.handleGesture(payload));
+        registrar.playToClient(VoicePayloads.PetSpeechPayload.TYPE, VoicePayloads.PetSpeechPayload.STREAM_CODEC);
+        registrar.playToClient(PetPayloads.PetGesturePayload.TYPE, PetPayloads.PetGesturePayload.STREAM_CODEC);
     }
 
     public static void registerClientPayloads(RegisterClientPayloadHandlersEvent event) {
@@ -79,5 +77,7 @@ public final class NeoForgeModNetworking {
         event.register(MusicPayloads.MusicStreamStartPayload.TYPE, (payload, context) -> ClientMusicPacketHandler.handleStreamStart(payload));
         event.register(MusicPayloads.MusicStreamChunkPayload.TYPE, (payload, context) -> ClientMusicPacketHandler.handleStreamChunk(payload));
         event.register(MusicPayloads.MusicStreamStopPayload.TYPE, (payload, context) -> ClientMusicPacketHandler.handleStreamStop(payload));
+        event.register(VoicePayloads.PetSpeechPayload.TYPE, (payload, context) -> ClientVoicePacketHandler.handleSpeech(payload));
+        event.register(PetPayloads.PetGesturePayload.TYPE, (payload, context) -> ClientPetPacketHandler.handleGesture(payload));
     }
 }
