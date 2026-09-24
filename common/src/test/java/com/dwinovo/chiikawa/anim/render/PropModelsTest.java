@@ -14,12 +14,14 @@ import com.dwinovo.chiikawa.client.render.LaborBoardRenderer;
 import com.dwinovo.chiikawa.data.LaborBoardLevelData;
 import com.dwinovo.chiikawa.item.BagItem;
 import com.google.gson.Gson;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
+import javax.imageio.ImageIO;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.junit.jupiter.api.Test;
@@ -30,7 +32,8 @@ import org.junit.jupiter.api.Test;
  * be one the code draws: a bag, hung from its centre, or a block — the labor board, with a
  * plate for every slip the mod's own levels put up, or the shop, standing inside its block.
  * A pack that gives boards more slips than that has them hang without a plate each. The
- * handbook is a prop too, only ever held.
+ * handbook is a prop too, only ever held, and so are the pets' weapons, each standing up
+ * with its texture fit for the block atlas its bits are drawn from when it breaks.
  */
 class PropModelsTest {
     private static final Path ASSETS = Path.of("src/main/resources/assets/chiikawa");
@@ -41,6 +44,10 @@ class PropModelsTest {
     private static final List<String> BLOCKS = List.of(LABOR_BOARD, SHOP);
     /** Props that are only ever an item in the hand or on a shelf. */
     private static final List<String> ITEMS = List.of("handbook");
+    /** Held as vanilla holds a sword, laid corner to corner from a model standing up. */
+    private static final List<String> WEAPONS = List.of("chiikawa_weapon", "hachiware_weapon", "usagi_weapon", "rakko_sword");
+    /** Vanilla bakes the block atlas four mip levels deep, which it keeps only if every sprite's sides divide by this. */
+    private static final int MIP_STEP = 16;
     private static final float HALF_BLOCK = 8.0F;
     private static final float EPSILON = 1.0E-3F;
 
@@ -66,7 +73,8 @@ class PropModelsTest {
     void everyPropIsOneTheCodeDrawsAndHasATexture() throws IOException {
         List<String> props = modelNames(false);
         for (String prop : props) {
-            assertTrue(BAGS.contains(prop) || BLOCKS.contains(prop) || ITEMS.contains(prop), prop + " is a model nothing draws");
+            assertTrue(BAGS.contains(prop) || BLOCKS.contains(prop) || ITEMS.contains(prop) || WEAPONS.contains(prop),
+                prop + " is a model nothing draws");
             assertTrue(Files.exists(ASSETS.resolve("textures/entities/" + prop + ".png")), prop + " has no texture");
         }
         assertTrue(props.containsAll(BAGS) && props.containsAll(BLOCKS) && props.containsAll(ITEMS),
@@ -87,6 +95,34 @@ class PropModelsTest {
             }
             assertEquals(0.0F, (minX + maxX) / 2.0F, 0.25F, bag + " is off centre across");
             assertEquals(0.0F, (minY + maxY) / 2.0F, 0.25F, bag + " is off centre up and down");
+        }
+    }
+
+    /**
+     * A weapon is modelled standing up, the end it is held by at the bottom, so that leaning
+     * it corner to corner lays it as a sword's sprite lies. Its texture goes on the block
+     * atlas, and a sprite whose sides do not divide by sixteen takes every block's distant
+     * mipmaps down with it.
+     */
+    @Test
+    void everyWeaponStandsUpAndFitsTheBlockAtlas() throws IOException {
+        for (String weapon : modelNames(false).stream().filter(WEAPONS::contains).toList()) {
+            BakedModel model = bake(weapon);
+            float minX = Float.MAX_VALUE, maxX = -Float.MAX_VALUE, minY = Float.MAX_VALUE, maxY = -Float.MAX_VALUE;
+            float minZ = Float.MAX_VALUE, maxZ = -Float.MAX_VALUE;
+            for (BakedCube cube : model.cubes) {
+                minX = Math.min(minX, cube.minX);
+                maxX = Math.max(maxX, cube.maxX);
+                minY = Math.min(minY, cube.minY);
+                maxY = Math.max(maxY, cube.maxY);
+                minZ = Math.min(minZ, cube.minZ);
+                maxZ = Math.max(maxZ, cube.maxZ);
+            }
+            assertTrue(maxY - minY > maxX - minX && maxY - minY > maxZ - minZ, weapon + " does not stand up");
+            BufferedImage texture = ImageIO.read(ASSETS.resolve("textures/entities/" + weapon + ".png").toFile());
+            assertTrue(texture.getWidth() % MIP_STEP == 0 && texture.getHeight() % MIP_STEP == 0,
+                weapon + "'s texture is " + texture.getWidth() + "x" + texture.getHeight()
+                    + ", which lowers the block atlas's mip levels");
         }
     }
 
