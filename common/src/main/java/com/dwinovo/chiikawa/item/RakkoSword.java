@@ -1,7 +1,6 @@
 package com.dwinovo.chiikawa.item;
 
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.ToolMaterial;
 
 /**
@@ -10,8 +9,8 @@ import net.minecraft.world.item.ToolMaterial;
  * should be, over Usagi's iron stick; nobody makes one and no shop sells one, so it comes
  * only with a wild Rakko.
  */
-public class RakkoSword extends SwordItem {
+public class RakkoSword extends Item {
     public RakkoSword(Item.Properties properties) {
-        super(ToolMaterial.DIAMOND, 3.0F, -2.4F, properties);
+        super(properties.sword(ToolMaterial.DIAMOND, 3.0F, -2.4F));
     }
 }

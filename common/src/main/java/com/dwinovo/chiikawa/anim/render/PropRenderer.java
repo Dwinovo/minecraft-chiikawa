@@ -11,13 +11,12 @@ import java.util.function.Predicate;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.ItemTransform;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SwordItem;
 import org.joml.Vector3f;
 
 /**
@@ -108,8 +107,9 @@ public final class PropRenderer {
             return;
         }
         boolean block = stack.getItem() instanceof BlockItem;
-        // What vanilla draws with its handheld model: its swords and its tools.
-        boolean handheld = stack.getItem() instanceof SwordItem || stack.getItem() instanceof DiggerItem;
+        // What vanilla draws with its handheld model: its swords and its tools, the items a
+        // tool material makes, which both mine as a tool and strike as a weapon.
+        boolean handheld = stack.has(DataComponents.TOOL) && stack.has(DataComponents.WEAPON);
         pose.pushPose();
         pose.translate(0.5F, 0.5F, 0.5F);
         ItemTransform transform = (block ? BLOCK_ITEM : handheld ? HANDHELD_ITEM : FLAT_ITEM).get(context);
