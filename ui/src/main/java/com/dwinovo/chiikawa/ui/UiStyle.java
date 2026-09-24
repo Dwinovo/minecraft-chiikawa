@@ -47,8 +47,6 @@ public final class UiStyle {
     public static final int BAR_H = 7;
     /** How tall anything you can press is — one height for all of them, so a row of them lines up. */
     public static final int CONTROL_H = 20;
-    /** Space above and below the line inside a chip. */
-    public static final int CHIP_PAD = 3;
     /** How far a card's shadow falls. */
     public static final int SHADOW_OFF = 2;
 
