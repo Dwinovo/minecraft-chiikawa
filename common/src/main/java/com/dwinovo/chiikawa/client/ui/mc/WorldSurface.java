@@ -60,10 +60,10 @@ public final class WorldSurface implements DrawSurface {
         Matrix4f matrix = pose.last().pose();
         VertexConsumer consumer = bufferSource.getBuffer(RenderType.textBackground());
         // Wound as the game winds its own name-tag backdrop, which this render type culls by.
-        consumer.addVertex(matrix, x, y + height, z).setColor(argb).setLight(FULL_BRIGHT);
-        consumer.addVertex(matrix, x + width, y + height, z).setColor(argb).setLight(FULL_BRIGHT);
-        consumer.addVertex(matrix, x + width, y, z).setColor(argb).setLight(FULL_BRIGHT);
-        consumer.addVertex(matrix, x, y, z).setColor(argb).setLight(FULL_BRIGHT);
+        consumer.vertex(matrix, x, y + height, z).color(argb).uv2(FULL_BRIGHT).endVertex();
+        consumer.vertex(matrix, x + width, y + height, z).color(argb).uv2(FULL_BRIGHT).endVertex();
+        consumer.vertex(matrix, x + width, y, z).color(argb).uv2(FULL_BRIGHT).endVertex();
+        consumer.vertex(matrix, x, y, z).color(argb).uv2(FULL_BRIGHT).endVertex();
     }
 
     @Override
