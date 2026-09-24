@@ -17,10 +17,11 @@ public final class VoicePayloads {
      *
      * @param pet the pet's entity id
      * @param line the translation key of what it said
+     * @param ticks how long the line stays up over the pet's head
      */
-    public record PetSpeechPayload(int pet, String line) implements MusicPayloads.Payload {
+    public record PetSpeechPayload(int pet, String line, int ticks) implements MusicPayloads.Payload {
         public static PetSpeechPayload read(FriendlyByteBuf buffer) {
-            return new PetSpeechPayload(buffer.readVarInt(), buffer.readUtf());
+            return new PetSpeechPayload(buffer.readVarInt(), buffer.readUtf(), buffer.readVarInt());
         }
 
         @Override
@@ -32,6 +33,7 @@ public final class VoicePayloads {
         public void write(FriendlyByteBuf buffer) {
             buffer.writeVarInt(pet);
             buffer.writeUtf(line);
+            buffer.writeVarInt(ticks);
         }
     }
 }
