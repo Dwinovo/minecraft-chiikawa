@@ -20,15 +20,15 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * How a pet and a person come to belong together: feeding one until it trusts you, it
  * keeping up with you afterwards, and its keeping its hands to itself before then.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class CareGameTests {
     private static final String BATCH = "chiikawa_care";
     private static final int FOLLOW_TICKS = 1200;

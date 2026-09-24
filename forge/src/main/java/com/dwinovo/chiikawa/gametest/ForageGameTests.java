@@ -16,8 +16,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Weeding and mushrooms — the work a pet may do off its own back, and the rule that says
@@ -27,8 +27,8 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
  * because nobody is paying it either way. That rule is the whole reason the labor board
  * exists, so it gets a case from both sides.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class ForageGameTests {
     private static final String DAY_BATCH = "chiikawa_forage_day";
     private static final String NIGHT_BATCH = "chiikawa_forage_night";

@@ -17,16 +17,16 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Catching up. A pet that is told to follow and then left far behind is fetched by the
  * server, not by itself — which is the only way it works for a pet that has stopped
  * thinking, and that is exactly the pet an owner loses.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class FollowGameTests {
     private static final String BATCH = "chiikawa_follow";
     private static final int STAND = 2;

@@ -18,8 +18,8 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * What an owner's word is worth, and what is left when a pet is gone.
@@ -28,8 +28,8 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
  * leave it" — a pet that wanders off to a crop because it noticed one has stopped being a
  * pet you can put somewhere.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class DirectiveGameTests {
     private static final String BATCH = "chiikawa_directive";
     /** How long a sitting pet is watched sitting before we believe it will keep sitting. */

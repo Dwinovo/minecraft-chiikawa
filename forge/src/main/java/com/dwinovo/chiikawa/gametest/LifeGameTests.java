@@ -29,21 +29,21 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Where a pet comes from and what happens after it is gone: the tool a wild one is born
  * with, and the doll that brings a dead one back with everything it had — and only that,
  * since a doll anyone could make would be a spawn egg.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class LifeGameTests {
     private static final String BATCH = "chiikawa_life";
     private static final int RITUAL_TICKS = 600;
@@ -173,10 +173,10 @@ public final class LifeGameTests {
     @GameTest(template = "floor8", batch = BATCH)
     public static void no_doll_can_be_made(GameTestHelper helper) {
         RegistryAccess registries = helper.getLevel().registryAccess();
-        List<Recipe<?>> recipes = List.copyOf(helper.getLevel().getRecipeManager().getRecipes());
+        List<RecipeHolder<?>> recipes = List.copyOf(helper.getLevel().getRecipeManager().getRecipes());
         for (Item item : BuiltInRegistries.ITEM) {
             if (item instanceof PetDollItem) {
-                helper.assertFalse(recipes.stream().anyMatch(recipe -> recipe.getResultItem(registries).is(item)),
+                helper.assertFalse(recipes.stream().anyMatch(recipe -> recipe.value().getResultItem(registries).is(item)),
                     BuiltInRegistries.ITEM.getKey(item) + " can be made, which turns it into a spawn egg");
             }
         }

@@ -27,15 +27,15 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The rules around a slip that are easy to state and easy to break: who may take one and
  * when, and what happens to one a pet was holding when it died.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class SlipGameTests {
     private static final String DAY_BATCH = "chiikawa_slip_day";
     private static final String NIGHT_BATCH = "chiikawa_slip_night";

@@ -18,8 +18,8 @@ import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Fighting: a pet with a weapon defends its patch, and one without the means to use it
@@ -29,8 +29,8 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
  * pet that found its target, walked to it and swung; waiting for the zombie to fall only
  * makes the case longer and flakier.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class CombatGameTests {
     private static final String BATCH = "chiikawa_combat";
     /**

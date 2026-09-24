@@ -49,9 +49,11 @@ minecraft {
         }
         // Headless batch of the in-game cases: ./gradlew :forge:runGameTestServer
         // Its exit code is the number of failures, so CI reads it without parsing a log.
+        // No forge.enabledGameTestNamespaces: from Forge 48 on it keeps only batches named
+        // "<namespace>.<batch>", and the cases' batches go unprefixed so their floors are
+        // found as chiikawa:floor16 (see GameTestKit). The mod's cases are the only ones here.
         gameTestServer {
             workingDirectory project.file('runs/gametestserver')
-            property 'forge.enabledGameTestNamespaces', mod_id
         }
 
         data {
@@ -62,7 +64,7 @@ minecraft {
 }
 
 // Vanilla lays the GameTest floors at y=-60, the top of the superflat world its own test
-// server makes. Forge 1.20.1 starts that server on the world server.properties describes,
+// server makes. Forge 1.20.2 starts that server on the world server.properties describes,
 // a normal one by default, which puts every case in a pocket dug deep underground: no sky,
 // and water and gravel breaking in from the caves around it. So the run is handed the flat
 // world vanilla means, made afresh each time so nothing from the last run is still about.

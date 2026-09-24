@@ -3,13 +3,8 @@ package com.dwinovo.chiikawa.gametest;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitEntity;
-import com.mojang.authlib.GameProfile;
-import io.netty.channel.embedded.EmbeddedChannel;
-import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
@@ -29,9 +24,9 @@ import net.minecraft.world.phys.AABB;
  * The exit code is the number of failures, so this reads straight into CI.
  *
  * <p>The cases live here rather than in {@code common} because the game decides which
- * namespace a test belongs to from {@code @GameTestHolder}, which is Forge's own
- * annotation — a case declared in common would be filed under {@code minecraft} and
- * dropped by the namespace filter. Nearly everything they exercise is common code all the
+ * namespace a test's floor comes from by {@code @GameTestHolder}, which is Forge's own
+ * annotation — a case declared in common would look for its floor under
+ * {@code minecraft}. Nearly everything they exercise is common code all the
  * same; what is loader-shaped — services, networking, registration — is covered by the
  * smoke runs on both loaders.
  *
@@ -92,33 +87,17 @@ public final class GameTestKit {
 
     /**
      * A player in the case's level, as the server sees one: an owner, a customer, a
-     * stranger. Vanilla's {@code makeMockServerPlayerInLevel} on 1.20.1 logs its player in
-     * over a connection with no channel, which Forge's login step cannot take, so every
-     * case gets its player here: vanilla's own, over the embedded channel later versions
-     * give it.
+     * stranger. Vanilla marks the only way to make one for removal and gives this version
+     * nothing to use instead, so every case gets its player here and the day it goes, this
+     * is the one line that changes.
      *
      * <p>The player starts in creative mode, and the server cannot send it a mod's own
      * packets: a case about eating or paying sets survival, and a case about a screen calls
      * the handler's logic rather than the handler.
      */
+    @SuppressWarnings("removal")
     static ServerPlayer player(GameTestHelper helper) {
-        ServerLevel level = helper.getLevel();
-        ServerPlayer player = new ServerPlayer(level.getServer(), level,
-                new GameProfile(UUID.randomUUID(), "test-mock-player")) {
-            @Override
-            public boolean isSpectator() {
-                return false;
-            }
-
-            @Override
-            public boolean isCreative() {
-                return true;
-            }
-        };
-        Connection connection = new Connection(PacketFlow.SERVERBOUND);
-        new EmbeddedChannel(connection);
-        level.getServer().getPlayerList().placeNewPlayer(connection, player);
-        return player;
+        return helper.makeMockServerPlayerInLevel();
     }
 
     /**
