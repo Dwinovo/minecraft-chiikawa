@@ -40,8 +40,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.EntityAttachment;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.LivingEntity;
 import org.joml.Quaternionf;
 
@@ -459,12 +457,12 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
 
     @Override
     protected void renderNameTag(T entity, Component displayName, PoseStack poseStack, MultiBufferSource bufferSource,
-                                 int packedLight, float partialTick) {
+                                 int packedLight) {
         boolean named = super.shouldShowName(entity);
         if (named) {
-            super.renderNameTag(entity, displayName, poseStack, bufferSource, packedLight, partialTick);
+            super.renderNameTag(entity, displayName, poseStack, bufferSource, packedLight);
         }
-        answer(entity).ifPresent(chip -> drawLabel(entity, chip, poseStack, bufferSource, partialTick,
+        answer(entity).ifPresent(chip -> drawLabel(entity, chip, poseStack, bufferSource,
             named ? LABEL_LINE : 0.0F));
     }
 
@@ -501,13 +499,11 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
 
     /** The mod's own label, drawn where a name tag goes, with the same widgets its screens use. */
     private void drawLabel(T entity, Chip chip, PoseStack poseStack, MultiBufferSource bufferSource,
-                           float partialTick, float extraHeight) {
-        Vec3 attachment = entity.getAttachments().getNullable(EntityAttachment.NAME_TAG, 0, entity.getViewYRot(partialTick));
-        if (attachment == null) {
-            return;
-        }
+                           float extraHeight) {
+        // 1.20.1 puts a name tag at a height of its own rather than at an attachment point.
+        float nameTag = entity.getNameTagOffsetY();
         poseStack.pushPose();
-        poseStack.translate(attachment.x, attachment.y + 0.5 + extraHeight, attachment.z);
+        poseStack.translate(0.0F, nameTag + extraHeight, 0.0F);
         poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
         // Text pixels from here on, with y running down as on a screen.
         poseStack.scale(LABEL_SCALE, -LABEL_SCALE, LABEL_SCALE);
