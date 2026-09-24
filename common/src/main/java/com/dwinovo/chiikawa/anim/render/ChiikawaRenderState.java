@@ -1,11 +1,8 @@
 package com.dwinovo.chiikawa.anim.render;
 
 import com.dwinovo.chiikawa.anim.controller.ControllerSnapshot;
-import com.dwinovo.chiikawa.ui.widget.Chip;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Render-state snapshot for chiikawa-animated entities. Extends vanilla
@@ -72,20 +69,6 @@ public class ChiikawaRenderState extends LivingEntityRenderState {
     public float netHeadYaw;
     /** Head pitch (entity X rotation) in degrees, captured at extract time for the same reason. */
     public float headPitch;
-    /** What the pet says over its head this frame, {@code null} when it says nothing. */
-    @Nullable
-    public Chip label;
-    /** Where the label hangs, as a name tag's {@link #nameTagAttachment} is kept for its tag. */
-    @Nullable
-    public Vec3 labelAttachment;
-    /** What the pet is saying over its head this frame, {@code null} when it says nothing. */
-    @Nullable
-    public String speech;
-    /** How much of the bubble shows, from 0 as it fades out to 1. */
-    public float speechAlpha;
-    /** Where the bubble hangs, as a name tag's {@link #nameTagAttachment} is kept for its tag. */
-    @Nullable
-    public Vec3 speechAttachment;
 
     private static final ControllerSnapshot[] EMPTY = new ControllerSnapshot[0];
     private static final boolean[] EMPTY_HIDDEN = new boolean[0];
