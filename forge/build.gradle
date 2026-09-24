@@ -83,6 +83,8 @@ tasks.matching { it.name == 'runGameTestServer' }.configureEach {
 mixin {
     add sourceSets.main, "${mod_id}.refmap.json"
     config "${mod_id}.mixins.json"
+    // Forge's own: the props' client extensions (see ItemAccessor).
+    config "${mod_id}.forge.mixins.json"
     // The GameTest harness's own: later versions' behaviour for a passed case (see GameTestInfoMixin).
     config "${mod_id}.gametest.mixins.json"
 }
@@ -153,6 +155,6 @@ tasks.named('devlibsClasses') { dependsOn extractDevAudioLibs }
 jar {
     finalizedBy('reobfJar')
     manifest.attributes([
-            "MixinConfigs": "${mod_id}.mixins.json,${mod_id}.gametest.mixins.json"
+            "MixinConfigs": "${mod_id}.mixins.json,${mod_id}.forge.mixins.json,${mod_id}.gametest.mixins.json"
     ])
 }
