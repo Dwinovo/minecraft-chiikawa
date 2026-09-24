@@ -58,7 +58,7 @@ public final class LanguageData {
                 "摇一摇宠物铃铛，你的宠物都会回来，别的维度也听得见。");
             addJobTranslations(adder, "职业", "无", "农夫", "剑士", "弓箭手", "音乐家", "未知");
             addEntityTranslations(adder, "乌萨奇", "小八", "吉伊", "狮萨", "飞鼠", "栗子馒头", "獭师父", "古本屋");
-            addItemTagTranslations(adder, "农夫工具", "剑士工具", "弓箭手工具", "音乐家工具", "驯服食物", "种植作物", "运送物品", "可拾取物品");
+            addItemTagTranslations(adder, "农夫工具", "剑士工具", "弓箭手工具", "音乐家工具", "驯服食物", "种植作物", "运送物品", "可拾取物品", "请客的吃食");
             addItemTranslations(
                 adder,
                 "乌萨奇刷怪蛋",
@@ -103,6 +103,7 @@ public final class LanguageData {
                     "上一页", "下一页");
             addIntentNameTranslations(adder, "跟着主人", "坐着", "闲逛", "捡东西", "去领工作牌",
                 "收割", "种地", "送货", "拔草", "采蘑菇", "讨伐", "射箭", "演奏", "去买东西", "送礼物");
+            addSocialTranslations(adder, "找伙伴玩", "陪伙伴玩", "附近没有想一起玩的伙伴", "没有伙伴过来找它");
             addTaskTypeTranslations(adder, "除草", "%s 株", "街头演奏", "%s 秒",
                 "近身讨伐", "远程讨伐", "%s 只");
             addBoardScreenTranslations(adder, "劳动公告板", "%s 张", "今天没有工作牌",
@@ -212,7 +213,7 @@ public final class LanguageData {
                 "ペットベルを鳴らせば、別のディメンションにいてもみんな戻ってきます。");
             addJobTranslations(adder, "職業", "なし", "農家", "剣士", "弓使い", "音楽家", "不明");
             addEntityTranslations(adder, "うさぎ", "ハチワレ", "ちいかわ", "シーサー", "モモンガ", "くりまんじゅう", "ラッコ", "古本屋");
-            addItemTagTranslations(adder, "農家の道具", "剣士の道具", "弓使いの道具", "音楽家の道具", "なつかせる食べ物", "植える作物", "運ぶアイテム", "拾えるアイテム");
+            addItemTagTranslations(adder, "農家の道具", "剣士の道具", "弓使いの道具", "音楽家の道具", "なつかせる食べ物", "植える作物", "運ぶアイテム", "拾えるアイテム", "おごる食べ物");
             addItemTranslations(
                 adder,
                 "うさぎのスポーンエッグ",
@@ -258,6 +259,7 @@ public final class LanguageData {
                     "前のページ", "次のページ");
             addIntentNameTranslations(adder, "飼い主についていく", "おすわり中", "ぶらぶら", "アイテムを拾う", "お仕事カードを取りに行く",
                 "収穫", "種まき", "運ぶ", "草むしり", "キノコ採り", "討伐", "弓で射る", "演奏", "お買い物", "プレゼントを渡す");
+            addSocialTranslations(adder, "なかまのところへ", "なかまに付き合う", "近くに遊びたいなかまがいない", "誰も来ていない");
             addTaskTypeTranslations(adder, "草むしり", "%s本", "路上演奏", "%s秒",
                 "近接討伐", "遠距離討伐", "%s体");
             addBoardScreenTranslations(adder, "労働掲示板", "%s枚", "今日はお仕事カードがありません",
@@ -367,7 +369,7 @@ public final class LanguageData {
                 "Ring the pet bell and your pets come back, even from other worlds.");
             addJobTranslations(adder, "Job", "None", "Farmer", "Fencer", "Archer", "Musician", "Unknown");
             addEntityTranslations(adder, "Usagi", "Hachiware", "Chiikawa", "Shisa", "Momonga", "Kurimanju", "Rakko", "Furuhonya");
-            addItemTagTranslations(adder, "Farmer Tools", "Fencer Tools", "Archer Tools", "Musician Tools", "Tame Foods", "Plant Crops", "Deliver Items", "Pickable Items");
+            addItemTagTranslations(adder, "Farmer Tools", "Fencer Tools", "Archer Tools", "Musician Tools", "Tame Foods", "Plant Crops", "Deliver Items", "Pickable Items", "Pet Treats");
             addItemTranslations(
                 adder,
                 "Usagi Spawn Egg",
@@ -414,6 +416,8 @@ public final class LanguageData {
             addIntentNameTranslations(adder, "Following its owner", "Sitting", "Wandering", "Picking up an item",
                 "Fetching a slip", "Harvesting", "Planting", "Delivering", "Pulling weeds", "Picking mushrooms",
                 "Fighting", "Shooting", "Performing", "Out shopping", "Bringing a present");
+            addSocialTranslations(adder, "Visiting a friend", "Playing along", "Nobody nearby it feels like playing with",
+                "Nobody is coming over");
             addTaskTypeTranslations(adder, "Weeding", "%s weeds", "Street Performance", "%ss",
                 "Monster Hunting", "Monster Shooting", "%s slain");
             addBoardScreenTranslations(adder, "Labor Board", "%s up", "No slips up today",
@@ -645,6 +649,18 @@ public final class LanguageData {
         adder.add("intent.chiikawa.gift_owner", giftOwner);
     }
 
+    /**
+     * Pets meeting pets: what a pet going over to another is doing, what the one it goes to
+     * is doing, and why either is not.
+     */
+    private static void addSocialTranslations(Adder adder, String socialize, String cooperate, String noPartner,
+            String notAsked) {
+        adder.add("intent.chiikawa.socialize", socialize);
+        adder.add("intent.chiikawa.cooperate", cooperate);
+        adder.add("intent.chiikawa.fail.no_partner", noPartner);
+        adder.add("intent.chiikawa.fail.not_asked", notAsked);
+    }
+
     /** Names of the slip types a labor board puts up, each with the unit it counts in. */
     private static void addTaskTypeTranslations(
         Adder adder,
@@ -794,7 +810,8 @@ public final class LanguageData {
         String tameFoods,
         String plantCrops,
         String deliverItems,
-        String pickableItems
+        String pickableItems,
+        String petTreats
     ) {
         adder.add("tag.item.chiikawa.entity_farmer_tools", farmerTools);
         adder.add("tag.item.chiikawa.entity_fencer_tools", fencerTools);
@@ -804,6 +821,7 @@ public final class LanguageData {
         adder.add("tag.item.chiikawa.entity_plant_crops", plantCrops);
         adder.add("tag.item.chiikawa.entity_deliver_items", deliverItems);
         adder.add("tag.item.chiikawa.entity_pickable_items", pickableItems);
+        adder.add("tag.item.chiikawa.pet_treats", petTreats);
     }
 
     private static void addItemTranslations(Adder adder, String usagiEgg, String hachiwareEgg, String chiikawaEgg,

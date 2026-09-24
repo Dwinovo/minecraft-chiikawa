@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPlacesSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetFarmerWorkSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetSocialSensor;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.platform.services.IPlatformRegistryAccess;
 import java.util.function.Supplier;
@@ -38,6 +39,8 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
         SENSOR_TYPES.register("pet_item_entity_sensor", () -> new SensorType<>(PetPickableItemSensor::new));
     private static final RegistryObject<SensorType<PetPlacesSensor>> PET_PLACES_SENSOR =
         SENSOR_TYPES.register("pet_places_sensor", () -> new SensorType<>(PetPlacesSensor::new));
+    private static final DeferredHolder<SensorType<?>, SensorType<PetSocialSensor>> PET_SOCIAL_SENSOR =
+        SENSOR_TYPES.register("pet_social_sensor", () -> new SensorType<>(PetSocialSensor::new));
 
     // Activity registrations
     private static final RegistryObject<Activity> FARMER_HARVEST =
@@ -68,6 +71,10 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
         ACTIVITIES.register("shop", () -> new Activity("shop"));
     private static final RegistryObject<Activity> GIFT_OWNER =
         ACTIVITIES.register("gift_owner", () -> new Activity("gift_owner"));
+    private static final DeferredHolder<Activity, Activity> SOCIALIZE =
+        ACTIVITIES.register("socialize", () -> new Activity("socialize"));
+    private static final DeferredHolder<Activity, Activity> COOPERATE =
+        ACTIVITIES.register("cooperate", () -> new Activity("cooperate"));
 
     // Menu registrations
     private static final RegistryObject<MenuType<PetBackpackMenu>> PET_BACKPACK =
@@ -108,6 +115,11 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
     @Override
     public Supplier<SensorType<PetPlacesSensor>> petPlacesSensor() {
         return PET_PLACES_SENSOR;
+    }
+
+    @Override
+    public Supplier<SensorType<PetSocialSensor>> petSocialSensor() {
+        return PET_SOCIAL_SENSOR;
     }
 
     @Override
@@ -178,6 +190,16 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
     @Override
     public Supplier<Activity> giftOwnerActivity() {
         return GIFT_OWNER;
+    }
+
+    @Override
+    public Supplier<Activity> socializeActivity() {
+        return SOCIALIZE;
+    }
+
+    @Override
+    public Supplier<Activity> cooperateActivity() {
+        return COOPERATE;
     }
 
     @Override
