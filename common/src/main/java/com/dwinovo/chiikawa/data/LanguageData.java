@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.data;
 
+import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.List;
 
 public final class LanguageData {
@@ -119,6 +120,56 @@ public final class LanguageData {
                     "跟在你身边，有怪就上",
                     "待在原地不动",
                     "在家附近干活、逛街、领牌子");
+            // What the pets say (design 0.1.1, section 3), in the words Chinese fans know the lines by.
+            addVoiceLines(adder, "chiikawa", VoiceMoment.TAME, "哇……");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.HURT, "不要！！", "呜……呜……");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.HUNT, "呀——！！！");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.PAID, "！！");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.SHOP, "哇……！");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.GIFT, "嗯……！");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.REVIVE, "啊……！");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.IDLE, "嘿咻……", "呼……");
+            addVoiceLines(adder, "hachiware", VoiceMoment.TAME, "也就是说……！？");
+            addVoiceLines(adder, "hachiware", VoiceMoment.HURT, "痛痛痛……");
+            addVoiceLines(adder, "hachiware", VoiceMoment.HUNT, "总会有办法的——！！");
+            addVoiceLines(adder, "hachiware", VoiceMoment.PAID, "太好啦～！！");
+            addVoiceLines(adder, "hachiware", VoiceMoment.SHOP, "这不就是……最棒的嘛！");
+            addVoiceLines(adder, "hachiware", VoiceMoment.GIFT, "给，这个送你！");
+            addVoiceLines(adder, "hachiware", VoiceMoment.REVIVE, "哭出来了！！");
+            addVoiceLines(adder, "hachiware", VoiceMoment.IDLE, "哼哼～♪");
+            addVoiceLines(adder, "usagi", VoiceMoment.TAME, "呀哈！");
+            addVoiceLines(adder, "usagi", VoiceMoment.HURT, "哈啊？");
+            addVoiceLines(adder, "usagi", VoiceMoment.HUNT, "乌拉——！！");
+            addVoiceLines(adder, "usagi", VoiceMoment.PAID, "噗噜噜噜");
+            addVoiceLines(adder, "usagi", VoiceMoment.SHOP, "噗噜呀");
+            addVoiceLines(adder, "usagi", VoiceMoment.GIFT, "乌拉");
+            addVoiceLines(adder, "usagi", VoiceMoment.REVIVE, "呀哈——！！");
+            addVoiceLines(adder, "usagi", VoiceMoment.IDLE, "哼嗯", "噗噜噜噜", "乌拉");
+            addVoiceLines(adder, "momonga", VoiceMoment.TAME, "终于成功啦！！");
+            addVoiceLines(adder, "momonga", VoiceMoment.HURT, "快安慰我。");
+            addVoiceLines(adder, "momonga", VoiceMoment.PAID, "快夸我。");
+            addVoiceLines(adder, "momonga", VoiceMoment.SHOP, "给我！");
+            addVoiceLines(adder, "momonga", VoiceMoment.GIFT, "快夸我。");
+            addVoiceLines(adder, "momonga", VoiceMoment.REVIVE, "快安慰我。");
+            addVoiceLines(adder, "momonga", VoiceMoment.IDLE, "快夸我。", "给我！");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.SHOP, "哈——……");
+            addVoiceLines(adder, "rakko", VoiceMoment.TAME, "……还不错。");
+            addVoiceLines(adder, "rakko", VoiceMoment.HUNT, "上了。");
+            addVoiceLines(adder, "rakko", VoiceMoment.PAID, "哼。");
+            addVoiceLines(adder, "rakko", VoiceMoment.SHOP, "……好吃。");
+            addVoiceLines(adder, "rakko", VoiceMoment.GIFT, "……给你。");
+            addVoiceLines(adder, "rakko", VoiceMoment.REVIVE, "……还差得远呢。");
+            addVoiceLines(adder, "shisa", VoiceMoment.TAME, "嗨赛！", "请多关照！");
+            addVoiceLines(adder, "shisa", VoiceMoment.HURT, "好痛！");
+            addVoiceLines(adder, "shisa", VoiceMoment.HUNT, "我、我会加油的……！");
+            addVoiceLines(adder, "shisa", VoiceMoment.PAID, "开心狮萨！");
+            addVoiceLines(adder, "shisa", VoiceMoment.SHOP, "我开动啦！");
+            addVoiceLines(adder, "shisa", VoiceMoment.GIFT, "请收下！");
+            addVoiceLines(adder, "shisa", VoiceMoment.REVIVE, "没事的啦～");
+            addVoiceLines(adder, "shisa", VoiceMoment.IDLE, "嗨赛！", "好想喝香片茶～");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.TAME, "蟹蟹！");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.GIFT, "给你……");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.IDLE, "蟹蟹");
         } else if ("ja_jp".equals(locale)) {
             addCommonTranslations(adder, "ちいかわ", "持ち物", "ついてくる", "おすわり", "自由行動");
             addDollTooltipTranslations(adder, "ぬいぐるみをケーキに置いてみる？");
@@ -224,6 +275,56 @@ public final class LanguageData {
                     "そばにいて、敵が来たら戦う",
                     "その場から動かない",
                     "家の近くで働いたり、買い物したり、カードを取ったり");
+            // What the pets say (design 0.1.1, section 3): the series' own lines.
+            addVoiceLines(adder, "chiikawa", VoiceMoment.TAME, "ワァ…");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.HURT, "ヤダッ!!", "ウッ…ウッ…");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.HUNT, "ヤーッ!!!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.PAID, "!!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.SHOP, "ワァ…!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.GIFT, "ン…!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.REVIVE, "ハッ…!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.IDLE, "ンショ…", "フゥ…");
+            addVoiceLines(adder, "hachiware", VoiceMoment.TAME, "ってコト!?");
+            addVoiceLines(adder, "hachiware", VoiceMoment.HURT, "イテテ…");
+            addVoiceLines(adder, "hachiware", VoiceMoment.HUNT, "なんとかなれーッ!!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.PAID, "ヤッタ〜!!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.SHOP, "これって…最高じゃん!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.GIFT, "はい、これ!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.REVIVE, "泣いちゃった!!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.IDLE, "フンフ〜ン♪");
+            addVoiceLines(adder, "usagi", VoiceMoment.TAME, "ヤハ!");
+            addVoiceLines(adder, "usagi", VoiceMoment.HURT, "ハァ？");
+            addVoiceLines(adder, "usagi", VoiceMoment.HUNT, "ウラァ!!");
+            addVoiceLines(adder, "usagi", VoiceMoment.PAID, "プルルル");
+            addVoiceLines(adder, "usagi", VoiceMoment.SHOP, "プルャ");
+            addVoiceLines(adder, "usagi", VoiceMoment.GIFT, "ウラ");
+            addVoiceLines(adder, "usagi", VoiceMoment.REVIVE, "ヤハーッ!!");
+            addVoiceLines(adder, "usagi", VoiceMoment.IDLE, "フゥン", "プルルル", "ウラ");
+            addVoiceLines(adder, "momonga", VoiceMoment.TAME, "ついにやったゾ!!");
+            addVoiceLines(adder, "momonga", VoiceMoment.HURT, "慰めろ");
+            addVoiceLines(adder, "momonga", VoiceMoment.PAID, "褒めろ");
+            addVoiceLines(adder, "momonga", VoiceMoment.SHOP, "よこせッ");
+            addVoiceLines(adder, "momonga", VoiceMoment.GIFT, "褒めろ");
+            addVoiceLines(adder, "momonga", VoiceMoment.REVIVE, "慰めろ");
+            addVoiceLines(adder, "momonga", VoiceMoment.IDLE, "褒めろ", "よこせッ");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.SHOP, "ハーッ…");
+            addVoiceLines(adder, "rakko", VoiceMoment.TAME, "…悪くない");
+            addVoiceLines(adder, "rakko", VoiceMoment.HUNT, "いくぞ");
+            addVoiceLines(adder, "rakko", VoiceMoment.PAID, "フッ");
+            addVoiceLines(adder, "rakko", VoiceMoment.SHOP, "…うまい");
+            addVoiceLines(adder, "rakko", VoiceMoment.GIFT, "…やる");
+            addVoiceLines(adder, "rakko", VoiceMoment.REVIVE, "…まだまだだな");
+            addVoiceLines(adder, "shisa", VoiceMoment.TAME, "はいさい!", "よろしくお願いします!");
+            addVoiceLines(adder, "shisa", VoiceMoment.HURT, "アガッ!");
+            addVoiceLines(adder, "shisa", VoiceMoment.HUNT, "が、がんばります…!");
+            addVoiceLines(adder, "shisa", VoiceMoment.PAID, "うれシーサー!");
+            addVoiceLines(adder, "shisa", VoiceMoment.SHOP, "いただきます!");
+            addVoiceLines(adder, "shisa", VoiceMoment.GIFT, "これ、どうぞ!");
+            addVoiceLines(adder, "shisa", VoiceMoment.REVIVE, "なんくるないさ〜");
+            addVoiceLines(adder, "shisa", VoiceMoment.IDLE, "はいさい!", "さんぴん茶、飲みたいな〜");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.TAME, "カニ!");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.GIFT, "どうぞ…");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.IDLE, "カニ");
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
@@ -330,6 +431,63 @@ public final class LanguageData {
                     "Stays by you and steps in when something attacks",
                     "Stays right where it is",
                     "Works, shops and takes slips around home");
+            // What the pets say (design 0.1.1, section 3), in the words English-speaking fans know the lines by.
+            addVoiceLines(adder, "chiikawa", VoiceMoment.TAME, "Wah...");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.HURT, "Nooo!!", "Hic... hic...");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.HUNT, "Yaaah!!!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.PAID, "!!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.SHOP, "Wah...!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.GIFT, "Mm...!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.REVIVE, "Hah...!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.IDLE, "Hup...", "Phew...");
+            addVoiceLines(adder, "hachiware", VoiceMoment.TAME, "Does that mean...!?");
+            addVoiceLines(adder, "hachiware", VoiceMoment.HURT, "Ow ow ow...");
+            addVoiceLines(adder, "hachiware", VoiceMoment.HUNT, "Something'll work out!!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.PAID, "Yaaay!!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.SHOP, "Isn't this... the best!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.GIFT, "Here, this is for you!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.REVIVE, "I'm crying!!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.IDLE, "Hmm hmm~♪");
+            addVoiceLines(adder, "usagi", VoiceMoment.TAME, "Yaha!");
+            addVoiceLines(adder, "usagi", VoiceMoment.HURT, "Haah?");
+            addVoiceLines(adder, "usagi", VoiceMoment.HUNT, "Uraaa!!");
+            addVoiceLines(adder, "usagi", VoiceMoment.PAID, "Prrrrr");
+            addVoiceLines(adder, "usagi", VoiceMoment.SHOP, "Purya");
+            addVoiceLines(adder, "usagi", VoiceMoment.GIFT, "Ura");
+            addVoiceLines(adder, "usagi", VoiceMoment.REVIVE, "Yahaaa!!");
+            addVoiceLines(adder, "usagi", VoiceMoment.IDLE, "Hmmn", "Prrrrr", "Ura");
+            addVoiceLines(adder, "momonga", VoiceMoment.TAME, "I finally did it!!");
+            addVoiceLines(adder, "momonga", VoiceMoment.HURT, "Comfort me.");
+            addVoiceLines(adder, "momonga", VoiceMoment.PAID, "Praise me.");
+            addVoiceLines(adder, "momonga", VoiceMoment.SHOP, "Gimme!");
+            addVoiceLines(adder, "momonga", VoiceMoment.GIFT, "Praise me.");
+            addVoiceLines(adder, "momonga", VoiceMoment.REVIVE, "Comfort me.");
+            addVoiceLines(adder, "momonga", VoiceMoment.IDLE, "Praise me.", "Gimme!");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.SHOP, "Haaah...");
+            addVoiceLines(adder, "rakko", VoiceMoment.TAME, "...Not bad.");
+            addVoiceLines(adder, "rakko", VoiceMoment.HUNT, "Let's go.");
+            addVoiceLines(adder, "rakko", VoiceMoment.PAID, "Heh.");
+            addVoiceLines(adder, "rakko", VoiceMoment.SHOP, "...Tasty.");
+            addVoiceLines(adder, "rakko", VoiceMoment.GIFT, "...Here.");
+            addVoiceLines(adder, "rakko", VoiceMoment.REVIVE, "...Still a long way to go.");
+            addVoiceLines(adder, "shisa", VoiceMoment.TAME, "Haisai!", "Pleased to meet you!");
+            addVoiceLines(adder, "shisa", VoiceMoment.HURT, "Ow!");
+            addVoiceLines(adder, "shisa", VoiceMoment.HUNT, "I-I'll do my best...!");
+            addVoiceLines(adder, "shisa", VoiceMoment.PAID, "Happy-shisa!");
+            addVoiceLines(adder, "shisa", VoiceMoment.SHOP, "Thanks for the treat!");
+            addVoiceLines(adder, "shisa", VoiceMoment.GIFT, "Please, take this!");
+            addVoiceLines(adder, "shisa", VoiceMoment.REVIVE, "It'll all work out~");
+            addVoiceLines(adder, "shisa", VoiceMoment.IDLE, "Haisai!", "I could go for some sanpin tea~");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.TAME, "Crab!");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.GIFT, "For you...");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.IDLE, "Crab");
+        }
+    }
+
+    /** A pet's lines for one moment, numbered from 1 in the order given; see {@link PetVoiceData}. */
+    private static void addVoiceLines(Adder adder, String pet, VoiceMoment moment, String... lines) {
+        for (int i = 0; i < lines.length; i++) {
+            adder.add(PetVoiceData.lineKey(pet, moment, i + 1), lines[i]);
         }
     }
 

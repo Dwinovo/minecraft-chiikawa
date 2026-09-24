@@ -26,7 +26,9 @@ public enum PetData {
     /** Whether the vanilla name tag is drawn, decided at extract time by {@code ChiikawaEntityRenderer}. */
     NAMED,
     /** The status {@code Chip} drawn over the pet's head, or {@code null} when it has nothing to say. */
-    STATUS_CHIP;
+    STATUS_CHIP,
+    /** What the pet is saying this frame, drawn in a bubble over its head, or {@code null}. */
+    SPEECH;
 
     /** Cached values() to avoid per-frame allocation; treat as immutable. */
     public static final PetData[] VALUES = values();

@@ -15,4 +15,9 @@ public final class NeoForgeNetworkHelper implements INetworkHelper {
     public void sendToServer(CustomPacketPayload payload) {
         PacketDistributor.sendToServer(payload);
     }
+
+    @Override
+    public boolean canReceive(ServerPlayer player, CustomPacketPayload.Type<?> type) {
+        return player.connection.hasChannel(type);
+    }
 }
