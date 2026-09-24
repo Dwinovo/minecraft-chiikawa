@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.voice;
 import com.dwinovo.chiikawa.Constants;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +22,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 public final class PetVoiceLoader extends SimpleJsonResourceReloadListener {
     public static final String DIRECTORY = "pet_voice";
     /** Id for loaders that register reload listeners by id. */
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
+    public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, DIRECTORY);
 
     private static final String LOG_PREFIX = "[chiikawa-voice] ";
 
@@ -44,9 +45,11 @@ public final class PetVoiceLoader extends SimpleJsonResourceReloadListener {
     static Loaded load(Map<ResourceLocation, JsonElement> files) {
         Map<ResourceLocation, PetVoice> voices = new HashMap<>();
         List<String> errors = new ArrayList<>();
-        files.forEach((entityId, json) -> PetVoice.CODEC.parse(JsonOps.INSTANCE, json)
-            .ifSuccess(voice -> voices.put(entityId, voice))
-            .ifError(error -> errors.add(LOG_PREFIX + entityId + " says nothing, failed to parse: " + error.message())));
+        files.forEach((entityId, json) -> {
+            DataResult<PetVoice> parsed = PetVoice.CODEC.parse(JsonOps.INSTANCE, json);
+            parsed.result().ifPresent(voice -> voices.put(entityId, voice));
+            parsed.error().ifPresent(error -> errors.add(LOG_PREFIX + entityId + " says nothing, failed to parse: " + error.message()));
+        });
         return new Loaded(voices, errors);
     }
 

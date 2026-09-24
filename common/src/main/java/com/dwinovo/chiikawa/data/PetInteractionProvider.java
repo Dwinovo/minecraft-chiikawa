@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.data;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.social.PetInteraction;
 import com.dwinovo.chiikawa.social.PetInteractionLoader;
 import com.mojang.serialization.JsonOps;
@@ -23,7 +24,7 @@ public final class PetInteractionProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cache) {
         return CompletableFuture.allOf(PetInteractionData.all().entrySet().stream()
             .map(entry -> DataProvider.saveStable(cache,
-                PetInteraction.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(),
+                PetInteraction.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(false, Constants.LOG::error),
                 pathProvider.json(entry.getKey())))
             .toArray(CompletableFuture[]::new));
     }

@@ -82,14 +82,14 @@ class PetVoiceTest {
 
     @Test
     void rejectsWhatCannotBeRight() {
-        assertTrue(decode("{ \"lines\": {}, \"cooldown_ticks\": 200 }").isError(), "no crowd limit");
-        assertTrue(decode("{ \"lines\": {}, \"crowd_limit\": 3 }").isError(), "no cooldown");
-        assertTrue(decode("{ \"lines\": {}, \"cooldown_ticks\": 200, \"crowd_limit\": 0 }").isError());
-        assertTrue(decode("{ \"lines\": {}, \"chance\": { \"idle\": 1.5 }, \"cooldown_ticks\": 200, \"crowd_limit\": 3 }").isError());
-        assertTrue(decode("{ \"lines\": { \"sneeze\": [] }, \"cooldown_ticks\": 200, \"crowd_limit\": 3 }").isError());
+        assertTrue(decode("{ \"lines\": {}, \"cooldown_ticks\": 200 }").error().isPresent(), "no crowd limit");
+        assertTrue(decode("{ \"lines\": {}, \"crowd_limit\": 3 }").error().isPresent(), "no cooldown");
+        assertTrue(decode("{ \"lines\": {}, \"cooldown_ticks\": 200, \"crowd_limit\": 0 }").error().isPresent());
+        assertTrue(decode("{ \"lines\": {}, \"chance\": { \"idle\": 1.5 }, \"cooldown_ticks\": 200, \"crowd_limit\": 3 }").error().isPresent());
+        assertTrue(decode("{ \"lines\": { \"sneeze\": [] }, \"cooldown_ticks\": 200, \"crowd_limit\": 3 }").error().isPresent());
         assertTrue(decode("""
             { "lines": { "hurt": [ { "text": "voice.chiikawa.chiikawa.hurt.1", "weight": 0 } ] },
-              "cooldown_ticks": 200, "crowd_limit": 3 }""").isError());
+              "cooldown_ticks": 200, "crowd_limit": 3 }""").error().isPresent());
     }
 
     @Test
@@ -97,13 +97,13 @@ class PetVoiceTest {
         PetVoice voice = new PetVoice(Map.of(VoiceMoment.HURT, List.of(new PetVoice.Line(YADA, 2))),
             Map.of(VoiceMoment.IDLE, 0.001F), 400, 2, 60, 16.0);
 
-        JsonElement json = PetVoice.CODEC.encodeStart(JsonOps.INSTANCE, voice).getOrThrow();
+        JsonElement json = PetVoice.CODEC.encodeStart(JsonOps.INSTANCE, voice).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
-        assertEquals(voice, PetVoice.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
+        assertEquals(voice, PetVoice.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow(false, org.junit.jupiter.api.Assertions::fail));
     }
 
     private static PetVoice parse(String json) {
-        return decode(json).getOrThrow();
+        return decode(json).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
     }
 
     private static DataResult<PetVoice> decode(String json) {

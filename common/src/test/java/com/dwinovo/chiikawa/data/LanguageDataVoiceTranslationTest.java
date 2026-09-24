@@ -62,8 +62,8 @@ class LanguageDataVoiceTranslationTest {
     @Test
     void everyVoiceSurvivesTheTripThroughItsFile() {
         PetVoiceData.all().forEach((pet, voice) -> assertEquals(voice,
-            PetVoice.CODEC.parse(JsonOps.INSTANCE, PetVoice.CODEC.encodeStart(JsonOps.INSTANCE, voice).getOrThrow())
-                .getOrThrow(), pet::toString));
+            PetVoice.CODEC.parse(JsonOps.INSTANCE, PetVoice.CODEC.encodeStart(JsonOps.INSTANCE, voice).getOrThrow(false, org.junit.jupiter.api.Assertions::fail))
+                .getOrThrow(false, org.junit.jupiter.api.Assertions::fail), pet::toString));
     }
 
     private static Set<String> lineKeys() {
