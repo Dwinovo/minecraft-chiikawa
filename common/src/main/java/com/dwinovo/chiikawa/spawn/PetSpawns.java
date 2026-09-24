@@ -11,6 +11,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.random.Weighted;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 
@@ -36,14 +37,14 @@ public final class PetSpawns {
      * @param biome the biome's key
      * @param hasTag whether the biome is in a tag, as the loader asking can tell
      */
-    public static List<MobSpawnSettings.SpawnerData> in(ResourceKey<Biome> biome, Predicate<TagKey<Biome>> hasTag) {
-        List<MobSpawnSettings.SpawnerData> found = byId.values().stream()
+    public static List<Weighted<MobSpawnSettings.SpawnerData>> in(ResourceKey<Biome> biome, Predicate<TagKey<Biome>> hasTag) {
+        List<Weighted<MobSpawnSettings.SpawnerData>> found = byId.values().stream()
             .filter(spawn -> spawn.covers(biome, hasTag))
             .flatMap(spawn -> spawn.spawners().stream())
             .toList();
         if (!found.isEmpty()) {
             Constants.LOG.debug("[chiikawa-spawn] {} spawns {}", biome.location(),
-                found.stream().map(spawner -> BuiltInRegistries.ENTITY_TYPE.getKey(spawner.type)).toList());
+                found.stream().map(spawner -> BuiltInRegistries.ENTITY_TYPE.getKey(spawner.value().type())).toList());
         }
         return found;
     }
