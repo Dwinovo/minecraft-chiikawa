@@ -14,22 +14,23 @@ import com.dwinovo.chiikawa.item.PetDollItem;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
@@ -64,7 +65,7 @@ public final class LifeGameTests {
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 200)
     public static void a_wild_pet_is_born_with_a_tool(GameTestHelper helper) {
         BlockPos at = helper.absolutePos(new BlockPos(3, STAND, 3));
-        AbstractPet pet = InitEntity.USAGI_PET.get().spawn(helper.getLevel(), at, MobSpawnType.NATURAL);
+        AbstractPet pet = InitEntity.USAGI_PET.get().spawn(helper.getLevel(), at, EntitySpawnReason.NATURAL);
 
         helper.assertTrue(pet != null, "nothing spawned");
         helper.assertFalse(pet.getMainHandItem().isEmpty(), "a wild pet turned up empty-handed");
@@ -153,11 +154,11 @@ public final class LifeGameTests {
      */
     @GameTest(template = "floor8", batch = BATCH)
     public static void wild_pets_spawn_where_the_data_pack_says(GameTestHelper helper) {
-        Registry<Biome> biomes = helper.getLevel().registryAccess().registryOrThrow(Registries.BIOME);
+        Registry<Biome> biomes = helper.getLevel().registryAccess().lookupOrThrow(Registries.BIOME);
         EntityType<?> usagi = InitEntity.USAGI_PET.get();
 
-        helper.assertTrue(spawns(biomes.getOrThrow(Biomes.PLAINS), usagi), "no Usagi turns up on the plains");
-        helper.assertFalse(spawns(biomes.getOrThrow(Biomes.OCEAN), usagi), "Usagi turns up at sea, where no list puts it");
+        helper.assertTrue(spawns(biomes.getOrThrow(Biomes.PLAINS).value(), usagi), "no Usagi turns up on the plains");
+        helper.assertFalse(spawns(biomes.getOrThrow(Biomes.OCEAN).value(), usagi), "Usagi turns up at sea, where no list puts it");
         helper.succeed();
     }
 
@@ -172,11 +173,12 @@ public final class LifeGameTests {
      */
     @GameTest(template = "floor8", batch = BATCH)
     public static void no_doll_can_be_made(GameTestHelper helper) {
-        RegistryAccess registries = helper.getLevel().registryAccess();
-        List<RecipeHolder<?>> recipes = List.copyOf(helper.getLevel().getRecipeManager().getRecipes());
+        ContextMap context = SlotDisplayContext.fromLevel(helper.getLevel());
+        List<RecipeHolder<?>> recipes = List.copyOf(helper.getLevel().recipeAccess().getRecipes());
         for (Item item : BuiltInRegistries.ITEM) {
             if (item instanceof PetDollItem) {
-                helper.assertFalse(recipes.stream().anyMatch(recipe -> recipe.value().getResultItem(registries).is(item)),
+                helper.assertFalse(recipes.stream().anyMatch(recipe -> recipe.value().display().stream()
+                        .anyMatch(display -> display.result().resolveForFirstStack(context).is(item))),
                     BuiltInRegistries.ITEM.getKey(item) + " can be made, which turns it into a spawn egg");
             }
         }
