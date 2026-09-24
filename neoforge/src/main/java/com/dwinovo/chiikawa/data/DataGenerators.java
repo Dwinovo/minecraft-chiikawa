@@ -45,6 +45,7 @@ public final class DataGenerators {
                 new ModItemTagsProvider(output, lookupProvider, existingFileHelper));
         event.getGenerator().addProvider(server, new ModRecipeProvider(output, lookupProvider));
         event.getGenerator().addProvider(server, new PetPersonalityProvider(output));
+        event.getGenerator().addProvider(server, new PetVoiceProvider(output));
         event.getGenerator().addProvider(server, new PetTaskTypeProvider(output));
         event.getGenerator().addProvider(server, new GameTestStructureProvider(output));
         event.getGenerator().addProvider(server, new ShopCatalogProvider(output));

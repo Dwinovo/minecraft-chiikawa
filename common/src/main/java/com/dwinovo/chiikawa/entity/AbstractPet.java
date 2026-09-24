@@ -29,6 +29,8 @@ import com.dwinovo.chiikawa.sound.PetSoundKind;
 import com.dwinovo.chiikawa.sound.PetSoundSet;
 import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.utils.Utils;
+import com.dwinovo.chiikawa.voice.PetSpeech;
+import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -181,6 +183,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     private static final String ACTION_CONTROLLER = "action";
     /** Controller name receiving reaction triggers — must match {@link com.dwinovo.chiikawa.anim.render.ChiikawaEntityRenderer#CONTROLLER_REACTION}. */
     private static final String REACTION_CONTROLLER = "reaction";
+    /** Controller name the pet talks on — must match {@link com.dwinovo.chiikawa.anim.render.ChiikawaEntityRenderer#CONTROLLER_TALK}. */
+    private static final String TALK_CONTROLLER = "talk";
     private static final java.util.List<MemoryModuleType<?>> MEMORY_TYPES = java.util.List.of(
         MemoryModuleType.PATH,
         MemoryModuleType.DOORS_TO_CLOSE,
@@ -205,7 +209,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitMemory.SHOP_COOLDOWN.get(),
         InitMemory.CURRENT_INTENT.get(),
         InitMemory.INTENT_REEVALUATE.get(),
-        InitMemory.INTENT_SWITCH_LOG.get()
+        InitMemory.INTENT_SWITCH_LOG.get(),
+        InitMemory.LAST_SAID.get()
     );
     private static final java.util.List<net.minecraft.world.entity.ai.sensing.SensorType<? extends net.minecraft.world.entity.ai.sensing.Sensor<? super AbstractPet>>> SENSOR_TYPES = java.util.List.of(
         net.minecraft.world.entity.ai.sensing.SensorType.HURT_BY,
@@ -221,6 +226,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     private int lastSeenTriggerSeq;
     /** Last {@link #REACTION_TRIGGER} sequence number this client handled. Server copy is unused. */
     private int lastSeenReactionSeq;
+    /** What this copy of the pet is saying; see {@link #speak}. Server copy is unused. */
+    @Nullable
+    private PetSpeech.Heard speech;
 
     private final SimpleContainer backpack = new SimpleContainer(FULL_BACKPACK_SIZE) {
         @Override
@@ -951,6 +959,24 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     }
 
     /**
+     * Starts saying a line on this copy of the pet: the words go up over its head and its
+     * mouth opens. The mouth moves on a layer of its own, above the reactions, so a pet can
+     * talk through whatever face it is pulling. Client side; what is said is the server's to
+     * decide, see {@link PetSpeech#say}.
+     *
+     * @param line the translation key of what it says
+     */
+    public void speak(String line) {
+        speech = new PetSpeech.Heard(line, tickCount);
+        playOnce(TALK_CONTROLLER, List.of(PetSpeech.mouth(line)));
+    }
+
+    /** What this copy of the pet is saying right now, if anything. Client side. */
+    public Optional<PetSpeech.Heard> getSpeech() {
+        return Optional.ofNullable(speech).filter(heard -> tickCount - heard.since() < PetSpeech.TALK_TICKS);
+    }
+
+    /**
      * Plays the first of these animations this pet has, once, on the action layer: for a
      * picture that asks for a move by name, since which moves there are differs from pet
      * to pet. Client side.
@@ -1141,11 +1167,19 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         return null;
     }
 
+    /**
+     * Hurt and still standing: the pet winces, and may cry out. Here rather than in
+     * {@link #getHurtSound}, which the client asks too and which only wants an answer.
+     */
+    @Override
+    protected void playHurtSound(DamageSource source) {
+        super.playHurtSound(source);
+        triggerReaction(PetReaction.HURT);
+        PetSpeech.say(this, VoiceMoment.HURT);
+    }
+
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        if (!level().isClientSide()) {
-            triggerReaction(PetReaction.HURT);
-        }
         SoundEvent sound = getSoundSet().getHurtSound();
         return sound != null ? sound : super.getHurtSound(source);
     }
