@@ -24,6 +24,7 @@ public final class DataGenerators {
                 new ModSoundDefinitionsProvider(output));
         event.getGenerator().addProvider(true,
                 new ModItemModelProvider(output));
+        event.getGenerator().addProvider(true, new PropAtlasProvider(output));
         event.getGenerator().addProvider(true, new ManualProvider(output));
         for (String locale : LanguageData.LOCALES) {
             event.getGenerator().addProvider(true, new ModLanguageProvider(output, locale));
