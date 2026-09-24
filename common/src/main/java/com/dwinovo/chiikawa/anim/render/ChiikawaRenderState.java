@@ -78,6 +78,14 @@ public class ChiikawaRenderState extends LivingEntityRenderState {
     /** Where the label hangs, as a name tag's {@link #nameTagAttachment} is kept for its tag. */
     @Nullable
     public Vec3 labelAttachment;
+    /** What the pet is saying over its head this frame, {@code null} when it says nothing. */
+    @Nullable
+    public String speech;
+    /** How much of the bubble shows, from 0 as it fades out to 1. */
+    public float speechAlpha;
+    /** Where the bubble hangs, as a name tag's {@link #nameTagAttachment} is kept for its tag. */
+    @Nullable
+    public Vec3 speechAttachment;
 
     private static final ControllerSnapshot[] EMPTY = new ControllerSnapshot[0];
     private static final boolean[] EMPTY_HIDDEN = new boolean[0];
