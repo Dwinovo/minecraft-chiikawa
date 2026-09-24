@@ -966,15 +966,16 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * decide, see {@link PetSpeech#say}.
      *
      * @param line the translation key of what it says
+     * @param ticks how long the words stay up
      */
-    public void speak(String line) {
-        speech = new PetSpeech.Heard(line, tickCount);
+    public void speak(String line, int ticks) {
+        speech = new PetSpeech.Heard(line, tickCount, ticks);
         playOnce(TALK_CONTROLLER, List.of(PetSpeech.mouth(line)));
     }
 
     /** What this copy of the pet is saying right now, if anything. Client side. */
     public Optional<PetSpeech.Heard> getSpeech() {
-        return Optional.ofNullable(speech).filter(heard -> tickCount - heard.since() < PetSpeech.TALK_TICKS);
+        return Optional.ofNullable(speech).filter(heard -> heard.left(tickCount, 0.0F) > 0.0F);
     }
 
     /**
