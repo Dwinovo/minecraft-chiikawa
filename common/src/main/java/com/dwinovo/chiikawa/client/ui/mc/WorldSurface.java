@@ -78,9 +78,11 @@ public final class WorldSurface implements DrawSurface {
     }
 
     /**
-     * An item, in the box a screen would give it. It is pushed half its own depth towards
-     * the camera first: a block's icon is a little cube, and one centred on the card would
-     * have its back half swallowed by the card it sits on.
+     * An item, in the box a screen would give it, pressed flat onto the card a hair in front
+     * of it. The label always faces the camera, so a flattened item looks just as it does in
+     * a slot, a block's little cube included. Given its full depth it stood off the card
+     * towards the camera, and seen from near or from the side it slid out of its box and
+     * swelled; centred on the card instead, a block would have its back half swallowed.
      */
     @Override
     public void drawIcon(Icon icon, int x, int y) {
@@ -92,9 +94,10 @@ public final class WorldSurface implements DrawSurface {
         minecraft.getItemModelResolver().updateForTopItem(state, item.stack(), ItemDisplayContext.GUI, minecraft.level,
             null, 0);
         pose.pushPose();
-        pose.translate(x + UiStyle.ICON / 2.0F, y + UiStyle.ICON / 2.0F, nextLayer() + UiStyle.ICON / 2.0F);
-        // The game hands an item a block-wide space with y up; this one is icon-wide with y down.
-        pose.scale(UiStyle.ICON, -UiStyle.ICON, UiStyle.ICON);
+        pose.translate(x + UiStyle.ICON / 2.0F, y + UiStyle.ICON / 2.0F, nextLayer() + LAYER_STEP / 2.0F);
+        // The game hands an item a block-wide space with y up; this one is icon-wide with y
+        // down, and one layer deep.
+        pose.scale(UiStyle.ICON, -UiStyle.ICON, LAYER_STEP);
         state.submit(pose, collector, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
         pose.popPose();
     }
