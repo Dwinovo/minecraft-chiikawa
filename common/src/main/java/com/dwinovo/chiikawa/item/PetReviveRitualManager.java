@@ -135,7 +135,7 @@ public final class PetReviveRitualManager {
             // A doll nobody died in, which only creative mode hands out: a new pet, brought
             // into the world the way any other is.
             pet.finalizeSpawn(level, level.getCurrentDifficultyAt(BlockPos.containing(revive.spawnPos)),
-                MobSpawnType.MOB_SUMMONED, null);
+                MobSpawnType.MOB_SUMMONED, null, null);
         }
 
         pet.teleportTo(revive.spawnPos.x, revive.spawnPos.y, revive.spawnPos.z);
