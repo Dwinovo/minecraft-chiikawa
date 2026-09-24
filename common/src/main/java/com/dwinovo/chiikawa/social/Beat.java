@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.social;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetGesture;
+import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.mojang.serialization.Codec;
@@ -26,9 +27,9 @@ import net.minecraft.util.valueproviders.IntProvider;
  */
 public record Beat(Optional<String> animation, Optional<PetReaction> reaction, Optional<VoiceMoment> voice) {
     public static final MapCodec<Beat> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-        Codec.STRING.optionalFieldOf("animation").forGetter(Beat::animation),
-        PetReaction.CODEC.optionalFieldOf("reaction").forGetter(Beat::reaction),
-        VoiceMoment.CODEC.optionalFieldOf("voice").forGetter(Beat::voice)
+        ModCodecs.strictOptionalField(Codec.STRING, "animation").forGetter(Beat::animation),
+        ModCodecs.strictOptionalField(PetReaction.CODEC, "reaction").forGetter(Beat::reaction),
+        ModCodecs.strictOptionalField(VoiceMoment.CODEC, "voice").forGetter(Beat::voice)
     ).apply(instance, Beat::new));
     public static final Codec<Beat> CODEC = MAP_CODEC.codec();
 
@@ -48,7 +49,7 @@ public record Beat(Optional<String> animation, Optional<PetReaction> reaction, O
      */
     public record Recurring(IntProvider everyTicks, Beat beat) {
         public static final Codec<Recurring> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            IntProvider.POSITIVE_CODEC.fieldOf("every_ticks").forGetter(Recurring::everyTicks),
+            ModCodecs.POSITIVE_INT_PROVIDER.fieldOf("every_ticks").forGetter(Recurring::everyTicks),
             MAP_CODEC.forGetter(Recurring::beat)
         ).apply(instance, Recurring::new));
 

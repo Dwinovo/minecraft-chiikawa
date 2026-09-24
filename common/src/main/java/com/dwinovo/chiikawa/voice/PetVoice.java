@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.voice;
 
+import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
@@ -44,8 +45,8 @@ public record PetVoice(
 
     public static final Codec<PetVoice> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         Codec.unboundedMap(VoiceMoment.CODEC, Line.CODEC.listOf()).fieldOf("lines").forGetter(PetVoice::lines),
-        Codec.unboundedMap(VoiceMoment.CODEC, Codec.floatRange(0.0F, 1.0F))
-            .optionalFieldOf("chance", Map.of()).forGetter(PetVoice::chance),
+        ModCodecs.strictOptionalField(Codec.unboundedMap(VoiceMoment.CODEC, Codec.floatRange(0.0F, 1.0F)),
+            "chance", Map.of()).forGetter(PetVoice::chance),
         ExtraCodecs.NON_NEGATIVE_INT.fieldOf("cooldown_ticks").forGetter(PetVoice::cooldownTicks),
         ExtraCodecs.POSITIVE_INT.fieldOf("crowd_limit").forGetter(PetVoice::crowdLimit),
         ExtraCodecs.POSITIVE_INT.fieldOf("talk_ticks").forGetter(PetVoice::talkTicks),
