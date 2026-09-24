@@ -1,7 +1,6 @@
 package com.dwinovo.chiikawa.network;
 
 import com.dwinovo.chiikawa.Constants;
-import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -81,16 +80,8 @@ public final class BoardPayloads {
     public record BoardSlipsPayload(BlockPos board, int level, int daily, NextLevel next, List<SlipView> slips)
             implements MusicPayloads.Payload {
         public static BoardSlipsPayload read(FriendlyByteBuf buffer) {
-            BlockPos board = buffer.readBlockPos();
-            int level = buffer.readVarInt();
-            int daily = buffer.readVarInt();
-            NextLevel next = NextLevel.read(buffer);
-            int size = buffer.readVarInt();
-            List<SlipView> slips = new ArrayList<>(size);
-            for (int i = 0; i < size; i++) {
-                slips.add(SlipView.read(buffer));
-            }
-            return new BoardSlipsPayload(board, level, daily, next, slips);
+            return new BoardSlipsPayload(buffer.readBlockPos(), buffer.readVarInt(), buffer.readVarInt(),
+                NextLevel.read(buffer), buffer.readList(SlipView::read));
         }
 
         @Override
@@ -104,10 +95,7 @@ public final class BoardPayloads {
             buffer.writeVarInt(level);
             buffer.writeVarInt(daily);
             next.write(buffer);
-            buffer.writeVarInt(slips.size());
-            for (SlipView slip : slips) {
-                slip.write(buffer);
-            }
+            buffer.writeCollection(slips, (buf, slip) -> slip.write(buf));
         }
     }
 
