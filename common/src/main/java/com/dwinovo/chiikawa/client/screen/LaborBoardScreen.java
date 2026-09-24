@@ -25,11 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -101,8 +101,8 @@ public class LaborBoardScreen extends Screen {
      * it, the panel would cover it.
      */
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
         GuiSurface surface = new GuiSurface(graphics, this.font);
         TitledPanel.draw(surface, leftPos, topPos, WIDTH, panelHeight, this.title.getString());
         int right = leftPos + WIDTH - UiStyle.PAD;
@@ -125,8 +125,8 @@ public class LaborBoardScreen extends Screen {
 
     /** The buttons over the panel, then whatever the cursor is asking about over them. */
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
         GuiSurface surface = new GuiSurface(graphics, this.font);
         hovered(mouseX, mouseY).ifPresent(slip -> surface.onTop(() ->
             Tooltip.draw(surface, detail(slip), mouseX, mouseY, this.width, this.height)));
@@ -162,7 +162,7 @@ public class LaborBoardScreen extends Screen {
         if (price > 0) {
             lines.add(Component.translatable("screen.chiikawa.labor_board.upgrade_hint", level + 1, next.daily())
                 .getString());
-            for (ResourceLocation type : next.unlocks()) {
+            for (Identifier type : next.unlocks()) {
                 lines.add(Component.translatable("screen.chiikawa.labor_board.unlocks", PetStatusText.taskName(type))
                     .getString());
             }
