@@ -20,7 +20,7 @@ public final class LanguageData {
             addCommonTranslations(adder, "Chiikawa", "背包", "跟随", "坐下", "自由活动");
             addDollTooltipTranslations(adder, "试着把玩偶放在蛋糕上？");
             addHandbookTranslations(adder, "吉伊的打工手册", "右键翻开，看大家怎么过日子", "这本手册还是空白的",
-                "上一页", "下一页", "哇！", "耶！", "好吃！", "给你！", "呜……");
+                "上一页", "下一页");
             addHandbookPage(adder, "meet", "遇见吉伊",
                 "平原、草原、沙漠和雪地里，会遇到拿着工具闲逛的吉伊们。",
                 "拿吃的喂它就能驯服，它会跟着你走。",
@@ -56,6 +56,11 @@ public final class LanguageData {
                 "把玩偶放到蛋糕上，它就带着东西回来了。",
                 "打不过时它会先退到你身边，回了血再上。",
                 "摇一摇宠物铃铛，你的宠物都会回来，别的维度也听得见。");
+            addHandbookPage(adder, "friends", "伙伴之间",
+                "宠物会在头顶的气泡里说自己的口头禅，附近的人都看得见。",
+                "两只宠物碰到一起，会演原作里的一小段：飞鼠扒上来要人夸，吉伊哭了。",
+                "獭师父请客，栗子馒头给刚除完草的送咖啡，古本屋打蟹蟹招呼。",
+                "小八在街头演奏时，路过的会坐下来听，时不时鼓鼓掌。");
             addJobTranslations(adder, "职业", "无", "农夫", "剑士", "弓箭手", "音乐家", "未知");
             addEntityTranslations(adder, "乌萨奇", "小八", "吉伊", "狮萨", "飞鼠", "栗子馒头", "獭师父", "古本屋");
             addItemTagTranslations(adder, "农夫工具", "剑士工具", "弓箭手工具", "音乐家工具", "驯服食物", "种植作物", "运送物品", "可拾取物品", "请客的吃食");
@@ -184,6 +189,7 @@ public final class LanguageData {
             addVoiceLines(adder, "usagi", VoiceMoment.GIVEN_COFFEE, "呀哈");
             addVoiceLines(adder, "usagi", VoiceMoment.LISTEN, "噗噜噜噜");
             addVoiceLines(adder, "momonga", VoiceMoment.CLING, "快夸我。");
+            addVoiceLines(adder, "momonga", VoiceMoment.TURNED_DOWN, "快安慰我。");
             addVoiceLines(adder, "momonga", VoiceMoment.CRAB_GREETING, "蟹！");
             addVoiceLines(adder, "momonga", VoiceMoment.GIVEN_COFFEE, "再给我点！");
             addVoiceLines(adder, "momonga", VoiceMoment.LISTEN, "再弹一首！");
@@ -198,7 +204,7 @@ public final class LanguageData {
             addCommonTranslations(adder, "ちいかわ", "持ち物", "ついてくる", "おすわり", "自由行動");
             addDollTooltipTranslations(adder, "ぬいぐるみをケーキに置いてみる？");
             addHandbookTranslations(adder, "ちいかわのお仕事ハンドブック", "右クリックで開いて、みんなの暮らしをのぞこう",
-                "このハンドブックはまだまっしろ", "前のページ", "次のページ", "ワァ！", "ヤッタ！", "おいしい！", "どうぞ！", "うう……");
+                "このハンドブックはまだまっしろ", "前のページ", "次のページ");
             addHandbookPage(adder, "meet", "ちいかわたちとの出会い",
                 "平原や草原、砂漠や雪原で、道具を持ってうろうろしている子たちに出会えます。",
                 "食べ物をあげるとなついて、ついてくるようになります。",
@@ -234,6 +240,11 @@ public final class LanguageData {
                 "ぬいぐるみをケーキに置くと、持ち物といっしょに戻ってきます。",
                 "勝てそうにないときは、まずあなたのそばへ下がり、回復してからまた戦います。",
                 "ペットベルを鳴らせば、別のディメンションにいてもみんな戻ってきます。");
+            addHandbookPage(adder, "friends", "なかまどうし",
+                "頭の上のふきだしで口ぐせをしゃべります。近くにいればだれにでも見えます。",
+                "出会ったふたりは、原作のひとコマを演じます。モモンガがしがみつくと、ちいかわは泣いちゃう。",
+                "ラッコはごちそうし、くりまんじゅうは草むしり帰りにコーヒーを、古本屋はカニのあいさつを。",
+                "ハチワレが路上演奏していると、通りかかった子がすわって聴き、ときどき拍手します。");
             addJobTranslations(adder, "職業", "なし", "農家", "剣士", "弓使い", "音楽家", "不明");
             addEntityTranslations(adder, "うさぎ", "ハチワレ", "ちいかわ", "シーサー", "モモンガ", "くりまんじゅう", "ラッコ", "古本屋");
             addItemTagTranslations(adder, "農家の道具", "剣士の道具", "弓使いの道具", "音楽家の道具", "なつかせる食べ物", "植える作物", "運ぶアイテム", "拾えるアイテム", "おごる食べ物");
@@ -363,6 +374,7 @@ public final class LanguageData {
             addVoiceLines(adder, "usagi", VoiceMoment.GIVEN_COFFEE, "ヤハ");
             addVoiceLines(adder, "usagi", VoiceMoment.LISTEN, "プルルル");
             addVoiceLines(adder, "momonga", VoiceMoment.CLING, "褒めろ");
+            addVoiceLines(adder, "momonga", VoiceMoment.TURNED_DOWN, "慰めろ");
             addVoiceLines(adder, "momonga", VoiceMoment.CRAB_GREETING, "カニッ");
             addVoiceLines(adder, "momonga", VoiceMoment.GIVEN_COFFEE, "もっとよこせッ");
             addVoiceLines(adder, "momonga", VoiceMoment.LISTEN, "もっと弾け");
@@ -377,7 +389,7 @@ public final class LanguageData {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
             addHandbookTranslations(adder, "Chiikawa's Work Handbook", "Right-click to see how everyone gets by",
-                "This handbook is still blank", "Previous page", "Next page", "Wah!", "Yay!", "Yum!", "For you!", "Ow...");
+                "This handbook is still blank", "Previous page", "Next page");
             addHandbookPage(adder, "meet", "Meeting Them",
                 "Out on the plains and in the snow, they wander about with a tool.",
                 "Feed one something tasty to tame it, and it will follow you.",
@@ -413,6 +425,11 @@ public final class LanguageData {
                 "Put the doll on a cake, and back it comes, things and all.",
                 "When a fight goes badly it backs off to you, then goes back in.",
                 "Ring the pet bell and your pets come back, even from other worlds.");
+            addHandbookPage(adder, "friends", "Among Friends",
+                "Pets say their catchphrases in a bubble, for anyone nearby to see.",
+                "Two pets that meet act out a scene: Momonga wants praise, Chiikawa cries.",
+                "Rakko shares treats, Kurimanju brings coffee, Furuhonya greets crab-style.",
+                "When Hachiware busks, passers-by sit and listen, clapping now and then.");
             addJobTranslations(adder, "Job", "None", "Farmer", "Fencer", "Archer", "Musician", "Unknown");
             addEntityTranslations(adder, "Usagi", "Hachiware", "Chiikawa", "Shisa", "Momonga", "Kurimanju", "Rakko", "Furuhonya");
             addItemTagTranslations(adder, "Farmer Tools", "Fencer Tools", "Archer Tools", "Musician Tools", "Tame Foods", "Plant Crops", "Deliver Items", "Pickable Items", "Pet Treats");
@@ -544,6 +561,7 @@ public final class LanguageData {
             addVoiceLines(adder, "usagi", VoiceMoment.GIVEN_COFFEE, "Yaha");
             addVoiceLines(adder, "usagi", VoiceMoment.LISTEN, "Prrrrr");
             addVoiceLines(adder, "momonga", VoiceMoment.CLING, "Praise me.");
+            addVoiceLines(adder, "momonga", VoiceMoment.TURNED_DOWN, "Comfort me.");
             addVoiceLines(adder, "momonga", VoiceMoment.CRAB_GREETING, "Crab!");
             addVoiceLines(adder, "momonga", VoiceMoment.GIVEN_COFFEE, "More! Gimme!");
             addVoiceLines(adder, "momonga", VoiceMoment.LISTEN, "Play another!");
@@ -813,18 +831,17 @@ public final class LanguageData {
         adder.add("screen.chiikawa.pet.bag_hint", bagHint);
     }
 
+    /**
+     * The handbook itself. What the pets in it say is not here: they say their own lines,
+     * the ones written under {@link #addVoiceLines}.
+     */
     private static void addHandbookTranslations(Adder adder, String name, String tip, String empty,
-            String previousPage, String nextPage, String wa, String yay, String yum, String present, String ouch) {
+            String previousPage, String nextPage) {
         adder.add("item.chiikawa.handbook", name);
         adder.add("tooltip.chiikawa.handbook", tip);
         adder.add("screen.chiikawa.handbook.empty", empty);
         adder.add("screen.chiikawa.handbook.previous_page", previousPage);
         adder.add("screen.chiikawa.handbook.next_page", nextPage);
-        adder.add("manual.chiikawa.say.wa", wa);
-        adder.add("manual.chiikawa.say.yay", yay);
-        adder.add("manual.chiikawa.say.yum", yum);
-        adder.add("manual.chiikawa.say.present", present);
-        adder.add("manual.chiikawa.say.ouch", ouch);
     }
 
     /** A handbook page's title and the lines under its panels, under the keys its page names. */
