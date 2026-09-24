@@ -8,6 +8,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -112,7 +113,14 @@ public final class GameTestKit {
         AbstractPet pet = helper.spawn(type, rel);
         pet.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
         if (owned) {
-            pet.tame(owner(helper));
+            Player owner = owner(helper);
+            pet.tame(owner);
+            // The tag keeps hold of the owner it was handed, and would hand this one back
+            // though it never entered the world; by name alone, the pet looks for its owner
+            // among the players present, as it did when the cases were written. Cleared
+            // first: a tag naming the same owner counts as no change and is not taken.
+            pet.setOwnerReference(null);
+            pet.setOwnerReference(EntityReference.of(owner.getUUID()));
         }
         pet.setPetDirective(PetDirective.FREE);
         return pet;
