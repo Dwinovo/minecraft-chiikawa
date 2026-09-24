@@ -21,9 +21,8 @@ import com.dwinovo.chiikawa.task.PetTaskTypes;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
 import java.util.List;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,8 +31,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * What an owner's emeralds buy a labor board. A level is the one thing on that screen an
@@ -41,7 +38,6 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
  * still; what the hunting slips it unlocks then count is in {@code HuntGameTests}.
  */
 @GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class UpgradeGameTests {
     private static final String BATCH = "chiikawa_upgrade";
     private static final int STAND = 2;
@@ -61,7 +57,7 @@ public final class UpgradeGameTests {
     @GameTest(template = "floor8", batch = BATCH)
     public static void boards_go_by_the_levels_in_the_data_pack(GameTestHelper helper) {
         helper.assertTrue(BoardLevels.current().equals(LaborBoardLevelData.LEVELS),
-            "boards go by " + BoardLevels.current() + ", not the generated " + LaborBoardLevelData.LEVELS);
+            Component.literal("boards go by " + BoardLevels.current() + ", not the generated " + LaborBoardLevelData.LEVELS));
         helper.succeed();
     }
 
@@ -76,13 +72,13 @@ public final class UpgradeGameTests {
         BoardLevels levels = BoardLevels.current();
         int level = board.boardLevel();
 
-        helper.assertTrue(next.price() == levels.priceAfter(level), "the screen quotes another price: " + next.price());
-        helper.assertTrue(next.daily() == levels.slipsAt(level + 1), "the screen promises " + next.daily() + " slips a day");
+        helper.assertTrue(next.price() == levels.priceAfter(level), Component.literal("the screen quotes another price: " + next.price()));
+        helper.assertTrue(next.daily() == levels.slipsAt(level + 1), Component.literal("the screen promises " + next.daily() + " slips a day"));
         helper.assertTrue(PetTaskTypes.all().entrySet().stream()
                 .filter(entry -> entry.getValue().minLevel() == level + 1)
                 .allMatch(entry -> next.unlocks().contains(entry.getKey()))
                 && !next.unlocks().isEmpty(),
-            "the screen does not say what work the next level puts up: " + next.unlocks());
+            Component.literal("the screen does not say what work the next level puts up: " + next.unlocks()));
         helper.succeed();
     }
 
@@ -92,13 +88,13 @@ public final class UpgradeGameTests {
         LaborBoardBlockEntity board = board(helper);
         List<BoardSlot> before = List.copyOf(board.today());
 
-        helper.assertTrue(board.upgrade(), "a board at its first level had no level to sell");
+        helper.assertTrue(board.upgrade(), Component.literal("a board at its first level had no level to sell"));
         List<BoardSlot> after = board.today();
 
         helper.assertTrue(after.size() == before.size() + 1,
-            "a paid-up board puts up " + after.size() + " slips, not one more than " + before.size());
+            Component.literal("a paid-up board puts up " + after.size() + " slips, not one more than " + before.size()));
         helper.assertTrue(after.subList(0, before.size()).equals(before),
-            "the slips that were already up changed under the pets working on them");
+            Component.literal("the slips that were already up changed under the pets working on them"));
         helper.succeed();
     }
 
@@ -110,12 +106,12 @@ public final class UpgradeGameTests {
         int price = BoardLevels.current().priceAfter(board.boardLevel());
 
         helper.assertTrue(BoardServerPacketHandler.buyLevel(helper.absolutePos(BOARD), owner),
-            "the board would not sell a level to somebody standing at it with the money");
+            Component.literal("the board would not sell a level to somebody standing at it with the money"));
 
         helper.assertTrue(board.boardLevel() == BoardLevels.FIRST_LEVEL + 1,
-            "the board took the money and stayed where it was");
+            Component.literal("the board took the money and stayed where it was"));
         helper.assertTrue(owner.getInventory().countItem(Items.EMERALD) == PLENTY - price,
-            "the board charged something other than the price on its own screen");
+            Component.literal("the board charged something other than the price on its own screen"));
         helper.succeed();
     }
 
@@ -127,11 +123,11 @@ public final class UpgradeGameTests {
         ServerPlayer owner = customer(helper, short_);
 
         helper.assertFalse(BoardServerPacketHandler.buyLevel(helper.absolutePos(BOARD), owner),
-            "the board sold a level to somebody who was an emerald short");
+            Component.literal("the board sold a level to somebody who was an emerald short"));
 
-        helper.assertTrue(board.boardLevel() == BoardLevels.FIRST_LEVEL, "the board went up a level for free");
+        helper.assertTrue(board.boardLevel() == BoardLevels.FIRST_LEVEL, Component.literal("the board went up a level for free"));
         helper.assertTrue(owner.getInventory().countItem(Items.EMERALD) == short_,
-            "the board took what it was given and gave nothing back");
+            Component.literal("the board took what it was given and gave nothing back"));
         helper.succeed();
     }
 
@@ -145,11 +141,11 @@ public final class UpgradeGameTests {
         ServerPlayer owner = customer(helper, PLENTY);
 
         helper.assertFalse(BoardServerPacketHandler.buyLevel(helper.absolutePos(BOARD), owner),
-            "a board at its top level sold another one");
+            Component.literal("a board at its top level sold another one"));
 
-        helper.assertTrue(board.boardLevel() == BoardLevels.current().top(), "a board went past its top level");
+        helper.assertTrue(board.boardLevel() == BoardLevels.current().top(), Component.literal("a board went past its top level"));
         helper.assertTrue(owner.getInventory().countItem(Items.EMERALD) == PLENTY,
-            "the board charged for a level it did not have");
+            Component.literal("the board charged for a level it did not have"));
         helper.succeed();
     }
 
@@ -161,8 +157,8 @@ public final class UpgradeGameTests {
         owner.setPos(helper.absoluteVec(BOARD.getCenter()).add(64.0, 0.0, 0.0));
 
         helper.assertFalse(BoardServerPacketHandler.buyLevel(helper.absolutePos(BOARD), owner),
-            "a board sold a level to somebody nowhere near it");
-        helper.assertTrue(board.boardLevel() == BoardLevels.FIRST_LEVEL, "the far-off board went up anyway");
+            Component.literal("a board sold a level to somebody nowhere near it"));
+        helper.assertTrue(board.boardLevel() == BoardLevels.FIRST_LEVEL, Component.literal("the far-off board went up anyway"));
         helper.succeed();
     }
 
@@ -175,7 +171,7 @@ public final class UpgradeGameTests {
     public static void a_fencer_takes_a_hunting_slip_off_a_paid_up_board(GameTestHelper helper) {
         BlockPos where = boardOfferingHunting(helper);
         helper.setBlock(where, InitBlocks.LABOR_BOARD.get());
-        if (helper.getBlockEntity(where) instanceof LaborBoardBlockEntity board) {
+        if (helper.getLevel().getBlockEntity(helper.absolutePos(where)) instanceof LaborBoardBlockEntity board) {
             while (board.upgrade()) {
                 // paid up to the top, which is where hunting comes from
             }
@@ -184,13 +180,13 @@ public final class UpgradeGameTests {
 
         helper.succeedWhen(() -> helper.assertTrue(
             pet.getTask().map(task -> task.counter().equals(PetWorkCounters.SLAY)).orElse(false),
-            "the fencer came away with " + pet.getTask().map(task -> task.type().toString()).orElse("nothing")));
+            Component.literal("the fencer came away with " + pet.getTask().map(task -> task.type().toString()).orElse("nothing"))));
     }
 
     /** A board on the floor, at the level it is placed at. */
     private static LaborBoardBlockEntity board(GameTestHelper helper) {
         helper.setBlock(BOARD, InitBlocks.LABOR_BOARD.get());
-        if (helper.getBlockEntity(BOARD) instanceof LaborBoardBlockEntity board) {
+        if (helper.getLevel().getBlockEntity(helper.absolutePos(BOARD)) instanceof LaborBoardBlockEntity board) {
             return board;
         }
         throw new AssertionError("the labor board was placed without its block entity");

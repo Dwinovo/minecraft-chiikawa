@@ -11,14 +11,11 @@ import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.PetFollowKeeper;
 import com.dwinovo.chiikawa.entity.brain.constraint.AnchorDistances;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Catching up. A pet that is told to follow and then left far behind is fetched by the
@@ -26,7 +23,6 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
  * thinking, and that is exactly the pet an owner loses.
  */
 @GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class FollowGameTests {
     private static final String BATCH = "chiikawa_follow";
     private static final int STAND = 2;
@@ -53,7 +49,7 @@ public final class FollowGameTests {
 
         PetFollowKeeper.fetchStrays(helper.getLevel());
 
-        helper.assertTrue(caughtUp(pet, owner), "the pet was left behind with nobody to notice");
+        helper.assertTrue(caughtUp(pet, owner), Component.literal("the pet was left behind with nobody to notice"));
         helper.succeed();
     }
 
@@ -67,7 +63,7 @@ public final class FollowGameTests {
 
         PetFollowKeeper.fetchStrays(helper.getLevel());
 
-        helper.assertFalse(caughtUp(pet, owner), "a pet that was told to stay put was dragged along anyway");
+        helper.assertFalse(caughtUp(pet, owner), Component.literal("a pet that was told to stay put was dragged along anyway"));
         helper.succeed();
     }
 
@@ -82,7 +78,7 @@ public final class FollowGameTests {
 
         PetFollowKeeper.fetchStrays(helper.getLevel());
 
-        helper.assertFalse(caughtUp(pet, owner), "a pet left to roam was fetched as if it were at heel");
+        helper.assertFalse(caughtUp(pet, owner), Component.literal("a pet left to roam was fetched as if it were at heel"));
         helper.succeed();
     }
 
@@ -96,7 +92,7 @@ public final class FollowGameTests {
 
         PetFollowKeeper.fetchStrays(helper.getLevel());
 
-        helper.assertFalse(caughtUp(pet, owner), "a wild pet was fetched to somebody it does not belong to");
+        helper.assertFalse(caughtUp(pet, owner), Component.literal("a wild pet was fetched to somebody it does not belong to"));
         helper.succeed();
     }
 
