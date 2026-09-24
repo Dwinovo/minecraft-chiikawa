@@ -8,9 +8,8 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.manual.ManualPage;
 import com.dwinovo.chiikawa.ui.Rect;
-import com.dwinovo.chiikawa.ui.Ui;
 import com.dwinovo.chiikawa.ui.UiStyle;
-import com.dwinovo.chiikawa.ui.UiTheme;
+import com.dwinovo.chiikawa.ui.widget.Bubble;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.math.Axis;
 import java.util.ArrayList;
@@ -205,18 +204,11 @@ public final class ManualScene {
             if (actor.motion().say().isEmpty()) {
                 return;
             }
-            String words = Component.translatable(actor.motion().say().get()).getString();
-            int width = surface.textWidth(words) + 2 * UiStyle.GAP;
-            int height = surface.lineHeight() + 2 * UiStyle.TIGHT;
-            int x = Mth.clamp(Math.round(screenX(area)) - width / 2, area.x() + UiStyle.TIGHT,
-                area.right() - UiStyle.TIGHT - width);
-            int y = area.y() + UiStyle.GAP;
-            Ui.sticker(surface, x, y, width, height, Ui.CARD_RADIUS, UiTheme.PANEL);
-            // The tail, pointing down at whoever is talking.
-            int tailX = Mth.clamp(Math.round(screenX(area)), x + 3, x + width - 4);
-            surface.fillRect(tailX - 1, y + height, 3, 1, UiTheme.INK);
-            surface.fillRect(tailX, y + height + 1, 1, 1, UiTheme.INK);
-            surface.drawText(words, x + UiStyle.GAP, y + UiStyle.TIGHT, UiTheme.TEXT);
+            Bubble bubble = new Bubble(Component.translatable(actor.motion().say().get()).getString());
+            int speaker = Math.round(screenX(area));
+            int width = bubble.width(surface);
+            int x = Mth.clamp(speaker - width / 2, area.x() + UiStyle.TIGHT, area.right() - UiStyle.TIGHT - width);
+            bubble.draw(surface, x, area.y() + UiStyle.GAP, speaker);
         }
     }
 
