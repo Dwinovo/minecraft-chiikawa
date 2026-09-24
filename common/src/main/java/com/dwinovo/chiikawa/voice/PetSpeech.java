@@ -17,10 +17,6 @@ import net.minecraft.server.level.ServerPlayer;
  * screen.
  */
 public final class PetSpeech {
-    /** How far a pet is heard: as far as the game carries a sound at full volume. */
-    public static final double HEARING_RANGE = 16.0;
-    /** How long a line stays up over a pet's head, long enough to read a few words. */
-    public static final int TALK_TICKS = 60;
     /** The two ways every pet opens its mouth to talk. */
     public static final List<String> MOUTHS = List.of("open_mouth1", "open_mouth2");
 
@@ -47,14 +43,15 @@ public final class PetSpeech {
             return Optional.empty();
         }
         Optional<String> line = voice.draw(moment, pet.getRandom());
-        if (line.isEmpty() || talkingNearby(level, pet, now) >= voice.crowdLimit()) {
+        double range = voice.hearingRange();
+        if (line.isEmpty() || talkingNearby(level, pet, now, range) >= voice.crowdLimit()) {
             return Optional.empty();
         }
-        pet.getBrain().setMemory(InitMemory.LAST_SAID.get(), new Said(line.get(), now));
-        PetSpeechPayload payload = new PetSpeechPayload(pet.getId(), line.get());
+        pet.getBrain().setMemory(InitMemory.LAST_SAID.get(), new Said(line.get(), now, voice.talkTicks()));
+        PetSpeechPayload payload = new PetSpeechPayload(pet.getId(), line.get(), voice.talkTicks());
         // Sent as the game sends a sound: to every player near enough to hear it.
         for (ServerPlayer player : level.players()) {
-            if (player.distanceToSqr(pet) <= HEARING_RANGE * HEARING_RANGE
+            if (player.distanceToSqr(pet) <= range * range
                     && Services.NETWORK.canReceive(player, PetSpeechPayload.TYPE)) {
                 Services.NETWORK.sendToClient(player, payload);
             }
@@ -63,12 +60,12 @@ public final class PetSpeech {
     }
 
     /** How many other pets within earshot of this one have a line over their heads. */
-    private static long talkingNearby(ServerLevel level, AbstractPet pet, long now) {
-        return level.getEntitiesOfClass(AbstractPet.class, pet.getBoundingBox().inflate(HEARING_RANGE),
-                other -> other != pet && other.distanceToSqr(pet) <= HEARING_RANGE * HEARING_RANGE)
+    private static long talkingNearby(ServerLevel level, AbstractPet pet, long now, double range) {
+        return level.getEntitiesOfClass(AbstractPet.class, pet.getBoundingBox().inflate(range),
+                other -> other != pet && other.distanceToSqr(pet) <= range * range)
             .stream()
             .filter(other -> other.getBrain().getMemory(InitMemory.LAST_SAID.get())
-                .filter(said -> now - said.gameTime() < TALK_TICKS)
+                .filter(said -> said.talking(now))
                 .isPresent())
             .count();
     }
@@ -87,8 +84,13 @@ public final class PetSpeech {
      *
      * @param line the translation key of what it said
      * @param gameTime when it said it
+     * @param ticks how long the line stays up over its head
      */
-    public record Said(String line, long gameTime) {
+    public record Said(String line, long gameTime, int ticks) {
+        /** Whether the line is still up over its head. */
+        public boolean talking(long now) {
+            return now - gameTime < ticks;
+        }
     }
 
     /**
@@ -96,7 +98,12 @@ public final class PetSpeech {
      *
      * @param line the translation key of what it said
      * @param since the pet's tick count when it started saying it
+     * @param ticks how long the line stays up over its head
      */
-    public record Heard(String line, int since) {
+    public record Heard(String line, int since, int ticks) {
+        /** How many ticks the line has left up, counting the part of a tick already drawn. */
+        public float left(int tickCount, float partialTick) {
+            return ticks - (tickCount - since + partialTick);
+        }
     }
 }
