@@ -35,7 +35,7 @@ public final class PetTaskTypeData {
             // Farmers are the most common job, so their slips come up the most. Picking
             // mushrooms is not among them: mushrooms are only there to pick at night, so a
             // slip for them left a farmer standing about all day waiting for the dark.
-            WEEDING, new PetTaskType(farmer, PetWorkCounters.WEED, vanilla("grass"),
+            WEEDING, new PetTaskType(farmer, PetWorkCounters.WEED, vanilla("short_grass"),
                 UniformInt.of(8, 16), reward(WEEDING), 5, BoardLevels.FIRST_LEVEL),
             // Seconds of music.
             STREET_PERFORMANCE, new PetTaskType(musician, PetWorkCounters.PLAY_MUSIC_SECOND, vanilla("note_block"),

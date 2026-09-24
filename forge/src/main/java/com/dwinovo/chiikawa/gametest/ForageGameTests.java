@@ -54,7 +54,7 @@ public final class ForageGameTests {
         holding(wildWorker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
         BlockPos weed = new BlockPos(7, STAND, 4);
         helper.setBlock(weed.below(), Blocks.GRASS_BLOCK);
-        helper.setBlock(weed, Blocks.GRASS);
+        helper.setBlock(weed, Blocks.SHORT_GRASS);
 
         helper.succeedWhen(() -> helper.assertBlockPresent(Blocks.AIR, weed));
     }
@@ -68,10 +68,10 @@ public final class ForageGameTests {
         holding(worker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
         BlockPos weed = new BlockPos(7, STAND, 4);
         helper.setBlock(weed.below(), Blocks.GRASS_BLOCK);
-        helper.setBlock(weed, Blocks.GRASS);
+        helper.setBlock(weed, Blocks.SHORT_GRASS);
 
         helper.runAtTickTime(LEAVE_IT_TICKS, () -> {
-            helper.assertBlockPresent(Blocks.GRASS, weed);
+            helper.assertBlockPresent(Blocks.SHORT_GRASS, weed);
             helper.succeed();
         });
     }

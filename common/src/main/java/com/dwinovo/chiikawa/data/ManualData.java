@@ -75,13 +75,13 @@ public final class ManualData {
                 pet(InitEntity.CHIIKAWA_PET).at(0.47F).facing(60.0F).hold(Items.WOODEN_HOE).action(PetAction.PICKUP),
                 pet(InitEntity.USAGI_PET).at(0.17F).facing(50.0F).hold(InitItems.USAGI_WEAPON.get()).walk()),
             // Standing in the grass it is pulling up: the tufts at its feet are drawn over it.
-            panel(item(Items.GRASS).at(0.2F).scale(0.8F),
-                item(Items.GRASS).at(0.84F).scale(0.7F),
+            panel(item(Items.SHORT_GRASS).at(0.2F).scale(0.8F),
+                item(Items.SHORT_GRASS).at(0.84F).scale(0.7F),
                 pet(InitEntity.CHIIKAWA_PET).at(0.5F).facing(20.0F).hold(Items.WOODEN_HOE).action(PetAction.HARVEST).every(24),
-                item(Items.GRASS).at(0.37F),
-                item(Items.GRASS).at(0.47F).scale(0.9F),
-                item(Items.GRASS).at(0.6F),
-                item(Items.GRASS).at(0.7F).scale(0.8F)),
+                item(Items.SHORT_GRASS).at(0.37F),
+                item(Items.SHORT_GRASS).at(0.47F).scale(0.9F),
+                item(Items.SHORT_GRASS).at(0.6F),
+                item(Items.SHORT_GRASS).at(0.7F).scale(0.8F)),
             panel(pet(InitEntity.CHIIKAWA_PET).at(0.42F).facing(15.0F).hold(Items.WOODEN_HOE)
                     .play("jump", "tame").every(30).say("manual.chiikawa.say.yay"),
                 money().at(0.72F).up(0.45F).bob()));

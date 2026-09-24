@@ -38,7 +38,7 @@ public final class ModAdvancementProvider implements DataProvider {
                 .rewards(AdvancementRewards.Builder.loot(ModLootTableProvider.HANDBOOK_GIFT))
                 .build(HANDBOOK)
                 .value();
-            return DataProvider.saveStable(cache, handbook.serializeToJson(), pathProvider.json(HANDBOOK));
+            return DataProvider.saveStable(cache, Advancement.CODEC, handbook, pathProvider.json(HANDBOOK));
         });
     }
 

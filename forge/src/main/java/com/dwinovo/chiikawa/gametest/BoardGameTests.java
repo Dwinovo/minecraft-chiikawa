@@ -103,7 +103,7 @@ public final class BoardGameTests {
             for (int z = 0; z < WEED_PATCH; z++) {
                 BlockPos weed = new BlockPos(2 + x, STAND, 2 + z);
                 helper.setBlock(weed.below(), Blocks.GRASS_BLOCK);
-                helper.setBlock(weed, Blocks.GRASS);
+                helper.setBlock(weed, Blocks.SHORT_GRASS);
             }
         }
     }
