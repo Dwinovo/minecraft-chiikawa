@@ -51,6 +51,7 @@ public final class InitTabs {
         InitItems.USAGI_WEAPON,
         InitItems.HACHIWARE_WEAPON,
         InitItems.CHIIKAWA_WEAPON,
+        InitItems.RAKKO_SWORD,
         InitItems.MUSIC_BOX,
         InitItems.LABOR_BOARD,
         InitItems.SHOP,
