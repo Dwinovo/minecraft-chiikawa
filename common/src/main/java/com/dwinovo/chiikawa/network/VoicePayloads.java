@@ -18,13 +18,15 @@ public final class VoicePayloads {
      *
      * @param pet the pet's entity id
      * @param line the translation key of what it said
+     * @param ticks how long the line stays up over the pet's head
      */
-    public record PetSpeechPayload(int pet, String line) implements CustomPacketPayload {
+    public record PetSpeechPayload(int pet, String line, int ticks) implements CustomPacketPayload {
         public static final Type<PetSpeechPayload> TYPE = new Type<>(
             ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "pet_speech"));
         public static final StreamCodec<RegistryFriendlyByteBuf, PetSpeechPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT, PetSpeechPayload::pet,
             ByteBufCodecs.STRING_UTF8, PetSpeechPayload::line,
+            ByteBufCodecs.VAR_INT, PetSpeechPayload::ticks,
             PetSpeechPayload::new);
 
         @Override

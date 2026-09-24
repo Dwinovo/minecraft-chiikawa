@@ -180,7 +180,7 @@ public final class VoiceGameTests {
             helper.assertTrue(PetSpeech.say(pet, VoiceMoment.HURT).isPresent(), "a pet in a quiet yard said nothing");
         }
         helper.assertFalse(PetSpeech.say(last, VoiceMoment.HURT).isPresent(), "one pet too many talked at once");
-        helper.runAfterDelay(PetSpeech.TALK_TICKS, () -> {
+        helper.runAfterDelay(PetVoices.of(InitEntity.CHIIKAWA_PET.get()).talkTicks(), () -> {
             helper.assertTrue(PetSpeech.say(last, VoiceMoment.HURT).isPresent(),
                 "the last pet was still waiting after the others had finished");
             helper.succeed();
@@ -194,7 +194,8 @@ public final class VoiceGameTests {
      */
     private static void quietYard(GameTestHelper helper, long dayTime) {
         settleWorld(helper.getLevel(), Difficulty.NORMAL, dayTime);
-        helper.getLevel().getEntitiesOfClass(AbstractPet.class, helper.getBounds().inflate(PetSpeech.HEARING_RANGE))
+        double range = PetVoices.of(InitEntity.CHIIKAWA_PET.get()).hearingRange();
+        helper.getLevel().getEntitiesOfClass(AbstractPet.class, helper.getBounds().inflate(range))
             .forEach(pet -> pet.getBrain().eraseMemory(InitMemory.LAST_SAID.get()));
     }
 
