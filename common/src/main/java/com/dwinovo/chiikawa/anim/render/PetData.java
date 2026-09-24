@@ -28,7 +28,12 @@ public enum PetData {
      * over its head; set only while it is being asked. Worked out at extract time, as
      * vanilla works out a name tag.
      */
-    STATUS_LABEL;
+    STATUS_LABEL,
+    /**
+     * The line a pet is saying, drawn in a bubble over its head; set only while it has one
+     * up. Worked out at extract time, as the label is.
+     */
+    SPEECH;
 
     /** Cached values() to avoid per-frame allocation; treat as immutable. */
     public static final PetData[] VALUES = values();

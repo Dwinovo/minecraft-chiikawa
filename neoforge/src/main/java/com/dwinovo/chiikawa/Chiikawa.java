@@ -27,6 +27,7 @@ import com.dwinovo.chiikawa.spawn.PetSpawnLoader;
 import com.dwinovo.chiikawa.spawn.PetSpawnsBiomeModifier;
 import com.dwinovo.chiikawa.task.BoardLevelsLoader;
 import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
+import com.dwinovo.chiikawa.voice.PetVoiceLoader;
 import com.dwinovo.chiikawa.entity.brain.task.farmer.crop.FarmRegistry;
 import com.dwinovo.chiikawa.item.PetDollItem;
 import com.dwinovo.chiikawa.item.PetReviveRitualManager;
@@ -86,6 +87,7 @@ public class Chiikawa {
             event.addListener(ShopCatalogLoader.ID, new ShopCatalogLoader());
             event.addListener(BoardLevelsLoader.ID, new BoardLevelsLoader());
             event.addListener(PetSpawnLoader.ID, new PetSpawnLoader());
+            event.addListener(PetVoiceLoader.ID, new PetVoiceLoader());
         });
 
         InitCapabilities.register(modEventBus);

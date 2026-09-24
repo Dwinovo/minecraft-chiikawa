@@ -6,11 +6,12 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 
 /**
  * Hachiware's renderer adds model-specific conditional bones. The
- * {@code guitar} prop and {@code Mouth3} expression bone are hidden by
- * default and only appear when some controller is currently sampling the
- * {@code guitar} animation. The main-hand locator does the inverse so the
- * music box item disappears during the performance instead of clipping
- * through the authored guitar prop.
+ * {@code guitar} prop is hidden by default and only appears when some
+ * controller is currently sampling the {@code guitar} animation. The
+ * {@code Mouth3} expression bone, its open mouth, shows while it sings along
+ * to the guitar and while it talks. The main-hand locator does the inverse of
+ * the guitar so the music box item disappears during the performance instead
+ * of clipping through the authored guitar prop.
  *
  * <p>The animator originally shipped a companion {@code noguitar} animation
  * whose only keyframe is {@code guitar.scale = 0} — a hand-rolled "hide
@@ -34,7 +35,7 @@ public class HachiwareRenderer extends ChiikawaEntityRenderer<HachiwarePet> {
         addBoneVisibilityRule("guitar",
                 (state, animCtx) -> isAnyControllerPlaying(state, GUITAR_ANIMATION));
         addBoneVisibilityRule("Mouth3",
-                (state, animCtx) -> isAnyControllerPlaying(state, GUITAR_ANIMATION));
+                (state, animCtx) -> isAnyControllerPlaying(state, GUITAR_ANIMATION) || isTalking(state));
         addBoneVisibilityRule("RightHandLocator",
                 (state, animCtx) -> !isAnyControllerPlaying(state, GUITAR_ANIMATION));
     }

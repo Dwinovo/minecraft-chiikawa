@@ -27,6 +27,11 @@ public final class FixedRandom implements RandomSource {
         return new FixedRandom(new float[0], values);
     }
 
+    /** Both kinds, for something that rolls a chance and then picks. */
+    public static FixedRandom of(float[] floats, int... ints) {
+        return new FixedRandom(floats, ints);
+    }
+
     @Override
     public float nextFloat() {
         if (floats.length == 0) {

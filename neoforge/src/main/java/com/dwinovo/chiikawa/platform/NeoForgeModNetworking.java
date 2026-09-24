@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
 import com.dwinovo.chiikawa.client.manual.ClientManualPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
 import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
+import com.dwinovo.chiikawa.client.voice.ClientVoicePacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
 import com.dwinovo.chiikawa.network.BoardServerPacketHandler;
 import com.dwinovo.chiikawa.network.ManualPayloads;
@@ -13,6 +14,7 @@ import com.dwinovo.chiikawa.network.ShopPayloads;
 import com.dwinovo.chiikawa.network.ShopServerPacketHandler;
 import com.dwinovo.chiikawa.network.MusicPayloads;
 import com.dwinovo.chiikawa.network.MusicServerPacketHandler;
+import com.dwinovo.chiikawa.network.VoicePayloads;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -62,6 +64,8 @@ public final class NeoForgeModNetworking {
                     MusicServerPacketHandler.handleSelectTrack(payload, player);
                 }
             });
+        registrar.playToClient(VoicePayloads.PetSpeechPayload.TYPE, VoicePayloads.PetSpeechPayload.STREAM_CODEC,
+            (payload, context) -> ClientVoicePacketHandler.handleSpeech(payload));
     }
 
     public static void registerClientPayloads(RegisterClientPayloadHandlersEvent event) {
