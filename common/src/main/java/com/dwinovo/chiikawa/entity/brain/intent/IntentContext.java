@@ -66,8 +66,9 @@ public record IntentContext(
         Level level = pet.level();
         return new IntentContext(
             GlobalPos.of(level.dimension(), pet.blockPosition()),
-            // A level without a day cycle, like the Nether, stays at its fixed time of day.
-            DayPhase.of(level.dimensionType().fixedTime().orElse(level.getDayTime())),
+            // A level without a day cycle, like the Nether, no longer has a time of day of its
+            // own; a day's routine goes by the world's clock there, as villagers' schedules do.
+            DayPhase.of(level.getDayTime()),
             ownership,
             PetPersonalities.of(pet.getType()),
             PetConstraints.anchorOf(pet, ownership),
