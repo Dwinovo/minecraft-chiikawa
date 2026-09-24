@@ -11,6 +11,9 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
  * opening under its mouth ({@code Mouth3}) shows only while an {@code open_mouth} animation
  * plays. Its cape would go through a rucksack, so under one it is tucked away, as Shisa's
  * and Momonga's tails are.
+ *
+ * <p>Its faces need no parts of their own: the stoic senpai nods when pleased and sets its
+ * brows when hurt, and never cries.
  */
 public class RakkoRenderer extends ChiikawaEntityRenderer<RakkoPet> {
     public RakkoRenderer(EntityRendererProvider.Context ctx) {
