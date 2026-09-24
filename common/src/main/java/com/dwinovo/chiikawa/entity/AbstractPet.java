@@ -89,7 +89,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -670,11 +669,14 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
             return;
         }
         AbstractArrow arrow = arrowItem.createArrow(serverLevel, ammo, this);
-        Vec3 from = getEyePosition();
-        Vec3 to = target.getEyePosition();
-        Vec3 delta = to.subtract(from);
+        // Aimed as a skeleton aims: a third of the way up the target, from the arrow, with
+        // the same lift for the fall. Aimed at the eyes, the lift carried it over a zombie's
+        // head at a pet's range.
+        double dx = target.getX() - getX();
+        double dy = target.getY(1.0 / 3.0) - arrow.getY();
+        double dz = target.getZ() - getZ();
         float inaccuracy = 14 - serverLevel.getDifficulty().getId() * 4;
-        arrow.shoot(delta.x, delta.y + Math.sqrt(delta.x * delta.x + delta.z * delta.z) * 0.2F, delta.z, 1.6F, inaccuracy);
+        arrow.shoot(dx, dy + Math.sqrt(dx * dx + dz * dz) * 0.2F, dz, 1.6F, inaccuracy);
         arrow.setOwner(this);
         serverLevel.addFreshEntity(arrow);
         boolean infinite = ammo.is(Items.ARROW)
