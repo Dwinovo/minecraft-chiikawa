@@ -183,22 +183,9 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     private void drawPortrait(GuiGraphics graphics, DrawSurface surface, AbstractPet pet, int mouseX, int mouseY) {
         Rect at = PORTRAIT.offset(this.leftPos, this.topPos);
         Ui.sticker(surface, at.x(), at.y(), at.width(), at.height(), Ui.CARD_RADIUS, UiTheme.SKY_PALE);
-        // 1.20.1 only offers the point-based renderEntityInInventoryFollowsMouse, so clip
-        // to the window and stand the pet in it the way the rectangle variant does later:
-        // its middle at the window's centre, the head turned from there towards the mouse.
-        int x1 = at.x() + 2;
-        int y1 = at.y() + 2;
-        int x2 = at.right() - 2;
-        int y2 = at.bottom() - 2;
-        float centerX = (x1 + x2) / 2.0F;
-        float centerY = (y1 + y2) / 2.0F;
-        ChiikawaEntityRenderer.drawPortrait(() -> {
-            graphics.enableScissor(x1, y1, x2, y2);
-            InventoryScreen.renderEntityInInventoryFollowsMouse(graphics, (int) centerX,
-                (int) (centerY + PORTRAIT_SCALE * (pet.getBbHeight() / 2.0F + PORTRAIT_Y_OFFSET)),
-                PORTRAIT_SCALE, centerX - mouseX, centerY - mouseY, pet);
-            graphics.disableScissor();
-        });
+        ChiikawaEntityRenderer.drawPortrait(() -> InventoryScreen.renderEntityInInventoryFollowsMouse(graphics,
+            at.x() + 2, at.y() + 2, at.right() - 2, at.bottom() - 2,
+            PORTRAIT_SCALE, PORTRAIT_Y_OFFSET, mouseX, mouseY, pet));
     }
 
     /**

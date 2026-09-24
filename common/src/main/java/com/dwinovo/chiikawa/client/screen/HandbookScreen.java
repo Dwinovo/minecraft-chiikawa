@@ -106,18 +106,9 @@ public class HandbookScreen extends Screen {
         scenes.forEach(ManualScene::tick);
     }
 
-    /**
-     * 1.20.1's {@code Screen.render} draws only the widgets, so the background, with the
-     * panel on it, goes first here, as vanilla's own screens draw theirs.
-     */
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics, mouseX, mouseY, partialTick);
-        super.render(graphics, mouseX, mouseY, partialTick);
-    }
-
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(graphics);
+        super.renderBackground(graphics, mouseX, mouseY, partialTick);
         GuiSurface surface = new GuiSurface(graphics, this.font);
         if (pages.isEmpty()) {
             TitledPanel.draw(surface, leftPos, topPos, WIDTH, panelHeight, this.title.getString());

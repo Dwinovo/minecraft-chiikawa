@@ -133,22 +133,13 @@ public class ShopScreen extends Screen {
     }
 
     /**
-     * 1.20.1's {@code Screen.render} draws only the widgets, so the background, with the
-     * panel on it, goes first here, as vanilla's own screens draw theirs.
-     */
-    @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics, mouseX, mouseY, partialTick);
-        super.render(graphics, mouseX, mouseY, partialTick);
-    }
-
-    /**
      * The panel and its rows, drawn right after the game dims what is behind the screen and
      * before the buttons, as the music box draws its own: drawn after them, the panel would
      * cover them.
      */
+    @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(graphics);
+        super.renderBackground(graphics, mouseX, mouseY, partialTick);
         GuiSurface surface = new GuiSurface(graphics, this.font);
         TitledPanel.draw(surface, leftPos, topPos, PANEL_W, panelHeight, this.title.getString());
         // What the customer has to spend, where a shopper looks first.

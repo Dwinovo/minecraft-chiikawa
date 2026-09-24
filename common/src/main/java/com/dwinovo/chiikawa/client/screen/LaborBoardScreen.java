@@ -100,8 +100,9 @@ public class LaborBoardScreen extends Screen {
      * the screen and before the upgrade button, as the music box draws its own: drawn after
      * it, the panel would cover it.
      */
+    @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(graphics);
+        super.renderBackground(graphics, mouseX, mouseY, partialTick);
         GuiSurface surface = new GuiSurface(graphics, this.font);
         TitledPanel.draw(surface, leftPos, topPos, WIDTH, panelHeight, this.title.getString());
         int right = leftPos + WIDTH - UiStyle.PAD;
@@ -125,9 +126,6 @@ public class LaborBoardScreen extends Screen {
     /** The buttons over the panel, then whatever the cursor is asking about over them. */
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        // 1.20.1's Screen.render draws only the widgets: the background, and the panel on
-        // it, go first, as vanilla's own screens draw theirs.
-        renderBackground(graphics, mouseX, mouseY, partialTick);
         super.render(graphics, mouseX, mouseY, partialTick);
         GuiSurface surface = new GuiSurface(graphics, this.font);
         hovered(mouseX, mouseY).ifPresent(slip -> surface.onTop(() ->
