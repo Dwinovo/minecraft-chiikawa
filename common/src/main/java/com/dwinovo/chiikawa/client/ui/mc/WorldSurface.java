@@ -18,7 +18,7 @@ import net.minecraft.world.item.ItemDisplayContext;
  * Draws the {@code chiikawa-ui} library in the world, on a surface already turned to face
  * the camera — the same widgets a screen uses, floating over a pet.
  *
- * <p>Both the fills and the text test depth, so a label behind a wall is hidden by it.
+ * <p>Both the fills and the text test depth, so a bubble behind a wall is hidden by it.
  *
  * <p>A screen has no depth: what is drawn later simply covers what came before. Here
  * everything would land on one plane, and two fills on one plane fight — the panel body
@@ -26,7 +26,7 @@ import net.minecraft.world.item.ItemDisplayContext;
  * because their depths differ by the last bit of a float. So each call sits a hair nearer
  * the camera than the one before it, and the painter's order a widget expects holds.
  *
- * <p>One surface is made per label, so the layers start over every time and a label never
+ * <p>One surface is made per bubble, so the layers start over every time and a bubble never
  * climbs away from the pet it belongs to.
  *
  * <p>A surface can be drawn faded, for something on its way out, such as a line a pet has
@@ -38,8 +38,8 @@ public final class WorldSurface implements DrawSurface {
     private static final int FULL_BRIGHT = LightCoordsUtil.FULL_BRIGHT;
     /**
      * How much nearer each call sits, in text pixels. Wide enough that the depth buffer
-     * still tells two layers apart at the far end of a label's range, and far too little
-     * for the label to look like it stands off the pet.
+     * still tells two layers apart at the far end of a bubble's range, and far too little
+     * for the bubble to look like it stands off the pet.
      */
     private static final float LAYER_STEP = 0.1F;
 
@@ -50,7 +50,7 @@ public final class WorldSurface implements DrawSurface {
     private float layer;
 
     /**
-     * @param pose already translated to the label's spot, turned to the camera and scaled
+     * @param pose already translated to the bubble's spot, turned to the camera and scaled
      *             to text pixels, with y running down as on a screen and z towards the camera
      */
     public WorldSurface(PoseStack pose, SubmitNodeCollector collector, Font font) {
@@ -93,7 +93,7 @@ public final class WorldSurface implements DrawSurface {
 
     /**
      * An item, in the box a screen would give it, pressed flat onto the card a hair in front
-     * of it. The label always faces the camera, so a flattened item looks just as it does in
+     * of it. A bubble always faces the camera, so a flattened item looks just as it does in
      * a slot, a block's little cube included. Given its full depth it stood off the card
      * towards the camera, and seen from near or from the side it slid out of its box and
      * swelled; centred on the card instead, a block would have its back half swallowed.
