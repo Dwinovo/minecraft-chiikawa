@@ -578,7 +578,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             return;
         }
         pet.getSpeech().ifPresent(speech -> {
-            float left = PetSpeech.TALK_TICKS - (pet.tickCount - speech.since() + partialTick);
+            float left = speech.left(pet.tickCount, partialTick);
             state.put(PetData.SPEECH, new Speech(Component.translatable(speech.line()).getString(),
                 entity.getAttachments().getNullable(EntityAttachment.NAME_TAG, 0, entity.getYRot(partialTick)),
                 super.shouldShowName(entity, state.distanceToCameraSq),

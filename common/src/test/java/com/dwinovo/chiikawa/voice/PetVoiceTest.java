@@ -38,7 +38,9 @@ class PetVoiceTest {
               },
               "chance": { "idle": 0.02 },
               "cooldown_ticks": 200,
-              "crowd_limit": 3
+              "crowd_limit": 3,
+              "talk_ticks": 60,
+              "hearing_range": 16.0
             }
             """);
 
@@ -47,11 +49,14 @@ class PetVoiceTest {
         assertEquals(0.02F, voice.chance().get(VoiceMoment.IDLE), 1.0E-6F);
         assertEquals(200, voice.cooldownTicks());
         assertEquals(3, voice.crowdLimit());
+        assertEquals(60, voice.talkTicks());
+        assertEquals(16.0, voice.hearingRange(), 1.0E-9);
     }
 
     @Test
     void aMomentWithNoLinesPassesInSilenceWithoutRollingAnything() {
-        PetVoice voice = new PetVoice(Map.of(VoiceMoment.HURT, List.of(new PetVoice.Line(YADA, 1))), Map.of(), 200, 3);
+        PetVoice voice = new PetVoice(Map.of(VoiceMoment.HURT, List.of(new PetVoice.Line(YADA, 1))), Map.of(),
+            200, 3, 60, 16.0);
 
         // A random source with nothing in it throws if anything is drawn from it.
         assertEquals(Optional.empty(), voice.draw(VoiceMoment.HUNT, FixedRandom.floats()));
@@ -60,7 +65,7 @@ class PetVoiceTest {
     @Test
     void aMomentWithNoChanceListedAlwaysSpeaksAndPicksByWeight() {
         PetVoice voice = new PetVoice(Map.of(VoiceMoment.HURT,
-            List.of(new PetVoice.Line(YADA, 3), new PetVoice.Line(SOB, 1))), Map.of(), 200, 3);
+            List.of(new PetVoice.Line(YADA, 3), new PetVoice.Line(SOB, 1))), Map.of(), 200, 3, 60, 16.0);
 
         assertEquals(Optional.of(YADA), voice.draw(VoiceMoment.HURT, FixedRandom.ints(2)));
         assertEquals(Optional.of(SOB), voice.draw(VoiceMoment.HURT, FixedRandom.ints(3)));
@@ -69,7 +74,7 @@ class PetVoiceTest {
     @Test
     void theChanceDecidesWhetherThePetSpeaksUpAtAll() {
         PetVoice voice = new PetVoice(Map.of(VoiceMoment.IDLE, List.of(new PetVoice.Line(NNSHO, 1))),
-            Map.of(VoiceMoment.IDLE, 0.25F), 200, 3);
+            Map.of(VoiceMoment.IDLE, 0.25F), 200, 3, 60, 16.0);
 
         assertEquals(Optional.empty(), voice.draw(VoiceMoment.IDLE, FixedRandom.floats(0.25F)));
         assertEquals(Optional.of(NNSHO), voice.draw(VoiceMoment.IDLE, FixedRandom.of(new float[] {0.2F}, 0)));
@@ -90,7 +95,7 @@ class PetVoiceTest {
     @Test
     void encodesWhatItParses() {
         PetVoice voice = new PetVoice(Map.of(VoiceMoment.HURT, List.of(new PetVoice.Line(YADA, 2))),
-            Map.of(VoiceMoment.IDLE, 0.001F), 400, 2);
+            Map.of(VoiceMoment.IDLE, 0.001F), 400, 2, 60, 16.0);
 
         JsonElement json = PetVoice.CODEC.encodeStart(JsonOps.INSTANCE, voice).getOrThrow();
 
