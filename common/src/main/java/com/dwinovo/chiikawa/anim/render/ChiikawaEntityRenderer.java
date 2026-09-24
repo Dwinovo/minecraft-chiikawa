@@ -12,12 +12,7 @@ import com.dwinovo.chiikawa.anim.controller.ControllerHandler;
 import com.dwinovo.chiikawa.anim.controller.ControllerSnapshot;
 import com.dwinovo.chiikawa.anim.molang.MolangContext;
 import com.dwinovo.chiikawa.anim.render.layer.HeldItemLayer;
-import com.dwinovo.chiikawa.client.ui.PetStatusText;
-import com.dwinovo.chiikawa.client.ui.mc.WorldSurface;
-import com.dwinovo.chiikawa.ui.DrawSurface;
-import com.dwinovo.chiikawa.ui.UiStyle;
-import com.dwinovo.chiikawa.ui.widget.Bubble;
-import com.dwinovo.chiikawa.ui.widget.Chip;
+import com.dwinovo.chiikawa.client.voice.SpeechBubbleRenderer;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.item.BagItem;
@@ -31,19 +26,14 @@ import com.dwinovo.chiikawa.anim.runtime.PoseSampler;
 import com.dwinovo.chiikawa.anim.state.PetAnimContext;
 import com.dwinovo.chiikawa.anim.state.PetAnimationResolver;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.state.CameraRenderState;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.LivingEntity;
 import org.joml.Quaternionf;
 
@@ -52,7 +42,6 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Base entity renderer for Bedrock-format pets. Owns the per-pet controller
@@ -394,8 +383,9 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         if (entity instanceof AbstractPet pet) {
             state.put(PetData.WORN_BAG, pet.getItemBySlot(EquipmentSlot.CHEST));
         }
-        extractLabel(entity, state);
-        extractSpeech(entity, state, partialTick);
+        if (!drawingPortrait && entity instanceof AbstractPet pet) {
+            speech.extract(pet, state, partialTick);
+        }
 
         if (entity instanceof ChiikawaAnimated animated) {
             PetAnimator animator = animated.getPetAnimator();
@@ -464,19 +454,16 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         return null;
     }
 
-    /** One line of label text, in blocks at the name-tag scale. */
-    private static final float LABEL_LINE = 0.28F;
-    private static final float LABEL_SCALE = 0.025F;
-    /** How long a line takes to fade at the end of its time over a pet's head, in ticks. */
-    private static final float SPEECH_FADE_TICKS = 10.0F;
-
     /** Whether a pet is being drawn as a picture in a screen rather than in the world. */
     private static boolean drawingPortrait;
 
+    /** What the pet is saying, over its head. */
+    private final SpeechBubbleRenderer speech = new SpeechBubbleRenderer();
+
     /**
-     * Draws a pet as a picture in a screen: the model, and nothing over its head. The
-     * label is the world answering an owner who points at a pet; in the pet's own screen
-     * the question has been asked already, and the screen says the rest.
+     * Draws a pet as a picture in a screen: the model, and nothing over its head. When its
+     * screen opens the crosshair is on it, so a named pet would carry its name tag into the
+     * picture, and a talking one its bubble; the screen says all that already.
      */
     public static void drawPortrait(Runnable draw) {
         drawingPortrait = true;
@@ -487,145 +474,9 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         }
     }
 
-    /**
-     * A working pet says so over its head when its owner asks, even when it has no name to
-     * show. Like a name tag, the label is there or it is not: it comes up the frame the
-     * crosshair lands and goes the frame it leaves, the way everything in the game does.
-     */
     @Override
     protected boolean shouldShowName(T entity, double distanceToCameraSq) {
-        return !drawingPortrait && (super.shouldShowName(entity, distanceToCameraSq) || answer(entity).isPresent());
-    }
-
-    /**
-     * The name tag and the label, worked out with the rest of the snapshot: the label goes
-     * into the state, and a pet shown only for its label keeps its name to itself.
-     */
-    private void extractLabel(T entity, ChiikawaRenderState state) {
-        if (state.nameTag == null) {
-            return;
-        }
-        answer(entity).ifPresent(chip -> state.put(PetData.STATUS_LABEL, chip));
-        if (!super.shouldShowName(entity, state.distanceToCameraSq)) {
-            state.nameTag = null;
-        }
-    }
-
-    @Override
-    protected void submitNameTag(ChiikawaRenderState state, PoseStack poseStack, SubmitNodeCollector collector,
-                                 CameraRenderState camera) {
-        boolean named = state.nameTag != null;
-        if (named) {
-            super.submitNameTag(state, poseStack, collector, camera);
-        }
-        Chip chip = state.get(PetData.STATUS_LABEL);
-        if (chip != null) {
-            drawLabel(state, chip, poseStack, collector, camera, named ? LABEL_LINE : 0.0F);
-        }
-    }
-
-    /** What the pet shows over its head right now: its status, if its owner is asking. */
-    private Optional<Chip> answer(T entity) {
-        return isAsked(entity) ? statusChip(entity) : Optional.empty();
-    }
-
-    /**
-     * What this pet would say if asked. Someone else's pets and idle pets have nothing to
-     * say, and F1 hides it with the rest of the HUD.
-     */
-    private Optional<Chip> statusChip(T entity) {
-        Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.options.hideGui || minecraft.player == null || !(entity instanceof AbstractPet pet)) {
-            return Optional.empty();
-        }
-        if (!pet.isOwnedBy(minecraft.player)) {
-            return Optional.empty();
-        }
-        return PetStatusText.chip(pet);
-    }
-
-    /**
-     * Whether the owner is asking this pet. The game's own crosshair pick is the asking,
-     * which is to say: pointed at, and near enough to reach out and pet it. That distance
-     * the game already decides — the owner's interaction range, longer in creative — so
-     * there is no radius of ours to argue about, and a yard full of pets stays a yard
-     * rather than a wall of labels.
-     */
-    private boolean isAsked(T entity) {
-        return entity == this.entityRenderDispatcher.crosshairPickEntity;
-    }
-
-    /** The mod's own label, drawn where a name tag goes, with the same widgets its screens use. */
-    private void drawLabel(ChiikawaRenderState state, Chip chip, PoseStack poseStack, SubmitNodeCollector collector,
-                           CameraRenderState camera, float extraHeight) {
-        if (!overHead(state.nameTagAttachment, poseStack, camera, extraHeight)) {
-            return;
-        }
-        chip.draw(new WorldSurface(poseStack, collector, getFont()), 0, 0);
-        poseStack.popPose();
-    }
-
-    /**
-     * What the pet is saying, worked out with the rest of the snapshot as the label is: the
-     * words, where the name tag goes and how much of the bubble still shows. Everyone near
-     * enough to have heard it sees it, whoever the pet belongs to, and F1 hides it with the
-     * rest of the HUD.
-     */
-    private void extractSpeech(T entity, ChiikawaRenderState state, float partialTick) {
-        if (drawingPortrait || Minecraft.getInstance().options.hideGui || !(entity instanceof AbstractPet pet)) {
-            return;
-        }
-        pet.getSpeech().ifPresent(speech -> {
-            float left = speech.left(pet.tickCount, partialTick);
-            state.put(PetData.SPEECH, new Speech(Component.translatable(speech.line()).getString(),
-                entity.getAttachments().getNullable(EntityAttachment.NAME_TAG, 0, entity.getYRot(partialTick)),
-                super.shouldShowName(entity, state.distanceToCameraSq),
-                Mth.clamp(left / SPEECH_FADE_TICKS, 0.0F, 1.0F)));
-        });
-    }
-
-    /** A line up over a pet this frame, as {@link #extractSpeech} found it. */
-    public record Speech(String line, Vec3 nameTag, boolean named, float alpha) {
-    }
-
-    /**
-     * The bubble over the pet's head. It sits above the name and the label rather than over
-     * them, and fades at the end.
-     */
-    private void drawSpeech(ChiikawaRenderState state, PoseStack poseStack, SubmitNodeCollector collector,
-                            CameraRenderState camera) {
-        Speech speech = state.get(PetData.SPEECH);
-        if (speech == null) {
-            return;
-        }
-        DrawSurface surface = new WorldSurface(poseStack, collector, getFont(), speech.alpha());
-        Chip chip = state.get(PetData.STATUS_LABEL);
-        float below = (speech.named() ? LABEL_LINE : 0.0F)
-            + (chip != null ? (chip.height(surface) + UiStyle.GAP) * LABEL_SCALE : 0.0F);
-        if (!overHead(speech.nameTag(), poseStack, camera, below)) {
-            return;
-        }
-        Bubble bubble = new Bubble(speech.line());
-        bubble.draw(surface, -bubble.width(surface) / 2, -bubble.height(surface) - Bubble.TAIL, 0);
-        poseStack.popPose();
-    }
-
-    /**
-     * Pushes a pose at the name-tag spot, {@code extraHeight} blocks higher, turned to the
-     * camera and scaled to text pixels with y running down as on a screen. The caller pops
-     * it.
-     *
-     * @return whether the pet has a name-tag spot; nothing is pushed when it has none
-     */
-    private boolean overHead(Vec3 attachment, PoseStack poseStack, CameraRenderState camera, float extraHeight) {
-        if (attachment == null) {
-            return false;
-        }
-        poseStack.pushPose();
-        poseStack.translate(attachment.x, attachment.y + 0.5 + extraHeight, attachment.z);
-        poseStack.mulPose(camera.orientation);
-        poseStack.scale(LABEL_SCALE, -LABEL_SCALE, LABEL_SCALE);
-        return true;
+        return !drawingPortrait && super.shouldShowName(entity, distanceToCameraSq);
     }
 
     @Override
@@ -692,7 +543,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
 
         poseStack.popPose();
         super.submit(state, poseStack, collector, camera);
-        drawSpeech(state, poseStack, collector, camera);
+        speech.submit(state, poseStack, collector, getFont(), camera);
     }
 
     /**

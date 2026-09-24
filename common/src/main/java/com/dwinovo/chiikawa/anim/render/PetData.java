@@ -24,14 +24,9 @@ public enum PetData {
     /** Worn {@link net.minecraft.world.item.ItemStack} snapshot consumed by {@code BagLayer} and the strap rules. */
     WORN_BAG,
     /**
-     * The {@link com.dwinovo.chiikawa.ui.widget.Chip} a pet answers its owner with, drawn
-     * over its head; set only while it is being asked. Worked out at extract time, as
-     * vanilla works out a name tag.
-     */
-    STATUS_LABEL,
-    /**
-     * The line a pet is saying, drawn in a bubble over its head; set only while it has one
-     * up. Worked out at extract time, as the label is.
+     * The line a pet is saying, drawn in a bubble over its head by
+     * {@link com.dwinovo.chiikawa.client.voice.SpeechBubbleRenderer}; set only while it has
+     * one up. Worked out at extract time, as vanilla works out a name tag.
      */
     SPEECH;
 
