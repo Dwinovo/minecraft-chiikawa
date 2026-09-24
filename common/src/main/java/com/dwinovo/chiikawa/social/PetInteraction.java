@@ -1,10 +1,6 @@
 package com.dwinovo.chiikawa.social;
 
-import com.dwinovo.chiikawa.anim.state.PetReaction;
-import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.task.FinishedSlip;
-import com.dwinovo.chiikawa.voice.PetSpeech;
-import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
@@ -25,7 +21,8 @@ import net.minecraft.world.item.ItemStack;
  * A little scene two pets play together, the way the characters get on in the series,
  * loaded from {@code data/<namespace>/pet_interaction/<id>.json} by
  * {@link PetInteractionLoader}. One pet walks up to another, the two face each other and
- * each plays its part, then they go their own ways.
+ * each plays its part — a pose held throughout, and beats as they meet, now and then while
+ * they are at it and as it is over (see {@link Beat}) — then they go their own ways.
  *
  * <p>Pets are named by entity type id or {@code #tag}. A pet plays the part of the first
  * entry that names it, so one file can have each character answer in its own way — the
@@ -117,26 +114,29 @@ public record PetInteraction(
     }
 
     /**
-     * One pet's part.
+     * One pet's part: the pose it holds while the scene lasts, and its beats — one as the
+     * two meet, one now and then while they are at it, and one as it is over.
      *
      * @param pets the pets that play it, by entity type id or {@code #tag}
-     * @param animation what it plays for as long as the scene lasts; a pet without that
-     *                  animation simply stands there
-     * @param reaction the face it pulls as its part begins
-     * @param voice the moment of its lines it says as its part begins, looked up in its own
-     *              {@code pet_voice} lines, so each character says it in its own words
+     * @param pose what it holds for as long as the scene lasts; a pet without that
+     *             animation simply stands there
+     * @param begin what it does as the two meet
+     * @param nowAndThen what it does over and over while the scene lasts
+     * @param end what it does as the scene is over
      */
     public record Side(
         List<ExtraCodecs.TagOrElementLocation> pets,
-        Optional<String> animation,
-        Optional<PetReaction> reaction,
-        Optional<VoiceMoment> voice
+        Optional<String> pose,
+        Optional<Beat> begin,
+        Optional<Beat.Recurring> nowAndThen,
+        Optional<Beat> end
     ) {
         public static final Codec<Side> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ExtraCodecs.nonEmptyList(ExtraCodecs.TAG_OR_ELEMENT_ID.listOf()).fieldOf("pets").forGetter(Side::pets),
-            Codec.STRING.optionalFieldOf("animation").forGetter(Side::animation),
-            PetReaction.CODEC.optionalFieldOf("reaction").forGetter(Side::reaction),
-            VoiceMoment.CODEC.optionalFieldOf("voice").forGetter(Side::voice)
+            Codec.STRING.optionalFieldOf("pose").forGetter(Side::pose),
+            Beat.CODEC.optionalFieldOf("begin").forGetter(Side::begin),
+            Beat.Recurring.CODEC.optionalFieldOf("now_and_then").forGetter(Side::nowAndThen),
+            Beat.CODEC.optionalFieldOf("end").forGetter(Side::end)
         ).apply(instance, Side::new));
 
         public Side {
@@ -146,21 +146,6 @@ public record PetInteraction(
         /** Whether this part is for that kind of pet. */
         public boolean names(Holder<EntityType<?>> type) {
             return pets.stream().anyMatch(entry -> PetInteraction.names(entry, type, Registries.ENTITY_TYPE));
-        }
-
-        /**
-         * Starts playing the part: the pose held for as long as the scene lasts, and the face
-         * pulled and the line said at once.
-         */
-        public void begin(AbstractPet pet) {
-            pet.setPerformance(animation.orElse(""));
-            reaction.ifPresent(pet::triggerReaction);
-            voice.ifPresent(moment -> PetSpeech.say(pet, moment));
-        }
-
-        /** Stops playing the part. */
-        public static void end(AbstractPet pet) {
-            pet.setPerformance("");
         }
     }
 

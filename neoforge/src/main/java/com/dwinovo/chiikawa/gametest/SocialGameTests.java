@@ -1,12 +1,17 @@
 package com.dwinovo.chiikawa.gametest;
 
 import static com.dwinovo.chiikawa.gametest.GameTestKit.NOON;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.assertSaid;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.count;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.isLine;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.lastSaid;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.owned;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.quietYard;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.wild;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.data.PetInteractionData;
 import com.dwinovo.chiikawa.data.PetTaskTypeData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
@@ -14,8 +19,15 @@ import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import com.dwinovo.chiikawa.entity.brain.intent.RunningIntent;
+import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.init.InitEntity;
+import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMemory;
+import com.dwinovo.chiikawa.music.MusicBoxSelection;
+import com.dwinovo.chiikawa.music.MusicTrackStatus;
+import com.dwinovo.chiikawa.music.MusicTrackView;
+import com.dwinovo.chiikawa.music.ServerMusicLibrary;
+import com.dwinovo.chiikawa.music.ServerMusicSystem;
 import com.dwinovo.chiikawa.social.InteractionPlan;
 import com.dwinovo.chiikawa.social.InteractionReservation;
 import com.dwinovo.chiikawa.social.PetInteraction;
@@ -23,12 +35,27 @@ import com.dwinovo.chiikawa.social.PetInteractions;
 import com.dwinovo.chiikawa.social.SocialCooldowns;
 import com.dwinovo.chiikawa.social.SocialRules;
 import com.dwinovo.chiikawa.task.FinishedSlip;
+import com.dwinovo.chiikawa.voice.VoiceMoment;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -57,6 +84,18 @@ public final class SocialGameTests {
     private static final int SHORT_WAIT = 60;
     /** A partner holding still shifts a little as it turns; this is more than that. */
     private static final double HELD_STILL = 1.5;
+    /**
+     * Importing a song, walking over, and the whole of the listening. Generous, because the
+     * import runs off the server thread in its own time, and a test server does not wait
+     * for it: it ticks as fast as it can in the meantime.
+     */
+    private static final int LISTEN_TICKS = 12000;
+    /** The listening case's song: its file's name, which is also its title. */
+    private static final String SONG = "chiikawa_gametest_busking";
+    /** Longer than walking over and listening all the way through, so Hachiware is still playing after. */
+    private static final int SONG_SECONDS = 50;
+    /** Low, to keep the file small; the library resamples it like any other. */
+    private static final int SONG_RATE = 8000;
 
     private static final int STAND = 2;
 
@@ -293,6 +332,117 @@ public final class SocialGameTests {
             .thenWaitUntil(() -> helper.assertTrue("drink".equals(chiikawa.getPerformance()), "the coffee never came"))
             .thenExecute(() -> helper.assertTrue(chiikawa.isEager(), "the coffee did not perk Chiikawa up"))
             .thenSucceed();
+    }
+
+    /**
+     * Nobody praises Momonga, so as it lets go it bursts into its fake tears and wants
+     * comforting instead: the scene's closing beat. A batch of its own, in a hushed yard,
+     * since what is being watched for is a line.
+     */
+    @GameTest(template = "floor16", batch = "chiikawa_social_turned_down", timeoutTicks = SCENE_TICKS)
+    public static void momonga_let_go_unpraised_wants_comforting(GameTestHelper helper) {
+        quietYard(helper, NOON);
+        AbstractPet momonga = wild(helper, InitEntity.MOMONGA_PET.get(), new BlockPos(4, STAND, 8));
+        AbstractPet chiikawa = wild(helper, InitEntity.CHIIKAWA_PET.get(), new BlockPos(8, STAND, 8));
+
+        helper.startSequence()
+            .thenIdle(SETTLE_TICKS)
+            .thenExecute(() -> thinkOf(momonga, PetInteractionData.CLING, chiikawa))
+            .thenWaitUntil(() -> helper.assertTrue("clung_to".equals(chiikawa.getPerformance()), "the scene never began"))
+            .thenWaitUntil(() -> helper.assertTrue(sceneOver(momonga, chiikawa), "the scene never ended"))
+            .thenExecute(() -> assertSaid(helper, momonga, VoiceMoment.TURNED_DOWN))
+            .thenSucceed();
+    }
+
+    /**
+     * Hachiware busks a real song off its music box, and Chiikawa sits down by it to listen
+     * and now and then claps along — with a word, which is what the case can hear: its
+     * listening line said again after the one it sat down with. Once the scene is over it
+     * gets up and Hachiware plays on.
+     *
+     * <p>The song is written into the test server's music folder the way a player adds one,
+     * and imported like any other; it is silence, which is all the server ever looks at.
+     */
+    @GameTest(template = "floor16", batch = "chiikawa_social_listen", timeoutTicks = LISTEN_TICKS)
+    public static void a_listener_sits_by_the_busker_and_claps_now_and_then(GameTestHelper helper) {
+        quietYard(helper, NOON);
+        ServerMusicLibrary library = ServerMusicSystem.library(helper.getLevel().getServer());
+        addSong(library);
+        AtomicReference<AbstractPet> hachiware = new AtomicReference<>();
+        AtomicReference<AbstractPet> chiikawa = new AtomicReference<>();
+        AtomicLong satDown = new AtomicLong();
+
+        helper.startSequence()
+            .thenWaitUntil(() -> helper.assertTrue(song(library).isPresent(), "the song was never imported"))
+            .thenExecute(() -> {
+                ItemStack box = new ItemStack(InitItems.MUSIC_BOX.get());
+                box.set(InitDataComponents.MUSIC_BOX_SELECTION.get(),
+                    new MusicBoxSelection(song(library).orElseThrow().trackId(), SONG, 0));
+                // Somebody's, and let loose: playing is work, which a wild pet does not do.
+                AbstractPet busker = owned(helper, InitEntity.HACHIWARE_PET.get(), new BlockPos(8, STAND, 8));
+                busker.setItemSlot(EquipmentSlot.MAINHAND, box);
+                hachiware.set(busker);
+                chiikawa.set(wild(helper, InitEntity.CHIIKAWA_PET.get(), new BlockPos(3, STAND, 8)));
+            })
+            .thenWaitUntil(() -> helper.assertTrue(hachiware.get().getActivity() == PetActivity.PLAY_GUITAR,
+                "Hachiware never started playing"))
+            .thenExecute(() -> thinkOf(chiikawa.get(), PetInteractionData.LISTEN_TO_MUSIC, hachiware.get()))
+            .thenWaitUntil(() -> {
+                helper.assertTrue("sit".equals(chiikawa.get().getPerformance()), "Chiikawa never sat down to listen");
+                satDown.set(helper.getLevel().getGameTime());
+            })
+            .thenWaitUntil(() -> helper.assertTrue(lastSaid(chiikawa.get())
+                    .filter(said -> said.gameTime() > satDown.get())
+                    .filter(said -> isLine(chiikawa.get(), VoiceMoment.LISTEN, said.line()))
+                    .isPresent(),
+                "Chiikawa never clapped along"))
+            .thenWaitUntil(() -> helper.assertTrue(chiikawa.get().getPerformance().isEmpty()
+                    && !chiikawa.get().getBrain().hasMemoryValue(InitMemory.INTERACTION_PLAN.get()),
+                "Chiikawa never got up again"))
+            .thenExecute(() -> helper.assertTrue(hachiware.get().getActivity() == PetActivity.PLAY_GUITAR,
+                "the audience leaving stopped the music"))
+            .thenSucceed();
+    }
+
+    /** Rakko and Kurimanju listen without a fuss: their part has no clapping in it. */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 20)
+    public static void rakko_and_kurimanju_listen_without_clapping(GameTestHelper helper) {
+        PetInteraction listen = scene(PetInteractionData.LISTEN_TO_MUSIC);
+        for (EntityType<?> composed : List.of(InitEntity.RAKKO_PET.get(), InitEntity.KURIMANJU_PET.get())) {
+            PetInteraction.Side part = listen.initiatorSide(composed.builtInRegistryHolder()).orElseThrow();
+            helper.assertTrue(part.nowAndThen().isEmpty(), composed.toShortString() + " claps along");
+        }
+        helper.assertTrue(listen.initiatorSide(InitEntity.CHIIKAWA_PET.get().builtInRegistryHolder()).orElseThrow()
+            .nowAndThen().isPresent(), "nobody claps at all");
+        helper.succeed();
+    }
+
+    /**
+     * Writes the song the listening case plays into the server's music folder, unless an
+     * earlier run left it there, and has the library look again.
+     */
+    private static void addSong(ServerMusicLibrary library) {
+        Path file = library.musicDir().resolve(SONG + ".wav");
+        try {
+            if (!Files.exists(file)) {
+                AudioFormat format = new AudioFormat(SONG_RATE, 16, 1, true, false);
+                byte[] silence = new byte[SONG_RATE * 2 * SONG_SECONDS];
+                try (AudioInputStream song = new AudioInputStream(new ByteArrayInputStream(silence), format,
+                        silence.length / 2)) {
+                    AudioSystem.write(song, AudioFileFormat.Type.WAVE, file.toFile());
+                }
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        library.rescan();
+    }
+
+    /** The case's song, once it is ready to play. */
+    private static Optional<MusicTrackView> song(ServerMusicLibrary library) {
+        return library.catalog().stream()
+            .filter(track -> track.title().equals(SONG) && track.status() == MusicTrackStatus.READY)
+            .findFirst();
     }
 
     /**

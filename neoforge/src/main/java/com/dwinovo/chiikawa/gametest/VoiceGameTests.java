@@ -2,31 +2,29 @@ package com.dwinovo.chiikawa.gametest;
 
 import static com.dwinovo.chiikawa.gametest.GameTestKit.MIDNIGHT;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.NOON;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.assertSaid;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.holding;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.pet;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
-import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.quietYard;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.said;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.data.PetTaskTypeData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitEntity;
-import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.dwinovo.chiikawa.task.TaskTracker;
 import com.dwinovo.chiikawa.voice.PetSpeech;
-import com.dwinovo.chiikawa.voice.PetVoice;
 import com.dwinovo.chiikawa.voice.PetVoices;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
@@ -184,36 +182,9 @@ public final class VoiceGameTests {
         });
     }
 
-    /**
-     * Settles the world as a batch would, and has every pet earlier batches left within
-     * earshot forget it was talking: those cases are over, and their chatter is not this
-     * one's business.
-     */
-    private static void quietYard(GameTestHelper helper, long dayTime) {
-        settleWorld(helper.getLevel(), Difficulty.NORMAL, dayTime);
-        double range = PetVoices.of(InitEntity.CHIIKAWA_PET.get()).hearingRange();
-        helper.getLevel().getEntitiesOfClass(AbstractPet.class, helper.getBounds().inflate(range))
-            .forEach(pet -> pet.getBrain().eraseMemory(InitMemory.LAST_SAID.get()));
-    }
-
     /** A pet left standing: nothing it thinks of doing gets in the way of what a case does to it. */
     private static AbstractPet still(AbstractPet pet) {
         pet.setNoAi(true);
         return pet;
-    }
-
-    private static Optional<String> said(AbstractPet pet) {
-        return pet.getBrain().getMemory(InitMemory.LAST_SAID.get()).map(PetSpeech.Said::line);
-    }
-
-    /** That the pet's last words were one of its own lines for this moment. */
-    private static void assertSaid(GameTestHelper helper, AbstractPet pet, VoiceMoment moment) {
-        String name = pet.getType().toShortString() + " at " + moment.getSerializedName();
-        Optional<String> line = said(pet);
-        helper.assertTrue(line.isPresent(), name + " said nothing");
-        List<String> lines = PetVoices.of(pet.getType()).lines().getOrDefault(moment, List.of()).stream()
-            .map(PetVoice.Line::text)
-            .toList();
-        helper.assertTrue(lines.contains(line.get()), name + " said " + line.get() + ", not one of " + lines);
     }
 }

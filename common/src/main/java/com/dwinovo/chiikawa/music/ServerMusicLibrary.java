@@ -81,6 +81,11 @@ public final class ServerMusicLibrary implements AutoCloseable {
         return config;
     }
 
+    /** The folder songs are put in, one MP3 or WAV file each, picked up on the next {@link #rescan}. */
+    public Path musicDir() {
+        return musicDir;
+    }
+
     public boolean rescan() {
         try {
             config = loadConfig();

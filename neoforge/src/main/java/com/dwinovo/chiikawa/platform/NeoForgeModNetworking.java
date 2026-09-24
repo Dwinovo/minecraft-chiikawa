@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.platform;
 import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
 import com.dwinovo.chiikawa.client.manual.ClientManualPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
+import com.dwinovo.chiikawa.client.pet.ClientPetPacketHandler;
 import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.client.voice.ClientVoicePacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
@@ -65,6 +66,7 @@ public final class NeoForgeModNetworking {
                 }
             });
         registrar.playToClient(VoicePayloads.PetSpeechPayload.TYPE, VoicePayloads.PetSpeechPayload.STREAM_CODEC);
+        registrar.playToClient(PetPayloads.PetGesturePayload.TYPE, PetPayloads.PetGesturePayload.STREAM_CODEC);
     }
 
     public static void registerClientPayloads(RegisterClientPayloadHandlersEvent event) {
@@ -76,5 +78,6 @@ public final class NeoForgeModNetworking {
         event.register(MusicPayloads.MusicStreamChunkPayload.TYPE, (payload, context) -> ClientMusicPacketHandler.handleStreamChunk(payload));
         event.register(MusicPayloads.MusicStreamStopPayload.TYPE, (payload, context) -> ClientMusicPacketHandler.handleStreamStop(payload));
         event.register(VoicePayloads.PetSpeechPayload.TYPE, (payload, context) -> ClientVoicePacketHandler.handleSpeech(payload));
+        event.register(PetPayloads.PetGesturePayload.TYPE, (payload, context) -> ClientPetPacketHandler.handleGesture(payload));
     }
 }
