@@ -3,10 +3,12 @@ package com.dwinovo.chiikawa.entity.brain.intent;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.CombatIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.ConstantIntent;
+import com.dwinovo.chiikawa.entity.brain.intent.impl.CooperateIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.FollowOwnerIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.GiftOwnerIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.PlayMusicIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.ShopIntent;
+import com.dwinovo.chiikawa.entity.brain.intent.impl.SocializeIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.TakeTaskIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.TargetIntent;
 import com.dwinovo.chiikawa.init.InitActivity;
@@ -25,7 +27,9 @@ import org.jetbrains.annotations.Nullable;
  * are offered by capabilities through {@code PetCapability#intents()}.
  *
  * <p>Preferences are base scores: fights (0.8) over taking a slip (0.7) over work (0.6)
- * over foraging (0.5) over picking up items (0.4), everything over wandering (0.05).
+ * over foraging (0.5) over picking up items (0.4) over playing a scene with another pet
+ * (0.35), everything over wandering (0.05); a pet another one is coming over to plays
+ * along (0.5).
  * Work the pet's slip counts is raised by {@link IntentSelector#TASK_BONUS}, and a pet's
  * personality weighs them all. The farmer's strict order that 0.0.9 hard-coded as an if-chain, harvest before
  * plant before deliver, is not a preference, so it is expressed by
@@ -48,6 +52,8 @@ public final class PetIntents {
     public static final Identifier TAKE_TASK = id("take_task");
     public static final Identifier SHOP = id("shop");
     public static final Identifier GIFT_OWNER = id("gift_owner");
+    public static final Identifier SOCIALIZE = id("socialize");
+    public static final Identifier COOPERATE = id("cooperate");
 
     private static final Map<Identifier, PetIntent> BY_ID = new LinkedHashMap<>();
 
@@ -60,7 +66,9 @@ public final class PetIntents {
             PerceivedTargets::pickableItem, 0.4F, "no_item", List.of(), Optional.empty())),
         register(new TakeTaskIntent()),
         register(new ShopIntent()),
-        register(new GiftOwnerIntent())
+        register(new GiftOwnerIntent()),
+        register(new SocializeIntent()),
+        register(new CooperateIntent())
     );
 
     static {

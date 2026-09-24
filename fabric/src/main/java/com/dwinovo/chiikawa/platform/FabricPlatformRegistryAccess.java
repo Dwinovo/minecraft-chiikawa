@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPlacesSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetFarmerWorkSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetSocialSensor;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.platform.services.IPlatformRegistryAccess;
 import java.util.function.Supplier;
@@ -20,6 +21,7 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     private final Supplier<SensorType<PetFarmerWorkSensor>> petFarmerWorkSensor;
     private final Supplier<SensorType<PetPickableItemSensor>> petItemEntitySensor;
     private final Supplier<SensorType<PetPlacesSensor>> petPlacesSensor;
+    private final Supplier<SensorType<PetSocialSensor>> petSocialSensor;
     private final Supplier<Activity> farmerHarvestActivity;
     private final Supplier<Activity> farmerPlantActivity;
     private final Supplier<Activity> deleverActivity;
@@ -34,6 +36,8 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     private final Supplier<Activity> takeTaskActivity;
     private final Supplier<Activity> shopActivity;
     private final Supplier<Activity> giftOwnerActivity;
+    private final Supplier<Activity> socializeActivity;
+    private final Supplier<Activity> cooperateActivity;
     private final Supplier<MenuType<PetBackpackMenu>> petBackpackMenu;
 
     public FabricPlatformRegistryAccess() {
@@ -41,6 +45,7 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
         petFarmerWorkSensor = registerSensor("pet_farmer_work_sensor", new SensorType<>(PetFarmerWorkSensor::new));
         petItemEntitySensor = registerSensor("pet_item_entity_sensor", new SensorType<>(PetPickableItemSensor::new));
         petPlacesSensor = registerSensor("pet_places_sensor", new SensorType<>(PetPlacesSensor::new));
+        petSocialSensor = registerSensor("pet_social_sensor", new SensorType<>(PetSocialSensor::new));
 
         farmerHarvestActivity = registerActivity("farmer_harvest", new Activity("farmer_harvest"));
         farmerPlantActivity = registerActivity("farmer_plant", new Activity("farmer_plant"));
@@ -56,6 +61,8 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
         takeTaskActivity = registerActivity("take_task", new Activity("take_task"));
         shopActivity = registerActivity("shop", new Activity("shop"));
         giftOwnerActivity = registerActivity("gift_owner", new Activity("gift_owner"));
+        socializeActivity = registerActivity("socialize", new Activity("socialize"));
+        cooperateActivity = registerActivity("cooperate", new Activity("cooperate"));
 
         petBackpackMenu = registerMenu("pet_backpack", new MenuType<>(PetBackpackMenu::new, net.minecraft.world.flag.FeatureFlags.DEFAULT_FLAGS));
     }
@@ -97,6 +104,11 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     @Override
     public Supplier<SensorType<PetPlacesSensor>> petPlacesSensor() {
         return petPlacesSensor;
+    }
+
+    @Override
+    public Supplier<SensorType<PetSocialSensor>> petSocialSensor() {
+        return petSocialSensor;
     }
 
     @Override
@@ -167,6 +179,16 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     @Override
     public Supplier<Activity> giftOwnerActivity() {
         return giftOwnerActivity;
+    }
+
+    @Override
+    public Supplier<Activity> socializeActivity() {
+        return socializeActivity;
+    }
+
+    @Override
+    public Supplier<Activity> cooperateActivity() {
+        return cooperateActivity;
     }
 
     @Override
