@@ -23,11 +23,7 @@ public enum PetData {
     HELD_ITEM_STACK,
     /** Worn {@link net.minecraft.world.item.ItemStack} snapshot consumed by {@code BagLayer} and the strap rules. */
     WORN_BAG,
-    /** Whether the vanilla name tag is drawn, decided at extract time by {@code ChiikawaEntityRenderer}. */
-    NAMED,
-    /** The status {@code Chip} drawn over the pet's head, or {@code null} when it has nothing to say. */
-    STATUS_CHIP,
-    /** What the pet is saying this frame, drawn in a bubble over its head, or {@code null}. */
+    /** What the pet is saying, consumed by {@code SpeechBubbleRenderer}; {@code null} when it says nothing. */
     SPEECH;
 
     /** Cached values() to avoid per-frame allocation; treat as immutable. */
