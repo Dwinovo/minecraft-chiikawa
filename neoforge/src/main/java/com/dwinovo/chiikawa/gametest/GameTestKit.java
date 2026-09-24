@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
@@ -211,8 +212,8 @@ public final class GameTestKit {
     static void assertSaid(GameTestHelper helper, AbstractPet pet, VoiceMoment moment) {
         String name = pet.getType().toShortString() + " at " + moment.getSerializedName();
         Optional<String> line = said(pet);
-        helper.assertTrue(line.isPresent(), name + " said nothing");
-        helper.assertTrue(isLine(pet, moment, line.get()), name + " said " + line.get() + ", not one of its lines");
+        helper.assertTrue(line.isPresent(), Component.literal(name + " said nothing"));
+        helper.assertTrue(isLine(pet, moment, line.get()), Component.literal(name + " said " + line.get() + ", not one of its lines"));
     }
 
     /** How many of an item the pet has, for a case that cares whether it got paid twice. */
