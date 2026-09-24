@@ -1,12 +1,10 @@
 package com.dwinovo.chiikawa.task;
 
+import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
-import net.minecraft.world.level.storage.loot.LootTable;
 
 /**
  * A slip (工作牌): one job's worth of a kind of work, rolled from a {@link PetTaskType}
@@ -28,7 +26,7 @@ public record PetTask(
     ResourceLocation counter,
     ResourceLocation icon,
     int target,
-    ResourceKey<LootTable> reward,
+    ResourceLocation reward,
     int progress
 ) {
     /** What a slip written before slips had a picture, or one naming no item, shows: nothing. */
@@ -38,10 +36,10 @@ public record PetTask(
         ResourceLocation.CODEC.fieldOf("type").forGetter(PetTask::type),
         ResourceLocation.CODEC.fieldOf("capability").forGetter(PetTask::capability),
         ResourceLocation.CODEC.fieldOf("counter").forGetter(PetTask::counter),
-        ResourceLocation.CODEC.optionalFieldOf("icon", NO_ICON).forGetter(PetTask::icon),
+        ModCodecs.strictOptionalField(ResourceLocation.CODEC, "icon", NO_ICON).forGetter(PetTask::icon),
         ExtraCodecs.POSITIVE_INT.fieldOf("target").forGetter(PetTask::target),
-        ResourceKey.codec(Registries.LOOT_TABLE).fieldOf("reward").forGetter(PetTask::reward),
-        ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("progress", 0).forGetter(PetTask::progress)
+        ResourceLocation.CODEC.fieldOf("reward").forGetter(PetTask::reward),
+        ModCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "progress", 0).forGetter(PetTask::progress)
     ).apply(instance, PetTask::new));
 
     /**

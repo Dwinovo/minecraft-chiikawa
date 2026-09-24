@@ -6,14 +6,10 @@ import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.data.loot.LootTableSubProvider;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -35,21 +31,20 @@ import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
  */
 public final class ModLootTableProvider extends LootTableProvider {
     /** What a newcomer is handed: the handbook, by the advancement that marks their arrival. */
-    public static final ResourceKey<LootTable> HANDBOOK_GIFT = ResourceKey.create(Registries.LOOT_TABLE,
-        new ResourceLocation(Constants.MOD_ID, "gifts/handbook"));
+    public static final ResourceLocation HANDBOOK_GIFT = new ResourceLocation(Constants.MOD_ID, "gifts/handbook");
 
-    public ModLootTableProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
+    public ModLootTableProvider(PackOutput output) {
         super(output, Set.of(), List.of(
-            new SubProviderEntry(lookup -> new BlockDrops(), LootContextParamSets.BLOCK),
-            new SubProviderEntry(lookup -> new SlipRewards(), LootContextParamSets.GIFT),
-            new SubProviderEntry(lookup -> new Gifts(), LootContextParamSets.ADVANCEMENT_REWARD)
-        ), registries);
+            new SubProviderEntry(BlockDrops::new, LootContextParamSets.BLOCK),
+            new SubProviderEntry(SlipRewards::new, LootContextParamSets.GIFT),
+            new SubProviderEntry(Gifts::new, LootContextParamSets.ADVANCEMENT_REWARD)
+        ));
     }
 
     /** What advancements hand out. */
     private static final class Gifts implements LootTableSubProvider {
         @Override
-        public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
+        public void generate(BiConsumer<ResourceLocation, LootTable.Builder> output) {
             output.accept(HANDBOOK_GIFT, LootTable.lootTable().withPool(LootPool.lootPool()
                 .setRolls(ConstantValue.exactly(1))
                 .add(LootItem.lootTableItem(InitItems.HANDBOOK.get()))));
@@ -58,12 +53,12 @@ public final class ModLootTableProvider extends LootTableProvider {
 
     private static final class BlockDrops implements LootTableSubProvider {
         @Override
-        public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
+        public void generate(BiConsumer<ResourceLocation, LootTable.Builder> output) {
             dropSelf(output, InitBlocks.LABOR_BOARD.get());
             dropSelf(output, InitBlocks.SHOP.get());
         }
 
-        private static void dropSelf(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output, Block block) {
+        private static void dropSelf(BiConsumer<ResourceLocation, LootTable.Builder> output, Block block) {
             output.accept(block.getLootTable(), LootTable.lootTable().withPool(LootPool.lootPool()
                 .setRolls(ConstantValue.exactly(1))
                 .add(LootItem.lootTableItem(block))
@@ -80,7 +75,7 @@ public final class ModLootTableProvider extends LootTableProvider {
         private static final float EXTRA_CHANCE = 0.3F;
 
         @Override
-        public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
+        public void generate(BiConsumer<ResourceLocation, LootTable.Builder> output) {
             reward(output, PetTaskTypeData.WEEDING, 1, 2, Items.BREAD, 1, 1);
             reward(output, PetTaskTypeData.STREET_PERFORMANCE, 2, 4, Items.COOKIE, 2, 4);
             // Hunting pays most: it is the only work a pet can fail by falling.
@@ -88,7 +83,7 @@ public final class ModLootTableProvider extends LootTableProvider {
             reward(output, PetTaskTypeData.RANGED_HUNTING, 4, 7, Items.ARROW, 4, 8);
         }
 
-        private static void reward(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output, ResourceLocation type,
+        private static void reward(BiConsumer<ResourceLocation, LootTable.Builder> output, ResourceLocation type,
                 int minPay, int maxPay, Item extra, int minExtra, int maxExtra) {
             output.accept(PetTaskTypeData.reward(type), LootTable.lootTable()
                 .withPool(LootPool.lootPool()

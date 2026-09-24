@@ -1,14 +1,12 @@
 package com.dwinovo.chiikawa.task;
 
+import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
-import net.minecraft.world.level.storage.loot.LootTable;
 
 /**
  * A kind of slip a labor board can put up, loaded from
@@ -29,7 +27,7 @@ public record PetTaskType(
     ResourceLocation counter,
     ResourceLocation icon,
     IntProvider amount,
-    ResourceKey<LootTable> reward,
+    ResourceLocation reward,
     int weight,
     int minLevel
 ) {
@@ -37,10 +35,10 @@ public record PetTaskType(
         ResourceLocation.CODEC.fieldOf("capability").forGetter(PetTaskType::capability),
         ResourceLocation.CODEC.fieldOf("counter").forGetter(PetTaskType::counter),
         ResourceLocation.CODEC.fieldOf("icon").forGetter(PetTaskType::icon),
-        IntProvider.POSITIVE_CODEC.fieldOf("amount").forGetter(PetTaskType::amount),
-        ResourceKey.codec(Registries.LOOT_TABLE).fieldOf("reward").forGetter(PetTaskType::reward),
-        ExtraCodecs.POSITIVE_INT.optionalFieldOf("weight", 1).forGetter(PetTaskType::weight),
-        ExtraCodecs.POSITIVE_INT.optionalFieldOf("min_level", BoardLevels.FIRST_LEVEL).forGetter(PetTaskType::minLevel)
+        ModCodecs.POSITIVE_INT_PROVIDER.fieldOf("amount").forGetter(PetTaskType::amount),
+        ResourceLocation.CODEC.fieldOf("reward").forGetter(PetTaskType::reward),
+        ModCodecs.strictOptionalField(ExtraCodecs.POSITIVE_INT, "weight", 1).forGetter(PetTaskType::weight),
+        ModCodecs.strictOptionalField(ExtraCodecs.POSITIVE_INT, "min_level", BoardLevels.FIRST_LEVEL).forGetter(PetTaskType::minLevel)
     ).apply(instance, PetTaskType::new));
 
     /**

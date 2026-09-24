@@ -36,7 +36,7 @@ public final class TagData {
         tags.add(InitTag.ENTITY_DELEVER_CONTAINER,
             Blocks.CHEST, Blocks.TRAPPED_CHEST, Blocks.BARREL, Blocks.HOPPER);
         tags.add(InitTag.ENTITY_WEEDS,
-            Blocks.SHORT_GRASS, Blocks.TALL_GRASS, Blocks.FERN, Blocks.LARGE_FERN);
+            Blocks.GRASS, Blocks.TALL_GRASS, Blocks.FERN, Blocks.LARGE_FERN);
         tags.add(InitTag.ENTITY_MUSHROOMS,
             Blocks.RED_MUSHROOM, Blocks.BROWN_MUSHROOM);
         tags.add(BlockTags.MINEABLE_WITH_AXE, InitBlocks.LABOR_BOARD.get(), InitBlocks.SHOP.get());
@@ -74,9 +74,10 @@ public final class TagData {
         // Creepers are in the list now. They are not something a pet with a sword walks
         // up to — a pet's reach is a block and a half, well inside the distance at which a
         // creeper starts swelling — but a pet has to be able to see one to keep away from
-        // it, and an archer can answer one from outside the blast.
+        // it, and an archer can answer one from outside the blast. (1.20.1 has no bogged
+        // or breeze yet.)
         tags.add(InitTag.ENTITY_HOSTILE_ENTITY,
-            EntityType.BLAZE, EntityType.BOGGED, EntityType.BREEZE, EntityType.CAVE_SPIDER, EntityType.CREEPER,
+            EntityType.BLAZE, EntityType.CAVE_SPIDER, EntityType.CREEPER,
             EntityType.DROWNED, EntityType.ENDERMITE, EntityType.EVOKER, EntityType.GUARDIAN, EntityType.HOGLIN,
             EntityType.HUSK,
             EntityType.ILLUSIONER, EntityType.MAGMA_CUBE, EntityType.PHANTOM, EntityType.PIGLIN, EntityType.PIGLIN_BRUTE,

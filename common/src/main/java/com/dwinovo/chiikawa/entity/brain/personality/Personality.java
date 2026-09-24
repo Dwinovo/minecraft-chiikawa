@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.personality;
 
 import com.dwinovo.chiikawa.entity.brain.intent.DayPhase;
+import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.HashSet;
@@ -9,7 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
@@ -52,11 +52,11 @@ public record Personality(
         Codec.unboundedMap(ResourceLocation.CODEC, Codec.floatRange(0.0F, Float.MAX_VALUE));
 
     public static final Codec<Personality> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        MULTIPLIERS_CODEC.optionalFieldOf("intent_multipliers", Map.of()).forGetter(Personality::intentMultipliers),
-        Codec.unboundedMap(DayPhase.CODEC, MULTIPLIERS_CODEC).optionalFieldOf("routine", Map.of()).forGetter(Personality::routine),
-        Codec.floatRange(0.0F, 1.0F).optionalFieldOf("randomness", DEFAULT.randomness()).forGetter(Personality::randomness),
-        WeightedItem.CODEC.listOf().optionalFieldOf("wild_tools", List.of()).forGetter(Personality::wildTools),
-        WeightedItem.CODEC.listOf().optionalFieldOf("likes", List.of()).forGetter(Personality::likes)
+        ModCodecs.strictOptionalField(MULTIPLIERS_CODEC, "intent_multipliers", Map.of()).forGetter(Personality::intentMultipliers),
+        ModCodecs.strictOptionalField(Codec.unboundedMap(DayPhase.CODEC, MULTIPLIERS_CODEC), "routine", Map.of()).forGetter(Personality::routine),
+        ModCodecs.strictOptionalField(Codec.floatRange(0.0F, 1.0F), "randomness", DEFAULT.randomness()).forGetter(Personality::randomness),
+        ModCodecs.strictOptionalField(WeightedItem.CODEC.listOf(), "wild_tools", List.of()).forGetter(Personality::wildTools),
+        ModCodecs.strictOptionalField(WeightedItem.CODEC.listOf(), "likes", List.of()).forGetter(Personality::likes)
     ).apply(instance, Personality::new));
 
     public Personality {
@@ -111,8 +111,8 @@ public record Personality(
      */
     public record WeightedItem(Item item, Weight weight) implements WeightedEntry {
         /** Lazy because the item registry only exists once the game has bootstrapped. */
-        public static final Codec<WeightedItem> CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.create(instance -> instance.group(
-            BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(WeightedItem::item),
+        public static final Codec<WeightedItem> CODEC = ExtraCodecs.lazyInitializedCodec(() -> RecordCodecBuilder.create(instance -> instance.group(
+            ModCodecs.ITEM.fieldOf("item").forGetter(WeightedItem::item),
             ExtraCodecs.POSITIVE_INT.xmap(Weight::of, Weight::asInt).fieldOf("weight").forGetter(WeightedItem::weight)
         ).apply(instance, WeightedItem::new)));
 

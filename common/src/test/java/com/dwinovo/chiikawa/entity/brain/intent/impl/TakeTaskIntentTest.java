@@ -11,7 +11,6 @@ import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.dwinovo.chiikawa.testing.TestContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -43,7 +42,7 @@ class TakeTaskIntentTest {
     void carriesOneSlipAtATime() {
         PetTask slip = new PetTask(new ResourceLocation("chiikawa", "weeding"),
             new ResourceLocation("chiikawa", "farmer"), PetWorkCounters.WEED, PetTask.NO_ICON, 8,
-            ResourceKey.create(Registries.LOOT_TABLE, new ResourceLocation("chiikawa", "pet_task/weeding")), 0);
+            new ResourceLocation("chiikawa", "pet_task/weeding"), 0);
 
         assertEquals("intent.chiikawa.fail.has_slip", intent.canRun(boardAt(1).task(slip).build()).reasonKey());
         // Having taken it ends the walk to the board.

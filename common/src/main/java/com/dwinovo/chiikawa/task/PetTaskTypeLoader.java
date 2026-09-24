@@ -2,8 +2,10 @@ package com.dwinovo.chiikawa.task;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.init.InitRegistry;
+import com.dwinovo.chiikawa.platform.Services;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +35,7 @@ public final class PetTaskTypeLoader extends SimpleJsonResourceReloadListener {
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
-        Loaded loaded = load(files, InitRegistry.PET_JOB_REGISTRY::containsKey);
+        Loaded loaded = load(files, id -> Services.REGISTRY.containsKey(InitRegistry.PET_JOB_KEY, id));
         loaded.errors().forEach(Constants.LOG::error);
         loaded.warnings().forEach(Constants.LOG::warn);
         PetTaskTypes.replaceAll(loaded.types());
@@ -49,8 +51,9 @@ public final class PetTaskTypeLoader extends SimpleJsonResourceReloadListener {
         Map<ResourceLocation, PetTaskType> types = new HashMap<>();
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
-        files.forEach((id, json) -> PetTaskType.CODEC.parse(JsonOps.INSTANCE, json)
-            .ifSuccess(type -> {
+        files.forEach((id, json) -> {
+            DataResult<PetTaskType> parsed = PetTaskType.CODEC.parse(JsonOps.INSTANCE, json);
+            parsed.result().ifPresent(type -> {
                 types.put(id, type);
                 if (!knownCapability.test(type.capability())) {
                     warnings.add(LOG_PREFIX + id + " is for unknown capability " + type.capability());
@@ -58,8 +61,9 @@ public final class PetTaskTypeLoader extends SimpleJsonResourceReloadListener {
                 if (!PetWorkCounters.ALL.contains(type.counter())) {
                     warnings.add(LOG_PREFIX + id + " counts unknown work " + type.counter());
                 }
-            })
-            .ifError(error -> errors.add(LOG_PREFIX + id + " is skipped, failed to parse: " + error.message())));
+            });
+            parsed.error().ifPresent(error -> errors.add(LOG_PREFIX + id + " is skipped, failed to parse: " + error.message()));
+        });
         return new Loaded(types, errors, warnings);
     }
 

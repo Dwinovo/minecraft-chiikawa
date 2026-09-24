@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.data;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalityLoader;
 import com.mojang.serialization.JsonOps;
@@ -23,7 +24,7 @@ public final class PetPersonalityProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cache) {
         return CompletableFuture.allOf(PersonalityData.all().entrySet().stream()
             .map(entry -> DataProvider.saveStable(cache,
-                Personality.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(),
+                Personality.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(false, Constants.LOG::error),
                 pathProvider.json(entry.getKey())))
             .toArray(CompletableFuture[]::new));
     }

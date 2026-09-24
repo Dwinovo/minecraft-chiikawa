@@ -73,7 +73,7 @@ class PetSpawnTest {
     }
 
     private static PetSpawn parse(String json) {
-        return PetSpawn.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(json)).getOrThrow();
+        return PetSpawn.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(json)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
     }
 
     private static ResourceKey<Biome> biome(String path) {

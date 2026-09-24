@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.spawn;
 import com.dwinovo.chiikawa.Constants;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,9 +45,11 @@ public final class PetSpawnLoader extends SimpleJsonResourceReloadListener {
     static Loaded load(Map<ResourceLocation, JsonElement> files) {
         Map<ResourceLocation, PetSpawn> spawns = new HashMap<>();
         List<String> errors = new ArrayList<>();
-        files.forEach((id, json) -> PetSpawn.CODEC.parse(JsonOps.INSTANCE, json)
-            .ifSuccess(spawn -> spawns.put(id, spawn))
-            .ifError(error -> errors.add(LOG_PREFIX + id + " is skipped, failed to parse: " + error.message())));
+        files.forEach((id, json) -> {
+            DataResult<PetSpawn> parsed = PetSpawn.CODEC.parse(JsonOps.INSTANCE, json);
+            parsed.result().ifPresent(spawn -> spawns.put(id, spawn));
+            parsed.error().ifPresent(error -> errors.add(LOG_PREFIX + id + " is skipped, failed to parse: " + error.message()));
+        });
         return new Loaded(spawns, errors);
     }
 

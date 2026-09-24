@@ -14,12 +14,9 @@ import java.util.UUID;
 import java.util.stream.LongStream;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.valueproviders.UniformInt;
-import net.minecraft.world.level.storage.loot.LootTable;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -219,8 +216,8 @@ class BoardSlipsTest {
             reward("test"), 0));
     }
 
-    private static ResourceKey<LootTable> reward(String path) {
-        return ResourceKey.create(Registries.LOOT_TABLE, id("pet_task/" + path));
+    private static ResourceLocation reward(String path) {
+        return id("pet_task/" + path);
     }
 
     private static ResourceLocation id(String path) {

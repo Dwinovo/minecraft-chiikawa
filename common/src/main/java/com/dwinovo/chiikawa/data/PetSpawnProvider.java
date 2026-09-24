@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.data;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.spawn.PetSpawn;
 import com.dwinovo.chiikawa.spawn.PetSpawnLoader;
 import com.mojang.serialization.JsonOps;
@@ -23,7 +24,7 @@ public final class PetSpawnProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cache) {
         return CompletableFuture.allOf(PetSpawnData.all().entrySet().stream()
             .map(entry -> DataProvider.saveStable(cache,
-                PetSpawn.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(),
+                PetSpawn.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(false, Constants.LOG::error),
                 pathProvider.json(entry.getKey())))
             .toArray(CompletableFuture[]::new));
     }

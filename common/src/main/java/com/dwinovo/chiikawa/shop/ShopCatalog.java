@@ -1,10 +1,10 @@
 package com.dwinovo.chiikawa.shop;
 
+import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.Item;
 
@@ -53,10 +53,10 @@ public record ShopCatalog(List<Entry> entries) {
      * @param sell what the shop pays for one; 0 means it does not want any
      */
     public record Entry(Item item, int buy, int sell) {
-        public static final Codec<Entry> CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.create(instance -> instance.group(
-            BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(Entry::item),
-            ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("buy", 0).forGetter(Entry::buy),
-            ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("sell", 0).forGetter(Entry::sell)
+        public static final Codec<Entry> CODEC = ExtraCodecs.lazyInitializedCodec(() -> RecordCodecBuilder.create(instance -> instance.group(
+            ModCodecs.ITEM.fieldOf("item").forGetter(Entry::item),
+            ModCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "buy", 0).forGetter(Entry::buy),
+            ModCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "sell", 0).forGetter(Entry::sell)
         ).apply(instance, Entry::new)));
 
         public boolean sells(Item wanted) {

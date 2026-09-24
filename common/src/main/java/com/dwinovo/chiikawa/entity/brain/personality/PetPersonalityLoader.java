@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,16 +49,18 @@ public final class PetPersonalityLoader extends SimpleJsonResourceReloadListener
         Map<ResourceLocation, Personality> personalities = new HashMap<>();
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
-        files.forEach((entityId, json) -> Personality.CODEC.parse(JsonOps.INSTANCE, json)
-            .ifSuccess(personality -> {
+        files.forEach((entityId, json) -> {
+            DataResult<Personality> parsed = Personality.CODEC.parse(JsonOps.INSTANCE, json);
+            parsed.result().ifPresent(personality -> {
                 personalities.put(entityId, personality);
                 personality.intentIds().stream()
                     .filter(intent -> PetIntents.get(intent) == null)
                     .sorted()
                     .forEach(intent -> warnings.add(LOG_PREFIX + entityId + " weighs unknown intent " + intent));
-            })
-            .ifError(error -> errors.add(LOG_PREFIX + entityId + " uses the default personality, failed to parse: "
-                + error.message())));
+            });
+            parsed.error().ifPresent(error -> errors.add(LOG_PREFIX + entityId + " uses the default personality, failed to parse: "
+                    + error.message()));
+        });
         return new Loaded(personalities, errors, warnings);
     }
 

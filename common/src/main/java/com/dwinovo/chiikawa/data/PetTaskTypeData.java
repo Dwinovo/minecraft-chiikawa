@@ -5,12 +5,10 @@ import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.task.BoardLevels;
 import com.dwinovo.chiikawa.task.PetTaskType;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
+import com.dwinovo.chiikawa.platform.Services;
 import java.util.Map;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.valueproviders.UniformInt;
-import net.minecraft.world.level.storage.loot.LootTable;
 
 /**
  * The generated slip types (gameplay doc, section 3). Hunting slips wait for a board
@@ -29,15 +27,15 @@ public final class PetTaskTypeData {
 
     /** @return slip types by id */
     public static Map<ResourceLocation, PetTaskType> all() {
-        ResourceLocation farmer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FARMER.get());
-        ResourceLocation musician = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.MUSICIAN.get());
-        ResourceLocation fencer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FENCER.get());
-        ResourceLocation archer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.ARCHER.get());
+        ResourceLocation farmer = Services.REGISTRY.getKey(InitRegistry.PET_JOB_KEY, InitRegistry.FARMER.get());
+        ResourceLocation musician = Services.REGISTRY.getKey(InitRegistry.PET_JOB_KEY, InitRegistry.MUSICIAN.get());
+        ResourceLocation fencer = Services.REGISTRY.getKey(InitRegistry.PET_JOB_KEY, InitRegistry.FENCER.get());
+        ResourceLocation archer = Services.REGISTRY.getKey(InitRegistry.PET_JOB_KEY, InitRegistry.ARCHER.get());
         return Map.of(
             // Farmers are the most common job, so their slips come up the most. Picking
             // mushrooms is not among them: mushrooms are only there to pick at night, so a
             // slip for them left a farmer standing about all day waiting for the dark.
-            WEEDING, new PetTaskType(farmer, PetWorkCounters.WEED, vanilla("short_grass"),
+            WEEDING, new PetTaskType(farmer, PetWorkCounters.WEED, vanilla("grass"),
                 UniformInt.of(8, 16), reward(WEEDING), 5, BoardLevels.FIRST_LEVEL),
             // Seconds of music.
             STREET_PERFORMANCE, new PetTaskType(musician, PetWorkCounters.PLAY_MUSIC_SECOND, vanilla("note_block"),
@@ -53,8 +51,8 @@ public final class PetTaskTypeData {
     }
 
     /** @return the reward loot table of a slip type, {@code <namespace>:pet_task/<path>} */
-    public static ResourceKey<LootTable> reward(ResourceLocation type) {
-        return ResourceKey.create(Registries.LOOT_TABLE, type.withPrefix("pet_task/"));
+    public static ResourceLocation reward(ResourceLocation type) {
+        return type.withPrefix("pet_task/");
     }
 
     /** What a slip is pictured as: the work it is about, not what it pays. */

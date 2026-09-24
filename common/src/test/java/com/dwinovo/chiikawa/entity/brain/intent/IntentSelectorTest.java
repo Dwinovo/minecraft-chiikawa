@@ -21,7 +21,6 @@ import java.util.Optional;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -210,7 +209,7 @@ class IntentSelectorTest {
     @Test
     void workTheCarriedSlipCountsIsPreferred() {
         PetTask weeding = new PetTask(id("weeding"), id("farmer"), PetWorkCounters.WEED, PetTask.NO_ICON, 8,
-            ResourceKey.create(Registries.LOOT_TABLE, id("pet_task/weeding")), 0);
+            id("pet_task/weeding"), 0);
         Optional<GlobalPos> near = near(true, 1);
         IntentContext ctx = TestContext.at(PET, new PetAnchor(PET, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, false, true))
             .targets(new PerceivedTargets(Optional.empty(), near, Optional.empty(), Optional.empty(), near, Optional.empty(),
