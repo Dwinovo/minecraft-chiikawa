@@ -41,7 +41,7 @@ class FaceAnimationsTest {
 
     @Test
     void facesBuiltFromBonesBlinkAndTalk() throws IOException {
-        for (String pet : List.of("chiikawa", "kurimanju", "momonga", "rakko", "shisa")) {
+        for (String pet : List.of("chiikawa", "furuhonya", "kurimanju", "momonga", "rakko", "shisa")) {
             JsonObject animations = read(ASSETS.resolve("animations/" + pet + ".json")).getAsJsonObject("animations");
             for (String face : FACE) {
                 assertTrue(animations.has(face), pet + " has no " + face);
