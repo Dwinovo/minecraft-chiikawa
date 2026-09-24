@@ -33,7 +33,7 @@ public final class ShopServerPacketHandler {
         if (catalog.isEmpty()) {
             return;
         }
-        Item item = BuiltInRegistries.ITEM.get(payload.item());
+        Item item = BuiltInRegistries.ITEM.getValue(payload.item());
         Optional<ShopCatalog.Entry> entry = payload.buying()
             ? catalog.get().sale(item)
             : catalog.get().purchase(item);

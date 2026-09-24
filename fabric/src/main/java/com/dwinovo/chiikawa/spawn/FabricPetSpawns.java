@@ -20,6 +20,7 @@ public final class FabricPetSpawns {
     public static void init() {
         BiomeModifications.create(ID).add(ModificationPhase.ADDITIONS, BiomeSelectors.all(),
             (selection, context) -> PetSpawns.in(selection.getBiomeKey(), selection::hasTag)
-                .forEach(spawner -> context.getSpawnSettings().addSpawn(spawner.type.getCategory(), spawner)));
+                .forEach(spawner -> context.getSpawnSettings().addSpawn(spawner.value().type().getCategory(), spawner.value(),
+                    spawner.weight())));
     }
 }

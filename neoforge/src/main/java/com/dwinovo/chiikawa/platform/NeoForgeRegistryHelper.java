@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
@@ -21,6 +22,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.NewRegistryEvent;
 import net.neoforged.neoforge.registries.RegistryBuilder;
 
@@ -48,7 +50,13 @@ public class NeoForgeRegistryHelper implements IRegistryHelper {
     public <T extends BlockEntity> Supplier<BlockEntityType<T>> registerBlockEntity(ResourceLocation id,
             BiFunction<BlockPos, BlockState, T> factory, Supplier<? extends Block> block) {
         return register(BuiltInRegistries.BLOCK_ENTITY_TYPE, id,
-            () -> BlockEntityType.Builder.of(factory::apply, block.get()).build(null));
+            () -> new BlockEntityType<>(factory::apply, block.get()));
+    }
+
+    @Override
+    public <T> EntityDataSerializer<T> registerEntityDataSerializer(ResourceLocation id, EntityDataSerializer<T> serializer) {
+        register(NeoForgeRegistries.ENTITY_DATA_SERIALIZERS, id, () -> serializer);
+        return serializer;
     }
 
     @Override

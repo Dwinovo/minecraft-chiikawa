@@ -49,26 +49,26 @@ public final class InitItems {
     public static final Supplier<Item> MUSIC_BOX =
         registerItem("music_box", MusicBoxItem::new);
     public static final Supplier<BlockItem> LABOR_BOARD =
-        registerItem("labor_board", () -> new BlockItem(InitBlocks.LABOR_BOARD.get(), new Item.Properties()));
+        registerItem("labor_board", properties -> new BlockItem(InitBlocks.LABOR_BOARD.get(), properties.useBlockDescriptionPrefix()));
     public static final Supplier<BlockItem> SHOP =
-        registerItem("shop", () -> new BlockItem(InitBlocks.SHOP.get(), new Item.Properties()));
+        registerItem("shop", properties -> new BlockItem(InitBlocks.SHOP.get(), properties.useBlockDescriptionPrefix()));
 
     public static final Supplier<Item> SIMPLE_DISH =
-        registerItem("simple_dish", () -> new Item(new Item.Properties()));
+        registerItem("simple_dish", properties -> new Item(properties));
 
     public static final Supplier<Item> PET_BELL =
-        registerItem("pet_bell", () -> new PetBellItem(new Item.Properties()));
+        registerItem("pet_bell", properties -> new PetBellItem(properties));
 
     public static final Supplier<Item> BACKPACK =
-        registerItem("backpack", () -> new BagItem(new Item.Properties(), BagItem.Wear.ON_BACK));
+        registerItem("backpack", properties -> new BagItem(properties, BagItem.Wear.ON_BACK));
     public static final Supplier<Item> BEAR_POUCH =
-        registerItem("bear_pouch", () -> new BagItem(new Item.Properties(), BagItem.Wear.SLUNG));
+        registerItem("bear_pouch", properties -> new BagItem(properties, BagItem.Wear.SLUNG));
     public static final Supplier<Item> WHALE_POUCH =
-        registerItem("whale_pouch", () -> new BagItem(new Item.Properties(), BagItem.Wear.SLUNG));
+        registerItem("whale_pouch", properties -> new BagItem(properties, BagItem.Wear.SLUNG));
     public static final Supplier<Item> STAR_POUCH =
-        registerItem("star_pouch", () -> new BagItem(new Item.Properties(), BagItem.Wear.SLUNG));
+        registerItem("star_pouch", properties -> new BagItem(properties, BagItem.Wear.SLUNG));
     public static final Supplier<Item> HANDBOOK =
-        registerItem("handbook", () -> new HandbookItem(new Item.Properties()));
+        registerItem("handbook", properties -> new HandbookItem(properties));
     /**
      * Everything drawn from a Bedrock model of its own, by {@code PropRenderer}: the bags,
      * the labor board, the shop and the handbook. Each loader gives these their built-in item renderer, and their

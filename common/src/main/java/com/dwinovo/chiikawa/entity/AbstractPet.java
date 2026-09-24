@@ -10,12 +10,14 @@ import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.anim.state.PetAnimContext;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
+import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import com.dwinovo.chiikawa.entity.brain.handler.ArcherJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.FarmerJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.FencerJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.MusicianJobHandler;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
+import com.dwinovo.chiikawa.init.InitDataSerializers;
 import com.dwinovo.chiikawa.utils.BrainUtils;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
 import com.dwinovo.chiikawa.entity.job.api.PetCapability;
@@ -49,10 +51,10 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.Brain;
@@ -156,7 +158,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      */
     private static final EntityDataAccessor<Byte> ACTIVITY = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.BYTE);
     /** The slip the pet carries, empty when none. Synced so the client can show and hang it. */
-    private static final EntityDataAccessor<CompoundTag> TASK = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.COMPOUND_TAG);
+    private static final EntityDataAccessor<CompoundTag> TASK = SynchedEntityData.defineId(AbstractPet.class, InitDataSerializers.COMPOUND_TAG);
     /** Id of the intent the pet is following, empty when none. Synced for the backpack screen. */
     private static final EntityDataAccessor<String> INTENT = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.STRING);
     /**
@@ -235,6 +237,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         // brain-side FloatBehavior bobs the pet to the surface smoothly instead of
         // sink-fighting the jump (which caused the repeated bouncing). One-time setup.
         this.getNavigation().setCanFloat(true);
+        keepEquipmentOnDeath();
     }
 
     public SimpleContainer getBackpack() {
@@ -716,7 +719,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
                 return;
             }
         }
-        spawnAtLocation(inBagSlot);
+        if (level() instanceof ServerLevel server) {
+            spawnAtLocation(server, inBagSlot);
+        }
     }
 
     /**
@@ -769,8 +774,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     public void dropBagContents() {
         for (int slot = BACKPACK_SIZE; slot < backpack.getContainerSize(); slot++) {
             ItemStack stack = backpack.removeItemNoUpdate(slot);
-            if (!stack.isEmpty()) {
-                spawnAtLocation(stack);
+            if (!stack.isEmpty() && level() instanceof ServerLevel server) {
+                spawnAtLocation(server, stack);
             }
         }
     }
@@ -977,6 +982,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     @Override
     public void readAdditionalSaveData(ValueInput input) {
         super.readAdditionalSaveData(input);
+        keepEquipmentOnDeath();
         input.child("Backpack").ifPresent(backpackInput -> {
             ContainerHelper.loadAllItems(backpackInput, backpack.getItems());
             clearBagSlotOfOldStorage();
@@ -995,10 +1001,10 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * decides its job, and roams freely around where it spawned.
      */
     @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType,
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnType,
             @Nullable SpawnGroupData spawnGroupData) {
         // One the world found for itself comes with a tool, as a pet met in the wild does.
-        if (spawnType == MobSpawnType.NATURAL || spawnType == MobSpawnType.CHUNK_GENERATION) {
+        if (spawnType == EntitySpawnReason.NATURAL || spawnType == EntitySpawnReason.CHUNK_GENERATION) {
             setItemSlot(EquipmentSlot.MAINHAND, PetPersonalities.of(getType()).drawWildTool(level.getRandom()));
         }
         // However it came, a new pet is nobody's yet, and goes its own way until it is tamed.
@@ -1031,9 +1037,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     @Override
     public void die(DamageSource source) {
         setTask(null);
-        if (level() instanceof ServerLevel server && getOwnerUUID() != null) {
+        if (level() instanceof ServerLevel server && PetTargeting.ownerId(this) != null) {
             // Its doll is what is left to find now, and that is on the floor, not in a roster.
-            PetRoster.of(server).forget(getOwnerUUID(), getUUID());
+            PetRoster.of(server).forget(PetTargeting.ownerId(this), getUUID());
         }
         super.die(source);
     }
@@ -1055,11 +1061,13 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     /**
      * Nothing a pet carries falls out when it dies; it all stays in the doll. Vanilla
      * would otherwise drop each equipment slot by chance, including the main hand tool,
-     * which is the first backpack slot.
+     * which is the first backpack slot. Set again after loading, which also ignores drop
+     * chances saved on existing pets.
      */
-    @Override
-    protected float getEquipmentDropChance(EquipmentSlot slot) {
-        return 0.0F;
+    private void keepEquipmentOnDeath() {
+        for (EquipmentSlot slot : EquipmentSlot.VALUES) {
+            setDropChance(slot, 0.0F);
+        }
     }
 
     protected Item getReviveDollItem() {
