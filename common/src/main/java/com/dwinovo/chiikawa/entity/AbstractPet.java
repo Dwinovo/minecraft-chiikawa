@@ -10,6 +10,7 @@ import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.anim.state.PetAnimContext;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
+import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import com.dwinovo.chiikawa.entity.brain.handler.ArcherJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.FarmerJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.FencerJobHandler;
@@ -37,7 +38,6 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -1006,11 +1006,11 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         });
         tag.getInt("PetJob").ifPresent(this::setPetJobId);
         tag.getByte("PetMode").ifPresent(value -> this.entityData.set(PET_MODE, value));
-        this.entityData.set(TASK, tag.contains("Task", Tag.TAG_COMPOUND) ? tag.getCompound("Task") : new CompoundTag());
-        setPendingGift(tag.contains("Gift", Tag.TAG_COMPOUND)
-            ? ItemStack.parse(level().registryAccess(), tag.getCompound("Gift")).orElse(ItemStack.EMPTY)
-            : ItemStack.EMPTY);
-        this.entityData.set(EAGER_UNTIL, tag.getLong("EagerUntil"));
+        this.entityData.set(TASK, tag.getCompoundOrEmpty("Task"));
+        setPendingGift(tag.getCompound("Gift")
+            .flatMap(gift -> ItemStack.parse(level().registryAccess(), gift))
+            .orElse(ItemStack.EMPTY));
+        this.entityData.set(EAGER_UNTIL, tag.getLongOr("EagerUntil", 0L));
         applyEagerness();
         refreshJobFromMainhand();
     }
@@ -1056,15 +1056,16 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     @Override
     public void die(DamageSource source) {
         setTask(null);
-        if (level() instanceof ServerLevel server && getOwnerUUID() != null) {
+        if (level() instanceof ServerLevel server && PetTargeting.ownerId(this) != null) {
             // Its doll is what is left to find now, and that is on the floor, not in a roster.
-            PetRoster.of(server).forget(getOwnerUUID(), getUUID());
+            PetRoster.of(server).forget(PetTargeting.ownerId(this), getUUID());
         }
         super.die(source);
     }
 
     @Override
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
+        keepEquipment();
         super.dropCustomDeathLoot(level, source, recentlyHit);
 
         Item dollItem = getReviveDollItem();
@@ -1080,11 +1081,13 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     /**
      * Nothing a pet carries falls out when it dies; it all stays in the doll. Vanilla
      * would otherwise drop each equipment slot by chance, including the main hand tool,
-     * which is the first backpack slot.
+     * which is the first backpack slot. The chances are the mob's own saved state, so every
+     * slot's is set to 0 right before vanilla rolls them, whatever was saved on the pet.
      */
-    @Override
-    protected float getEquipmentDropChance(EquipmentSlot slot) {
-        return 0.0F;
+    private void keepEquipment() {
+        for (EquipmentSlot slot : EquipmentSlot.VALUES) {
+            setDropChance(slot, 0.0F);
+        }
     }
 
     protected Item getReviveDollItem() {

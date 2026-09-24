@@ -43,10 +43,10 @@ public class ShopBlockEntity extends BlockEntity {
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        if (tag.contains(CATALOG_KEY)) {
-            ResourceLocation saved = ResourceLocation.tryParse(tag.getString(CATALOG_KEY));
+        tag.getString(CATALOG_KEY).ifPresent(id -> {
+            ResourceLocation saved = ResourceLocation.tryParse(id);
             catalogId = saved == null ? ShopCatalogData.GENERAL : saved;
-        }
+        });
     }
 
     @Override

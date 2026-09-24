@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.entity;
 
+import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -80,7 +81,7 @@ public final class PetRecall {
         Set<UUID> answered = new HashSet<>();
         for (ServerLevel level : server.getAllLevels()) {
             for (AbstractPet pet : level.getEntities(EntityTypeTest.forClass(AbstractPet.class),
-                    candidate -> candidate.isAlive() && owner.getUUID().equals(candidate.getOwnerUUID()))) {
+                    candidate -> candidate.isAlive() && owner.getUUID().equals(PetTargeting.ownerId(candidate)))) {
                 if (bring(pet, owner)) {
                     answered.add(pet.getUUID());
                 }
