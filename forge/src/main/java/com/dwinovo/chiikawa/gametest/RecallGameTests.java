@@ -11,6 +11,7 @@ import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.PetRecall;
 import com.dwinovo.chiikawa.entity.PetRoster;
 import com.dwinovo.chiikawa.entity.PetUnloadFollow;
+import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.init.InitItems;
 import java.util.List;
 import java.util.UUID;
@@ -25,7 +26,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
@@ -99,8 +99,7 @@ public final class RecallGameTests {
         ServerPlayer owner = owner(helper);
         AbstractPet pet = pet(helper, owner);
         UUID id = pet.getUUID();
-        Entity moved = pet.changeDimension(new DimensionTransition(nether, new Vec3(8.5, 70.0, 8.5), Vec3.ZERO,
-            0.0F, 0.0F, DimensionTransition.DO_NOTHING));
+        Entity moved = Services.ENTITY.changeDimension(pet, nether, new Vec3(8.5, 70.0, 8.5), 0.0F, 0.0F);
         helper.assertTrue(moved instanceof AbstractPet, "the pet would not go to the nether to begin with");
 
         PetRecall.ring(owner);

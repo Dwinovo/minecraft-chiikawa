@@ -16,11 +16,11 @@ import com.dwinovo.chiikawa.task.BoardLevels;
 import com.dwinovo.chiikawa.task.BoardSlips;
 import com.dwinovo.chiikawa.task.BoardSlot;
 import com.dwinovo.chiikawa.task.PetTaskTypes;
+import com.dwinovo.chiikawa.platform.Services;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -103,7 +103,7 @@ public final class BoardGameTests {
             for (int z = 0; z < WEED_PATCH; z++) {
                 BlockPos weed = new BlockPos(2 + x, STAND, 2 + z);
                 helper.setBlock(weed.below(), Blocks.GRASS_BLOCK);
-                helper.setBlock(weed, Blocks.SHORT_GRASS);
+                helper.setBlock(weed, Blocks.GRASS);
             }
         }
     }
@@ -122,7 +122,7 @@ public final class BoardGameTests {
         // Everything but the hand it holds the hoe in, packed with something an emerald
         // cannot join and a farmer will not pick up again.
         for (int slot = 1; slot < pet.getBackpack().getContainerSize(); slot++) {
-            pet.getBackpack().setItem(slot, new ItemStack(Items.COBBLESTONE, Items.COBBLESTONE.getDefaultMaxStackSize()));
+            pet.getBackpack().setItem(slot, new ItemStack(Items.COBBLESTONE, Items.COBBLESTONE.getMaxStackSize()));
         }
 
         helper.succeedWhen(() -> helper.assertItemEntityPresent(Items.EMERALD, new BlockPos(4, STAND, 4), 10.0));
@@ -172,13 +172,12 @@ public final class BoardGameTests {
         BlockPos at = new BlockPos(3, STAND, 3);
         helper.setBlock(at, InitBlocks.LABOR_BOARD.get());
         LaborBoardBlockEntity board = (LaborBoardBlockEntity) helper.getBlockEntity(at);
-        HolderLookup.Provider registries = helper.getLevel().registryAccess();
-        CompoundTag before = board.saveWithoutMetadata(registries);
+        CompoundTag before = board.saveWithoutMetadata();
 
-        board.getUpdateTag(registries);
+        board.getUpdateTag();
 
-        helper.assertTrue(before.equals(board.saveWithoutMetadata(registries)),
-            "asking for what players see changed the board: " + before + " became " + board.saveWithoutMetadata(registries));
+        helper.assertTrue(before.equals(board.saveWithoutMetadata()),
+            "asking for what players see changed the board: " + before + " became " + board.saveWithoutMetadata());
         helper.succeed();
     }
 
@@ -258,7 +257,7 @@ public final class BoardGameTests {
     private static BlockPos boardWhere(GameTestHelper helper, Predicate<List<BoardSlot>> wanted, String what) {
         ServerLevel level = helper.getLevel();
         long day = level.getDayTime() / Level.TICKS_PER_DAY;
-        ResourceLocation farmer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FARMER.get());
+        ResourceLocation farmer = Services.REGISTRY.getKey(InitRegistry.PET_JOB_KEY, InitRegistry.FARMER.get());
         for (int x = 8; x < 15; x++) {
             for (int z = 2; z < 15; z++) {
                 BlockPos rel = new BlockPos(x, STAND, z);

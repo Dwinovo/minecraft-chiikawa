@@ -19,6 +19,7 @@ import com.dwinovo.chiikawa.task.BoardSlips;
 import com.dwinovo.chiikawa.task.BoardSlot;
 import com.dwinovo.chiikawa.task.PetTaskTypes;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
+import com.dwinovo.chiikawa.platform.Services;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
@@ -205,7 +206,7 @@ public final class UpgradeGameTests {
     private static BlockPos boardOfferingHunting(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         long day = level.getDayTime() / Level.TICKS_PER_DAY;
-        ResourceLocation fencer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FENCER.get());
+        ResourceLocation fencer = Services.REGISTRY.getKey(InitRegistry.PET_JOB_KEY, InitRegistry.FENCER.get());
         for (int x = 8; x < 15; x++) {
             for (int z = 2; z < 15; z++) {
                 BlockPos rel = new BlockPos(x, STAND, z);
