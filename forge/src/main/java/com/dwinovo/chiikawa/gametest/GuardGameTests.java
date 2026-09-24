@@ -27,8 +27,8 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Standing up for its owner, and knowing when not to stand anywhere near something.
@@ -37,8 +37,8 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
  * rather than off on its own, the thing it is fighting is after the owner rather than the
  * pet, and some of what turns up is not worth walking towards at all.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class GuardGameTests {
     private static final String BATCH = "chiikawa_guard";
     private static final int STAND = 2;

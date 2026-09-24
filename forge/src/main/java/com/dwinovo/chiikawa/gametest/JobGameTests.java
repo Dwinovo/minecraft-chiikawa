@@ -23,8 +23,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Jobs: what a pet takes up, from the tool in its hand, and whether it then does the work.
@@ -33,8 +33,8 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
  * of it out loud — the right tool makes a farmer and the farmer harvests, the wrong tool
  * makes something else and the crop is left standing.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class JobGameTests {
     private static final String BATCH = "chiikawa_jobs";
     /** Long enough to walk a few blocks, take a swing and be paid for it. */

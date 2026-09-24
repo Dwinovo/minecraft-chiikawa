@@ -33,16 +33,16 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * What an owner's emeralds buy a labor board. A level is the one thing on that screen an
  * owner can spend money on, so what it costs and what it gives are both worth holding
  * still; what the hunting slips it unlocks then count is in {@code HuntGameTests}.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class UpgradeGameTests {
     private static final String BATCH = "chiikawa_upgrade";
     private static final int STAND = 2;

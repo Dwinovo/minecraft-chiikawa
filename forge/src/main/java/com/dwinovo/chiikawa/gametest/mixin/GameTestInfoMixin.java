@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Clears a case's floor the moment it passes, as {@code GameTestInfo.succeed} does from
- * 1.20.4 on. 1.20.1 leaves everything on it running until the batch is over, so a pet
+ * 1.20.4 on. 1.20.2 leaves everything on it running until the batch is over, so a pet
  * whose case has passed goes on working, and walks into the cases still going beside it:
  * a fencer finds another case's zombie, a farmer another case's slip.
  */

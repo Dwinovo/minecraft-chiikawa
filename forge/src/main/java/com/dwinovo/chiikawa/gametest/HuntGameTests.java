@@ -27,16 +27,16 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * What counts towards a hunting slip. A kill in a real fight is rarely a clean one —
  * the owner is swinging too, arrows are in the air, other pets are helping — and the
  * slip has to agree with what the player watched happen.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class HuntGameTests {
     private static final String BATCH = "chiikawa_hunt";
     private static final int STAND = 2;

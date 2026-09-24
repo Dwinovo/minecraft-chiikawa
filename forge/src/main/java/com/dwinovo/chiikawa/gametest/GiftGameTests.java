@@ -20,15 +20,15 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Presents, and pocket money: the two ways things pass between a pet and the person it
  * belongs to without either of them going near a shop counter.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class GiftGameTests {
     private static final String BATCH = "chiikawa_gift";
     private static final int WALK_TICKS = 1200;

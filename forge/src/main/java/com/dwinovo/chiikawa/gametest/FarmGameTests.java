@@ -20,8 +20,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FarmBlock;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The rest of a farmer's round: sowing what it has, putting the crop away, and picking up
@@ -31,8 +31,8 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
  * harvest, or fills its own backpack and stops, is a pet an owner has to tidy up after —
  * which is the opposite of the point.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class FarmGameTests {
     private static final String BATCH = "chiikawa_farm";
     /**

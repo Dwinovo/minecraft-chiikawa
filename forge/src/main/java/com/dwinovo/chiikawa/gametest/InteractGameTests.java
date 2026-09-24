@@ -20,16 +20,16 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * What a right click does. Every instruction an owner can give a pet goes through one
  * hand and one button, so which of them happens depends on what is held and whether the
  * owner is crouching — a tangle worth pinning down.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class InteractGameTests {
     private static final String BATCH = "chiikawa_interact";
     private static final int STAND = 2;

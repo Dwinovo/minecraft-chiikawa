@@ -18,8 +18,8 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * How far a pet may go, and what it may do when it gets there.
@@ -28,8 +28,8 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
  * "stay around here and get on with it" has said nothing at all, and the pet is gone by
  * morning.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class AnchorGameTests {
     private static final String BATCH = "chiikawa_anchor";
     private static final int WALK_HOME_TICKS = 3600;

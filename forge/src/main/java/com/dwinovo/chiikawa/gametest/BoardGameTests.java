@@ -32,8 +32,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The labor board, end to end: a pet that may not weed for free walks over, takes the
@@ -43,8 +43,8 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
  * anything, and it is the one with the most between the first tick and the last — seeing,
  * reserving, walking, claiming, counting the work, being paid.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class BoardGameTests {
     private static final String BATCH = "chiikawa_board";
     /** Everything above, at the speed a pet does it. */

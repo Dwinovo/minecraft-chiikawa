@@ -27,8 +27,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The bell, and the note of where each pet was that lets it ring for one nobody has
@@ -37,8 +37,8 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
  * <p>A ring is not over when it is rung: a pet whose chunk had to be woken is read back
  * over the next few ticks, so the cases ring and then watch, the way the bell does.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class RecallGameTests {
     private static final String BATCH = "chiikawa_recall";
     private static final int STAND = 2;

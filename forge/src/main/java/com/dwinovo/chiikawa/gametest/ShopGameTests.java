@@ -24,16 +24,16 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Spending. A pet that earns and never spends is a pet with a growing pile of emeralds
  * and nothing to show for it, so the half of the loop that goes the other way gets cases
  * of its own.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class ShopGameTests {
     private static final String BATCH = "chiikawa_shop";
     private static final int SHOP_TICKS = 3600;
