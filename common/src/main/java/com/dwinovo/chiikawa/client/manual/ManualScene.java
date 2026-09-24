@@ -31,6 +31,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.joml.Matrix4f;
 
 /**
  * One panel of the handbook, put on stage: the pets in it made and dressed once, then
@@ -185,7 +186,9 @@ public final class ManualScene {
             float size = blockPixels * actor.scale();
             graphics.pose().pushPose();
             graphics.pose().translate(screenX(area), screenY(area, groundY), 50.0F);
-            graphics.pose().scale(size, size, -size);
+            // As this version's inventory draws an entity: z flipped in the pose alone. Its
+            // PoseStack.scale would flip the normals too, and turn the inventory light around.
+            graphics.pose().mulPoseMatrix(new Matrix4f().scaling(size, size, -size));
             graphics.pose().mulPose(Axis.ZP.rotationDegrees(180.0F));
             Lighting.setupForEntityInInventory();
             EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
@@ -232,7 +235,9 @@ public final class ManualScene {
             float size = blockPixels * actor.scale();
             graphics.pose().pushPose();
             graphics.pose().translate(screenX(area), screenY(area, groundY), 50.0F);
-            graphics.pose().scale(size, size, -size);
+            // As this version's inventory draws an entity: z flipped in the pose alone. Its
+            // PoseStack.scale would flip the normals too, and turn the inventory light around.
+            graphics.pose().mulPoseMatrix(new Matrix4f().scaling(size, size, -size));
             graphics.pose().mulPose(Axis.ZP.rotationDegrees(180.0F));
             // Turned the way a pet is, so a prop and a pet given the same facing face alike.
             graphics.pose().mulPose(Axis.YP.rotationDegrees(actor.facing()));
