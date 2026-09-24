@@ -21,9 +21,8 @@ import java.util.function.Supplier;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,15 +36,12 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The things a pet can be given: what it carries, what happens when that is taken away
  * again, and the one thing it eats rather than carries.
  */
 @GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class SupplyGameTests {
     private static final String BATCH = "chiikawa_supply";
     private static final int STAND = 2;
@@ -72,7 +68,7 @@ public final class SupplyGameTests {
         for (Item item : BuiltInRegistries.ITEM) {
             ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
             if (id.getNamespace().equals(Constants.MOD_ID)) {
-                helper.assertTrue(listed.contains(item), id + " is not in the creative tab");
+                helper.assertTrue(listed.contains(item), Component.literal(id + " is not in the creative tab"));
             }
         }
         helper.succeed();
@@ -88,11 +84,11 @@ public final class SupplyGameTests {
             Set<String> written = new HashSet<>();
             LanguageData.addTranslations(locale, (key, value) -> written.add(key));
             ManualData.all().forEach((id, page) -> {
-                helper.assertTrue(written.contains(page.title()), locale + " has no " + page.title());
+                helper.assertTrue(written.contains(page.title()), Component.literal(locale + " has no " + page.title()));
                 page.panels().forEach(panel -> {
-                    helper.assertTrue(written.contains(panel.caption()), locale + " has no " + panel.caption());
+                    helper.assertTrue(written.contains(panel.caption()), Component.literal(locale + " has no " + panel.caption()));
                     panel.actors().forEach(actor -> actor.motion().say().ifPresent(say ->
-                        helper.assertTrue(written.contains(say), locale + " has no " + say)));
+                        helper.assertTrue(written.contains(say), Component.literal(locale + " has no " + say))));
                 });
             });
         }
@@ -108,12 +104,12 @@ public final class SupplyGameTests {
     public static void a_newcomer_is_handed_the_handbook(GameTestHelper helper) {
         ServerPlayer newcomer = player(helper);
         AdvancementHolder arrival = helper.getLevel().getServer().getAdvancements().get(ModAdvancementProvider.HANDBOOK);
-        helper.assertTrue(arrival != null, "there is no advancement to hand the handbook out");
+        helper.assertTrue(arrival != null, Component.literal("there is no advancement to hand the handbook out"));
 
         newcomer.getAdvancements().award(arrival, "arrived");
 
         helper.assertTrue(newcomer.getInventory().contains(new ItemStack(InitItems.HANDBOOK.get())),
-            "a newcomer arrived and was handed nothing");
+            Component.literal("a newcomer arrived and was handed nothing"));
         helper.succeed();
     }
 
@@ -125,13 +121,13 @@ public final class SupplyGameTests {
     public static void every_bag_adds_room(GameTestHelper helper) {
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
 
-        helper.assertFalse(pet.isWearingBag(), "a pet turned up already wearing a bag");
+        helper.assertFalse(pet.isWearingBag(), Component.literal("a pet turned up already wearing a bag"));
         for (Item bag : bags()) {
             pet.setItemSlot(EquipmentSlot.CHEST, new ItemStack(bag));
-            helper.assertTrue(pet.isWearingBag(), "a " + bag + " went on and the pet did not notice");
+            helper.assertTrue(pet.isWearingBag(), Component.literal("a " + bag + " went on and the pet did not notice"));
         }
         helper.assertTrue(pet.getBackpack().getContainerSize() == AbstractPet.FULL_BACKPACK_SIZE,
-            "the bag's slots are not there to be used");
+            Component.literal("the bag's slots are not there to be used"));
         helper.succeed();
     }
 
@@ -153,9 +149,9 @@ public final class SupplyGameTests {
         menu.clicked(AbstractPet.BAG_SLOT, 0, ClickType.PICKUP, owner);
 
         helper.assertTrue(pet.getItemBySlot(EquipmentSlot.CHEST).is(InitItems.STAR_POUCH.get()),
-            "the star pouch did not go on");
-        helper.assertTrue(menu.getCarried().is(InitItems.BACKPACK.get()), "the rucksack did not come off onto the cursor");
-        helper.assertTrue(pet.getBackpack().getItem(FIRST_BAG_SLOT).is(Items.CAKE), "the cake did not stay with the pet");
+            Component.literal("the star pouch did not go on"));
+        helper.assertTrue(menu.getCarried().is(InitItems.BACKPACK.get()), Component.literal("the rucksack did not come off onto the cursor"));
+        helper.assertTrue(pet.getBackpack().getItem(FIRST_BAG_SLOT).is(Items.CAKE), Component.literal("the cake did not stay with the pet"));
         helper.succeed();
     }
 
@@ -168,9 +164,9 @@ public final class SupplyGameTests {
         Slot bagSlot = new PetBackpackMenu(1, owner.getInventory(), pet).slots.get(AbstractPet.BAG_SLOT);
 
         for (Item bag : bags()) {
-            helper.assertTrue(bagSlot.mayPlace(new ItemStack(bag)), "the bag slot refused a " + bag);
+            helper.assertTrue(bagSlot.mayPlace(new ItemStack(bag)), Component.literal("the bag slot refused a " + bag));
         }
-        helper.assertFalse(bagSlot.mayPlace(new ItemStack(Items.CAKE)), "the bag slot took a cake");
+        helper.assertFalse(bagSlot.mayPlace(new ItemStack(Items.CAKE)), Component.literal("the bag slot took a cake"));
         helper.succeed();
     }
 
@@ -188,7 +184,7 @@ public final class SupplyGameTests {
         pet.dropBagContents();
 
         helper.assertTrue(pet.getBackpack().getItem(FIRST_BAG_SLOT).isEmpty(),
-            "the cake stayed in a bag nobody is wearing");
+            Component.literal("the cake stayed in a bag nobody is wearing"));
         helper.assertItemEntityPresent(Items.CAKE, new BlockPos(3, STAND, 3), 4.0);
         helper.succeed();
     }
@@ -200,7 +196,7 @@ public final class SupplyGameTests {
         pet.getBackpack().setItem(AbstractPet.BAG_SLOT, new ItemStack(InitItems.BACKPACK.get()));
 
         helper.assertTrue(pet.getItemBySlot(EquipmentSlot.CHEST).is(InitItems.BACKPACK.get()),
-            "a bag put in the bag slot is not what the pet is wearing");
+            Component.literal("a bag put in the bag slot is not what the pet is wearing"));
         helper.succeed();
     }
     /**
@@ -219,7 +215,7 @@ public final class SupplyGameTests {
         int withoutPet = new PetBackpackMenu(2, owner.getInventory()).slots.size();
 
         helper.assertTrue(withPet == withoutPet,
-            "the server lays out " + withPet + " slots and the client " + withoutPet);
+            Component.literal("the server lays out " + withPet + " slots and the client " + withoutPet));
         helper.succeed();
     }
 
@@ -237,11 +233,11 @@ public final class SupplyGameTests {
 
         menu.showSlots(false);
         helper.assertTrue(menu.slots.stream().noneMatch(net.minecraft.world.inventory.Slot::isActive),
-            "a slot stayed open on a page that does not show slots");
+            Component.literal("a slot stayed open on a page that does not show slots"));
 
         menu.showSlots(true);
-        helper.assertTrue(menu.slots.get(AbstractPet.MAINHAND_SLOT).isActive(), "the hand did not come back");
-        helper.assertTrue(menu.slots.get(menu.slots.size() - 1).isActive(), "the player's own hotbar did not come back");
+        helper.assertTrue(menu.slots.get(AbstractPet.MAINHAND_SLOT).isActive(), Component.literal("the hand did not come back"));
+        helper.assertTrue(menu.slots.get(menu.slots.size() - 1).isActive(), Component.literal("the player's own hotbar did not come back"));
         helper.succeed();
     }
 
@@ -259,11 +255,11 @@ public final class SupplyGameTests {
         owner.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(InitItems.SIMPLE_DISH.get(), 2));
         pet.mobInteract(owner, InteractionHand.MAIN_HAND);
 
-        helper.assertTrue(pet.isEager(), "a pet ate a whole dish and thought nothing of it");
+        helper.assertTrue(pet.isEager(), Component.literal("a pet ate a whole dish and thought nothing of it"));
         helper.assertTrue(pet.getAttributeValue(Attributes.MOVEMENT_SPEED) > plodding,
-            "an eager pet is no quicker about anything");
+            Component.literal("an eager pet is no quicker about anything"));
         helper.assertTrue(owner.getItemInHand(InteractionHand.MAIN_HAND).getCount() == 1,
-            "the dish was not eaten");
+            Component.literal("the dish was not eaten"));
         helper.succeed();
     }
 
@@ -280,7 +276,7 @@ public final class SupplyGameTests {
         pet.feedDish(DISH);
 
         helper.assertTrue(pet.getAttributeValue(Attributes.MOVEMENT_SPEED) == onDish,
-            "a second dish stacked on top of the first");
+            Component.literal("a second dish stacked on top of the first"));
         helper.succeed();
     }
 
@@ -292,9 +288,9 @@ public final class SupplyGameTests {
         pet.feedDish(SHORT_DISH);
 
         helper.succeedWhen(() -> {
-            helper.assertFalse(pet.isEager(), "the mood never wore off");
+            helper.assertFalse(pet.isEager(), Component.literal("the mood never wore off"));
             helper.assertTrue(pet.getAttributeValue(Attributes.MOVEMENT_SPEED) == plodding,
-                "the mood wore off and left the pet hurrying anyway");
+                Component.literal("the mood wore off and left the pet hurrying anyway"));
         });
     }
 
@@ -311,9 +307,9 @@ public final class SupplyGameTests {
         stranger.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(InitItems.SIMPLE_DISH.get()));
         pet.mobInteract(stranger, InteractionHand.MAIN_HAND);
 
-        helper.assertFalse(pet.isEager(), "somebody else's dish put the pet in the mood");
+        helper.assertFalse(pet.isEager(), Component.literal("somebody else's dish put the pet in the mood"));
         helper.assertTrue(stranger.getItemInHand(InteractionHand.MAIN_HAND).getCount() == 1,
-            "the dish was eaten by a pet that is not theirs");
+            Component.literal("the dish was eaten by a pet that is not theirs"));
         helper.succeed();
     }
 
@@ -330,12 +326,12 @@ public final class SupplyGameTests {
         PetBackpackMenu menu = new PetBackpackMenu(1, owner.getInventory(), pet);
 
         helper.assertFalse(menu.slots.get(FIRST_BAG_SLOT).isActive(),
-            "a pet with no bag had the bag's slots open");
+            Component.literal("a pet with no bag had the bag's slots open"));
 
         pet.setItemSlot(EquipmentSlot.CHEST, new ItemStack(InitItems.BACKPACK.get()));
 
         helper.assertTrue(menu.slots.get(FIRST_BAG_SLOT).isActive(),
-            "the bag went on and its slots stayed shut");
+            Component.literal("the bag went on and its slots stayed shut"));
         helper.succeed();
     }
 
