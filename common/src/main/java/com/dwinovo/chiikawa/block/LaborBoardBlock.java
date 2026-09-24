@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.block;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.network.BoardServerPacketHandler;
 import com.dwinovo.chiikawa.platform.Services;
+import com.mojang.serialization.MapCodec;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -36,6 +37,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * {@link LaborBoardBlockEntity}.
  */
 public class LaborBoardBlock extends BaseEntityBlock {
+    public static final MapCodec<LaborBoardBlock> CODEC = simpleCodec(LaborBoardBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     /**
      * Posts, board and the plates on it, which stand the same depth either side of the
@@ -53,6 +55,11 @@ public class LaborBoardBlock extends BaseEntityBlock {
     public LaborBoardBlock(Properties properties) {
         super(properties);
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
     }
 
     /**

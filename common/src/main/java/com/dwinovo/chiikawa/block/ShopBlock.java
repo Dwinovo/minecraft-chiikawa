@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.block;
 import com.dwinovo.chiikawa.network.ShopPayloads.PriceView;
 import com.dwinovo.chiikawa.network.ShopPayloads.ShopPricesPayload;
 import com.dwinovo.chiikawa.platform.Services;
+import com.mojang.serialization.MapCodec;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -38,6 +39,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * could walk through it would be serving itself from the wrong side.
  */
 public class ShopBlock extends BaseEntityBlock {
+    public static final MapCodec<ShopBlock> CODEC = simpleCodec(ShopBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     /** The stall up to its awning, the counter's top and the awning overhanging the customer's side. */
     private static final Map<Direction, VoxelShape> SHAPES = Map.of(
@@ -50,6 +52,11 @@ public class ShopBlock extends BaseEntityBlock {
     public ShopBlock(Properties properties) {
         super(properties);
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
     }
 
     @Override
