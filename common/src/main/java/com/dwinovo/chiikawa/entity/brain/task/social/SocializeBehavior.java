@@ -13,13 +13,16 @@ import com.dwinovo.chiikawa.social.PartPlayer;
 import com.dwinovo.chiikawa.social.PetInteraction;
 import com.dwinovo.chiikawa.social.SocialRules;
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.Consumable;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -161,7 +164,8 @@ public class SocializeBehavior extends Behavior<AbstractPet> {
             }
             // Eaten there and then, and worth what a snack from its owner is worth.
             partner.heal(PetInteractHandler.FEED_HEAL);
-            partner.playSound(partner.getEatingSound(treat), 1.0F, 1.0F);
+            Consumable eaten = treat.get(DataComponents.CONSUMABLE);
+            partner.playSound(eaten != null ? eaten.sound().value() : SoundEvents.GENERIC_EAT.value(), 1.0F, 1.0F);
         }
         if (interaction.partnerEagerTicks() > 0) {
             partner.feedDish(interaction.partnerEagerTicks());
