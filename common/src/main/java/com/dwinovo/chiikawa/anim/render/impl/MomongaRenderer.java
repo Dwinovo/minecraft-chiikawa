@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.anim.render.impl;
 
 import com.dwinovo.chiikawa.anim.render.ChiikawaEntityRenderer;
+import com.dwinovo.chiikawa.anim.render.ShownDuring;
 import com.dwinovo.chiikawa.anim.render.layer.BagLayer;
 import com.dwinovo.chiikawa.entity.impl.MomongaPet;
 import com.dwinovo.chiikawa.item.BagItem;
@@ -11,11 +12,17 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
  * shared {@code blink} loop, and the opening under its ω ({@code Mouth3}) shows only while
  * an {@code open_mouth} animation plays. Its big tail would fill a rucksack, so under one
  * it is tucked away, as Shisa's is.
+ *
+ * <p>Its faces: pleased with itself, eyes shut in arcs; hurt, a loud cry, eyes screwed up
+ * and tears running — not always a real one; brought back, all sweetness.
  */
 public class MomongaRenderer extends ChiikawaEntityRenderer<MomongaPet> {
     public MomongaRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, "momonga");
         addBoneVisibilityRule("Mouth3", (state, animCtx) -> isTalking(state));
         addBoneVisibilityRule("tail", (state, animCtx) -> BagLayer.wearOf(state) != BagItem.Wear.ON_BACK);
+        addBoneVisibilityRule("HappyEyes", ShownDuring.any("happy", "revive"));
+        addBoneVisibilityRule("CryEyes", ShownDuring.any("hurt"));
+        addBoneVisibilityRule("Tears", ShownDuring.any("hurt"));
     }
 }
