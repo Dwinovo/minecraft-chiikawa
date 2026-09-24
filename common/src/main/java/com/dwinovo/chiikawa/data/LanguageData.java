@@ -78,8 +78,9 @@ public final class LanguageData {
                 "獭师父玩偶",
                 "古本屋玩偶",
                 "乌萨奇的讨伐棒",
-                "小八的讨伐棒",
-                "吉伊的讨伐棒"
+                "小八的刺叉",
+                "吉伊的刺叉",
+                "獭师父的剑"
             );
             addMusicBoxTranslations(adder, "八音盒", "未选择歌曲", "歌曲：%s", "选择歌曲", "导入中", "导入失败", "没有可播放的歌曲",
                 "把 MP3 / WAV 文件放入文件夹后点击刷新", "部分歌曲导入失败", "请使用 MP3 格式的音频", "打开文件夹", "刷新", "上一页", "下一页");
@@ -255,9 +256,10 @@ public final class LanguageData {
                 "くりまんじゅうのぬいぐるみ",
                 "ラッコのぬいぐるみ",
                 "古本屋のぬいぐるみ",
-                "うさぎの討伐武器",
-                "ハチワレの討伐武器",
-                "ちいかわの討伐武器"
+                "うさぎの討伐棒",
+                "ハチワレのさすまた",
+                "ちいかわのさすまた",
+                "ラッコの剣"
             );
             addMusicBoxTranslations(adder, "オルゴール", "曲が選ばれていません", "曲：%s", "曲を選ぶ", "読み込み中", "読み込み失敗", "再生できる曲がありません",
                 "MP3・WAVファイルをフォルダに入れて、更新を押してください", "一部の曲を読み込めませんでした", "MP3形式の音声を使ってください", "フォルダを開く", "更新", "前のページ", "次のページ");
@@ -434,9 +436,10 @@ public final class LanguageData {
                 "Kurimanju Doll",
                 "Rakko Doll",
                 "Furuhonya Doll",
-                "Usagi Weapon",
-                "Hachiware Weapon",
-                "Chiikawa Weapon"
+                "Usagi's Subjugation Stick",
+                "Hachiware's Sasumata",
+                "Chiikawa's Sasumata",
+                "Rakko's Sword"
             );
             addMusicBoxTranslations(adder, "Music Box", "No song selected", "Song: %s", "Choose Song", "Importing", "Failed", "No playable songs",
                 "Put MP3 / WAV files in the folder, then reload", "Some songs failed to import", "Please use MP3 audio files", "Open Folder", "Reload", "Previous page", "Next page");
@@ -897,7 +900,7 @@ public final class LanguageData {
         String shisaEgg, String momongaEgg, String kurimanjuEgg, String rakkoEgg, String furuhonyaEgg,
         String usagiDoll, String hachiwareDoll, String chiikawaDoll,
         String shisaDoll, String momongaDoll, String kurimanjuDoll, String rakkoDoll, String furuhonyaDoll,
-        String usagiWeapon, String hachiwareWeapon, String chiikawaWeapon) {
+        String usagiWeapon, String hachiwareWeapon, String chiikawaWeapon, String rakkoSword) {
         adder.add("item.chiikawa.usagi_spawn_egg", usagiEgg);
         adder.add("item.chiikawa.hachiware_spawn_egg", hachiwareEgg);
         adder.add("item.chiikawa.chiikawa_spawn_egg", chiikawaEgg);
@@ -917,6 +920,7 @@ public final class LanguageData {
         adder.add("item.chiikawa.usagi_weapon", usagiWeapon);
         adder.add("item.chiikawa.hachiware_weapon", hachiwareWeapon);
         adder.add("item.chiikawa.chiikawa_weapon", chiikawaWeapon);
+        adder.add("item.chiikawa.rakko_sword", rakkoSword);
     }
 
     private static void addMusicBoxTranslations(
