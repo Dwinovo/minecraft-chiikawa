@@ -325,6 +325,15 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         return false;
     }
 
+    /**
+     * Visibility-rule helper: whether the pet is talking, i.e. one of the
+     * {@code open_mouth} animations is playing. A face whose mouth opens as
+     * Chiikawa's does shows its opening ({@code Mouth3}) only then.
+     */
+    public static boolean isTalking(ChiikawaRenderState state) {
+        return isAnyControllerPlaying(state, "open_mouth1") || isAnyControllerPlaying(state, "open_mouth2");
+    }
+
     private void fillRenderState(T entity, ChiikawaRenderState state, float partialTick) {
         state.modelKey = modelKey;
         state.texture = textureLocation;
