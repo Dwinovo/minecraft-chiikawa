@@ -37,7 +37,7 @@ public final class SpeechBubbleRenderer {
 
     /** Takes down what the pet is saying this frame, if anything, into its render state. */
     public void extract(AbstractPet pet, ChiikawaRenderState state, float partialTick) {
-        if (Minecraft.getInstance().options.hideGui) {
+        if (Minecraft.getInstance().gui.hud.isHidden()) {
             return;
         }
         pet.getSpeech().ifPresent(speech -> {
