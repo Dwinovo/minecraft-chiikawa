@@ -41,6 +41,7 @@ public class ForgeDataGenerators {
         // Recipe provider
         generator.addProvider(event.includeServer(), new ModRecipeProvider(output));
         generator.addProvider(event.includeServer(), new PetPersonalityProvider(output));
+        generator.addProvider(event.includeServer(), new PetVoiceProvider(output));
         generator.addProvider(event.includeServer(), new PetTaskTypeProvider(output));
         generator.addProvider(event.includeServer(), new GameTestStructureProvider(output));
         generator.addProvider(event.includeServer(), new ShopCatalogProvider(output));

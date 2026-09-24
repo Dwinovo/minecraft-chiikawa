@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSwitchLog;
 import com.dwinovo.chiikawa.entity.brain.intent.RunningIntent;
 import com.dwinovo.chiikawa.platform.Services;
+import com.dwinovo.chiikawa.voice.PetSpeech;
 import java.util.Optional;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
@@ -116,6 +117,14 @@ public final class InitMemory {
         Services.REGISTRY.<MemoryModuleType<IntentSwitchLog>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
             new ResourceLocation(Constants.MOD_ID, "intent_switch_log"),
+            () -> new MemoryModuleType<>(Optional.empty())
+        );
+
+    /** What the pet last said out loud and when; see {@link PetSpeech}. */
+    public static final Supplier<MemoryModuleType<PetSpeech.Said>> LAST_SAID =
+        Services.REGISTRY.<MemoryModuleType<PetSpeech.Said>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "last_said"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
