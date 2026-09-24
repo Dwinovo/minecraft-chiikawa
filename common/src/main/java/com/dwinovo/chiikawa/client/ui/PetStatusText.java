@@ -1,16 +1,13 @@
 package com.dwinovo.chiikawa.client.ui;
 
-import com.dwinovo.chiikawa.client.ui.mc.ItemIcon;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.task.PetTask;
-import com.dwinovo.chiikawa.ui.widget.Chip;
-import java.util.Optional;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
 /**
- * What a pet is doing, in words. One place builds these, so the backpack screen, the label
- * over a pet's head and the labor board all say the same thing about the same pet.
+ * What a pet is doing, in words. One place builds these, so the backpack screen and the
+ * labor board say the same thing about the same pet.
  *
  * <p>Short by design: each of these is read beside an icon, a bar or a badge that already
  * carries half the meaning. The sentences that used to be here — "Doing: X", "Slip: Y
@@ -30,24 +27,6 @@ public final class PetStatusText {
             .map(PetStatusText::intentName)
             .or(() -> pet.getTask().map(task -> taskName(task.type())))
             .orElseGet(() -> Component.translatable("screen.chiikawa.pet.doing.nothing"));
-    }
-
-    /**
-     * The card that floats over a pet's head: what the work is, what the pet is at, and how
-     * far along.
-     *
-     * @return nothing while the pet is idle and carries no slip, so a pet with nothing to
-     *         report says nothing rather than saying "idle" over and over
-     */
-    public static Optional<Chip> chip(AbstractPet pet) {
-        Optional<PetTask> task = pet.getTask();
-        if (pet.getIntent().isEmpty() && task.isEmpty()) {
-            return Optional.empty();
-        }
-        String text = activity(pet).getString();
-        return Optional.of(task
-            .map(slip -> Chip.working(ItemIcon.of(slip.icon()), text, slip.progress(), slip.target()))
-            .orElseGet(() -> Chip.of(text)));
     }
 
     /** How far along a slip is, as a count. Numbers read the same in every language. */
