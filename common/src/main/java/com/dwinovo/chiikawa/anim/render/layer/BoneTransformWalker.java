@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.anim.render.layer;
 
 import com.dwinovo.chiikawa.anim.baked.BakedBone;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
+import com.dwinovo.chiikawa.anim.render.BedrockRotation;
 import com.dwinovo.chiikawa.anim.runtime.PoseSampler;
 import com.mojang.blaze3d.vertex.PoseStack;
 import org.joml.Quaternionf;
@@ -89,7 +90,7 @@ public final class BoneTransformWalker {
             // geometry hangs at the pivot rather than absolute zero.
             poseStack.translate(bone.pivotX + dPosX, bone.pivotY + dPosY, bone.pivotZ + dPosZ);
             if (hasRot) {
-                rotBuf.identity().rotationXYZ(rotX, rotY, rotZ);
+                BedrockRotation.of(rotBuf, rotX, rotY, rotZ);
                 poseStack.last().rotate(rotBuf);
             }
             if (hasScale) {
@@ -104,7 +105,7 @@ public final class BoneTransformWalker {
         if (hasRot || hasScale) {
             poseStack.translate(bone.pivotX + dPosX, bone.pivotY + dPosY, bone.pivotZ + dPosZ);
             if (hasRot) {
-                rotBuf.identity().rotationXYZ(rotX, rotY, rotZ);
+                BedrockRotation.of(rotBuf, rotX, rotY, rotZ);
                 poseStack.last().rotate(rotBuf);
             }
             if (hasScale) {
