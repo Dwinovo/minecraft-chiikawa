@@ -96,7 +96,9 @@ public final class PetConstraints {
         return switch (category) {
             case FOLLOW_OWNER -> !wild && directive == PetDirective.FOLLOW;
             case STAY -> !wild && directive == PetDirective.STAY;
-            case WANDER, TAKE_TASK -> wild || directive != PetDirective.STAY;
+            // Meeting other pets goes wherever wandering does: at heel it happens around the
+            // owner's feet, since the follow anchor calls the pet back before it gets far.
+            case WANDER, TAKE_TASK, SOCIAL -> wild || directive != PetDirective.STAY;
             // Giving goes wherever the pet may walk: a pet at heel hands its present over
             // on the way, one left to itself brings it back. A pet told to sit sits, and
             // gives it to whoever comes to collect it.
