@@ -23,6 +23,7 @@ import com.dwinovo.chiikawa.entity.PetRecall;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalityLoader;
 import com.dwinovo.chiikawa.platform.FabricReloadListeners;
 import com.dwinovo.chiikawa.shop.ShopCatalogLoader;
+import com.dwinovo.chiikawa.social.PetInteractionLoader;
 import com.dwinovo.chiikawa.spawn.FabricPetSpawns;
 import com.dwinovo.chiikawa.spawn.PetSpawnLoader;
 import com.dwinovo.chiikawa.task.BoardLevelsLoader;
@@ -81,6 +82,7 @@ public class ChiikawaFabricMod implements ModInitializer {
         FabricReloadListeners.register(PackType.SERVER_DATA, BoardLevelsLoader.ID, new BoardLevelsLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, PetSpawnLoader.ID, new PetSpawnLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, PetVoiceLoader.ID, new PetVoiceLoader());
+        FabricReloadListeners.register(PackType.SERVER_DATA, PetInteractionLoader.ID, new PetInteractionLoader());
         ServerTickEvents.END_SERVER_TICK.register(PetReviveRitualManager::tickServer);
         ServerTickEvents.END_SERVER_TICK.register(ServerMusicSystem::tickServer);
         ServerTickEvents.END_SERVER_TICK.register(PetFollowKeeper::tickServer);
