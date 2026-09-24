@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.gametest;
 
+import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.NOON;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.holding;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
@@ -10,8 +11,6 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -20,8 +19,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * How a pet and a person come to belong together: feeding one until it trusts you, it
@@ -64,7 +61,7 @@ public final class CareGameTests {
         helper.assertTrue(pet.isTame(), "a wild pet ate " + COOKIES + " cookies and still would not be tamed");
         // By name on the tag, not by the owner standing there: this one never entered the
         // world, and a pet asked who its owner is looks them up among the players present.
-        helper.assertTrue(player.getUUID().equals(pet.getOwnerUUID()), "the pet was tamed by somebody else");
+        helper.assertTrue(player.getUUID().equals(PetTargeting.ownerId(pet)), "the pet was tamed by somebody else");
         helper.assertTrue(pet.getPetDirective() == PetDirective.FOLLOW,
             "a freshly tamed pet did not come to heel");
         helper.succeed();

@@ -16,7 +16,7 @@ import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Writes the in-game cases' floors to {@code data/chiikawa/structure/<id>.nbt}.
@@ -46,7 +46,7 @@ public final class GameTestStructureProvider implements DataProvider {
             .toArray(CompletableFuture[]::new));
     }
 
-    private CompletableFuture<?> save(CachedOutput cache, ResourceLocation id, Vec3i size) {
+    private CompletableFuture<?> save(CachedOutput cache, Identifier id, Vec3i size) {
         byte[] bytes = compressed(floor(size));
         return CompletableFuture.runAsync(() -> {
             try {
@@ -57,23 +57,30 @@ public final class GameTestStructureProvider implements DataProvider {
         });
     }
 
-    /** A structure of the size asked for, solid along its bottom and empty above. */
+    /**
+     * A structure of the size asked for, solid along its bottom and empty above, on one more
+     * layer of ground. The game counts a case's blocks from the corner of its structure; it
+     * used to count them from the structure block under that corner, and the cases are
+     * written that way, standing on a floor at y 1. The layer beneath puts the floor there.
+     */
     private static CompoundTag floor(Vec3i size) {
         CompoundTag structure = new CompoundTag();
-        structure.putInt("DataVersion", SharedConstants.getCurrentVersion().getDataVersion().getVersion());
-        structure.put("size", intList(size.getX(), size.getY(), size.getZ()));
+        structure.putInt("DataVersion", SharedConstants.getCurrentVersion().dataVersion().version());
+        structure.put("size", intList(size.getX(), size.getY() + 1, size.getZ()));
 
         ListTag palette = new ListTag();
         palette.add(NbtUtils.writeBlockState(GameTestStructureData.GROUND));
         structure.put("palette", palette);
 
         ListTag blocks = new ListTag();
-        for (int x = 0; x < size.getX(); x++) {
-            for (int z = 0; z < size.getZ(); z++) {
-                CompoundTag block = new CompoundTag();
-                block.put("pos", intList(x, 0, z));
-                block.putInt("state", 0);
-                blocks.add(block);
+        for (int y = 0; y <= 1; y++) {
+            for (int x = 0; x < size.getX(); x++) {
+                for (int z = 0; z < size.getZ(); z++) {
+                    CompoundTag block = new CompoundTag();
+                    block.put("pos", intList(x, y, z));
+                    block.putInt("state", 0);
+                    blocks.add(block);
+                }
             }
         }
         structure.put("blocks", blocks);
@@ -105,7 +112,7 @@ public final class GameTestStructureProvider implements DataProvider {
     }
 
     /** @return the floors this writes, for a loader that wants to log or check them */
-    public static Map<ResourceLocation, Vec3i> floors() {
+    public static Map<Identifier, Vec3i> floors() {
         return GameTestStructureData.all();
     }
 }

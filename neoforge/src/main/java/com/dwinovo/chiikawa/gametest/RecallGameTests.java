@@ -15,8 +15,6 @@ import com.dwinovo.chiikawa.init.InitItems;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,10 +23,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The bell, and the note of where each pet was that lets it ring for one nobody has
@@ -99,8 +95,8 @@ public final class RecallGameTests {
         ServerPlayer owner = owner(helper);
         AbstractPet pet = pet(helper, owner);
         UUID id = pet.getUUID();
-        Entity moved = pet.changeDimension(new DimensionTransition(nether, new Vec3(8.5, 70.0, 8.5), Vec3.ZERO,
-            0.0F, 0.0F, DimensionTransition.DO_NOTHING));
+        Entity moved = pet.teleport(new TeleportTransition(nether, new Vec3(8.5, 70.0, 8.5), Vec3.ZERO,
+            0.0F, 0.0F, TeleportTransition.DO_NOTHING));
         helper.assertTrue(moved instanceof AbstractPet, "the pet would not go to the nether to begin with");
 
         PetRecall.ring(owner);
@@ -182,7 +178,7 @@ public final class RecallGameTests {
 
         bell.use(helper.getLevel(), owner, InteractionHand.MAIN_HAND);
 
-        helper.assertTrue(owner.getCooldowns().isOnCooldown(InitItems.PET_BELL.get()),
+        helper.assertTrue(owner.getCooldowns().isOnCooldown(new ItemStack(InitItems.PET_BELL.get())),
             "the bell can be rung again on the next tick");
         helper.assertTrue(owner.getItemInHand(InteractionHand.MAIN_HAND).getCount() == 1,
             "ringing the bell used it up");
