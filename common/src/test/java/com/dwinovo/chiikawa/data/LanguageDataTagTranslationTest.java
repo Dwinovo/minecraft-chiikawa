@@ -18,18 +18,12 @@ class LanguageDataTagTranslationTest {
     };
 
     @Test
-    void englishLocaleIncludesItemTagTranslations() {
-        Map<String, String> translations = collect("en_us");
-        for (String key : ITEM_TAG_KEYS) {
-            assertTrue(translations.containsKey(key), () -> "missing translation key: " + key);
-        }
-    }
-
-    @Test
-    void chineseLocaleIncludesItemTagTranslations() {
-        Map<String, String> translations = collect("zh_cn");
-        for (String key : ITEM_TAG_KEYS) {
-            assertTrue(translations.containsKey(key), () -> "missing translation key: " + key);
+    void everyLocaleIncludesItemTagTranslations() {
+        for (String locale : LanguageData.LOCALES) {
+            Map<String, String> translations = collect(locale);
+            for (String key : ITEM_TAG_KEYS) {
+                assertTrue(translations.containsKey(key), () -> locale + " is missing " + key);
+            }
         }
     }
 
