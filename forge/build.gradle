@@ -50,9 +50,25 @@ minecraft {
     }
 }
 
+// Vanilla lays the GameTest floors at y=-60, the top of the superflat world its own test
+// server makes. Forge 1.20.1 starts that server on the world server.properties describes,
+// a normal one by default, which puts every case in a pocket dug deep underground: no sky,
+// and water and gravel breaking in from the caves around it. So the run is handed the flat
+// world vanilla means, made afresh each time so nothing from the last run is still about.
+tasks.matching { it.name == 'runGameTestServer' }.configureEach {
+    doFirst {
+        def runDir = file('runs/gametestserver')
+        delete new File(runDir, 'world')
+        runDir.mkdirs()
+        new File(runDir, 'server.properties').text = 'level-type=minecraft\\:flat\n'
+    }
+}
+
 mixin {
     add sourceSets.main, "${mod_id}.refmap.json"
     config "${mod_id}.mixins.json"
+    // The GameTest harness's own: later versions' behaviour for a passed case (see GameTestInfoMixin).
+    config "${mod_id}.gametest.mixins.json"
 }
 
 sourceSets.main.resources.srcDir 'src/generated/resources'
@@ -96,6 +112,6 @@ dependencies {
 jar {
     finalizedBy('reobfJar')
     manifest.attributes([
-            "MixinConfigs": "${mod_id}.mixins.json"
+            "MixinConfigs": "${mod_id}.mixins.json,${mod_id}.gametest.mixins.json"
     ])
 }
