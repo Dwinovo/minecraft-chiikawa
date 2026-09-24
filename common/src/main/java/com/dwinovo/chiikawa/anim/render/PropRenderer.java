@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
@@ -28,15 +29,22 @@ import org.jspecify.annotations.Nullable;
  * ({@link com.dwinovo.chiikawa.anim.render.layer.BagLayer}), standing in the world, and as
  * an item. As an item it is put where vanilla would put one of its own of the same kind:
  * a block's item with {@code block/block}'s transforms, standing on the floor of its block;
- * anything else with {@code item/generated}'s, turned to face the way a sprite does and
- * sized to fill as much of a slot as a sprite does. The transforms are its item model's,
- * which the game applies before handing it over; see {@code PropItemModelProvider}.
+ * a sword or a tool with {@code item/handheld}'s, laid corner to corner as a sword's sprite
+ * is drawn; anything else with {@code item/generated}'s. Either of the last two is turned to
+ * face the way a sprite does and sized to fill as much of a slot as a sprite does. The
+ * transforms are its item model's, which the game applies before handing it over; see
+ * {@code PropItemModelProvider}.
+ *
+ * <p>A sword or a tool is modelled standing up, the end it is held by at the bottom and its
+ * front towards {@code -Z} like any prop's.
  */
 public final class PropRenderer {
     /** A sprite's fourteen pixels of the sixteen, in blocks. */
     private static final float ITEM_SPAN = 14.0F / 16.0F;
     private static final float PIXEL = 1.0F / 16.0F;
     private static final ModelRenderer MESH = new ModelRenderer();
+    /** How far a sword's sprite leans: its blade runs from the bottom left corner to the top right. */
+    private static final float HANDHELD_LEAN = 45.0F;
 
     private PropRenderer() {
     }
@@ -78,16 +86,36 @@ public final class PropRenderer {
             pose.translate(0.0F, -0.5F, 0.0F);
             pose.scale(PIXEL, PIXEL, PIXEL);
         } else {
-            // A sprite shows its south face; a prop's face is on its north.
-            pose.mulPose(Axis.YP.rotationDegrees(180.0F));
-            fitToSprite(model, pose);
+            intoSprite(model, isHandheld(item) ? HANDHELD_LEAN : 0.0F, pose);
         }
         draw(id, model, pose, collector, light, overlay, bone -> true, null);
         pose.popPose();
     }
 
-    /** Scales and centres the model to span what a sprite spans. */
-    private static void fitToSprite(BakedModel model, PoseStack pose) {
+    /**
+     * Whether a prop's item is held as vanilla holds its swords and its tools, which vanilla
+     * draws with its handheld model: an item that comes with a tool's rules for mining, as
+     * every sword and tool does.
+     */
+    public static boolean isHandheld(Item item) {
+        return item.components().has(DataComponents.TOOL);
+    }
+
+    /**
+     * From a flat item's frame to the model's: facing the way a sprite faces, leaning
+     * {@code lean} degrees clockwise as the viewer sees it, and scaled and centred so that,
+     * leaning so, it spans what a sprite spans.
+     */
+    static void intoSprite(BakedModel model, float lean, PoseStack pose) {
+        // A sprite shows its south face; a prop's face is on its north.
+        pose.mulPose(Axis.YP.rotationDegrees(180.0F));
+        // Anticlockwise about the model's Z, which the viewer, on its other side, sees as clockwise.
+        pose.mulPose(Axis.ZP.rotationDegrees(lean));
+        fitToSprite(model, lean, pose);
+    }
+
+    /** Scales and centres the model to span what a sprite spans, leaning {@code lean} degrees. */
+    private static void fitToSprite(BakedModel model, float lean, PoseStack pose) {
         float minX = Float.MAX_VALUE, minY = Float.MAX_VALUE, minZ = Float.MAX_VALUE;
         float maxX = -Float.MAX_VALUE, maxY = -Float.MAX_VALUE, maxZ = -Float.MAX_VALUE;
         for (BakedCube cube : model.cubes) {
@@ -98,7 +126,12 @@ public final class PropRenderer {
             maxY = Math.max(maxY, cube.maxY);
             maxZ = Math.max(maxZ, cube.maxZ);
         }
-        float fit = ITEM_SPAN / Math.max(maxX - minX, maxY - minY);
+        float cos = (float) Math.abs(Math.cos(Math.toRadians(lean)));
+        float sin = (float) Math.abs(Math.sin(Math.toRadians(lean)));
+        float width = maxX - minX;
+        float height = maxY - minY;
+        // How wide and how tall the model stands once it leans.
+        float fit = ITEM_SPAN / Math.max(width * cos + height * sin, width * sin + height * cos);
         pose.scale(fit, fit, fit);
         pose.translate(-(minX + maxX) / 2.0F, -(minY + maxY) / 2.0F, -(minZ + maxZ) / 2.0F);
     }

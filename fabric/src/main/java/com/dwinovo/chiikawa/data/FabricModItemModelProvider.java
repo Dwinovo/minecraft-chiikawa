@@ -27,12 +27,8 @@ public class FabricModItemModelProvider extends FabricModelProvider {
         itemModelGenerator.generateFlatItem(InitItems.SIMPLE_DISH.get(), ModelTemplates.FLAT_ITEM);
         itemModelGenerator.generateFlatItem(InitItems.PET_BELL.get(), ModelTemplates.FLAT_ITEM);
 
-        // Weapons use custom Blockbench models under resources.
-        itemModelGenerator.declareCustomModelItem(InitItems.USAGI_WEAPON.get());
-        itemModelGenerator.declareCustomModelItem(InitItems.HACHIWARE_WEAPON.get());
-        itemModelGenerator.declareCustomModelItem(InitItems.CHIIKAWA_WEAPON.get());
         itemModelGenerator.generateFlatItem(InitItems.MUSIC_BOX.get(), ModelTemplates.FLAT_ITEM);
-        // The props' item models come from PropItemModelProvider, shared with NeoForge.
+        // The props' item models, the weapons' among them, come from PropItemModelProvider, shared with NeoForge.
         PropItemModelProvider.generate(itemModelGenerator.itemModelOutput, itemModelGenerator.modelOutput);
     }
 

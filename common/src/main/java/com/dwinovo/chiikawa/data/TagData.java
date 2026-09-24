@@ -64,7 +64,8 @@ public final class TagData {
             .add(key(Items.WOODEN_SWORD), key(Items.STONE_SWORD), key(Items.IRON_SWORD), key(Items.GOLDEN_SWORD), key(Items.DIAMOND_SWORD), key(Items.NETHERITE_SWORD))
             .add(key(InitItems.USAGI_WEAPON.get()))
             .add(key(InitItems.HACHIWARE_WEAPON.get()))
-            .add(key(InitItems.CHIIKAWA_WEAPON.get()));
+            .add(key(InitItems.CHIIKAWA_WEAPON.get()))
+            .add(key(InitItems.RAKKO_SWORD.get()));
         tags.tag(InitTag.ENTITY_ARCHER_TOOLS)
             .add(key(Items.BOW));
         tags.tag(InitTag.ENTITY_MUSICIAN_TOOLS)

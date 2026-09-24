@@ -19,14 +19,10 @@ public final class ModItemModelProvider extends ModelProvider {
         generateSpawnEggs(itemModels);
         generateDolls(itemModels);
 
-        // Weapons use custom Blockbench models under resources.
-        itemModels.declareCustomModelItem(InitItems.USAGI_WEAPON.get());
-        itemModels.declareCustomModelItem(InitItems.HACHIWARE_WEAPON.get());
-        itemModels.declareCustomModelItem(InitItems.CHIIKAWA_WEAPON.get());
         itemModels.generateFlatItem(InitItems.MUSIC_BOX.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(InitItems.SIMPLE_DISH.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(InitItems.PET_BELL.get(), ModelTemplates.FLAT_ITEM);
-        // The props' item models come from PropItemModelProvider, shared with Fabric.
+        // The props' item models, the weapons' among them, come from PropItemModelProvider, shared with Fabric.
         PropItemModelProvider.generate(itemModels.itemModelOutput, itemModels.modelOutput);
         // The blocks' states and models are shared with Fabric.
         ModBlockModelProvider.generate(blockModels);
