@@ -8,6 +8,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.random.Weighted;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 
@@ -23,10 +24,10 @@ import net.minecraft.world.level.biome.MobSpawnSettings;
  * @param biomes where these spawn
  * @param spawners who spawns there; each goes in its own mob category
  */
-public record PetSpawn(List<ExtraCodecs.TagOrElementLocation> biomes, List<MobSpawnSettings.SpawnerData> spawners) {
+public record PetSpawn(List<ExtraCodecs.TagOrElementLocation> biomes, List<Weighted<MobSpawnSettings.SpawnerData>> spawners) {
     public static final Codec<PetSpawn> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         ExtraCodecs.TAG_OR_ELEMENT_ID.listOf().fieldOf("biomes").forGetter(PetSpawn::biomes),
-        MobSpawnSettings.SpawnerData.CODEC.listOf().fieldOf("spawners").forGetter(PetSpawn::spawners)
+        Weighted.codec(MobSpawnSettings.SpawnerData.CODEC).listOf().fieldOf("spawners").forGetter(PetSpawn::spawners)
     ).apply(instance, PetSpawn::new));
 
     public PetSpawn {
