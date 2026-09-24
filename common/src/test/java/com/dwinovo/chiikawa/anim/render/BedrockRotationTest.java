@@ -28,4 +28,20 @@ class BedrockRotationTest {
         assertEquals(want.y, got.y, 1.0e-5f);
         assertEquals(want.z, got.z, 1.0e-5f);
     }
+
+    @Test
+    void theAnglesComeBackAsTheyWent() {
+        float[][] cases = {{-20, -40, 0}, {35, 70, -15}, {-60, 10, 45}, {89, -30, 20}, {0, 0, 0}};
+        for (float[] c : cases) {
+            Quaternionf turn = BedrockRotation.of(new Quaternionf(), c[0] * DEG, c[1] * DEG, c[2] * DEG);
+            Vector3f back = BedrockRotation.angles(turn, new Vector3f());
+            Quaternionf again = BedrockRotation.of(new Quaternionf(), back.x, back.y, back.z);
+            Vector3f point = new Vector3f(0.3f, 0.7f, -0.5f);
+            Vector3f a = turn.transform(new Vector3f(point));
+            Vector3f b = again.transform(new Vector3f(point));
+            assertEquals(a.x, b.x, 1.0e-4f, () -> java.util.Arrays.toString(c));
+            assertEquals(a.y, b.y, 1.0e-4f, () -> java.util.Arrays.toString(c));
+            assertEquals(a.z, b.z, 1.0e-4f, () -> java.util.Arrays.toString(c));
+        }
+    }
 }
