@@ -1,7 +1,6 @@
 package com.dwinovo.chiikawa.network;
 
 import com.dwinovo.chiikawa.Constants;
-import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -37,13 +36,7 @@ public final class ShopPayloads {
     /** Opens the shop screen with what this counter deals in today. */
     public record ShopPricesPayload(BlockPos shop, List<PriceView> prices) implements MusicPayloads.Payload {
         public static ShopPricesPayload read(FriendlyByteBuf buffer) {
-            BlockPos shop = buffer.readBlockPos();
-            int size = buffer.readVarInt();
-            List<PriceView> prices = new ArrayList<>(size);
-            for (int i = 0; i < size; i++) {
-                prices.add(PriceView.read(buffer));
-            }
-            return new ShopPricesPayload(shop, prices);
+            return new ShopPricesPayload(buffer.readBlockPos(), buffer.readList(PriceView::read));
         }
 
         @Override
@@ -54,10 +47,7 @@ public final class ShopPayloads {
         @Override
         public void write(FriendlyByteBuf buffer) {
             buffer.writeBlockPos(shop);
-            buffer.writeVarInt(prices.size());
-            for (PriceView price : prices) {
-                price.write(buffer);
-            }
+            buffer.writeCollection(prices, (buf, price) -> price.write(buf));
         }
     }
 
