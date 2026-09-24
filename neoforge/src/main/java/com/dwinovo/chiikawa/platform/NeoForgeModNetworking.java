@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.platform;
 import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
 import com.dwinovo.chiikawa.client.manual.ClientManualPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
+import com.dwinovo.chiikawa.client.pet.ClientPetPacketHandler;
 import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.client.voice.ClientVoicePacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
@@ -66,6 +67,8 @@ public final class NeoForgeModNetworking {
             });
         registrar.playToClient(VoicePayloads.PetSpeechPayload.TYPE, VoicePayloads.PetSpeechPayload.STREAM_CODEC,
             (payload, context) -> ClientVoicePacketHandler.handleSpeech(payload));
+        registrar.playToClient(PetPayloads.PetGesturePayload.TYPE, PetPayloads.PetGesturePayload.STREAM_CODEC,
+            (payload, context) -> ClientPetPacketHandler.handleGesture(payload));
     }
 
     public static void registerClientPayloads(RegisterClientPayloadHandlersEvent event) {

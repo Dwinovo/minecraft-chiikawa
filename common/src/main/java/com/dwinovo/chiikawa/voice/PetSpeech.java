@@ -7,7 +7,6 @@ import com.dwinovo.chiikawa.platform.Services;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 
 /**
  * A pet saying something out loud (design 0.1.1, section 3). The server decides whether it
@@ -48,14 +47,8 @@ public final class PetSpeech {
             return Optional.empty();
         }
         pet.getBrain().setMemory(InitMemory.LAST_SAID.get(), new Said(line.get(), now, voice.talkTicks()));
-        PetSpeechPayload payload = new PetSpeechPayload(pet.getId(), line.get(), voice.talkTicks());
-        // Sent as the game sends a sound: to every player near enough to hear it.
-        for (ServerPlayer player : level.players()) {
-            if (player.distanceToSqr(pet) <= range * range
-                    && Services.NETWORK.canReceive(player, PetSpeechPayload.TYPE)) {
-                Services.NETWORK.sendToClient(player, payload);
-            }
-        }
+        Services.NETWORK.sendToPlayersNear(level, pet.position(), range,
+            new PetSpeechPayload(pet.getId(), line.get(), voice.talkTicks()));
         return line;
     }
 

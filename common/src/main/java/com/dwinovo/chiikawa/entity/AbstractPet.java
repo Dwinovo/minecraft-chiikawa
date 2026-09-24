@@ -990,8 +990,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     /**
      * Plays the first of these animations this pet has, once, on the action layer: for a
-     * picture that asks for a move by name, since which moves there are differs from pet
-     * to pet. Client side.
+     * picture that asks for a move by name, and for a move the server names by data (see
+     * {@link PetGesture}), since which moves there are differs from pet to pet. Client side.
      *
      * @return whether the pet had any of them
      */
