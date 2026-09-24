@@ -7,11 +7,10 @@ name: Publish
 #   版本号  gradle.properties 的 version——游戏里显示的也是它
 #   loader  ./gradlew releaseJars 产出的 build/release/<loader>/,一个 loader 一个 jar
 #
-# 三段:
+# 两段:
 #   build    构建一次 → 打 tag v<版本>-<MC>[-<渠道>],把这个版本钉在这个提交上
 #   upload   每个 loader 一路,传 Modrinth 与 CurseForge
-#   release  所有 loader 都上架之后,建 GitHub Release
-# 三段用的是同一次构建的产物。
+# 两段用的是同一次构建的产物。玩家从 Modrinth 和 CurseForge 下载,GitHub 上不建 Release。
 #
 # 中途失败了,在这次运行的页面点 "Re-run failed jobs"——只重跑失败的那几路,发出去的不会重发。
 # 别重新点 Run workflow:tag 已经打上,会被当成"这个版本发过了"拒掉。
@@ -25,7 +24,7 @@ on:
         default: beta
 
 permissions:
-  contents: write # 打 tag、建 GitHub Release
+  contents: write # 打 tag
   actions: read # 查这个提交的 Build 是不是绿的
 
 # 同一条分支同一时刻只跑一次发版;不同分支互不相干。
@@ -202,29 +201,3 @@ jobs:
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           curseforge-id: 1106419
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-
-  release:
-    needs: [build, upload]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: release
-          path: build
-
-      - name: Create GitHub Release
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ needs.build.outputs.tag }}
-          VERSION: ${{ needs.build.outputs.version }}
-          MC: ${{ needs.build.outputs.mc }}
-          CHANNEL: ${{ inputs.channel }}
-        run: |
-          set -euo pipefail
-          flags=()
-          [ "$CHANNEL" = release ] || flags+=(--prerelease)
-          gh release create "$TAG" build/release/*/*.jar \
-            --repo "$GITHUB_REPOSITORY" --verify-tag \
-            --title "Chiikawa ${VERSION}-${CHANNEL} (MC ${MC})" \
-            --notes-file build/changelog.md "${flags[@]}"
