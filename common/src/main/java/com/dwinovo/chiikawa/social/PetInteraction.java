@@ -64,10 +64,10 @@ public record PetInteraction(
     public static final Codec<PetInteraction> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         ExtraCodecs.nonEmptyList(Side.CODEC.listOf()).fieldOf("initiators").forGetter(PetInteraction::initiators),
         ExtraCodecs.nonEmptyList(Side.CODEC.listOf()).fieldOf("partners").forGetter(PetInteraction::partners),
-        PartnerState.CODEC.optionalFieldOf("partner_state", PartnerState.IDLE).forGetter(PetInteraction::partnerState),
-        SlipCondition.CODEC.optionalFieldOf("partner_finished").forGetter(PetInteraction::partnerFinished),
-        ExtraCodecs.TAG_OR_ELEMENT_ID.optionalFieldOf("hands_over").forGetter(PetInteraction::handsOver),
-        ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("partner_eager_ticks", 0).forGetter(PetInteraction::partnerEagerTicks),
+        ExtraCodecs.strictOptionalField(PartnerState.CODEC, "partner_state", PartnerState.IDLE).forGetter(PetInteraction::partnerState),
+        ExtraCodecs.strictOptionalField(SlipCondition.CODEC, "partner_finished").forGetter(PetInteraction::partnerFinished),
+        ExtraCodecs.strictOptionalField(ExtraCodecs.TAG_OR_ELEMENT_ID, "hands_over").forGetter(PetInteraction::handsOver),
+        ExtraCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "partner_eager_ticks", 0).forGetter(PetInteraction::partnerEagerTicks),
         Codec.doubleRange(0.0, Double.MAX_VALUE).fieldOf("notice_distance").forGetter(PetInteraction::noticeDistance),
         ExtraCodecs.NON_NEGATIVE_INT.fieldOf("approach_distance").forGetter(PetInteraction::approachDistance),
         ExtraCodecs.POSITIVE_INT.fieldOf("reservation_ticks").forGetter(PetInteraction::reservationTicks),
@@ -133,10 +133,10 @@ public record PetInteraction(
     ) {
         public static final Codec<Side> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ExtraCodecs.nonEmptyList(ExtraCodecs.TAG_OR_ELEMENT_ID.listOf()).fieldOf("pets").forGetter(Side::pets),
-            Codec.STRING.optionalFieldOf("pose").forGetter(Side::pose),
-            Beat.CODEC.optionalFieldOf("begin").forGetter(Side::begin),
-            Beat.Recurring.CODEC.optionalFieldOf("now_and_then").forGetter(Side::nowAndThen),
-            Beat.CODEC.optionalFieldOf("end").forGetter(Side::end)
+            ExtraCodecs.strictOptionalField(Codec.STRING, "pose").forGetter(Side::pose),
+            ExtraCodecs.strictOptionalField(Beat.CODEC, "begin").forGetter(Side::begin),
+            ExtraCodecs.strictOptionalField(Beat.Recurring.CODEC, "now_and_then").forGetter(Side::nowAndThen),
+            ExtraCodecs.strictOptionalField(Beat.CODEC, "end").forGetter(Side::end)
         ).apply(instance, Side::new));
 
         public Side {
