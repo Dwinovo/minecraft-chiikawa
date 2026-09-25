@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.OptionalInt;
+import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -62,6 +63,45 @@ class BoardSlipsTest {
             .anyMatch(day -> !BoardSlips.roll(BoardSlips.seed(42L, day, pos), types(), LEVELS, BoardLevels.FIRST_LEVEL)
                 .equals(today)));
         assertNotEquals(BoardSlips.seed(42L, 7L, pos), BoardSlips.seed(42L, 7L, pos.east()));
+    }
+
+    /**
+     * A board's slips say nothing about its neighbours'. Among a patch of boards, a day
+     * that comes up on one board in sixteen — every slip mushroom picking — is missing from
+     * the whole patch about as seldom as it would be from boards far apart. While alike
+     * seeds went into the game's random numbers unstirred, boards near one another rolled
+     * alike, and whole patches went without it four times as often.
+     */
+    @Test
+    void aPatchOfBoardsRollsAsBoardsFarApartWould() {
+        ResourceLocation rare = id("mushroom_picking");
+        int worlds = 2_000;
+        int wide = 7;
+        int deep = 13;
+        double oneBoard = Math.pow(2.0 / 5.0, LEVELS.slipsAt(BoardLevels.FIRST_LEVEL));
+        double expected = worlds * Math.pow(1 - oneBoard, wide * deep);
+        // Worlds and places as a game's are: any seed, anywhere.
+        Random worldsAndPlaces = new Random(1L);
+        int without = 0;
+        for (int w = 0; w < worlds; w++) {
+            long world = worldsAndPlaces.nextLong();
+            BlockPos corner = new BlockPos(worldsAndPlaces.nextInt(20_000) - 10_000, -59,
+                worldsAndPlaces.nextInt(20_000) - 10_000);
+            boolean found = false;
+            for (int x = 0; x < wide && !found; x++) {
+                for (int z = 0; z < deep && !found; z++) {
+                    found = BoardSlips.roll(BoardSlips.seed(world, 0L, corner.offset(x, 0, z)), types(), LEVELS,
+                            BoardLevels.FIRST_LEVEL).stream()
+                        .allMatch(slot -> slot.slip().type().equals(rare));
+                }
+            }
+            if (!found) {
+                without++;
+            }
+        }
+        assertTrue(without < 2 * expected,
+            without + " patches of " + worlds + " never had an all-mushroom day, where about " + Math.round(expected)
+                + " would");
     }
 
     @Test
