@@ -60,7 +60,7 @@ public record Personality(
         ExtraCodecs.strictOptionalField(Codec.floatRange(0.0F, 1.0F), "randomness", DEFAULT.randomness()).forGetter(Personality::randomness),
         ExtraCodecs.strictOptionalField(WeightedItem.CODEC.listOf(), "wild_tools", List.of()).forGetter(Personality::wildTools),
         ExtraCodecs.strictOptionalField(WeightedItem.CODEC.listOf(), "likes", List.of()).forGetter(Personality::likes),
-        IdleHabits.CODEC.optionalFieldOf("idle", IdleHabits.DEFAULT).forGetter(Personality::idle)
+        ExtraCodecs.strictOptionalField(IdleHabits.CODEC, "idle", IdleHabits.DEFAULT).forGetter(Personality::idle)
     ).apply(instance, Personality::new));
 
     public Personality {
