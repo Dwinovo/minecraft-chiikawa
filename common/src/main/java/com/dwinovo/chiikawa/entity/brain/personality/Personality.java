@@ -37,16 +37,19 @@ import net.minecraft.world.item.ItemStack;
  * @param likes what this kind of pet would spend its own money on, by weight. A pet with
  *              nothing listed buys nothing: a shop is somewhere it goes because it wants
  *              something, not a chore it performs
+ * @param idle what it does with itself when it has nothing to do
  */
 public record Personality(
     Map<ResourceLocation, Float> intentMultipliers,
     Map<DayPhase, Map<ResourceLocation, Float>> routine,
     float randomness,
     List<WeightedItem> wildTools,
-    List<WeightedItem> likes
+    List<WeightedItem> likes,
+    IdleHabits idle
 ) {
-    /** No leanings: every multiplier 1, no randomness, nothing held and nothing wanted. */
-    public static final Personality DEFAULT = new Personality(Map.of(), Map.of(), 0.0F, List.of(), List.of());
+    /** No leanings: every multiplier 1, no randomness, nothing held, nothing wanted, no habits of its own. */
+    public static final Personality DEFAULT = new Personality(Map.of(), Map.of(), 0.0F, List.of(), List.of(),
+        IdleHabits.DEFAULT);
 
     private static final Codec<Map<ResourceLocation, Float>> MULTIPLIERS_CODEC =
         Codec.unboundedMap(ResourceLocation.CODEC, Codec.floatRange(0.0F, Float.MAX_VALUE));
@@ -56,7 +59,8 @@ public record Personality(
         ExtraCodecs.strictOptionalField(Codec.unboundedMap(DayPhase.CODEC, MULTIPLIERS_CODEC), "routine", Map.of()).forGetter(Personality::routine),
         ExtraCodecs.strictOptionalField(Codec.floatRange(0.0F, 1.0F), "randomness", DEFAULT.randomness()).forGetter(Personality::randomness),
         ExtraCodecs.strictOptionalField(WeightedItem.CODEC.listOf(), "wild_tools", List.of()).forGetter(Personality::wildTools),
-        ExtraCodecs.strictOptionalField(WeightedItem.CODEC.listOf(), "likes", List.of()).forGetter(Personality::likes)
+        ExtraCodecs.strictOptionalField(WeightedItem.CODEC.listOf(), "likes", List.of()).forGetter(Personality::likes),
+        IdleHabits.CODEC.optionalFieldOf("idle", IdleHabits.DEFAULT).forGetter(Personality::idle)
     ).apply(instance, Personality::new));
 
     public Personality {
