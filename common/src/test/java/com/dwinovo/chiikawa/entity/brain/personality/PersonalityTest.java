@@ -130,14 +130,14 @@ class PersonalityTest {
     void idleHabitsStayWithinWhatAPetCanDo() {
         String ticks = "\"ticks\": { \"min_inclusive\": 40, \"max_inclusive\": 40 }";
         // Farther than a pet sees who is around it.
-        assertTrue(decode("{ \"idle\": { \"look_at_player\": { \"weight\": 1, \"range\": 17, " + ticks + " } } }").isError());
-        assertTrue(decode("{ \"idle\": { \"look_at_player\": { \"weight\": -1, \"range\": 5, " + ticks + " } } }").isError());
-        assertTrue(decode("{ \"idle\": { \"rest\": { \"weight\": 1, \"ticks\": { \"min_inclusive\": 0, \"max_inclusive\": 10 } } } }").isError());
+        assertTrue(decode("{ \"idle\": { \"look_at_player\": { \"weight\": 1, \"range\": 17, " + ticks + " } } }").error().isPresent());
+        assertTrue(decode("{ \"idle\": { \"look_at_player\": { \"weight\": -1, \"range\": 5, " + ticks + " } } }").error().isPresent());
+        assertTrue(decode("{ \"idle\": { \"rest\": { \"weight\": 1, \"ticks\": { \"min_inclusive\": 0, \"max_inclusive\": 10 } } } }").error().isPresent());
         assertTrue(decode("{ \"idle\": { \"rest\": { \"weight\": 1, \"ticks\": { \"min_inclusive\": 10, \"max_inclusive\": "
-            + (IdleHabits.LONGEST_TICKS + 1) + " } } } }").isError());
-        assertTrue(decode("{ \"idle\": { \"stroll\": -1 } }").isError());
+            + (IdleHabits.LONGEST_TICKS + 1) + " } } } }").error().isPresent());
+        assertTrue(decode("{ \"idle\": { \"stroll\": -1 } }").error().isPresent());
         // Shortest longer than longest.
-        assertTrue(decode("{ \"idle\": { \"rest\": { \"weight\": 1, \"ticks\": { \"min_inclusive\": 60, \"max_inclusive\": 30 } } } }").isError());
+        assertTrue(decode("{ \"idle\": { \"rest\": { \"weight\": 1, \"ticks\": { \"min_inclusive\": 60, \"max_inclusive\": 30 } } } }").error().isPresent());
     }
 
     private static Personality parse(String json) {

@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.personality;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.InclusiveRange;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -38,10 +39,10 @@ public record IdleHabits(Glance lookAtPlayer, Glance lookAtCreature, int stroll,
         new Pause(1, new InclusiveRange<>(30, 60)));
 
     public static final Codec<IdleHabits> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        Glance.CODEC.optionalFieldOf("look_at_player", DEFAULT.lookAtPlayer()).forGetter(IdleHabits::lookAtPlayer),
-        Glance.CODEC.optionalFieldOf("look_at_creature", DEFAULT.lookAtCreature()).forGetter(IdleHabits::lookAtCreature),
-        WEIGHT.optionalFieldOf("stroll", DEFAULT.stroll()).forGetter(IdleHabits::stroll),
-        Pause.CODEC.optionalFieldOf("rest", DEFAULT.rest()).forGetter(IdleHabits::rest)
+        ExtraCodecs.strictOptionalField(Glance.CODEC, "look_at_player", DEFAULT.lookAtPlayer()).forGetter(IdleHabits::lookAtPlayer),
+        ExtraCodecs.strictOptionalField(Glance.CODEC, "look_at_creature", DEFAULT.lookAtCreature()).forGetter(IdleHabits::lookAtCreature),
+        ExtraCodecs.strictOptionalField(WEIGHT, "stroll", DEFAULT.stroll()).forGetter(IdleHabits::stroll),
+        ExtraCodecs.strictOptionalField(Pause.CODEC, "rest", DEFAULT.rest()).forGetter(IdleHabits::rest)
     ).apply(instance, IdleHabits::new));
 
     /**
