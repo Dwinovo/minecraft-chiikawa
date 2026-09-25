@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.entity.brain.personality.IdleHabits;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.testing.FixedRandom;
 import com.dwinovo.chiikawa.testing.ItemComponents;
@@ -125,7 +126,7 @@ class ShopTest {
 
     private static Personality likes(Item item) {
         return new Personality(Map.of(), Map.of(), 0.0F, List.of(),
-            List.of(new Personality.WeightedItem(item, 1)));
+            List.of(new Personality.WeightedItem(item, 1)), IdleHabits.DEFAULT);
     }
 
     private static Identifier id(String path) {

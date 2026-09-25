@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.data;
 
 import com.dwinovo.chiikawa.entity.brain.intent.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
+import com.dwinovo.chiikawa.entity.brain.personality.IdleHabits;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.InclusiveRange;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
@@ -46,6 +48,10 @@ public final class PersonalityData {
             // Snacks, and not much else.
             .likes(Items.COOKIE, 3)
             .likes(Items.BREAD, 1)
+            // Shy but fond: looks over at its owner often, and quickly away again.
+            .idle(habits()
+                .lookAtPlayer(3, 6.0F, 20, 40)
+                .lookAtCreature(2, 5.0F, 20, 40))
             .build());
         // Cheerful, often playing music.
         all.put(id(InitEntity.HACHIWARE_PET.get()), personality()
@@ -59,6 +65,10 @@ public final class PersonalityData {
             .likes(Items.SUGAR, 2)
             .likes(Items.EGG, 2)
             .likes(Items.WHEAT, 1)
+            // Friendly and curious, camera at the ready: takes a good long look at everyone.
+            .idle(habits()
+                .lookAtPlayer(3, 8.0F, 60, 100)
+                .lookAtCreature(3, 8.0F, 60, 100))
             .build());
         // Very whimsical.
         all.put(id(InitEntity.USAGI_PET.get()), personality()
@@ -73,6 +83,12 @@ public final class PersonalityData {
             .likes(Items.PUMPKIN_PIE, 1)
             .likes(Items.SWEET_BERRIES, 1)
             .likes(Items.APPLE, 1)
+            // Never still: forever off somewhere, sparing anyone only a glance.
+            .idle(habits()
+                .lookAtPlayer(1, 5.0F, 15, 30)
+                .lookAtCreature(1, 5.0F, 15, 30)
+                .stroll(4)
+                .rest(1, 15, 30))
             .build());
         // Hard-working.
         all.put(id(InitEntity.SHISA_PET.get()), personality()
@@ -86,6 +102,10 @@ public final class PersonalityData {
             // Something bottled to drink.
             .likes(Items.HONEY_BOTTLE, 3)
             .likes(Items.MILK_BUCKET, 1)
+            // Polite and friendly: turns to whoever comes by.
+            .idle(habits()
+                .lookAtPlayer(3, 6.0F, 45, 90)
+                .stroll(1))
             .build());
         // Would rather not work.
         all.put(id(InitEntity.MOMONGA_PET.get()), personality()
@@ -100,6 +120,10 @@ public final class PersonalityData {
             .likes(Items.POPPY, 2)
             .likes(Items.PINK_TULIP, 2)
             .likes(Items.DANDELION, 1)
+            // Wants to be looked at, so looks at you, long and from far off, waiting to be praised.
+            .idle(habits()
+                .lookAtPlayer(5, 10.0F, 80, 140)
+                .lookAtCreature(1, 5.0F, 20, 40))
             .build());
         // Laid-back.
         all.put(id(InitEntity.KURIMANJU_PET.get()), personality()
@@ -113,6 +137,11 @@ public final class PersonalityData {
             .likes(Items.COOKED_COD, 2)
             .likes(Items.BAKED_POTATO, 2)
             .likes(Items.DRIED_KELP, 1)
+            // In no hurry about anything: sits a long while, a sigh after a drink.
+            .idle(habits()
+                .lookAtCreature(1, 5.0F, 45, 90)
+                .stroll(1)
+                .rest(4, 80, 160))
             .build());
         // Loves subjugation.
         all.put(id(InitEntity.RAKKO_PET.get()), personality()
@@ -125,6 +154,10 @@ public final class PersonalityData {
             .likes(Items.CAKE, 3)
             .likes(Items.PUMPKIN_PIE, 2)
             .likes(Items.SWEET_BERRIES, 2)
+            // The top-ranked subjugator keeps an eye on what moves around it, less on people.
+            .idle(habits()
+                .lookAtPlayer(1, 5.0F, 30, 60)
+                .lookAtCreature(3, 10.0F, 45, 90))
             .build());
         // Quiet.
         all.put(id(InitEntity.FURUHONYA_PET.get()), personality()
@@ -134,6 +167,12 @@ public final class PersonalityData {
             // Books, of course.
             .likes(Items.BOOK, 3)
             .likes(Items.PAPER, 1)
+            // Quiet: rests a good while, and when it looks up it looks for a long time.
+            .idle(habits()
+                .lookAtPlayer(2, 5.0F, 60, 120)
+                .lookAtCreature(1, 5.0F, 45, 90)
+                .stroll(1)
+                .rest(3, 80, 160))
             .build());
         return all;
     }
@@ -146,12 +185,18 @@ public final class PersonalityData {
         return new Builder();
     }
 
+    /** Starts from the habits every pet has, changing only what a character does otherwise. */
+    private static HabitsBuilder habits() {
+        return new HabitsBuilder();
+    }
+
     private static final class Builder {
         private final Map<Identifier, Float> multipliers = new HashMap<>();
         private final Map<DayPhase, Map<Identifier, Float>> routine = new EnumMap<>(DayPhase.class);
         private final List<Personality.WeightedItem> wildTools = new ArrayList<>();
         private final List<Personality.WeightedItem> likes = new ArrayList<>();
         private float randomness;
+        private IdleHabits idle = IdleHabits.DEFAULT;
 
         Builder weigh(float factor, Identifier intent) {
             return weigh(factor, List.of(intent));
@@ -188,8 +233,44 @@ public final class PersonalityData {
             return this;
         }
 
+        Builder idle(HabitsBuilder habits) {
+            this.idle = habits.build();
+            return this;
+        }
+
         Personality build() {
-            return new Personality(multipliers, routine, randomness, wildTools, likes);
+            return new Personality(multipliers, routine, randomness, wildTools, likes, idle);
+        }
+    }
+
+    private static final class HabitsBuilder {
+        private IdleHabits.Glance lookAtPlayer = IdleHabits.DEFAULT.lookAtPlayer();
+        private IdleHabits.Glance lookAtCreature = IdleHabits.DEFAULT.lookAtCreature();
+        private int stroll = IdleHabits.DEFAULT.stroll();
+        private IdleHabits.Pause rest = IdleHabits.DEFAULT.rest();
+
+        HabitsBuilder lookAtPlayer(int weight, float range, int shortest, int longest) {
+            lookAtPlayer = new IdleHabits.Glance(weight, range, new InclusiveRange<>(shortest, longest));
+            return this;
+        }
+
+        HabitsBuilder lookAtCreature(int weight, float range, int shortest, int longest) {
+            lookAtCreature = new IdleHabits.Glance(weight, range, new InclusiveRange<>(shortest, longest));
+            return this;
+        }
+
+        HabitsBuilder stroll(int weight) {
+            stroll = weight;
+            return this;
+        }
+
+        HabitsBuilder rest(int weight, int shortest, int longest) {
+            rest = new IdleHabits.Pause(weight, new InclusiveRange<>(shortest, longest));
+            return this;
+        }
+
+        IdleHabits build() {
+            return new IdleHabits(lookAtPlayer, lookAtCreature, stroll, rest);
         }
     }
 }
