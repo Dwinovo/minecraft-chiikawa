@@ -1,12 +1,15 @@
 package com.dwinovo.chiikawa.entity.brain.task.idle;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.ToIntFunction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.behavior.ShufflingList;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
 /**
  * Runs one of its behaviours at a time, picked by weight, as vanilla's {@code RunOne} does:
@@ -28,6 +31,16 @@ public final class WeightedChoice<E extends LivingEntity> implements BehaviorCon
     @Override
     public Behavior.Status getStatus() {
         return running == null ? Behavior.Status.STOPPED : Behavior.Status.RUNNING;
+    }
+
+    /** Every memory any of its behaviours needs, as vanilla's {@code GateBehavior} gathers them. */
+    @Override
+    public Set<MemoryModuleType<?>> getRequiredMemories() {
+        Set<MemoryModuleType<?>> memories = new HashSet<>();
+        for (Option<E> option : options) {
+            memories.addAll(option.behavior().getRequiredMemories());
+        }
+        return memories;
     }
 
     @Override
