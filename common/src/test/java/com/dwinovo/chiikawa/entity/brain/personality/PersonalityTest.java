@@ -71,7 +71,7 @@ class PersonalityTest {
     void encodesWhatItParses() {
         Personality personality = new Personality(Map.of(HARVEST, 1.3F), Map.of(DayPhase.MORNING, Map.of(HARVEST, 1.2F)),
             0.05F, List.of(new Personality.WeightedItem(Items.STONE_SWORD, 4)),
-            List.of(new Personality.WeightedItem(Items.COOKIE, 2)));
+            List.of(new Personality.WeightedItem(Items.COOKIE, 2)), IdleHabits.DEFAULT);
 
         JsonElement json = Personality.CODEC.encodeStart(JsonOps.INSTANCE, personality).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
         Personality decoded = Personality.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
@@ -88,7 +88,7 @@ class PersonalityTest {
         Personality personality = new Personality(Map.of(), Map.of(), 0.0F, List.of(
             new Personality.WeightedItem(Items.WOODEN_HOE, 6),
             new Personality.WeightedItem(Items.AIR, 1),
-            new Personality.WeightedItem(Items.WOODEN_SWORD, 3)), List.of());
+            new Personality.WeightedItem(Items.WOODEN_SWORD, 3)), List.of(), IdleHabits.DEFAULT);
 
         // The draw picks an index below the total weight of 10.
         assertEquals(Items.WOODEN_HOE, personality.drawWildTool(FixedRandom.ints(0)).getItem());
@@ -101,6 +101,43 @@ class PersonalityTest {
     @Test
     void aPersonalityWithoutWildToolsSpawnsEmptyHanded() {
         assertTrue(Personality.DEFAULT.drawWildTool(FixedRandom.ints(0)).isEmpty());
+    }
+
+    @Test
+    void idleHabitsSayHowOftenHowNearAndHowLong() {
+        IdleHabits idle = parse("""
+            {
+              "idle": {
+                "look_at_player": { "weight": 5, "range": 10, "ticks": { "min_inclusive": 80, "max_inclusive": 140 } },
+                "stroll": 0,
+                "rest": { "weight": 4, "ticks": { "min_inclusive": 120, "max_inclusive": 120 } }
+              }
+            }
+            """).idle();
+
+        assertEquals(5, idle.lookAtPlayer().weight());
+        assertEquals(10.0F, idle.lookAtPlayer().range());
+        assertEquals(80, (int) idle.lookAtPlayer().ticks().minInclusive());
+        assertEquals(140, (int) idle.lookAtPlayer().ticks().maxInclusive());
+        assertEquals(0, idle.stroll(), "a weight of 0 is a pet that never strolls off");
+        assertEquals(4, idle.rest().weight());
+        assertEquals(120, (int) idle.rest().ticks().maxInclusive());
+        // A habit left out is the one every pet has.
+        assertEquals(IdleHabits.DEFAULT.lookAtCreature(), idle.lookAtCreature());
+    }
+
+    @Test
+    void idleHabitsStayWithinWhatAPetCanDo() {
+        String ticks = "\"ticks\": { \"min_inclusive\": 40, \"max_inclusive\": 40 }";
+        // Farther than a pet sees who is around it.
+        assertTrue(decode("{ \"idle\": { \"look_at_player\": { \"weight\": 1, \"range\": 17, " + ticks + " } } }").isError());
+        assertTrue(decode("{ \"idle\": { \"look_at_player\": { \"weight\": -1, \"range\": 5, " + ticks + " } } }").isError());
+        assertTrue(decode("{ \"idle\": { \"rest\": { \"weight\": 1, \"ticks\": { \"min_inclusive\": 0, \"max_inclusive\": 10 } } } }").isError());
+        assertTrue(decode("{ \"idle\": { \"rest\": { \"weight\": 1, \"ticks\": { \"min_inclusive\": 10, \"max_inclusive\": "
+            + (IdleHabits.LONGEST_TICKS + 1) + " } } } }").isError());
+        assertTrue(decode("{ \"idle\": { \"stroll\": -1 } }").isError());
+        // Shortest longer than longest.
+        assertTrue(decode("{ \"idle\": { \"rest\": { \"weight\": 1, \"ticks\": { \"min_inclusive\": 60, \"max_inclusive\": 30 } } } }").isError());
     }
 
     private static Personality parse(String json) {
