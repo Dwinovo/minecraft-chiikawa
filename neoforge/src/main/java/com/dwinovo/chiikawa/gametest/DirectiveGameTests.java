@@ -82,12 +82,12 @@ public final class DirectiveGameTests {
         pet.setPetDirective(PetDirective.STAY);
         ServerPlayer visitor = player(helper);
         visitor.setGameMode(GameType.SURVIVAL);
-        visitor.moveTo(helper.absoluteVec(new Vec3(5.5, STAND, 5.5)));
+        visitor.snapTo(helper.absoluteVec(new Vec3(5.5, STAND, 5.5)));
 
         helper.succeedWhen(() -> helper.assertTrue(pet.getBrain().getMemory(MemoryModuleType.LOOK_TARGET)
                 .filter(look -> look instanceof EntityTracker tracker && tracker.getEntity() == visitor)
                 .isPresent(),
-            "the sitting pet never looked at the player beside it"));
+            Component.literal("the sitting pet never looked at the player beside it")));
     }
 
     /**
