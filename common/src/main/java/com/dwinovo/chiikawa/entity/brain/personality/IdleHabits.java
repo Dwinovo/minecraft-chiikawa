@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain.personality;
 
+import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.InclusiveRange;
@@ -32,16 +33,16 @@ public record IdleHabits(Glance lookAtPlayer, Glance lookAtCreature, int stroll,
 
     /** A pet with no habits of its own: what every pet did before they had any. */
     public static final IdleHabits DEFAULT = new IdleHabits(
-        new Glance(2, 5.0F, new InclusiveRange<>(45)),
-        new Glance(2, 5.0F, new InclusiveRange<>(45)),
+        new Glance(2, 5.0F, new InclusiveRange<>(45, 45)),
+        new Glance(2, 5.0F, new InclusiveRange<>(45, 45)),
         2,
         new Pause(1, new InclusiveRange<>(30, 60)));
 
     public static final Codec<IdleHabits> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        Glance.CODEC.optionalFieldOf("look_at_player", DEFAULT.lookAtPlayer()).forGetter(IdleHabits::lookAtPlayer),
-        Glance.CODEC.optionalFieldOf("look_at_creature", DEFAULT.lookAtCreature()).forGetter(IdleHabits::lookAtCreature),
-        WEIGHT.optionalFieldOf("stroll", DEFAULT.stroll()).forGetter(IdleHabits::stroll),
-        Pause.CODEC.optionalFieldOf("rest", DEFAULT.rest()).forGetter(IdleHabits::rest)
+        ModCodecs.strictOptionalField(Glance.CODEC, "look_at_player", DEFAULT.lookAtPlayer()).forGetter(IdleHabits::lookAtPlayer),
+        ModCodecs.strictOptionalField(Glance.CODEC, "look_at_creature", DEFAULT.lookAtCreature()).forGetter(IdleHabits::lookAtCreature),
+        ModCodecs.strictOptionalField(WEIGHT, "stroll", DEFAULT.stroll()).forGetter(IdleHabits::stroll),
+        ModCodecs.strictOptionalField(Pause.CODEC, "rest", DEFAULT.rest()).forGetter(IdleHabits::rest)
     ).apply(instance, IdleHabits::new));
 
     /**
