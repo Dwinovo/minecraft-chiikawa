@@ -53,6 +53,7 @@ public final class BoardGameTests {
     private static final int STAND = 2;
     /** Grass to pull: more than the largest weeding slip asks for, so the work cannot run out. */
     private static final int WEED_PATCH = 6;
+    private static final int WEED_CORNER = 2;
     /** How long two pets are watched, which is longer than one takes to walk over and claim. */
     private static final int WATCH_TICKS = 1200;
 
@@ -101,11 +102,15 @@ public final class BoardGameTests {
     private static void weedPatch(GameTestHelper helper) {
         for (int x = 0; x < WEED_PATCH; x++) {
             for (int z = 0; z < WEED_PATCH; z++) {
-                BlockPos weed = new BlockPos(2 + x, STAND, 2 + z);
+                BlockPos weed = new BlockPos(WEED_CORNER + x, STAND, WEED_CORNER + z);
                 helper.setBlock(weed.below(), Blocks.GRASS_BLOCK);
                 helper.setBlock(weed, Blocks.SHORT_GRASS);
             }
         }
+    }
+
+    private static boolean onWeedPatch(int x, int z) {
+        return x >= WEED_CORNER && x < WEED_CORNER + WEED_PATCH && z >= WEED_CORNER && z < WEED_CORNER + WEED_PATCH;
     }
 
     /**
@@ -250,7 +255,10 @@ public final class BoardGameTests {
     }
 
     /**
-     * The first spot on the floor whose day, rolled, answers {@code wanted}.
+     * The first spot on the floor whose day, rolled, answers {@code wanted}. Every spot off
+     * the weed patch is tried: the world's seed is new each run, and the rarest day a case
+     * asks for — one farmer's slip and no second — comes up on one board in fifteen, so a
+     * handful of spots leaves a case failing now and then for want of a board.
      *
      * @param wanted asked of the day's slips a farmer could take, in the order a pet meets them
      */
@@ -258,8 +266,11 @@ public final class BoardGameTests {
         ServerLevel level = helper.getLevel();
         long day = level.getDayTime() / Level.TICKS_PER_DAY;
         ResourceLocation farmer = Services.REGISTRY.getKey(InitRegistry.PET_JOB_KEY, InitRegistry.FARMER.get());
-        for (int x = 8; x < 15; x++) {
-            for (int z = 2; z < 15; z++) {
+        for (int x = 1; x < 15; x++) {
+            for (int z = 1; z < 15; z++) {
+                if (onWeedPatch(x, z)) {
+                    continue;
+                }
                 BlockPos rel = new BlockPos(x, STAND, z);
                 long seed = BoardSlips.seed(level.getSeed(), day, helper.absolutePos(rel));
                 List<BoardSlot> farmerSlips = BoardSlips.roll(seed, PetTaskTypes.all(), BoardLevels.current(), BoardLevels.FIRST_LEVEL)
