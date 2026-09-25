@@ -5,11 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import org.junit.jupiter.api.Test;
 
 class WeightedChoiceTest {
@@ -123,6 +125,11 @@ class WeightedChoiceTest {
         @Override
         public Behavior.Status getStatus() {
             return status;
+        }
+
+        @Override
+        public Set<MemoryModuleType<?>> getRequiredMemories() {
+            return Set.of();
         }
 
         @Override
