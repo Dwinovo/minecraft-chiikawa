@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.stream.Stream;
 import javax.imageio.ImageIO;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.junit.jupiter.api.Test;
 
@@ -149,7 +150,7 @@ class PropModelsTest {
         for (BakedCube cube : model.cubes) {
             Matrix4f turn = new Matrix4f()
                 .translate(cube.pivotX, cube.pivotY, cube.pivotZ)
-                .rotateXYZ(cube.rotX, cube.rotY, cube.rotZ)
+                .rotate(BedrockRotation.of(new Quaternionf(), cube.rotX, cube.rotY, cube.rotZ))
                 .translate(-cube.pivotX, -cube.pivotY, -cube.pivotZ);
             for (int corner = 0; corner < 8; corner++) {
                 Vector3f at = turn.transformPosition(new Vector3f(
