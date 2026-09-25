@@ -9,6 +9,7 @@ import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.levelgen.RandomSupport;
 
 /**
  * The rules of a labor board's daily slips, kept free of the block entity so they can be
@@ -93,10 +94,16 @@ public final class BoardSlips {
         return hanging;
     }
 
-    /** The slip at one place on the board: the same one every time it is worked out. */
+    /**
+     * The slip at one place on the board: the same one every time it is worked out. The
+     * seed is stirred before it is used, as the game stirs a seed it makes from a position:
+     * the game's random numbers start out alike from seeds that are alike, and a board's
+     * seed and its neighbour's are alike, so unstirred, boards side by side put up much the
+     * same slips.
+     */
     private static BoardSlot rollOne(long seed, int index,
             List<Map.Entry<Identifier, PetTaskType>> offered, int totalWeight) {
-        RandomSource random = RandomSource.create(seed + index * SLIP_SEED_STEP);
+        RandomSource random = RandomSource.create(RandomSupport.mixStafford13(seed + index * SLIP_SEED_STEP));
         int pick = random.nextInt(totalWeight);
         for (Map.Entry<Identifier, PetTaskType> entry : offered) {
             pick -= entry.getValue().weight();
