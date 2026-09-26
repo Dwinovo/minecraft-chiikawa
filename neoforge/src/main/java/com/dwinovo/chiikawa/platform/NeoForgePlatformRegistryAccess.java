@@ -9,11 +9,13 @@ import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetSocialSensor;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.platform.services.IPlatformRegistryAccess;
+import com.dwinovo.chiikawa.qualification.QualificationCondition;
 import java.util.function.Supplier;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -26,6 +28,11 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
         DeferredRegister.create(Registries.ACTIVITY, Constants.MOD_ID);
     private static final DeferredRegister<MenuType<?>> MENUS =
         DeferredRegister.create(Registries.MENU, Constants.MOD_ID);
+    private static final DeferredRegister<LootItemConditionType> LOOT_CONDITIONS =
+        DeferredRegister.create(Registries.LOOT_CONDITION_TYPE, Constants.MOD_ID);
+
+    private static final DeferredHolder<LootItemConditionType, LootItemConditionType> QUALIFICATION_CONDITION =
+        LOOT_CONDITIONS.register("qualification", () -> new LootItemConditionType(QualificationCondition.CODEC));
 
     private static final DeferredHolder<SensorType<?>, SensorType<PetAttackbleEntitySensor>> PET_ATTACKBLE_ENTITY_SENSOR =
         SENSOR_TYPES.register("pet_attackble_entity_sensor", () -> new SensorType<>(PetAttackbleEntitySensor::new));
@@ -84,6 +91,7 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
         SENSOR_TYPES.register(modEventBus);
         ACTIVITIES.register(modEventBus);
         MENUS.register(modEventBus);
+        LOOT_CONDITIONS.register(modEventBus);
     }
 
     @Override
@@ -189,6 +197,11 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
     @Override
     public Supplier<Activity> cooperateActivity() {
         return COOPERATE;
+    }
+
+    @Override
+    public Supplier<LootItemConditionType> qualificationCondition() {
+        return QUALIFICATION_CONDITION;
     }
 
     @Override
