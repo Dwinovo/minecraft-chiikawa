@@ -4,13 +4,62 @@ import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import java.util.List;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.Level;
 
 /**
  * The rules of a licence's exams, kept free of the pet so they can be tested on their own:
  * who may sit, who wants to, the odds, and what a wild pet turns up holding.
  */
 public final class QualificationExam {
+    /** Exams are sat in the working day: from an hour after sunrise until an hour before sunset. */
+    public static final long EXAM_FROM = 1000L;
+    public static final long EXAM_UNTIL = 11000L;
+    /** Results go up at sunrise the day after, and anyone who has not been to see them by noon hears them anyway. */
+    public static final long RESULTS_UNTIL = 6000L;
+    /** Owners hear about tomorrow's exam at sunset the day before. */
+    public static final long EVE_REMINDER_AT = 12000L;
+
     private QualificationExam() {
+    }
+
+    /** @return the day number of a time of day, as boards and exams count days */
+    public static long day(long dayTime) {
+        return Math.floorDiv(dayTime, Level.TICKS_PER_DAY);
+    }
+
+    /** @return ticks since sunrise */
+    public static long timeOfDay(long dayTime) {
+        return Math.floorMod(dayTime, Level.TICKS_PER_DAY);
+    }
+
+    /** Whether an exam can be sat now: an exam day, in working hours. */
+    public static boolean isExamTime(Qualification qualification, long dayTime) {
+        long time = timeOfDay(dayTime);
+        return isExamDay(qualification, day(dayTime)) && time >= EXAM_FROM && time < EXAM_UNTIL;
+    }
+
+    /** Whether tomorrow is an exam day. */
+    public static boolean isExamEve(Qualification qualification, long dayTime) {
+        return isExamDay(qualification, day(dayTime) + 1);
+    }
+
+    /**
+     * Whether a pet's result is out: it sat an exam on an earlier day than today. The morning
+     * after, it goes to see; see {@link #mustHearResults} for when it hears them anyway.
+     */
+    public static boolean resultsOut(Licence licence, long dayTime) {
+        return licence.pending().isPresent() && day(dayTime) > licence.decidedDay();
+    }
+
+    /** Whether a pet whose results are out goes to the board to see them, rather than hearing them where it is. */
+    public static boolean goesToSeeResults(Licence licence, long dayTime) {
+        return resultsOut(licence, dayTime) && day(dayTime) == licence.decidedDay() + 1
+            && timeOfDay(dayTime) < RESULTS_UNTIL;
+    }
+
+    /** Whether a pet whose results are out has missed the morning, and hears them wherever it is. */
+    public static boolean mustHearResults(Licence licence, long dayTime) {
+        return resultsOut(licence, dayTime) && !goesToSeeResults(licence, dayTime);
     }
 
     /**

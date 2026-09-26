@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.testing.FixedRandom;
 import java.util.List;
@@ -49,18 +50,18 @@ class QualificationExamTest {
     /** Not every pet wants to go every time; one that has read the book always does. */
     @Test
     void wantingToGoIsUpToThePetUnlessItHasReadTheBook() {
-        Personality.Leaning keen = new Personality.Leaning(0.6F, 1.0F, 0.0F);
+        Personality.Leaning keen = new Personality.Leaning(0.6F, 1.0F, 0.0F, PetReaction.CONFUSED);
 
         assertTrue(QualificationExam.wantsToSit(keen, Licence.NONE, FixedRandom.floats(0.59F)));
         assertFalse(QualificationExam.wantsToSit(keen, Licence.NONE, FixedRandom.floats(0.61F)));
-        assertTrue(QualificationExam.wantsToSit(new Personality.Leaning(0.0F, 1.0F, 0.0F),
+        assertTrue(QualificationExam.wantsToSit(new Personality.Leaning(0.0F, 1.0F, 0.0F, PetReaction.CONFUSED),
             Licence.NONE.withBookRead(), FixedRandom.floats(0.99F)));
     }
 
     /** The design's own example: Chiikawa for grade 5, five slips practised, one exam failed, no book. */
     @Test
     void practiceFailingAndTheBookAddUpAndThePetsLeaningScalesThem() {
-        Personality.Leaning chiikawa = new Personality.Leaning(0.6F, 0.7F, 0.0F);
+        Personality.Leaning chiikawa = new Personality.Leaning(0.6F, 0.7F, 0.0F, PetReaction.CONFUSED);
         Licence licence = new Licence(0, 5, 1, false, Optional.empty(), -1L, false);
 
         assertEquals((0.40F + 0.15F + 0.05F) * 0.7F, QualificationExam.passChance(weeding, licence, chiikawa), EPSILON);
@@ -76,13 +77,13 @@ class QualificationExamTest {
         // Grade 1: 8% plus the most practice and failing add.
         assertEquals(0.08F + 0.30F + 0.20F, QualificationExam.passChance(weeding, worn, plain), EPSILON);
         assertEquals(0.95F, QualificationExam.passChance(weeding, worn.withBookRead(),
-            new Personality.Leaning(0.6F, 3.0F, 0.0F)), EPSILON);
+            new Personality.Leaning(0.6F, 3.0F, 0.0F, PetReaction.CONFUSED)), EPSILON);
     }
 
     /** A pet that gets more from a book gets it on top of what the book gives anyone. */
     @Test
     void aBookworkGetsMoreFromTheBook() {
-        Personality.Leaning bookworm = new Personality.Leaning(0.6F, 1.0F, 0.1F);
+        Personality.Leaning bookworm = new Personality.Leaning(0.6F, 1.0F, 0.1F, PetReaction.CONFUSED);
 
         assertEquals(0.40F + 0.25F + 0.1F,
             QualificationExam.passChance(weeding, Licence.NONE.withBookRead(), bookworm), EPSILON);
@@ -90,7 +91,7 @@ class QualificationExamTest {
 
     @Test
     void aWildPetsGradeIsDrawnByTheWeightsScaledByItsAptitude() {
-        Personality.Leaning none = new Personality.Leaning(0.6F, 0.0F, 0.0F);
+        Personality.Leaning none = new Personality.Leaning(0.6F, 0.0F, 0.0F, PetReaction.CONFUSED);
         Personality.Leaning plain = Personality.Leaning.DEFAULT;
 
         assertEquals(0, QualificationExam.wildGrade(weeding, none, FixedRandom.floats(0.99F)),
