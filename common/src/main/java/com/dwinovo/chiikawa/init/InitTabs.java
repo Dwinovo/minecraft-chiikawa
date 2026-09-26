@@ -60,6 +60,7 @@ public final class InitTabs {
         InitItems.WHALE_POUCH,
         InitItems.STAR_POUCH,
         InitItems.SIMPLE_DISH,
+        InitItems.WEEDING_BOOK,
         InitItems.PET_BELL
     );
 
