@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.data;
 
+import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.brain.intent.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import com.dwinovo.chiikawa.entity.brain.personality.IdleHabits;
@@ -52,8 +53,9 @@ public final class PersonalityData {
             .idle(habits()
                 .lookAtPlayer(3, 6.0F, 20, 40)
                 .lookAtCreature(2, 5.0F, 20, 40))
-            // Wants its licence badly, but nerves get the better of it at the exam; keeps at it.
-            .licence(QualificationData.WEEDING, 0.85F, 0.7F)
+            // Wants its licence badly, but nerves get the better of it at the exam; keeps at it,
+            // and cries when it fails.
+            .licence(QualificationData.WEEDING, 0.85F, 0.7F, 0.0F, PetReaction.HURT)
             .build());
         // Cheerful, often playing music.
         all.put(id(InitEntity.HACHIWARE_PET.get()), personality()
@@ -268,7 +270,13 @@ public final class PersonalityData {
 
         /** @param bookBonus what reading the book adds for it, on top of what it adds for anyone */
         Builder licence(ResourceLocation qualification, float eagerness, float aptitude, float bookBonus) {
-            licences.put(qualification, new Personality.Leaning(eagerness, aptitude, bookBonus));
+            return licence(qualification, eagerness, aptitude, bookBonus, Personality.Leaning.DEFAULT.failReaction());
+        }
+
+        /** @param failReaction the face it pulls on hearing it failed */
+        Builder licence(ResourceLocation qualification, float eagerness, float aptitude, float bookBonus,
+                        PetReaction failReaction) {
+            licences.put(qualification, new Personality.Leaning(eagerness, aptitude, bookBonus, failReaction));
             return this;
         }
 

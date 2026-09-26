@@ -112,6 +112,9 @@ public final class PetConstraints {
             // beside its owner, and something is attacking them. Only a pet told to sit
             // sits through that.
             case COMBAT -> wild || directive != PetDirective.STAY;
+            // Licences are an owner's pet's business: a wild pet holds what it turned up
+            // with. A pet told to sit hears its results where it sits.
+            case EXAM -> !wild && directive != PetDirective.STAY;
         };
     }
 

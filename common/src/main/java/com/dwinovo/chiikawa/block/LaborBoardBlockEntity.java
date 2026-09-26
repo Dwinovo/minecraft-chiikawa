@@ -55,6 +55,8 @@ public class LaborBoardBlockEntity extends BlockEntity {
      * reckons it: worked out here and sent to the players nearby, who see only this.
      */
     private int hanging;
+    /** The exam room in front of the board: its seats, and who sat what there. */
+    private BoardExam exam = new BoardExam();
 
     public LaborBoardBlockEntity(BlockPos pos, BlockState state) {
         super(InitBlockEntities.LABOR_BOARD.get(), pos, state);
@@ -106,6 +108,19 @@ public class LaborBoardBlockEntity extends BlockEntity {
                 update(i, BoardSlot::release);
             }
         }
+    }
+
+    /**
+     * The exam room in front of the board. A caller that changes it tells the board, which
+     * saves it with the chunk; see {@link #examChanged}.
+     */
+    public BoardExam exam() {
+        return exam;
+    }
+
+    /** The exam room changed: saved with the chunk. */
+    public void examChanged() {
+        setChanged();
     }
 
     /** @return which of the day's plates still hang, a bit for each place */
