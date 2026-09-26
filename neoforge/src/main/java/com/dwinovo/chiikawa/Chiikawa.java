@@ -20,12 +20,14 @@ import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.entity.PetFollowKeeper;
 import com.dwinovo.chiikawa.entity.PetRecall;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalityLoader;
+import com.dwinovo.chiikawa.qualification.QualificationLoader;
 import com.dwinovo.chiikawa.shop.ShopCatalogLoader;
 import com.dwinovo.chiikawa.social.PetInteractionLoader;
 import com.dwinovo.chiikawa.spawn.PetSpawnLoader;
 import com.dwinovo.chiikawa.spawn.PetSpawnsBiomeModifier;
 import com.dwinovo.chiikawa.task.BoardLevelsLoader;
 import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
+import com.dwinovo.chiikawa.task.PetTaskTypes;
 import com.dwinovo.chiikawa.voice.PetVoiceLoader;
 import com.dwinovo.chiikawa.entity.brain.task.farmer.crop.FarmRegistry;
 import com.dwinovo.chiikawa.item.PetDollItem;
@@ -86,6 +88,7 @@ public class Chiikawa {
             event.addListener(PetSpawnLoader.ID, new PetSpawnLoader());
             event.addListener(PetVoiceLoader.ID, new PetVoiceLoader());
             event.addListener(PetInteractionLoader.ID, new PetInteractionLoader());
+            event.addListener(QualificationLoader.ID, new QualificationLoader(task -> PetTaskTypes.all().containsKey(task)));
         });
 
         InitCapabilities.register(modEventBus);

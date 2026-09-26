@@ -16,6 +16,7 @@ import com.dwinovo.chiikawa.entity.brain.handler.FencerJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.MusicianJobHandler;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
+import com.dwinovo.chiikawa.qualification.PetLicences;
 import com.dwinovo.chiikawa.utils.BrainUtils;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
 import com.dwinovo.chiikawa.entity.job.api.PetCapability;
@@ -241,6 +242,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     @Nullable
     private PetSpeech.Heard speech;
 
+    /** Where it stands with every licence; kept on the server, saved with the pet. */
+    private final PetLicences licences = new PetLicences();
     private final SimpleContainer backpack = new SimpleContainer(FULL_BACKPACK_SIZE) {
         @Override
         public void setChanged() {
@@ -1052,6 +1055,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         if (isEager()) {
             tag.putLong("EagerUntil", this.entityData.get(EAGER_UNTIL));
         }
+        licences.save(tag);
     }
 
     @Override
@@ -1074,6 +1078,12 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         this.entityData.set(EAGER_UNTIL, tag.getLong("EagerUntil"));
         applyEagerness();
         refreshJobFromMainhand();
+        licences.load(tag);
+    }
+
+    /** @return where this pet stands with every licence */
+    public PetLicences licences() {
+        return licences;
     }
 
     /**
@@ -1086,6 +1096,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         // One the world found for itself comes with a tool, as a pet met in the wild does.
         if (spawnType == EntitySpawnReason.NATURAL || spawnType == EntitySpawnReason.CHUNK_GENERATION) {
             setItemSlot(EquipmentSlot.MAINHAND, PetPersonalities.of(getType()).drawWildTool(level.getRandom()));
+            // And with whatever licences it happens to hold; any other pet starts with none.
+            licences.drawWild(PetPersonalities.of(getType()), level.getRandom());
         }
         // However it came, a new pet is nobody's yet, and goes its own way until it is tamed.
         setPetDirective(PetDirective.FREE);

@@ -23,6 +23,7 @@ public class FabricModItemModelProvider extends FabricModelProvider {
         generateDolls(itemModelGenerator);
 
         itemModelGenerator.generateFlatItem(InitItems.SIMPLE_DISH.get(), ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(InitItems.WEEDING_BOOK.get(), ModelTemplates.FLAT_ITEM);
         itemModelGenerator.generateFlatItem(InitItems.PET_BELL.get(), ModelTemplates.FLAT_ITEM);
 
         itemModelGenerator.generateFlatItem(InitItems.MUSIC_BOX.get(), ModelTemplates.FLAT_ITEM);
