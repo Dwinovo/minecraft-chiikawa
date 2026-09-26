@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.platform;
 
+import com.dwinovo.chiikawa.entity.brain.PetActivities;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPlacesSensor;
@@ -47,22 +48,22 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
         petPlacesSensor = registerSensor("pet_places_sensor", new SensorType<>(PetPlacesSensor::new));
         petSocialSensor = registerSensor("pet_social_sensor", new SensorType<>(PetSocialSensor::new));
 
-        farmerHarvestActivity = registerActivity("farmer_harvest", new Activity("farmer_harvest"));
-        farmerPlantActivity = registerActivity("farmer_plant", new Activity("farmer_plant"));
-        deleverActivity = registerActivity("delever", new Activity("delever"));
-        weedActivity = registerActivity("weed", new Activity("weed"));
-        pickMushroomActivity = registerActivity("pick_mushroom", new Activity("pick_mushroom"));
-        fencerFightActivity = registerActivity("fencer_fight", new Activity("fencer_fight"));
-        archerShootActivity = registerActivity("archer_shoot", new Activity("archer_shoot"));
-        musicianPlayActivity = registerActivity("musician_play", new Activity("musician_play"));
-        followOwnerActivity = registerActivity("follow_owner", new Activity("follow_owner"));
-        stayActivity = registerActivity("stay", new Activity("stay"));
-        pickUpActivity = registerActivity("pick_up", new Activity("pick_up"));
-        takeTaskActivity = registerActivity("take_task", new Activity("take_task"));
-        shopActivity = registerActivity("shop", new Activity("shop"));
-        giftOwnerActivity = registerActivity("gift_owner", new Activity("gift_owner"));
-        socializeActivity = registerActivity("socialize", new Activity("socialize"));
-        cooperateActivity = registerActivity("cooperate", new Activity("cooperate"));
+        farmerHarvestActivity = registerActivity("farmer_harvest");
+        farmerPlantActivity = registerActivity("farmer_plant");
+        deleverActivity = registerActivity("delever");
+        weedActivity = registerActivity("weed");
+        pickMushroomActivity = registerActivity("pick_mushroom");
+        fencerFightActivity = registerActivity("fencer_fight");
+        archerShootActivity = registerActivity("archer_shoot");
+        musicianPlayActivity = registerActivity("musician_play");
+        followOwnerActivity = registerActivity("follow_owner");
+        stayActivity = registerActivity("stay");
+        pickUpActivity = registerActivity("pick_up");
+        takeTaskActivity = registerActivity("take_task");
+        shopActivity = registerActivity("shop");
+        giftOwnerActivity = registerActivity("gift_owner");
+        socializeActivity = registerActivity("socialize");
+        cooperateActivity = registerActivity("cooperate");
 
         petBackpackMenu = registerMenu("pet_backpack", new MenuType<>(PetBackpackMenu::new, net.minecraft.world.flag.FeatureFlags.DEFAULT_FLAGS));
     }
@@ -72,8 +73,8 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
         return () -> type;
     }
 
-    private static Supplier<Activity> registerActivity(String path, Activity activity) {
-        Registry.register(BuiltInRegistries.ACTIVITY, id(path), activity);
+    private static Supplier<Activity> registerActivity(String path) {
+        Activity activity = Registry.register(BuiltInRegistries.ACTIVITY, id(path), new Activity(PetActivities.name(path)));
         return () -> activity;
     }
 
