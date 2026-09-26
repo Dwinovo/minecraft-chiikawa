@@ -41,7 +41,11 @@ public enum VoiceMoment implements StringRepresentable {
     /** Being brought a coffee after the weeding. */
     GIVEN_COFFEE,
     /** Listening to Hachiware play: as it sits down, and now and then as it claps along. */
-    LISTEN;
+    LISTEN,
+    /** Hearing it passed a licence exam, at the board the morning after or wherever it is by noon. */
+    EXAM_PASS,
+    /** Hearing it failed one. */
+    EXAM_FAIL;
 
     public static final Codec<VoiceMoment> CODEC = StringRepresentable.fromEnum(VoiceMoment::values);
 

@@ -16,6 +16,7 @@ import com.dwinovo.chiikawa.entity.brain.handler.FencerJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.MusicianJobHandler;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
+import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.qualification.PetLicences;
 import com.dwinovo.chiikawa.utils.BrainUtils;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
@@ -600,6 +601,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         BrainUtils.addShopTasks(brain);
         BrainUtils.addGiftTasks(brain);
         BrainUtils.addSocialTasks(brain);
+        BrainUtils.addExamTasks(brain);
 
         // Each job's activities — registered once, dormant until the intent
         // selector picks one of that job's intents.
@@ -672,6 +674,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
             this.entityData.set(EAGER_UNTIL, 0L);
             applyEagerness();
         }
+        PetExams.upkeep(this);
         IntentSelector.tick(this, serverLevel);
         getBrain().tick(serverLevel, this);
         super.customServerAiStep();
