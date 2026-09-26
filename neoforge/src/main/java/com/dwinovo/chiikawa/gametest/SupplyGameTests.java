@@ -76,6 +76,25 @@ public final class SupplyGameTests {
     }
 
     /**
+     * Every activity the mod registers is named as it is registered. Vanilla counts two
+     * activities as one when their names match, and a bare name another mod also uses -
+     * Fowl Play's {@code pick_up} - kept the game from starting with both installed.
+     */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void every_activity_is_named_as_it_is_registered(GameTestHelper helper) {
+        int ours = 0;
+        for (ResourceLocation id : BuiltInRegistries.ACTIVITY.keySet()) {
+            if (id.getNamespace().equals(Constants.MOD_ID)) {
+                String name = BuiltInRegistries.ACTIVITY.get(id).getName();
+                helper.assertTrue(name.equals(id.toString()), "activity " + id + " is named " + name);
+                ours++;
+            }
+        }
+        helper.assertTrue(ours > 0, "the mod registers no activities");
+        helper.succeed();
+    }
+
+    /**
      * Every word the handbook's own pages show is written in every language: a title, a
      * caption or a bubble left out shows its raw key on the page.
      */
