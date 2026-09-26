@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.mixin.BrainAccessor;
 import com.google.common.collect.ImmutableList;
@@ -23,6 +24,19 @@ import net.minecraft.world.entity.schedule.Activity;
  */
 public final class PetActivities {
     private PetActivities() {
+    }
+
+    /**
+     * The name to give an activity: {@code chiikawa:<path>}, as it is registered. Vanilla
+     * counts two activities as one when their names match, and Forge's registry refuses an
+     * object equal to one it already holds, so a bare name another mod also uses - Fowl
+     * Play's {@code pick_up} - stopped the game from starting with both installed. (Each
+     * loader makes the activity itself: only the loaders can reach its constructor.)
+     *
+     * @param path the activity's registry path
+     */
+    public static String name(String path) {
+        return Constants.MOD_ID + ":" + path;
     }
 
     /**
