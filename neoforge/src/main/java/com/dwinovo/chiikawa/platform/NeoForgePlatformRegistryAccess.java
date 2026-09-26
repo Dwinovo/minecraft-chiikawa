@@ -70,6 +70,10 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
         ACTIVITIES.register("socialize", () -> new Activity(PetActivities.name("socialize")));
     private static final DeferredHolder<Activity, Activity> COOPERATE =
         ACTIVITIES.register("cooperate", () -> new Activity(PetActivities.name("cooperate")));
+    private static final DeferredHolder<Activity, Activity> TAKE_EXAM =
+        ACTIVITIES.register("take_exam", () -> new Activity(PetActivities.name("take_exam")));
+    private static final DeferredHolder<Activity, Activity> CHECK_RESULTS =
+        ACTIVITIES.register("check_results", () -> new Activity(PetActivities.name("check_results")));
 
     private static final DeferredHolder<MenuType<?>, MenuType<PetBackpackMenu>> PET_BACKPACK =
         MENUS.register("pet_backpack", () -> IMenuTypeExtension.create((containerId, inventory, buf) ->
@@ -185,6 +189,16 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
     @Override
     public Supplier<Activity> cooperateActivity() {
         return COOPERATE;
+    }
+
+    @Override
+    public Supplier<Activity> takeExamActivity() {
+        return TAKE_EXAM;
+    }
+
+    @Override
+    public Supplier<Activity> checkResultsActivity() {
+        return CHECK_RESULTS;
     }
 
     @Override
