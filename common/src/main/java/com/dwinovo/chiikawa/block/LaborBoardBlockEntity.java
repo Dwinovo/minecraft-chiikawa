@@ -57,6 +57,11 @@ public class LaborBoardBlockEntity extends BlockEntity {
     private int hanging;
     /** The exam room in front of the board: its seats, and who sat what there. */
     private BoardExam exam = new BoardExam();
+    /**
+     * The sheet pinned up about exams, as {@link BoardNotice#of} reckons it from the calendar:
+     * worked out here and sent to the players nearby, who see only this.
+     */
+    private BoardNotice notice = BoardNotice.NONE;
 
     public LaborBoardBlockEntity(BlockPos pos, BlockState state) {
         super(InitBlockEntities.LABOR_BOARD.get(), pos, state);
@@ -121,6 +126,20 @@ public class LaborBoardBlockEntity extends BlockEntity {
     /** The exam room changed: saved with the chunk. */
     public void examChanged() {
         setChanged();
+    }
+
+    /** @return the sheet pinned up about exams */
+    public BoardNotice notice() {
+        return notice;
+    }
+
+    /** Pins up the sheet the calendar calls for, and tells the players nearby when it changes. */
+    private void refreshNotice() {
+        BoardNotice now = BoardNotice.of(level().getDayTime(), exam);
+        if (now != notice) {
+            notice = now;
+            markUpdated();
+        }
     }
 
     /** @return which of the day's plates still hang, a bit for each place */
@@ -223,6 +242,7 @@ public class LaborBoardBlockEntity extends BlockEntity {
     public static void serverTick(Level level, BlockPos pos, BlockState state, LaborBoardBlockEntity board) {
         if (level.getGameTime() % CLOCK_TICKS == 0) {
             board.today();
+            board.refreshNotice();
         }
     }
 
@@ -240,6 +260,7 @@ public class LaborBoardBlockEntity extends BlockEntity {
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag tag = new CompoundTag();
         tag.putInt("Hanging", hanging);
+        tag.putByte("Notice", (byte) notice.ordinal());
         return tag;
     }
 
@@ -274,6 +295,8 @@ public class LaborBoardBlockEntity extends BlockEntity {
         // A save holds the slips and the plates follow from them; a player's game is sent
         // the plates alone.
         hanging = tag.getInt("Hanging").orElseGet(() -> BoardSlips.hanging(slots));
+        // Sent to players; a save works it out again from the calendar within a second.
+        notice = BoardNotice.byOrdinal(tag.getByteOr("Notice", (byte) 0));
         exam = tag.read("Exam", BoardExam.CODEC).orElseGet(BoardExam::new);
     }
 }
