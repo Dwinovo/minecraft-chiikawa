@@ -87,7 +87,7 @@ class PetPosesTest {
                 BakedCube cube = model.cubes[c];
                 stack.pushPose();
                 if (cube.hasRotation) {
-                    stack.rotateAround(BedrockRotation.of(turn, cube.rotX, cube.rotY, cube.rotZ),
+                    stack.last().rotateAround(BedrockRotation.of(turn, cube.rotX, cube.rotY, cube.rotZ),
                         cube.pivotX, cube.pivotY, cube.pivotZ);
                 }
                 Matrix4f matrix = stack.last().pose();
