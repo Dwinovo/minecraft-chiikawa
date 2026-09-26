@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.platform;
 
+import com.dwinovo.chiikawa.entity.brain.PetActivities;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPlacesSensor;
@@ -38,37 +39,37 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
         SENSOR_TYPES.register("pet_social_sensor", () -> new SensorType<>(PetSocialSensor::new));
 
     private static final DeferredHolder<Activity, Activity> FARMER_HARVEST =
-        ACTIVITIES.register("farmer_harvest", () -> new Activity("farmer_harvest"));
+        ACTIVITIES.register("farmer_harvest", () -> new Activity(PetActivities.name("farmer_harvest")));
     private static final DeferredHolder<Activity, Activity> FARMER_PLANT =
-        ACTIVITIES.register("farmer_plant", () -> new Activity("farmer_plant"));
+        ACTIVITIES.register("farmer_plant", () -> new Activity(PetActivities.name("farmer_plant")));
     private static final DeferredHolder<Activity, Activity> DELEVER =
-        ACTIVITIES.register("delever", () -> new Activity("delever"));
+        ACTIVITIES.register("delever", () -> new Activity(PetActivities.name("delever")));
     private static final DeferredHolder<Activity, Activity> WEED =
-        ACTIVITIES.register("weed", () -> new Activity("weed"));
+        ACTIVITIES.register("weed", () -> new Activity(PetActivities.name("weed")));
     private static final DeferredHolder<Activity, Activity> PICK_MUSHROOM =
-        ACTIVITIES.register("pick_mushroom", () -> new Activity("pick_mushroom"));
+        ACTIVITIES.register("pick_mushroom", () -> new Activity(PetActivities.name("pick_mushroom")));
     private static final DeferredHolder<Activity, Activity> FENCER_FIGHT =
-        ACTIVITIES.register("fencer_fight", () -> new Activity("fencer_fight"));
+        ACTIVITIES.register("fencer_fight", () -> new Activity(PetActivities.name("fencer_fight")));
     private static final DeferredHolder<Activity, Activity> ARCHER_SHOOT =
-        ACTIVITIES.register("archer_shoot", () -> new Activity("archer_shoot"));
+        ACTIVITIES.register("archer_shoot", () -> new Activity(PetActivities.name("archer_shoot")));
     private static final DeferredHolder<Activity, Activity> MUSICIAN_PLAY =
-        ACTIVITIES.register("musician_play", () -> new Activity("musician_play"));
+        ACTIVITIES.register("musician_play", () -> new Activity(PetActivities.name("musician_play")));
     private static final DeferredHolder<Activity, Activity> FOLLOW_OWNER =
-        ACTIVITIES.register("follow_owner", () -> new Activity("follow_owner"));
+        ACTIVITIES.register("follow_owner", () -> new Activity(PetActivities.name("follow_owner")));
     private static final DeferredHolder<Activity, Activity> STAY =
-        ACTIVITIES.register("stay", () -> new Activity("stay"));
+        ACTIVITIES.register("stay", () -> new Activity(PetActivities.name("stay")));
     private static final DeferredHolder<Activity, Activity> PICK_UP =
-        ACTIVITIES.register("pick_up", () -> new Activity("pick_up"));
+        ACTIVITIES.register("pick_up", () -> new Activity(PetActivities.name("pick_up")));
     private static final DeferredHolder<Activity, Activity> TAKE_TASK =
-        ACTIVITIES.register("take_task", () -> new Activity("take_task"));
+        ACTIVITIES.register("take_task", () -> new Activity(PetActivities.name("take_task")));
     private static final DeferredHolder<Activity, Activity> SHOP =
-        ACTIVITIES.register("shop", () -> new Activity("shop"));
+        ACTIVITIES.register("shop", () -> new Activity(PetActivities.name("shop")));
     private static final DeferredHolder<Activity, Activity> GIFT_OWNER =
-        ACTIVITIES.register("gift_owner", () -> new Activity("gift_owner"));
+        ACTIVITIES.register("gift_owner", () -> new Activity(PetActivities.name("gift_owner")));
     private static final DeferredHolder<Activity, Activity> SOCIALIZE =
-        ACTIVITIES.register("socialize", () -> new Activity("socialize"));
+        ACTIVITIES.register("socialize", () -> new Activity(PetActivities.name("socialize")));
     private static final DeferredHolder<Activity, Activity> COOPERATE =
-        ACTIVITIES.register("cooperate", () -> new Activity("cooperate"));
+        ACTIVITIES.register("cooperate", () -> new Activity(PetActivities.name("cooperate")));
 
     private static final DeferredHolder<MenuType<?>, MenuType<PetBackpackMenu>> PET_BACKPACK =
         MENUS.register("pet_backpack", () -> IMenuTypeExtension.create((containerId, inventory, buf) ->
