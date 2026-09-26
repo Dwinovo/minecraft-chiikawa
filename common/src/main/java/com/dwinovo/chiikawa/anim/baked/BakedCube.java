@@ -16,7 +16,7 @@ public final class BakedCube {
 
     /** Pivot for this cube's own rotation (in the same space as min/max). */
     public final float pivotX, pivotY, pivotZ;
-    /** Per-cube rotation in radians, applied around (pivotX, pivotY, pivotZ). XYZ Euler. */
+    /** Per-cube rotation in radians, applied around (pivotX, pivotY, pivotZ), in {@link com.dwinovo.chiikawa.anim.render.BedrockRotation}'s order. */
     public final float rotX, rotY, rotZ;
     public final boolean hasRotation;
 

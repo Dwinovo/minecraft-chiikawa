@@ -18,7 +18,7 @@ import com.dwinovo.chiikawa.anim.molang.MolangNode;
  * <h2>Pose buffer layout</h2>
  * Caller-owned, reused across frames. Per bone:
  * <pre>
- *   [b * 9 + 0..2] rotation delta  (radians, XYZ Euler, applied on top of rest pose)
+ *   [b * 9 + 0..2] rotation delta  (radians, added to the rest angles, turned in BedrockRotation's order)
  *   [b * 9 + 3..5] position offset (pixel units, applied as a translate)
  *   [b * 9 + 6..8] scale           (multiplier; identity = 1)
  * </pre>
