@@ -654,6 +654,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
             this.entityData.set(EAGER_UNTIL, 0L);
             applyEagerness();
         }
+        PetExams.upkeep(this);
         IntentSelector.tick(this, level);
         getBrain().tick(level, this);
         super.customServerAiStep(level);
