@@ -73,7 +73,7 @@ class PersonalityTest {
     void encodesWhatItParses() {
         Personality personality = new Personality(Map.of(HARVEST, 1.3F), Map.of(DayPhase.MORNING, Map.of(HARVEST, 1.2F)),
             0.05F, List.of(new Personality.WeightedItem(Items.STONE_SWORD, 4)),
-            List.of(new Personality.WeightedItem(Items.COOKIE, 2)), IdleHabits.DEFAULT);
+            List.of(new Personality.WeightedItem(Items.COOKIE, 2)), IdleHabits.DEFAULT, Map.of());
 
         JsonElement json = Personality.CODEC.encodeStart(JsonOps.INSTANCE, personality).getOrThrow();
         Personality decoded = Personality.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow();
@@ -90,7 +90,7 @@ class PersonalityTest {
         Personality personality = new Personality(Map.of(), Map.of(), 0.0F, List.of(
             new Personality.WeightedItem(Items.WOODEN_HOE, 6),
             new Personality.WeightedItem(Items.AIR, 1),
-            new Personality.WeightedItem(Items.WOODEN_SWORD, 3)), List.of(), IdleHabits.DEFAULT);
+            new Personality.WeightedItem(Items.WOODEN_SWORD, 3)), List.of(), IdleHabits.DEFAULT, Map.of());
 
         // The draw picks an index below the total weight of 10.
         assertEquals(Items.WOODEN_HOE, personality.drawWildTool(FixedRandom.ints(0)).getItem());
