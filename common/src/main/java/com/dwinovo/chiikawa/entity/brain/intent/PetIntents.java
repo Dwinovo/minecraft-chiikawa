@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.intent;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.entity.brain.intent.impl.CheckResultsIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.CombatIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.ConstantIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.CooperateIntent;
@@ -9,6 +10,7 @@ import com.dwinovo.chiikawa.entity.brain.intent.impl.GiftOwnerIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.PlayMusicIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.ShopIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.SocializeIntent;
+import com.dwinovo.chiikawa.entity.brain.intent.impl.TakeExamIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.TakeTaskIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.TargetIntent;
 import com.dwinovo.chiikawa.init.InitActivity;
@@ -54,6 +56,8 @@ public final class PetIntents {
     public static final ResourceLocation GIFT_OWNER = id("gift_owner");
     public static final ResourceLocation SOCIALIZE = id("socialize");
     public static final ResourceLocation COOPERATE = id("cooperate");
+    public static final ResourceLocation TAKE_EXAM = id("take_exam");
+    public static final ResourceLocation CHECK_RESULTS = id("check_results");
 
     private static final Map<ResourceLocation, PetIntent> BY_ID = new LinkedHashMap<>();
 
@@ -68,7 +72,9 @@ public final class PetIntents {
         register(new ShopIntent()),
         register(new GiftOwnerIntent()),
         register(new SocializeIntent()),
-        register(new CooperateIntent())
+        register(new CooperateIntent()),
+        register(new TakeExamIntent()),
+        register(new CheckResultsIntent())
     );
 
     static {

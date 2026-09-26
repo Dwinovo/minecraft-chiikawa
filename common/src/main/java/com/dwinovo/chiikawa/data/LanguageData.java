@@ -99,7 +99,9 @@ public final class LanguageData {
             addSupplyTranslations(adder, "双肩包", "小熊挎包", "鲸鱼挎包", "星星挎包", "给宠物背上，背包多 10 格",
                     "简单料理", "喂给宠物，一阵子干活更起劲",
                     "宠物铃铛", "叫回你的宠物，跨维度也听得见；响过一次要等半分钟");
-            addLicenceTranslations(adder, "除草证参考书", "手持右键自己的宠物让它读，下一次除草证考试更有把握；考完用掉");
+            addLicenceTranslations(adder, "除草证参考书", "手持右键自己的宠物让它读，下一次除草证考试更有把握；考完用掉",
+                "除草证", "%1$s 通过了%2$s %3$s 级考试", "%1$s 没有通过%2$s %3$s 级考试", "明天是%s考试",
+                "去考试", "去看榜", "现在没有要考的试，也没有要看的榜");
             addPetNewsTranslations(adder, "%1$s 花 %2$s 个%4$s买了 %3$s",
                     "%1$s 花 %2$s 个%4$s买了 %3$s，当场吃掉了",
                     "%1$s 花 %2$s 个%4$s买了 %3$s，说要送给你",
@@ -286,7 +288,9 @@ public final class LanguageData {
             addSupplyTranslations(adder, "リュック", "くまのポーチ", "くじらのポーチ", "星のポーチ", "ペットに背負わせると、持ち物が10マス増える",
                     "かんたんごはん", "ペットに食べさせると、しばらくお仕事にやる気が出る",
                     "ペットベル", "ペットを呼び戻す。別のディメンションでも聞こえる。一度鳴らすと30秒待つ");
-            addLicenceTranslations(adder, "草むしり検定の参考書", "持って自分の子を右クリックすると読ませられる。次の草むしり検定で受かりやすくなり、試験で使い切る");
+            addLicenceTranslations(adder, "草むしり検定の参考書", "持って自分の子を右クリックすると読ませられる。次の草むしり検定で受かりやすくなり、試験で使い切る",
+                "草むしり検定", "%1$sが%2$s%3$s級に合格した", "%1$sは%2$s%3$s級に落ちた", "明日は%sの試験",
+                "試験を受けに行く", "合格発表を見に行く", "今は受ける試験も見る発表もない");
             addPetNewsTranslations(adder, "%1$sが%4$s%2$s個で%3$sを買った",
                     "%1$sが%4$s%2$s個で%3$sを買って、その場で食べた",
                     "%1$sが%4$s%2$s個で%3$sを買った。あなたへのプレゼントだって",
@@ -473,7 +477,9 @@ public final class LanguageData {
             addSupplyTranslations(adder, "Rucksack", "Bear Pouch", "Whale Pouch", "Star Pouch", "Worn by a pet: ten more slots",
                     "Simple Dish", "Fed to a pet: keener on work for a while",
                     "Pet Bell", "Calls your pets home, even from another dimension; half a minute between rings");
-            addLicenceTranslations(adder, "Weeding Licence Study Guide", "Right-click your pet with it to have it read: better odds at its next weeding licence exam; used up by the exam");
+            addLicenceTranslations(adder, "Weeding Licence Study Guide", "Right-click your pet with it to have it read: better odds at its next weeding licence exam; used up by the exam",
+                "Weeding Licence", "%1$s passed the %2$s grade %3$s exam", "%1$s failed the %2$s grade %3$s exam", "Tomorrow is the %s exam",
+                "Off to an exam", "Off to see the results", "No exam to sit or results to see now");
             addPetNewsTranslations(adder, "%1$s spent %2$s × %4$s on %3$s",
                     "%1$s spent %2$s × %4$s on %3$s and ate it on the spot",
                     "%1$s spent %2$s × %4$s on %3$s, and says it is for you",
@@ -681,10 +687,21 @@ public final class LanguageData {
         adder.add("tooltip.chiikawa.pet_bell", petBellTip);
     }
 
-    /** The weeding licence: the book a pet reads for its exams. */
-    private static void addLicenceTranslations(Adder adder, String weedingBook, String weedingBookTip) {
+    /**
+     * The weeding licence: the book a pet reads for its exams, what the licence is called,
+     * and what its owner reads in chat - the pet, the licence and the grade it sat.
+     */
+    private static void addLicenceTranslations(Adder adder, String weedingBook, String weedingBookTip, String weeding,
+            String passed, String failed, String tomorrow, String takeExam, String checkResults, String noBoard) {
         adder.add("item.chiikawa.weeding_book", weedingBook);
         adder.add("tooltip.chiikawa.weeding_book", weedingBookTip);
+        adder.add("qualification.chiikawa.weeding", weeding);
+        adder.add("message.chiikawa.exam.passed", passed);
+        adder.add("message.chiikawa.exam.failed", failed);
+        adder.add("message.chiikawa.exam.tomorrow", tomorrow);
+        adder.add("intent.chiikawa.take_exam", takeExam);
+        adder.add("intent.chiikawa.check_results", checkResults);
+        adder.add("intent.chiikawa.fail.no_board", noBoard);
     }
 
     /** What a rung bell tells its owner. */

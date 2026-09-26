@@ -33,6 +33,8 @@ public final class TestContext {
     private Optional<GlobalPos> socialPartner = Optional.empty();
     private boolean playingAlong;
     private boolean eager;
+    private Optional<GlobalPos> examBoard = Optional.empty();
+    private Optional<GlobalPos> resultsBoard = Optional.empty();
 
     private TestContext(GlobalPos petPos, PetAnchor anchor) {
         this.petPos = petPos;
@@ -108,6 +110,18 @@ public final class TestContext {
     }
 
     /** The pet has been fed something worth working off. */
+    /** A board the pet could sit an exam at now. */
+    public TestContext examBoard(GlobalPos board) {
+        this.examBoard = Optional.of(board);
+        return this;
+    }
+
+    /** A board the pet could go and see its results at this morning. */
+    public TestContext resultsBoard(GlobalPos board) {
+        this.resultsBoard = Optional.of(board);
+        return this;
+    }
+
     public TestContext eager() {
         this.eager = true;
         return this;
@@ -116,6 +130,6 @@ public final class TestContext {
     public IntentContext build() {
         return new IntentContext(petPos, phase, ownership, personality, anchor, targets, task, offeringBoard,
             shopWorthVisiting, takeTaskCoolingDown, shopCoolingDown, socialPartner, playingAlong, carryingGift, eager,
-            false, false, false, false);
+            false, false, false, false, examBoard, resultsBoard);
     }
 }
