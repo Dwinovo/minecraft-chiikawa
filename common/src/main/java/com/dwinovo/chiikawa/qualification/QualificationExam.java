@@ -38,6 +38,18 @@ public final class QualificationExam {
         return isExamDay(qualification, day(dayTime)) && time >= EXAM_FROM && time < EXAM_UNTIL;
     }
 
+    /** Days until an exam can next be sat: today while today's is still on, otherwise the next exam day. */
+    public static int daysToExam(Qualification qualification, long dayTime) {
+        long today = day(dayTime);
+        boolean todaysIsOver = timeOfDay(dayTime) >= EXAM_UNTIL;
+        for (int days = 0; days <= qualification.everyDays(); days++) {
+            if (isExamDay(qualification, today + days) && !(days == 0 && todaysIsOver)) {
+                return days;
+            }
+        }
+        return qualification.everyDays();
+    }
+
     /** Whether tomorrow is an exam day. */
     public static boolean isExamEve(Qualification qualification, long dayTime) {
         return isExamDay(qualification, day(dayTime) + 1);

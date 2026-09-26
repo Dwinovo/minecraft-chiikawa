@@ -9,6 +9,7 @@ import com.dwinovo.chiikawa.network.BoardPayloads.BoardSlipsPayload;
 import com.dwinovo.chiikawa.network.BoardPayloads.BoardUpgradePayload;
 import com.dwinovo.chiikawa.network.BoardPayloads.SlipView;
 import com.dwinovo.chiikawa.platform.Services;
+import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.shop.Wallet;
 import com.dwinovo.chiikawa.ui.DrawSurface;
 import com.dwinovo.chiikawa.ui.Rect;
@@ -43,6 +44,8 @@ public class LaborBoardScreen extends Screen {
     private static final int WIDTH = 236;
     /** Room for the word and its price, whichever language it is in. */
     private static final int UPGRADE_MIN_W = 64;
+    /** One line of what the board says about exams. */
+    private static final int EXAM_LINE_H = 11;
 
     private final BlockPos board;
     private final int level;
@@ -50,6 +53,7 @@ public class LaborBoardScreen extends Screen {
     private final BoardPayloads.NextLevel next;
     private final int price;
     private final List<SlipView> slips;
+    private final BoardPayloads.ExamNotice exams;
     /** What the upgrade is paid in: pictured on the button, named in the tooltip. */
     private final ItemStack coin = Wallet.coins(1);
     private int leftPos;
@@ -57,6 +61,7 @@ public class LaborBoardScreen extends Screen {
     private int panelHeight;
     private int contentY;
     private int footerY;
+    private int examY;
 
     public LaborBoardScreen(BoardSlipsPayload payload) {
         super(Component.translatable("screen.chiikawa.labor_board"));
@@ -66,18 +71,22 @@ public class LaborBoardScreen extends Screen {
         this.next = payload.next();
         this.price = next.price();
         this.slips = payload.slips();
+        this.exams = payload.exams();
     }
 
     @Override
     protected void init() {
         int rows = Math.max(1, slips.size());
+        int examHeight = exams.lines() == 0 ? 0 : UiStyle.GAP_SECTION + exams.lines() * EXAM_LINE_H;
         this.panelHeight = UiStyle.TITLE_H + UiStyle.PAD
             + rows * UiStyle.ROW_H + (rows - 1) * UiStyle.GAP
+            + examHeight
             + UiStyle.GAP_SECTION + UiStyle.CONTROL_H + UiStyle.PAD;
         this.leftPos = (this.width - WIDTH) / 2;
         this.topPos = (this.height - panelHeight) / 2;
         this.contentY = TitledPanel.contentY(topPos);
         this.footerY = topPos + panelHeight - UiStyle.PAD - UiStyle.CONTROL_H;
+        this.examY = contentY + rows * UiStyle.ROW_H + (rows - 1) * UiStyle.GAP + UiStyle.GAP_SECTION;
         clearWidgets();
         if (price > 0) {
             addRenderableWidget(upgradeButton());
@@ -118,6 +127,7 @@ public class LaborBoardScreen extends Screen {
                 drawRow(surface, slips.get(i), row, row.contains(mouseX, mouseY));
             }
         }
+        drawExams(surface);
         // A board with nothing on it today can still be paid up.
         drawFooter(surface);
     }
@@ -153,6 +163,34 @@ public class LaborBoardScreen extends Screen {
             Ui.textRight(surface, Component.translatable("screen.chiikawa.labor_board.max_level").getString(),
                 leftPos + WIDTH - UiStyle.PAD,
                 UiStyle.centerIn(footerY, UiStyle.CONTROL_H, surface.lineHeight()), UiTheme.TEXT_MUTED);
+        }
+    }
+
+    /**
+     * What the board says about licence exams, under the slips: an exam today or tomorrow,
+     * then who sat what here last exam day and how they did, as a board posts its results.
+     */
+    private void drawExams(DrawSurface surface) {
+        if (exams.lines() == 0) {
+            return;
+        }
+        int x = leftPos + UiStyle.PAD;
+        int right = leftPos + WIDTH - UiStyle.PAD;
+        Ui.divider(surface, x, examY - UiStyle.GAP_SECTION / 2, WIDTH - 2 * UiStyle.PAD);
+        int y = examY;
+        for (BoardPayloads.ExamNotice.Upcoming exam : exams.upcoming()) {
+            String when = exam.days() == 0 ? "screen.chiikawa.labor_board.exam_today" : "screen.chiikawa.labor_board.exam_tomorrow";
+            surface.drawText(Component.translatable(when, PetExams.name(exam.qualification())).getString(), x, y,
+                UiTheme.ACCENT);
+            y += EXAM_LINE_H;
+        }
+        for (BoardPayloads.ExamNotice.Posted sitting : exams.posted()) {
+            surface.drawText(Component.translatable("screen.chiikawa.labor_board.sat", sitting.name(),
+                PetExams.name(sitting.qualification()), sitting.rank()).getString(), x, y, UiTheme.TEXT);
+            Ui.textRight(surface, Component.translatable(sitting.passed()
+                    ? "screen.chiikawa.labor_board.passed" : "screen.chiikawa.labor_board.failed").getString(),
+                right, y, sitting.passed() ? UiTheme.LEAF : UiTheme.TEXT_MUTED);
+            y += EXAM_LINE_H;
         }
     }
 
