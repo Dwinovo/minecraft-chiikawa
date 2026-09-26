@@ -105,6 +105,7 @@ public final class PetInteractionData {
             // Hachiware plays on; whoever comes by sits down to listen and now and then
             // claps along, with a word when it has one. Rakko and Kurimanju listen without a
             // fuss, and never clap.
+            // Music draws a crowd: an idle pet in earshot soon thinks of going over.
             LISTEN_TO_MUSIC, new PetInteraction(
                 List.of(
                     part(InitEntity.CHIIKAWA_PET.get(), InitEntity.HACHIWARE_PET.get(), InitEntity.USAGI_PET.get(),
@@ -118,7 +119,7 @@ public final class PetInteractionData {
                         .begin(beat(null, VoiceMoment.LISTEN)).build()),
                 List.of(part(InitEntity.HACHIWARE_PET.get()).build()),
                 PetInteraction.PartnerState.PLAYING_MUSIC, Optional.empty(), Optional.empty(), 0,
-                12.0, 3, 400, 400, 6000, 0.1F)
+                12.0, 3, 400, 400, 6000, 0.6F)
         );
     }
 
