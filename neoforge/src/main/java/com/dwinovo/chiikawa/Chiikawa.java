@@ -15,6 +15,7 @@ import com.dwinovo.chiikawa.init.InitActivity;
 import com.dwinovo.chiikawa.init.InitCapabilities;
 import com.dwinovo.chiikawa.init.InitSounds;
 import com.dwinovo.chiikawa.init.InitItems;
+import com.dwinovo.chiikawa.init.InitLootConditions;
 import com.dwinovo.chiikawa.init.InitTabs;
 import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.init.InitEntityDataSerializers;
@@ -63,6 +64,7 @@ public class Chiikawa {
         InitMemory.init();
         InitSensor.init();
         InitActivity.init();
+        InitLootConditions.init();
         InitSounds.init();
         InitMenu.init();
         InitDataComponents.init();
