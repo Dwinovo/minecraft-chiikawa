@@ -52,8 +52,8 @@ public final class PersonalityData {
             .idle(habits()
                 .lookAtPlayer(3, 6.0F, 20, 40)
                 .lookAtCreature(2, 5.0F, 20, 40))
-            // Wants its licence, but nerves get the better of it at the exam; keeps at it.
-            .licence(QualificationData.WEEDING, 0.6F, 0.7F)
+            // Wants its licence badly, but nerves get the better of it at the exam; keeps at it.
+            .licence(QualificationData.WEEDING, 0.85F, 0.7F)
             .build());
         // Cheerful, often playing music.
         all.put(id(InitEntity.HACHIWARE_PET.get()), personality()
@@ -71,8 +71,8 @@ public final class PersonalityData {
             .idle(habits()
                 .lookAtPlayer(3, 8.0F, 60, 100)
                 .lookAtCreature(3, 8.0F, 60, 100))
-            // Cheerful, and steady with a book in hand.
-            .licence(QualificationData.WEEDING, 0.7F, 1.0F)
+            // Wants it as much as Chiikawa, and fares a little better with a book in hand.
+            .licence(QualificationData.WEEDING, 0.85F, 0.8F)
             .build());
         // Very whimsical.
         all.put(id(InitEntity.USAGI_PET.get()), personality()
@@ -112,8 +112,9 @@ public final class PersonalityData {
             .idle(habits()
                 .lookAtPlayer(3, 6.0F, 45, 90)
                 .stroll(1))
-            // Takes its licences more seriously than anyone.
-            .licence(QualificationData.WEEDING, 0.8F, 1.1F)
+            // Hard-working and does well at it, though the licence it is set on is a
+            // different one.
+            .licence(QualificationData.WEEDING, 0.6F, 1.1F)
             .build());
         // Would rather not work.
         all.put(id(InitEntity.MOMONGA_PET.get()), personality()
