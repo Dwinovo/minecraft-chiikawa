@@ -7,6 +7,7 @@ import com.dwinovo.chiikawa.init.InitCapabilities;
 import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
+import com.dwinovo.chiikawa.init.InitLootConditions;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitMemory;
@@ -60,6 +61,7 @@ public class ChiikawaForge {
         InitMemory.init();
         InitSensor.init();
         InitActivity.init();
+        InitLootConditions.init();
         InitSounds.init();
         InitMenu.init();
         InitDataComponents.init();

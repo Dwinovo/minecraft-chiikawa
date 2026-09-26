@@ -3,6 +3,8 @@ package com.dwinovo.chiikawa.task;
 import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.dwinovo.chiikawa.qualification.LicenceRequirement;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
@@ -21,6 +23,7 @@ import net.minecraft.util.valueproviders.IntProvider;
  * @param weight how often a board puts up this type relative to the others
  * @param minLevel the board level this type needs before it goes up at all, so an
  *                 upgrade is worth paying for rather than only worth counting
+ * @param requires the licence grade a pet must hold to take a slip of this type, if any
  */
 public record PetTaskType(
     ResourceLocation capability,
@@ -29,7 +32,8 @@ public record PetTaskType(
     IntProvider amount,
     ResourceLocation reward,
     int weight,
-    int minLevel
+    int minLevel,
+    Optional<LicenceRequirement> requires
 ) {
     public static final Codec<PetTaskType> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         ResourceLocation.CODEC.fieldOf("capability").forGetter(PetTaskType::capability),
@@ -38,7 +42,8 @@ public record PetTaskType(
         ModCodecs.POSITIVE_INT_PROVIDER.fieldOf("amount").forGetter(PetTaskType::amount),
         ResourceLocation.CODEC.fieldOf("reward").forGetter(PetTaskType::reward),
         ExtraCodecs.strictOptionalField(ExtraCodecs.POSITIVE_INT, "weight", 1).forGetter(PetTaskType::weight),
-        ExtraCodecs.strictOptionalField(ExtraCodecs.POSITIVE_INT, "min_level", BoardLevels.FIRST_LEVEL).forGetter(PetTaskType::minLevel)
+        ExtraCodecs.strictOptionalField(ExtraCodecs.POSITIVE_INT, "min_level", BoardLevels.FIRST_LEVEL).forGetter(PetTaskType::minLevel),
+        ExtraCodecs.strictOptionalField(LicenceRequirement.CODEC, "requires").forGetter(PetTaskType::requires)
     ).apply(instance, PetTaskType::new));
 
     /**

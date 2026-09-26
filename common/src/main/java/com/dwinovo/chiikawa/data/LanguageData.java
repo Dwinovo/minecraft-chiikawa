@@ -114,7 +114,7 @@ public final class LanguageData {
                 "收割", "种地", "送货", "拔草", "采蘑菇", "讨伐", "射箭", "演奏", "去买东西", "送礼物");
             addSocialTranslations(adder, "找伙伴玩", "陪伙伴玩", "附近没有想一起玩的伙伴", "没有伙伴过来找它");
             addTaskTypeTranslations(adder, "除草", "%s 株", "街头演奏", "%s 秒",
-                "近身讨伐", "远程讨伐", "%s 只");
+                "近身讨伐", "远程讨伐", "%s 只", "高级除草");
             addBoardScreenTranslations(adder, "劳动公告板", "%s 张", "今天没有工作牌",
                     "限%s", "待领", "已领", "%s 领走了",
                     "Lv.%s", "每天 %s 张", "升级 %s",
@@ -303,7 +303,7 @@ public final class LanguageData {
                 "収穫", "種まき", "運ぶ", "草むしり", "キノコ採り", "討伐", "弓で射る", "演奏", "お買い物", "プレゼントを渡す");
             addSocialTranslations(adder, "なかまのところへ", "なかまに付き合う", "近くに遊びたいなかまがいない", "誰も来ていない");
             addTaskTypeTranslations(adder, "草むしり", "%s本", "路上演奏", "%s秒",
-                "近接討伐", "遠距離討伐", "%s体");
+                "近接討伐", "遠距離討伐", "%s体", "上級草むしり");
             addBoardScreenTranslations(adder, "労働掲示板", "%s枚", "今日はお仕事カードがありません",
                     "%s限定", "募集中", "受注済み", "%sが受けた",
                     "Lv.%s", "1日%s枚", "レベルアップ %s",
@@ -494,7 +494,7 @@ public final class LanguageData {
             addSocialTranslations(adder, "Visiting a friend", "Playing along", "Nobody nearby it feels like playing with",
                 "Nobody is coming over");
             addTaskTypeTranslations(adder, "Weeding", "%s weeds", "Street Performance", "%ss",
-                "Monster Hunting", "Monster Shooting", "%s slain");
+                "Monster Hunting", "Monster Shooting", "%s slain", "Advanced Weeding");
             addBoardScreenTranslations(adder, "Labor Board", "%s up", "No slips up today",
                     "%s only", "Open", "Taken", "Taken by %s",
                     "Lv.%s", "%s a day", "Upgrade %s",
@@ -786,10 +786,14 @@ public final class LanguageData {
         String streetPerformanceAmount,
         String meleeHunting,
         String rangedHunting,
-        String huntingAmount
+        String huntingAmount,
+        String advancedWeeding
     ) {
         adder.add("pet_task.chiikawa.weeding", weeding);
         adder.add("pet_task.chiikawa.weeding.amount", weedingAmount);
+        adder.add("pet_task.chiikawa.advanced_weeding", advancedWeeding);
+        // Counted in weeds, as weeding is.
+        adder.add("pet_task.chiikawa.advanced_weeding.amount", weedingAmount);
         adder.add("pet_task.chiikawa.street_performance", streetPerformance);
         adder.add("pet_task.chiikawa.street_performance.amount", streetPerformanceAmount);
         adder.add("pet_task.chiikawa.melee_hunting", meleeHunting);

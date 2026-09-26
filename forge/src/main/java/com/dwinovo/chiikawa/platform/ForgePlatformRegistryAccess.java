@@ -9,7 +9,9 @@ import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetSocialSensor;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.platform.services.IPlatformRegistryAccess;
+import com.dwinovo.chiikawa.qualification.QualificationCondition;
 import java.util.function.Supplier;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.inventory.MenuType;
@@ -19,6 +21,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.NewRegistryEvent;
 import net.minecraftforge.registries.RegistryObject;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 
 public final class ForgePlatformRegistryAccess implements IPlatformRegistryAccess {
     // Sensor Types
@@ -30,6 +33,11 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
     // Menus
     private static final DeferredRegister<MenuType<?>> MENUS =
         DeferredRegister.create(ForgeRegistries.MENU_TYPES, Constants.MOD_ID);
+    private static final DeferredRegister<LootItemConditionType> LOOT_CONDITIONS =
+        DeferredRegister.create(Registries.LOOT_CONDITION_TYPE, Constants.MOD_ID);
+
+    private static final RegistryObject<LootItemConditionType> QUALIFICATION_CONDITION =
+        LOOT_CONDITIONS.register("qualification", () -> new LootItemConditionType(new QualificationCondition.Serializer()));
 
     // Sensor registrations
     private static final RegistryObject<SensorType<PetAttackbleEntitySensor>> PET_ATTACKBLE_ENTITY_SENSOR =
@@ -76,9 +84,9 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
         ACTIVITIES.register("socialize", () -> new Activity(PetActivities.name("socialize")));
     private static final RegistryObject<Activity> COOPERATE =
         ACTIVITIES.register("cooperate", () -> new Activity(PetActivities.name("cooperate")));
-    private static final DeferredHolder<Activity, Activity> TAKE_EXAM =
+    private static final RegistryObject<Activity> TAKE_EXAM =
         ACTIVITIES.register("take_exam", () -> new Activity(PetActivities.name("take_exam")));
-    private static final DeferredHolder<Activity, Activity> CHECK_RESULTS =
+    private static final RegistryObject<Activity> CHECK_RESULTS =
         ACTIVITIES.register("check_results", () -> new Activity(PetActivities.name("check_results")));
 
     // Menu registrations
@@ -95,6 +103,7 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
         SENSOR_TYPES.register(modEventBus);
         ACTIVITIES.register(modEventBus);
         MENUS.register(modEventBus);
+        LOOT_CONDITIONS.register(modEventBus);
     }
 
     private static void onNewRegistry(NewRegistryEvent event) {
@@ -205,6 +214,11 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
     @Override
     public Supplier<Activity> cooperateActivity() {
         return COOPERATE;
+    }
+
+    @Override
+    public Supplier<LootItemConditionType> qualificationCondition() {
+        return QUALIFICATION_CONDITION;
     }
 
     @Override
