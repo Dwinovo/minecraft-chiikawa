@@ -21,6 +21,7 @@ import com.dwinovo.chiikawa.entity.PetFollowKeeper;
 import com.dwinovo.chiikawa.entity.PetRecall;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalityLoader;
 import com.dwinovo.chiikawa.platform.FabricReloadListeners;
+import com.dwinovo.chiikawa.qualification.ExamNotices;
 import com.dwinovo.chiikawa.qualification.QualificationLoader;
 import com.dwinovo.chiikawa.shop.ShopCatalogLoader;
 import com.dwinovo.chiikawa.social.PetInteractionLoader;
@@ -92,6 +93,7 @@ public class ChiikawaFabricMod implements ModInitializer {
         ServerTickEvents.END_SERVER_TICK.register(ServerMusicSystem::tickServer);
         ServerTickEvents.END_SERVER_TICK.register(PetFollowKeeper::tickServer);
         ServerTickEvents.END_SERVER_TICK.register(PetRecall::tickServer);
+        ServerTickEvents.END_SERVER_TICK.register(ExamNotices::tickServer);
         ServerLifecycleEvents.SERVER_STOPPED.register(ServerMusicSystem::stopServer);
         Constants.LOG.info("Hello Chiikawa Fabric world!");
         CommonClass.init();

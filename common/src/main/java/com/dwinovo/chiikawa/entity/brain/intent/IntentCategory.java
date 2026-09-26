@@ -23,5 +23,10 @@ public enum IntentCategory {
      * Playing a little scene with another pet, either side of it. Only where a pet may
      * wander, so a following pet only does it while its owner is close by.
      */
-    SOCIAL
+    SOCIAL,
+    /**
+     * Sitting a licence exam at a labor board, and going back to see the results. Where a
+     * slip is taken: on the way while following, anywhere while free.
+     */
+    EXAM
 }

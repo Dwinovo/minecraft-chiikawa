@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.intent;
 
 import com.dwinovo.chiikawa.anim.state.PetActivity;
+import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
@@ -10,6 +11,7 @@ import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
 import com.dwinovo.chiikawa.entity.brain.task.musician.PlayMusicBehavior;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitMemory;
+import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.shop.ShopBasket;
 import com.dwinovo.chiikawa.shop.Wallet;
 import com.dwinovo.chiikawa.social.InteractionPlan;
@@ -45,6 +47,8 @@ import net.minecraft.world.level.Level;
  * @param hasArrows whether the pet carries arrows
  * @param hasPlayableSelection whether the held music box selects a song the pet would play now
  * @param playingMusic whether the pet is performing
+ * @param examBoard the nearest labor board, while the pet means to sit an exam now and a seat there is free
+ * @param resultsBoard the nearest labor board, while the pet has results out to go and see this morning
  */
 public record IntentContext(
     GlobalPos petPos,
@@ -65,7 +69,9 @@ public record IntentContext(
     boolean attackCoolingDown,
     boolean hasArrows,
     boolean hasPlayableSelection,
-    boolean playingMusic
+    boolean playingMusic,
+    Optional<GlobalPos> examBoard,
+    Optional<GlobalPos> resultsBoard
 ) {
     public static IntentContext capture(AbstractPet pet, PetOwnership ownership) {
         Level level = pet.level();
@@ -93,8 +99,34 @@ public record IntentContext(
             pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_COOLING_DOWN),
             !Utils.getArrow(pet).isEmpty(),
             PlayMusicBehavior.playableSelection(pet).isPresent(),
-            pet.getActivity() == PetActivity.PLAY_GUITAR
+            pet.getActivity() == PetActivity.PLAY_GUITAR,
+            examBoard(pet),
+            resultsBoard(pet)
         );
+    }
+
+    private static Optional<GlobalPos> examBoard(AbstractPet pet) {
+        if (PetExams.toSit(pet).isEmpty()) {
+            return Optional.empty();
+        }
+        long gameTime = pet.level().getGameTime();
+        return nearestBoard(pet)
+            .filter(board -> board.exam().hasSeatFor(pet.getUUID(), gameTime))
+            .map(board -> GlobalPos.of(pet.level().dimension(), board.getBlockPos()));
+    }
+
+    private static Optional<GlobalPos> resultsBoard(AbstractPet pet) {
+        if (!PetExams.goesToSeeResults(pet)) {
+            return Optional.empty();
+        }
+        return nearestBoard(pet).map(board -> GlobalPos.of(pet.level().dimension(), board.getBlockPos()));
+    }
+
+    private static Optional<LaborBoardBlockEntity> nearestBoard(AbstractPet pet) {
+        Level level = pet.level();
+        return pet.getBrain().getMemory(InitMemory.NEAREST_BOARD.get())
+            .filter(level::isLoaded)
+            .flatMap(pos -> level.getBlockEntity(pos, InitBlockEntities.LABOR_BOARD.get()));
     }
 
     /**
