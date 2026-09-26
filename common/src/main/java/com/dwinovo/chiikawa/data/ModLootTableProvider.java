@@ -4,6 +4,9 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
+import com.dwinovo.chiikawa.qualification.LicenceRequirement;
+import com.dwinovo.chiikawa.qualification.Qualification;
+import com.dwinovo.chiikawa.qualification.QualificationCondition;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -81,7 +84,8 @@ public final class ModLootTableProvider extends LootTableProvider {
 
         @Override
         public void generate(HolderLookup.Provider registries, BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
-            reward(output, PetTaskTypeData.WEEDING, 1, 2, Items.BREAD, 1, 1);
+            reward(output, PetTaskTypeData.WEEDING, 1, 2, Items.BREAD, 1, 1, QualificationData.WEEDING);
+            reward(output, PetTaskTypeData.ADVANCED_WEEDING, 3, 5, Items.BREAD, 2, 3, QualificationData.WEEDING);
             reward(output, PetTaskTypeData.STREET_PERFORMANCE, 2, 4, Items.COOKIE, 2, 4);
             // Hunting pays most: it is the only work a pet can fail by falling.
             reward(output, PetTaskTypeData.MELEE_HUNTING, 4, 7, Items.COOKED_BEEF, 1, 2);
@@ -90,7 +94,30 @@ public final class ModLootTableProvider extends LootTableProvider {
 
         private static void reward(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output, ResourceLocation type,
                 int minPay, int maxPay, Item extra, int minExtra, int maxExtra) {
-            output.accept(PetTaskTypeData.reward(type), LootTable.lootTable()
+            output.accept(PetTaskTypeData.reward(type), slipReward(minPay, maxPay, extra, minExtra, maxExtra));
+        }
+
+        /**
+         * A slip whose pay goes up with a licence: one more coin for each grade the pet
+         * holds, each coin a pool of its own asked for with {@code chiikawa:qualification},
+         * so a pack sees plainly what each grade is worth and can change it.
+         */
+        private static void reward(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output, ResourceLocation type,
+                int minPay, int maxPay, Item extra, int minExtra, int maxExtra, ResourceLocation licence) {
+            LootTable.Builder table = slipReward(minPay, maxPay, extra, minExtra, maxExtra);
+            Qualification qualification = QualificationData.all().get(licence);
+            for (int held = 1; held <= qualification.grades(); held++) {
+                LicenceRequirement grade = new LicenceRequirement(licence, qualification.rank(held));
+                table.withPool(LootPool.lootPool()
+                    .setRolls(ConstantValue.exactly(1))
+                    .when(() -> new QualificationCondition(grade))
+                    .add(TagEntry.expandTag(InitTag.CURRENCY)));
+            }
+            output.accept(PetTaskTypeData.reward(type), table);
+        }
+
+        private static LootTable.Builder slipReward(int minPay, int maxPay, Item extra, int minExtra, int maxExtra) {
+            return LootTable.lootTable()
                 .withPool(LootPool.lootPool()
                     .setRolls(ConstantValue.exactly(1))
                     .add(TagEntry.expandTag(InitTag.CURRENCY)
@@ -99,7 +126,7 @@ public final class ModLootTableProvider extends LootTableProvider {
                     .setRolls(ConstantValue.exactly(1))
                     .when(LootItemRandomChanceCondition.randomChance(EXTRA_CHANCE))
                     .add(LootItem.lootTableItem(extra)
-                        .apply(SetItemCountFunction.setCount(UniformGenerator.between(minExtra, maxExtra))))));
+                        .apply(SetItemCountFunction.setCount(UniformGenerator.between(minExtra, maxExtra)))));
         }
     }
 }

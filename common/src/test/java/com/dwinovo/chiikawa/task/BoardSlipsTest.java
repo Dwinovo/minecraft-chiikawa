@@ -7,11 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.LongStream;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
@@ -32,6 +34,8 @@ class BoardSlipsTest {
     private static final long NOON = 6000L;
     private static final long NOW = 100_000L;
     private static final BoardSlot.Claim TAKER = new BoardSlot.Claim("Usagi", "Dwinovo");
+    /** A pet that may take any slip: one no slip asks a licence of. */
+    private static final Predicate<PetTask> ANY_SLIP = slip -> true;
     /** Three slips a day, one more a level: the rolls below count on nothing else. */
     private static final BoardLevels LEVELS = new BoardLevels(List.of(
         new BoardLevels.Level(3, 0), new BoardLevels.Level(4, 16), new BoardLevels.Level(5, 32)));
@@ -158,7 +162,7 @@ class BoardSlipsTest {
     void workATooLowBoardCannotPutUpStaysOff() {
         SortedMap<ResourceLocation, PetTaskType> types = types();
         types.put(id("melee_hunting"), new PetTaskType(id("fencer"), PetWorkCounters.SLAY, PetTask.NO_ICON,
-            UniformInt.of(3, 6), reward("melee_hunting"), 50, 2));
+            UniformInt.of(3, 6), reward("melee_hunting"), 50, 2, Optional.empty()));
 
         for (long day = 0; day < 50; day++) {
             long seed = BoardSlips.seed(1L, day, BlockPos.ZERO);
@@ -176,23 +180,23 @@ class BoardSlipsTest {
     void findsTheFirstOpenSlipForThePetsCapability() {
         List<BoardSlot> slots = List.of(slot(MUSICIAN), slot(FARMER), slot(FARMER));
 
-        assertEquals(OptionalInt.of(1), BoardSlips.find(slots, FARMER, PET, false, NOON, NOW));
-        assertEquals(OptionalInt.of(0), BoardSlips.find(slots, MUSICIAN, PET, false, NOON, NOW));
-        assertEquals(OptionalInt.empty(), BoardSlips.find(slots, id("fencer"), PET, false, NOON, NOW));
+        assertEquals(OptionalInt.of(1), BoardSlips.find(slots, FARMER, PET, false, NOON, NOW, ANY_SLIP));
+        assertEquals(OptionalInt.of(0), BoardSlips.find(slots, MUSICIAN, PET, false, NOON, NOW, ANY_SLIP));
+        assertEquals(OptionalInt.empty(), BoardSlips.find(slots, id("fencer"), PET, false, NOON, NOW, ANY_SLIP));
     }
 
     @Test
     void skipsTakenSlipsAndSlipsHeldByAnotherPet() {
         List<BoardSlot> slots = List.of(taken(FARMER), slot(FARMER).reserve(OTHER, NOW + 10), slot(FARMER));
 
-        assertEquals(OptionalInt.of(2), BoardSlips.find(slots, FARMER, PET, false, NOON, NOW));
+        assertEquals(OptionalInt.of(2), BoardSlips.find(slots, FARMER, PET, false, NOON, NOW, ANY_SLIP));
     }
 
     @Test
     void aLapsedReservationFreesTheSlip() {
         List<BoardSlot> slots = List.of(slot(FARMER).reserve(OTHER, NOW));
 
-        assertEquals(OptionalInt.of(0), BoardSlips.find(slots, FARMER, PET, false, NOON, NOW));
+        assertEquals(OptionalInt.of(0), BoardSlips.find(slots, FARMER, PET, false, NOON, NOW, ANY_SLIP));
         assertFalse(slots.get(0).reservedBy(OTHER, NOW));
     }
 
@@ -200,23 +204,32 @@ class BoardSlipsTest {
     void aPetFindsTheSlipItHoldsFirst() {
         List<BoardSlot> slots = List.of(slot(FARMER), slot(FARMER).reserve(PET, NOW + 10));
 
-        assertEquals(OptionalInt.of(1), BoardSlips.find(slots, FARMER, PET, false, NOON, NOW));
+        assertEquals(OptionalInt.of(1), BoardSlips.find(slots, FARMER, PET, false, NOON, NOW, ANY_SLIP));
+    }
+
+    /** A slip the pet may not take, such as one asking a licence it lacks, is left for another. */
+    @Test
+    void aSlipThePetMayNotTakeIsLeftForAnother() {
+        List<BoardSlot> slots = List.of(slot(FARMER), slot(FARMER));
+        PetTask first = slots.get(0).slip();
+
+        assertEquals(OptionalInt.of(1), BoardSlips.find(slots, FARMER, PET, false, NOON, NOW, slip -> slip != first));
     }
 
     @Test
     void wildPetsOnlyTakeWhatIsLeftLaterInTheDay() {
         List<BoardSlot> slots = List.of(slot(FARMER));
 
-        assertEquals(OptionalInt.empty(), BoardSlips.find(slots, FARMER, PET, true, BoardSlips.WILD_CLAIM_DELAY - 1, NOW));
-        assertEquals(OptionalInt.of(0), BoardSlips.find(slots, FARMER, PET, true, BoardSlips.WILD_CLAIM_DELAY, NOW));
-        assertEquals(OptionalInt.of(0), BoardSlips.find(slots, FARMER, PET, false, 0L, NOW));
+        assertEquals(OptionalInt.empty(), BoardSlips.find(slots, FARMER, PET, true, BoardSlips.WILD_CLAIM_DELAY - 1, NOW, ANY_SLIP));
+        assertEquals(OptionalInt.of(0), BoardSlips.find(slots, FARMER, PET, true, BoardSlips.WILD_CLAIM_DELAY, NOW, ANY_SLIP));
+        assertEquals(OptionalInt.of(0), BoardSlips.find(slots, FARMER, PET, false, 0L, NOW, ANY_SLIP));
     }
 
     @Test
     void aWildPetKeepsTheSlipItAlreadyHolds() {
         List<BoardSlot> slots = List.of(slot(FARMER).reserve(PET, NOW + 10));
 
-        assertEquals(OptionalInt.of(0), BoardSlips.find(slots, FARMER, PET, true, 0L, NOW));
+        assertEquals(OptionalInt.of(0), BoardSlips.find(slots, FARMER, PET, true, 0L, NOW, ANY_SLIP));
     }
 
     @Test
@@ -244,9 +257,9 @@ class BoardSlipsTest {
     private static SortedMap<ResourceLocation, PetTaskType> types() {
         SortedMap<ResourceLocation, PetTaskType> types = new TreeMap<>();
         types.put(id("weeding"), new PetTaskType(FARMER, PetWorkCounters.WEED, PetTask.NO_ICON,
-            UniformInt.of(8, 16), reward("weeding"), 3, BoardLevels.FIRST_LEVEL));
+            UniformInt.of(8, 16), reward("weeding"), 3, BoardLevels.FIRST_LEVEL, Optional.empty()));
         types.put(id("mushroom_picking"), new PetTaskType(FARMER, PetWorkCounters.PICK_MUSHROOM, PetTask.NO_ICON,
-            UniformInt.of(8, 16), reward("mushroom_picking"), 2, BoardLevels.FIRST_LEVEL));
+            UniformInt.of(8, 16), reward("mushroom_picking"), 2, BoardLevels.FIRST_LEVEL, Optional.empty()));
         return types;
     }
 
