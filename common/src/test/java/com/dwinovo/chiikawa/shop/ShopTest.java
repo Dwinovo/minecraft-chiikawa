@@ -124,7 +124,7 @@ class ShopTest {
 
     private static Personality likes(Item item) {
         return new Personality(Map.of(), Map.of(), 0.0F, List.of(),
-            List.of(new Personality.WeightedItem(item, 1)), IdleHabits.DEFAULT);
+            List.of(new Personality.WeightedItem(item, 1)), IdleHabits.DEFAULT, Map.of());
     }
 
     private static Identifier id(String path) {
