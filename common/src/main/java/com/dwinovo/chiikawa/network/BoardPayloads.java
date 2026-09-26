@@ -67,6 +67,48 @@ public final class BoardPayloads {
     }
 
     /**
+     * What a board says about licence exams, as its screen shows it: the exams coming up
+     * today or tomorrow, and what was sat at this board last exam day, posted the morning
+     * after. Worked out on the server, where the calendar and the results are.
+     *
+     * @param upcoming each licence whose exam is today or tomorrow, with how many days off
+     * @param posted who sat what here last exam day, and how they did
+     */
+    public record ExamNotice(List<Upcoming> upcoming, List<Posted> posted) {
+        public static final StreamCodec<FriendlyByteBuf, ExamNotice> STREAM_CODEC = StreamCodec.of(
+            (buffer, value) -> {
+                buffer.writeCollection(value.upcoming, (buf, exam) -> {
+                    buf.writeResourceLocation(exam.qualification());
+                    buf.writeVarInt(exam.days());
+                });
+                buffer.writeCollection(value.posted, (buf, sitting) -> {
+                    buf.writeUtf(sitting.name());
+                    buf.writeResourceLocation(sitting.qualification());
+                    buf.writeVarInt(sitting.rank());
+                    buf.writeBoolean(sitting.passed());
+                });
+            },
+            buffer -> new ExamNotice(
+                buffer.readList(buf -> new Upcoming(buf.readResourceLocation(), buf.readVarInt())),
+                buffer.readList(buf -> new Posted(buf.readUtf(), buf.readResourceLocation(), buf.readVarInt(),
+                    buf.readBoolean())))
+        );
+
+        /** @return how many lines the notice takes on the screen */
+        public int lines() {
+            return upcoming.size() + posted.size();
+        }
+
+        /** @param days 0 for today, 1 for tomorrow */
+        public record Upcoming(ResourceLocation qualification, int days) {
+        }
+
+        /** @param rank the grade sat, as the player reads it */
+        public record Posted(String name, ResourceLocation qualification, int rank, boolean passed) {
+        }
+    }
+
+    /**
      * Opens the labor board screen with the day's slips, and sends it again after an
      * upgrade so the screen shows what was just paid for.
      *
@@ -74,9 +116,10 @@ public final class BoardPayloads {
      * @param level how far the board has been paid up
      * @param daily how many slips a day it puts up at that level
      * @param next what the level after it costs and gives
+     * @param exams what it says about licence exams
      */
-    public record BoardSlipsPayload(BlockPos board, int level, int daily, NextLevel next, List<SlipView> slips)
-            implements CustomPacketPayload {
+    public record BoardSlipsPayload(BlockPos board, int level, int daily, NextLevel next, List<SlipView> slips,
+                                    ExamNotice exams) implements CustomPacketPayload {
         public static final Type<BoardSlipsPayload> TYPE = new Type<>(
             ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "board_slips"));
         public static final StreamCodec<RegistryFriendlyByteBuf, BoardSlipsPayload> STREAM_CODEC = StreamCodec.of(
@@ -86,9 +129,11 @@ public final class BoardPayloads {
                 buffer.writeVarInt(value.daily);
                 NextLevel.STREAM_CODEC.encode(buffer, value.next);
                 buffer.writeCollection(value.slips, (buf, slip) -> SlipView.STREAM_CODEC.encode(buf, slip));
+                ExamNotice.STREAM_CODEC.encode(buffer, value.exams);
             },
             buffer -> new BoardSlipsPayload(buffer.readBlockPos(), buffer.readVarInt(), buffer.readVarInt(),
-                NextLevel.STREAM_CODEC.decode(buffer), buffer.readList(buf -> SlipView.STREAM_CODEC.decode(buf)))
+                NextLevel.STREAM_CODEC.decode(buffer), buffer.readList(buf -> SlipView.STREAM_CODEC.decode(buf)),
+                ExamNotice.STREAM_CODEC.decode(buffer))
         );
 
         @Override
