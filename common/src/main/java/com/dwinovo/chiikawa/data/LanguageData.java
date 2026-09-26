@@ -102,6 +102,9 @@ public final class LanguageData {
             addLicenceTranslations(adder, "除草证参考书", "手持右键自己的宠物让它读，下一次除草证考试更有把握；考完用掉",
                 "除草证", "%1$s 通过了%2$s %3$s 级考试", "%1$s 没有通过%2$s %3$s 级考试", "明天是%s考试",
                 "去考试", "去看榜", "现在没有要考的试，也没有要看的榜");
+            addLicenceScreenTranslations(adder, "%s 级", "无", "%s：%s 级", "%s：还没有", "已经是最高级",
+                "明天早上看榜", "还要再干些活才能报考", "今天考试", "明天考试", "下次考试：还有 %s 天");
+            addBoardExamTranslations(adder, "%s考试：今天", "%s考试：明天", "%1$s　%2$s %3$s 级", "合格", "落榜");
             addPetNewsTranslations(adder, "%1$s 花 %2$s 个%4$s买了 %3$s",
                     "%1$s 花 %2$s 个%4$s买了 %3$s，当场吃掉了",
                     "%1$s 花 %2$s 个%4$s买了 %3$s，说要送给你",
@@ -291,6 +294,9 @@ public final class LanguageData {
             addLicenceTranslations(adder, "草むしり検定の参考書", "持って自分の子を右クリックすると読ませられる。次の草むしり検定で受かりやすくなり、試験で使い切る",
                 "草むしり検定", "%1$sが%2$s%3$s級に合格した", "%1$sは%2$s%3$s級に落ちた", "明日は%sの試験",
                 "試験を受けに行く", "合格発表を見に行く", "今は受ける試験も見る発表もない");
+            addLicenceScreenTranslations(adder, "%s級", "なし", "%s：%s級", "%s：まだない", "もう最上級",
+                "明日の朝に合格発表", "受験するにはもう少し働かないと", "今日が試験", "明日が試験", "次の試験まであと%s日");
+            addBoardExamTranslations(adder, "%sの試験：今日", "%sの試験：明日", "%1$s　%2$s%3$s級", "合格", "不合格");
             addPetNewsTranslations(adder, "%1$sが%4$s%2$s個で%3$sを買った",
                     "%1$sが%4$s%2$s個で%3$sを買って、その場で食べた",
                     "%1$sが%4$s%2$s個で%3$sを買った。あなたへのプレゼントだって",
@@ -480,6 +486,11 @@ public final class LanguageData {
             addLicenceTranslations(adder, "Weeding Licence Study Guide", "Right-click your pet with it to have it read: better odds at its next weeding licence exam; used up by the exam",
                 "Weeding Licence", "%1$s passed the %2$s grade %3$s exam", "%1$s failed the %2$s grade %3$s exam", "Tomorrow is the %s exam",
                 "Off to an exam", "Off to see the results", "No exam to sit or results to see now");
+            addLicenceScreenTranslations(adder, "Grade %s", "None", "%s: grade %s", "%s: none yet", "Holds the top grade",
+                "Results tomorrow morning", "Needs a little more work to sit it", "Exam today", "Exam tomorrow",
+                "Next exam in %s days");
+            addBoardExamTranslations(adder, "%s exam: today", "%s exam: tomorrow", "%1$s  %2$s grade %3$s", "Passed",
+                "Failed");
             addPetNewsTranslations(adder, "%1$s spent %2$s × %4$s on %3$s",
                     "%1$s spent %2$s × %4$s on %3$s and ate it on the spot",
                     "%1$s spent %2$s × %4$s on %3$s, and says it is for you",
@@ -685,6 +696,38 @@ public final class LanguageData {
         adder.add("tooltip.chiikawa.simple_dish", simpleDishTip);
         adder.add("item.chiikawa.pet_bell", petBell);
         adder.add("tooltip.chiikawa.pet_bell", petBellTip);
+    }
+
+    /**
+     * What a labor board's screen says of exams: one today or tomorrow, and a line for each
+     * pet that sat one there, with how it did.
+     */
+    private static void addBoardExamTranslations(Adder adder, String today, String tomorrow, String sat, String passed,
+            String failed) {
+        adder.add("screen.chiikawa.labor_board.exam_today", today);
+        adder.add("screen.chiikawa.labor_board.exam_tomorrow", tomorrow);
+        adder.add("screen.chiikawa.labor_board.sat", sat);
+        adder.add("screen.chiikawa.labor_board.passed", passed);
+        adder.add("screen.chiikawa.labor_board.failed", failed);
+    }
+
+    /**
+     * What a pet's screen says of a licence: the grade on its chip, and under the cursor
+     * the licence and grade, then what comes next.
+     */
+    private static void addLicenceScreenTranslations(Adder adder, String rank, String none, String held,
+            String heldNone, String top, String awaiting, String unpractised, String today, String tomorrow,
+            String inDays) {
+        adder.add("screen.chiikawa.pet.licence.rank", rank);
+        adder.add("screen.chiikawa.pet.licence.none", none);
+        adder.add("screen.chiikawa.pet.licence.held", held);
+        adder.add("screen.chiikawa.pet.licence.held_none", heldNone);
+        adder.add("screen.chiikawa.pet.licence.top", top);
+        adder.add("screen.chiikawa.pet.licence.awaiting", awaiting);
+        adder.add("screen.chiikawa.pet.licence.unpractised", unpractised);
+        adder.add("screen.chiikawa.pet.licence.today", today);
+        adder.add("screen.chiikawa.pet.licence.tomorrow", tomorrow);
+        adder.add("screen.chiikawa.pet.licence.in_days", inDays);
     }
 
     /**

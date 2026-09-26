@@ -60,6 +60,10 @@ public final class PetExams {
         if (pet.tickCount % UPKEEP_TICKS != 0 || !pet.isTame()) {
             return;
         }
+        long now = pet.level().getDayTime();
+        pet.showLicences(Qualifications.all().entrySet().stream()
+            .map(entry -> LicenceView.of(entry.getKey(), entry.getValue(), pet.licences().get(entry.getKey()), now))
+            .toList());
         long dayTime = pet.level().getDayTime();
         long today = QualificationExam.day(dayTime);
         Personality personality = PetPersonalities.of(pet.getType());
