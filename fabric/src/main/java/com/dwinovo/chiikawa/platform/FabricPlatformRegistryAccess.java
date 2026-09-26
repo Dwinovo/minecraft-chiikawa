@@ -39,6 +39,8 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     private final Supplier<Activity> giftOwnerActivity;
     private final Supplier<Activity> socializeActivity;
     private final Supplier<Activity> cooperateActivity;
+    private final Supplier<Activity> takeExamActivity;
+    private final Supplier<Activity> checkResultsActivity;
     private final Supplier<MenuType<PetBackpackMenu>> petBackpackMenu;
 
     public FabricPlatformRegistryAccess() {
@@ -64,6 +66,8 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
         giftOwnerActivity = registerActivity("gift_owner");
         socializeActivity = registerActivity("socialize");
         cooperateActivity = registerActivity("cooperate");
+        takeExamActivity = registerActivity("take_exam");
+        checkResultsActivity = registerActivity("check_results");
 
         petBackpackMenu = registerMenu("pet_backpack", new MenuType<>(PetBackpackMenu::new, net.minecraft.world.flag.FeatureFlags.DEFAULT_FLAGS));
     }
@@ -190,6 +194,16 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     @Override
     public Supplier<Activity> cooperateActivity() {
         return cooperateActivity;
+    }
+
+    @Override
+    public Supplier<Activity> takeExamActivity() {
+        return takeExamActivity;
+    }
+
+    @Override
+    public Supplier<Activity> checkResultsActivity() {
+        return checkResultsActivity;
     }
 
     @Override
