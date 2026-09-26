@@ -74,7 +74,14 @@ public enum PetActivity {
     NONE(0, null, 0),
 
     /** Hachiware-only performance loop; duration is owned by the active music stream session. */
-    PLAY_GUITAR(10, "guitar", 0);
+    PLAY_GUITAR(10, "guitar", 0),
+
+    /**
+     * Sitting a licence exam: the paper and the pencil, for as long as the exam behavior
+     * holds the pet at its seat. Sits as it sits elsewhere until the pets have an exam
+     * animation of their own (0.1.2 design, step 7).
+     */
+    EXAM(11, "sit", 0);
 
     private static final PetActivity[] BY_NETWORK_ID = buildLookup();
 
