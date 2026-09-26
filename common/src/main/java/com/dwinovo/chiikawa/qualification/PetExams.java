@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * A pet and its licences' exams: what it means to sit now, whether it has results to go
@@ -122,6 +123,31 @@ public final class PetExams {
         PetSpeech.say(pet, passed ? VoiceMoment.EXAM_PASS : VoiceMoment.EXAM_FAIL);
         pet.tellOwner(Component.translatable(passed ? "message.chiikawa.exam.passed" : "message.chiikawa.exam.failed",
             pet.getDisplayName(), name(id), rank));
+    }
+
+    /** @return the licence this is the book for, if it is one */
+    public static Optional<ResourceLocation> bookOf(ItemStack stack) {
+        return Qualifications.all().entrySet().stream()
+            .filter(entry -> stack.is(entry.getValue().book()))
+            .map(Map.Entry::getKey)
+            .findFirst();
+    }
+
+    /**
+     * Reads the licence's book for the next exam.
+     *
+     * @return whether it did: a pet that has read it already and not sat since, or holds
+     *         every grade, has no use for another
+     */
+    public static boolean read(AbstractPet pet, ResourceLocation id) {
+        Licence licence = pet.licences().get(id);
+        boolean useful = Qualifications.get(id)
+            .map(qualification -> !licence.read() && licence.held() < qualification.grades())
+            .orElse(false);
+        if (useful) {
+            pet.licences().set(id, licence.withBookRead());
+        }
+        return useful;
     }
 
     /** @return what the licence is called, as the player reads it */

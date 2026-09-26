@@ -50,6 +50,8 @@ public final class ShopCatalogData {
             // Things for a pet itself. A name tag is vanilla's own, and a player already
             // knows what one is for; the shop only has to have one.
             sells(InitItems.SIMPLE_DISH.get(), 3),
+            // For the weeding licence exam: read the night before, better odds in the morning.
+            sells(InitItems.WEEDING_BOOK.get(), 4),
             sells(Items.NAME_TAG, 8),
             sells(InitItems.BACKPACK.get(), 12),
             sells(InitItems.BEAR_POUCH.get(), 12),
