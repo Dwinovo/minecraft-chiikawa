@@ -20,6 +20,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -56,6 +57,11 @@ public final class GameTestKit {
     private static final double DROP_SEARCH = 6.0;
     /** Long enough for a batch to run under one sky. */
     private static final int CLEAR_WEATHER_TICKS = 24000;
+    /**
+     * Chunks each way round the spawn's chunk kept loaded for a new player: the spawn radius
+     * puts it up to a chunk from the spawn, and the game waits for the chunks one round it.
+     */
+    private static final int SPAWN_CHUNKS = 2;
 
     private GameTestKit() {
     }
@@ -121,6 +127,7 @@ public final class GameTestKit {
      */
     static ServerPlayer player(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
+        keepSpawnLoaded(level);
         ServerPlayer player = new ServerPlayer(level.getServer(), level,
                 new GameProfile(UUID.randomUUID(), "test-mock-player")) {
             @Override
@@ -137,6 +144,23 @@ public final class GameTestKit {
         new EmbeddedChannel(connection);
         level.getServer().getPlayerList().placeNewPlayer(connection, player);
         return player;
+    }
+
+    /**
+     * Keeps the chunks round the world's spawn loaded for good. The game puts a new player
+     * near the spawn, within the spawn radius, and waits there on the server thread until
+     * the chunks round it and their entities are in. From 1.21.5 the ticket it loads them
+     * with lasts a tick, and on a test server nothing else holds the spawn loaded: when the
+     * ticket lapses first the wait never ends, and the server hangs with it. A forced chunk
+     * never lapses.
+     */
+    private static void keepSpawnLoaded(ServerLevel level) {
+        ChunkPos spawn = new ChunkPos(level.getSharedSpawnPos());
+        for (int x = -SPAWN_CHUNKS; x <= SPAWN_CHUNKS; x++) {
+            for (int z = -SPAWN_CHUNKS; z <= SPAWN_CHUNKS; z++) {
+                level.setChunkForced(spawn.x + x, spawn.z + z, true);
+            }
+        }
     }
 
     /**
