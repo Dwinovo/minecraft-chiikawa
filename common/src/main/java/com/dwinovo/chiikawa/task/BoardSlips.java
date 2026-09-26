@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.OptionalInt;
 import java.util.SortedMap;
 import java.util.UUID;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
@@ -116,7 +117,8 @@ public final class BoardSlips {
 
     /**
      * The slip a pet would take: the one it already holds, otherwise the first open one
-     * for its capability. Wild pets only look once {@link #WILD_CLAIM_DELAY} has passed.
+     * for its capability that it may take. Wild pets only look once {@link #WILD_CLAIM_DELAY}
+     * has passed.
      *
      * @param slots the board's slips
      * @param capability the pet's capability id
@@ -124,10 +126,11 @@ public final class BoardSlips {
      * @param wild whether the pet has no owner
      * @param timeOfDay ticks since sunrise
      * @param gameTime the current game time, for reservations
+     * @param mayTake whether the pet may take a slip at all, such as one that asks a licence of it
      * @return the slip's index
      */
     public static OptionalInt find(List<BoardSlot> slots, Identifier capability, UUID pet, boolean wild,
-            long timeOfDay, long gameTime) {
+            long timeOfDay, long gameTime, Predicate<PetTask> mayTake) {
         for (int i = 0; i < slots.size(); i++) {
             BoardSlot slot = slots.get(i);
             if (slot.reservedBy(pet, gameTime) && slot.slip().capability().equals(capability)) {
@@ -139,7 +142,7 @@ public final class BoardSlips {
         }
         for (int i = 0; i < slots.size(); i++) {
             BoardSlot slot = slots.get(i);
-            if (slot.slip().capability().equals(capability) && slot.openTo(pet, gameTime)) {
+            if (slot.slip().capability().equals(capability) && slot.openTo(pet, gameTime) && mayTake.test(slot.slip())) {
                 return OptionalInt.of(i);
             }
         }
