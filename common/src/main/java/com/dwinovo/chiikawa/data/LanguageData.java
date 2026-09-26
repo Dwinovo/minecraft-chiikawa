@@ -19,48 +19,48 @@ public final class LanguageData {
         if ("zh_cn".equals(locale)) {
             addCommonTranslations(adder, "Chiikawa", "背包", "跟随", "坐下", "自由活动");
             addDollTooltipTranslations(adder, "试着把玩偶放在蛋糕上？");
-            addHandbookTranslations(adder, "吉伊的打工手册", "右键翻开，看大家怎么过日子", "这本手册还是空白的",
+            addHandbookTranslations(adder, "吉伊的打工手册", "右键打开，查看宠物的各种玩法", "这本手册还是空白的",
                 "上一页", "下一页");
             addHandbookPage(adder, "meet", "遇见吉伊",
-                "平原、草原、沙漠和雪地里，会遇到拿着工具闲逛的吉伊们。",
-                "拿吃的喂它就能驯服，它会跟着你走。",
-                "蹲下右键换指令：跟着你、坐下等你，或者自由活动。",
-                "右键打开它的界面，背包、状态和指令都在里面。");
+                "平原、热带草原、沙漠、沼泽和雪原中会出现野生宠物，手上各拿着工具。",
+                "手持面包、曲奇等食物右键野生宠物，每次有 30% 的几率驯服。",
+                "潜行右键自己的宠物，在跟随、坐下、自由活动之间切换。",
+                "直接右键宠物打开界面，可以管理背包、查看状态、切换指令。");
             addHandbookPage(adder, "work", "去打工",
-                "放一块劳动公告板，每天早上它会贴出几张工作牌。",
-                "拿着工具的吉伊会自己去领牌：锄头去除草，剑去讨伐。",
-                "领了牌就去干活，牌上写着要干多少。",
-                "干完了！工钱直接进它的背包，主人随时可以拿。");
+                "放置劳动公告板后，每天日出时会贴出 3 张工作牌。",
+                "宠物按主手的工具去领牌，例如拿锄头的领除草牌。",
+                "领到牌后，宠物会去完成牌上写的工作量。",
+                "报酬直接放进宠物的背包，主人打开界面就能取出。");
             addHandbookPage(adder, "shop", "去商店",
-                "放一个商店。宠物攒够了钱，会自己去买喜欢的东西。",
-                "它按自己的口味挑：吉伊最爱零食。",
-                "你也能在柜台卖作物、买东西，价钱写在按钮上。",
-                "拿着钱右键它，就是给它零花钱。");
+                "放置商店后，自由活动的宠物会用背包里的绿宝石去买东西。",
+                "每个角色喜欢买的东西不同，吉伊最常买零食。",
+                "右键柜台打开价目表，玩家也可以在这里买卖物品。",
+                "手持绿宝石右键自己的宠物，可以给它零花钱。");
             addHandbookPage(adder, "presents", "送礼物",
-                "宠物有时会在商店给你挑一份礼物……",
-                "……揣着它来找你……",
-                "……亲手交给你！",
-                "它买了什么、送了什么，聊天框里都会说一声。");
+                "宠物在商店购物时，有时会顺便给主人买一份礼物。",
+                "买好后，它会拿着礼物走到主人身边。",
+                "礼物直接放进主人的物品栏，物品栏满了就放在脚边。",
+                "买礼物和送出礼物时，主人的聊天栏都会有提示。");
             addHandbookPage(adder, "supplies", "背包和用品",
-                "背上双肩包，背包多出 10 格。",
-                "小熊、鲸鱼、星星挎包，谁都能背。",
-                "喂一份简单料理，一阵子干活更快、更有干劲。",
-                "用名字牌给它起个名字。");
+                "给宠物装备双肩包，背包增加 10 格。",
+                "小熊、鲸鱼、星星挎包同样增加 10 格，所有宠物都能装备。",
+                "喂宠物简单料理后，5 分钟内移动更快，也更愿意干活。",
+                "可以用命名牌给宠物命名。");
             addHandbookPage(adder, "upgrade", "升级公告板",
-                "花钱给公告板升级，每天多贴几张牌。",
-                "升到二级后会贴出讨伐牌。",
-                "拿剑的上前砍，拿弓的在远处射。",
-                "讨伐报酬最高，但倒下就算失败。");
+                "在公告板界面花费绿宝石升级，每升一级每天多贴一张牌。",
+                "升到 2 级后会出现讨伐牌。",
+                "拿剑的宠物负责近战讨伐，拿弓的负责远程讨伐。",
+                "讨伐报酬最高，但宠物倒下时这张牌会失败。");
             addHandbookPage(adder, "safety", "倒下与召回",
-                "宠物倒下会变成玩偶，身上的东西都在里面。",
-                "把玩偶放到蛋糕上，它就带着东西回来了。",
-                "打不过时它会先退到你身边，回了血再上。",
-                "摇一摇宠物铃铛，你的宠物都会回来，别的维度也听得见。");
+                "宠物倒下后会变成玩偶，背包里的物品都保存在玩偶中。",
+                "手持玩偶右键已放置的蛋糕，宠物会带着物品复活。",
+                "生命值低于 35% 时，宠物会先撤出战斗，恢复到 60% 再回去。",
+                "使用宠物铃铛，所有宠物都会传送到你身边，包括其他维度中的。");
             addHandbookPage(adder, "friends", "伙伴之间",
-                "宠物会在头顶的气泡里说自己的口头禅，附近的人都看得见。",
-                "两只宠物碰到一起，会演原作里的一小段：飞鼠扒上来要人夸，吉伊哭了。",
-                "獭师父请客，栗子馒头给刚除完草的送咖啡，古本屋打蟹蟹招呼。",
-                "小八在街头演奏时，路过的会坐下来听，时不时鼓鼓掌。");
+                "宠物说话时头顶会出现对话气泡，16 格内的玩家都能看到。",
+                "两只宠物都空闲时，偶尔会演一段原作中的场景，比如飞鼠缠着吉伊。",
+                "獭师父会请吉伊和小八吃东西，栗子馒头会给刚除完草的宠物送咖啡。",
+                "小八街头演奏时，附近空闲的宠物会过来坐下听，时不时鼓掌。");
             addJobTranslations(adder, "职业", "无", "农夫", "剑士", "弓箭手", "音乐家", "未知");
             addEntityTranslations(adder, "乌萨奇", "小八", "吉伊", "狮萨", "飞鼠", "栗子馒头", "獭师父", "古本屋");
             addItemTagTranslations(adder, "农夫工具", "剑士工具", "弓箭手工具", "音乐家工具", "驯服食物", "种植作物", "运送物品", "可拾取物品", "请客的吃食");
@@ -204,48 +204,48 @@ public final class LanguageData {
         } else if ("ja_jp".equals(locale)) {
             addCommonTranslations(adder, "ちいかわ", "持ち物", "ついてくる", "おすわり", "自由行動");
             addDollTooltipTranslations(adder, "ぬいぐるみをケーキに置いてみる？");
-            addHandbookTranslations(adder, "ちいかわのお仕事ハンドブック", "右クリックで開いて、みんなの暮らしをのぞこう",
+            addHandbookTranslations(adder, "ちいかわのお仕事ハンドブック", "右クリックで開いて、遊び方を確認できます",
                 "このハンドブックはまだまっしろ", "前のページ", "次のページ");
             addHandbookPage(adder, "meet", "ちいかわたちとの出会い",
-                "平原や草原、砂漠や雪原で、道具を持ってうろうろしている子たちに出会えます。",
-                "食べ物をあげるとなついて、ついてくるようになります。",
-                "スニークして右クリックで指示を切り替え：ついてくる、おすわり、自由行動。",
-                "右クリックで画面を開くと、持ち物・ようす・指示がそろっています。");
+                "平原・サバンナ・砂漠・湿地・雪原に、道具を持った野生の子が現れます。",
+                "食べ物を持って野生の子を右クリック。1回につき30%の確率でなつきます。",
+                "スニークしながら右クリックで、ついてくる・おすわり・自由行動を切り替えます。",
+                "右クリックで画面を開き、持ち物・状態・指示を確認できます。");
             addHandbookPage(adder, "work", "お仕事へ",
-                "労働掲示板を置くと、毎朝お仕事カードが何枚か貼り出されます。",
-                "道具を持った子は自分でカードを取りに行きます。クワなら草むしり、剣なら討伐。",
-                "カードを取ったらお仕事へ。どれだけやるかはカードに書いてあります。",
-                "できた！報酬はそのまま持ち物に入り、あなたがいつでも受け取れます。");
+                "労働掲示板を置くと、毎日日の出に仕事カードが3枚貼り出されます。",
+                "メインハンドの道具に合ったカードを取りに行きます。クワなら草むしりです。",
+                "カードを取ると、書かれた量の仕事をしに行きます。",
+                "報酬はその子の持ち物に直接入り、画面を開けば受け取れます。");
             addHandbookPage(adder, "shop", "お店へ",
-                "お店を置こう。お金がたまった子は、好きなものを自分で買いに行きます。",
-                "何を買うかはその子の好み次第。ちいかわはおやつが大好き。",
-                "カウンターで作物を売ったり買い物したりもできます。値段はボタンに。",
-                "お金を持って右クリックすると、おこづかいをあげられます。");
+                "お店を置くと、自由行動の子が持ち物のエメラルドで買い物に行きます。",
+                "買うものは子によって違い、ちいかわはおやつをよく買います。",
+                "カウンターを右クリックすると価格表が開き、プレイヤーも売り買いできます。",
+                "エメラルドを持って自分の子を右クリックすると、おこづかいを渡せます。");
             addHandbookPage(adder, "presents", "プレゼント",
-                "ときどき、お店であなたへのプレゼントを選んでくれます……",
-                "……それを持ってあなたのところまで来て……",
-                "……自分で手渡してくれます！",
-                "何を買って何をくれたかは、チャットで教えてくれます。");
+                "お店で買い物をするとき、ときどき飼い主へのプレゼントも買います。",
+                "買ったあとは、プレゼントを持って飼い主のところまで歩いてきます。",
+                "プレゼントはインベントリに直接入り、いっぱいなら足元に置かれます。",
+                "買ったときと渡したときに、チャット欄でお知らせが届きます。");
             addHandbookPage(adder, "supplies", "カバンとごはん",
-                "リュックを背負わせると、持ち物が10マス増えます。",
-                "くま・くじら・星のポーチは、だれでも使えます。",
-                "かんたんごはんを食べると、しばらくお仕事が速くなり、やる気も出ます。",
-                "名札で名前をつけてあげましょう。");
+                "リュックを装備すると、持ち物が10マス増えます。",
+                "くま・くじら・星のポーチも10マス増え、どの子でも装備できます。",
+                "かんたんごはんを食べると、5分間移動が速くなり、仕事にも積極的になります。",
+                "名札で名前をつけられます。");
             addHandbookPage(adder, "upgrade", "掲示板のレベルアップ",
-                "お金を払ってレベルアップすると、1日に貼られるカードが増えます。",
-                "レベル2になると討伐のカードも貼られます。",
-                "剣を持った子は近くで戦い、弓を持った子は遠くから射ます。",
-                "討伐は報酬がいちばん高いけれど、倒れたら失敗です。");
+                "掲示板の画面でエメラルドを払うと、レベルが上がり1日のカードが1枚増えます。",
+                "レベル2から討伐のカードが出るようになります。",
+                "剣を持った子は近くで、弓を持った子は遠くから討伐します。",
+                "討伐は報酬が最も高いですが、倒れるとそのカードは失敗です。");
             addHandbookPage(adder, "safety", "倒れたとき・呼び戻し",
-                "倒れた子はぬいぐるみになります。持ち物はぜんぶその中に。",
-                "ぬいぐるみをケーキに置くと、持ち物といっしょに戻ってきます。",
-                "勝てそうにないときは、まずあなたのそばへ下がり、回復してからまた戦います。",
-                "ペットベルを鳴らせば、別のディメンションにいてもみんな戻ってきます。");
+                "倒れた子はぬいぐるみになり、持ち物はすべてその中に残ります。",
+                "ぬいぐるみを持って、置いたケーキを右クリックすると持ち物ごと復活します。",
+                "体力が35%を下回ると戦いから離れ、60%まで回復してから戻ります。",
+                "ペットベルを使うと、別のディメンションの子も含めて全員が手元に戻ります。");
             addHandbookPage(adder, "friends", "なかまどうし",
-                "頭の上のふきだしで口ぐせをしゃべります。近くにいればだれにでも見えます。",
-                "出会ったふたりは、原作のひとコマを演じます。モモンガがしがみつくと、ちいかわは泣いちゃう。",
-                "ラッコはごちそうし、くりまんじゅうは草むしり帰りにコーヒーを、古本屋はカニのあいさつを。",
-                "ハチワレが路上演奏していると、通りかかった子がすわって聴き、ときどき拍手します。");
+                "しゃべると頭の上にふきだしが出て、16ブロック以内のプレイヤーに見えます。",
+                "手の空いた2匹は、ときどき原作の一場面を演じます。たとえばモモンガのしがみつき。",
+                "ラッコはごちそうを、くりまんじゅうは草むしり帰りの子にコーヒーを渡します。",
+                "ハチワレが路上演奏していると、近くの手の空いた子が座って聴き、拍手します。");
             addJobTranslations(adder, "職業", "なし", "農家", "剣士", "弓使い", "音楽家", "不明");
             addEntityTranslations(adder, "うさぎ", "ハチワレ", "ちいかわ", "シーサー", "モモンガ", "くりまんじゅう", "ラッコ", "古本屋");
             addItemTagTranslations(adder, "農家の道具", "剣士の道具", "弓使いの道具", "音楽家の道具", "なつかせる食べ物", "植える作物", "運ぶアイテム", "拾えるアイテム", "おごる食べ物");
@@ -390,48 +390,48 @@ public final class LanguageData {
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
-            addHandbookTranslations(adder, "Chiikawa's Work Handbook", "Right-click to see how everyone gets by",
+            addHandbookTranslations(adder, "Chiikawa's Work Handbook", "Right-click to open: how everything works",
                 "This handbook is still blank", "Previous page", "Next page");
             addHandbookPage(adder, "meet", "Meeting Them",
-                "Out on the plains and in the snow, they wander about with a tool.",
-                "Feed one something tasty to tame it, and it will follow you.",
-                "Sneak and right-click to switch: follow, sit and wait, or roam free.",
-                "Right-click to open its screen: its bag, how it is, and orders.");
+                "Wild pets roam plains, savannas, deserts, swamps and snowfields.",
+                "Right-click a wild pet with food; each try has a 30% chance to tame it.",
+                "Sneak and right-click your pet to switch: Follow, Sit, Free Roam.",
+                "Right-click your pet to open its screen: bag, status and orders.");
             addHandbookPage(adder, "work", "Off to Work",
-                "Put up a labor board. Every morning it puts up a few work slips.",
-                "A pet with a tool takes a slip itself: a hoe weeds, a sword hunts.",
-                "Slip in hand, off it goes to work. The slip says how much.",
-                "Done! The pay goes straight into its bag, yours to take any time.");
+                "Place a labor board. Each sunrise it puts up 3 work slips.",
+                "Pets take slips for the tool in their main hand: a hoe takes weeding.",
+                "With a slip, the pet goes to do the amount written on it.",
+                "The pay goes into the pet's bag; open its screen to take it out.");
             addHandbookPage(adder, "shop", "The Shop",
-                "Put up a shop. A pet with money saved goes and buys what it likes.",
-                "It picks by its own taste: Chiikawa loves snacks.",
-                "You can sell crops and buy things at the counter too.",
-                "Right-click it holding money to give it pocket money.");
+                "Place a shop, and free-roaming pets spend the emeralds in their bags.",
+                "Each pet buys what it likes; Chiikawa mostly buys snacks.",
+                "Right-click the counter for the price list; players can trade too.",
+                "Right-click your pet holding emeralds to give it pocket money.");
             addHandbookPage(adder, "presents", "Presents",
-                "Now and then a pet picks out a present for you...",
-                "...carries it all the way to you...",
-                "...and hands it over itself!",
-                "What it bought and what it gave, it tells you in chat.");
+                "When a pet goes shopping, it sometimes buys its owner a present.",
+                "Then it walks the present over to its owner.",
+                "The present goes into your inventory, or at your feet if it is full.",
+                "A chat message tells you when it buys a present and when it gives it.");
             addHandbookPage(adder, "supplies", "Bags and Treats",
-                "A rucksack on its back gives it ten more slots.",
-                "The bear, whale and star pouches fit anyone.",
-                "A simple dish makes it quicker and keener for a while.",
-                "Give it a name with a name tag.");
+                "A backpack adds 10 slots to a pet's bag.",
+                "Bear, whale and star pouches also add 10 slots; any pet can wear one.",
+                "A simple dish makes a pet faster and keener to work for 5 minutes.",
+                "Use a name tag to name your pet.");
             addHandbookPage(adder, "upgrade", "A Better Board",
-                "Pay to upgrade a board, and it puts up more slips a day.",
-                "From level two it puts up hunting slips.",
-                "A sword goes in close; a bow shoots from afar.",
-                "Hunting pays best, but a pet that falls loses the slip.");
+                "Pay emeralds on the board's screen to level it up: one more slip a day.",
+                "From level 2, the board puts up hunting slips.",
+                "Pets with swords hunt up close; pets with bows shoot from range.",
+                "Hunting pays the most, but the slip fails if the pet falls.");
             addHandbookPage(adder, "safety", "Falling and Coming Back",
-                "A pet that falls leaves a doll with all its things inside.",
-                "Put the doll on a cake, and back it comes, things and all.",
-                "When a fight goes badly it backs off to you, then goes back in.",
-                "Ring the pet bell and your pets come back, even from other worlds.");
+                "A pet that falls becomes a doll, with everything it carried inside.",
+                "Right-click a placed cake with the doll to bring the pet back.",
+                "Below 35% health a pet leaves the fight, and returns at 60%.",
+                "Use the pet bell to bring all your pets to you, from any dimension.");
             addHandbookPage(adder, "friends", "Among Friends",
-                "Pets say their catchphrases in a bubble, for anyone nearby to see.",
-                "Two pets that meet act out a scene: Momonga wants praise, Chiikawa cries.",
-                "Rakko shares treats, Kurimanju brings coffee, Furuhonya greets crab-style.",
-                "When Hachiware busks, passers-by sit and listen, clapping now and then.");
+                "When a pet talks, a speech bubble shows to players within 16 blocks.",
+                "Two idle pets sometimes act out a scene, like Momonga clinging on.",
+                "Rakko treats Chiikawa and Hachiware; Kurimanju brings weeders coffee.",
+                "When Hachiware busks, idle pets nearby sit, listen and clap.");
             addJobTranslations(adder, "Job", "None", "Farmer", "Fencer", "Archer", "Musician", "Unknown");
             addEntityTranslations(adder, "Usagi", "Hachiware", "Chiikawa", "Shisa", "Momonga", "Kurimanju", "Rakko", "Furuhonya");
             addItemTagTranslations(adder, "Farmer Tools", "Fencer Tools", "Archer Tools", "Musician Tools", "Tame Foods", "Plant Crops", "Deliver Items", "Pickable Items", "Pet Treats");
