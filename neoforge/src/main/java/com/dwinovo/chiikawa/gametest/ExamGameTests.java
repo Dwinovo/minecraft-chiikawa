@@ -7,6 +7,8 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
+import com.dwinovo.chiikawa.block.BoardExam;
+import com.dwinovo.chiikawa.block.BoardNotice;
 import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
 import com.dwinovo.chiikawa.data.PetTaskTypeData;
 import com.dwinovo.chiikawa.data.QualificationData;
@@ -165,6 +167,30 @@ public final class ExamGameTests {
             helper.assertTrue(licence.pending().isEmpty(), "the pet has not heard its results");
             helper.assertTrue(licence.held() == 0 && licence.fails() == 2, "a fail was not counted");
         });
+    }
+
+    /** On exam day a board has the exam notice pinned up, for players to see from across the garden. */
+    @GameTest(template = "floor8", batch = EXAM_DAY, timeoutTicks = 100)
+    public static void a_board_pins_up_the_exam_notice_on_exam_day(GameTestHelper helper) {
+        BlockPos boardPos = new BlockPos(3, STAND, 3);
+        helper.setBlock(boardPos, InitBlocks.LABOR_BOARD.get());
+
+        helper.succeedWhen(() -> helper.assertTrue(board(helper, boardPos).notice() == BoardNotice.EXAM,
+            "the board has no exam notice up on exam day"));
+    }
+
+    /** The morning after, a board where an exam was sat has the results pinned up. */
+    @GameTest(template = "floor8", batch = RESULTS_MORNING, timeoutTicks = 100)
+    public static void a_board_pins_up_the_results_the_morning_after(GameTestHelper helper) {
+        BlockPos boardPos = new BlockPos(3, STAND, 3);
+        helper.setBlock(boardPos, InitBlocks.LABOR_BOARD.get());
+        LaborBoardBlockEntity board = board(helper, boardPos);
+        board.exam().record(new BoardExam.Sitting(UUID.randomUUID(), "Chiikawa", QualificationData.WEEDING, 5, true,
+            EXAM_DAY_NUMBER));
+        board.examChanged();
+
+        helper.succeedWhen(() -> helper.assertTrue(board.notice() == BoardNotice.RESULTS,
+            "the board has no results up the morning after an exam"));
     }
 
     /** Read before the exam: the book is spent. A pet that has read one and not sat since takes no other. */
