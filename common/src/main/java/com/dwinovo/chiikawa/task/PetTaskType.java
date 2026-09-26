@@ -2,6 +2,8 @@ package com.dwinovo.chiikawa.task;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.dwinovo.chiikawa.qualification.LicenceRequirement;
+import java.util.Optional;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
@@ -24,6 +26,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
  * @param weight how often a board puts up this type relative to the others
  * @param minLevel the board level this type needs before it goes up at all, so an
  *                 upgrade is worth paying for rather than only worth counting
+ * @param requires the licence grade a pet must hold to take a slip of this type, if any
  */
 public record PetTaskType(
     Identifier capability,
@@ -32,7 +35,8 @@ public record PetTaskType(
     IntProvider amount,
     ResourceKey<LootTable> reward,
     int weight,
-    int minLevel
+    int minLevel,
+    Optional<LicenceRequirement> requires
 ) {
     public static final Codec<PetTaskType> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         Identifier.CODEC.fieldOf("capability").forGetter(PetTaskType::capability),
@@ -41,7 +45,8 @@ public record PetTaskType(
         IntProviders.POSITIVE_CODEC.fieldOf("amount").forGetter(PetTaskType::amount),
         ResourceKey.codec(Registries.LOOT_TABLE).fieldOf("reward").forGetter(PetTaskType::reward),
         ExtraCodecs.POSITIVE_INT.optionalFieldOf("weight", 1).forGetter(PetTaskType::weight),
-        ExtraCodecs.POSITIVE_INT.optionalFieldOf("min_level", BoardLevels.FIRST_LEVEL).forGetter(PetTaskType::minLevel)
+        ExtraCodecs.POSITIVE_INT.optionalFieldOf("min_level", BoardLevels.FIRST_LEVEL).forGetter(PetTaskType::minLevel),
+        LicenceRequirement.CODEC.optionalFieldOf("requires").forGetter(PetTaskType::requires)
     ).apply(instance, PetTaskType::new));
 
     /**

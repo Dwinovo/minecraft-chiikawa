@@ -7,10 +7,12 @@ import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
+import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.shop.Wallet;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -45,6 +47,9 @@ public final class PetInteractHandler {
         }
         if (isTame && isOwner && held.is(InitItems.SIMPLE_DISH.get())) {
             return handleDish(level, pet, player, hand);
+        }
+        if (isTame && isOwner && PetExams.bookOf(held).isPresent()) {
+            return handleBook(level, pet, player, hand, PetExams.bookOf(held).get());
         }
         if (isTame && isOwner && Wallet.isMoney(held)) {
             return handleGiveMoney(level, pet, player, hand);
@@ -97,6 +102,27 @@ public final class PetInteractHandler {
             pet.triggerReaction(PetReaction.HAPPY);
             pet.playTameSound();
             IntentSelector.requestReevaluate(pet);
+        }
+        return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
+    }
+
+    /**
+     * A licence's book, read for the next exam. A pet with no use for it - it has read one
+     * already and not sat since, or holds every grade - does not take it, and the book is
+     * not spent.
+     */
+    private static InteractionResult handleBook(Level level, AbstractPet pet, Player player, InteractionHand hand,
+            ResourceLocation licence) {
+        if (!level.isClientSide()) {
+            if (!PetExams.read(pet, licence)) {
+                pet.triggerReaction(PetReaction.CONFUSED);
+                return InteractionResult.PASS;
+            }
+            if (!player.getAbilities().instabuild) {
+                player.getItemInHand(hand).shrink(1);
+            }
+            pet.triggerReaction(PetReaction.HAPPY);
+            pet.playTameSound();
         }
         return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
     }

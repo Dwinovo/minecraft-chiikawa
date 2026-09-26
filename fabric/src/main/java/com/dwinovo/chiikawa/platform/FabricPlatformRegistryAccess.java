@@ -9,6 +9,7 @@ import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetSocialSensor;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.platform.services.IPlatformRegistryAccess;
+import com.dwinovo.chiikawa.qualification.QualificationCondition;
 import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -16,6 +17,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 
 public final class FabricPlatformRegistryAccess implements IPlatformRegistryAccess {
     private final Supplier<SensorType<PetAttackbleEntitySensor>> petAttackbleEntitySensor;
@@ -42,8 +44,12 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     private final Supplier<Activity> takeExamActivity;
     private final Supplier<Activity> checkResultsActivity;
     private final Supplier<MenuType<PetBackpackMenu>> petBackpackMenu;
+    private final Supplier<LootItemConditionType> qualificationCondition;
 
     public FabricPlatformRegistryAccess() {
+        LootItemConditionType qualification = Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, id("qualification"),
+            new LootItemConditionType(QualificationCondition.CODEC));
+        qualificationCondition = () -> qualification;
         petAttackbleEntitySensor = registerSensor("pet_attackble_entity_sensor", new SensorType<>(PetAttackbleEntitySensor::new));
         petFarmerWorkSensor = registerSensor("pet_farmer_work_sensor", new SensorType<>(PetFarmerWorkSensor::new));
         petItemEntitySensor = registerSensor("pet_item_entity_sensor", new SensorType<>(PetPickableItemSensor::new));
@@ -194,6 +200,11 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     @Override
     public Supplier<Activity> cooperateActivity() {
         return cooperateActivity;
+    }
+
+    @Override
+    public Supplier<LootItemConditionType> qualificationCondition() {
+        return qualificationCondition;
     }
 
     @Override

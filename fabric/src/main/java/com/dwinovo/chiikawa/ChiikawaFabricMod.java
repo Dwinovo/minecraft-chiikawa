@@ -16,6 +16,7 @@ import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitItems;
+import com.dwinovo.chiikawa.init.InitLootConditions;
 import com.dwinovo.chiikawa.init.InitTabs;
 import com.dwinovo.chiikawa.entity.PetFollowKeeper;
 import com.dwinovo.chiikawa.entity.PetRecall;
@@ -54,6 +55,7 @@ public class ChiikawaFabricMod implements ModInitializer {
         InitSensor.init();
         InitTag.init();
         InitActivity.init();
+        InitLootConditions.init();
         InitSounds.init();
         InitMenu.init();
         InitDataComponents.init();
