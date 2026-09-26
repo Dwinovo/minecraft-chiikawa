@@ -11,6 +11,7 @@ import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.network.PetPayloads.PetDirectivePayload;
 import com.dwinovo.chiikawa.platform.Services;
+import com.dwinovo.chiikawa.qualification.LicenceView;
 import com.dwinovo.chiikawa.shop.Wallet;
 import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.ui.DrawSurface;
@@ -35,6 +36,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -285,8 +287,15 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
                 UiTheme.TEXT_MUTED);
             y += 30 + 6;
         }
-        chip(surface, this.leftPos + UiStyle.PAD, y, new ItemIcon(pet.getMainHandItem()),
-            PetStatusText.jobName(pet.getCapabilityId()).getString(), UiTheme.SURFACE, List.of());
+        int x = this.leftPos + UiStyle.PAD;
+        x += chip(surface, x, y, new ItemIcon(pet.getMainHandItem()),
+            PetStatusText.jobName(pet.getCapabilityId()).getString(), UiTheme.SURFACE, List.of()) + UiStyle.GAP;
+        // A chip for each licence beside the job: the grade held, and what is next under the cursor.
+        for (LicenceView licence : pet.licenceViews()) {
+            x += chip(surface, x, y, new ItemIcon(new ItemStack(BuiltInRegistries.ITEM.get(licence.book()))),
+                PetStatusText.licenceRank(licence).getString(), UiTheme.LEAF_PALE,
+                PetStatusText.licenceNotes(licence).stream().map(Component::getString).toList()) + UiStyle.GAP;
+        }
     }
 
     /**
