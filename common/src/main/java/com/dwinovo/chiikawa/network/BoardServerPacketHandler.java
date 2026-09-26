@@ -3,6 +3,8 @@ package com.dwinovo.chiikawa.network;
 import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.platform.Services;
+import com.dwinovo.chiikawa.qualification.QualificationExam;
+import com.dwinovo.chiikawa.qualification.Qualifications;
 import com.dwinovo.chiikawa.shop.Wallet;
 import com.dwinovo.chiikawa.task.BoardLevels;
 import com.dwinovo.chiikawa.task.PetTaskTypes;
@@ -35,7 +37,23 @@ public final class BoardServerPacketHandler {
         BoardPayloads.NextLevel next = price > 0
             ? new BoardPayloads.NextLevel(price, levels.slipsAt(level + 1), firstPutUpAt(level + 1))
             : BoardPayloads.NextLevel.NONE;
-        return new BoardPayloads.BoardSlipsPayload(pos, level, levels.slipsAt(level), next, board.slipViews());
+        return new BoardPayloads.BoardSlipsPayload(pos, level, levels.slipsAt(level), next, board.slipViews(),
+            exams(board));
+    }
+
+    /** The exams coming up today or tomorrow, and what was posted at this board since the last one. */
+    private static BoardPayloads.ExamNotice exams(LaborBoardBlockEntity board) {
+        long dayTime = board.getLevel().getDayTime();
+        List<BoardPayloads.ExamNotice.Upcoming> upcoming = Qualifications.all().entrySet().stream()
+            .map(entry -> new BoardPayloads.ExamNotice.Upcoming(entry.getKey(),
+                QualificationExam.daysToExam(entry.getValue(), dayTime)))
+            .filter(exam -> exam.days() <= 1)
+            .toList();
+        List<BoardPayloads.ExamNotice.Posted> posted = board.exam().posted(QualificationExam.day(dayTime)).stream()
+            .map(sitting -> new BoardPayloads.ExamNotice.Posted(sitting.name(), sitting.qualification(), sitting.rank(),
+                sitting.passed()))
+            .toList();
+        return new BoardPayloads.ExamNotice(upcoming, posted);
     }
 
     /** The kinds of work a board first puts up at this level: what buying it adds besides slips. */
