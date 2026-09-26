@@ -67,6 +67,25 @@ class LicenceTest {
         assertEquals(1, licences.get(WEEDING).practice());
     }
 
+    /** "Grade 3 or better" is grade 3, 2 or 1; nothing counts while no data pack has the licence. */
+    @Test
+    void aRequirementIsMetByTheGradeNamedOrABetterOne() {
+        Qualifications.replaceAll(Map.of(WEEDING, weeding()));
+        LicenceRequirement gradeThree = new LicenceRequirement(WEEDING, 3);
+        PetLicences licences = new PetLicences();
+
+        assertFalse(gradeThree.metBy(licences), "no grade at all");
+        licences.set(WEEDING, Licence.holding(2));
+        assertFalse(gradeThree.metBy(licences), "grade 4");
+        licences.set(WEEDING, Licence.holding(3));
+        assertTrue(gradeThree.metBy(licences), "grade 3");
+        licences.set(WEEDING, Licence.holding(5));
+        assertTrue(gradeThree.metBy(licences), "grade 1");
+
+        Qualifications.replaceAll(Map.of());
+        assertFalse(gradeThree.metBy(licences), "a licence no pack has");
+    }
+
     /** Saved with the pet, and a licence it never had anything to do with is not saved at all. */
     @Test
     void licencesAreSavedAndLoadedWithThePet() {
