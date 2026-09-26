@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.item.BagItem;
 import com.dwinovo.chiikawa.item.ChiikawaWeapon;
 import com.dwinovo.chiikawa.item.HachiwareWeapon;
+import com.dwinovo.chiikawa.item.DescribedItem;
 import com.dwinovo.chiikawa.item.HandbookItem;
 import com.dwinovo.chiikawa.item.MusicBoxItem;
 import com.dwinovo.chiikawa.item.PetBellItem;
@@ -54,7 +55,11 @@ public final class InitItems {
         registerItem("shop", () -> new BlockItem(InitBlocks.SHOP.get(), new Item.Properties()));
 
     public static final Supplier<Item> SIMPLE_DISH =
-        registerItem("simple_dish", () -> new Item(new Item.Properties()));
+        registerItem("simple_dish", () -> new DescribedItem(new Item.Properties()));
+
+    /** Read before a weeding licence exam: the pet's odds go up, and the book is spent on the exam. */
+    public static final Supplier<Item> WEEDING_BOOK =
+        registerItem("weeding_book", () -> new DescribedItem(new Item.Properties().stacksTo(16)));
 
     public static final Supplier<Item> PET_BELL =
         registerItem("pet_bell", () -> new PetBellItem(new Item.Properties()));
