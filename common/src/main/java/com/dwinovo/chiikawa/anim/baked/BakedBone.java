@@ -12,7 +12,7 @@ public final class BakedBone {
 
     /** Bone pivot in absolute pixel space (Bedrock convention: world-space). */
     public final float pivotX, pivotY, pivotZ;
-    /** Initial bone rotation in radians (XYZ Euler). Identity if all zero. */
+    /** Initial bone rotation in radians, in {@link com.dwinovo.chiikawa.anim.render.BedrockRotation}'s order. Identity if all zero. */
     public final float restRotX, restRotY, restRotZ;
     public final boolean hasRestRotation;
 
