@@ -4,6 +4,8 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.PetActivities;
 import com.dwinovo.chiikawa.entity.brain.personality.IdleHabits;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
+import com.dwinovo.chiikawa.entity.brain.task.exam.CheckResultsBehavior;
+import com.dwinovo.chiikawa.entity.brain.task.exam.TakeExamBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.idle.GlanceBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.idle.RestBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.idle.WeightedChoice;
@@ -95,6 +97,17 @@ public final class BrainUtils {
     public static void addTakeTaskTasks(Brain<AbstractPet> brain) {
         PetActivities.register(brain, InitActivity.TAKE_TASK.get(),
             ImmutableList.of(Pair.of(2, new TakeTaskBehavior())), Set.of());
+    }
+
+    /**
+     * {@code take_exam}: sit a licence exam at a labor board; {@code check_results}: go and
+     * see how it went the morning after.
+     */
+    public static void addExamTasks(Brain<AbstractPet> brain) {
+        PetActivities.register(brain, InitActivity.TAKE_EXAM.get(),
+            ImmutableList.of(Pair.of(2, new TakeExamBehavior())), Set.of());
+        PetActivities.register(brain, InitActivity.CHECK_RESULTS.get(),
+            ImmutableList.of(Pair.of(2, new CheckResultsBehavior())), Set.of());
     }
 
     /**
