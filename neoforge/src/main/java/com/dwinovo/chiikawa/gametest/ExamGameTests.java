@@ -1,15 +1,20 @@
 package com.dwinovo.chiikawa.gametest;
 
+import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
+import com.dwinovo.chiikawa.data.PetTaskTypeData;
 import com.dwinovo.chiikawa.data.QualificationData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitBlocks;
+import com.dwinovo.chiikawa.init.InitItems;
+import com.dwinovo.chiikawa.init.InitTag;
 import com.dwinovo.chiikawa.qualification.Licence;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,8 +23,16 @@ import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
@@ -152,6 +165,56 @@ public final class ExamGameTests {
             helper.assertTrue(licence.pending().isEmpty(), "the pet has not heard its results");
             helper.assertTrue(licence.held() == 0 && licence.fails() == 2, "a fail was not counted");
         });
+    }
+
+    /** Read before the exam: the book is spent. A pet that has read one and not sat since takes no other. */
+    @GameTest(template = "floor8", batch = EXAM_DAY, timeoutTicks = 100)
+    public static void a_pet_reads_the_book_once_before_each_exam(GameTestHelper helper) {
+        ServerPlayer owner = player(helper);
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        // A mock player turns up in creative, where nothing in a hand is ever spent.
+        owner.setGameMode(GameType.SURVIVAL);
+        owner.setShiftKeyDown(false);
+        owner.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(InitItems.WEEDING_BOOK.get(), 2));
+
+        pet.mobInteract(owner, InteractionHand.MAIN_HAND);
+        helper.assertTrue(pet.licences().get(QualificationData.WEEDING).read(), "the pet did not read the book");
+        helper.assertTrue(owner.getItemInHand(InteractionHand.MAIN_HAND).getCount() == 1, "the book was not spent");
+
+        pet.mobInteract(owner, InteractionHand.MAIN_HAND);
+        helper.assertTrue(owner.getItemInHand(InteractionHand.MAIN_HAND).getCount() == 1,
+            "a pet that had read the book already took another");
+        helper.succeed();
+    }
+
+    /** A licensed pet is paid more for the same slip: a coin more for each grade it holds. */
+    @GameTest(template = "floor8", batch = EXAM_DAY, timeoutTicks = 100)
+    public static void a_licensed_pet_is_paid_more_for_weeding(GameTestHelper helper) {
+        AbstractPet unlicensed = worker(helper, new BlockPos(2, STAND, 2));
+        AbstractPet gradeOne = worker(helper, new BlockPos(5, STAND, 5));
+        gradeOne.licences().set(QualificationData.WEEDING, Licence.holding(5));
+
+        // The weeding slip pays one or two coins; five grades add a coin each.
+        int plain = weedingPay(helper, unlicensed);
+        int licensed = weedingPay(helper, gradeOne);
+        helper.assertTrue(plain >= 1 && plain <= 2, "a pet with no licence was paid " + plain);
+        helper.assertTrue(licensed >= 6 && licensed <= 7, "a grade 1 pet was paid " + licensed);
+        helper.succeed();
+    }
+
+    /** What a finished weeding slip pays this pet, rolled as a finished slip is. */
+    private static int weedingPay(GameTestHelper helper, AbstractPet pet) {
+        ServerLevel level = helper.getLevel();
+        LootTable reward = level.getServer().reloadableRegistries().getLootTable(PetTaskTypeData.reward(PetTaskTypeData.WEEDING));
+        LootParams params = new LootParams.Builder(level)
+            .withParameter(LootContextParams.ORIGIN, pet.position())
+            .withParameter(LootContextParams.THIS_ENTITY, pet)
+            .create(LootContextParamSets.GIFT);
+        return reward.getRandomItems(params).stream()
+            .filter(stack -> stack.is(InitTag.CURRENCY))
+            .mapToInt(ItemStack::getCount)
+            .sum();
     }
 
     private static LaborBoardBlockEntity board(GameTestHelper helper, BlockPos pos) {

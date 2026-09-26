@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.registries.Registries;
@@ -52,7 +53,7 @@ class PetTaskTest {
     @Test
     void aTypeRollsAFreshSlipOfItsKind() {
         PetTaskType type = new PetTaskType(FARMER, PetWorkCounters.WEED, GRASS, UniformInt.of(4, 4),
-            WEEDING.reward(), 1, BoardLevels.FIRST_LEVEL);
+            WEEDING.reward(), 1, BoardLevels.FIRST_LEVEL, Optional.empty());
 
         assertEquals(new PetTask(id("weeding"), FARMER, PetWorkCounters.WEED, GRASS, 4, WEEDING.reward(), 0),
             type.roll(id("weeding"), RandomSource.create(1L)));
