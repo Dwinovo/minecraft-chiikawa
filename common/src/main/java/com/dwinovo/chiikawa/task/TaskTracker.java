@@ -47,6 +47,7 @@ public final class TaskTracker {
         ServerLevel level = (ServerLevel) pet.level();
         pet.setTask(null);
         pet.getBrain().setMemory(InitMemory.LAST_FINISHED_SLIP.get(), new FinishedSlip(task.type(), level.getGameTime()));
+        pet.licences().practised(task.type());
         LootTable reward = level.getServer().reloadableRegistries().getLootTable(task.reward());
         LootParams params = new LootParams.Builder(level)
             .withParameter(LootContextParams.ORIGIN, pet.position())

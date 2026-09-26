@@ -52,6 +52,8 @@ public final class PersonalityData {
             .idle(habits()
                 .lookAtPlayer(3, 6.0F, 20, 40)
                 .lookAtCreature(2, 5.0F, 20, 40))
+            // Wants its licence, but nerves get the better of it at the exam; keeps at it.
+            .licence(QualificationData.WEEDING, 0.6F, 0.7F)
             .build());
         // Cheerful, often playing music.
         all.put(id(InitEntity.HACHIWARE_PET.get()), personality()
@@ -69,6 +71,8 @@ public final class PersonalityData {
             .idle(habits()
                 .lookAtPlayer(3, 8.0F, 60, 100)
                 .lookAtCreature(3, 8.0F, 60, 100))
+            // Cheerful, and steady with a book in hand.
+            .licence(QualificationData.WEEDING, 0.7F, 1.0F)
             .build());
         // Very whimsical.
         all.put(id(InitEntity.USAGI_PET.get()), personality()
@@ -89,6 +93,8 @@ public final class PersonalityData {
                 .lookAtCreature(1, 5.0F, 15, 30)
                 .stroll(4)
                 .rest(1, 15, 30))
+            // Goes when it feels like it, and passes when it goes.
+            .licence(QualificationData.WEEDING, 0.4F, 1.4F)
             .build());
         // Hard-working.
         all.put(id(InitEntity.SHISA_PET.get()), personality()
@@ -106,6 +112,8 @@ public final class PersonalityData {
             .idle(habits()
                 .lookAtPlayer(3, 6.0F, 45, 90)
                 .stroll(1))
+            // Takes its licences more seriously than anyone.
+            .licence(QualificationData.WEEDING, 0.8F, 1.1F)
             .build());
         // Would rather not work.
         all.put(id(InitEntity.MOMONGA_PET.get()), personality()
@@ -124,6 +132,8 @@ public final class PersonalityData {
             .idle(habits()
                 .lookAtPlayer(5, 10.0F, 80, 140)
                 .lookAtCreature(1, 5.0F, 20, 40))
+            // No more keen on exams than on work.
+            .licence(QualificationData.WEEDING, 0.3F, 0.6F)
             .build());
         // Laid-back.
         all.put(id(InitEntity.KURIMANJU_PET.get()), personality()
@@ -142,6 +152,8 @@ public final class PersonalityData {
                 .lookAtCreature(1, 5.0F, 45, 90)
                 .stroll(1)
                 .rest(4, 80, 160))
+            // In no hurry, about this either.
+            .licence(QualificationData.WEEDING, 0.4F, 0.9F)
             .build());
         // Loves subjugation.
         all.put(id(InitEntity.RAKKO_PET.get()), personality()
@@ -158,6 +170,8 @@ public final class PersonalityData {
             .idle(habits()
                 .lookAtPlayer(1, 5.0F, 30, 60)
                 .lookAtCreature(3, 10.0F, 45, 90))
+            // Good at whatever it puts its hand to.
+            .licence(QualificationData.WEEDING, 0.6F, 1.1F)
             .build());
         // Quiet.
         all.put(id(InitEntity.FURUHONYA_PET.get()), personality()
@@ -173,6 +187,8 @@ public final class PersonalityData {
                 .lookAtCreature(1, 5.0F, 45, 90)
                 .stroll(1)
                 .rest(3, 80, 160))
+            // Has a book for everything, and gets more from one than anyone.
+            .licence(QualificationData.WEEDING, 0.6F, 1.0F, 0.1F)
             .build());
         return all;
     }
@@ -197,6 +213,7 @@ public final class PersonalityData {
         private final List<Personality.WeightedItem> likes = new ArrayList<>();
         private float randomness;
         private IdleHabits idle = IdleHabits.DEFAULT;
+        private final Map<ResourceLocation, Personality.Leaning> licences = new HashMap<>();
 
         Builder weigh(float factor, ResourceLocation intent) {
             return weigh(factor, List.of(intent));
@@ -238,8 +255,24 @@ public final class PersonalityData {
             return this;
         }
 
+        /**
+         * How this kind of pet takes to a licence's exams.
+         *
+         * @param eagerness how likely it is to want to sit each exam
+         * @param aptitude what its odds of passing are multiplied by
+         */
+        Builder licence(ResourceLocation qualification, float eagerness, float aptitude) {
+            return licence(qualification, eagerness, aptitude, 0.0F);
+        }
+
+        /** @param bookBonus what reading the book adds for it, on top of what it adds for anyone */
+        Builder licence(ResourceLocation qualification, float eagerness, float aptitude, float bookBonus) {
+            licences.put(qualification, new Personality.Leaning(eagerness, aptitude, bookBonus));
+            return this;
+        }
+
         Personality build() {
-            return new Personality(multipliers, routine, randomness, wildTools, likes, idle);
+            return new Personality(multipliers, routine, randomness, wildTools, likes, idle, licences);
         }
     }
 
