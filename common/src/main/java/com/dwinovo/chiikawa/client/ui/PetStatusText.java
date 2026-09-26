@@ -2,6 +2,9 @@ package com.dwinovo.chiikawa.client.ui;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.task.PetTask;
+import com.dwinovo.chiikawa.qualification.LicenceView;
+import com.dwinovo.chiikawa.qualification.PetExams;
+import java.util.List;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
@@ -51,5 +54,39 @@ public final class PetStatusText {
 
     private static Component intentName(Identifier intent) {
         return Component.translatable("intent." + intent.getNamespace() + "." + intent.getPath());
+    }
+
+    /** @return the grade a licence chip shows: "grade 3", or none */
+    public static Component licenceRank(LicenceView licence) {
+        return licence.rank() == 0
+            ? Component.translatable("screen.chiikawa.pet.licence.none")
+            : Component.translatable("screen.chiikawa.pet.licence.rank", licence.rank());
+    }
+
+    /**
+     * @return what a licence chip says under the cursor: the licence and the grade held, and
+     *         what comes next - nothing more to pass, results to hear, practice to do, or when
+     *         the next exam is
+     */
+    public static List<Component> licenceNotes(LicenceView licence) {
+        Component name = PetExams.name(licence.qualification());
+        Component held = licence.rank() == 0
+            ? Component.translatable("screen.chiikawa.pet.licence.held_none", name)
+            : Component.translatable("screen.chiikawa.pet.licence.held", name, licence.rank());
+        Component next;
+        if (licence.top()) {
+            next = Component.translatable("screen.chiikawa.pet.licence.top");
+        } else if (licence.awaitingResults()) {
+            next = Component.translatable("screen.chiikawa.pet.licence.awaiting");
+        } else if (!licence.practised()) {
+            next = Component.translatable("screen.chiikawa.pet.licence.unpractised");
+        } else if (licence.daysToExam() == 0) {
+            next = Component.translatable("screen.chiikawa.pet.licence.today");
+        } else if (licence.daysToExam() == 1) {
+            next = Component.translatable("screen.chiikawa.pet.licence.tomorrow");
+        } else {
+            next = Component.translatable("screen.chiikawa.pet.licence.in_days", licence.daysToExam());
+        }
+        return List.of(held, next);
     }
 }
