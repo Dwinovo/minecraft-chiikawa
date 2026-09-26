@@ -25,6 +25,7 @@ public final class ModItemModelProvider extends ModelProvider {
 
         itemModels.generateFlatItem(InitItems.MUSIC_BOX.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(InitItems.SIMPLE_DISH.get(), ModelTemplates.FLAT_ITEM);
+        itemModels.generateFlatItem(InitItems.WEEDING_BOOK.get(), ModelTemplates.FLAT_ITEM);
         itemModels.generateFlatItem(InitItems.PET_BELL.get(), ModelTemplates.FLAT_ITEM);
         // The props' item models, the weapons' among them, come from PropItemModelProvider, shared with Fabric.
         PropItemModelProvider.declareItems(itemModels.itemModelOutput);
