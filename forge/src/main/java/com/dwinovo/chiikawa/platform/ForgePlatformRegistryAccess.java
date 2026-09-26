@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.platform;
 
+import com.dwinovo.chiikawa.entity.brain.PetActivities;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPlacesSensor;
@@ -44,37 +45,37 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
 
     // Activity registrations
     private static final RegistryObject<Activity> FARMER_HARVEST =
-        ACTIVITIES.register("farmer_harvest", () -> new Activity("farmer_harvest"));
+        ACTIVITIES.register("farmer_harvest", () -> new Activity(PetActivities.name("farmer_harvest")));
     private static final RegistryObject<Activity> FARMER_PLANT =
-        ACTIVITIES.register("farmer_plant", () -> new Activity("farmer_plant"));
+        ACTIVITIES.register("farmer_plant", () -> new Activity(PetActivities.name("farmer_plant")));
     private static final RegistryObject<Activity> DELEVER =
-        ACTIVITIES.register("delever", () -> new Activity("delever"));
+        ACTIVITIES.register("delever", () -> new Activity(PetActivities.name("delever")));
     private static final RegistryObject<Activity> WEED =
-        ACTIVITIES.register("weed", () -> new Activity("weed"));
+        ACTIVITIES.register("weed", () -> new Activity(PetActivities.name("weed")));
     private static final RegistryObject<Activity> PICK_MUSHROOM =
-        ACTIVITIES.register("pick_mushroom", () -> new Activity("pick_mushroom"));
+        ACTIVITIES.register("pick_mushroom", () -> new Activity(PetActivities.name("pick_mushroom")));
     private static final RegistryObject<Activity> FENCER_FIGHT =
-        ACTIVITIES.register("fencer_fight", () -> new Activity("fencer_fight"));
+        ACTIVITIES.register("fencer_fight", () -> new Activity(PetActivities.name("fencer_fight")));
     private static final RegistryObject<Activity> ARCHER_SHOOT =
-        ACTIVITIES.register("archer_shoot", () -> new Activity("archer_shoot"));
+        ACTIVITIES.register("archer_shoot", () -> new Activity(PetActivities.name("archer_shoot")));
     private static final RegistryObject<Activity> MUSICIAN_PLAY =
-        ACTIVITIES.register("musician_play", () -> new Activity("musician_play"));
+        ACTIVITIES.register("musician_play", () -> new Activity(PetActivities.name("musician_play")));
     private static final RegistryObject<Activity> FOLLOW_OWNER =
-        ACTIVITIES.register("follow_owner", () -> new Activity("follow_owner"));
+        ACTIVITIES.register("follow_owner", () -> new Activity(PetActivities.name("follow_owner")));
     private static final RegistryObject<Activity> STAY =
-        ACTIVITIES.register("stay", () -> new Activity("stay"));
+        ACTIVITIES.register("stay", () -> new Activity(PetActivities.name("stay")));
     private static final RegistryObject<Activity> PICK_UP =
-        ACTIVITIES.register("pick_up", () -> new Activity("pick_up"));
+        ACTIVITIES.register("pick_up", () -> new Activity(PetActivities.name("pick_up")));
     private static final RegistryObject<Activity> TAKE_TASK =
-        ACTIVITIES.register("take_task", () -> new Activity("take_task"));
+        ACTIVITIES.register("take_task", () -> new Activity(PetActivities.name("take_task")));
     private static final RegistryObject<Activity> SHOP =
-        ACTIVITIES.register("shop", () -> new Activity("shop"));
+        ACTIVITIES.register("shop", () -> new Activity(PetActivities.name("shop")));
     private static final RegistryObject<Activity> GIFT_OWNER =
-        ACTIVITIES.register("gift_owner", () -> new Activity("gift_owner"));
+        ACTIVITIES.register("gift_owner", () -> new Activity(PetActivities.name("gift_owner")));
     private static final RegistryObject<Activity> SOCIALIZE =
-        ACTIVITIES.register("socialize", () -> new Activity("socialize"));
+        ACTIVITIES.register("socialize", () -> new Activity(PetActivities.name("socialize")));
     private static final RegistryObject<Activity> COOPERATE =
-        ACTIVITIES.register("cooperate", () -> new Activity("cooperate"));
+        ACTIVITIES.register("cooperate", () -> new Activity(PetActivities.name("cooperate")));
 
     // Menu registrations
     private static final RegistryObject<MenuType<PetBackpackMenu>> PET_BACKPACK =
