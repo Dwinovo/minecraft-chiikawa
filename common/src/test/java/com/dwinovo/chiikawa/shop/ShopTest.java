@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 
 /** Money, price lists, and what a pet would buy with the one from the other. */
 class ShopTest {
-    /** Money as a pack that made money of diamonds has it: the wallet takes whatever it is told money is. */
+    /** Paid in diamonds, as a pack that made money of diamonds has it, or as an exam's fee is. */
     private static final Predicate<ItemStack> DIAMONDS = stack -> stack.is(Items.DIAMOND);
     private static final ShopCatalog SHOP = new ShopCatalog(List.of(
         new ShopCatalog.Entry(Items.COOKIE, 1, 0),
@@ -41,13 +41,13 @@ class ShopTest {
     }
 
     @Test
-    void aWalletCountsOnlyWhatIsMoney() {
+    void paymentCountsOnlyWhatPays() {
         SimpleContainer bag = new SimpleContainer(4);
         bag.setItem(0, new ItemStack(Items.DIAMOND, 3));
         bag.setItem(1, new ItemStack(Items.EMERALD, 9));
         bag.setItem(2, new ItemStack(Items.DIAMOND, 2));
 
-        assertEquals(5, Wallet.count(bag, DIAMONDS), "a pack that made money of diamonds");
+        assertEquals(5, Payment.count(bag, DIAMONDS), "a pack that made money of diamonds");
     }
 
     @Test
@@ -56,8 +56,8 @@ class ShopTest {
         bag.setItem(0, new ItemStack(Items.DIAMOND, 2));
         bag.setItem(2, new ItemStack(Items.DIAMOND, 2));
 
-        assertTrue(Wallet.pay(bag, 3, DIAMONDS));
-        assertEquals(1, Wallet.count(bag, DIAMONDS));
+        assertTrue(Payment.take(bag, 3, DIAMONDS));
+        assertEquals(1, Payment.count(bag, DIAMONDS));
     }
 
     @Test
@@ -65,8 +65,8 @@ class ShopTest {
         SimpleContainer bag = new SimpleContainer(2);
         bag.setItem(0, new ItemStack(Items.DIAMOND, 2));
 
-        assertFalse(Wallet.pay(bag, 3, DIAMONDS));
-        assertEquals(2, Wallet.count(bag, DIAMONDS), "a pet paid part of a price and got nothing for it");
+        assertFalse(Payment.take(bag, 3, DIAMONDS));
+        assertEquals(2, Payment.count(bag, DIAMONDS), "a pet paid part of a price and got nothing for it");
     }
 
     @Test

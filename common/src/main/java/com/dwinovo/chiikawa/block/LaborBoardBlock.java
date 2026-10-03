@@ -115,7 +115,7 @@ public class LaborBoardBlock extends BaseEntityBlock {
         }
         if (player instanceof ServerPlayer serverPlayer
                 && level.getBlockEntity(pos) instanceof LaborBoardBlockEntity board) {
-            Services.NETWORK.sendToClient(serverPlayer, BoardServerPacketHandler.view(pos, board));
+            Services.NETWORK.sendToClient(serverPlayer, BoardServerPacketHandler.view(pos, board, serverPlayer));
         }
         return InteractionResult.CONSUME;
     }
