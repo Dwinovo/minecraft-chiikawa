@@ -100,11 +100,14 @@ public final class LanguageData {
                     "简单料理", "喂给宠物，一阵子干活更起劲",
                     "宠物铃铛", "叫回你的宠物，跨维度也听得见；响过一次要等半分钟");
             addLicenceTranslations(adder, "除草证参考书", "手持右键自己的宠物让它读，下一次除草证考试更有把握；考完用掉",
-                "除草证", "%1$s 通过了%2$s %3$s 级考试", "%1$s 没有通过%2$s %3$s 级考试", "明天是%s考试",
+                "除草证", "%1$s 通过了%2$s %3$s 级考试", "%1$s 没有通过%2$s %3$s 级考试",
+                "%1$s 去考%2$s了", "%1$s 交卷了，%2$s的结果明天早上出", "%1$s 没赶上今天的%2$s考试", "、",
                 "去考试", "去看榜", "现在没有要考的试，也没有要看的榜");
             addLicenceScreenTranslations(adder, "%s 级", "无", "%s：%s 级", "%s：还没有", "已经是最高级",
-                "明天早上看榜", "还要再干些活才能报考", "今天考试", "明天考试", "下次考试：还有 %s 天");
-            addBoardExamTranslations(adder, "%s考试：今天", "%s考试：明天", "%1$s　%2$s %3$s 级", "合格", "落榜");
+                "明天早上看榜", "今天要去考试", "还要再干些活才能报考", "可以报考：到公告板开考");
+            addBoardExamTranslations(adder, "开考 %s", "会去：%s", "考试中：%s", "白天才能开考", "附近没有能考的宠物",
+                "报名费：%1$s × %2$s，你有 %3$s 个", "去考的是附近干过这项活、没在待命的宠物",
+                "%1$s　%2$s %3$s 级", "合格", "落榜");
             addPetNewsTranslations(adder, "%1$s 花 %2$s 个%4$s买了 %3$s",
                     "%1$s 花 %2$s 个%4$s买了 %3$s，当场吃掉了",
                     "%1$s 花 %2$s 个%4$s买了 %3$s，说要送给你",
@@ -292,11 +295,14 @@ public final class LanguageData {
                     "かんたんごはん", "ペットに食べさせると、しばらくお仕事にやる気が出る",
                     "ペットベル", "ペットを呼び戻す。別のディメンションでも聞こえる。一度鳴らすと30秒待つ");
             addLicenceTranslations(adder, "草むしり検定の参考書", "持って自分の子を右クリックすると読ませられる。次の草むしり検定で受かりやすくなり、試験で使い切る",
-                "草むしり検定", "%1$sが%2$s%3$s級に合格した", "%1$sは%2$s%3$s級に落ちた", "明日は%sの試験",
+                "草むしり検定", "%1$sが%2$s%3$s級に合格した", "%1$sは%2$s%3$s級に落ちた",
+                "%1$sが%2$sを受けに行った", "%1$sが%2$sの答案を出した。結果は明日の朝", "%1$sは今日の%2$sに間に合わなかった", "、",
                 "試験を受けに行く", "合格発表を見に行く", "今は受ける試験も見る発表もない");
             addLicenceScreenTranslations(adder, "%s級", "なし", "%s：%s級", "%s：まだない", "もう最上級",
-                "明日の朝に合格発表", "受験するにはもう少し働かないと", "今日が試験", "明日が試験", "次の試験まであと%s日");
-            addBoardExamTranslations(adder, "%sの試験：今日", "%sの試験：明日", "%1$s　%2$s%3$s級", "合格", "不合格");
+                "明日の朝に合格発表", "今日は試験を受けに行く", "受験するにはもう少し働かないと", "受験できる：掲示板で試験を開こう");
+            addBoardExamTranslations(adder, "試験を開く %s", "受ける子：%s", "受験中：%s", "試験は昼のあいだだけ", "近くに受けられる子がいない",
+                "受験料：%1$s × %2$s（%3$s個持っています）", "受けるのは、近くにいてこの仕事をしたことがあり、待機中でない子",
+                "%1$s　%2$s%3$s級", "合格", "不合格");
             addPetNewsTranslations(adder, "%1$sが%4$s%2$s個で%3$sを買った",
                     "%1$sが%4$s%2$s個で%3$sを買って、その場で食べた",
                     "%1$sが%4$s%2$s個で%3$sを買った。あなたへのプレゼントだって",
@@ -484,13 +490,17 @@ public final class LanguageData {
                     "Simple Dish", "Fed to a pet: keener on work for a while",
                     "Pet Bell", "Calls your pets home, even from another dimension; half a minute between rings");
             addLicenceTranslations(adder, "Weeding Licence Study Guide", "Right-click your pet with it to have it read: better odds at its next weeding licence exam; used up by the exam",
-                "Weeding Licence", "%1$s passed the %2$s grade %3$s exam", "%1$s failed the %2$s grade %3$s exam", "Tomorrow is the %s exam",
+                "Weeding Licence", "%1$s passed the %2$s grade %3$s exam", "%1$s failed the %2$s grade %3$s exam",
+                "%1$s went to sit the %2$s exam", "%1$s handed in the %2$s paper; results tomorrow morning",
+                "%1$s missed today's %2$s exam", ", ",
                 "Off to an exam", "Off to see the results", "No exam to sit or results to see now");
             addLicenceScreenTranslations(adder, "Grade %s", "None", "%s: grade %s", "%s: none yet", "Holds the top grade",
-                "Results tomorrow morning", "Needs a little more work to sit it", "Exam today", "Exam tomorrow",
-                "Next exam in %s days");
-            addBoardExamTranslations(adder, "%s exam: today", "%s exam: tomorrow", "%1$s  %2$s grade %3$s", "Passed",
-                "Failed");
+                "Results tomorrow morning", "Sitting the exam today", "Needs a little more work to sit it",
+                "Ready: open the exam at a labor board");
+            addBoardExamTranslations(adder, "Open exam %s", "Going: %s", "Sitting: %s", "Exams open only in the daytime",
+                "No pet nearby can sit it", "Fee: %1$s × %2$s (you have %3$s)",
+                "Goes: pets nearby that have done this work and are not told to stay",
+                "%1$s  %2$s grade %3$s", "Passed", "Failed");
             addPetNewsTranslations(adder, "%1$s spent %2$s × %4$s on %3$s",
                     "%1$s spent %2$s × %4$s on %3$s and ate it on the spot",
                     "%1$s spent %2$s × %4$s on %3$s, and says it is for you",
@@ -699,13 +709,19 @@ public final class LanguageData {
     }
 
     /**
-     * What a labor board's screen says of exams: one today or tomorrow, and a line for each
-     * pet that sat one there, with how it did.
+     * What a labor board's screen says of exams: the button that opens one with its fee on
+     * it, who would go, who is sitting it, or why it cannot be opened; the fee and who goes
+     * under the cursor; and a line for each pet that sat one there, with how it did.
      */
-    private static void addBoardExamTranslations(Adder adder, String today, String tomorrow, String sat, String passed,
-            String failed) {
-        adder.add("screen.chiikawa.labor_board.exam_today", today);
-        adder.add("screen.chiikawa.labor_board.exam_tomorrow", tomorrow);
+    private static void addBoardExamTranslations(Adder adder, String open, String going, String called, String closed,
+            String nobody, String fee, String who, String sat, String passed, String failed) {
+        adder.add("screen.chiikawa.labor_board.exam_open", open);
+        adder.add("screen.chiikawa.labor_board.exam_going", going);
+        adder.add("screen.chiikawa.labor_board.exam_called", called);
+        adder.add("screen.chiikawa.labor_board.exam_closed", closed);
+        adder.add("screen.chiikawa.labor_board.exam_nobody", nobody);
+        adder.add("screen.chiikawa.labor_board.exam_fee", fee);
+        adder.add("screen.chiikawa.labor_board.exam_who", who);
         adder.add("screen.chiikawa.labor_board.sat", sat);
         adder.add("screen.chiikawa.labor_board.passed", passed);
         adder.add("screen.chiikawa.labor_board.failed", failed);
@@ -716,32 +732,37 @@ public final class LanguageData {
      * the licence and grade, then what comes next.
      */
     private static void addLicenceScreenTranslations(Adder adder, String rank, String none, String held,
-            String heldNone, String top, String awaiting, String unpractised, String today, String tomorrow,
-            String inDays) {
+            String heldNone, String top, String awaiting, String called, String unpractised, String ready) {
         adder.add("screen.chiikawa.pet.licence.rank", rank);
         adder.add("screen.chiikawa.pet.licence.none", none);
         adder.add("screen.chiikawa.pet.licence.held", held);
         adder.add("screen.chiikawa.pet.licence.held_none", heldNone);
         adder.add("screen.chiikawa.pet.licence.top", top);
         adder.add("screen.chiikawa.pet.licence.awaiting", awaiting);
+        adder.add("screen.chiikawa.pet.licence.called", called);
         adder.add("screen.chiikawa.pet.licence.unpractised", unpractised);
-        adder.add("screen.chiikawa.pet.licence.today", today);
-        adder.add("screen.chiikawa.pet.licence.tomorrow", tomorrow);
-        adder.add("screen.chiikawa.pet.licence.in_days", inDays);
+        adder.add("screen.chiikawa.pet.licence.ready", ready);
     }
 
     /**
      * The weeding licence: the book a pet reads for its exams, what the licence is called,
-     * and what its owner reads in chat - the pet, the licence and the grade it sat.
+     * and what its owner reads in chat - the pets called to an exam, one handing its paper
+     * in or missing the exam, and its result with the grade it sat.
+     *
+     * @param separator what goes between the names of the pets called
      */
     private static void addLicenceTranslations(Adder adder, String weedingBook, String weedingBookTip, String weeding,
-            String passed, String failed, String tomorrow, String takeExam, String checkResults, String noBoard) {
+            String passed, String failed, String called, String handedIn, String missed, String separator,
+            String takeExam, String checkResults, String noBoard) {
         adder.add("item.chiikawa.weeding_book", weedingBook);
         adder.add("tooltip.chiikawa.weeding_book", weedingBookTip);
         adder.add("qualification.chiikawa.weeding", weeding);
         adder.add("message.chiikawa.exam.passed", passed);
         adder.add("message.chiikawa.exam.failed", failed);
-        adder.add("message.chiikawa.exam.tomorrow", tomorrow);
+        adder.add("message.chiikawa.exam.called", called);
+        adder.add("message.chiikawa.exam.handed_in", handedIn);
+        adder.add("message.chiikawa.exam.missed", missed);
+        adder.add("message.chiikawa.list_separator", separator);
         adder.add("intent.chiikawa.take_exam", takeExam);
         adder.add("intent.chiikawa.check_results", checkResults);
         adder.add("intent.chiikawa.fail.no_board", noBoard);

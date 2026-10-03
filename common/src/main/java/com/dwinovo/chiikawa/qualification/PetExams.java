@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.qualification;
 
 import com.dwinovo.chiikawa.anim.state.PetReaction;
-import com.dwinovo.chiikawa.block.BoardExam;
+import com.dwinovo.chiikawa.block.ExamResults;
 import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
@@ -10,79 +10,83 @@ import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * A pet and its licences' exams: what it means to sit now, whether it has results to go
- * and see, the once-a-second upkeep that makes up its mind on exam day and tells it its
- * results when it misses the morning, sitting an exam, and hearing how it went.
+ * A pet and its licences' exams, from the pet's side: the exam it has been called to sit
+ * now, the results it has to go and see, the once-a-second upkeep that lets it off an exam
+ * it missed and tells it results it did not go to see, handing a paper in, and hearing how
+ * it went. Being called is {@link ExamOpening}'s business.
  */
 public final class PetExams {
-    /** How often a pet looks at the calendar. */
+    /** How often a pet looks at the clock. */
     public static final int UPKEEP_TICKS = 20;
 
     private PetExams() {
     }
 
     /**
-     * The licence this pet means to sit now: an exam day, in working hours, one it may sit
-     * and has made up its mind to.
+     * An exam a pet has been called to sit now.
+     *
+     * @param board where its owner opened it
      */
-    public static Optional<ResourceLocation> toSit(AbstractPet pet) {
+    public record Summons(ResourceLocation qualification, GlobalPos board) {
+    }
+
+    /** The exam this pet has been called to and can still sit, if any. */
+    public static Optional<Summons> toSit(AbstractPet pet) {
         long dayTime = pet.level().getDayTime();
-        long today = QualificationExam.day(dayTime);
-        for (Map.Entry<ResourceLocation, Qualification> entry : Qualifications.all().entrySet()) {
-            Licence licence = pet.licences().get(entry.getKey());
-            if (QualificationExam.isExamTime(entry.getValue(), dayTime)
-                    && QualificationExam.maySit(entry.getValue(), licence)
-                    && licence.decidedDay() == today && licence.wantsToSit()) {
-                return Optional.of(entry.getKey());
+        for (ResourceLocation id : Qualifications.all().keySet()) {
+            Licence licence = pet.licences().get(id);
+            if (QualificationExam.isCalledNow(licence, dayTime)) {
+                return licence.call().map(called -> new Summons(id, called.board()));
             }
         }
         return Optional.empty();
     }
 
-    /** Whether this pet has results out that it goes to a board to see this morning. */
-    public static boolean goesToSeeResults(AbstractPet pet) {
+    /** The board this pet sat at and goes to this morning to see how it did, if any. */
+    public static Optional<GlobalPos> resultsBoard(AbstractPet pet) {
         long dayTime = pet.level().getDayTime();
         return Qualifications.all().keySet().stream()
-            .anyMatch(id -> QualificationExam.goesToSeeResults(pet.licences().get(id), dayTime));
+            .map(id -> pet.licences().get(id))
+            .filter(licence -> QualificationExam.goesToSeeResults(licence, dayTime))
+            .flatMap(licence -> licence.paper().stream())
+            .map(ExamStage.Sat::board)
+            .findFirst();
     }
 
     /**
-     * Once a second: on exam day a pet that may sit makes up its mind, once, whether it
-     * wants to; a pet whose results are out and that has missed the morning hears them
-     * where it is. Wild pets have nothing to do with exams.
+     * Once a second: shows the owner's screen where the pet stands; lets it off an exam it
+     * was called to and can no longer sit, and tells its owner so; and tells it results it
+     * has missed the morning to go and see. Wild pets have nothing to do with exams.
      */
     public static void upkeep(AbstractPet pet) {
         if (pet.tickCount % UPKEEP_TICKS != 0 || !pet.isTame()) {
             return;
         }
-        long now = pet.level().getDayTime();
-        pet.showLicences(Qualifications.all().entrySet().stream()
-            .map(entry -> LicenceView.of(entry.getKey(), entry.getValue(), pet.licences().get(entry.getKey()), now))
-            .toList());
         long dayTime = pet.level().getDayTime();
-        long today = QualificationExam.day(dayTime);
-        Personality personality = PetPersonalities.of(pet.getType());
         Qualifications.all().forEach((id, qualification) -> {
             Licence licence = pet.licences().get(id);
-            if (QualificationExam.isExamDay(qualification, today) && licence.decidedDay() != today
-                    && QualificationExam.maySit(qualification, licence)) {
-                pet.licences().set(id, licence.decided(today,
-                    QualificationExam.wantsToSit(personality.leaning(id), licence, pet.getRandom())));
+            if (QualificationExam.missedCall(licence, dayTime)) {
+                pet.licences().set(id, licence.excused());
+                pet.tellOwner(Component.translatable("message.chiikawa.exam.missed", pet.getDisplayName(), name(id)));
             }
             if (QualificationExam.mustHearResults(pet.licences().get(id), dayTime)) {
                 hearResults(pet, id);
             }
         });
+        pet.showLicences(Qualifications.all().entrySet().stream()
+            .map(entry -> LicenceView.of(entry.getKey(), entry.getValue(), pet.licences().get(entry.getKey()), dayTime))
+            .toList());
     }
 
     /**
      * Hands the paper in: the result is decided now, kept with the pet until the morning,
-     * and the board keeps it to post then.
+     * and the board keeps it to post then. The owner hears it is done.
      */
     public static void handIn(AbstractPet pet, ResourceLocation id, LaborBoardBlockEntity board) {
         Qualifications.get(id).ifPresent(qualification -> {
@@ -91,12 +95,13 @@ public final class PetExams {
             boolean passed = QualificationExam.passes(qualification, licence, leaning, pet.getRandom());
             long today = QualificationExam.day(pet.level().getDayTime());
             pet.licences().set(id, licence.sat(passed));
-            BoardExam exam = board.exam();
-            exam.forgetBefore(today);
-            exam.record(new BoardExam.Sitting(pet.getUUID(), pet.getDisplayName().getString(), id,
+            ExamResults results = board.exam().results();
+            results.forgetBefore(today);
+            results.record(new ExamResults.Sitting(pet.getUUID(), pet.getDisplayName().getString(), id,
                 qualification.rank(licence.held() + 1), passed, today));
-            exam.leave(pet.getUUID());
+            board.exam().seats().leave(pet.getUUID());
             board.examChanged();
+            pet.tellOwner(Component.translatable("message.chiikawa.exam.handed_in", pet.getDisplayName(), name(id)));
         });
     }
 
@@ -115,11 +120,12 @@ public final class PetExams {
      */
     public static void hearResults(AbstractPet pet, ResourceLocation id) {
         Licence licence = pet.licences().get(id);
+        Optional<ExamStage.Sat> paper = licence.paper();
         Optional<Qualification> qualification = Qualifications.get(id);
-        if (licence.pending().isEmpty() || qualification.isEmpty()) {
+        if (paper.isEmpty() || qualification.isEmpty()) {
             return;
         }
-        boolean passed = licence.pending().get();
+        boolean passed = paper.get().passed();
         int rank = qualification.get().rank(licence.held() + 1);
         pet.licences().set(id, licence.announced());
         pet.triggerReaction(passed ? PetReaction.HAPPY
