@@ -69,7 +69,7 @@ public final class UpgradeGameTests {
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 200)
     public static void a_board_says_what_its_next_level_gives(GameTestHelper helper) {
         LaborBoardBlockEntity board = board(helper);
-        BoardPayloads.NextLevel next = BoardServerPacketHandler.view(helper.absolutePos(BOARD), board).next();
+        BoardPayloads.NextLevel next = BoardServerPacketHandler.view(helper.absolutePos(BOARD), board, player(helper)).next();
         BoardLevels levels = BoardLevels.current();
         int level = board.boardLevel();
 
