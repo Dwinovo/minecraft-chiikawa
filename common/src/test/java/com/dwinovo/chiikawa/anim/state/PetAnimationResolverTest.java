@@ -43,6 +43,15 @@ class PetAnimationResolverTest {
         assertEquals(List.of("guitar", "idle"), PetAnimationResolver.resolve(context));
     }
 
+    /** A pet with no exam animation of its own sits at the paper, as it sits anywhere. */
+    @Test
+    void anExamFallsBackToSitting() {
+        PetAnimContext context = PetAnimContext.base(
+                PetDirective.FOLLOW, /*jobId=*/0, /*walkSpeed=*/0.0f, PetActivity.EXAM);
+
+        assertEquals(List.of("exam", "sit", "idle"), PetAnimationResolver.resolve(context));
+    }
+
     @Test
     void aPartInASceneComesFirstAndFallsBackToWhatThePetWouldDoAnyway() {
         PetAnimContext context = PetAnimContext.base(

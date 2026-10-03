@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain.task.exam;
 
+import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.qualification.PetExams;
@@ -64,6 +65,7 @@ public class CheckResultsBehavior extends Behavior<AbstractPet> {
                 pet.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
                 pet.getNavigation().stop();
                 pet.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(board.getBlockPos()));
+                pet.setActivity(PetActivity.READ_RESULTS);
                 readUntil = gameTime + READING_TICKS;
             } else if (!pet.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET)) {
                 // The walk ended short of the board: it hears the results by noon anyway.
@@ -79,6 +81,9 @@ public class CheckResultsBehavior extends Behavior<AbstractPet> {
 
     @Override
     protected void stop(ServerLevel level, AbstractPet pet, long gameTime) {
+        if (pet.getActivity() == PetActivity.READ_RESULTS) {
+            pet.setActivity(PetActivity.NONE);
+        }
         where = null;
     }
 
