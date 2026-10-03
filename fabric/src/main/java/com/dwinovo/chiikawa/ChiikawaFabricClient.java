@@ -10,6 +10,7 @@ import com.dwinovo.chiikawa.anim.render.impl.RakkoRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.ShisaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.UsagiRenderer;
 import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
+import com.dwinovo.chiikawa.client.render.ExamDeskRenderer;
 import com.dwinovo.chiikawa.client.render.LaborBoardRenderer;
 import com.dwinovo.chiikawa.client.render.PropBlockRenderer;
 import com.dwinovo.chiikawa.client.render.PropItemRenderer;
@@ -46,6 +47,7 @@ public class ChiikawaFabricClient implements ClientModInitializer {
         // Props are drawn from their own Bedrock models, as items as everywhere else.
         SpecialModelRenderersAccessor.chiikawa$getIdMapper().put(PropItemRenderer.ID, PropItemRenderer.Unbaked.MAP_CODEC);
         BlockEntityRenderers.register(InitBlockEntities.LABOR_BOARD.get(), context -> new LaborBoardRenderer());
+        BlockEntityRenderers.register(InitBlockEntities.EXAM_DESK.get(), context -> new ExamDeskRenderer());
         BlockEntityRenderers.register(InitBlockEntities.SHOP.get(), context -> new PropBlockRenderer<>());
 
         MenuScreens.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);
