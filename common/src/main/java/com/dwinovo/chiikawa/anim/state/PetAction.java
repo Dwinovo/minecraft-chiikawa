@@ -16,7 +16,9 @@ public enum PetAction {
     DEPOSIT(6, "deposit", "use_mainhand"),
     SLASH(7, "slash", "use_mainhand"),
     BOW_DRAW(8, "bow_draw", "sword_attack"),
-    BOW_RELEASE(9, "bow_release", "sword_attack");
+    BOW_RELEASE(9, "bow_release", "sword_attack"),
+    /** Handing an exam paper in; a pet with no animation for it gives it a swing of the hand. */
+    HAND_IN(10, "hand_in", "use_mainhand");
 
     private static final PetAction[] BY_NETWORK_ID = buildNetworkLookup();
 
@@ -58,6 +60,7 @@ public enum PetAction {
             case "slash" -> SLASH;
             case "bow_draw" -> BOW_DRAW;
             case "bow_release" -> BOW_RELEASE;
+            case "hand_in" -> HAND_IN;
             default -> NONE;
         };
     }

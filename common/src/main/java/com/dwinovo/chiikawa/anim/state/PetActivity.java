@@ -1,5 +1,7 @@
 package com.dwinovo.chiikawa.anim.state;
 
+import java.util.List;
+
 /**
  * Code-bounded sustained loop activity. The third animation-need bucket
  * (alongside one-shot {@link PetAction}/{@link PetReaction} edge events and
@@ -71,39 +73,41 @@ public enum PetActivity {
      * (10-19 personality, 20-29 social, 30-39 vital, etc.). Append-only:
      * once a value ships, its network ID is frozen.
      */
-    NONE(0, null, 0),
+    NONE(0, 0),
 
     /** Hachiware-only performance loop; duration is owned by the active music stream session. */
-    PLAY_GUITAR(10, "guitar", 0),
+    PLAY_GUITAR(10, 0, "guitar"),
 
     /**
-     * Sitting a licence exam: the paper and the pencil, for as long as the exam behavior
-     * holds the pet at its seat. Sits as it sits elsewhere until the pets have an exam
-     * animation of their own (0.1.2 design, step 7).
+     * Sitting a licence exam over the answer sheet, for as long as the exam behavior holds
+     * the pet at its seat. A pet with no exam animation of its own sits as it sits elsewhere.
      */
-    EXAM(11, "sit", 0);
+    EXAM(11, 0, "exam", "sit"),
+
+    /** Reading the results at the board the morning after an exam, before it hears them. */
+    READ_RESULTS(12, 0, "read_results");
 
     private static final PetActivity[] BY_NETWORK_ID = buildLookup();
 
     private final int networkId;
-    /** Resolver-side animation name to play, or {@code null} for {@link #NONE}. */
-    private final String animationName;
+    /** Animations to play, the first the pet has; none for {@link #NONE}. */
+    private final List<String> animationCandidates;
     /** Server-side duration for code-bounded activity behaviors, in game ticks. */
     private final int durationTicks;
 
-    PetActivity(int networkId, String animationName, int durationTicks) {
+    PetActivity(int networkId, int durationTicks, String... animationCandidates) {
         this.networkId = networkId;
-        this.animationName = animationName;
         this.durationTicks = durationTicks;
+        this.animationCandidates = List.of(animationCandidates);
     }
 
     public int networkId() {
         return networkId;
     }
 
-    /** Animation file name to look up for this activity, or {@code null} when no activity is set. */
-    public String animationName() {
-        return animationName;
+    /** Animations to look up for this activity, the first a pet has winning; empty when no activity is set. */
+    public List<String> animationCandidates() {
+        return animationCandidates;
     }
 
     /**
