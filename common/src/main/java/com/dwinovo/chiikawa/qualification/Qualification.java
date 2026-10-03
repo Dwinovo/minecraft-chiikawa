@@ -12,8 +12,8 @@ import net.minecraft.world.item.Item;
 
 /**
  * A licence pets sit exams for, loaded from {@code data/<namespace>/pet_qualification/<id>.json}
- * by {@link QualificationLoader}: how many grades it has, how often its exam is held, what
- * counts as practice for it, and the odds.
+ * by {@link QualificationLoader}: how many grades it has, what an owner pays to open its exam,
+ * what counts as practice for it, and the odds.
  *
  * <p>Grades are counted up from nothing, as levels of anything are: a pet holds 0 until it
  * passes its first exam, and the top is {@link #grades()}. The series counts them the other
@@ -21,7 +21,7 @@ import net.minecraft.world.item.Item;
  * {@link #rank}.
  *
  * @param grades how many grades there are
- * @param everyDays an exam is held every this many days, the same day everywhere
+ * @param fee what an owner pays at a board to open the exam there
  * @param practiceTask the slip type whose completion counts as practice
  * @param requiredPractice slips finished since the last exam before a pet may sit the next
  * @param basePass the chance of passing the exam for each grade, the first grade first
@@ -37,7 +37,7 @@ import net.minecraft.world.item.Item;
  */
 public record Qualification(
     int grades,
-    int everyDays,
+    ExamFee fee,
     ResourceLocation practiceTask,
     int requiredPractice,
     List<Float> basePass,
@@ -57,7 +57,7 @@ public record Qualification(
     public static final Codec<Qualification> CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.<Qualification>create(
         instance -> instance.group(
             Codec.intRange(1, 10).fieldOf("grades").forGetter(Qualification::grades),
-            ExtraCodecs.POSITIVE_INT.fieldOf("every_days").forGetter(Qualification::everyDays),
+            ExamFee.CODEC.fieldOf("fee").forGetter(Qualification::fee),
             ResourceLocation.CODEC.fieldOf("practice_task").forGetter(Qualification::practiceTask),
             ExtraCodecs.NON_NEGATIVE_INT.fieldOf("required_practice").forGetter(Qualification::requiredPractice),
             CHANCE.listOf().fieldOf("base_pass").forGetter(Qualification::basePass),
