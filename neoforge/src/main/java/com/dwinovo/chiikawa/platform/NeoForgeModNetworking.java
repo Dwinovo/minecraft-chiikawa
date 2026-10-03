@@ -35,6 +35,12 @@ public final class NeoForgeModNetworking {
                     BoardServerPacketHandler.handleUpgrade(payload, player);
                 }
             });
+        registrar.playToServer(BoardPayloads.BoardExamPayload.TYPE, BoardPayloads.BoardExamPayload.STREAM_CODEC,
+            (payload, context) -> {
+                if (context.player() instanceof ServerPlayer player) {
+                    BoardServerPacketHandler.handleExam(payload, player);
+                }
+            });
         registrar.playToServer(PetPayloads.PetDirectivePayload.TYPE, PetPayloads.PetDirectivePayload.STREAM_CODEC,
             (payload, context) -> {
                 if (context.player() instanceof ServerPlayer player) {

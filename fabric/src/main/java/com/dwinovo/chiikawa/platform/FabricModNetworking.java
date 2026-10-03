@@ -28,6 +28,7 @@ public final class FabricModNetworking {
     public static void registerServer() {
         PayloadTypeRegistry.playS2C().register(BoardPayloads.BoardSlipsPayload.TYPE, BoardPayloads.BoardSlipsPayload.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(BoardPayloads.BoardUpgradePayload.TYPE, BoardPayloads.BoardUpgradePayload.STREAM_CODEC);
+        PayloadTypeRegistry.playC2S().register(BoardPayloads.BoardExamPayload.TYPE, BoardPayloads.BoardExamPayload.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(PetPayloads.PetDirectivePayload.TYPE, PetPayloads.PetDirectivePayload.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(ShopPayloads.ShopPricesPayload.TYPE, ShopPayloads.ShopPricesPayload.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(ManualPayloads.OpenHandbookPayload.TYPE, ManualPayloads.OpenHandbookPayload.STREAM_CODEC);
@@ -46,6 +47,8 @@ public final class FabricModNetworking {
             (payload, context) -> context.server().execute(() -> MusicServerPacketHandler.handleCatalogRequest(payload, context.player())));
         ServerPlayNetworking.registerGlobalReceiver(BoardPayloads.BoardUpgradePayload.TYPE,
             (payload, context) -> context.server().execute(() -> BoardServerPacketHandler.handleUpgrade(payload, context.player())));
+        ServerPlayNetworking.registerGlobalReceiver(BoardPayloads.BoardExamPayload.TYPE,
+            (payload, context) -> context.server().execute(() -> BoardServerPacketHandler.handleExam(payload, context.player())));
         ServerPlayNetworking.registerGlobalReceiver(PetPayloads.PetDirectivePayload.TYPE,
             (payload, context) -> context.server().execute(() -> PetServerPacketHandler.handleDirective(payload, context.player())));
         ServerPlayNetworking.registerGlobalReceiver(ShopPayloads.ShopTradePayload.TYPE,

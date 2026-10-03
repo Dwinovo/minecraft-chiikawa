@@ -14,13 +14,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.schedule.Activity;
 
 /**
- * Sits a licence exam at the nearest labor board: on exam day, in working hours, when the
- * pet may sit, has made up its mind to, and there is a seat free. Starts only on a board
- * within the anchor's reach, as a slip is taken, so a pet at heel sits it only when its
- * owner brings it near a board.
+ * Sits a licence exam at the board its owner opened it at: the day it was called, until
+ * the exam closes, while a seat there is free. Starts only on a board within the anchor's
+ * reach, as a slip is taken, so a pet at heel sits it while its owner stays near the board.
  */
 public final class TakeExamIntent implements PetIntent {
-    /** Ahead of taking a slip: exam day is the day for the exam. */
+    /** Ahead of taking a slip or getting on with work: the owner paid for this. */
     private static final float SCORE = 0.72F;
 
     @Override
