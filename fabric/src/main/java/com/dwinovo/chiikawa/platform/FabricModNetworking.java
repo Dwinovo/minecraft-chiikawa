@@ -45,6 +45,11 @@ public final class FabricModNetworking {
                 BoardPayloads.BoardUpgradePayload payload = BoardPayloads.BoardUpgradePayload.read(buffer);
                 server.execute(() -> BoardServerPacketHandler.handleUpgrade(payload, player));
             });
+        ServerPlayNetworking.registerGlobalReceiver(BoardPayloads.BOARD_EXAM,
+            (server, player, handler, buffer, responseSender) -> {
+                BoardPayloads.BoardExamPayload payload = BoardPayloads.BoardExamPayload.read(buffer);
+                server.execute(() -> BoardServerPacketHandler.handleExam(payload, player));
+            });
         ServerPlayNetworking.registerGlobalReceiver(PetPayloads.PET_DIRECTIVE,
             (server, player, handler, buffer, responseSender) -> {
                 PetPayloads.PetDirectivePayload payload = PetPayloads.PetDirectivePayload.read(buffer);

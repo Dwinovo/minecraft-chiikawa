@@ -9,7 +9,6 @@ import com.dwinovo.chiikawa.network.BoardPayloads.BoardSlipsPayload;
 import com.dwinovo.chiikawa.network.BoardPayloads.BoardUpgradePayload;
 import com.dwinovo.chiikawa.network.BoardPayloads.SlipView;
 import com.dwinovo.chiikawa.platform.Services;
-import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.shop.Wallet;
 import com.dwinovo.chiikawa.ui.DrawSurface;
 import com.dwinovo.chiikawa.ui.Rect;
@@ -36,16 +35,15 @@ import net.minecraft.world.item.ItemStack;
 /**
  * The day's slips on a labor board. The slips themselves are read-only — pets take their
  * own, the owner only looks — so the list is built to be looked at: a row is a picture, a
- * name and a state, and everything else waits under the cursor. The one thing the owner
- * can do here, buy the board a level, sits under a rule at the bottom, away from the
- * slips, with its price on the button.
+ * name and a state, and everything else waits under the cursor. Under them, the exams the
+ * owner can open here and the results posted; see {@link BoardExamSection}. Buying the
+ * board a level sits under a rule at the bottom, away from the slips, with its price on
+ * the button.
  */
 public class LaborBoardScreen extends Screen {
     private static final int WIDTH = 236;
     /** Room for the word and its price, whichever language it is in. */
     private static final int UPGRADE_MIN_W = 64;
-    /** One line of what the board says about exams. */
-    private static final int EXAM_LINE_H = 11;
 
     private final BlockPos board;
     private final int level;
@@ -53,7 +51,7 @@ public class LaborBoardScreen extends Screen {
     private final BoardPayloads.NextLevel next;
     private final int price;
     private final List<SlipView> slips;
-    private final BoardPayloads.ExamNotice exams;
+    private final BoardExamSection exams;
     /** What the upgrade is paid in: pictured on the button, named in the tooltip. */
     private final ItemStack coin = Wallet.coins(1);
     private int leftPos;
@@ -71,13 +69,13 @@ public class LaborBoardScreen extends Screen {
         this.next = payload.next();
         this.price = next.price();
         this.slips = payload.slips();
-        this.exams = payload.exams();
+        this.exams = new BoardExamSection(payload.board(), payload.exams());
     }
 
     @Override
     protected void init() {
         int rows = Math.max(1, slips.size());
-        int examHeight = exams.lines() == 0 ? 0 : UiStyle.GAP_SECTION + exams.lines() * EXAM_LINE_H;
+        int examHeight = exams.height() == 0 ? 0 : UiStyle.GAP_SECTION + exams.height();
         this.panelHeight = UiStyle.TITLE_H + UiStyle.PAD
             + rows * UiStyle.ROW_H + (rows - 1) * UiStyle.GAP
             + examHeight
@@ -88,6 +86,7 @@ public class LaborBoardScreen extends Screen {
         this.footerY = topPos + panelHeight - UiStyle.PAD - UiStyle.CONTROL_H;
         this.examY = contentY + rows * UiStyle.ROW_H + (rows - 1) * UiStyle.GAP + UiStyle.GAP_SECTION;
         clearWidgets();
+        exams.layout(leftPos + UiStyle.PAD, examY, WIDTH - 2 * UiStyle.PAD, this.font).forEach(this::addRenderableWidget);
         if (price > 0) {
             addRenderableWidget(upgradeButton());
         }
@@ -105,8 +104,8 @@ public class LaborBoardScreen extends Screen {
     }
 
     /**
-     * The panel, its slips and its footer, drawn right after the game dims what is behind
-     * the screen and before the upgrade button, as the music box draws its own: drawn after
+     * The panel, its slips, its exams and its footer, drawn right after the game dims what is
+     * behind the screen and before the buttons, as the music box draws its own: drawn after
      * it, the panel would cover it.
      */
     @Override
@@ -128,7 +127,7 @@ public class LaborBoardScreen extends Screen {
                 drawRow(surface, slips.get(i), row, row.contains(mouseX, mouseY));
             }
         }
-        drawExams(surface);
+        exams.draw(surface);
         // A board with nothing on it today can still be paid up.
         drawFooter(surface);
     }
@@ -140,6 +139,8 @@ public class LaborBoardScreen extends Screen {
         GuiSurface surface = new GuiSurface(graphics, this.font);
         hovered(mouseX, mouseY).ifPresent(slip -> surface.onTop(() ->
             Tooltip.draw(surface, detail(slip), mouseX, mouseY, this.width, this.height)));
+        exams.tooltip(mouseX, mouseY).ifPresent(lines -> surface.onTop(() ->
+            Tooltip.draw(surface, lines, mouseX, mouseY, this.width, this.height)));
         if (footer().contains(mouseX, mouseY)) {
             surface.onTop(() -> Tooltip.draw(surface, upgradeDetail(), mouseX, mouseY, this.width, this.height));
         }
@@ -161,34 +162,6 @@ public class LaborBoardScreen extends Screen {
             Ui.textRight(surface, Component.translatable("screen.chiikawa.labor_board.max_level").getString(),
                 leftPos + WIDTH - UiStyle.PAD,
                 UiStyle.centerIn(footerY, UiStyle.CONTROL_H, surface.lineHeight()), UiTheme.TEXT_MUTED);
-        }
-    }
-
-    /**
-     * What the board says about licence exams, under the slips: an exam today or tomorrow,
-     * then who sat what here last exam day and how they did, as a board posts its results.
-     */
-    private void drawExams(DrawSurface surface) {
-        if (exams.lines() == 0) {
-            return;
-        }
-        int x = leftPos + UiStyle.PAD;
-        int right = leftPos + WIDTH - UiStyle.PAD;
-        Ui.divider(surface, x, examY - UiStyle.GAP_SECTION / 2, WIDTH - 2 * UiStyle.PAD);
-        int y = examY;
-        for (BoardPayloads.ExamNotice.Upcoming exam : exams.upcoming()) {
-            String when = exam.days() == 0 ? "screen.chiikawa.labor_board.exam_today" : "screen.chiikawa.labor_board.exam_tomorrow";
-            surface.drawText(Component.translatable(when, PetExams.name(exam.qualification())).getString(), x, y,
-                UiTheme.ACCENT);
-            y += EXAM_LINE_H;
-        }
-        for (BoardPayloads.ExamNotice.Posted sitting : exams.posted()) {
-            surface.drawText(Component.translatable("screen.chiikawa.labor_board.sat", sitting.name(),
-                PetExams.name(sitting.qualification()), sitting.rank()).getString(), x, y, UiTheme.TEXT);
-            Ui.textRight(surface, Component.translatable(sitting.passed()
-                    ? "screen.chiikawa.labor_board.passed" : "screen.chiikawa.labor_board.failed").getString(),
-                right, y, sitting.passed() ? UiTheme.LEAF : UiTheme.TEXT_MUTED);
-            y += EXAM_LINE_H;
         }
     }
 
