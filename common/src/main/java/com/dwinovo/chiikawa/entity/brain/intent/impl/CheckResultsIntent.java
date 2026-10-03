@@ -11,8 +11,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.schedule.Activity;
 
 /**
- * Goes to the nearest labor board the morning after an exam to see how it did. A pet that
- * cannot get to one by noon hears its results wherever it is instead; see
+ * Goes back to the labor board it sat an exam at, the morning after, to see how it did. A
+ * pet that cannot get there by noon hears its results wherever it is instead; see
  * {@link com.dwinovo.chiikawa.qualification.PetExams#upkeep}.
  */
 public final class CheckResultsIntent implements PetIntent {

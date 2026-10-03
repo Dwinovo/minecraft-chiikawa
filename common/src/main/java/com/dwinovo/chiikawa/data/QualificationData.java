@@ -2,15 +2,17 @@ package com.dwinovo.chiikawa.data;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.init.InitItems;
+import com.dwinovo.chiikawa.qualification.ExamFee;
 import com.dwinovo.chiikawa.qualification.Qualification;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.InclusiveRange;
+import net.minecraft.world.item.Items;
 
 /**
- * The generated licences (0.1.2 design, section 2): for now the weeding licence, grade 5
- * to grade 1, practised by weeding slips and sat every seventh day.
+ * The generated licences: for now the weeding licence, grade 5 to grade 1, practised by
+ * weeding slips, and sat whenever an owner pays a diamond at a board to open the exam.
  */
 public final class QualificationData {
     public static final ResourceLocation WEEDING = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "weeding");
@@ -22,7 +24,7 @@ public final class QualificationData {
     public static Map<ResourceLocation, Qualification> all() {
         return Map.of(WEEDING, new Qualification(
             5,
-            7,
+            new ExamFee(Items.DIAMOND, 1),
             PetTaskTypeData.WEEDING,
             1,
             // Grade 5, the first, is passed more often than not by a pet that has practised;
