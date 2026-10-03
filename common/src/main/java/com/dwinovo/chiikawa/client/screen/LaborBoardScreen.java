@@ -35,10 +35,9 @@ import net.minecraft.world.item.ItemStack;
 /**
  * The day's slips on a labor board. The slips themselves are read-only — pets take their
  * own, the owner only looks — so the list is built to be looked at: a row is a picture, a
- * name and a state, and everything else waits under the cursor. Under them, the exams the
- * owner can open here and the results posted; see {@link BoardExamSection}. Buying the
- * board a level sits under a rule at the bottom, away from the slips, with its price on
- * the button.
+ * name and a state, and everything else waits under the cursor. The one thing the owner
+ * can do here, buy the board a level, sits under a rule at the bottom, away from the
+ * slips, with its price on the button.
  */
 public class LaborBoardScreen extends Screen {
     private static final int WIDTH = 236;
@@ -51,7 +50,6 @@ public class LaborBoardScreen extends Screen {
     private final BoardPayloads.NextLevel next;
     private final int price;
     private final List<SlipView> slips;
-    private final BoardExamSection exams;
     /** What the upgrade is paid in: pictured on the button, named in the tooltip. */
     private final ItemStack coin = Wallet.coins(1);
     private int leftPos;
@@ -59,7 +57,6 @@ public class LaborBoardScreen extends Screen {
     private int panelHeight;
     private int contentY;
     private int footerY;
-    private int examY;
 
     public LaborBoardScreen(BoardSlipsPayload payload) {
         super(Component.translatable("screen.chiikawa.labor_board"));
@@ -69,24 +66,19 @@ public class LaborBoardScreen extends Screen {
         this.next = payload.next();
         this.price = next.price();
         this.slips = payload.slips();
-        this.exams = new BoardExamSection(payload.board(), payload.exams());
     }
 
     @Override
     protected void init() {
         int rows = Math.max(1, slips.size());
-        int examHeight = exams.height() == 0 ? 0 : UiStyle.GAP_SECTION + exams.height();
         this.panelHeight = UiStyle.TITLE_H + UiStyle.PAD
             + rows * UiStyle.ROW_H + (rows - 1) * UiStyle.GAP
-            + examHeight
             + UiStyle.GAP_SECTION + UiStyle.CONTROL_H + UiStyle.PAD;
         this.leftPos = (this.width - WIDTH) / 2;
         this.topPos = (this.height - panelHeight) / 2;
         this.contentY = TitledPanel.contentY(topPos);
         this.footerY = topPos + panelHeight - UiStyle.PAD - UiStyle.CONTROL_H;
-        this.examY = contentY + rows * UiStyle.ROW_H + (rows - 1) * UiStyle.GAP + UiStyle.GAP_SECTION;
         clearWidgets();
-        exams.layout(leftPos + UiStyle.PAD, examY, WIDTH - 2 * UiStyle.PAD, this.font).forEach(this::addRenderableWidget);
         if (price > 0) {
             addRenderableWidget(upgradeButton());
         }
@@ -104,8 +96,8 @@ public class LaborBoardScreen extends Screen {
     }
 
     /**
-     * The panel, its slips, its exams and its footer, drawn right after the game dims what is
-     * behind the screen and before the buttons, as the music box draws its own: drawn after
+     * The panel, its slips and its footer, drawn right after the game dims what is behind
+     * the screen and before the upgrade button, as the music box draws its own: drawn after
      * it, the panel would cover it.
      */
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
@@ -126,7 +118,6 @@ public class LaborBoardScreen extends Screen {
                 drawRow(surface, slips.get(i), row, row.contains(mouseX, mouseY));
             }
         }
-        exams.draw(surface);
         // A board with nothing on it today can still be paid up.
         drawFooter(surface);
     }
@@ -141,8 +132,6 @@ public class LaborBoardScreen extends Screen {
         GuiSurface surface = new GuiSurface(graphics, this.font);
         hovered(mouseX, mouseY).ifPresent(slip -> surface.onTop(() ->
             Tooltip.draw(surface, detail(slip), mouseX, mouseY, this.width, this.height)));
-        exams.tooltip(mouseX, mouseY).ifPresent(lines -> surface.onTop(() ->
-            Tooltip.draw(surface, lines, mouseX, mouseY, this.width, this.height)));
         if (footer().contains(mouseX, mouseY)) {
             surface.onTop(() -> Tooltip.draw(surface, upgradeDetail(), mouseX, mouseY, this.width, this.height));
         }

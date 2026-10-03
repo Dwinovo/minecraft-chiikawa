@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.init;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.block.ExamDeskBlock;
 import com.dwinovo.chiikawa.block.LaborBoardBlock;
 import com.dwinovo.chiikawa.block.ShopBlock;
 import com.dwinovo.chiikawa.platform.Services;
@@ -18,6 +19,7 @@ import net.minecraft.world.level.material.MapColor;
 public final class InitBlocks {
     private static final ResourceLocation LABOR_BOARD_ID = new ResourceLocation(Constants.MOD_ID, "labor_board");
     private static final ResourceLocation SHOP_ID = new ResourceLocation(Constants.MOD_ID, "shop");
+    private static final ResourceLocation EXAM_DESK_ID = new ResourceLocation(Constants.MOD_ID, "exam_desk");
 
     public static final Supplier<LaborBoardBlock> LABOR_BOARD = Services.REGISTRY.<LaborBoardBlock>register(
         BuiltInRegistries.BLOCK,
@@ -38,6 +40,18 @@ public final class InitBlocks {
             .mapColor(MapColor.WOOD)
             .instrument(NoteBlockInstrument.BASS)
             .strength(2.5F)
+            .sound(SoundType.WOOD)
+            .noOcclusion()
+            .ignitedByLava())
+    );
+
+    public static final Supplier<ExamDeskBlock> EXAM_DESK = Services.REGISTRY.<ExamDeskBlock>register(
+        BuiltInRegistries.BLOCK,
+        EXAM_DESK_ID,
+        () -> new ExamDeskBlock(BlockBehaviour.Properties.of()
+            .mapColor(MapColor.WOOD)
+            .instrument(NoteBlockInstrument.BASS)
+            .strength(2.0F)
             .sound(SoundType.WOOD)
             .noOcclusion()
             .ignitedByLava())

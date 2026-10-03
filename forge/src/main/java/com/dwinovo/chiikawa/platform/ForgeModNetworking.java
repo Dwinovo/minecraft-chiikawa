@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.platform;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
+import com.dwinovo.chiikawa.client.exam.ClientExamDeskPacketHandler;
 import com.dwinovo.chiikawa.client.manual.ClientManualPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
 import com.dwinovo.chiikawa.client.pet.ClientPetPacketHandler;
@@ -9,6 +10,8 @@ import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.client.voice.ClientVoicePacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
 import com.dwinovo.chiikawa.network.BoardServerPacketHandler;
+import com.dwinovo.chiikawa.network.ExamDeskPayloads;
+import com.dwinovo.chiikawa.network.ExamDeskServerPacketHandler;
 import com.dwinovo.chiikawa.network.ManualPayloads;
 import com.dwinovo.chiikawa.network.PetPayloads;
 import com.dwinovo.chiikawa.network.PetServerPacketHandler;
@@ -52,11 +55,13 @@ public final class ForgeModNetworking {
                     BoardServerPacketHandler.handleUpgrade(payload, player);
                 }
             });
-        serverbound(BoardPayloads.BoardExamPayload.class, BoardPayloads.BoardExamPayload::read,
+        clientbound(ExamDeskPayloads.DeskViewPayload.class, ExamDeskPayloads.DeskViewPayload::read,
+            (payload, context) -> ClientExamDeskPacketHandler.handleView(payload));
+        serverbound(ExamDeskPayloads.SignUpPayload.class, ExamDeskPayloads.SignUpPayload::read,
             (payload, context) -> {
                 ServerPlayer player = context.getSender();
                 if (player != null) {
-                    BoardServerPacketHandler.handleExam(payload, player);
+                    ExamDeskServerPacketHandler.handleSignUp(payload, player);
                 }
             });
         serverbound(PetPayloads.PetDirectivePayload.class, PetPayloads.PetDirectivePayload::read,

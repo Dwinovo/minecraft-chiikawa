@@ -7,13 +7,14 @@ import java.util.function.Predicate;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 /**
- * Draws a block from a Bedrock model of its own, named after the block, turned the way the
- * block faces. The model stands on the middle of the block's floor and faces north, like the
+ * Draws a block from a Bedrock model of its own, named after the block unless it says
+ * otherwise, turned the way the block faces. The model stands on the middle of the block's floor and faces north, like the
  * block models of vanilla's facing blocks; a block that shows only some of its bones, as the
  * labor board shows only the plates still hanging, says which.
  */
@@ -27,8 +28,13 @@ public class PropBlockRenderer<T extends BlockEntity> implements BlockEntityRend
         pose.translate(0.5F, 0.0F, 0.5F);
         pose.mulPose(Axis.YP.rotationDegrees(180.0F - state.getValue(BlockStateProperties.HORIZONTAL_FACING).toYRot()));
         pose.scale(PIXEL, PIXEL, PIXEL);
-        PropRenderer.draw(BuiltInRegistries.BLOCK.getKey(state.getBlock()), pose, buffers, light, overlay, shown(block));
+        PropRenderer.draw(model(block), pose, buffers, light, overlay, shown(block));
         pose.popPose();
+    }
+
+    /** Which model to draw: the one named after the block, unless the block says otherwise. */
+    protected ResourceLocation model(T block) {
+        return BuiltInRegistries.BLOCK.getKey(block.getBlockState().getBlock());
     }
 
     /** Which of the model's bones to draw: all of them, unless the block says otherwise. */
