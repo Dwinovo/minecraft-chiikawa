@@ -128,6 +128,16 @@ public final class ModRecipeProvider extends RecipeProvider {
             .pattern("W W")
             .unlockedBy(getHasName(Items.EMERALD), has(Items.EMERALD))
             .save(this.output);
+
+        // A low desk: a top of slabs on two legs, with a sheet of paper for the exam.
+        ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.DECORATIONS, InitItems.EXAM_DESK.get())
+            .define('W', ItemTags.WOODEN_SLABS)
+            .define('S', Items.STICK)
+            .define('P', Items.PAPER)
+            .pattern("WWW")
+            .pattern("SPS")
+            .unlockedBy(getHasName(Items.PAPER), has(Items.PAPER))
+            .save(this.output);
     }
 
     /** A pouch: a string over the top, three of its wool for the body. */

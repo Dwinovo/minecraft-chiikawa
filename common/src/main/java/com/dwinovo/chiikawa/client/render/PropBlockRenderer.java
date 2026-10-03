@@ -11,14 +11,15 @@ import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Draws a block from a Bedrock model of its own, named after the block, turned the way the
- * block faces. The model stands on the middle of the block's floor and faces north, like the
+ * Draws a block from a Bedrock model of its own, named after the block unless it says
+ * otherwise, turned the way the block faces. The model stands on the middle of the block's floor and faces north, like the
  * block models of vanilla's facing blocks; a block that shows only some of its bones, as the
  * labor board shows only the plates still hanging, says which.
  */
@@ -34,6 +35,7 @@ public class PropBlockRenderer<T extends BlockEntity> implements BlockEntityRend
     public void extractRenderState(T block, State state, float partialTick, Vec3 cameraPosition,
             @Nullable ModelFeatureRenderer.CrumblingOverlay breakProgress) {
         BlockEntityRenderer.super.extractRenderState(block, state, partialTick, cameraPosition, breakProgress);
+        state.model = model(block);
         state.shown = shown(block);
     }
 
@@ -43,9 +45,14 @@ public class PropBlockRenderer<T extends BlockEntity> implements BlockEntityRend
         pose.translate(0.5F, 0.0F, 0.5F);
         pose.mulPose(Axis.YP.rotationDegrees(180.0F - state.blockState.getValue(BlockStateProperties.HORIZONTAL_FACING).toYRot()));
         pose.scale(PIXEL, PIXEL, PIXEL);
-        PropRenderer.draw(BuiltInRegistries.BLOCK.getKey(state.blockState.getBlock()), pose, collector, state.lightCoords,
+        PropRenderer.draw(state.model, pose, collector, state.lightCoords,
             OverlayTexture.NO_OVERLAY, state.shown);
         pose.popPose();
+    }
+
+    /** Which model to draw: the one named after the block, unless the block says otherwise. */
+    protected ResourceLocation model(T block) {
+        return BuiltInRegistries.BLOCK.getKey(block.getBlockState().getBlock());
     }
 
     /** Which of the model's bones to draw: all of them, unless the block says otherwise. */
@@ -55,6 +62,7 @@ public class PropBlockRenderer<T extends BlockEntity> implements BlockEntityRend
 
     /** What a prop block is drawn from: the block, and which of its bones show. */
     public static class State extends BlockEntityRenderState {
+        public ResourceLocation model;
         public Predicate<String> shown = bone -> true;
     }
 }
