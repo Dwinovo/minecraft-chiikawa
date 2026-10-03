@@ -19,7 +19,6 @@ import com.dwinovo.chiikawa.init.InitTabs;
 import com.dwinovo.chiikawa.entity.PetFollowKeeper;
 import com.dwinovo.chiikawa.entity.PetRecall;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalityLoader;
-import com.dwinovo.chiikawa.qualification.ExamNotices;
 import com.dwinovo.chiikawa.qualification.QualificationLoader;
 import com.dwinovo.chiikawa.shop.ShopCatalogLoader;
 import com.dwinovo.chiikawa.social.PetInteractionLoader;
