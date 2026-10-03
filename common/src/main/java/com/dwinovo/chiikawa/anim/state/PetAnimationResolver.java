@@ -38,8 +38,9 @@ public final class PetAnimationResolver {
         // now" decision (eat, play guitar, ...). Falls back to "idle" so a
         // pet whose model lacks the specific animation degrades gracefully.
         if (safe.activity() != PetActivity.NONE) {
-            String anim = safe.activity().animationName();
-            return anim == null ? List.of("idle") : List.of(anim, "idle");
+            List<String> candidates = new ArrayList<>(safe.activity().animationCandidates());
+            candidates.add("idle");
+            return candidates;
         }
 
         // A part in a scene with another pet, named by data: first if this pet has it,
