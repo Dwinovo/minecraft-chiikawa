@@ -42,6 +42,7 @@ class PetPosesTest {
     private static final Path ASSETS = Path.of("src/main/resources/assets/chiikawa");
     private static final Gson GSON = new Gson();
     private static final String SIT = "sit";
+    private static final String EXAM = "exam";
     /** A quarter of a pixel either way: closer than anyone can see against the ground. */
     private static final float GROUND_SLACK = 0.25F;
 
@@ -55,6 +56,22 @@ class PetPosesTest {
             float lowest = lowestPoint(pet, SIT);
             if (Math.abs(lowest) > GROUND_SLACK) {
                 wrong.add(pet + " sits with its lowest point at " + lowest + " px");
+            }
+        }
+        assertTrue(wrong.isEmpty(), String.join("; ", wrong));
+    }
+
+    /** A pet with an exam pose of its own sits on the ground over its paper, and the paper lies on it. */
+    @Test
+    void everyExamPoseSitsOnTheGround() throws IOException {
+        List<String> wrong = new ArrayList<>();
+        for (String pet : pets()) {
+            if (!animations(pet).getAsJsonObject("animations").has(EXAM)) {
+                continue;
+            }
+            float lowest = lowestPoint(pet, EXAM);
+            if (Math.abs(lowest) > GROUND_SLACK) {
+                wrong.add(pet + " sits its exam with its lowest point at " + lowest + " px");
             }
         }
         assertTrue(wrong.isEmpty(), String.join("; ", wrong));
@@ -76,7 +93,7 @@ class PetPosesTest {
         float lowest = Float.MAX_VALUE;
         for (int b = 0; b < model.bones.length; b++) {
             BakedBone bone = model.bones[b];
-            if (bone.cubeCount == 0) {
+            if (bone.cubeCount == 0 || hiddenIn(bone, animation)) {
                 continue;
             }
             PoseStack stack = new PoseStack();
@@ -102,6 +119,11 @@ class PetPosesTest {
             }
         }
         return lowest;
+    }
+
+    /** Whether the bone is one of the things a pet has only at an exam, and this is not that. */
+    private static boolean hiddenIn(BakedBone bone, String animation) {
+        return ExamProp.of(bone.name).filter(prop -> !prop.shownDuring().animations().contains(animation)).isPresent();
     }
 
     /** The pets: every geo model with an animation file beside it. */

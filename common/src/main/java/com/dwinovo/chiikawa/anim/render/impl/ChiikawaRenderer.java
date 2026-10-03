@@ -13,7 +13,8 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
  *
  * <p>Its faces are the ones the series gives it: pleased, its eyes shut in two arcs; hurt,
  * it cries, eyes screwed up and tears running, as it does whenever something goes wrong;
- * puzzled, a drop of sweat; brought back, laughing and crying at once.
+ * puzzled, a drop of sweat; brought back, laughing and crying at once. At an exam it sweats
+ * when it gets stuck.
  */
 public class ChiikawaRenderer extends ChiikawaEntityRenderer<ChiikawaPet> {
     public ChiikawaRenderer(EntityRendererProvider.Context ctx) {
@@ -22,6 +23,6 @@ public class ChiikawaRenderer extends ChiikawaEntityRenderer<ChiikawaPet> {
         addBoneVisibilityRule("HappyEyes", ShownDuring.any("happy", "revive"));
         addBoneVisibilityRule("CryEyes", ShownDuring.any("hurt"));
         addBoneVisibilityRule("Tears", ShownDuring.any("hurt", "revive"));
-        addBoneVisibilityRule("Sweat", ShownDuring.any("confused"));
+        addBoneVisibilityRule("Sweat", ShownDuring.any("confused", "exam"));
     }
 }
