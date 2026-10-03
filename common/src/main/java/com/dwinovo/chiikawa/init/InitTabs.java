@@ -55,6 +55,7 @@ public final class InitTabs {
         InitItems.MUSIC_BOX,
         InitItems.LABOR_BOARD,
         InitItems.SHOP,
+        InitItems.EXAM_DESK,
         InitItems.BACKPACK,
         InitItems.BEAR_POUCH,
         InitItems.WHALE_POUCH,

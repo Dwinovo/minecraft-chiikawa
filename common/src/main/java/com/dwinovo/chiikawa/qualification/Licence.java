@@ -37,23 +37,23 @@ public record Licence(int held, int practice, int fails, boolean read, ExamStage
         return new Licence(held, practice, fails, true, exam);
     }
 
-    /** Called by its owner to sit the exam at {@code board} today. */
-    public Licence called(GlobalPos board, long day) {
-        return new Licence(held, practice, fails, read, new ExamStage.Called(board, day));
+    /** Signed up by its owner to sit the exam at {@code desk} today. */
+    public Licence called(GlobalPos desk, long day) {
+        return new Licence(held, practice, fails, read, new ExamStage.Called(desk, day));
     }
 
-    /** Let off an exam it was called to and never sat: as if it had not been called. */
+    /** Let off an exam it was signed up for and never sat: as if it had not been. */
     public Licence excused() {
         return call().isPresent() ? new Licence(held, practice, fails, read, ExamStage.NONE) : this;
     }
 
     /**
-     * Has sat the exam it was called to and handed the paper in: the practice and the book
+     * Has sat the exam it was signed up for and handed the paper in: the practice and the book
      * are spent on it, and the result waits for the morning.
      */
     public Licence sat(boolean passed) {
         return call()
-            .map(called -> new Licence(held, 0, fails, false, new ExamStage.Sat(called.board(), called.day(), passed)))
+            .map(called -> new Licence(held, 0, fails, false, new ExamStage.Sat(called.desk(), called.day(), passed)))
             .orElse(this);
     }
 
@@ -66,7 +66,7 @@ public record Licence(int held, int practice, int fails, boolean read, ExamStage
             .orElse(this);
     }
 
-    /** @return the exam it has been called to, if any */
+    /** @return the exam it has been signed up for, if any */
     public Optional<ExamStage.Called> call() {
         return exam instanceof ExamStage.Called called ? Optional.of(called) : Optional.empty();
     }
