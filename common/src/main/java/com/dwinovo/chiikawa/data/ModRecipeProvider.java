@@ -104,6 +104,16 @@ public final class ModRecipeProvider extends RecipeProvider {
             .unlockedBy(getHasName(Items.EMERALD), has(Items.EMERALD))
             .save(this.output);
 
+        // A low desk: a top of slabs on two legs, with a sheet of paper for the exam.
+        ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.DECORATIONS, InitItems.EXAM_DESK.get())
+            .define('W', ItemTags.WOODEN_SLABS)
+            .define('S', Items.STICK)
+            .define('P', Items.PAPER)
+            .pattern("WWW")
+            .pattern("SPS")
+            .unlockedBy(getHasName(Items.PAPER), has(Items.PAPER))
+            .save(this.output);
+
         // A plate of something hot: bread, a vegetable, and something cooked.
         ShapelessRecipeBuilder.shapeless(itemLookup, RecipeCategory.FOOD, InitItems.SIMPLE_DISH.get())
             .requires(Items.BREAD)

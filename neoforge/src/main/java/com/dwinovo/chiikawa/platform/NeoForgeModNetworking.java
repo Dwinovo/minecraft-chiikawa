@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.platform;
 
 import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
+import com.dwinovo.chiikawa.client.exam.ClientExamDeskPacketHandler;
 import com.dwinovo.chiikawa.client.manual.ClientManualPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
 import com.dwinovo.chiikawa.client.pet.ClientPetPacketHandler;
@@ -8,6 +9,8 @@ import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.client.voice.ClientVoicePacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
 import com.dwinovo.chiikawa.network.BoardServerPacketHandler;
+import com.dwinovo.chiikawa.network.ExamDeskPayloads;
+import com.dwinovo.chiikawa.network.ExamDeskServerPacketHandler;
 import com.dwinovo.chiikawa.network.ManualPayloads;
 import com.dwinovo.chiikawa.network.PetPayloads;
 import com.dwinovo.chiikawa.network.PetServerPacketHandler;
@@ -35,10 +38,12 @@ public final class NeoForgeModNetworking {
                     BoardServerPacketHandler.handleUpgrade(payload, player);
                 }
             });
-        registrar.playToServer(BoardPayloads.BoardExamPayload.TYPE, BoardPayloads.BoardExamPayload.STREAM_CODEC,
+        registrar.playToClient(ExamDeskPayloads.DeskViewPayload.TYPE, ExamDeskPayloads.DeskViewPayload.STREAM_CODEC,
+            (payload, context) -> ClientExamDeskPacketHandler.handleView(payload));
+        registrar.playToServer(ExamDeskPayloads.SignUpPayload.TYPE, ExamDeskPayloads.SignUpPayload.STREAM_CODEC,
             (payload, context) -> {
                 if (context.player() instanceof ServerPlayer player) {
-                    BoardServerPacketHandler.handleExam(payload, player);
+                    ExamDeskServerPacketHandler.handleSignUp(payload, player);
                 }
             });
         registrar.playToServer(PetPayloads.PetDirectivePayload.TYPE, PetPayloads.PetDirectivePayload.STREAM_CODEC,
