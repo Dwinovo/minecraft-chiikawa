@@ -52,6 +52,13 @@ public final class ForgeModNetworking {
                     BoardServerPacketHandler.handleUpgrade(payload, player);
                 }
             });
+        serverbound(BoardPayloads.BoardExamPayload.class, BoardPayloads.BoardExamPayload::read,
+            (payload, context) -> {
+                ServerPlayer player = context.getSender();
+                if (player != null) {
+                    BoardServerPacketHandler.handleExam(payload, player);
+                }
+            });
         serverbound(PetPayloads.PetDirectivePayload.class, PetPayloads.PetDirectivePayload::read,
             (payload, context) -> {
                 ServerPlayer player = context.getSender();

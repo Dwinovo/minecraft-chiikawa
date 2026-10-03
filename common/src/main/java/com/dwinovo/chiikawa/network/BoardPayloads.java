@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 public final class BoardPayloads {
     public static final ResourceLocation BOARD_SLIPS = new ResourceLocation(Constants.MOD_ID, "board_slips");
     public static final ResourceLocation BOARD_UPGRADE = new ResourceLocation(Constants.MOD_ID, "board_upgrade");
+    public static final ResourceLocation BOARD_EXAM = new ResourceLocation(Constants.MOD_ID, "board_exam");
 
     private BoardPayloads() {
     }
@@ -69,25 +70,29 @@ public final class BoardPayloads {
     }
 
     /**
-     * What a board says about licence exams, as its screen shows it: the exams coming up
-     * today or tomorrow, and what was sat at this board last exam day, posted the morning
-     * after. Worked out on the server, where the calendar and the results are.
+     * The exams a board's screen offers its owner, and the results it has posted. Worked out
+     * on the server for the owner looking, since who would go is their pets.
      *
-     * @param upcoming each licence whose exam is today or tomorrow, with how many days off
-     * @param posted who sat what here last exam day, and how they did
+     * @param offers one for each licence: what opening its exam here would come to
+     * @param posted who sat what here last time, and how they did
      */
-    public record ExamNotice(List<Upcoming> upcoming, List<Posted> posted) {
-        public static ExamNotice read(FriendlyByteBuf buffer) {
-            return new ExamNotice(
-                buffer.readList(buf -> new Upcoming(buf.readResourceLocation(), buf.readVarInt())),
+    public record ExamView(List<Offer> offers, List<Posted> posted) {
+        public static ExamView read(FriendlyByteBuf buffer) {
+            return new ExamView(
+                buffer.readList(buf -> new Offer(buf.readResourceLocation(), buf.readResourceLocation(), buf.readVarInt(),
+                    buf.readBoolean(), buf.readList(FriendlyByteBuf::readUtf), buf.readList(FriendlyByteBuf::readUtf))),
                 buffer.readList(buf -> new Posted(buf.readUtf(), buf.readResourceLocation(), buf.readVarInt(),
                     buf.readBoolean())));
         }
 
         public void write(FriendlyByteBuf buffer) {
-            buffer.writeCollection(upcoming, (buf, exam) -> {
-                buf.writeResourceLocation(exam.qualification());
-                buf.writeVarInt(exam.days());
+            buffer.writeCollection(offers, (buf, offer) -> {
+                buf.writeResourceLocation(offer.qualification());
+                buf.writeResourceLocation(offer.feeItem());
+                buf.writeVarInt(offer.feeCount());
+                buf.writeBoolean(offer.open());
+                buf.writeCollection(offer.going(), FriendlyByteBuf::writeUtf);
+                buf.writeCollection(offer.called(), FriendlyByteBuf::writeUtf);
             });
             buffer.writeCollection(posted, (buf, sitting) -> {
                 buf.writeUtf(sitting.name());
@@ -97,13 +102,17 @@ public final class BoardPayloads {
             });
         }
 
-        /** @return how many lines the notice takes on the screen */
-        public int lines() {
-            return upcoming.size() + posted.size();
-        }
-
-        /** @param days 0 for today, 1 for tomorrow */
-        public record Upcoming(ResourceLocation qualification, int days) {
+        /**
+         * One licence's exam, as the owner could open it here now.
+         *
+         * @param feeItem what the fee is paid in
+         * @param feeCount how many
+         * @param open whether it may be opened at this time of day
+         * @param going the owner's pets that would be called
+         * @param called the owner's pets called here today that have not handed in yet
+         */
+        public record Offer(ResourceLocation qualification, ResourceLocation feeItem, int feeCount, boolean open,
+                            List<String> going, List<String> called) {
         }
 
         /** @param rank the grade sat, as the player reads it */
@@ -113,19 +122,19 @@ public final class BoardPayloads {
 
     /**
      * Opens the labor board screen with the day's slips, and sends it again after an
-     * upgrade so the screen shows what was just paid for.
+     * upgrade or an exam is opened so the screen shows what was just paid for.
      *
      * @param board which board; the screen sends it back when the owner buys a level
      * @param level how far the board has been paid up
      * @param daily how many slips a day it puts up at that level
      * @param next what the level after it costs and gives
-     * @param exams what it says about licence exams
+     * @param exams the exams the owner can open here, and the results posted
      */
     public record BoardSlipsPayload(BlockPos board, int level, int daily, NextLevel next, List<SlipView> slips,
-                                    ExamNotice exams) implements MusicPayloads.Payload {
+                                    ExamView exams) implements MusicPayloads.Payload {
         public static BoardSlipsPayload read(FriendlyByteBuf buffer) {
             return new BoardSlipsPayload(buffer.readBlockPos(), buffer.readVarInt(), buffer.readVarInt(),
-                NextLevel.read(buffer), buffer.readList(SlipView::read), ExamNotice.read(buffer));
+                NextLevel.read(buffer), buffer.readList(SlipView::read), ExamView.read(buffer));
         }
 
         @Override
@@ -163,6 +172,30 @@ public final class BoardPayloads {
         @Override
         public void write(FriendlyByteBuf buffer) {
             buffer.writeBlockPos(board);
+        }
+    }
+
+    /**
+     * An exam opened at a board. The fee is not in here: what it costs and who goes are the
+     * server's business, and a screen only asks.
+     *
+     * @param board which board; the server checks the player is still standing at it
+     * @param qualification the licence whose exam is opened
+     */
+    public record BoardExamPayload(BlockPos board, ResourceLocation qualification) implements MusicPayloads.Payload {
+        public static BoardExamPayload read(FriendlyByteBuf buffer) {
+            return new BoardExamPayload(buffer.readBlockPos(), buffer.readResourceLocation());
+        }
+
+        @Override
+        public ResourceLocation id() {
+            return BOARD_EXAM;
+        }
+
+        @Override
+        public void write(FriendlyByteBuf buffer) {
+            buffer.writeBlockPos(board);
+            buffer.writeResourceLocation(qualification);
         }
     }
 }
