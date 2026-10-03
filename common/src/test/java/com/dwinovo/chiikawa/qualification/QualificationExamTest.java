@@ -8,6 +8,7 @@ import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.testing.FixedRandom;
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -35,24 +36,40 @@ class QualificationExamTest {
         board = GlobalPos.of(Level.OVERWORLD, BlockPos.ZERO);
     }
 
-    /** From an hour after sunrise until late enough in the afternoon to get there and write. */
+    /** From an hour after sunrise until late enough in the afternoon to get to the desk and write. */
     @Test
-    void anExamIsOpenedOnlyInTheWorkingDay() {
-        assertFalse(QualificationExam.mayOpen(at(DAY, 500L)), "before the working day");
-        assertTrue(QualificationExam.mayOpen(at(DAY, QualificationExam.EXAM_FROM)));
-        assertTrue(QualificationExam.mayOpen(at(DAY, QualificationExam.LAST_CALL - 1)));
-        assertFalse(QualificationExam.mayOpen(at(DAY, QualificationExam.LAST_CALL)), "too late to sit it");
-        assertFalse(QualificationExam.mayOpen(at(DAY, 18000L)), "at night");
+    void aPetIsSignedUpOnlyInTheWorkingDay() {
+        assertFalse(QualificationExam.maySignUp(at(DAY, 500L)), "before the working day");
+        assertTrue(QualificationExam.maySignUp(at(DAY, QualificationExam.EXAM_FROM)));
+        assertTrue(QualificationExam.maySignUp(at(DAY, QualificationExam.LAST_CALL - 1)));
+        assertFalse(QualificationExam.maySignUp(at(DAY, QualificationExam.LAST_CALL)), "too late to sit it");
+        assertFalse(QualificationExam.maySignUp(at(DAY, 18000L)), "at night");
     }
 
+    /** The licence says why a pet cannot be signed up: every grade held, no practice, or something on. */
     @Test
-    void aPetIsCalledOnlyWithAGradeLeftPracticeDoneAndNothingOn() {
-        assertFalse(QualificationExam.maySit(weeding, Licence.NONE), "has not practised");
-        assertTrue(QualificationExam.maySit(weeding, Licence.NONE.practised()));
-        assertFalse(QualificationExam.maySit(weeding, Licence.holding(5).practised()), "holds every grade");
-        assertFalse(QualificationExam.maySit(weeding, Licence.NONE.practised().called(board, DAY)), "called already");
-        assertFalse(QualificationExam.maySit(weeding, Licence.NONE.practised().called(board, DAY).sat(true)),
-            "still waiting for results");
+    void theLicenceSaysWhyAPetCannotBeSignedUp() {
+        assertEquals(Optional.of(Ineligible.UNPRACTISED), QualificationExam.whyNot(weeding, Licence.NONE));
+        assertEquals(Optional.empty(), QualificationExam.whyNot(weeding, Licence.NONE.practised()));
+        assertEquals(Optional.of(Ineligible.TOP_GRADE), QualificationExam.whyNot(weeding, Licence.holding(5).practised()));
+        assertEquals(Optional.of(Ineligible.BUSY),
+            QualificationExam.whyNot(weeding, Licence.NONE.practised().called(board, DAY)), "signed up already");
+        assertEquals(Optional.of(Ineligible.BUSY),
+            QualificationExam.whyNot(weeding, Licence.NONE.practised().called(board, DAY).sat(true)), "waiting for results");
+    }
+
+    /** The odds come apart into what the owner is shown, and put back together into the chance. */
+    @Test
+    void theOddsArePiecesThatMakeTheChance() {
+        Personality.Leaning chiikawa = new Personality.Leaning(0.7F, 0.0F, PetReaction.CONFUSED);
+        PassOdds odds = QualificationExam.odds(weeding, new Licence(0, 5, 1, true, ExamStage.NONE), chiikawa);
+
+        assertEquals(0.40F, odds.base(), EPSILON);
+        assertEquals(0.15F, odds.practice(), EPSILON);
+        assertEquals(0.05F, odds.failing(), EPSILON);
+        assertEquals(0.25F, odds.book(), EPSILON);
+        assertEquals(0.7F, odds.aptitude(), EPSILON);
+        assertEquals((0.40F + 0.15F + 0.05F + 0.25F) * 0.7F, odds.chance(), EPSILON);
     }
 
     /** Called for the day it was opened, until the exam closes; after that it has missed it. */

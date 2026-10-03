@@ -26,6 +26,7 @@ import com.dwinovo.chiikawa.anim.render.impl.UsagiRenderer;
 import com.dwinovo.chiikawa.client.manual.ManualStageRenderState;
 import com.dwinovo.chiikawa.client.manual.ManualStageRenderer;
 import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
+import com.dwinovo.chiikawa.client.render.ExamDeskRenderer;
 import com.dwinovo.chiikawa.client.render.LaborBoardRenderer;
 import com.dwinovo.chiikawa.client.render.PropBlockRenderer;
 import com.dwinovo.chiikawa.client.render.PropItemRenderer;
@@ -83,6 +84,7 @@ public class ChiikawaClient {
     @SubscribeEvent
     static void registerBlockEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(InitBlockEntities.LABOR_BOARD.get(), context -> new LaborBoardRenderer());
+        event.registerBlockEntityRenderer(InitBlockEntities.EXAM_DESK.get(), context -> new ExamDeskRenderer());
         event.registerBlockEntityRenderer(InitBlockEntities.SHOP.get(), context -> new PropBlockRenderer<>());
     }
 

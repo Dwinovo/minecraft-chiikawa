@@ -10,6 +10,8 @@ import com.dwinovo.chiikawa.anim.baked.BakedCube;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
 import com.dwinovo.chiikawa.anim.compile.ModelBaker;
 import com.dwinovo.chiikawa.anim.format.BedrockGeoFile;
+import com.dwinovo.chiikawa.block.DeskSheet;
+import com.dwinovo.chiikawa.block.ExamDeskBlock;
 import com.dwinovo.chiikawa.client.render.LaborBoardRenderer;
 import com.dwinovo.chiikawa.data.LaborBoardLevelData;
 import com.dwinovo.chiikawa.item.BagItem;
@@ -31,7 +33,8 @@ import org.junit.jupiter.api.Test;
  * What the art has to give the code. Every pet needs a place to hang each kind of bag and a
  * strap to hold it; every prop — a model without animations — needs a texture, and needs to
  * be one the code draws: a bag, hung from its centre, or a block — the labor board, with a
- * plate for every slip the mod's own levels put up, or the shop, standing inside its block.
+ * plate for every slip the mod's own levels put up, the shop standing inside its block, or
+ * the exam desk and its chair, each inside its own block at the heights the block has them.
  * A pack that gives boards more slips than that has them hang without a plate each. The
  * handbook is a prop too, only ever held, and so are the pets' weapons, each standing up
  * with its texture fit for the block atlas its bits are drawn from when it breaks.
@@ -42,7 +45,9 @@ class PropModelsTest {
     private static final List<String> BAGS = List.of("backpack", "bear_pouch", "whale_pouch", "star_pouch");
     private static final String LABOR_BOARD = "labor_board";
     private static final String SHOP = "shop";
-    private static final List<String> BLOCKS = List.of(LABOR_BOARD, SHOP);
+    private static final String EXAM_DESK = "exam_desk";
+    private static final String EXAM_DESK_CHAIR = "exam_desk_chair";
+    private static final List<String> BLOCKS = List.of(LABOR_BOARD, SHOP, EXAM_DESK, EXAM_DESK_CHAIR);
     /** Props that are only ever an item in the hand or on a shelf. */
     private static final List<String> ITEMS = List.of("handbook");
     /** Held as vanilla holds a sword, laid corner to corner from a model standing up. */
@@ -146,7 +151,52 @@ class PropModelsTest {
      */
     @Test
     void theShopStandsInsideItsBlock() throws IOException {
-        BakedModel model = bake(SHOP);
+        assertInsideItsBlock(SHOP);
+    }
+
+    /**
+     * Each half of the exam desk stays inside its own block, as each half of a bed does; the
+     * desk's top and the chair's seat are as high as the block says, since that is where a
+     * pet sits and writes; and the desk has every sheet it can have on it.
+     */
+    @Test
+    void theExamDeskAndItsChairAreAsHighAsTheBlockSays() throws IOException {
+        assertInsideItsBlock(EXAM_DESK);
+        assertInsideItsBlock(EXAM_DESK_CHAIR);
+        assertEquals(ExamDeskBlock.DESK_HEIGHT, top(bake(EXAM_DESK), "Desk"), EPSILON, "the desk's top is not where the block has it");
+        assertEquals(ExamDeskBlock.SEAT_HEIGHT, lowestTop(bake(EXAM_DESK_CHAIR), "Chair"), EPSILON,
+            "the chair's seat is not where the block has it");
+        BakedModel desk = bake(EXAM_DESK);
+        for (DeskSheet sheet : DeskSheet.values()) {
+            sheet.bone().ifPresent(bone -> assertTrue(bone(desk, EXAM_DESK, bone).cubeCount > 0, "the desk has no " + bone));
+        }
+    }
+
+    /** The highest point of a bone's cubes: a desk's top. */
+    private static float top(BakedModel model, String bone) {
+        BakedBone found = bone(model, "the model", bone);
+        float top = -Float.MAX_VALUE;
+        for (int c = found.cubeStart; c < found.cubeStart + found.cubeCount; c++) {
+            top = Math.max(top, model.cubes[c].maxY);
+        }
+        return top;
+    }
+
+    /** The top of the widest cube of a bone: a chair's seat, rather than its back. */
+    private static float lowestTop(BakedModel model, String bone) {
+        BakedBone found = bone(model, "the model", bone);
+        BakedCube widest = model.cubes[found.cubeStart];
+        for (int c = found.cubeStart; c < found.cubeStart + found.cubeCount; c++) {
+            BakedCube cube = model.cubes[c];
+            if ((cube.maxX - cube.minX) * (cube.maxZ - cube.minZ) > (widest.maxX - widest.minX) * (widest.maxZ - widest.minZ)) {
+                widest = cube;
+            }
+        }
+        return widest.maxY;
+    }
+
+    private static void assertInsideItsBlock(String name) throws IOException {
+        BakedModel model = bake(name);
         for (BakedCube cube : model.cubes) {
             Matrix4f turn = new Matrix4f()
                 .translate(cube.pivotX, cube.pivotY, cube.pivotZ)
@@ -158,7 +208,7 @@ class PropModelsTest {
                     (corner & 2) != 0 ? cube.maxY : cube.minY,
                     (corner & 4) != 0 ? cube.maxZ : cube.minZ));
                 assertTrue(Math.abs(at.x) <= HALF_BLOCK + EPSILON && Math.abs(at.z) <= HALF_BLOCK + EPSILON
-                    && at.y >= -EPSILON && at.y <= 2 * HALF_BLOCK + EPSILON, "the shop reaches out of its block at " + at);
+                    && at.y >= -EPSILON && at.y <= 2 * HALF_BLOCK + EPSILON, name + " reaches out of its block at " + at);
             }
         }
     }
