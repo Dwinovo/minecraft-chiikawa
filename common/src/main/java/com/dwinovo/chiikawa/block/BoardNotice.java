@@ -1,14 +1,13 @@
 package com.dwinovo.chiikawa.block;
 
 import com.dwinovo.chiikawa.qualification.QualificationExam;
-import com.dwinovo.chiikawa.qualification.Qualifications;
 import java.util.Optional;
 
 /**
  * The sheet a labor board has pinned up about licence exams, so a player sees from across
- * the garden that an exam is coming or that results are out: the exam notice the day before
- * an exam and on the day, then the results the morning after, until the next notice goes
- * up. Each sheet is a bone of the board's model.
+ * the garden that an exam is on or that results are out: the exam notice while one opened
+ * there is on, then the results the morning after, until the next notice goes up. Each
+ * sheet is a bone of the board's model.
  */
 public enum BoardNotice {
     NONE(Optional.empty()),
@@ -37,16 +36,14 @@ public enum BoardNotice {
     }
 
     /**
-     * What a board has pinned up at this time of day: the exam notice from the day before an
-     * exam until the exam is over; otherwise the results, while it has any posted.
+     * What a board has pinned up now: the exam notice while an exam opened there is on, or
+     * while anyone is still at the paper; otherwise the results, while it has any posted.
      */
-    public static BoardNotice of(long dayTime, BoardExam exam) {
-        boolean examComing = Qualifications.all().values().stream()
-            .anyMatch(qualification -> QualificationExam.daysToExam(qualification, dayTime) <= 1);
-        if (examComing) {
+    public static BoardNotice of(long dayTime, long gameTime, BoardExam exam) {
+        if (exam.isOn(dayTime) || exam.seats().anyTaken(gameTime)) {
             return EXAM;
         }
-        return exam.posted(QualificationExam.day(dayTime)).isEmpty() ? NONE : RESULTS;
+        return exam.results().posted(QualificationExam.day(dayTime)).isEmpty() ? NONE : RESULTS;
     }
 
     public static BoardNotice byOrdinal(int ordinal) {

@@ -84,17 +84,15 @@ public record Personality(
     /**
      * How a kind of pet takes to one licence's exams.
      *
-     * @param eagerness how likely it is to want to sit the exam, each exam day
      * @param aptitude what its odds of passing are multiplied by
      * @param bookBonus what reading the book adds for it, on top of what it adds for anyone
      * @param failReaction the face it pulls on hearing it failed
      */
-    public record Leaning(float eagerness, float aptitude, float bookBonus, PetReaction failReaction) {
-        /** Wants to go more often than not, passes as the licence's odds say, and is puzzled to fail. */
-        public static final Leaning DEFAULT = new Leaning(0.6F, 1.0F, 0.0F, PetReaction.CONFUSED);
+    public record Leaning(float aptitude, float bookBonus, PetReaction failReaction) {
+        /** Passes as the licence's odds say, and is puzzled to fail. */
+        public static final Leaning DEFAULT = new Leaning(1.0F, 0.0F, PetReaction.CONFUSED);
 
         public static final Codec<Leaning> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.floatRange(0.0F, 1.0F).optionalFieldOf("eagerness", DEFAULT.eagerness()).forGetter(Leaning::eagerness),
             Codec.floatRange(0.0F, 10.0F).optionalFieldOf("aptitude", DEFAULT.aptitude()).forGetter(Leaning::aptitude),
             Codec.floatRange(0.0F, 1.0F).optionalFieldOf("book_bonus", DEFAULT.bookBonus()).forGetter(Leaning::bookBonus),
             PetReaction.CODEC.optionalFieldOf("fail_reaction", DEFAULT.failReaction()).forGetter(Leaning::failReaction)

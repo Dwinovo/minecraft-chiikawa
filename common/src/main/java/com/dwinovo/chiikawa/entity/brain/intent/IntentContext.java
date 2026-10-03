@@ -47,8 +47,8 @@ import net.minecraft.world.level.Level;
  * @param hasArrows whether the pet carries arrows
  * @param hasPlayableSelection whether the held music box selects a song the pet would play now
  * @param playingMusic whether the pet is performing
- * @param examBoard the nearest labor board, while the pet means to sit an exam now and a seat there is free
- * @param resultsBoard the nearest labor board, while the pet has results out to go and see this morning
+ * @param examBoard the labor board the pet has been called to sit an exam at, while it can and a seat there is free
+ * @param resultsBoard the labor board the pet sat an exam at, while it has the results to go and see there this morning
  */
 public record IntentContext(
     GlobalPos petPos,
@@ -106,27 +106,17 @@ public record IntentContext(
     }
 
     private static Optional<GlobalPos> examBoard(AbstractPet pet) {
-        if (PetExams.toSit(pet).isEmpty()) {
-            return Optional.empty();
-        }
         long gameTime = pet.level().getGameTime();
-        return nearestBoard(pet)
-            .filter(board -> board.exam().hasSeatFor(pet.getUUID(), gameTime))
-            .map(board -> GlobalPos.of(pet.level().dimension(), board.getBlockPos()));
+        return PetExams.toSit(pet)
+            .map(PetExams.Summons::board)
+            .filter(board -> LaborBoardBlockEntity.at(pet.level(), board)
+                .filter(found -> found.exam().seats().hasSeatFor(pet.getUUID(), gameTime))
+                .isPresent());
     }
 
     private static Optional<GlobalPos> resultsBoard(AbstractPet pet) {
-        if (!PetExams.goesToSeeResults(pet)) {
-            return Optional.empty();
-        }
-        return nearestBoard(pet).map(board -> GlobalPos.of(pet.level().dimension(), board.getBlockPos()));
-    }
-
-    private static Optional<LaborBoardBlockEntity> nearestBoard(AbstractPet pet) {
-        Level level = pet.level();
-        return pet.getBrain().getMemory(InitMemory.NEAREST_BOARD.get())
-            .filter(level::isLoaded)
-            .flatMap(pos -> level.getBlockEntity(pos, InitBlockEntities.LABOR_BOARD.get()));
+        return PetExams.resultsBoard(pet)
+            .filter(board -> LaborBoardBlockEntity.at(pet.level(), board).isPresent());
     }
 
     /**
