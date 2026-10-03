@@ -53,9 +53,9 @@ public final class PersonalityData {
             .idle(habits()
                 .lookAtPlayer(3, 6.0F, 20, 40)
                 .lookAtCreature(2, 5.0F, 20, 40))
-            // Wants its licence badly, but nerves get the better of it at the exam; keeps at it,
-            // and cries when it fails.
-            .licence(QualificationData.WEEDING, 0.85F, 0.7F, 0.0F, PetReaction.HURT)
+            // Wants its licence badly, but nerves get the better of it at the exam, and it
+            // cries when it fails.
+            .licence(QualificationData.WEEDING, 0.7F, 0.0F, PetReaction.HURT)
             .build());
         // Cheerful, often playing music.
         all.put(id(InitEntity.HACHIWARE_PET.get()), personality()
@@ -73,8 +73,8 @@ public final class PersonalityData {
             .idle(habits()
                 .lookAtPlayer(3, 8.0F, 60, 100)
                 .lookAtCreature(3, 8.0F, 60, 100))
-            // Wants it as much as Chiikawa, and fares a little better with a book in hand.
-            .licence(QualificationData.WEEDING, 0.85F, 0.8F)
+            // Wants it as much as Chiikawa, and fares a little better.
+            .licence(QualificationData.WEEDING, 0.8F)
             .build());
         // Very whimsical.
         all.put(id(InitEntity.USAGI_PET.get()), personality()
@@ -95,8 +95,8 @@ public final class PersonalityData {
                 .lookAtCreature(1, 5.0F, 15, 30)
                 .stroll(4)
                 .rest(1, 15, 30))
-            // Goes when it feels like it, and passes when it goes.
-            .licence(QualificationData.WEEDING, 0.4F, 1.4F)
+            // Passes more often than anyone, for all it seems to care.
+            .licence(QualificationData.WEEDING, 1.4F)
             .build());
         // Hard-working.
         all.put(id(InitEntity.SHISA_PET.get()), personality()
@@ -116,7 +116,7 @@ public final class PersonalityData {
                 .stroll(1))
             // Hard-working and does well at it, though the licence it is set on is a
             // different one.
-            .licence(QualificationData.WEEDING, 0.6F, 1.1F)
+            .licence(QualificationData.WEEDING, 1.1F)
             .build());
         // Would rather not work.
         all.put(id(InitEntity.MOMONGA_PET.get()), personality()
@@ -135,8 +135,8 @@ public final class PersonalityData {
             .idle(habits()
                 .lookAtPlayer(5, 10.0F, 80, 140)
                 .lookAtCreature(1, 5.0F, 20, 40))
-            // No more keen on exams than on work.
-            .licence(QualificationData.WEEDING, 0.3F, 0.6F)
+            // No better at exams than at work.
+            .licence(QualificationData.WEEDING, 0.6F)
             .build());
         // Laid-back.
         all.put(id(InitEntity.KURIMANJU_PET.get()), personality()
@@ -155,8 +155,8 @@ public final class PersonalityData {
                 .lookAtCreature(1, 5.0F, 45, 90)
                 .stroll(1)
                 .rest(4, 80, 160))
-            // In no hurry, about this either.
-            .licence(QualificationData.WEEDING, 0.4F, 0.9F)
+            // Takes it as easily as everything else, and passes a little less often for it.
+            .licence(QualificationData.WEEDING, 0.9F)
             .build());
         // Loves subjugation.
         all.put(id(InitEntity.RAKKO_PET.get()), personality()
@@ -174,7 +174,7 @@ public final class PersonalityData {
                 .lookAtPlayer(1, 5.0F, 30, 60)
                 .lookAtCreature(3, 10.0F, 45, 90))
             // Good at whatever it puts its hand to.
-            .licence(QualificationData.WEEDING, 0.6F, 1.1F)
+            .licence(QualificationData.WEEDING, 1.1F)
             .build());
         // Quiet.
         all.put(id(InitEntity.FURUHONYA_PET.get()), personality()
@@ -191,7 +191,7 @@ public final class PersonalityData {
                 .stroll(1)
                 .rest(3, 80, 160))
             // Has a book for everything, and gets more from one than anyone.
-            .licence(QualificationData.WEEDING, 0.6F, 1.0F, 0.1F)
+            .licence(QualificationData.WEEDING, 1.0F, 0.1F)
             .build());
         return all;
     }
@@ -261,22 +261,20 @@ public final class PersonalityData {
         /**
          * How this kind of pet takes to a licence's exams.
          *
-         * @param eagerness how likely it is to want to sit each exam
          * @param aptitude what its odds of passing are multiplied by
          */
-        Builder licence(ResourceLocation qualification, float eagerness, float aptitude) {
-            return licence(qualification, eagerness, aptitude, 0.0F);
+        Builder licence(ResourceLocation qualification, float aptitude) {
+            return licence(qualification, aptitude, 0.0F);
         }
 
         /** @param bookBonus what reading the book adds for it, on top of what it adds for anyone */
-        Builder licence(ResourceLocation qualification, float eagerness, float aptitude, float bookBonus) {
-            return licence(qualification, eagerness, aptitude, bookBonus, Personality.Leaning.DEFAULT.failReaction());
+        Builder licence(ResourceLocation qualification, float aptitude, float bookBonus) {
+            return licence(qualification, aptitude, bookBonus, Personality.Leaning.DEFAULT.failReaction());
         }
 
         /** @param failReaction the face it pulls on hearing it failed */
-        Builder licence(ResourceLocation qualification, float eagerness, float aptitude, float bookBonus,
-                        PetReaction failReaction) {
-            licences.put(qualification, new Personality.Leaning(eagerness, aptitude, bookBonus, failReaction));
+        Builder licence(ResourceLocation qualification, float aptitude, float bookBonus, PetReaction failReaction) {
+            licences.put(qualification, new Personality.Leaning(aptitude, bookBonus, failReaction));
             return this;
         }
 

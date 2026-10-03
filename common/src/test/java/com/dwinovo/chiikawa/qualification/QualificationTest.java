@@ -30,7 +30,7 @@ class QualificationTest {
         Qualification weeding = parse(file("[0.4, 0.3, 0.22, 0.15, 0.08]", "[70, 18, 8, 3, 1, 0]")).getOrThrow();
 
         assertEquals(5, weeding.grades());
-        assertEquals(7, weeding.everyDays());
+        assertEquals(new ExamFee(Items.DIAMOND, 1), weeding.fee());
         assertEquals(WEEDING, weeding.practiceTask());
         assertEquals(0.08F, weeding.basePass().get(4), 1.0E-6F);
         assertEquals(Items.BOOK, weeding.book());
@@ -77,7 +77,7 @@ class QualificationTest {
         return JsonParser.parseString("""
             {
               "grades": 5,
-              "every_days": 7,
+              "fee": {"item": "minecraft:diamond", "count": 1},
               "practice_task": "chiikawa:weeding",
               "required_practice": 1,
               "base_pass": %s,

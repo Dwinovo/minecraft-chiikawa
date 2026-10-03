@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import net.minecraft.SharedConstants;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.InclusiveRange;
@@ -23,17 +25,8 @@ class LicenceViewTest {
     static void bootstrap() {
         SharedConstants.tryDetectVersion();
         Bootstrap.bootStrap();
-        weeding = new Qualification(5, 7, WEEDING, 1, List.of(0.40F, 0.30F, 0.22F, 0.15F, 0.08F), 0.03F, 0.30F,
+        weeding = new Qualification(5, new ExamFee(Items.DIAMOND, 1), WEEDING, 1, List.of(0.40F, 0.30F, 0.22F, 0.15F, 0.08F), 0.03F, 0.30F,
             0.05F, 0.20F, Items.BOOK, 0.25F, 0.95F, new InclusiveRange<>(480, 560), List.of(70, 18, 8, 3, 1, 0));
-    }
-
-    /** Day 6 is the first exam day: today while it is on, and the next one a week on once it is over. */
-    @Test
-    void theNextExamIsCountedInDays() {
-        assertEquals(3, QualificationExam.daysToExam(weeding, at(3, MORNING)));
-        assertEquals(1, QualificationExam.daysToExam(weeding, at(5, MORNING)));
-        assertEquals(0, QualificationExam.daysToExam(weeding, at(6, MORNING)));
-        assertEquals(7, QualificationExam.daysToExam(weeding, at(6, QualificationExam.EXAM_UNTIL)));
     }
 
     @Test
@@ -50,10 +43,15 @@ class LicenceViewTest {
     }
 
     @Test
-    void itShowsWhetherThePetHasPractisedAndWhetherItAwaitsResults() {
+    void itShowsWhetherThePetHasPractisedIsCalledTodayOrAwaitsResults() {
+        GlobalPos board = GlobalPos.of(Level.OVERWORLD, BlockPos.ZERO);
+        Licence called = Licence.NONE.practised().called(board, 3L);
+
         assertFalse(LicenceView.of(WEEDING, weeding, Licence.NONE, at(3, MORNING)).practised());
         assertTrue(LicenceView.of(WEEDING, weeding, Licence.NONE.practised(), at(3, MORNING)).practised());
-        assertTrue(LicenceView.of(WEEDING, weeding, Licence.NONE.practised().sat(true), at(6, MORNING)).awaitingResults());
+        assertTrue(LicenceView.of(WEEDING, weeding, called, at(3, MORNING)).called());
+        assertFalse(LicenceView.of(WEEDING, weeding, called, at(4, MORNING)).called(), "yesterday's call");
+        assertTrue(LicenceView.of(WEEDING, weeding, called.sat(true), at(3, MORNING)).awaitingResults());
     }
 
     private static long at(long day, long timeOfDay) {
