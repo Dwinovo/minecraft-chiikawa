@@ -101,13 +101,18 @@ public final class LanguageData {
                     "宠物铃铛", "叫回你的宠物，跨维度也听得见；响过一次要等半分钟");
             addLicenceTranslations(adder, "除草证参考书", "手持右键自己的宠物让它读，下一次除草证考试更有把握；考完用掉",
                 "除草证", "%1$s 通过了%2$s %3$s 级考试", "%1$s 没有通过%2$s %3$s 级考试",
-                "%1$s 去考%2$s了", "%1$s 交卷了，%2$s的结果明天早上出", "%1$s 没赶上今天的%2$s考试", "、",
-                "去考试", "去看榜", "现在没有要考的试，也没有要看的榜");
+                "已给%1$s报名%2$s %3$s 级考试", "%1$s 交卷了，%2$s的结果明天早上出", "%1$s 没赶上今天的%2$s考试",
+                "考试桌没了，%1$s的%2$s考试中止了",
+                "去考试", "去看成绩", "没有能去的考试桌");
             addLicenceScreenTranslations(adder, "%s 级", "无", "%s：%s 级", "%s：还没有", "已经是最高级",
-                "明天早上看榜", "今天要去考试", "还要再干些活才能报考", "可以报考：到公告板开考");
-            addBoardExamTranslations(adder, "开考 %s", "会去：%s", "考试中：%s", "白天才能开考", "附近没有能考的宠物",
-                "报名费：%1$s × %2$s，你有 %3$s 个", "去考的是附近干过这项活、没在待命的宠物",
-                "%1$s　%2$s %3$s 级", "合格", "落榜");
+                "明天早上出成绩", "今天要去考试", "还要再干些活才能报考", "可以报考：到考试桌报名");
+            addExamDeskStatusTranslations(adder, "考试桌", "选一只宠物报名", "白天才能报名", "这张桌子有人在考",
+                "桌子后面被挡住了，没地方坐", "%1$s 正在考%2$s %3$s 级", "%1$s 交卷了，明天早上出成绩",
+                "%1$s 的%2$s %3$s 级：合格", "%1$s 的%2$s %3$s 级：落榜");
+            addExamDeskPetTranslations(adder, "报名费 %s", "报名 %s", "考 %s 级", "附近没有你的宠物", "（%s 级）", "（还没有证）",
+                "已经是最高级", "还要再干些活", "已报名或在等成绩", "在待命", "离得太远");
+            addExamDeskOddsTranslations(adder, "基础 %s%%", "多干活 +%s%%", "之前落榜 +%s%%", "读过参考书 +%s%%",
+                "性格 ×%s", "通过率 %s（最高 %s%%）");
             addPetNewsTranslations(adder, "%1$s 花 %2$s 个%4$s买了 %3$s",
                     "%1$s 花 %2$s 个%4$s买了 %3$s，当场吃掉了",
                     "%1$s 花 %2$s 个%4$s买了 %3$s，说要送给你",
@@ -296,13 +301,18 @@ public final class LanguageData {
                     "ペットベル", "ペットを呼び戻す。別のディメンションでも聞こえる。一度鳴らすと30秒待つ");
             addLicenceTranslations(adder, "草むしり検定の参考書", "持って自分の子を右クリックすると読ませられる。次の草むしり検定で受かりやすくなり、試験で使い切る",
                 "草むしり検定", "%1$sが%2$s%3$s級に合格した", "%1$sは%2$s%3$s級に落ちた",
-                "%1$sが%2$sを受けに行った", "%1$sが%2$sの答案を出した。結果は明日の朝", "%1$sは今日の%2$sに間に合わなかった", "、",
-                "試験を受けに行く", "合格発表を見に行く", "今は受ける試験も見る発表もない");
+                "%1$sを%2$s%3$s級に申し込んだ", "%1$sが%2$sの答案を出した。結果は明日の朝", "%1$sは今日の%2$sに間に合わなかった",
+                "試験机がなくなり、%1$sの%2$sは中止になった",
+                "試験を受けに行く", "結果を見に行く", "行ける試験机がない");
             addLicenceScreenTranslations(adder, "%s級", "なし", "%s：%s級", "%s：まだない", "もう最上級",
-                "明日の朝に合格発表", "今日は試験を受けに行く", "受験するにはもう少し働かないと", "受験できる：掲示板で試験を開こう");
-            addBoardExamTranslations(adder, "試験を開く %s", "受ける子：%s", "受験中：%s", "試験は昼のあいだだけ", "近くに受けられる子がいない",
-                "受験料：%1$s × %2$s（%3$s個持っています）", "受けるのは、近くにいてこの仕事をしたことがあり、待機中でない子",
-                "%1$s　%2$s%3$s級", "合格", "不合格");
+                "明日の朝に結果が出る", "今日は試験を受けに行く", "受験するにはもう少し働かないと", "受験できる：試験机で申し込もう");
+            addExamDeskStatusTranslations(adder, "試験机", "申し込む子を選んでね", "申し込みは昼のあいだだけ", "この机は受験中",
+                "机の後ろがふさがっていて座れない", "%1$sが%2$s%3$s級を受験中", "%1$sは答案を出した。結果は明日の朝",
+                "%1$sの%2$s%3$s級：合格", "%1$sの%2$s%3$s級：不合格");
+            addExamDeskPetTranslations(adder, "受験料 %s", "申し込む %s", "%s級を受ける", "近くにあなたの子がいない", "（%s級）", "（まだない）",
+                "もう最上級", "もう少し働かないと", "申し込み済みか結果待ち", "待機中", "遠すぎる");
+            addExamDeskOddsTranslations(adder, "基本 %s%%", "よく働いた +%s%%", "前に落ちた +%s%%", "参考書を読んだ +%s%%",
+                "性格 ×%s", "合格率 %s（最高 %s%%）");
             addPetNewsTranslations(adder, "%1$sが%4$s%2$s個で%3$sを買った",
                     "%1$sが%4$s%2$s個で%3$sを買って、その場で食べた",
                     "%1$sが%4$s%2$s個で%3$sを買った。あなたへのプレゼントだって",
@@ -491,16 +501,21 @@ public final class LanguageData {
                     "Pet Bell", "Calls your pets home, even from another dimension; half a minute between rings");
             addLicenceTranslations(adder, "Weeding Licence Study Guide", "Right-click your pet with it to have it read: better odds at its next weeding licence exam; used up by the exam",
                 "Weeding Licence", "%1$s passed the %2$s grade %3$s exam", "%1$s failed the %2$s grade %3$s exam",
-                "%1$s went to sit the %2$s exam", "%1$s handed in the %2$s paper; results tomorrow morning",
-                "%1$s missed today's %2$s exam", ", ",
-                "Off to an exam", "Off to see the results", "No exam to sit or results to see now");
+                "Signed %1$s up for the %2$s grade %3$s exam", "%1$s handed in the %2$s paper; results tomorrow morning",
+                "%1$s missed today's %2$s exam", "The exam desk is gone; %1$s's %2$s exam is off",
+                "Off to an exam", "Off to see the results", "No exam desk to go to");
             addLicenceScreenTranslations(adder, "Grade %s", "None", "%s: grade %s", "%s: none yet", "Holds the top grade",
                 "Results tomorrow morning", "Sitting the exam today", "Needs a little more work to sit it",
-                "Ready: open the exam at a labor board");
-            addBoardExamTranslations(adder, "Open exam %s", "Going: %s", "Sitting: %s", "Exams open only in the daytime",
-                "No pet nearby can sit it", "Fee: %1$s × %2$s (you have %3$s)",
-                "Goes: pets nearby that have done this work and are not told to stay",
-                "%1$s  %2$s grade %3$s", "Passed", "Failed");
+                "Ready: sign it up at an exam desk");
+            addExamDeskStatusTranslations(adder, "Exam Desk", "Pick a pet to sign up", "Sign-ups only in the daytime",
+                "Someone is sitting an exam here", "Something is in the way behind the desk",
+                "%1$s is sitting the %2$s grade %3$s exam", "%1$s has handed in; results tomorrow morning",
+                "%1$s, %2$s grade %3$s: passed", "%1$s, %2$s grade %3$s: failed");
+            addExamDeskPetTranslations(adder, "Fee %s", "Sign up %s", "Grade %s", "None of your pets nearby", " (grade %s)",
+                " (no licence yet)", "Holds the top grade", "Needs more work", "Signed up or awaiting results", "Told to stay",
+                "Too far away");
+            addExamDeskOddsTranslations(adder, "Base %s%%", "Work done +%s%%", "Failed before +%s%%", "Read the guide +%s%%",
+                "Personality ×%s", "Pass chance %s (best %s%%)");
             addPetNewsTranslations(adder, "%1$s spent %2$s × %4$s on %3$s",
                     "%1$s spent %2$s × %4$s on %3$s and ate it on the spot",
                     "%1$s spent %2$s × %4$s on %3$s, and says it is for you",
@@ -709,25 +724,6 @@ public final class LanguageData {
     }
 
     /**
-     * What a labor board's screen says of exams: the button that opens one with its fee on
-     * it, who would go, who is sitting it, or why it cannot be opened; the fee and who goes
-     * under the cursor; and a line for each pet that sat one there, with how it did.
-     */
-    private static void addBoardExamTranslations(Adder adder, String open, String going, String called, String closed,
-            String nobody, String fee, String who, String sat, String passed, String failed) {
-        adder.add("screen.chiikawa.labor_board.exam_open", open);
-        adder.add("screen.chiikawa.labor_board.exam_going", going);
-        adder.add("screen.chiikawa.labor_board.exam_called", called);
-        adder.add("screen.chiikawa.labor_board.exam_closed", closed);
-        adder.add("screen.chiikawa.labor_board.exam_nobody", nobody);
-        adder.add("screen.chiikawa.labor_board.exam_fee", fee);
-        adder.add("screen.chiikawa.labor_board.exam_who", who);
-        adder.add("screen.chiikawa.labor_board.sat", sat);
-        adder.add("screen.chiikawa.labor_board.passed", passed);
-        adder.add("screen.chiikawa.labor_board.failed", failed);
-    }
-
-    /**
      * What a pet's screen says of a licence: the grade on its chip, and under the cursor
      * the licence and grade, then what comes next.
      */
@@ -752,20 +748,69 @@ public final class LanguageData {
      * @param separator what goes between the names of the pets called
      */
     private static void addLicenceTranslations(Adder adder, String weedingBook, String weedingBookTip, String weeding,
-            String passed, String failed, String called, String handedIn, String missed, String separator,
-            String takeExam, String checkResults, String noBoard) {
+            String passed, String failed, String signedUp, String handedIn, String missed, String deskGone,
+            String takeExam, String checkResults, String noDesk) {
         adder.add("item.chiikawa.weeding_book", weedingBook);
         adder.add("tooltip.chiikawa.weeding_book", weedingBookTip);
         adder.add("qualification.chiikawa.weeding", weeding);
         adder.add("message.chiikawa.exam.passed", passed);
         adder.add("message.chiikawa.exam.failed", failed);
-        adder.add("message.chiikawa.exam.called", called);
+        adder.add("message.chiikawa.exam.signed_up", signedUp);
         adder.add("message.chiikawa.exam.handed_in", handedIn);
         adder.add("message.chiikawa.exam.missed", missed);
-        adder.add("message.chiikawa.list_separator", separator);
+        adder.add("message.chiikawa.exam.desk_gone", deskGone);
         adder.add("intent.chiikawa.take_exam", takeExam);
         adder.add("intent.chiikawa.check_results", checkResults);
-        adder.add("intent.chiikawa.fail.no_board", noBoard);
+        adder.add("intent.chiikawa.fail.no_desk", noDesk);
+    }
+
+    /**
+     * The exam desk, and the line at the top of its screen: what to do, why it takes nobody
+     * now, or whoever it has and where they are with it - the pet, the licence, the grade.
+     */
+    private static void addExamDeskStatusTranslations(Adder adder, String desk, String pick, String closed,
+            String taken, String noSeat, String sitting, String handedIn, String passed, String failed) {
+        adder.add("block.chiikawa.exam_desk", desk);
+        adder.add("screen.chiikawa.exam_desk", desk);
+        adder.add("screen.chiikawa.exam_desk.pick", pick);
+        adder.add("screen.chiikawa.exam_desk.closed.closed", closed);
+        adder.add("screen.chiikawa.exam_desk.closed.taken", taken);
+        adder.add("screen.chiikawa.exam_desk.closed.no_seat", noSeat);
+        adder.add("screen.chiikawa.exam_desk.booking.sitting", sitting);
+        adder.add("screen.chiikawa.exam_desk.booking.handed_in", handedIn);
+        adder.add("screen.chiikawa.exam_desk.booking.passed", passed);
+        adder.add("screen.chiikawa.exam_desk.booking.failed", failed);
+    }
+
+    /**
+     * The pets on an exam desk's screen: the fee, the button with it on, the grade each would
+     * sit, and why one cannot go; under the cursor, the grade it holds after its name.
+     */
+    private static void addExamDeskPetTranslations(Adder adder, String fee, String signUp, String sits, String nobody,
+            String holds, String holdsNone, String topGrade, String unpractised, String busy, String staying,
+            String outOfReach) {
+        adder.add("screen.chiikawa.exam_desk.fee", fee);
+        adder.add("screen.chiikawa.exam_desk.sign_up", signUp);
+        adder.add("screen.chiikawa.exam_desk.sits", sits);
+        adder.add("screen.chiikawa.exam_desk.nobody", nobody);
+        adder.add("screen.chiikawa.exam_desk.holds", holds);
+        adder.add("screen.chiikawa.exam_desk.holds_none", holdsNone);
+        adder.add("screen.chiikawa.exam_desk.ineligible.top_grade", topGrade);
+        adder.add("screen.chiikawa.exam_desk.ineligible.unpractised", unpractised);
+        adder.add("screen.chiikawa.exam_desk.ineligible.busy", busy);
+        adder.add("screen.chiikawa.exam_desk.ineligible.staying", staying);
+        adder.add("screen.chiikawa.exam_desk.ineligible.out_of_reach", outOfReach);
+    }
+
+    /** What a pet's odds come from, under the cursor on an exam desk's screen, in percent. */
+    private static void addExamDeskOddsTranslations(Adder adder, String base, String practice, String failing,
+            String book, String aptitude, String total) {
+        adder.add("screen.chiikawa.exam_desk.odds.base", base);
+        adder.add("screen.chiikawa.exam_desk.odds.practice", practice);
+        adder.add("screen.chiikawa.exam_desk.odds.failing", failing);
+        adder.add("screen.chiikawa.exam_desk.odds.book", book);
+        adder.add("screen.chiikawa.exam_desk.odds.aptitude", aptitude);
+        adder.add("screen.chiikawa.exam_desk.odds.total", total);
     }
 
     /** What a rung bell tells its owner. */

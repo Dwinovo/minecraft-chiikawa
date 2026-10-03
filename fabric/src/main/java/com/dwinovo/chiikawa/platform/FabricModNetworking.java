@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.platform;
 
 import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
+import com.dwinovo.chiikawa.client.exam.ClientExamDeskPacketHandler;
 import com.dwinovo.chiikawa.client.manual.ClientManualPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
 import com.dwinovo.chiikawa.client.pet.ClientPetPacketHandler;
@@ -8,6 +9,8 @@ import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.client.voice.ClientVoicePacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
 import com.dwinovo.chiikawa.network.BoardServerPacketHandler;
+import com.dwinovo.chiikawa.network.ExamDeskPayloads;
+import com.dwinovo.chiikawa.network.ExamDeskServerPacketHandler;
 import com.dwinovo.chiikawa.network.ManualPayloads;
 import com.dwinovo.chiikawa.network.PetPayloads;
 import com.dwinovo.chiikawa.network.PetServerPacketHandler;
@@ -45,10 +48,10 @@ public final class FabricModNetworking {
                 BoardPayloads.BoardUpgradePayload payload = BoardPayloads.BoardUpgradePayload.read(buffer);
                 server.execute(() -> BoardServerPacketHandler.handleUpgrade(payload, player));
             });
-        ServerPlayNetworking.registerGlobalReceiver(BoardPayloads.BOARD_EXAM,
+        ServerPlayNetworking.registerGlobalReceiver(ExamDeskPayloads.EXAM_DESK_SIGN_UP,
             (server, player, handler, buffer, responseSender) -> {
-                BoardPayloads.BoardExamPayload payload = BoardPayloads.BoardExamPayload.read(buffer);
-                server.execute(() -> BoardServerPacketHandler.handleExam(payload, player));
+                ExamDeskPayloads.SignUpPayload payload = ExamDeskPayloads.SignUpPayload.read(buffer);
+                server.execute(() -> ExamDeskServerPacketHandler.handleSignUp(payload, player));
             });
         ServerPlayNetworking.registerGlobalReceiver(PetPayloads.PET_DIRECTIVE,
             (server, player, handler, buffer, responseSender) -> {
@@ -67,6 +70,11 @@ public final class FabricModNetworking {
             (client, handler, buffer, responseSender) -> {
                 BoardPayloads.BoardSlipsPayload payload = BoardPayloads.BoardSlipsPayload.read(buffer);
                 client.execute(() -> ClientBoardPacketHandler.handleSlips(payload));
+            });
+        ClientPlayNetworking.registerGlobalReceiver(ExamDeskPayloads.EXAM_DESK_VIEW,
+            (client, handler, buffer, responseSender) -> {
+                ExamDeskPayloads.DeskViewPayload payload = ExamDeskPayloads.DeskViewPayload.read(buffer);
+                client.execute(() -> ClientExamDeskPacketHandler.handleView(payload));
             });
         ClientPlayNetworking.registerGlobalReceiver(ShopPayloads.SHOP_PRICES,
             (client, handler, buffer, responseSender) -> {
