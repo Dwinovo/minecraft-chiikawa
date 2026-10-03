@@ -20,8 +20,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Draws a block from a Bedrock model of its own, named after the block, turned the way the
- * block faces. The model stands on the middle of the block's floor and faces north, like the
+ * Draws a block from a Bedrock model of its own, named after the block unless it says
+ * otherwise, turned the way the block faces. The model stands on the middle of the block's floor and faces north, like the
  * block models of vanilla's facing blocks; a block that shows only some of its bones, as the
  * labor board shows only the plates still hanging, says which.
  */
@@ -45,7 +45,7 @@ public class PropBlockRenderer<T extends BlockEntity> implements BlockEntityRend
             ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress) {
         BlockEntityRenderer.super.extractRenderState(block, state, partialTick, cameraPosition, breakProgress);
         BlockState blockState = block.getBlockState();
-        state.model = BuiltInRegistries.BLOCK.getKey(blockState.getBlock());
+        state.model = model(block);
         state.facing = blockState.getValue(BlockStateProperties.HORIZONTAL_FACING);
         state.shown = shown(block);
     }
@@ -59,6 +59,14 @@ public class PropBlockRenderer<T extends BlockEntity> implements BlockEntityRend
         PropRenderer.draw(state.model, pose, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, state.shown,
             state.breakProgress);
         pose.popPose();
+    }
+
+    /**
+     * Which model to draw: the one named after the block, unless the block says otherwise.
+     * Asked while the render state is taken, so the answer is what the block is now.
+     */
+    protected Identifier model(T block) {
+        return BuiltInRegistries.BLOCK.getKey(block.getBlockState().getBlock());
     }
 
     /**

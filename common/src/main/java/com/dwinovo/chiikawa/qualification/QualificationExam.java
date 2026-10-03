@@ -2,21 +2,22 @@ package com.dwinovo.chiikawa.qualification;
 
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 
 /**
  * The rules of a licence's exams, kept free of the pet so they can be tested on their own:
- * when one can be opened and sat, who may sit, when results are out, the odds, and what a
+ * when a pet can be signed up and sit, who may, when results are out, the odds, and what a
  * wild pet turns up holding.
  */
 public final class QualificationExam {
-    /** An owner may open an exam from an hour after sunrise... */
+    /** An owner may sign a pet up from an hour after sunrise... */
     public static final long EXAM_FROM = 1000L;
-    /** ...until late enough in the afternoon that the pets called still have time to get there and write. */
+    /** ...until late enough in the afternoon that the pet still has time to get to the desk and write. */
     public static final long LAST_CALL = 9000L;
-    /** A pet called that has not sat down to the paper by an hour before sunset has missed it. */
+    /** A pet signed up that has not sat down to the paper by an hour before sunset has missed it. */
     public static final long EXAM_UNTIL = 11000L;
     /** Results go up at sunrise the day after, and anyone who has not been to see them by noon hears them anyway. */
     public static final long RESULTS_UNTIL = 6000L;
@@ -24,7 +25,7 @@ public final class QualificationExam {
     private QualificationExam() {
     }
 
-    /** @return the day number of a time of day, as boards and exams count days */
+    /** @return the day number of a time of day, as exams count days */
     public static long day(long dayTime) {
         return Math.floorDiv(dayTime, Level.TICKS_PER_DAY);
     }
@@ -34,48 +35,68 @@ public final class QualificationExam {
         return Math.floorMod(dayTime, Level.TICKS_PER_DAY);
     }
 
-    /** Whether an owner may open an exam now: in the working day, early enough to sit it. */
-    public static boolean mayOpen(long dayTime) {
+    /** Whether an owner may sign a pet up now: in the working day, early enough to sit the exam. */
+    public static boolean maySignUp(long dayTime) {
         long time = timeOfDay(dayTime);
         return time >= EXAM_FROM && time < LAST_CALL;
     }
 
     /**
-     * Whether a pet may be called to an exam: it has a grade left to pass, has practised
-     * enough since the last one, and has nothing on - neither called already nor waiting
-     * to hear about the last one.
+     * Why the licence keeps a pet from being signed up: it holds every grade, has not
+     * practised enough since its last exam, or has something on - signed up already, or
+     * waiting to hear about the last one.
+     *
+     * @return empty when it may be signed up
      */
-    public static boolean maySit(Qualification qualification, Licence licence) {
-        return licence.held() < qualification.grades()
-            && licence.practice() >= qualification.requiredPractice()
-            && licence.exam() instanceof ExamStage.None;
+    public static Optional<Ineligible> whyNot(Qualification qualification, Licence licence) {
+        if (licence.held() >= qualification.grades()) {
+            return Optional.of(Ineligible.TOP_GRADE);
+        }
+        if (!(licence.exam() instanceof ExamStage.None)) {
+            return Optional.of(Ineligible.BUSY);
+        }
+        if (licence.practice() < qualification.requiredPractice()) {
+            return Optional.of(Ineligible.UNPRACTISED);
+        }
+        return Optional.empty();
     }
 
-    /** Whether a pet called to an exam can still sit it: the day it was called, before the exam closes. */
+    /** Whether an exam for {@code examDay} can still be sat: it is that day, and the exam has not closed. */
+    public static boolean canSit(long examDay, long dayTime) {
+        return day(dayTime) == examDay && timeOfDay(dayTime) < EXAM_UNTIL;
+    }
+
+    /** Whether an exam sat on {@code examDay} has its results out: it was an earlier day than today. */
+    public static boolean resultsOut(long examDay, long dayTime) {
+        return day(dayTime) > examDay;
+    }
+
+    /** Whether it is the morning the results of an exam sat on {@code examDay} are up to go and see. */
+    public static boolean isResultsMorning(long examDay, long dayTime) {
+        return day(dayTime) == examDay + 1 && timeOfDay(dayTime) < RESULTS_UNTIL;
+    }
+
+    /** Whether a pet signed up for an exam can still sit it. */
     public static boolean isCalledNow(Licence licence, long dayTime) {
-        return licence.call()
-            .filter(called -> called.day() == day(dayTime) && timeOfDay(dayTime) < EXAM_UNTIL)
-            .isPresent();
+        return licence.call().filter(called -> canSit(called.day(), dayTime)).isPresent();
     }
 
-    /** Whether a pet was called to an exam it can no longer sit. */
+    /** Whether a pet was signed up for an exam it can no longer sit. */
     public static boolean missedCall(Licence licence, long dayTime) {
         return licence.call().isPresent() && !isCalledNow(licence, dayTime);
     }
 
     /**
-     * Whether a pet's result is out: it sat an exam on an earlier day than today. The morning
-     * after, it goes to see; see {@link #mustHearResults} for when it hears them anyway.
+     * Whether a pet's result is out. The morning after, it goes to see; see
+     * {@link #mustHearResults} for when it hears them anyway.
      */
     public static boolean resultsOut(Licence licence, long dayTime) {
-        return licence.paper().filter(sat -> day(dayTime) > sat.day()).isPresent();
+        return licence.paper().filter(sat -> resultsOut(sat.day(), dayTime)).isPresent();
     }
 
-    /** Whether a pet whose results are out goes to the board to see them, rather than hearing them where it is. */
+    /** Whether a pet whose results are out goes to its desk to see them, rather than hearing them where it is. */
     public static boolean goesToSeeResults(Licence licence, long dayTime) {
-        return resultsOut(licence, dayTime)
-            && licence.paper().filter(sat -> day(dayTime) == sat.day() + 1).isPresent()
-            && timeOfDay(dayTime) < RESULTS_UNTIL;
+        return licence.paper().filter(sat -> isResultsMorning(sat.day(), dayTime)).isPresent();
     }
 
     /** Whether a pet whose results are out has missed the morning, and hears them wherever it is. */
@@ -83,17 +104,20 @@ public final class QualificationExam {
         return resultsOut(licence, dayTime) && !goesToSeeResults(licence, dayTime);
     }
 
-    /**
-     * The chance of passing the next grade: the grade's own odds, plus what practice,
-     * failing and the book add, all scaled by how the pet leans, and never above the best
-     * odds the licence allows.
-     */
+    /** A pet's odds at its next grade, piece by piece. */
+    public static PassOdds odds(Qualification qualification, Licence licence, Personality.Leaning leaning) {
+        return new PassOdds(
+            qualification.basePass().get(Math.min(licence.held(), qualification.grades() - 1)),
+            Math.min(licence.practice() * qualification.practicePerSlip(), qualification.practiceCap()),
+            Math.min(licence.fails() * qualification.failBonus(), qualification.failCap()),
+            licence.read() ? qualification.bookBonus() + leaning.bookBonus() : 0.0F,
+            leaning.aptitude(),
+            qualification.maxPass());
+    }
+
+    /** The chance of passing the next grade; see {@link PassOdds}. */
     public static float passChance(Qualification qualification, Licence licence, Personality.Leaning leaning) {
-        float base = qualification.basePass().get(Math.min(licence.held(), qualification.grades() - 1));
-        float practice = Math.min(licence.practice() * qualification.practicePerSlip(), qualification.practiceCap());
-        float failing = Math.min(licence.fails() * qualification.failBonus(), qualification.failCap());
-        float book = licence.read() ? qualification.bookBonus() + leaning.bookBonus() : 0.0F;
-        return Mth.clamp((base + practice + failing + book) * leaning.aptitude(), 0.0F, qualification.maxPass());
+        return odds(qualification, licence, leaning).chance();
     }
 
     /** Whether this sitting passes. */

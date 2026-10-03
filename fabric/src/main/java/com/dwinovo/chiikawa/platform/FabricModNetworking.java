@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.platform;
 
 import com.dwinovo.chiikawa.client.board.ClientBoardPacketHandler;
+import com.dwinovo.chiikawa.client.exam.ClientExamDeskPacketHandler;
 import com.dwinovo.chiikawa.client.manual.ClientManualPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
 import com.dwinovo.chiikawa.client.pet.ClientPetPacketHandler;
@@ -8,6 +9,8 @@ import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.client.voice.ClientVoicePacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
 import com.dwinovo.chiikawa.network.BoardServerPacketHandler;
+import com.dwinovo.chiikawa.network.ExamDeskPayloads;
+import com.dwinovo.chiikawa.network.ExamDeskServerPacketHandler;
 import com.dwinovo.chiikawa.network.ManualPayloads;
 import com.dwinovo.chiikawa.network.PetPayloads;
 import com.dwinovo.chiikawa.network.PetServerPacketHandler;
@@ -28,6 +31,8 @@ public final class FabricModNetworking {
     public static void registerServer() {
         PayloadTypeRegistry.clientboundPlay().register(BoardPayloads.BoardSlipsPayload.TYPE, BoardPayloads.BoardSlipsPayload.STREAM_CODEC);
         PayloadTypeRegistry.serverboundPlay().register(BoardPayloads.BoardUpgradePayload.TYPE, BoardPayloads.BoardUpgradePayload.STREAM_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(ExamDeskPayloads.DeskViewPayload.TYPE, ExamDeskPayloads.DeskViewPayload.STREAM_CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(ExamDeskPayloads.SignUpPayload.TYPE, ExamDeskPayloads.SignUpPayload.STREAM_CODEC);
         PayloadTypeRegistry.serverboundPlay().register(PetPayloads.PetDirectivePayload.TYPE, PetPayloads.PetDirectivePayload.STREAM_CODEC);
         PayloadTypeRegistry.clientboundPlay().register(ShopPayloads.ShopPricesPayload.TYPE, ShopPayloads.ShopPricesPayload.STREAM_CODEC);
         PayloadTypeRegistry.clientboundPlay().register(ManualPayloads.OpenHandbookPayload.TYPE, ManualPayloads.OpenHandbookPayload.STREAM_CODEC);
@@ -46,6 +51,8 @@ public final class FabricModNetworking {
             (payload, context) -> context.server().execute(() -> MusicServerPacketHandler.handleCatalogRequest(payload, context.player())));
         ServerPlayNetworking.registerGlobalReceiver(BoardPayloads.BoardUpgradePayload.TYPE,
             (payload, context) -> context.server().execute(() -> BoardServerPacketHandler.handleUpgrade(payload, context.player())));
+        ServerPlayNetworking.registerGlobalReceiver(ExamDeskPayloads.SignUpPayload.TYPE,
+            (payload, context) -> context.server().execute(() -> ExamDeskServerPacketHandler.handleSignUp(payload, context.player())));
         ServerPlayNetworking.registerGlobalReceiver(PetPayloads.PetDirectivePayload.TYPE,
             (payload, context) -> context.server().execute(() -> PetServerPacketHandler.handleDirective(payload, context.player())));
         ServerPlayNetworking.registerGlobalReceiver(ShopPayloads.ShopTradePayload.TYPE,
@@ -55,6 +62,8 @@ public final class FabricModNetworking {
     public static void registerClient() {
         ClientPlayNetworking.registerGlobalReceiver(BoardPayloads.BoardSlipsPayload.TYPE,
             (payload, context) -> context.client().execute(() -> ClientBoardPacketHandler.handleSlips(payload)));
+        ClientPlayNetworking.registerGlobalReceiver(ExamDeskPayloads.DeskViewPayload.TYPE,
+            (payload, context) -> context.client().execute(() -> ClientExamDeskPacketHandler.handleView(payload)));
         ClientPlayNetworking.registerGlobalReceiver(ShopPayloads.ShopPricesPayload.TYPE,
             (payload, context) -> context.client().execute(() -> ClientShopPacketHandler.handlePrices(payload)));
         ClientPlayNetworking.registerGlobalReceiver(ManualPayloads.OpenHandbookPayload.TYPE,

@@ -20,6 +20,7 @@ public final class ModBlockModelProvider {
     public static void generate(BlockModelGenerators blockModels) {
         drawnByItsRenderer(blockModels, InitBlocks.LABOR_BOARD.get(), Blocks.SPRUCE_PLANKS);
         drawnByItsRenderer(blockModels, InitBlocks.SHOP.get(), Blocks.BIRCH_PLANKS);
+        drawnByItsRenderer(blockModels, InitBlocks.EXAM_DESK.get(), Blocks.OAK_PLANKS);
     }
 
     /**
