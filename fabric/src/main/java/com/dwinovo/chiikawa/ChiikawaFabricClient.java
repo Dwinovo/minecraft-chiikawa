@@ -11,6 +11,7 @@ import com.dwinovo.chiikawa.anim.render.impl.ShisaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.UsagiRenderer;
 import com.dwinovo.chiikawa.client.manual.GuiPropRenderer;
 import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
+import com.dwinovo.chiikawa.client.render.ExamDeskRenderer;
 import com.dwinovo.chiikawa.client.render.LaborBoardRenderer;
 import com.dwinovo.chiikawa.client.render.PropBlockRenderer;
 import com.dwinovo.chiikawa.client.render.PropItemRenderer;
@@ -48,6 +49,7 @@ public class ChiikawaFabricClient implements ClientModInitializer {
         // Props are drawn from their own Bedrock models, as items as everywhere else.
         SpecialModelRenderers.ID_MAPPER.put(PropItemRenderer.ID, PropItemRenderer.Unbaked.MAP_CODEC);
         BlockEntityRendererRegistry.register(InitBlockEntities.LABOR_BOARD.get(), context -> new LaborBoardRenderer());
+        BlockEntityRendererRegistry.register(InitBlockEntities.EXAM_DESK.get(), context -> new ExamDeskRenderer());
         BlockEntityRendererRegistry.register(InitBlockEntities.SHOP.get(), context -> new PropBlockRenderer<>());
         // The handbook's props, pasted into its panels as the game pastes in a pet.
         PictureInPictureRendererRegistry.register(context -> new GuiPropRenderer(context.bufferSource()));

@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.init;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.block.ExamDeskBlockEntity;
 import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
 import com.dwinovo.chiikawa.block.ShopBlockEntity;
 import com.dwinovo.chiikawa.platform.Services;
@@ -19,6 +20,12 @@ public final class InitBlockEntities {
         Identifier.fromNamespaceAndPath(Constants.MOD_ID, "shop"),
         ShopBlockEntity::new,
         InitBlocks.SHOP
+    );
+
+    public static final Supplier<BlockEntityType<ExamDeskBlockEntity>> EXAM_DESK = Services.REGISTRY.registerBlockEntity(
+        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "exam_desk"),
+        ExamDeskBlockEntity::new,
+        InitBlocks.EXAM_DESK
     );
 
     private InitBlockEntities() {
