@@ -53,6 +53,8 @@ public final class InitItems {
         registerItem("labor_board", () -> new BlockItem(InitBlocks.LABOR_BOARD.get(), new Item.Properties()));
     public static final Supplier<BlockItem> SHOP =
         registerItem("shop", () -> new BlockItem(InitBlocks.SHOP.get(), new Item.Properties()));
+    public static final Supplier<BlockItem> EXAM_DESK =
+        registerItem("exam_desk", () -> new BlockItem(InitBlocks.EXAM_DESK.get(), new Item.Properties()));
 
     public static final Supplier<Item> SIMPLE_DISH =
         registerItem("simple_dish", () -> new DescribedItem(new Item.Properties()));
@@ -76,11 +78,11 @@ public final class InitItems {
         registerItem("handbook", () -> new HandbookItem(new Item.Properties()));
     /**
      * Everything drawn from a Bedrock model of its own, by {@code PropRenderer}: the bags,
-     * the labor board, the shop, the handbook and the pets' weapons. Each loader gives these their built-in item
+     * the labor board, the shop, the exam desk, the handbook and the pets' weapons. Each loader gives these their built-in item
      * renderer, and their item models are generated from this list.
      */
     public static final List<Supplier<? extends Item>> PROPS =
-        List.of(BACKPACK, BEAR_POUCH, WHALE_POUCH, STAR_POUCH, LABOR_BOARD, SHOP, HANDBOOK,
+        List.of(BACKPACK, BEAR_POUCH, WHALE_POUCH, STAR_POUCH, LABOR_BOARD, SHOP, EXAM_DESK, HANDBOOK,
             CHIIKAWA_WEAPON, HACHIWARE_WEAPON, USAGI_WEAPON, RAKKO_SWORD);
 
     public static final Supplier<Item> USAGI_DOLL =

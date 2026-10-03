@@ -14,9 +14,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.schedule.Activity;
 
 /**
- * Sits a licence exam at the board its owner opened it at: the day it was called, until
- * the exam closes, while a seat there is free. Starts only on a board within the anchor's
- * reach, as a slip is taken, so a pet at heel sits it while its owner stays near the board.
+ * Sits a licence exam at the desk its owner signed it up at: that day, until the exam
+ * closes. Starts only on a desk within the anchor's reach, as a slip is taken, so a pet at
+ * heel sits it while its owner stays near the desk.
  */
 public final class TakeExamIntent implements PetIntent {
     /** Ahead of taking a slip or getting on with work: the owner paid for this. */
@@ -39,12 +39,12 @@ public final class TakeExamIntent implements PetIntent {
 
     @Override
     public IntentCheck canRun(IntentContext ctx) {
-        return check(ctx.examBoard(), ctx, PetAnchor::withinReach, "out_of_reach");
+        return check(ctx.examDesk(), ctx, PetAnchor::withinReach, "out_of_reach");
     }
 
     @Override
     public IntentCheck canContinue(IntentContext ctx) {
-        return check(ctx.examBoard(), ctx, PetAnchor::withinLeash, "out_of_leash");
+        return check(ctx.examDesk(), ctx, PetAnchor::withinLeash, "out_of_leash");
     }
 
     @Override
@@ -52,10 +52,10 @@ public final class TakeExamIntent implements PetIntent {
         return SCORE;
     }
 
-    static IntentCheck check(Optional<GlobalPos> board, IntentContext ctx,
+    static IntentCheck check(Optional<GlobalPos> desk, IntentContext ctx,
             BiPredicate<PetAnchor, GlobalPos> inRange, String outOfRange) {
-        return board
+        return desk
             .map(pos -> inRange.test(ctx.anchor(), pos) ? IntentCheck.OK : IntentCheck.fail(outOfRange))
-            .orElseGet(() -> IntentCheck.fail("no_board"));
+            .orElseGet(() -> IntentCheck.fail("no_desk"));
     }
 }
