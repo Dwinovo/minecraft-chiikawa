@@ -3,13 +3,13 @@ package com.dwinovo.chiikawa.anim.render;
 import java.util.Optional;
 
 /**
- * What a pet has with it at a licence exam: the answer sheet in front of it and the pencil in
- * its hand, each a bone of its model under the same name for every pet, there only while it
- * sits the exam, and the sheet while it hands it in. A pet whose model lacks one goes
+ * What a pet has with it at a licence exam: the pencil in its hand while it writes, and the
+ * sheet it holds out as it hands it in - the sheet it writes on is the desk's. Each is a
+ * bone of its model under the same name for every pet; a pet whose model lacks one goes
  * without.
  */
 public enum ExamProp {
-    PAPER("ExamPaper", ShownDuring.any("exam", "hand_in")),
+    PAPER("ExamPaper", ShownDuring.any("hand_in")),
     PENCIL("ExamPencil", ShownDuring.any("exam"));
 
     private final String bone;

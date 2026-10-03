@@ -1,6 +1,8 @@
 package com.dwinovo.chiikawa.data;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.block.DeskPart;
+import com.dwinovo.chiikawa.block.ExamDeskBlock;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
@@ -27,7 +29,10 @@ import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.entries.TagEntry;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.advancements.critereon.StatePropertiesPredicate;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
@@ -64,13 +69,27 @@ public final class ModLootTableProvider extends LootTableProvider {
         public void generate(HolderLookup.Provider registries, BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
             dropSelf(output, InitBlocks.LABOR_BOARD.get());
             dropSelf(output, InitBlocks.SHOP.get());
+            // Only the desk half drops it, as only the head of a bed drops the bed.
+            dropSelf(output, InitBlocks.EXAM_DESK.get(), LootItemBlockStatePropertyCondition
+                .hasBlockStateProperties(InitBlocks.EXAM_DESK.get())
+                .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(ExamDeskBlock.PART, DeskPart.DESK)));
         }
 
         private static void dropSelf(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output, Block block) {
-            output.accept(block.getLootTable(), LootTable.lootTable().withPool(LootPool.lootPool()
+            output.accept(block.getLootTable(), LootTable.lootTable().withPool(selfPool(block)));
+        }
+
+        /** Drops itself only when {@code when} holds of the block broken. */
+        private static void dropSelf(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output, Block block,
+                                     LootItemCondition.Builder when) {
+            output.accept(block.getLootTable(), LootTable.lootTable().withPool(selfPool(block).when(when)));
+        }
+
+        private static LootPool.Builder selfPool(Block block) {
+            return LootPool.lootPool()
                 .setRolls(ConstantValue.exactly(1))
                 .add(LootItem.lootTableItem(block))
-                .when(ExplosionCondition.survivesExplosion())));
+                .when(ExplosionCondition.survivesExplosion());
         }
     }
 
