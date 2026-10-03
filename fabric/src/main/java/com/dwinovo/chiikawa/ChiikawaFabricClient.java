@@ -11,6 +11,7 @@ import com.dwinovo.chiikawa.anim.render.impl.RakkoRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.ShisaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.UsagiRenderer;
 import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
+import com.dwinovo.chiikawa.client.render.ExamDeskRenderer;
 import com.dwinovo.chiikawa.client.render.LaborBoardRenderer;
 import com.dwinovo.chiikawa.client.render.PropBlockRenderer;
 import com.dwinovo.chiikawa.client.render.PropPictureRenderer;
@@ -51,6 +52,7 @@ public class ChiikawaFabricClient implements ClientModInitializer {
         // The handbook's props, drawn in a screen the way the game draws an entity there.
         SpecialGuiElementRegistry.register(context -> new PropPictureRenderer(context.vertexConsumers()));
         BlockEntityRenderers.register(InitBlockEntities.LABOR_BOARD.get(), context -> new LaborBoardRenderer());
+        BlockEntityRenderers.register(InitBlockEntities.EXAM_DESK.get(), context -> new ExamDeskRenderer());
         BlockEntityRenderers.register(InitBlockEntities.SHOP.get(), context -> new PropBlockRenderer<>());
 
         MenuScreens.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);

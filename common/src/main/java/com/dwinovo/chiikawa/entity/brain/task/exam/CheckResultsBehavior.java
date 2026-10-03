@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.task.exam;
 
 import com.dwinovo.chiikawa.anim.state.PetActivity;
-import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
+import com.dwinovo.chiikawa.block.ExamDeskBlockEntity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.qualification.PetExams;
 import com.google.common.collect.ImmutableMap;
@@ -17,14 +17,13 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Walks back to the board it sat an exam at, the morning after, stands in front of the
- * results a moment, and hears them: every result it has out.
+ * Walks back to the desk it sat an exam at, the morning after, reads the results laid on it
+ * a moment, and hears them: every result it has out.
  */
 public class CheckResultsBehavior extends Behavior<AbstractPet> {
     private static final float SPEED = 0.7F;
-    /** Manhattan distance to the board the walk counts as arrived; the board itself is solid. */
-    private static final int ARRIVE_DISTANCE = 2;
-    private static final double READING_DISTANCE_SQR = 3.0 * 3.0;
+    /** Close enough to the desk, at its chair, to read what is on it. */
+    private static final double READING_DISTANCE_SQR = 1.2 * 1.2;
     /** How long it stands reading the results before it takes them in. */
     private static final int READING_TICKS = 60;
     private static final int MAX_TICKS = 1200;
@@ -40,35 +39,36 @@ public class CheckResultsBehavior extends Behavior<AbstractPet> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, AbstractPet pet) {
-        return PetExams.resultsBoard(pet).flatMap(board -> LaborBoardBlockEntity.at(level, board)).isPresent();
+        return PetExams.resultsDesk(pet).flatMap(desk -> ExamDeskBlockEntity.at(level, desk)).isPresent();
     }
 
     @Override
     protected void start(ServerLevel level, AbstractPet pet, long gameTime) {
-        where = PetExams.resultsBoard(pet).orElseThrow();
+        where = PetExams.resultsDesk(pet).orElseThrow();
         readUntil = -1L;
         heard = false;
         gaveUp = false;
-        BehaviorUtils.setWalkAndLookTargetMemories(pet, where.pos(), SPEED, ARRIVE_DISTANCE);
+        ExamDeskBlockEntity desk = desk(level).orElseThrow();
+        BehaviorUtils.setWalkAndLookTargetMemories(pet, desk.chair(), SPEED, 0);
     }
 
     @Override
     protected boolean canStillUse(ServerLevel level, AbstractPet pet, long gameTime) {
-        return !heard && !gaveUp && board(level).isPresent();
+        return !heard && !gaveUp && desk(level).isPresent();
     }
 
     @Override
     protected void tick(ServerLevel level, AbstractPet pet, long gameTime) {
-        LaborBoardBlockEntity board = board(level).orElseThrow();
+        ExamDeskBlockEntity desk = desk(level).orElseThrow();
         if (readUntil < 0L) {
-            if (pet.distanceToSqr(Vec3.atCenterOf(board.getBlockPos())) <= READING_DISTANCE_SQR) {
+            if (pet.distanceToSqr(Vec3.atBottomCenterOf(desk.chair())) <= READING_DISTANCE_SQR) {
                 pet.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
                 pet.getNavigation().stop();
-                pet.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(board.getBlockPos()));
+                pet.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(desk.getBlockPos()));
                 pet.setActivity(PetActivity.READ_RESULTS);
                 readUntil = gameTime + READING_TICKS;
             } else if (!pet.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET)) {
-                // The walk ended short of the board: it hears the results by noon anyway.
+                // The walk ended short of the desk: it hears the results by noon anyway.
                 gaveUp = true;
             }
             return;
@@ -87,7 +87,7 @@ public class CheckResultsBehavior extends Behavior<AbstractPet> {
         where = null;
     }
 
-    private Optional<LaborBoardBlockEntity> board(ServerLevel level) {
-        return where == null ? Optional.empty() : LaborBoardBlockEntity.at(level, where);
+    private Optional<ExamDeskBlockEntity> desk(ServerLevel level) {
+        return where == null ? Optional.empty() : ExamDeskBlockEntity.at(level, where);
     }
 }

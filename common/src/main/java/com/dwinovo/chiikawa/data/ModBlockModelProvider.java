@@ -38,7 +38,8 @@ public final class ModBlockModelProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cache) {
         return CompletableFuture.allOf(
             drawnByItsRenderer(cache, InitBlocks.LABOR_BOARD.get(), Blocks.SPRUCE_PLANKS),
-            drawnByItsRenderer(cache, InitBlocks.SHOP.get(), Blocks.BIRCH_PLANKS)
+            drawnByItsRenderer(cache, InitBlocks.SHOP.get(), Blocks.BIRCH_PLANKS),
+            drawnByItsRenderer(cache, InitBlocks.EXAM_DESK.get(), Blocks.OAK_PLANKS)
         );
     }
 
