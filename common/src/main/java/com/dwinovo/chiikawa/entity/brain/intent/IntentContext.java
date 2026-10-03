@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.intent;
 
 import com.dwinovo.chiikawa.anim.state.PetActivity;
-import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
+import com.dwinovo.chiikawa.block.ExamDeskBlockEntity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
@@ -47,8 +47,8 @@ import net.minecraft.world.level.Level;
  * @param hasArrows whether the pet carries arrows
  * @param hasPlayableSelection whether the held music box selects a song the pet would play now
  * @param playingMusic whether the pet is performing
- * @param examBoard the labor board the pet has been called to sit an exam at, while it can and a seat there is free
- * @param resultsBoard the labor board the pet sat an exam at, while it has the results to go and see there this morning
+ * @param examDesk the exam desk the pet is signed up at, while it can still sit its exam there
+ * @param resultsDesk the exam desk the pet sat an exam at, while it has the results to go and see there this morning
  */
 public record IntentContext(
     GlobalPos petPos,
@@ -70,8 +70,8 @@ public record IntentContext(
     boolean hasArrows,
     boolean hasPlayableSelection,
     boolean playingMusic,
-    Optional<GlobalPos> examBoard,
-    Optional<GlobalPos> resultsBoard
+    Optional<GlobalPos> examDesk,
+    Optional<GlobalPos> resultsDesk
 ) {
     public static IntentContext capture(AbstractPet pet, PetOwnership ownership) {
         Level level = pet.level();
@@ -99,23 +99,20 @@ public record IntentContext(
             !Utils.getArrow(pet).isEmpty(),
             PlayMusicBehavior.playableSelection(pet).isPresent(),
             pet.getActivity() == PetActivity.PLAY_GUITAR,
-            examBoard(pet),
-            resultsBoard(pet)
+            examDesk(pet),
+            resultsDesk(pet)
         );
     }
 
-    private static Optional<GlobalPos> examBoard(AbstractPet pet) {
-        long gameTime = pet.level().getGameTime();
+    private static Optional<GlobalPos> examDesk(AbstractPet pet) {
         return PetExams.toSit(pet)
-            .map(PetExams.Summons::board)
-            .filter(board -> LaborBoardBlockEntity.at(pet.level(), board)
-                .filter(found -> found.exam().seats().hasSeatFor(pet.getUUID(), gameTime))
-                .isPresent());
+            .map(PetExams.Summons::desk)
+            .filter(desk -> ExamDeskBlockEntity.at(pet.level(), desk).isPresent());
     }
 
-    private static Optional<GlobalPos> resultsBoard(AbstractPet pet) {
-        return PetExams.resultsBoard(pet)
-            .filter(board -> LaborBoardBlockEntity.at(pet.level(), board).isPresent());
+    private static Optional<GlobalPos> resultsDesk(AbstractPet pet) {
+        return PetExams.resultsDesk(pet)
+            .filter(desk -> ExamDeskBlockEntity.at(pet.level(), desk).isPresent());
     }
 
     /**

@@ -61,7 +61,10 @@ class PetPosesTest {
         assertTrue(wrong.isEmpty(), String.join("; ", wrong));
     }
 
-    /** A pet with an exam pose of its own sits on the ground over its paper, and the paper lies on it. */
+    /**
+     * A pet with an exam pose of its own sits on the exam desk's chair, not sunk into the seat
+     * and not hovering over it: the pet stands on the seat, so the seat is its ground.
+     */
     @Test
     void everyExamPoseSitsOnTheGround() throws IOException {
         List<String> wrong = new ArrayList<>();
