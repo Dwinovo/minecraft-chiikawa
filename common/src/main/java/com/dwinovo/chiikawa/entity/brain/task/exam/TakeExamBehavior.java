@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain.task.exam;
 
+import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.block.ExamSeats;
 import com.dwinovo.chiikawa.block.LaborBoardBlock;
@@ -24,7 +25,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Sits a licence exam: takes a seat in front of the board its owner opened it at, walks to
  * it, sits facing the board over the paper for as long as the licence says, and hands it
- * in. The result is decided as it is handed in and heard the morning after; a pet called
+ * in, holding it out as it does. The result is decided as it is handed in and heard the morning after; a pet called
  * away before it hands in gives up its seat and has sat nothing, and can come back to it
  * while the exam is on.
  */
@@ -88,6 +89,7 @@ public class TakeExamBehavior extends Behavior<AbstractPet> {
         pet.getLookControl().setLookAt(Vec3.atCenterOf(board.getBlockPos()));
         if (gameTime >= writingUntil) {
             PetExams.handIn(pet, summons.qualification(), board);
+            pet.triggerAction(PetAction.HAND_IN);
             handedIn = true;
         }
     }
