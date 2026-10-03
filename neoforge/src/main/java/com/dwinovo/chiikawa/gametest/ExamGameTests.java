@@ -7,8 +7,8 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
-import com.dwinovo.chiikawa.block.BoardExam;
 import com.dwinovo.chiikawa.block.BoardNotice;
+import com.dwinovo.chiikawa.block.ExamResults;
 import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
 import com.dwinovo.chiikawa.data.PetTaskTypeData;
 import com.dwinovo.chiikawa.data.QualificationData;
@@ -17,10 +17,13 @@ import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
+import com.dwinovo.chiikawa.qualification.ExamOpening;
+import com.dwinovo.chiikawa.qualification.ExamStage;
 import com.dwinovo.chiikawa.qualification.Licence;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -29,6 +32,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -39,12 +43,13 @@ import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
- * The weeding licence, end to end: a pet that has practised and wants to sits the exam
- * at the board on exam day and hands a paper in; the morning after it goes to the board
- * and hears how it did; a pet that cannot go hears by noon wherever it is.
+ * The weeding licence, end to end: an owner pays a diamond at a board and every pet of
+ * theirs that may sit is called; a called pet sits the exam there and hands a paper in;
+ * the morning after it goes back to the board and hears how it did; a pet that cannot go
+ * hears by noon wherever it is, and one that never sat down is let off.
  *
- * <p>Each part of the calendar is its own batch, since a batch sets the time of day for
- * every case in it: exam day, the morning after, and the afternoon after.
+ * <p>Each part of the exam is its own batch, since a batch sets the time of day for every
+ * case in it: the exam's day, the morning after, and the afternoon after.
  */
 @GameTestHolder(Constants.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -52,8 +57,8 @@ public final class ExamGameTests {
     private static final String EXAM_DAY = "chiikawa_exam_day";
     private static final String RESULTS_MORNING = "chiikawa_exam_results";
     private static final String RESULTS_AFTERNOON = "chiikawa_exam_afternoon";
-    /** Day 6 is the first exam day, the seventh day of the world. */
-    private static final long EXAM_DAY_NUMBER = 6L;
+    /** Any day will do: an exam is held the day its owner opens it. */
+    private static final long EXAM_DAY_NUMBER = 3L;
     private static final long MORNING = 2000L;
     private static final long AFTERNOON = 8000L;
     /** Long enough to walk to a seat and write a paper, about 26 seconds. */
@@ -77,37 +82,63 @@ public final class ExamGameTests {
         settleWorld(level, Difficulty.PEACEFUL, (EXAM_DAY_NUMBER + 1) * Level.TICKS_PER_DAY + AFTERNOON);
     }
 
-    /** Practised and keen: on exam day it takes a seat at the board and hands a paper in. */
+    /**
+     * One diamond for the sitting, however many go: the pets that have practised are called,
+     * and one that has not, or is told to stay, is not.
+     */
+    @GameTest(template = "floor8", batch = EXAM_DAY, timeoutTicks = 100)
+    public static void opening_an_exam_calls_every_pet_that_may_sit_for_one_diamond(GameTestHelper helper) {
+        BlockPos boardPos = new BlockPos(3, STAND, 1);
+        helper.setBlock(boardPos, InitBlocks.LABOR_BOARD.get());
+        ServerPlayer owner = player(helper);
+        owner.getInventory().add(new ItemStack(Items.DIAMOND, 2));
+        AbstractPet first = ownersPet(helper, owner, new BlockPos(1, STAND, 5), true);
+        AbstractPet second = ownersPet(helper, owner, new BlockPos(5, STAND, 5), true);
+        AbstractPet unpractised = ownersPet(helper, owner, new BlockPos(3, STAND, 6), false);
+        AbstractPet staying = ownersPet(helper, owner, new BlockPos(3, STAND, 4), true);
+        staying.setPetDirective(PetDirective.STAY);
+
+        Optional<ExamOpening.Refusal> refusal = ExamOpening.open(owner, board(helper, boardPos), QualificationData.WEEDING);
+
+        helper.assertTrue(refusal.isEmpty(), "the exam was not opened: " + refusal);
+        helper.assertTrue(called(first) && called(second), "a practised pet was not called");
+        helper.assertFalse(called(unpractised), "a pet that has not practised was called");
+        helper.assertFalse(called(staying), "a pet told to stay was called");
+        helper.assertTrue(owner.getInventory().countItem(Items.DIAMOND) == 1, "the fee was not one diamond");
+        helper.succeed();
+    }
+
+    /** An owner with nobody to send pays nothing. */
+    @GameTest(template = "floor8", batch = EXAM_DAY, timeoutTicks = 100)
+    public static void nobody_to_call_costs_nothing(GameTestHelper helper) {
+        BlockPos boardPos = new BlockPos(3, STAND, 1);
+        helper.setBlock(boardPos, InitBlocks.LABOR_BOARD.get());
+        ServerPlayer owner = player(helper);
+        owner.getInventory().add(new ItemStack(Items.DIAMOND, 1));
+        ownersPet(helper, owner, new BlockPos(3, STAND, 5), false);
+
+        Optional<ExamOpening.Refusal> refusal = ExamOpening.open(owner, board(helper, boardPos), QualificationData.WEEDING);
+
+        helper.assertTrue(refusal.equals(Optional.of(ExamOpening.Refusal.NOBODY)), "refused for " + refusal);
+        helper.assertTrue(owner.getInventory().countItem(Items.DIAMOND) == 1, "a diamond went on an empty room");
+        helper.succeed();
+    }
+
+    /** Called: it takes a seat at the board and hands a paper in, kept for the morning. */
     @GameTest(template = "floor16", batch = EXAM_DAY, timeoutTicks = EXAM_TICKS)
-    public static void a_keen_pet_sits_the_exam_and_hands_a_paper_in(GameTestHelper helper) {
+    public static void a_called_pet_sits_the_exam_and_hands_a_paper_in(GameTestHelper helper) {
         BlockPos boardPos = new BlockPos(8, STAND, 3);
         helper.setBlock(boardPos, InitBlocks.LABOR_BOARD.get());
         AbstractPet pet = worker(helper, new BlockPos(8, STAND, 11));
-        pet.licences().set(QualificationData.WEEDING, Licence.NONE.practised().decided(EXAM_DAY_NUMBER, true));
+        pet.licences().set(QualificationData.WEEDING, Licence.NONE.practised().called(at(helper, boardPos), EXAM_DAY_NUMBER));
 
         helper.succeedWhen(() -> {
             Licence licence = pet.licences().get(QualificationData.WEEDING);
-            helper.assertTrue(licence.pending().isPresent(), "the pet has not handed a paper in");
+            helper.assertTrue(licence.paper().isPresent(), "the pet has not handed a paper in");
             helper.assertTrue(licence.held() == 0, "the result was heard on the day of the exam");
-            LaborBoardBlockEntity board = board(helper, boardPos);
-            helper.assertTrue(board.exam().posted(EXAM_DAY_NUMBER + 1).stream()
+            helper.assertTrue(board(helper, boardPos).exam().results().posted(EXAM_DAY_NUMBER + 1).stream()
                     .anyMatch(sitting -> sitting.pet().equals(pet.getUUID()) && sitting.rank() == 5),
                 "the board has not kept the paper to post in the morning");
-        });
-    }
-
-    /** A pet that does not want to go this time stays away, practised or not. */
-    @GameTest(template = "floor16", batch = EXAM_DAY, timeoutTicks = RESULTS_TICKS)
-    public static void a_pet_that_does_not_want_to_go_does_not_sit(GameTestHelper helper) {
-        BlockPos boardPos = new BlockPos(8, STAND, 3);
-        helper.setBlock(boardPos, InitBlocks.LABOR_BOARD.get());
-        AbstractPet pet = worker(helper, new BlockPos(8, STAND, 11));
-        pet.licences().set(QualificationData.WEEDING, Licence.NONE.practised().decided(EXAM_DAY_NUMBER, false));
-
-        helper.runAtTickTime(RESULTS_TICKS - 20, () -> {
-            helper.assertTrue(pet.licences().get(QualificationData.WEEDING).pending().isEmpty(),
-                "a pet that did not want to go sat the exam");
-            helper.succeed();
         });
     }
 
@@ -117,33 +148,44 @@ public final class ExamGameTests {
         BlockPos boardPos = new BlockPos(8, STAND, 3);
         helper.setBlock(boardPos, InitBlocks.LABOR_BOARD.get());
         AbstractPet pet = worker(helper, new BlockPos(8, STAND, 11));
-        pet.licences().set(QualificationData.WEEDING, Licence.NONE.practised().decided(EXAM_DAY_NUMBER, true));
+        pet.licences().set(QualificationData.WEEDING, Licence.NONE.practised().called(at(helper, boardPos), EXAM_DAY_NUMBER));
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(
-                board(helper, boardPos).exam().seat(pet.getUUID(), helper.getLevel().getGameTime()).isPresent()
-                    && pet.getActivity() == PetActivity.EXAM,
+            .thenWaitUntil(() -> helper.assertTrue(pet.getActivity() == PetActivity.EXAM,
                 "the pet never sat down to the paper"))
             .thenExecute(() -> pet.setPetDirective(PetDirective.STAY))
             .thenIdle(40)
             .thenExecute(() -> {
-                helper.assertTrue(pet.licences().get(QualificationData.WEEDING).pending().isEmpty(),
+                helper.assertTrue(pet.licences().get(QualificationData.WEEDING).paper().isEmpty(),
                     "a pet called away still handed a paper in");
-                helper.assertTrue(board(helper, boardPos).exam().hasSeatFor(UUID.randomUUID(),
-                    helper.getLevel().getGameTime()), "the seat was not given up");
+                helper.assertFalse(board(helper, boardPos).exam().seats().anyTaken(helper.getLevel().getGameTime()),
+                    "the seat was not given up");
             })
             .thenSucceed();
     }
 
-    /** The morning after it goes to the board, reads the results and hears it passed. */
+    /** While an exam opened at a board is on, the board has the exam notice pinned up. */
+    @GameTest(template = "floor8", batch = EXAM_DAY, timeoutTicks = 100)
+    public static void a_board_pins_up_the_exam_notice_while_an_exam_is_on(GameTestHelper helper) {
+        BlockPos boardPos = new BlockPos(3, STAND, 3);
+        helper.setBlock(boardPos, InitBlocks.LABOR_BOARD.get());
+        LaborBoardBlockEntity board = board(helper, boardPos);
+        helper.assertTrue(board.notice() == BoardNotice.NONE, "a board with no exam on has a notice up");
+        board.exam().opened(EXAM_DAY_NUMBER);
+        board.examChanged();
+
+        helper.succeedWhen(() -> helper.assertTrue(board.notice() == BoardNotice.EXAM,
+            "the board has no exam notice up while an exam is on"));
+    }
+
+    /** The morning after it goes back to the board it sat at, reads the results and hears it passed. */
     @GameTest(template = "floor16", batch = RESULTS_MORNING, timeoutTicks = RESULTS_TICKS)
     public static void the_morning_after_a_pet_sees_its_results_at_the_board(GameTestHelper helper) {
         BlockPos boardPos = new BlockPos(8, STAND, 3);
         helper.setBlock(boardPos, InitBlocks.LABOR_BOARD.get());
-        // Nearer this board than any a neighbouring case left standing: a pet goes to the nearest.
-        AbstractPet pet = worker(helper, new BlockPos(8, STAND, 7));
-        pet.licences().set(QualificationData.WEEDING,
-            new Licence(0, 0, 0, false, Optional.of(true), EXAM_DAY_NUMBER, true));
+        AbstractPet pet = worker(helper, new BlockPos(8, STAND, 11));
+        pet.licences().set(QualificationData.WEEDING, new Licence(0, 0, 0, false,
+            new ExamStage.Sat(at(helper, boardPos), EXAM_DAY_NUMBER, true)));
 
         helper.succeedWhen(() -> {
             Licence licence = pet.licences().get(QualificationData.WEEDING);
@@ -154,43 +196,48 @@ public final class ExamGameTests {
         });
     }
 
-    /** One told to sit hears by noon where it sits: a fail, and one more fail to try again after. */
-    @GameTest(template = "floor8", batch = RESULTS_AFTERNOON, timeoutTicks = 100)
-    public static void a_pet_that_missed_the_morning_hears_its_results_where_it_is(GameTestHelper helper) {
-        AbstractPet pet = worker(helper, new BlockPos(3, STAND, 3));
-        pet.setPetDirective(PetDirective.STAY);
-        pet.licences().set(QualificationData.WEEDING,
-            new Licence(0, 0, 1, false, Optional.of(false), EXAM_DAY_NUMBER, true));
-
-        helper.succeedWhen(() -> {
-            Licence licence = pet.licences().get(QualificationData.WEEDING);
-            helper.assertTrue(licence.pending().isEmpty(), "the pet has not heard its results");
-            helper.assertTrue(licence.held() == 0 && licence.fails() == 2, "a fail was not counted");
-        });
-    }
-
-    /** On exam day a board has the exam notice pinned up, for players to see from across the garden. */
-    @GameTest(template = "floor8", batch = EXAM_DAY, timeoutTicks = 100)
-    public static void a_board_pins_up_the_exam_notice_on_exam_day(GameTestHelper helper) {
-        BlockPos boardPos = new BlockPos(3, STAND, 3);
-        helper.setBlock(boardPos, InitBlocks.LABOR_BOARD.get());
-
-        helper.succeedWhen(() -> helper.assertTrue(board(helper, boardPos).notice() == BoardNotice.EXAM,
-            "the board has no exam notice up on exam day"));
-    }
-
     /** The morning after, a board where an exam was sat has the results pinned up. */
     @GameTest(template = "floor8", batch = RESULTS_MORNING, timeoutTicks = 100)
     public static void a_board_pins_up_the_results_the_morning_after(GameTestHelper helper) {
         BlockPos boardPos = new BlockPos(3, STAND, 3);
         helper.setBlock(boardPos, InitBlocks.LABOR_BOARD.get());
         LaborBoardBlockEntity board = board(helper, boardPos);
-        board.exam().record(new BoardExam.Sitting(UUID.randomUUID(), "Chiikawa", QualificationData.WEEDING, 5, true,
-            EXAM_DAY_NUMBER));
+        board.exam().results().record(new ExamResults.Sitting(UUID.randomUUID(), "Chiikawa", QualificationData.WEEDING,
+            5, true, EXAM_DAY_NUMBER));
         board.examChanged();
 
         helper.succeedWhen(() -> helper.assertTrue(board.notice() == BoardNotice.RESULTS,
             "the board has no results up the morning after an exam"));
+    }
+
+    /** Called yesterday and never sat down: let off, and free to be called again. */
+    @GameTest(template = "floor8", batch = RESULTS_MORNING, timeoutTicks = 100)
+    public static void a_pet_that_missed_its_exam_is_let_off(GameTestHelper helper) {
+        BlockPos boardPos = new BlockPos(3, STAND, 1);
+        helper.setBlock(boardPos, InitBlocks.LABOR_BOARD.get());
+        AbstractPet pet = worker(helper, new BlockPos(3, STAND, 5));
+        pet.licences().set(QualificationData.WEEDING, Licence.NONE.practised().called(at(helper, boardPos), EXAM_DAY_NUMBER));
+
+        helper.succeedWhen(() -> {
+            Licence licence = pet.licences().get(QualificationData.WEEDING);
+            helper.assertTrue(licence.exam() instanceof ExamStage.None, "the pet is still called to yesterday's exam");
+            helper.assertTrue(licence.practice() == 1, "missing the exam cost the pet its practice");
+        });
+    }
+
+    /** One told to sit hears by noon where it sits: a fail, and one more fail to try again after. */
+    @GameTest(template = "floor8", batch = RESULTS_AFTERNOON, timeoutTicks = 100)
+    public static void a_pet_that_missed_the_morning_hears_its_results_where_it_is(GameTestHelper helper) {
+        AbstractPet pet = worker(helper, new BlockPos(3, STAND, 3));
+        pet.setPetDirective(PetDirective.STAY);
+        pet.licences().set(QualificationData.WEEDING, new Licence(0, 0, 1, false,
+            new ExamStage.Sat(at(helper, new BlockPos(3, STAND, 1)), EXAM_DAY_NUMBER, false)));
+
+        helper.succeedWhen(() -> {
+            Licence licence = pet.licences().get(QualificationData.WEEDING);
+            helper.assertTrue(licence.paper().isEmpty(), "the pet has not heard its results");
+            helper.assertTrue(licence.held() == 0 && licence.fails() == 2, "a fail was not counted");
+        });
     }
 
     /** Read before the exam: the book is spent. A pet that has read one and not sat since takes no other. */
@@ -229,6 +276,21 @@ public final class ExamGameTests {
         helper.succeed();
     }
 
+    /** A pet of {@code owner}'s left to itself, that has done a weeding slip or not. */
+    private static AbstractPet ownersPet(GameTestHelper helper, ServerPlayer owner, BlockPos rel, boolean practised) {
+        AbstractPet pet = wildPet(helper, rel);
+        pet.tame(owner);
+        pet.setPetDirective(PetDirective.FREE);
+        if (practised) {
+            pet.licences().set(QualificationData.WEEDING, Licence.NONE.practised());
+        }
+        return pet;
+    }
+
+    private static boolean called(AbstractPet pet) {
+        return pet.licences().get(QualificationData.WEEDING).call().isPresent();
+    }
+
     /** What a finished weeding slip pays this pet, rolled as a finished slip is. */
     private static int weedingPay(GameTestHelper helper, AbstractPet pet) {
         ServerLevel level = helper.getLevel();
@@ -241,6 +303,10 @@ public final class ExamGameTests {
             .filter(stack -> stack.is(InitTag.CURRENCY))
             .mapToInt(ItemStack::getCount)
             .sum();
+    }
+
+    private static GlobalPos at(GameTestHelper helper, BlockPos rel) {
+        return GlobalPos.of(helper.getLevel().dimension(), helper.absolutePos(rel));
     }
 
     private static LaborBoardBlockEntity board(GameTestHelper helper, BlockPos pos) {

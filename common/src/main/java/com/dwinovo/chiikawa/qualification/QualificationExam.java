@@ -8,16 +8,18 @@ import net.minecraft.world.level.Level;
 
 /**
  * The rules of a licence's exams, kept free of the pet so they can be tested on their own:
- * who may sit, who wants to, the odds, and what a wild pet turns up holding.
+ * when one can be opened and sat, who may sit, when results are out, the odds, and what a
+ * wild pet turns up holding.
  */
 public final class QualificationExam {
-    /** Exams are sat in the working day: from an hour after sunrise until an hour before sunset. */
+    /** An owner may open an exam from an hour after sunrise... */
     public static final long EXAM_FROM = 1000L;
+    /** ...until late enough in the afternoon that the pets called still have time to get there and write. */
+    public static final long LAST_CALL = 9000L;
+    /** A pet called that has not sat down to the paper by an hour before sunset has missed it. */
     public static final long EXAM_UNTIL = 11000L;
     /** Results go up at sunrise the day after, and anyone who has not been to see them by noon hears them anyway. */
     public static final long RESULTS_UNTIL = 6000L;
-    /** Owners hear about tomorrow's exam at sunset the day before. */
-    public static final long EVE_REMINDER_AT = 12000L;
 
     private QualificationExam() {
     }
@@ -32,27 +34,33 @@ public final class QualificationExam {
         return Math.floorMod(dayTime, Level.TICKS_PER_DAY);
     }
 
-    /** Whether an exam can be sat now: an exam day, in working hours. */
-    public static boolean isExamTime(Qualification qualification, long dayTime) {
+    /** Whether an owner may open an exam now: in the working day, early enough to sit it. */
+    public static boolean mayOpen(long dayTime) {
         long time = timeOfDay(dayTime);
-        return isExamDay(qualification, day(dayTime)) && time >= EXAM_FROM && time < EXAM_UNTIL;
+        return time >= EXAM_FROM && time < LAST_CALL;
     }
 
-    /** Days until an exam can next be sat: today while today's is still on, otherwise the next exam day. */
-    public static int daysToExam(Qualification qualification, long dayTime) {
-        long today = day(dayTime);
-        boolean todaysIsOver = timeOfDay(dayTime) >= EXAM_UNTIL;
-        for (int days = 0; days <= qualification.everyDays(); days++) {
-            if (isExamDay(qualification, today + days) && !(days == 0 && todaysIsOver)) {
-                return days;
-            }
-        }
-        return qualification.everyDays();
+    /**
+     * Whether a pet may be called to an exam: it has a grade left to pass, has practised
+     * enough since the last one, and has nothing on - neither called already nor waiting
+     * to hear about the last one.
+     */
+    public static boolean maySit(Qualification qualification, Licence licence) {
+        return licence.held() < qualification.grades()
+            && licence.practice() >= qualification.requiredPractice()
+            && licence.exam() instanceof ExamStage.None;
     }
 
-    /** Whether tomorrow is an exam day. */
-    public static boolean isExamEve(Qualification qualification, long dayTime) {
-        return isExamDay(qualification, day(dayTime) + 1);
+    /** Whether a pet called to an exam can still sit it: the day it was called, before the exam closes. */
+    public static boolean isCalledNow(Licence licence, long dayTime) {
+        return licence.call()
+            .filter(called -> called.day() == day(dayTime) && timeOfDay(dayTime) < EXAM_UNTIL)
+            .isPresent();
+    }
+
+    /** Whether a pet was called to an exam it can no longer sit. */
+    public static boolean missedCall(Licence licence, long dayTime) {
+        return licence.call().isPresent() && !isCalledNow(licence, dayTime);
     }
 
     /**
@@ -60,46 +68,19 @@ public final class QualificationExam {
      * after, it goes to see; see {@link #mustHearResults} for when it hears them anyway.
      */
     public static boolean resultsOut(Licence licence, long dayTime) {
-        return licence.pending().isPresent() && day(dayTime) > licence.decidedDay();
+        return licence.paper().filter(sat -> day(dayTime) > sat.day()).isPresent();
     }
 
     /** Whether a pet whose results are out goes to the board to see them, rather than hearing them where it is. */
     public static boolean goesToSeeResults(Licence licence, long dayTime) {
-        return resultsOut(licence, dayTime) && day(dayTime) == licence.decidedDay() + 1
+        return resultsOut(licence, dayTime)
+            && licence.paper().filter(sat -> day(dayTime) == sat.day() + 1).isPresent()
             && timeOfDay(dayTime) < RESULTS_UNTIL;
     }
 
     /** Whether a pet whose results are out has missed the morning, and hears them wherever it is. */
     public static boolean mustHearResults(Licence licence, long dayTime) {
         return resultsOut(licence, dayTime) && !goesToSeeResults(licence, dayTime);
-    }
-
-    /**
-     * Whether {@code day} is an exam day: every {@link Qualification#everyDays()} days, the
-     * same days everywhere, the first one that many days in.
-     *
-     * @param day the day number, counted in whole days of time of day
-     */
-    public static boolean isExamDay(Qualification qualification, long day) {
-        return day > 0 && (day + 1) % qualification.everyDays() == 0;
-    }
-
-    /**
-     * Whether a pet may sit the next exam at all: it has a grade left to pass, has practised
-     * enough since the last one, and is not still waiting to hear about the last one.
-     */
-    public static boolean maySit(Qualification qualification, Licence licence) {
-        return licence.held() < qualification.grades()
-            && licence.practice() >= qualification.requiredPractice()
-            && licence.pending().isEmpty();
-    }
-
-    /**
-     * Whether a pet wants to sit today's exam: a pet that has read the book always does;
-     * otherwise as eager as its personality makes it.
-     */
-    public static boolean wantsToSit(Personality.Leaning leaning, Licence licence, RandomSource random) {
-        return licence.read() || random.nextFloat() < leaning.eagerness();
     }
 
     /**

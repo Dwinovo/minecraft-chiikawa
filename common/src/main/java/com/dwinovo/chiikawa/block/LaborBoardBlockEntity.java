@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.UnaryOperator;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -56,16 +57,23 @@ public class LaborBoardBlockEntity extends BlockEntity {
      * reckons it: worked out here and sent to the players nearby, who see only this.
      */
     private int hanging;
-    /** The exam room in front of the board: its seats, and who sat what there. */
+    /** The exam room in front of the board: when one was opened, its seats, and who sat what there. */
     private BoardExam exam = new BoardExam();
     /**
-     * The sheet pinned up about exams, as {@link BoardNotice#of} reckons it from the calendar:
-     * worked out here and sent to the players nearby, who see only this.
+     * The sheet pinned up about exams, as {@link BoardNotice#of} reckons it from the exam
+     * room: worked out here and sent to the players nearby, who see only this.
      */
     private BoardNotice notice = BoardNotice.NONE;
 
     public LaborBoardBlockEntity(BlockPos pos, BlockState state) {
         super(InitBlockEntities.LABOR_BOARD.get(), pos, state);
+    }
+
+    /** @return the board at {@code pos}, while it is in {@code level} and loaded */
+    public static Optional<LaborBoardBlockEntity> at(Level level, GlobalPos pos) {
+        return Optional.of(pos)
+            .filter(at -> at.dimension().equals(level.dimension()) && level.isLoaded(at.pos()))
+            .flatMap(at -> level.getBlockEntity(at.pos(), InitBlockEntities.LABOR_BOARD.get()));
     }
 
     /** @return whether the board has a slip {@code pet} would take right now */
@@ -124,9 +132,10 @@ public class LaborBoardBlockEntity extends BlockEntity {
         return exam;
     }
 
-    /** The exam room changed: saved with the chunk. */
+    /** The exam room changed: saved with the chunk, and the sheet pinned up to match. */
     public void examChanged() {
         setChanged();
+        refreshNotice();
     }
 
     /** @return the sheet pinned up about exams */
@@ -134,9 +143,9 @@ public class LaborBoardBlockEntity extends BlockEntity {
         return notice;
     }
 
-    /** Pins up the sheet the calendar calls for, and tells the players nearby when it changes. */
+    /** Pins up the sheet the exam room calls for, and tells the players nearby when it changes. */
     private void refreshNotice() {
-        BoardNotice now = BoardNotice.of(level().getDayTime(), exam);
+        BoardNotice now = BoardNotice.of(level().getDayTime(), level().getGameTime(), exam);
         if (now != notice) {
             notice = now;
             markUpdated();
@@ -295,9 +304,18 @@ public class LaborBoardBlockEntity extends BlockEntity {
         slots = input.read("Slots", SLOTS_CODEC).orElse(List.of());
         // A save holds the slips and the plates follow from them; a player's game is sent
         // the plates alone.
+<<<<<<< HEAD
         hanging = input.getInt("Hanging").orElseGet(() -> BoardSlips.hanging(slots));
-        // Sent to players; a save works it out again from the calendar within a second.
+        // Sent to players; a save works it out again from the exam room within a second.
         notice = BoardNotice.byOrdinal(input.getByteOr("Notice", (byte) 0));
         exam = input.read("Exam", BoardExam.CODEC).orElseGet(BoardExam::new);
+=======
+        hanging = tag.contains("Hanging", Tag.TAG_INT) ? tag.getInt("Hanging") : BoardSlips.hanging(slots);
+        // Sent to players; a save works it out again from the exam room within a second.
+        notice = BoardNotice.byOrdinal(tag.getByte("Notice"));
+        exam = tag.contains("Exam", Tag.TAG_COMPOUND)
+            ? BoardExam.CODEC.parse(NbtOps.INSTANCE, tag.get("Exam")).result().orElseGet(BoardExam::new)
+            : new BoardExam();
+>>>>>>> 198dc3c9 (feat(licence): owners open exams at a board for a diamond, and every pet that may sit goes)
     }
 }

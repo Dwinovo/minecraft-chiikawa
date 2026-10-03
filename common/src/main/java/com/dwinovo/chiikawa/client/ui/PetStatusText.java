@@ -65,8 +65,8 @@ public final class PetStatusText {
 
     /**
      * @return what a licence chip says under the cursor: the licence and the grade held, and
-     *         what comes next - nothing more to pass, results to hear, practice to do, or when
-     *         the next exam is
+     *         what comes next - nothing more to pass, results to hear, an exam to sit today,
+     *         practice to do, or an exam its owner can open for it
      */
     public static List<Component> licenceNotes(LicenceView licence) {
         Component name = PetExams.name(licence.qualification());
@@ -78,14 +78,12 @@ public final class PetStatusText {
             next = Component.translatable("screen.chiikawa.pet.licence.top");
         } else if (licence.awaitingResults()) {
             next = Component.translatable("screen.chiikawa.pet.licence.awaiting");
+        } else if (licence.called()) {
+            next = Component.translatable("screen.chiikawa.pet.licence.called");
         } else if (!licence.practised()) {
             next = Component.translatable("screen.chiikawa.pet.licence.unpractised");
-        } else if (licence.daysToExam() == 0) {
-            next = Component.translatable("screen.chiikawa.pet.licence.today");
-        } else if (licence.daysToExam() == 1) {
-            next = Component.translatable("screen.chiikawa.pet.licence.tomorrow");
         } else {
-            next = Component.translatable("screen.chiikawa.pet.licence.in_days", licence.daysToExam());
+            next = Component.translatable("screen.chiikawa.pet.licence.ready");
         }
         return List.of(held, next);
     }
