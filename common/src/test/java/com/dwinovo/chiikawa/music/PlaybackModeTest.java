@@ -124,7 +124,7 @@ class PlaybackModeTest {
     }
 
     @Test
-    void savedAsItsOrdinalEveryModeRoundTripsAndAnUnknownOneReadsAsOnce() {
+    void codecRoundTripsEveryModeAndReadsAnUnknownOneAsOnce() {
         for (PlaybackMode mode : PlaybackMode.values()) {
             assertEquals(mode, PlaybackMode.fromId(mode.ordinal()));
         }
