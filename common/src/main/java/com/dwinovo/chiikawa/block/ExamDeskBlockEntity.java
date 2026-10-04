@@ -7,7 +7,6 @@ import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -123,7 +122,7 @@ public class ExamDeskBlockEntity extends BlockEntity {
 
     /** What a player's game is told of the desk: only the sheet on it. Only read here, as the labor board's plates are. */
     @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+    public CompoundTag getUpdateTag() {
         CompoundTag tag = new CompoundTag();
         tag.putByte("Sheet", (byte) sheet.ordinal());
         return tag;
@@ -139,15 +138,15 @@ public class ExamDeskBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(CompoundTag tag) {
+        super.saveAdditional(tag);
         booking.flatMap(held -> DeskBooking.CODEC.encodeStart(NbtOps.INSTANCE, held).result())
             .ifPresent(encoded -> tag.put("Booking", encoded));
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(CompoundTag tag) {
+        super.load(tag);
         booking = tag.contains("Booking", Tag.TAG_COMPOUND)
             ? DeskBooking.CODEC.parse(NbtOps.INSTANCE, tag.get("Booking")).result()
             : Optional.empty();

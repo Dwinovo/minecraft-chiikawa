@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.qualification;
 import com.dwinovo.chiikawa.Constants;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,7 +23,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 public final class QualificationLoader extends SimpleJsonResourceReloadListener {
     public static final String DIRECTORY = "pet_qualification";
     /** Id for loaders that register reload listeners by id. */
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
+    public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, DIRECTORY);
 
     private static final String LOG_PREFIX = "[chiikawa-licence] ";
 
@@ -52,14 +53,17 @@ public final class QualificationLoader extends SimpleJsonResourceReloadListener 
         Map<ResourceLocation, Qualification> qualifications = new HashMap<>();
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
-        files.forEach((id, json) -> Qualification.CODEC.parse(JsonOps.INSTANCE, json)
-            .ifSuccess(qualification -> {
+        files.forEach((id, json) -> {
+            DataResult<Qualification> parsed = Qualification.CODEC.parse(JsonOps.INSTANCE, json);
+            parsed.result().ifPresent(qualification -> {
                 qualifications.put(id, qualification);
                 if (!knownTask.test(qualification.practiceTask())) {
                     warnings.add(LOG_PREFIX + id + " is practised by unknown slip type " + qualification.practiceTask());
                 }
-            })
-            .ifError(error -> errors.add(LOG_PREFIX + id + " is skipped, failed to parse: " + error.message())));
+            });
+            parsed.error().ifPresent(error ->
+                errors.add(LOG_PREFIX + id + " is skipped, failed to parse: " + error.message()));
+        });
         return new Loaded(qualifications, errors, warnings);
     }
 

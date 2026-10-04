@@ -23,7 +23,7 @@ public final class InitBlockEntities {
     );
 
     public static final Supplier<BlockEntityType<ExamDeskBlockEntity>> EXAM_DESK = Services.REGISTRY.registerBlockEntity(
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "exam_desk"),
+        new ResourceLocation(Constants.MOD_ID, "exam_desk"),
         ExamDeskBlockEntity::new,
         InitBlocks.EXAM_DESK
     );

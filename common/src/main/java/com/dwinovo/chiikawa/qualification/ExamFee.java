@@ -1,9 +1,9 @@
 package com.dwinovo.chiikawa.qualification;
 
 import com.dwinovo.chiikawa.shop.Payment;
+import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
@@ -18,8 +18,8 @@ import net.minecraft.world.item.ItemStack;
  */
 public record ExamFee(Item item, int count) {
     /** Lazy because the item registry only exists once the game has bootstrapped. */
-    public static final Codec<ExamFee> CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.create(instance -> instance.group(
-        BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(ExamFee::item),
+    public static final Codec<ExamFee> CODEC = ExtraCodecs.lazyInitializedCodec(() -> RecordCodecBuilder.create(instance -> instance.group(
+        ModCodecs.ITEM.fieldOf("item").forGetter(ExamFee::item),
         ExtraCodecs.POSITIVE_INT.fieldOf("count").forGetter(ExamFee::count)
     ).apply(instance, ExamFee::new)));
 

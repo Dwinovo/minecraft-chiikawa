@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.whistle;
 import com.dwinovo.chiikawa.Constants;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +22,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 public final class WhistleSettingsLoader extends SimpleJsonResourceReloadListener {
     public static final String DIRECTORY = "pet_whistle";
     /** Id for loaders that register reload listeners by id. */
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
+    public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, DIRECTORY);
 
     private static final String LOG_PREFIX = "[chiikawa-whistle] ";
 
@@ -44,9 +45,12 @@ public final class WhistleSettingsLoader extends SimpleJsonResourceReloadListene
     static Loaded load(Map<ResourceLocation, JsonElement> files) {
         Map<ResourceLocation, WhistleSettings> settings = new HashMap<>();
         List<String> errors = new ArrayList<>();
-        files.forEach((id, json) -> WhistleSettings.CODEC.parse(JsonOps.INSTANCE, json)
-            .ifSuccess(parsed -> settings.put(id, parsed))
-            .ifError(error -> errors.add(LOG_PREFIX + id + " is skipped, failed to parse: " + error.message())));
+        files.forEach((id, json) -> {
+            DataResult<WhistleSettings> parsed = WhistleSettings.CODEC.parse(JsonOps.INSTANCE, json);
+            parsed.result().ifPresent(value -> settings.put(id, value));
+            parsed.error().ifPresent(error ->
+                errors.add(LOG_PREFIX + id + " is skipped, failed to parse: " + error.message()));
+        });
         return new Loaded(settings, errors);
     }
 

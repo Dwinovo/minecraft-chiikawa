@@ -49,7 +49,7 @@ public final class ShopTrade {
         for (ItemStack slot : customer.items) {
             if (slot.isEmpty()) {
                 room += lot.getMaxStackSize();
-            } else if (ItemStack.isSameItemSameComponents(slot, lot)) {
+            } else if (ItemStack.isSameItemSameTags(slot, lot)) {
                 room += slot.getMaxStackSize() - slot.getCount();
             }
         }

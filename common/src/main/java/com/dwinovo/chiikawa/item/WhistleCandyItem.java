@@ -1,12 +1,12 @@
 package com.dwinovo.chiikawa.item;
 
 import com.dwinovo.chiikawa.entity.PetDirective;
-import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.whistle.PetWhistle;
 import com.dwinovo.chiikawa.whistle.WhistleSettings;
 import java.util.Optional;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -38,6 +38,8 @@ public class WhistleCandyItem extends DescribedItem {
      * remote player's game cannot know how long a blow is and only needs to not cut it short.
      */
     private static final int POSE_TICKS = 72000;
+    /** The stack's own tag, as the music box keeps its selection in one. */
+    private static final String ORDER_KEY = "ChiikawaWhistleOrder";
 
     public WhistleCandyItem(Properties properties) {
         super(properties);
@@ -45,15 +47,21 @@ public class WhistleCandyItem extends DescribedItem {
 
     /** The order the candy blows, follow until it is switched. */
     public static PetDirective order(ItemStack stack) {
-        return stack.getOrDefault(InitDataComponents.WHISTLE_MODE.get(), PetDirective.FOLLOW);
+        CompoundTag tag = stack.getTag();
+        return tag == null ? PetDirective.FOLLOW : PetDirective.fromId(tag.getInt(ORDER_KEY));
+    }
+
+    /** Whether the candy carries an order of its own, which a candy that blows follow does not. */
+    public static boolean hasOrder(ItemStack stack) {
+        return stack.getTag() != null && stack.getTag().contains(ORDER_KEY);
     }
 
     private static void setOrder(ItemStack stack, PetDirective order) {
         // Follow is what a candy is without a note, so a candy switched back stacks with the rest.
         if (order == PetDirective.FOLLOW) {
-            stack.remove(InitDataComponents.WHISTLE_MODE.get());
+            stack.removeTagKey(ORDER_KEY);
         } else {
-            stack.set(InitDataComponents.WHISTLE_MODE.get(), order);
+            stack.getOrCreateTag().putInt(ORDER_KEY, order.ordinal());
         }
     }
 
@@ -84,7 +92,7 @@ public class WhistleCandyItem extends DescribedItem {
     }
 
     @Override
-    public int getUseDuration(ItemStack stack, LivingEntity entity) {
+    public int getUseDuration(ItemStack stack) {
         return settings().map(WhistleSettings::blowTicks).orElse(POSE_TICKS);
     }
 

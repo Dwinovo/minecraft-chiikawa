@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.qualification;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.nbt.CompoundTag;
@@ -57,16 +58,17 @@ public final class PetLicences {
 
     public void save(CompoundTag tag) {
         if (!byId.isEmpty()) {
-            CODEC.encodeStart(NbtOps.INSTANCE, byId).ifSuccess(licences -> tag.put(TAG, licences));
+            CODEC.encodeStart(NbtOps.INSTANCE, byId).result().ifPresent(licences -> tag.put(TAG, licences));
         }
     }
 
     public void load(CompoundTag tag) {
         byId.clear();
         if (tag.contains(TAG, Tag.TAG_COMPOUND)) {
-            CODEC.parse(NbtOps.INSTANCE, tag.get(TAG))
-                .ifSuccess(byId::putAll)
-                .ifError(error -> Constants.LOG.warn("[chiikawa-licence] a pet's licences did not load: {}", error.message()));
+            DataResult<Map<ResourceLocation, Licence>> parsed = CODEC.parse(NbtOps.INSTANCE, tag.get(TAG));
+            parsed.result().ifPresent(byId::putAll);
+            parsed.error().ifPresent(error ->
+                Constants.LOG.warn("[chiikawa-licence] a pet's licences did not load: {}", error.message()));
         }
     }
 }

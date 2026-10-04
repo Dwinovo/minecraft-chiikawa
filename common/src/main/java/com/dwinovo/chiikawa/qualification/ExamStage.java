@@ -15,7 +15,7 @@ public sealed interface ExamStage {
     /** Nothing on. */
     None NONE = new None();
 
-    Codec<ExamStage> CODEC = Codec.STRING.dispatch("stage", ExamStage::kind, ExamStage::codecOf);
+    Codec<ExamStage> CODEC = Codec.STRING.dispatch("stage", ExamStage::kind, kind -> codecOf(kind).codec());
 
     /** @return what the stage is called in a save */
     String kind();

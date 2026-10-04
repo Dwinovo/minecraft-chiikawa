@@ -21,10 +21,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class LicenceTest {
-    private static final ResourceLocation WEEDING = ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding");
-    private static final ResourceLocation WEEDING_SLIP = ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding");
-    private static final ResourceLocation OTHER_SLIP = ResourceLocation.fromNamespaceAndPath("chiikawa", "street_performance");
-    private static final ResourceLocation OTHER = ResourceLocation.fromNamespaceAndPath("chiikawa", "drinking");
+    private static final ResourceLocation WEEDING = new ResourceLocation("chiikawa", "weeding");
+    private static final ResourceLocation WEEDING_SLIP = new ResourceLocation("chiikawa", "weeding");
+    private static final ResourceLocation OTHER_SLIP = new ResourceLocation("chiikawa", "street_performance");
+    private static final ResourceLocation OTHER = new ResourceLocation("chiikawa", "drinking");
     private static GlobalPos board;
 
     @BeforeAll

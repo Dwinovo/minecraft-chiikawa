@@ -2,12 +2,12 @@ package com.dwinovo.chiikawa.block;
 
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.network.ExamDeskServerPacketHandler;
-import com.mojang.serialization.MapCodec;
 import java.util.EnumMap;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -46,7 +46,6 @@ import org.jetbrains.annotations.Nullable;
  * {@link com.dwinovo.chiikawa.qualification.ExamEnrollment}'s business.
  */
 public class ExamDeskBlock extends BaseEntityBlock implements PropAtRest {
-    public static final MapCodec<ExamDeskBlock> CODEC = simpleCodec(ExamDeskBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<DeskPart> PART = EnumProperty.create("part", DeskPart.class);
     /** How high the chair's seat is, in pixels; its model is built to it. */
@@ -77,11 +76,6 @@ public class ExamDeskBlock extends BaseEntityBlock implements PropAtRest {
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(PART, DeskPart.DESK));
     }
 
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
-    }
-
     /** The chair of a desk at {@code desk} facing {@code facing}: the block behind it. */
     public static BlockPos chair(BlockPos desk, Direction facing) {
         return desk.relative(DeskPart.DESK.toOther(facing));
@@ -101,24 +95,24 @@ public class ExamDeskBlock extends BaseEntityBlock implements PropAtRest {
 
     /** Drawn by each half's block entity renderer from that half's own model; see {@code ExamDeskRenderer}. */
     @Override
-    protected RenderShape getRenderShape(BlockState state) {
+    public RenderShape getRenderShape(BlockState state) {
         return RenderShape.ENTITYBLOCK_ANIMATED;
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return (state.getValue(PART) == DeskPart.DESK ? DESK_OUTLINE : CHAIR_OUTLINE).get(state.getValue(FACING));
     }
 
     @Override
-    protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return (state.getValue(PART) == DeskPart.DESK ? DESK_SOLID : CHAIR_SOLID).get(state.getValue(FACING));
     }
 
     /** Pets walk round the desk, as they do round a bed, and up onto the chair. */
     @Override
-    protected boolean isPathfindable(BlockState state, PathComputationType type) {
-        return state.getValue(PART) == DeskPart.CHAIR && super.isPathfindable(state, type);
+    public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos, PathComputationType type) {
+        return state.getValue(PART) == DeskPart.CHAIR && super.isPathfindable(state, level, pos, type);
     }
 
     /** The desk faces whoever places it, its chair on the far side: the pet sits looking at them. */
@@ -145,7 +139,7 @@ public class ExamDeskBlock extends BaseEntityBlock implements PropAtRest {
 
     /** Either half goes when the other does, as a bed's do. */
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbour, LevelAccessor level,
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbour, LevelAccessor level,
                                      BlockPos pos, BlockPos neighbourPos) {
         if (direction == state.getValue(PART).toOther(state.getValue(FACING))) {
             return neighbour.is(this) && neighbour.getValue(PART) != state.getValue(PART)
@@ -160,7 +154,7 @@ public class ExamDeskBlock extends BaseEntityBlock implements PropAtRest {
      * without dropping anything, as one breaking the foot of a bed takes the head.
      */
     @Override
-    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         if (!level.isClientSide && player.isCreative() && state.getValue(PART) == DeskPart.CHAIR) {
             BlockPos desk = pos.relative(DeskPart.CHAIR.toOther(state.getValue(FACING)));
             BlockState deskState = level.getBlockState(desk);
@@ -169,12 +163,13 @@ public class ExamDeskBlock extends BaseEntityBlock implements PropAtRest {
                 level.levelEvent(player, 2001, desk, Block.getId(deskState));
             }
         }
-        return super.playerWillDestroy(level, pos, state, player);
+        super.playerWillDestroy(level, pos, state, player);
     }
 
     /** Opens the sign-up screen, from either half: the owner's pets nearby, and the odds of each. */
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
+            BlockHitResult hit) {
         if (level.isClientSide()) {
             return InteractionResult.SUCCESS;
         }
@@ -187,12 +182,12 @@ public class ExamDeskBlock extends BaseEntityBlock implements PropAtRest {
     }
 
     @Override
-    protected BlockState rotate(BlockState state, Rotation rotation) {
+    public BlockState rotate(BlockState state, Rotation rotation) {
         return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState state, Mirror mirror) {
+    public BlockState mirror(BlockState state, Mirror mirror) {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 
