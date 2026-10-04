@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Sits a licence exam: walks to the chair of the desk its owner signed it up at, sits on it
  * up against the desk, facing the way the desk faces, writes for as long as the licence
- * says, and hands the paper in, holding it out as it does. The result is decided as
+ * says, and hands the paper in, pushing it across the desk before it gets up. The result is decided as
  * it is handed in and heard the morning after; a pet called away before it hands in has sat
  * nothing, and can come back to it while the exam is on.
  */
@@ -31,9 +31,12 @@ public class TakeExamBehavior extends Behavior<AbstractPet> {
     private static final double ARRIVED_SQR = 0.8 * 0.8;
     /** Longest the whole exam may take: the walk and the paper. */
     private static final int MAX_TICKS = 2400;
+    /** How long it stays in its chair handing the paper in: the {@code hand_in} animation's second. */
+    private static final int HAND_IN_TICKS = 20;
 
     private PetExams.@Nullable Summons summons;
     private long writingUntil;
+    private long upAt;
     private boolean handedIn;
     private boolean gaveUp;
 
@@ -58,7 +61,7 @@ public class TakeExamBehavior extends Behavior<AbstractPet> {
 
     @Override
     protected boolean canStillUse(ServerLevel level, AbstractPet pet, long gameTime) {
-        return !handedIn && !gaveUp && desk(level).isPresent();
+        return !(handedIn && gameTime >= upAt) && !gaveUp && desk(level).isPresent();
     }
 
     @Override
@@ -74,10 +77,11 @@ public class TakeExamBehavior extends Behavior<AbstractPet> {
             return;
         }
         faceDesk(pet, desk);
-        if (gameTime >= writingUntil) {
+        if (!handedIn && gameTime >= writingUntil) {
             PetExams.handIn(pet, summons.qualification(), desk);
             pet.triggerAction(PetAction.HAND_IN);
             handedIn = true;
+            upAt = gameTime + HAND_IN_TICKS;
         }
     }
 
