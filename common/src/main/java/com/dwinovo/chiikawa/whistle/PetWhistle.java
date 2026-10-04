@@ -1,12 +1,12 @@
 package com.dwinovo.chiikawa.whistle;
 
-import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
 import com.dwinovo.chiikawa.init.InitMemory;
+import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.dwinovo.chiikawa.whistle.WhistleHearing.Hearing;
@@ -49,7 +49,7 @@ public final class PetWhistle {
                 owner.getBoundingBox().inflate(settings.range()), AbstractPet::isAlive)) {
             Hearing hearing = WhistleHearing.of(owner.getUUID(), order, PetOwnership.of(pet),
                 pet.level() == level, pet.distanceToSqr(owner), settings.range(),
-                pet.getActivity() == PetActivity.EXAM);
+                PetExams.seatedAtExam(pet));
             long at = now + pet.getRandom().nextInt(settings.reactDelayTicks() + 1);
             switch (hearing) {
                 case OWNED -> {
