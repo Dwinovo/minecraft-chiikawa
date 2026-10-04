@@ -1,13 +1,8 @@
 package com.dwinovo.chiikawa.qualification;
 
-import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitLootConditions;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.JsonOps;
 import java.util.Set;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -40,19 +35,5 @@ public record QualificationCondition(LicenceRequirement requirement) implements 
     public boolean test(LootContext context) {
         Entity entity = context.getParamOrNull(LootContextParams.THIS_ENTITY);
         return entity instanceof AbstractPet pet && requirement.metBy(pet.licences());
-    }
-
-    /** 1.20.1 reads and writes a condition through a serializer rather than a codec; this one hands both to {@link #CODEC}. */
-    public static final class Serializer implements net.minecraft.world.level.storage.loot.Serializer<QualificationCondition> {
-        @Override
-        public void serialize(JsonObject json, QualificationCondition condition, JsonSerializationContext context) {
-            CODEC.encodeStart(JsonOps.INSTANCE, condition).getOrThrow(false, Constants.LOG::error)
-                .getAsJsonObject().entrySet().forEach(entry -> json.add(entry.getKey(), entry.getValue()));
-        }
-
-        @Override
-        public QualificationCondition deserialize(JsonObject json, JsonDeserializationContext context) {
-            return CODEC.parse(JsonOps.INSTANCE, json).getOrThrow(false, Constants.LOG::error);
-        }
     }
 }

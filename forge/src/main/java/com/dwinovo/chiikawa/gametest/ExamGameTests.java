@@ -44,7 +44,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 
 /**
  * The weeding licence, end to end: an owner signs one pet up at an exam desk for a diamond;
@@ -56,8 +56,8 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
  * <p>Each part of the exam is its own batch, since a batch sets the time of day for every
  * case in it: the exam's day, the morning after, and the afternoon after.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class ExamGameTests {
     private static final String EXAM_DAY = "chiikawa_exam_day";
     private static final String RESULTS_MORNING = "chiikawa_exam_results";

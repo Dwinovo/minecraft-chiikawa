@@ -37,7 +37,7 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
         DeferredRegister.create(Registries.LOOT_CONDITION_TYPE, Constants.MOD_ID);
 
     private static final RegistryObject<LootItemConditionType> QUALIFICATION_CONDITION =
-        LOOT_CONDITIONS.register("qualification", () -> new LootItemConditionType(new QualificationCondition.Serializer()));
+        LOOT_CONDITIONS.register("qualification", () -> new LootItemConditionType(QualificationCondition.CODEC));
 
     // Sensor registrations
     private static final RegistryObject<SensorType<PetAttackbleEntitySensor>> PET_ATTACKBLE_ENTITY_SENSOR =

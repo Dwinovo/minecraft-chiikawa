@@ -100,7 +100,7 @@ public record ManualPage(int order, String title, List<Panel> panels) {
             ExtraCodecs.strictOptionalField(Codec.FLOAT, "y", 0.0F).forGetter(Actor::y),
             ExtraCodecs.strictOptionalField(Codec.floatRange(0.0F, 4.0F), "scale", 1.0F).forGetter(Actor::scale),
             ExtraCodecs.strictOptionalField(Codec.FLOAT, "facing", 0.0F).forGetter(Actor::facing),
-            ExtraCodecs.strictOptionalField(ModCodecs.VEC3, "offset", Vec3.ZERO).forGetter(Actor::offset),
+            ExtraCodecs.strictOptionalField(Vec3.CODEC, "offset", Vec3.ZERO).forGetter(Actor::offset),
             ExtraCodecs.strictOptionalField(ExtraCodecs.TAG_OR_ELEMENT_ID, "hold").forGetter(Actor::hold),
             ExtraCodecs.strictOptionalField(ExtraCodecs.TAG_OR_ELEMENT_ID, "bag").forGetter(Actor::bag),
             ExtraCodecs.strictOptionalField(Codec.BOOL, "sit", false).forGetter(Actor::sit),

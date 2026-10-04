@@ -26,7 +26,7 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 
 /**
  * The whistle candy: an owner blows it and the pets within earshot take the order, each a
@@ -34,8 +34,8 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
  * desk keeps writing. The blow itself is called the way the item calls it, so what is
  * checked is the service and the candy, not the right-click that holds one.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class WhistleGameTests {
     private static final String BATCH = "chiikawa_whistle";
     /**
