@@ -19,7 +19,9 @@ import net.minecraft.world.entity.schedule.Activity;
 
 /**
  * Performs the song selected on the held music box: once per selection, or over and over
- * while the pet carries a street performance slip.
+ * while the pet carries a street performance slip. A continuous playback mode of the box
+ * keeps the intent available after each song, so it goes on for as long as the pet has
+ * nothing better to do.
  *
  * <p>The pet remembers which selection it last started. That memory is forgotten
  * whenever the musician cannot perform (not free, or no longer holding the music
@@ -71,6 +73,6 @@ public final class PlayMusicIntent implements PetIntent {
 
     @Override
     public Set<MemoryModuleType<?>> forgetWhenUnavailable() {
-        return Set.of(InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get());
+        return Set.of(InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get(), InitMemory.MUSICIAN_NOW_PLAYING.get());
     }
 }
