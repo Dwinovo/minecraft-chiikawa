@@ -52,7 +52,7 @@ public class ExamDeskBlock extends BaseEntityBlock {
     /** How high the chair's seat is, in pixels; its model is built to it. */
     public static final int SEAT_HEIGHT = 4;
     /** How high the desk's top is, in pixels: a pet on the chair has its chin at it. */
-    public static final int DESK_HEIGHT = 8;
+    public static final int DESK_HEIGHT = 7;
     /** How far from the desk a pet sits on the chair, in pixels: close enough to write on it. */
     public static final int SEAT_INSET = 3;
 
