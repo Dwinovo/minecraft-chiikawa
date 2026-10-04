@@ -5,7 +5,9 @@ import com.dwinovo.chiikawa.client.ui.mc.GuiSurface;
 import com.dwinovo.chiikawa.client.ui.mc.UiButton;
 import com.dwinovo.chiikawa.music.MusicTrackStatus;
 import com.dwinovo.chiikawa.music.MusicTrackView;
+import com.dwinovo.chiikawa.music.PlaybackMode;
 import com.dwinovo.chiikawa.network.MusicPayloads.MusicBoxSelectTrackPayload;
+import com.dwinovo.chiikawa.network.MusicPayloads.MusicBoxSetModePayload;
 import com.dwinovo.chiikawa.network.MusicPayloads.MusicCatalogRequestPayload;
 import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.ui.DrawSurface;
@@ -25,6 +27,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
 
 /**
  * The music box: the tracks found in the player's own music folder, one to a row, picked
@@ -34,6 +37,9 @@ import net.minecraft.network.chat.Component;
  * <p>A track that is still being imported, or that could not be read, stays on the list
  * with a badge saying so rather than vanishing: a file the player just dropped in and
  * cannot find again is worse than one that says it went wrong.
+ *
+ * <p>Above the footer sits one button that cycles the box's playback mode, and says which
+ * mode it is in.
  */
 public class MusicBoxScreen extends Screen {
     private static final int PANEL_W = 236;
@@ -45,12 +51,23 @@ public class MusicBoxScreen extends Screen {
     private List<MusicTrackView> tracks;
     private int page;
     private int leftPos, topPos, panelHeight;
-    private int listY, footerY;
+    private int listY, modeY, footerY;
+    private PlaybackMode mode;
 
     public MusicBoxScreen(int handIndex, List<MusicTrackView> tracks) {
         super(Component.translatable("screen.chiikawa.music_box.title"));
         this.handIndex = handIndex;
         this.tracks = List.copyOf(tracks);
+        this.mode = heldMode();
+    }
+
+    /** The mode of the box in the hand this screen was opened from; it is synced to the client with the stack. */
+    private PlaybackMode heldMode() {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.player == null) {
+            return PlaybackMode.ONCE;
+        }
+        return PlaybackMode.get(minecraft.player.getItemInHand(handIndex == 1 ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND));
     }
 
     public int handIndex() {
@@ -67,11 +84,12 @@ public class MusicBoxScreen extends Screen {
     protected void init() {
         int hint = hasFailedTracks() ? UiStyle.LINE + UiStyle.GAP : 0;
         this.panelHeight = UiStyle.TITLE_H + UiStyle.PAD + ROWS * ROW_H + UiStyle.PAD
-            + hint + UiStyle.CONTROL_H + UiStyle.PAD;
+            + hint + UiStyle.CONTROL_H + UiStyle.GAP + UiStyle.CONTROL_H + UiStyle.PAD;
         this.leftPos = (this.width - PANEL_W) / 2;
         this.topPos = (this.height - panelHeight) / 2;
         this.listY = topPos + UiStyle.TITLE_H + UiStyle.PAD;
         this.footerY = topPos + panelHeight - UiStyle.PAD - UiStyle.CONTROL_H;
+        this.modeY = footerY - UiStyle.GAP - UiStyle.CONTROL_H;
         rebuildButtons();
     }
 
@@ -103,6 +121,11 @@ public class MusicBoxScreen extends Screen {
         next.active = page + 1 < pages;
         addRenderableWidget(next);
 
+        Component modeLabel = Component.translatable("screen.chiikawa.music_box.mode",
+            Component.translatable(mode.translationKey()));
+        addRenderableWidget(UiButton.text(leftPos + UiStyle.PAD, modeY, PANEL_W - 2 * UiStyle.PAD,
+            UiStyle.CONTROL_H, modeLabel, this::cycleMode));
+
         // The two doings sit in the middle, between the two page arrows.
         Component folder = Component.translatable("screen.chiikawa.music_box.open_folder");
         Component reload = Component.translatable("screen.chiikawa.music_box.reload");
@@ -113,6 +136,12 @@ public class MusicBoxScreen extends Screen {
             this::openMusicFolder));
         addRenderableWidget(UiButton.text(doingsX + folderWidth + UiStyle.GAP, footerY, reloadWidth,
             UiStyle.CONTROL_H, reload, () -> requestCatalog(true)));
+    }
+
+    private void cycleMode() {
+        mode = mode.cycle();
+        Services.NETWORK.sendToServer(new MusicBoxSetModePayload(handIndex, mode));
+        rebuildButtons();
     }
 
     private int buttonWidth(Component label) {
@@ -143,7 +172,7 @@ public class MusicBoxScreen extends Screen {
                 leftPos + PANEL_W / 2, middle + UiStyle.LINE + UiStyle.GAP);
         } else if (hasFailedTracks()) {
             Ui.emptyState(surface, Component.translatable("screen.chiikawa.music_box.format_hint").getString(),
-                leftPos + PANEL_W / 2, footerY - UiStyle.GAP - UiStyle.LINE);
+                leftPos + PANEL_W / 2, modeY - UiStyle.GAP - UiStyle.LINE);
         }
     }
 

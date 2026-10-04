@@ -42,11 +42,14 @@ public final class FabricModNetworking {
         PayloadTypeRegistry.clientboundPlay().register(MusicPayloads.MusicStreamChunkPayload.TYPE, MusicPayloads.MusicStreamChunkPayload.STREAM_CODEC);
         PayloadTypeRegistry.clientboundPlay().register(MusicPayloads.MusicStreamStopPayload.TYPE, MusicPayloads.MusicStreamStopPayload.STREAM_CODEC);
         PayloadTypeRegistry.serverboundPlay().register(MusicPayloads.MusicBoxSelectTrackPayload.TYPE, MusicPayloads.MusicBoxSelectTrackPayload.STREAM_CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(MusicPayloads.MusicBoxSetModePayload.TYPE, MusicPayloads.MusicBoxSetModePayload.STREAM_CODEC);
         PayloadTypeRegistry.serverboundPlay().register(MusicPayloads.MusicCatalogRequestPayload.TYPE, MusicPayloads.MusicCatalogRequestPayload.STREAM_CODEC);
         PayloadTypeRegistry.clientboundPlay().register(VoicePayloads.PetSpeechPayload.TYPE, VoicePayloads.PetSpeechPayload.STREAM_CODEC);
         PayloadTypeRegistry.clientboundPlay().register(PetPayloads.PetGesturePayload.TYPE, PetPayloads.PetGesturePayload.STREAM_CODEC);
         ServerPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicBoxSelectTrackPayload.TYPE,
             (payload, context) -> context.server().execute(() -> MusicServerPacketHandler.handleSelectTrack(payload, context.player())));
+        ServerPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicBoxSetModePayload.TYPE,
+            (payload, context) -> context.server().execute(() -> MusicServerPacketHandler.handleSetMode(payload, context.player())));
         ServerPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicCatalogRequestPayload.TYPE,
             (payload, context) -> context.server().execute(() -> MusicServerPacketHandler.handleCatalogRequest(payload, context.player())));
         ServerPlayNetworking.registerGlobalReceiver(BoardPayloads.BoardUpgradePayload.TYPE,
