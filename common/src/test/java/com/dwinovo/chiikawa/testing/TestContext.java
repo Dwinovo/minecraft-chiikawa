@@ -130,6 +130,6 @@ public final class TestContext {
     public IntentContext build() {
         return new IntentContext(petPos, phase, ownership, personality, anchor, targets, task, offeringBoard,
             shopWorthVisiting, takeTaskCoolingDown, shopCoolingDown, socialPartner, playingAlong, carryingGift, eager,
-            false, false, false, false, examDesk, resultsDesk);
+            false, false, false, false, examDesk, resultsDesk, false);
     }
 }
