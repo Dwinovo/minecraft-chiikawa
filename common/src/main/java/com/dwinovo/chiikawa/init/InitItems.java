@@ -72,7 +72,7 @@ public final class InitItems {
 
     /** Hold to blow: the pets nearby take the order it is set to; sneak-use to change the order. */
     public static final Supplier<Item> WHISTLE_CANDY =
-        registerItem("whistle_candy", () -> new WhistleCandyItem(new Item.Properties().stacksTo(64)));
+        registerItem("whistle_candy", properties -> new WhistleCandyItem(properties.stacksTo(64)));
 
     public static final Supplier<Item> BACKPACK =
         registerItem("backpack", properties -> new BagItem(properties, BagItem.Wear.ON_BACK));
