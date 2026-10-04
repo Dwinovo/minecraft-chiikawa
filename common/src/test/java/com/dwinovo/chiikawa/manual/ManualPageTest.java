@@ -11,6 +11,7 @@ import com.mojang.serialization.JsonOps;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 import org.junit.jupiter.api.Test;
 
 class ManualPageTest {
@@ -20,13 +21,15 @@ class ManualPageTest {
             { "order": 5, "title": "t", "panels": [ { "caption": "c", "actors": [
                 { "pet": "chiikawa:usagi", "x": 0.3, "facing": 20, "hold": "minecraft:wooden_hoe",
                   "action": "harvest", "every": 24, "say": "s" },
-                { "prop": "chiikawa:labor_board", "x": 0.7 },
+                { "prop": "chiikawa:labor_board", "x": 0.7, "offset": [0, 4, 11] },
                 { "item": "#chiikawa:currency", "y": 0.4, "bob": true } ] } ] }""");
 
         ManualPage.Actor usagi = page.panels().get(0).actors().get(0);
         assertEquals(PetAction.HARVEST, usagi.action().orElseThrow());
         assertEquals(24, usagi.motion().every());
         assertEquals("s", usagi.motion().say().orElseThrow());
+        assertEquals(new Vec3(0, 4, 11), page.panels().get(0).actors().get(1).offset());
+        assertEquals(Vec3.ZERO, usagi.offset(), "an actor stands on its spot when nothing says otherwise");
         ManualPage.Actor money = page.panels().get(0).actors().get(2);
         assertTrue(money.item().orElseThrow().tag(), "money is named by its tag");
         assertTrue(money.motion().bob());
