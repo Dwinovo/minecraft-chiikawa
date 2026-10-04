@@ -49,15 +49,23 @@ public record ShopCatalog(List<Entry> entries) {
      * One line of the price list.
      *
      * @param item what is being priced
-     * @param buy what a customer pays for one; 0 means the shop does not sell it
-     * @param sell what the shop pays for one; 0 means it does not want any
+     * @param buy what a customer pays for {@code count} of them; 0 means the shop does not sell it
+     * @param sell what the shop pays for {@code count} of them; 0 means it does not want any
+     * @param count how many items change hands for the price, either way: 1 for a single
+     *              item, more for a bundle (a handful of candy for an emerald)
      */
-    public record Entry(Item item, int buy, int sell) {
+    public record Entry(Item item, int buy, int sell, int count) {
         public static final Codec<Entry> CODEC = ExtraCodecs.lazyInitializedCodec(() -> RecordCodecBuilder.create(instance -> instance.group(
             ModCodecs.ITEM.fieldOf("item").forGetter(Entry::item),
             ExtraCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "buy", 0).forGetter(Entry::buy),
-            ExtraCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "sell", 0).forGetter(Entry::sell)
+            ExtraCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "sell", 0).forGetter(Entry::sell),
+            ExtraCodecs.strictOptionalField(ExtraCodecs.POSITIVE_INT, "count", 1).forGetter(Entry::count)
         ).apply(instance, Entry::new)));
+
+        /** A single item at this price, which is what most lines of a list are. */
+        public Entry(Item item, int buy, int sell) {
+            this(item, buy, sell, 1);
+        }
 
         public boolean sells(Item wanted) {
             return buy > 0 && item == wanted;
