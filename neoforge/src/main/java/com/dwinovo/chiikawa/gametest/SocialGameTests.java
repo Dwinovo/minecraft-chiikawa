@@ -37,19 +37,10 @@ import com.dwinovo.chiikawa.social.SocialCooldowns;
 import com.dwinovo.chiikawa.social.SocialRules;
 import com.dwinovo.chiikawa.task.FinishedSlip;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
@@ -96,8 +87,6 @@ public final class SocialGameTests {
     private static final String SONG = "chiikawa_gametest_busking";
     /** Longer than walking over and listening all the way through, so Hachiware is still playing after. */
     private static final int SONG_SECONDS = 50;
-    /** Low, to keep the file small; the library resamples it like any other. */
-    private static final int SONG_RATE = 8000;
 
     private static final int STAND = 2;
 
@@ -369,17 +358,17 @@ public final class SocialGameTests {
     public static void a_listener_sits_by_the_busker_and_claps_now_and_then(GameTestHelper helper) {
         quietYard(helper, NOON);
         ServerMusicLibrary library = ServerMusicSystem.library(helper.getLevel().getServer());
-        addSong(library);
+        GameTestKit.addSong(library, SONG, SONG_SECONDS);
         AtomicReference<AbstractPet> hachiware = new AtomicReference<>();
         AtomicReference<AbstractPet> chiikawa = new AtomicReference<>();
         AtomicLong satDown = new AtomicLong();
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(song(library).isPresent(), "the song was never imported"))
+            .thenWaitUntil(() -> helper.assertTrue(GameTestKit.readySong(library, SONG).isPresent(), "the song was never imported"))
             .thenExecute(() -> {
                 ItemStack box = new ItemStack(InitItems.MUSIC_BOX.get());
                 box.set(InitDataComponents.MUSIC_BOX_SELECTION.get(),
-                    new MusicBoxSelection(song(library).orElseThrow().trackId(), SONG, 0));
+                    new MusicBoxSelection(GameTestKit.readySong(library, SONG).orElseThrow().trackId(), SONG, 0));
                 // Somebody's, and let loose: playing is work, which a wild pet does not do.
                 AbstractPet busker = owned(helper, InitEntity.HACHIWARE_PET.get(), new BlockPos(8, STAND, 8));
                 busker.setItemSlot(EquipmentSlot.MAINHAND, box);
@@ -415,18 +404,18 @@ public final class SocialGameTests {
     public static void the_busker_plays_on_beside_a_game_that_cannot_hear_it(GameTestHelper helper) {
         quietYard(helper, NOON);
         ServerMusicLibrary library = ServerMusicSystem.library(helper.getLevel().getServer());
-        addSong(library);
+        GameTestKit.addSong(library, SONG, SONG_SECONDS);
         AtomicReference<AbstractPet> hachiware = new AtomicReference<>();
         AtomicLong started = new AtomicLong();
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(song(library).isPresent(), "the song was never imported"))
+            .thenWaitUntil(() -> helper.assertTrue(GameTestKit.readySong(library, SONG).isPresent(), "the song was never imported"))
             .thenExecute(() -> {
                 ServerPlayer bystander = player(helper);
                 bystander.snapTo(helper.absoluteVec(new Vec3(9.5, STAND, 8.5)));
                 ItemStack box = new ItemStack(InitItems.MUSIC_BOX.get());
                 box.set(InitDataComponents.MUSIC_BOX_SELECTION.get(),
-                    new MusicBoxSelection(song(library).orElseThrow().trackId(), SONG, 0));
+                    new MusicBoxSelection(GameTestKit.readySong(library, SONG).orElseThrow().trackId(), SONG, 0));
                 AbstractPet busker = owned(helper, InitEntity.HACHIWARE_PET.get(), new BlockPos(8, STAND, 8));
                 busker.setItemSlot(EquipmentSlot.MAINHAND, box);
                 hachiware.set(busker);
@@ -453,34 +442,6 @@ public final class SocialGameTests {
         helper.assertTrue(listen.initiatorSide(InitEntity.CHIIKAWA_PET.get().builtInRegistryHolder()).orElseThrow()
             .nowAndThen().isPresent(), "nobody claps at all");
         helper.succeed();
-    }
-
-    /**
-     * Writes the song the listening case plays into the server's music folder, unless an
-     * earlier run left it there, and has the library look again.
-     */
-    private static void addSong(ServerMusicLibrary library) {
-        Path file = library.musicDir().resolve(SONG + ".wav");
-        try {
-            if (!Files.exists(file)) {
-                AudioFormat format = new AudioFormat(SONG_RATE, 16, 1, true, false);
-                byte[] silence = new byte[SONG_RATE * 2 * SONG_SECONDS];
-                try (AudioInputStream song = new AudioInputStream(new ByteArrayInputStream(silence), format,
-                        silence.length / 2)) {
-                    AudioSystem.write(song, AudioFileFormat.Type.WAVE, file.toFile());
-                }
-            }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-        library.rescan();
-    }
-
-    /** The case's song, once it is ready to play. */
-    private static Optional<MusicTrackView> song(ServerMusicLibrary library) {
-        return library.catalog().stream()
-            .filter(track -> track.title().equals(SONG) && track.status() == MusicTrackStatus.READY)
-            .findFirst();
     }
 
     /**

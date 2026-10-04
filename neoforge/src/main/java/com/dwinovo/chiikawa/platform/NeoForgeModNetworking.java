@@ -76,6 +76,12 @@ public final class NeoForgeModNetworking {
                     MusicServerPacketHandler.handleSelectTrack(payload, player);
                 }
             });
+        registrar.playToServer(MusicPayloads.MusicBoxSetModePayload.TYPE, MusicPayloads.MusicBoxSetModePayload.STREAM_CODEC,
+            (payload, context) -> {
+                if (context.player() instanceof ServerPlayer player) {
+                    MusicServerPacketHandler.handleSetMode(payload, player);
+                }
+            });
         registrar.playToClient(VoicePayloads.PetSpeechPayload.TYPE, VoicePayloads.PetSpeechPayload.STREAM_CODEC);
         registrar.playToClient(PetPayloads.PetGesturePayload.TYPE, PetPayloads.PetGesturePayload.STREAM_CODEC);
     }
