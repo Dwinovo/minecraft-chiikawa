@@ -10,6 +10,9 @@ import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.ui.Rect;
 import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.widget.Bubble;
+import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +28,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -157,11 +161,15 @@ public final class ManualScene {
 
         /**
          * From the middle of a picture the size of the panel to where this stands, in blocks
-         * of {@code size} screen pixels, with y running down as on the screen.
+         * of {@code size} screen pixels, with y running down as on the screen. It stands off
+         * its spot by the actor's offset, turned the way it faces.
          */
         Vector3f fromMiddle(Rect area, int groundY, float size) {
-            return new Vector3f((screenX(area) - (area.x() + area.right()) / 2.0F) / size,
-                (screenY(area, groundY) - (area.y() + area.bottom()) / 2.0F) / size, 0.0F);
+            Vec3 offset = actor.offset();
+            Vector3f shift = Axis.YP.rotationDegrees(actor.facing())
+                .transform(new Vector3f((float) offset.x / 16.0F, (float) offset.y / 16.0F, (float) offset.z / 16.0F));
+            return new Vector3f((screenX(area) - (area.x() + area.right()) / 2.0F) / size - shift.x,
+                (screenY(area, groundY) - (area.y() + area.bottom()) / 2.0F) / size - shift.y, 0.0F);
         }
     }
 
