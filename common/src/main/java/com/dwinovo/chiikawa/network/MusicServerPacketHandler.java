@@ -2,11 +2,13 @@ package com.dwinovo.chiikawa.network;
 
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.music.MusicBoxSelection;
+import com.dwinovo.chiikawa.music.PlaybackMode;
 import com.dwinovo.chiikawa.music.ServerMusicLibrary;
 import com.dwinovo.chiikawa.music.ServerMusicSystem;
 import com.dwinovo.chiikawa.network.MusicPayloads.MusicCatalogPayload;
 import com.dwinovo.chiikawa.network.MusicPayloads.MusicCatalogRequestPayload;
 import com.dwinovo.chiikawa.network.MusicPayloads.MusicBoxSelectTrackPayload;
+import com.dwinovo.chiikawa.network.MusicPayloads.MusicBoxSetModePayload;
 import com.dwinovo.chiikawa.platform.Services;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -26,6 +28,15 @@ public final class MusicServerPacketHandler {
             int revision = current == null ? 1 : current.revision() + 1;
             MusicBoxSelection.set(stack, new MusicBoxSelection(track.trackId(), track.title(), revision));
         });
+    }
+
+    /** Sets the box's playback mode; the pet starts over from the selected song, as for a new selection. */
+    public static void handleSetMode(MusicBoxSetModePayload payload, ServerPlayer player) {
+        ItemStack stack = musicBoxStack(player, payload.handIndex());
+        if (!stack.is(InitItems.MUSIC_BOX.get())) {
+            return;
+        }
+        PlaybackMode.set(stack, payload.mode());
     }
 
     public static void handleCatalogRequest(MusicCatalogRequestPayload payload, ServerPlayer player) {

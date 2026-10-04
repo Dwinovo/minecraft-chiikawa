@@ -70,6 +70,14 @@ public final class InitMemory {
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
+    /** The track the musician last started, which a continuous playback mode follows on from. */
+    public static final Supplier<MemoryModuleType<String>> MUSICIAN_NOW_PLAYING =
+        Services.REGISTRY.<MemoryModuleType<String>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "musician_now_playing"),
+            () -> new MemoryModuleType<>(Optional.empty())
+        );
+
     /** The labor board nearest the pet. */
     public static final Supplier<MemoryModuleType<BlockPos>> NEAREST_BOARD =
         Services.REGISTRY.<MemoryModuleType<BlockPos>>register(
