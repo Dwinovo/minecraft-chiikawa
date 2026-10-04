@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.network;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.music.MusicStopReason;
 import com.dwinovo.chiikawa.music.MusicTrackView;
+import com.dwinovo.chiikawa.music.PlaybackMode;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.network.FriendlyByteBuf;
@@ -11,6 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 public final class MusicPayloads {
     public static final ResourceLocation MUSIC_CATALOG = payloadId("music_catalog");
     public static final ResourceLocation MUSIC_BOX_SELECT_TRACK = payloadId("music_box_select_track");
+    public static final ResourceLocation MUSIC_BOX_SET_MODE = payloadId("music_box_set_mode");
     public static final ResourceLocation MUSIC_CATALOG_REQUEST = payloadId("music_catalog_request");
     public static final ResourceLocation MUSIC_STREAM_START = payloadId("music_stream_start");
     public static final ResourceLocation MUSIC_STREAM_CHUNK = payloadId("music_stream_chunk");
@@ -66,6 +68,23 @@ public final class MusicPayloads {
         public void write(FriendlyByteBuf buffer) {
             buffer.writeVarInt(handIndex);
             buffer.writeUtf(trackId);
+        }
+    }
+
+    public record MusicBoxSetModePayload(int handIndex, PlaybackMode mode) implements Payload {
+        public static MusicBoxSetModePayload read(FriendlyByteBuf buffer) {
+            return new MusicBoxSetModePayload(buffer.readVarInt(), PlaybackMode.fromId(buffer.readVarInt()));
+        }
+
+        @Override
+        public ResourceLocation id() {
+            return MUSIC_BOX_SET_MODE;
+        }
+
+        @Override
+        public void write(FriendlyByteBuf buffer) {
+            buffer.writeVarInt(handIndex);
+            buffer.writeVarInt(mode.ordinal());
         }
     }
 
