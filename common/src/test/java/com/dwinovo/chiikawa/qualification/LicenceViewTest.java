@@ -55,6 +55,6 @@ class LicenceViewTest {
     }
 
     private static long at(long day, long timeOfDay) {
-        return day * Level.TICKS_PER_DAY + timeOfDay;
+        return day * SharedConstants.TICKS_PER_GAME_DAY + timeOfDay;
     }
 }

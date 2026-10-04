@@ -8,7 +8,7 @@ import com.dwinovo.chiikawa.qualification.QualificationExam;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.level.Level;
+import net.minecraft.SharedConstants;
 import org.junit.jupiter.api.Test;
 
 /** A desk's note of its pet, by the clock: held while the exam is on, the results up the morning after, then gone. */
@@ -37,6 +37,6 @@ class DeskBookingTest {
     }
 
     private static long at(long day, long timeOfDay) {
-        return day * Level.TICKS_PER_DAY + timeOfDay;
+        return day * SharedConstants.TICKS_PER_GAME_DAY + timeOfDay;
     }
 }
