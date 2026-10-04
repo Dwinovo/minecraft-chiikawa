@@ -18,4 +18,15 @@ public final class FabricReloadListeners {
     public static void register(PackType type, ResourceLocation id, PreparableReloadListener listener) {
         ResourceLoader.get(type).registerReloader(id, listener);
     }
+
+    /**
+     * Fabric runs listeners in no order of its own unless told one.
+     *
+     * @param type server data or client resources
+     * @param first the listener that has to have run
+     * @param second the listener that needs what the first loaded
+     */
+    public static void runBefore(PackType type, ResourceLocation first, ResourceLocation second) {
+        ResourceLoader.get(type).addReloaderOrdering(first, second);
+    }
 }
