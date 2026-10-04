@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.intent;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.entity.brain.intent.impl.AnswerWhistleIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.CheckResultsIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.CombatIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.ConstantIntent;
@@ -30,7 +31,8 @@ import org.jetbrains.annotations.Nullable;
  *
  * <p>Preferences are base scores: fights (0.8) over taking a slip (0.7) over work (0.6)
  * over foraging (0.5) over picking up items (0.4) over playing a scene with another pet
- * (0.35), everything over wandering (0.05); a pet another one is coming over to plays
+ * (0.35), everything over wandering (0.05); a wild pet curious about a whistle (0.55) goes over
+ * before it forages; a pet another one is coming over to plays
  * along (0.5).
  * Work the pet's slip counts is raised by {@link IntentSelector#TASK_BONUS}, and a pet's
  * personality weighs them all. The farmer's strict order that 0.0.9 hard-coded as an if-chain, harvest before
@@ -58,6 +60,7 @@ public final class PetIntents {
     public static final Identifier COOPERATE = id("cooperate");
     public static final Identifier TAKE_EXAM = id("take_exam");
     public static final Identifier CHECK_RESULTS = id("check_results");
+    public static final Identifier ANSWER_WHISTLE = id("answer_whistle");
 
     private static final Map<Identifier, PetIntent> BY_ID = new LinkedHashMap<>();
 
@@ -74,7 +77,8 @@ public final class PetIntents {
         register(new SocializeIntent()),
         register(new CooperateIntent()),
         register(new TakeExamIntent()),
-        register(new CheckResultsIntent())
+        register(new CheckResultsIntent()),
+        register(new AnswerWhistleIntent())
     );
 
     static {

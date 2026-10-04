@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.entity.brain.PetActivities;
 import com.dwinovo.chiikawa.entity.brain.personality.IdleHabits;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
 import com.dwinovo.chiikawa.entity.brain.task.exam.CheckResultsBehavior;
+import com.dwinovo.chiikawa.entity.brain.task.tameable.AnswerWhistleBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.exam.TakeExamBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.idle.GlanceBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.idle.RestBehavior;
@@ -108,6 +109,12 @@ public final class BrainUtils {
             ImmutableList.of(Pair.of(2, new TakeExamBehavior())), Set.of());
         PetActivities.register(brain, InitActivity.CHECK_RESULTS.get(),
             ImmutableList.of(Pair.of(2, new CheckResultsBehavior())), Set.of());
+    }
+
+    /** {@code answer_whistle}: a wild pet goes over to see who whistled. */
+    public static void addWhistleTasks(Brain<AbstractPet> brain) {
+        PetActivities.register(brain, InitActivity.ANSWER_WHISTLE.get(),
+            ImmutableList.of(Pair.of(2, new AnswerWhistleBehavior())), Set.of());
     }
 
     /**

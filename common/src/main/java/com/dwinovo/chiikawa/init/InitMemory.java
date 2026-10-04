@@ -8,6 +8,8 @@ import com.dwinovo.chiikawa.social.InteractionPlan;
 import com.dwinovo.chiikawa.social.InteractionReservation;
 import com.dwinovo.chiikawa.social.SocialCooldowns;
 import com.dwinovo.chiikawa.task.FinishedSlip;
+import com.dwinovo.chiikawa.whistle.WhistleCall;
+import com.dwinovo.chiikawa.whistle.WhistleHeard;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -161,6 +163,22 @@ public final class InitMemory {
         Services.REGISTRY.<MemoryModuleType<PetSpeech.Said>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
             Identifier.fromNamespaceAndPath(Constants.MOD_ID, "last_said"),
+            () -> new MemoryModuleType<>(Optional.empty())
+        );
+
+    /** An order the owner whistled that the pet has not taken yet, see {@link WhistleCall}. */
+    public static final Supplier<MemoryModuleType<WhistleCall>> WHISTLE_CALL =
+        Services.REGISTRY.<MemoryModuleType<WhistleCall>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "whistle_call"),
+            () -> new MemoryModuleType<>(Optional.empty())
+        );
+
+    /** Present, with an expiry, while a wild pet is curious about a whistle, see {@link WhistleHeard}. */
+    public static final Supplier<MemoryModuleType<WhistleHeard>> WHISTLE_HEARD =
+        Services.REGISTRY.<MemoryModuleType<WhistleHeard>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "whistle_heard"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 

@@ -53,6 +53,8 @@ public final class ShopCatalogData {
             // For the weeding licence exam: read the night before, better odds in the morning.
             sells(InitItems.WEEDING_BOOK.get(), 4),
             sells(Items.NAME_TAG, 8),
+            // Four to the emerald, so one purse of wages calls a whole yard to heel.
+            sells(InitItems.WHISTLE_CANDY.get(), 1, 4),
             sells(InitItems.BACKPACK.get(), 12),
             sells(InitItems.BEAR_POUCH.get(), 12),
             sells(InitItems.WHALE_POUCH.get(), 12),
@@ -74,6 +76,11 @@ public final class ShopCatalogData {
     /** On the shelf at this price, and not taken in. */
     private static ShopCatalog.Entry sells(Item item, int buy) {
         return new ShopCatalog.Entry(item, buy, 0);
+    }
+
+    /** A bundle on the shelf: {@code count} of them for the price. */
+    private static ShopCatalog.Entry sells(Item item, int buy, int count) {
+        return new ShopCatalog.Entry(item, buy, 0, count);
     }
 
     /** Taken in at this price, and not on the shelf. */
