@@ -18,8 +18,8 @@ import net.minecraft.resources.Identifier;
  *
  * <p>Every character talks as the series draws it (research notes, section 2), and a moment
  * it would let pass in silence has no lines here: Kurimanju only sighs over something good
- * to eat or drink, Rakko does not cry out when it is hurt, and Momonga has never been one
- * for a fight.
+ * to eat or drink, or a passed exam, Rakko does not cry out when it is hurt, and Momonga has
+ * never been one for a fight.
  *
  * <p>Pets are named by their entity id's path rather than by their registered type, so the
  * table can be read without the game's registries — and checked the same way.
@@ -54,6 +54,8 @@ public final class PetVoiceData {
             .says(VoiceMoment.TREATED, 1)
             .says(VoiceMoment.GIVEN_COFFEE, 1)
             .says(VoiceMoment.LISTEN, 1)
+            .says(VoiceMoment.EXAM_PASS, 1)
+            .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.001F));
         // Cheerful, and one of the few who speak in words.
         add(all, voice("hachiware")
@@ -70,6 +72,8 @@ public final class PetVoiceData {
             .says(VoiceMoment.TREATED, 1)
             .says(VoiceMoment.GIVEN_COFFEE, 1)
             .says(VoiceMoment.LISTEN, 1)
+            .says(VoiceMoment.EXAM_PASS, 1)
+            .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.002F));
         // Nothing but its own noises, and never a tear.
         add(all, voice("usagi")
@@ -84,6 +88,8 @@ public final class PetVoiceData {
             .says(VoiceMoment.CLUNG_TO, 1)
             .says(VoiceMoment.GIVEN_COFFEE, 1)
             .says(VoiceMoment.LISTEN, 1)
+            .says(VoiceMoment.EXAM_PASS, 1)
+            .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.002F));
         // Wants praise for everything, and comfort for the rest; no fighter. It never lets
         // up: quiet only while its last demand is still over its head, so a demand for
@@ -102,12 +108,16 @@ public final class PetVoiceData {
             .says(VoiceMoment.CRAB_GREETING, 1)
             .says(VoiceMoment.GIVEN_COFFEE, 1)
             .says(VoiceMoment.LISTEN, 1)
+            .says(VoiceMoment.EXAM_PASS, 1)
+            .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.002F)
             .chance(VoiceMoment.LISTEN, 0.5F)
             .cooldown(TALK));
-        // A grown-up of few words: a sigh over something good, and that is all.
+        // A grown-up of few words: a sigh over something good, a passed exam among them,
+        // and that is all.
         add(all, voice("kurimanju")
             .says(VoiceMoment.SHOP, 1)
+            .says(VoiceMoment.EXAM_PASS, 1)
             .cooldown(2 * COOLDOWN));
         // Hardboiled, a word or two at most, softer only over something sweet.
         add(all, voice("rakko")
@@ -119,6 +129,8 @@ public final class PetVoiceData {
             .says(VoiceMoment.REVIVE, 1)
             .says(VoiceMoment.TREAT, 1)
             .says(VoiceMoment.GIVEN_COFFEE, 1)
+            .says(VoiceMoment.EXAM_PASS, 1)
+            .says(VoiceMoment.EXAM_FAIL, 1)
             .cooldown(2 * COOLDOWN));
         // Polite and earnest, with a touch of Okinawa.
         add(all, voice("shisa")
@@ -133,6 +145,8 @@ public final class PetVoiceData {
             .says(VoiceMoment.CLUNG_TO, 1)
             .says(VoiceMoment.GIVEN_COFFEE, 1)
             .says(VoiceMoment.LISTEN, 1)
+            .says(VoiceMoment.EXAM_PASS, 1)
+            .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.0015F));
         // Quiet and kind: the crab greeting, and a word when it gives something.
         add(all, voice("furuhonya")
@@ -141,6 +155,8 @@ public final class PetVoiceData {
             .says(VoiceMoment.IDLE, 1)
             .says(VoiceMoment.CRAB_GREETING, 1)
             .says(VoiceMoment.GIVEN_COFFEE, 1)
+            .says(VoiceMoment.EXAM_PASS, 1)
+            .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.0005F)
             .cooldown(2 * COOLDOWN));
         return all;
