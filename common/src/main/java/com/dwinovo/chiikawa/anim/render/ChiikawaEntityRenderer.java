@@ -172,8 +172,8 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         for (BagItem.Wear wear : BagItem.Wear.values()) {
             addBoneVisibilityRule(wear.strap(), (state, animCtx) -> BagLayer.wearOf(state) == wear);
         }
-        // What a pet has with it at an exam, likewise part of its model.
-        for (ExamProp prop : ExamProp.values()) {
+        // What a pet has with it only while it does something, likewise part of its model.
+        for (PropBone prop : PropBone.values()) {
             addBoneVisibilityRule(prop.bone(), prop.shownDuring());
         }
 
