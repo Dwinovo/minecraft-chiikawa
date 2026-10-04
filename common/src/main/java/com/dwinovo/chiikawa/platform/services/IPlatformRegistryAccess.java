@@ -10,7 +10,8 @@ import java.util.function.Supplier;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import com.dwinovo.chiikawa.qualification.QualificationCondition;
+import com.mojang.serialization.MapCodec;
 
 public interface IPlatformRegistryAccess {
     Supplier<SensorType<PetAttackbleEntitySensor>> petAttackbleEntitySensor();
@@ -76,5 +77,5 @@ public interface IPlatformRegistryAccess {
 
     Supplier<MenuType<PetBackpackMenu>> petBackpackMenu();
 
-    Supplier<LootItemConditionType> qualificationCondition();
+    Supplier<MapCodec<QualificationCondition>> qualificationCondition();
 }

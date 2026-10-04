@@ -5,7 +5,7 @@ import com.dwinovo.chiikawa.block.ExamDeskBlock;
 import com.dwinovo.chiikawa.block.ExamDeskBlockEntity;
 import java.util.function.Predicate;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Draws each half of an exam desk from a model of its own, as each half of a bed is drawn:
@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
  */
 public final class ExamDeskRenderer extends PropBlockRenderer<ExamDeskBlockEntity> {
     @Override
-    protected ResourceLocation model(ExamDeskBlockEntity half) {
+    protected Identifier model(ExamDeskBlockEntity half) {
         return half.part().model(BuiltInRegistries.BLOCK.getKey(half.getBlockState().getBlock()));
     }
 

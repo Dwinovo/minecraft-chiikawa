@@ -13,7 +13,7 @@ import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -64,13 +64,13 @@ public final class ExamEnrollment {
     }
 
     /** What signing up for one licence at a desk comes to for an owner: the fee, and each of their pets nearby. */
-    public record Offer(ResourceLocation qualification, ExamFee fee, List<Candidate> candidates) {
+    public record Offer(Identifier qualification, ExamFee fee, List<Candidate> candidates) {
     }
 
     /** Why the desk itself takes nobody now, if it does not: the time of day, another pet at it, or no room on the chair. */
     public static Optional<Refusal> deskRefusal(ExamDeskBlockEntity desk) {
         ServerLevel level = (ServerLevel) desk.getLevel();
-        if (!QualificationExam.maySignUp(level.getDayTime())) {
+        if (!QualificationExam.maySignUp(level.getOverworldClockTime())) {
             return Optional.of(Refusal.CLOSED);
         }
         if (!desk.isFree()) {
@@ -98,7 +98,7 @@ public final class ExamEnrollment {
      *
      * @return why it was not signed up, if it was not
      */
-    public static Optional<Refusal> signUp(ServerPlayer owner, ExamDeskBlockEntity desk, ResourceLocation id, UUID petId) {
+    public static Optional<Refusal> signUp(ServerPlayer owner, ExamDeskBlockEntity desk, Identifier id, UUID petId) {
         Optional<Refusal> closed = deskRefusal(desk);
         if (closed.isPresent()) {
             return closed;
@@ -118,18 +118,18 @@ public final class ExamEnrollment {
         if (!qualification.get().fee().payFrom(owner.getInventory())) {
             return Optional.of(Refusal.UNPAID);
         }
-        long today = QualificationExam.day(desk.getLevel().getDayTime());
+        long today = QualificationExam.day(desk.getLevel().getOverworldClockTime());
         pet.licences().set(id, pet.licences().get(id).called(where(desk), today));
         desk.book(new DeskBooking(pet.getUUID(), pet.getDisplayName().getString(), id, candidate.nextRank(), today,
             Optional.empty()));
         owner.containerMenu.broadcastChanges();
         owner.level().playSound(null, desk.getBlockPos(), SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 1.0F, 1.0F);
-        owner.displayClientMessage(Component.translatable("message.chiikawa.exam.signed_up",
-            pet.getDisplayName(), PetExams.name(id), candidate.nextRank()), false);
+        owner.sendSystemMessage(Component.translatable("message.chiikawa.exam.signed_up",
+            pet.getDisplayName(), PetExams.name(id), candidate.nextRank()));
         return Optional.empty();
     }
 
-    private static Candidate candidate(AbstractPet pet, ExamDeskBlockEntity desk, ResourceLocation id,
+    private static Candidate candidate(AbstractPet pet, ExamDeskBlockEntity desk, Identifier id,
                                        Qualification qualification) {
         Licence licence = pet.licences().get(id);
         int heldRank = licence.held() == 0 ? 0 : qualification.rank(licence.held());

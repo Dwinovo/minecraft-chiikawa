@@ -11,7 +11,6 @@ import com.mojang.serialization.JsonOps;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.junit.jupiter.api.Test;
 

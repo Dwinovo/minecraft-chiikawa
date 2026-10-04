@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -104,7 +104,7 @@ public class ExamDeskScreen extends Screen {
 
     /** The pets, the ones that can go first and the likeliest of those first, each with its button. */
     private void addRows(OfferView offer, int shown) {
-        Item fee = BuiltInRegistries.ITEM.get(offer.feeItem());
+        Item fee = BuiltInRegistries.ITEM.getValue(offer.feeItem());
         ItemIcon feeIcon = new ItemIcon(new ItemStack(fee));
         int carried = carried(fee);
         List<CandidateView> pets = offer.candidates().stream()
@@ -138,8 +138,8 @@ public class ExamDeskScreen extends Screen {
      * own: drawn after them, the panel would cover them.
      */
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
         GuiSurface surface = new GuiSurface(graphics, this.font);
         TitledPanel.draw(surface, leftPos, topPos, WIDTH, panelHeight, this.title.getString());
         int x = leftPos + UiStyle.PAD;
@@ -152,7 +152,7 @@ public class ExamDeskScreen extends Screen {
         }
         int nameY = UiStyle.centerIn(headerY, UiStyle.ROW_H, surface.lineHeight());
         surface.drawText(PetExams.name(offer.get().qualification()).getString(), x, nameY, UiTheme.TEXT);
-        Price.drawRight(surface, new ItemIcon(new ItemStack(BuiltInRegistries.ITEM.get(offer.get().feeItem()))),
+        Price.drawRight(surface, new ItemIcon(new ItemStack(BuiltInRegistries.ITEM.getValue(offer.get().feeItem()))),
             Component.translatable("screen.chiikawa.exam_desk.fee", offer.get().feeCount()).getString(),
             right, headerY, UiStyle.ROW_H, UiTheme.TEXT_MUTED);
         Ui.divider(surface, x, rowsY - UiStyle.GAP / 2 - 1, WIDTH - 2 * UiStyle.PAD);
@@ -167,8 +167,8 @@ public class ExamDeskScreen extends Screen {
 
     /** The buttons over the panel, then what the odds of the pet under the cursor come from. */
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
         GuiSurface surface = new GuiSurface(graphics, this.font);
         rows.stream().filter(row -> row.area().contains(mouseX, mouseY)).findFirst().ifPresent(row ->
             surface.onTop(() -> Tooltip.draw(surface, oddsLines(row.pet()), mouseX, mouseY, this.width, this.height)));

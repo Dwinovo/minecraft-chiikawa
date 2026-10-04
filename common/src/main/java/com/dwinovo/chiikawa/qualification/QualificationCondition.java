@@ -1,15 +1,13 @@
 package com.dwinovo.chiikawa.qualification;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.init.InitLootConditions;
 import com.mojang.serialization.MapCodec;
 import java.util.Set;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 
 /**
  * {@code chiikawa:qualification}: whether the pet a loot table is rolled for holds a grade
@@ -22,18 +20,18 @@ public record QualificationCondition(LicenceRequirement requirement) implements 
         LicenceRequirement.MAP_CODEC.xmap(QualificationCondition::new, QualificationCondition::requirement);
 
     @Override
-    public LootItemConditionType getType() {
-        return InitLootConditions.QUALIFICATION.get();
+    public MapCodec<QualificationCondition> codec() {
+        return CODEC;
     }
 
     @Override
-    public Set<LootContextParam<?>> getReferencedContextParams() {
+    public Set<ContextKey<?>> getReferencedContextParams() {
         return Set.of(LootContextParams.THIS_ENTITY);
     }
 
     @Override
     public boolean test(LootContext context) {
-        Entity entity = context.getParamOrNull(LootContextParams.THIS_ENTITY);
+        Entity entity = context.getOptionalParameter(LootContextParams.THIS_ENTITY);
         return entity instanceof AbstractPet pet && requirement.metBy(pet.licences());
     }
 }

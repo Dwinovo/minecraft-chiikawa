@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.dwinovo.chiikawa.qualification.QualificationExam;
 import java.util.Optional;
 import java.util.UUID;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 class DeskBookingTest {
     private static final long DAY = 3L;
     private static final DeskBooking SIGNED_UP = new DeskBooking(UUID.randomUUID(), "Chiikawa",
-        ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding"), 5, DAY, Optional.empty());
+        Identifier.fromNamespaceAndPath("chiikawa", "weeding"), 5, DAY, Optional.empty());
 
     @Test
     void theDeskIsHeldWhileItsPetCanStillSit() {

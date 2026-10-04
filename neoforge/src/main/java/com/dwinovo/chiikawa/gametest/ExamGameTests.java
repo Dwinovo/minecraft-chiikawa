@@ -24,11 +24,10 @@ import com.dwinovo.chiikawa.qualification.ExamStage;
 import com.dwinovo.chiikawa.qualification.Ineligible;
 import com.dwinovo.chiikawa.qualification.Licence;
 import java.util.Optional;
+import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,14 +36,11 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The weeding licence, end to end: an owner signs one pet up at an exam desk for a diamond;
@@ -76,17 +72,17 @@ public final class ExamGameTests {
 
     @BeforeBatch(batch = EXAM_DAY)
     public static void examDay(ServerLevel level) {
-        settleWorld(level, Difficulty.PEACEFUL, EXAM_DAY_NUMBER * Level.TICKS_PER_DAY + MORNING);
+        settleWorld(level, Difficulty.PEACEFUL, EXAM_DAY_NUMBER * SharedConstants.TICKS_PER_GAME_DAY + MORNING);
     }
 
     @BeforeBatch(batch = RESULTS_MORNING)
     public static void resultsMorning(ServerLevel level) {
-        settleWorld(level, Difficulty.PEACEFUL, (EXAM_DAY_NUMBER + 1) * Level.TICKS_PER_DAY + MORNING);
+        settleWorld(level, Difficulty.PEACEFUL, (EXAM_DAY_NUMBER + 1) * SharedConstants.TICKS_PER_GAME_DAY + MORNING);
     }
 
     @BeforeBatch(batch = RESULTS_AFTERNOON)
     public static void resultsAfternoon(ServerLevel level) {
-        settleWorld(level, Difficulty.PEACEFUL, (EXAM_DAY_NUMBER + 1) * Level.TICKS_PER_DAY + AFTERNOON);
+        settleWorld(level, Difficulty.PEACEFUL, (EXAM_DAY_NUMBER + 1) * SharedConstants.TICKS_PER_GAME_DAY + AFTERNOON);
     }
 
     /** One diamond, one pet: it is sent to the desk, and the desk is booked for it. */
@@ -291,7 +287,7 @@ public final class ExamGameTests {
         BlockState desk = InitBlocks.EXAM_DESK.get().defaultBlockState().setValue(ExamDeskBlock.FACING, Direction.NORTH);
         helper.setBlock(DESK, desk);
         helper.setBlock(ExamDeskBlock.chair(DESK, Direction.NORTH), desk.setValue(ExamDeskBlock.PART, DeskPart.CHAIR));
-        return (ExamDeskBlockEntity) helper.getBlockEntity(DESK);
+        return helper.getBlockEntity(DESK, ExamDeskBlockEntity.class);
     }
 
     /** A practised pet of a fresh owner's, signed up at the desk. */

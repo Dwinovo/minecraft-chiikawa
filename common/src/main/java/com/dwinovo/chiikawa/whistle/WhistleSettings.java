@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 
 /**
@@ -26,29 +26,29 @@ import net.minecraft.util.ExtraCodecs;
  * @param pitch how high
  */
 public record WhistleSettings(double range, int blowTicks, int cooldownTicks, int reactDelayTicks,
-                              int curiousTicks, ResourceLocation sound, float pitch) {
+                              int curiousTicks, Identifier sound, float pitch) {
     public static final Codec<WhistleSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         Codec.doubleRange(1.0, 256.0).fieldOf("range").forGetter(WhistleSettings::range),
         ExtraCodecs.POSITIVE_INT.fieldOf("blow_ticks").forGetter(WhistleSettings::blowTicks),
         ExtraCodecs.NON_NEGATIVE_INT.fieldOf("cooldown_ticks").forGetter(WhistleSettings::cooldownTicks),
         ExtraCodecs.NON_NEGATIVE_INT.fieldOf("react_delay_ticks").forGetter(WhistleSettings::reactDelayTicks),
         ExtraCodecs.POSITIVE_INT.fieldOf("curious_ticks").forGetter(WhistleSettings::curiousTicks),
-        ResourceLocation.CODEC.fieldOf("sound").forGetter(WhistleSettings::sound),
+        Identifier.CODEC.fieldOf("sound").forGetter(WhistleSettings::sound),
         Codec.floatRange(0.5F, 2.0F).fieldOf("pitch").forGetter(WhistleSettings::pitch)
     ).apply(instance, WhistleSettings::new));
 
-    private static volatile Map<ResourceLocation, WhistleSettings> byItem = Collections.emptyMap();
+    private static volatile Map<Identifier, WhistleSettings> byItem = Collections.emptyMap();
 
     /**
      * @param item an item's id
      * @return how that item is blown, or nothing when no data pack makes a whistle of it:
      *         an item whose settings are gone does nothing when used rather than guessing
      */
-    public static Optional<WhistleSettings> of(ResourceLocation item) {
+    public static Optional<WhistleSettings> of(Identifier item) {
         return Optional.ofNullable(byItem.get(item));
     }
 
-    static void replaceAll(Map<ResourceLocation, WhistleSettings> settings) {
+    static void replaceAll(Map<Identifier, WhistleSettings> settings) {
         byItem = Map.copyOf(settings);
     }
 }

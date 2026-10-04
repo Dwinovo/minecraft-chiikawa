@@ -30,7 +30,7 @@ public final class ExamDeskServerPacketHandler {
     /** @return the desk as its screen shows it to {@code player} */
     public static ExamDeskPayloads.DeskViewPayload view(ExamDeskBlockEntity desk, ServerPlayer player) {
         return new ExamDeskPayloads.DeskViewPayload(desk.getBlockPos(), ExamEnrollment.deskRefusal(desk),
-            desk.booking().map(booking -> bookingView(booking, desk.getLevel().getDayTime())),
+            desk.booking().map(booking -> bookingView(booking, desk.getLevel().getOverworldClockTime())),
             ExamEnrollment.offers(player, desk).stream()
                 .map(offer -> new ExamDeskPayloads.OfferView(offer.qualification(),
                     BuiltInRegistries.ITEM.getKey(offer.fee().item()), offer.fee().count(),

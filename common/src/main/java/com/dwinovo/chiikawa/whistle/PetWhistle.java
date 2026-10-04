@@ -40,7 +40,7 @@ public final class PetWhistle {
 
     /** Gives every pet within earshot of {@code owner} the order, or its curiosity. */
     public static Heard blow(ServerPlayer owner, PetDirective order, WhistleSettings settings) {
-        ServerLevel level = owner.serverLevel();
+        ServerLevel level = owner.level();
         long now = level.getGameTime();
         GlobalPos where = GlobalPos.of(level.dimension(), owner.blockPosition());
         int owned = 0;

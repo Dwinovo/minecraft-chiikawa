@@ -19,12 +19,9 @@ import com.dwinovo.chiikawa.music.ServerMusicLibrary;
 import com.dwinovo.chiikawa.music.ServerMusicSystem;
 import java.util.concurrent.atomic.AtomicReference;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * What a musician does when a song of its music box ends. The songs are two short ones of

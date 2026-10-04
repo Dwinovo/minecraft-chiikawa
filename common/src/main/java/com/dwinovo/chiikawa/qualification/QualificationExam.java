@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.Level;
+import net.minecraft.SharedConstants;
 
 /**
  * The rules of a licence's exams, kept free of the pet so they can be tested on their own:
@@ -27,12 +27,12 @@ public final class QualificationExam {
 
     /** @return the day number of a time of day, as exams count days */
     public static long day(long dayTime) {
-        return Math.floorDiv(dayTime, Level.TICKS_PER_DAY);
+        return Math.floorDiv(dayTime, SharedConstants.TICKS_PER_GAME_DAY);
     }
 
     /** @return ticks since sunrise */
     public static long timeOfDay(long dayTime) {
-        return Math.floorMod(dayTime, Level.TICKS_PER_DAY);
+        return Math.floorMod(dayTime, SharedConstants.TICKS_PER_GAME_DAY);
     }
 
     /** Whether an owner may sign a pet up now: in the working day, early enough to sit the exam. */

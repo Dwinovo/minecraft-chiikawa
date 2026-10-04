@@ -4,7 +4,7 @@ import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.whistle.WhistleSettings;
 import java.util.Map;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * The generated whistle settings, by the id of the item that is blown. The candy carries
@@ -16,9 +16,9 @@ public final class WhistleSettingsData {
     }
 
     /** @return settings by item id */
-    public static Map<ResourceLocation, WhistleSettings> all() {
+    public static Map<Identifier, WhistleSettings> all() {
         return Map.of(BuiltInRegistries.ITEM.getKey(InitItems.WHISTLE_CANDY.get()),
             new WhistleSettings(32.0, 10, 40, 10, 200,
-                ResourceLocation.withDefaultNamespace("block.note_block.flute"), 2.0F));
+                Identifier.withDefaultNamespace("block.note_block.flute"), 2.0F));
     }
 }

@@ -15,7 +15,8 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import com.mojang.serialization.MapCodec;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -28,11 +29,11 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
         DeferredRegister.create(Registries.ACTIVITY, Constants.MOD_ID);
     private static final DeferredRegister<MenuType<?>> MENUS =
         DeferredRegister.create(Registries.MENU, Constants.MOD_ID);
-    private static final DeferredRegister<LootItemConditionType> LOOT_CONDITIONS =
+    private static final DeferredRegister<MapCodec<? extends LootItemCondition>> LOOT_CONDITIONS =
         DeferredRegister.create(Registries.LOOT_CONDITION_TYPE, Constants.MOD_ID);
 
-    private static final DeferredHolder<LootItemConditionType, LootItemConditionType> QUALIFICATION_CONDITION =
-        LOOT_CONDITIONS.register("qualification", () -> new LootItemConditionType(QualificationCondition.CODEC));
+    private static final DeferredHolder<MapCodec<? extends LootItemCondition>, MapCodec<QualificationCondition>> QUALIFICATION_CONDITION =
+        LOOT_CONDITIONS.register("qualification", () -> QualificationCondition.CODEC);
 
     private static final DeferredHolder<SensorType<?>, SensorType<PetAttackbleEntitySensor>> PET_ATTACKBLE_ENTITY_SENSOR =
         SENSOR_TYPES.register("pet_attackble_entity_sensor", () -> new SensorType<>(PetAttackbleEntitySensor::new));
@@ -202,7 +203,7 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
     }
 
     @Override
-    public Supplier<LootItemConditionType> qualificationCondition() {
+    public Supplier<MapCodec<QualificationCondition>> qualificationCondition() {
         return QUALIFICATION_CONDITION;
     }
 
