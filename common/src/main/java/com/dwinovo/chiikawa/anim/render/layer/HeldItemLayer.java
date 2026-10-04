@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import java.util.List;
 
 /**
  * {@link RenderLayer} that submits the entity's mainhand {@link ItemStack} at
@@ -34,6 +35,12 @@ import net.minecraft.world.item.ItemStack;
  * item is turned the same way before it is drawn; see {@link #intoFist}. Without that
  * turn a sword stood on its pommel pointing at the sky, and every swing of the arm swung
  * its blade backwards.
+ *
+ * <h2>Hands full</h2>
+ * While the pet has something of its own model in its hands — a bone named among
+ * {@code handsFullWith}, drawn this frame — the item is put away while it is. Whether
+ * such a bone is drawn is its own visibility rule's call, so the layer follows the
+ * animation without knowing it.
  */
 public final class HeldItemLayer implements RenderLayer {
 
@@ -41,14 +48,17 @@ public final class HeldItemLayer implements RenderLayer {
     public static final String DEFAULT_BONE = "RightHandLocator";
 
     private final String boneName;
+    private final List<String> handsFullWith;
     private final BoneTransformWalker walker = new BoneTransformWalker();
 
-    public HeldItemLayer() {
-        this(DEFAULT_BONE);
+    /** @param handsFullWith bones that, while drawn, are in the pet's hands instead */
+    public HeldItemLayer(List<String> handsFullWith) {
+        this(DEFAULT_BONE, handsFullWith);
     }
 
-    public HeldItemLayer(String boneName) {
+    public HeldItemLayer(String boneName, List<String> handsFullWith) {
         this.boneName = boneName;
+        this.handsFullWith = List.copyOf(handsFullWith);
     }
 
     @Override
@@ -59,6 +69,7 @@ public final class HeldItemLayer implements RenderLayer {
         if (targetIdx == null) return;
         // If the hand is hidden, so is what it holds.
         if (ctx.isHidden(targetIdx)) return;
+        if (handsFull(ctx)) return;
 
         // Resolve the item model fresh per submit. The state is small and
         // short-lived so the allocation is cheaper than caching bookkeeping.
@@ -81,6 +92,14 @@ public final class HeldItemLayer implements RenderLayer {
         itemRenderState.submit(ctx.poseStack(), ctx.collector(), ctx.packedLight(),
                 OverlayTexture.NO_OVERLAY, 0);
         ctx.poseStack().popPose();
+    }
+
+    boolean handsFull(RenderLayerContext ctx) {
+        for (String bone : handsFullWith) {
+            Integer idx = ctx.model().boneIndex.get(bone);
+            if (idx != null && !ctx.isHidden(idx)) return true;
+        }
+        return false;
     }
 
     /**
