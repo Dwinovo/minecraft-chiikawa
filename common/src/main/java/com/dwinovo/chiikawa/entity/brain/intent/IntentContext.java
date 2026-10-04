@@ -106,7 +106,7 @@ public record IntentContext(
             pet.getActivity() == PetActivity.PLAY_GUITAR,
             examDesk(pet),
             resultsDesk(pet),
-            pet.getActivity() == PetActivity.EXAM,
+            PetExams.seatedAtExam(pet),
             pet.getBrain().getMemory(InitMemory.WHISTLE_HEARD.get())
                 .filter(heard -> heard.from() <= level.getGameTime())
                 .map(WhistleHeard::where)
