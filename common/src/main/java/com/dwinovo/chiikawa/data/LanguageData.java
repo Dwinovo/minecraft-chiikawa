@@ -61,6 +61,11 @@ public final class LanguageData {
                 "两只宠物都空闲时，偶尔会演一段原作中的场景，比如飞鼠缠着吉伊。",
                 "獭师父会请吉伊和小八吃东西，栗子馒头会给刚除完草的宠物送咖啡。",
                 "小八街头演奏时，附近空闲的宠物会过来坐下听，时不时鼓掌。");
+            addHandbookPage(adder, "licence", "考除草证",
+                "做公告板的除草牌就是练习；手持参考书右键宠物，它会读书备考。",
+                "放置考试桌，右键选一只宠物报名，交 1 颗钻石。一张桌子一次考一只。",
+                "白天宠物坐到桌前答卷，第二天早上出结果。拆掉桌子考试就取消。",
+                "考过升一级，除草报酬更高；3 级起能接大片除草牌。");
             addJobTranslations(adder, "职业", "无", "农夫", "剑士", "弓箭手", "音乐家", "未知");
             addEntityTranslations(adder, "乌萨奇", "小八", "吉伊", "狮萨", "飞鼠", "栗子馒头", "獭师父", "古本屋");
             addItemTagTranslations(adder, "农夫工具", "剑士工具", "弓箭手工具", "音乐家工具", "驯服食物", "种植作物", "运送物品", "可拾取物品", "请客的吃食");
@@ -275,6 +280,11 @@ public final class LanguageData {
                 "手の空いた2匹は、ときどき原作の一場面を演じます。たとえばモモンガのしがみつき。",
                 "ラッコはごちそうを、くりまんじゅうは草むしり帰りの子にコーヒーを渡します。",
                 "ハチワレが路上演奏していると、近くの手の空いた子が座って聴き、拍手します。");
+            addHandbookPage(adder, "licence", "草むしり検定",
+                "掲示板の草むしり札が練習になります。参考書を持って右クリックすると勉強します。",
+                "試験机を置いて右クリックし、受ける子を選んでダイヤ1個で申し込みます。",
+                "昼間に机で答案を書き、結果は翌朝出ます。机を壊すと試験は中止です。",
+                "合格すると1級上がり報酬アップ。3級からは大きな草むしり札も受けられます。");
             addJobTranslations(adder, "職業", "なし", "農家", "剣士", "弓使い", "音楽家", "不明");
             addEntityTranslations(adder, "うさぎ", "ハチワレ", "ちいかわ", "シーサー", "モモンガ", "くりまんじゅう", "ラッコ", "古本屋");
             addItemTagTranslations(adder, "農家の道具", "剣士の道具", "弓使いの道具", "音楽家の道具", "なつかせる食べ物", "植える作物", "運ぶアイテム", "拾えるアイテム", "おごる食べ物");
@@ -490,6 +500,11 @@ public final class LanguageData {
                 "Two idle pets sometimes act out a scene, like Momonga clinging on.",
                 "Rakko treats Chiikawa and Hachiware; Kurimanju brings weeders coffee.",
                 "When Hachiware busks, idle pets nearby sit, listen and clap.");
+            addHandbookPage(adder, "licence", "Weeding Licence",
+                "Board weeding is practice; a pet given the study guide reads up too.",
+                "Place an exam desk, right-click it and sign one pet up for a diamond.",
+                "By day it writes at the desk; results next morning. No desk, no exam.",
+                "A pass is a grade up and better pay; grade 3 opens big weeding slips.");
             addJobTranslations(adder, "Job", "None", "Farmer", "Fencer", "Archer", "Musician", "Unknown");
             addEntityTranslations(adder, "Usagi", "Hachiware", "Chiikawa", "Shisa", "Momonga", "Kurimanju", "Rakko", "Furuhonya");
             addItemTagTranslations(adder, "Farmer Tools", "Fencer Tools", "Archer Tools", "Musician Tools", "Tame Foods", "Plant Crops", "Deliver Items", "Pickable Items", "Pet Treats");
