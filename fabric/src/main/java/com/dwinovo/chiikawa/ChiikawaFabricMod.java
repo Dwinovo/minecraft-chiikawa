@@ -19,6 +19,7 @@ import com.dwinovo.chiikawa.init.InitLootConditions;
 import com.dwinovo.chiikawa.init.InitTabs;
 import com.dwinovo.chiikawa.init.InitCapabilities;
 import com.dwinovo.chiikawa.entity.PetFollowKeeper;
+import java.util.Set;
 import com.dwinovo.chiikawa.entity.PetRecall;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalityLoader;
 import com.dwinovo.chiikawa.platform.FabricReloadListeners;
@@ -88,8 +89,9 @@ public class ChiikawaFabricMod implements ModInitializer {
         FabricReloadListeners.register(PackType.SERVER_DATA, PetSpawnLoader.ID, new PetSpawnLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, PetVoiceLoader.ID, new PetVoiceLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, PetInteractionLoader.ID, new PetInteractionLoader());
+        // A licence is checked against the slip types, which have to be loaded by then.
         FabricReloadListeners.register(PackType.SERVER_DATA, QualificationLoader.ID,
-            new QualificationLoader(task -> PetTaskTypes.all().containsKey(task)));
+            new QualificationLoader(task -> PetTaskTypes.all().containsKey(task)), Set.of(PetTaskTypeLoader.ID));
         ServerTickEvents.END_SERVER_TICK.register(PetReviveRitualManager::tickServer);
         ServerTickEvents.END_SERVER_TICK.register(ServerMusicSystem::tickServer);
         ServerTickEvents.END_SERVER_TICK.register(PetFollowKeeper::tickServer);
