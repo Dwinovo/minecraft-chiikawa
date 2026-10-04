@@ -124,6 +124,20 @@ class ShopTest {
         assertEquals(1, loaded.errors().size());
     }
 
+    @Test
+    void aBundleCountDefaultsToOneAndIsParsedWhenGiven() {
+        ShopCatalog parsed = ShopCatalog.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("""
+            { "entries": [ { "item": "minecraft:cookie", "buy": 1 },
+                           { "item": "minecraft:sugar", "buy": 1, "count": 4 } ] }"""))
+            .getOrThrow();
+
+        assertEquals(1, parsed.sale(Items.COOKIE).orElseThrow().count());
+        assertEquals(4, parsed.sale(Items.SUGAR).orElseThrow().count());
+        assertTrue(ShopCatalog.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("""
+            { "entries": [ { "item": "minecraft:sugar", "buy": 1, "count": 0 } ] }""")).error().isPresent(),
+            "a bundle of none");
+    }
+
     private static Personality likes(Item item) {
         return new Personality(Map.of(), Map.of(), 0.0F, List.of(),
             List.of(new Personality.WeightedItem(item, 1)), IdleHabits.DEFAULT, Map.of());
