@@ -1,7 +1,6 @@
 package com.dwinovo.chiikawa.qualification;
 
 import com.dwinovo.chiikawa.Constants;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
@@ -9,9 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 /**
@@ -19,7 +20,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
  * file that fails to parse is skipped; a licence whose practice is a slip type no data
  * pack has is kept but warned about, since no pet could ever practise for it.
  */
-public final class QualificationLoader extends SimpleJsonResourceReloadListener {
+public final class QualificationLoader extends SimpleJsonResourceReloadListener<JsonElement> {
     public static final String DIRECTORY = "pet_qualification";
     /** Id for loaders that register reload listeners by id. */
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
@@ -30,7 +31,7 @@ public final class QualificationLoader extends SimpleJsonResourceReloadListener 
 
     /** @param knownTask whether a slip type is loaded, asked once the slip types have been */
     public QualificationLoader(Predicate<ResourceLocation> knownTask) {
-        super(new Gson(), DIRECTORY);
+        super(ExtraCodecs.JSON, FileToIdConverter.json(DIRECTORY));
         this.knownTask = knownTask;
     }
 

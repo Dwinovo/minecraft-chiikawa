@@ -89,7 +89,7 @@ public final class SupplyGameTests {
         int ours = 0;
         for (ResourceLocation id : BuiltInRegistries.ACTIVITY.keySet()) {
             if (id.getNamespace().equals(Constants.MOD_ID)) {
-                String name = BuiltInRegistries.ACTIVITY.get(id).getName();
+                String name = BuiltInRegistries.ACTIVITY.getValue(id).getName();
                 helper.assertTrue(name.equals(id.toString()), "activity " + id + " is named " + name);
                 ours++;
             }

@@ -291,7 +291,7 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
             PetStatusText.jobName(pet.getCapabilityId()).getString(), UiTheme.SURFACE, List.of()) + UiStyle.GAP;
         // A chip for each licence beside the job: the grade held, and what is next under the cursor.
         for (LicenceView licence : pet.licenceViews()) {
-            x += chip(surface, x, y, new ItemIcon(new ItemStack(BuiltInRegistries.ITEM.get(licence.book()))),
+            x += chip(surface, x, y, new ItemIcon(new ItemStack(BuiltInRegistries.ITEM.getValue(licence.book()))),
                 PetStatusText.licenceRank(licence).getString(), UiTheme.LEAF_PALE,
                 PetStatusText.licenceNotes(licence).stream().map(Component::getString).toList()) + UiStyle.GAP;
         }
