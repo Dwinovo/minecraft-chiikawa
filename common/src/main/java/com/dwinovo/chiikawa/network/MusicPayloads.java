@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.network;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.music.MusicStopReason;
 import com.dwinovo.chiikawa.music.MusicTrackView;
+import com.dwinovo.chiikawa.music.PlaybackMode;
 import java.util.List;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -42,6 +43,22 @@ public final class MusicPayloads {
                 buffer.writeUtf(value.trackId);
             },
             buffer -> new MusicBoxSelectTrackPayload(buffer.readVarInt(), buffer.readUtf())
+        );
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
+    public record MusicBoxSetModePayload(int handIndex, PlaybackMode mode) implements CustomPacketPayload {
+        public static final Type<MusicBoxSetModePayload> TYPE = payloadType("music_box_set_mode");
+        public static final StreamCodec<RegistryFriendlyByteBuf, MusicBoxSetModePayload> STREAM_CODEC = StreamCodec.of(
+            (buffer, value) -> {
+                buffer.writeVarInt(value.handIndex);
+                PlaybackMode.STREAM_CODEC.encode(buffer, value.mode);
+            },
+            buffer -> new MusicBoxSetModePayload(buffer.readVarInt(), PlaybackMode.STREAM_CODEC.decode(buffer))
         );
 
         @Override

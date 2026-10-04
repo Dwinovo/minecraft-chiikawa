@@ -94,6 +94,7 @@ public final class LanguageData {
             );
             addMusicBoxTranslations(adder, "八音盒", "未选择歌曲", "歌曲：%s", "选择歌曲", "导入中", "导入失败", "没有可播放的歌曲",
                 "把 MP3 / WAV 文件放入文件夹后点击刷新", "部分歌曲导入失败", "请使用 MP3 格式的音频", "打开文件夹", "刷新", "上一页", "下一页");
+            addMusicBoxModeTranslations(adder, "播放模式：%s", "单次播放", "顺序播放", "随机播放", "单曲循环");
             addIntentFailureTranslations(adder, "无法跟随主人", "主人就在附近", "已经回到主人身边", "目标不在范围内",
                 "目标离开了活动范围", "附近没有可拾取的物品", "没有可收割的作物", "没有可种植的耕地", "没有可存放的容器",
                 "没有攻击目标", "攻击冷却中", "没有箭", "没有新的曲子可演奏", "曲子演奏完了", "先做更要紧的活",
@@ -321,6 +322,7 @@ public final class LanguageData {
             );
             addMusicBoxTranslations(adder, "オルゴール", "曲が選ばれていません", "曲：%s", "曲を選ぶ", "読み込み中", "読み込み失敗", "再生できる曲がありません",
                 "MP3・WAVファイルをフォルダに入れて、更新を押してください", "一部の曲を読み込めませんでした", "MP3形式の音声を使ってください", "フォルダを開く", "更新", "前のページ", "次のページ");
+            addMusicBoxModeTranslations(adder, "再生モード：%s", "1回だけ再生", "順番に再生", "シャッフル再生", "1曲リピート");
             addIntentFailureTranslations(adder, "飼い主についていけない", "飼い主がすぐ近くにいる", "飼い主のそばに戻った", "目標が届かないところにいる",
                 "目標が行動範囲の外に出た", "近くに拾えるアイテムがない", "収穫できる作物がない", "種をまける耕地がない", "しまえる入れ物がない",
                 "攻撃する相手がいない", "攻撃のクールダウン中", "矢がない", "新しく演奏できる曲がない", "演奏が終わった",
@@ -549,6 +551,7 @@ public final class LanguageData {
             );
             addMusicBoxTranslations(adder, "Music Box", "No song selected", "Song: %s", "Choose Song", "Importing", "Failed", "No playable songs",
                 "Put MP3 / WAV files in the folder, then reload", "Some songs failed to import", "Please use MP3 audio files", "Open Folder", "Reload", "Previous page", "Next page");
+            addMusicBoxModeTranslations(adder, "Playback: %s", "Play once", "Play in order", "Shuffle", "Repeat one");
             addIntentFailureTranslations(adder, "Can't follow the owner", "Owner is close by", "Back with the owner", "Target is out of range",
                 "Target left the allowed area", "No item to pick up", "No crop to harvest", "No farmland to plant", "No container to deliver to",
                 "No target to attack", "Attack is cooling down", "No arrows", "No new song to play", "The song is over",
@@ -1211,5 +1214,20 @@ public final class LanguageData {
         // Read out rather than written on the buttons: the arrows say it plainly enough.
         adder.add("screen.chiikawa.music_box.previous_page", previousPage);
         adder.add("screen.chiikawa.music_box.next_page", nextPage);
+    }
+
+    private static void addMusicBoxModeTranslations(
+        Adder adder,
+        String heading,
+        String once,
+        String inOrder,
+        String shuffle,
+        String repeatOne
+    ) {
+        adder.add("screen.chiikawa.music_box.mode", heading);
+        adder.add("screen.chiikawa.music_box.mode.once", once);
+        adder.add("screen.chiikawa.music_box.mode.in_order", inOrder);
+        adder.add("screen.chiikawa.music_box.mode.shuffle", shuffle);
+        adder.add("screen.chiikawa.music_box.mode.repeat_one", repeatOne);
     }
 }
