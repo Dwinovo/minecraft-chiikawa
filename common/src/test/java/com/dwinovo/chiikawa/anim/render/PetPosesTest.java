@@ -126,7 +126,7 @@ class PetPosesTest {
 
     /** Whether the bone is one of the things a pet has only while it does something, and this is not that. */
     private static boolean hiddenIn(BakedBone bone, String animation) {
-        return PropBone.of(bone.name).filter(prop -> !prop.shownDuring().animations().contains(animation)).isPresent();
+        return PropBone.of(bone.name).filter(prop -> !prop.shownDuring().shownIn(animation)).isPresent();
     }
 
     /** The pets: every geo model with an animation file beside it. */
