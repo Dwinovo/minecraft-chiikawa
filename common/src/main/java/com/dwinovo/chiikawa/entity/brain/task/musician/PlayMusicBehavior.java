@@ -6,6 +6,8 @@ import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.music.ChiikawaMusicConfig;
 import com.dwinovo.chiikawa.music.MusicBoxSelection;
+import com.dwinovo.chiikawa.music.PlaybackMode;
+import com.dwinovo.chiikawa.music.ServerMusicLibrary;
 import com.dwinovo.chiikawa.music.ServerMusicSystem;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.dwinovo.chiikawa.task.TaskTracker;
@@ -27,6 +29,10 @@ import net.minecraft.world.item.ItemStack;
  * lasts, reporting each second of it as work. The stream itself is ended by the stream
  * manager when the song finishes, by a newer song replacing it, or by the
  * {@code play_music} intent when the pet stops performing.
+ *
+ * <p>Which track plays is {@link PlaybackMode#nextTrack}'s to say: the selected one first,
+ * then, in a continuous mode, whatever follows the track the pet last started. A new
+ * selection or a new mode on the box starts over from the selected track.
  */
 public class PlayMusicBehavior extends Behavior<AbstractPet> {
     private static final int MAX_DURATION_TICKS = ChiikawaMusicConfig.DEFAULT.maxTrackSeconds() * 20 + 40;
@@ -34,11 +40,13 @@ public class PlayMusicBehavior extends Behavior<AbstractPet> {
     private static final int TICKS_PER_SECOND = 20;
     private static final Map<MemoryModuleType<?>, MemoryStatus> REQUIRED_MEMORIES = ImmutableMap.of(
         InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get(), MemoryStatus.REGISTERED,
+        InitMemory.MUSICIAN_NOW_PLAYING.get(), MemoryStatus.REGISTERED,
         MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED,
         MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED
     );
 
     private String activeTrackId = "";
+    private String activeSignature = "";
     private int ticksPlayed;
 
     public PlayMusicBehavior() {
@@ -46,18 +54,37 @@ public class PlayMusicBehavior extends Behavior<AbstractPet> {
     }
 
     /**
-     * A selection plays once, unless the pet carries a street performance slip: then it
-     * keeps playing it until the slip is paid.
+     * In the default mode a selection plays once, unless the pet carries a street
+     * performance slip: then it keeps playing it until the slip is paid. In a continuous
+     * mode it is playable for as long as the selected track is ready.
      *
      * @param pet the pet
-     * @return the held music box selection, if the pet would play it now
+     * @return the held music box selection, if the pet would play on from it now
      */
     public static Optional<MusicBoxSelection> playableSelection(AbstractPet pet) {
-        boolean performing = pet.getTask()
+        Optional<MusicBoxSelection> selection = selection(pet);
+        PlaybackMode mode = PlaybackMode.get(pet.getMainHandItem());
+        if (mode.continuous()) {
+            return selection.filter(chosen -> library(pet).getTrack(chosen.trackId()).isPresent());
+        }
+        Optional<String> lastPlayed = pet.getBrain().getMemory(InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get());
+        return selection.filter(chosen -> performing(pet)
+            || lastPlayed.filter(signature(chosen, mode)::equals).isEmpty());
+    }
+
+    private static boolean performing(AbstractPet pet) {
+        return pet.getTask()
             .filter(task -> task.counter().equals(PetWorkCounters.PLAY_MUSIC_SECOND))
             .isPresent();
-        Optional<String> lastPlayed = pet.getBrain().getMemory(InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get());
-        return selection(pet).filter(selection -> performing || lastPlayed.filter(selection.signature()::equals).isEmpty());
+    }
+
+    /** Names a selection together with the mode it is played in: either changing starts over. */
+    private static String signature(MusicBoxSelection selection, PlaybackMode mode) {
+        return selection.signature() + ":" + mode.name();
+    }
+
+    private static ServerMusicLibrary library(AbstractPet pet) {
+        return ServerMusicSystem.library(pet.level().getServer());
     }
 
     @Override
@@ -69,15 +96,28 @@ public class PlayMusicBehavior extends Behavior<AbstractPet> {
     protected void start(ServerLevel level, AbstractPet pet, long gameTime) {
         MusicBoxSelection selection = playableSelection(pet).orElseThrow();
         ticksPlayed = 0;
+        PlaybackMode mode = PlaybackMode.get(pet.getMainHandItem());
+        String signature = signature(selection, mode);
+        // The track that just finished, unless this selection and mode have not played yet.
+        String finished = pet.getBrain().getMemory(InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get())
+            .filter(signature::equals)
+            .flatMap(ignored -> pet.getBrain().getMemory(InitMemory.MUSICIAN_NOW_PLAYING.get()))
+            .orElse(null);
+        // A street performance slip repeats the song whatever the mode.
+        PlaybackMode playing = mode == PlaybackMode.ONCE && performing(pet) ? PlaybackMode.REPEAT_ONE : mode;
+        Optional<String> next = playing.nextTrack(library(pet).catalog(), selection.trackId(), finished,
+            pet.getRandom()::nextInt);
         // Remembered even if the stream cannot start, so a failing song is not retried.
-        pet.getBrain().setMemory(InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get(), selection.signature());
-        activeTrackId = selection.trackId();
+        pet.getBrain().setMemory(InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get(), signature);
+        activeSignature = signature;
+        activeTrackId = next.orElse("");
+        next.ifPresent(track -> pet.getBrain().setMemory(InitMemory.MUSICIAN_NOW_PLAYING.get(), track));
         pet.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
         pet.getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
         pet.getNavigation().stop();
         lookAtOwner(pet);
 
-        if (ServerMusicSystem.streams(level.getServer()).start(pet, activeTrackId).isEmpty()) {
+        if (next.isEmpty() || ServerMusicSystem.streams(level.getServer()).start(pet, activeTrackId).isEmpty()) {
             activeTrackId = "";
             pet.setActivity(PetActivity.NONE);
             return;
@@ -99,13 +139,15 @@ public class PlayMusicBehavior extends Behavior<AbstractPet> {
     @Override
     protected boolean canStillUse(ServerLevel level, AbstractPet pet, long gameTime) {
         return pet.getActivity() == PetActivity.PLAY_GUITAR
-            && selection(pet).filter(selection -> selection.trackId().equals(activeTrackId)).isPresent()
+            && selection(pet).filter(selection -> signature(selection, PlaybackMode.get(pet.getMainHandItem()))
+                .equals(activeSignature)).isPresent()
             && ServerMusicSystem.streams(level.getServer()).isPlaying(pet, activeTrackId);
     }
 
     @Override
     protected void stop(ServerLevel level, AbstractPet pet, long gameTime) {
         activeTrackId = "";
+        activeSignature = "";
         if (pet.getActivity() == PetActivity.PLAY_GUITAR) {
             pet.setActivity(PetActivity.NONE);
         }
