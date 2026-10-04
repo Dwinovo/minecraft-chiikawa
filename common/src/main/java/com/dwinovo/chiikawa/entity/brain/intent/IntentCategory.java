@@ -28,5 +28,7 @@ public enum IntentCategory {
      * Sitting a licence exam at a labor board, and going back to see the results. Where a
      * slip is taken: on the way while following, anywhere while free.
      */
-    EXAM
+    EXAM,
+    /** A wild pet going over to see who whistled. Wild pets only: an owner's pet takes the order itself. */
+    CURIOUS
 }

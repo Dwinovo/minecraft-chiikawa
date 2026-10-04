@@ -1,6 +1,10 @@
 package com.dwinovo.chiikawa.entity;
 
+import com.mojang.serialization.Codec;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 /**
  * The owner's standing order for a pet, cycled by sneak-right-click.
@@ -18,6 +22,11 @@ public enum PetDirective {
     STAY("message.chiikawa.pet_stay"),
     FREE("message.chiikawa.pet_free");
 
+    /** As saved on an item: the ordinal, which is what a pet is saved with too. */
+    public static final Codec<PetDirective> CODEC = Codec.INT.xmap(PetDirective::fromId, PetDirective::ordinal);
+    public static final StreamCodec<ByteBuf, PetDirective> STREAM_CODEC =
+        ByteBufCodecs.VAR_INT.map(PetDirective::fromId, PetDirective::ordinal);
+
     private final String messageKey;
 
     PetDirective(String messageKey) {
@@ -30,6 +39,11 @@ public enum PetDirective {
      */
     public Component message(AbstractPet pet) {
         return Component.translatable(messageKey, pet.getDisplayName().getString());
+    }
+
+    /** The order's name as the pet screen writes it, for anything else that has to name an order. */
+    public Component orderName() {
+        return Component.translatable("screen.chiikawa.pet.order." + name().toLowerCase(java.util.Locale.ROOT));
     }
 
     public static PetDirective fromId(int id) {
