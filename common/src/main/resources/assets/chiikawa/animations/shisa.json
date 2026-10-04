@@ -2935,7 +2935,7 @@
             "vector": [
               0,
               0,
-              "0.4*ysm.head_yaw"
+              0
             ]
           },
           "position": {
@@ -11760,8 +11760,8 @@
           "rotation": {
             "vector": [
               0,
-              "1.5*v.L6_P0-0.4*v.L4_P0",
-              "0.6*v.L6_P0"
+              0,
+              0
             ]
           },
           "position": {
@@ -12165,7 +12165,7 @@
         "MAllBody": {
           "rotation": {
             "vector": [
-              "-v.L6_P00",
+              0,
               0,
               0
             ]
@@ -12174,8 +12174,8 @@
         "MHead": {
           "rotation": {
             "vector": [
-              "ysm.head_pitch",
-              "math.clamp(ysm.head_yaw,-60,60)",
+              0,
+              0,
               0
             ]
           }
@@ -21462,8 +21462,8 @@
         "MAllBody": {
           "rotation": {
             "vector": [
-              "-ysm.head_pitch",
-              "-ysm.head_yaw",
+              0,
+              0,
               0
             ]
           }
@@ -21471,8 +21471,8 @@
         "MHead": {
           "rotation": {
             "vector": [
-              "ysm.head_pitch",
-              "math.clamp(ysm.head_yaw,-60,60)",
+              0,
+              0,
               0
             ]
           }
