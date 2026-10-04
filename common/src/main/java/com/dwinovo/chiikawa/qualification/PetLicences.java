@@ -1,15 +1,13 @@
 package com.dwinovo.chiikawa.qualification;
 
-import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.mojang.serialization.Codec;
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 /**
  * Where one pet stands with every licence, kept by the pet and saved with it. A licence the
@@ -55,18 +53,14 @@ public final class PetLicences {
             Licence.holding(QualificationExam.wildGrade(qualification, personality.leaning(id), random))));
     }
 
-    public void save(CompoundTag tag) {
+    public void save(ValueOutput output) {
         if (!byId.isEmpty()) {
-            CODEC.encodeStart(NbtOps.INSTANCE, byId).ifSuccess(licences -> tag.put(TAG, licences));
+            output.store(TAG, CODEC, byId);
         }
     }
 
-    public void load(CompoundTag tag) {
+    public void load(ValueInput input) {
         byId.clear();
-        if (tag.contains(TAG, Tag.TAG_COMPOUND)) {
-            CODEC.parse(NbtOps.INSTANCE, tag.get(TAG))
-                .ifSuccess(byId::putAll)
-                .ifError(error -> Constants.LOG.warn("[chiikawa-licence] a pet's licences did not load: {}", error.message()));
-        }
+        input.read(TAG, CODEC).ifPresent(byId::putAll);
     }
 }

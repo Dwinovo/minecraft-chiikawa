@@ -46,7 +46,7 @@ public final class ShopTrade {
     /** Whether there is room for all of the lot, which {@link Inventory#add} alone cannot say. */
     private static boolean fits(Inventory customer, ItemStack lot) {
         int room = 0;
-        for (ItemStack slot : customer.items) {
+        for (ItemStack slot : customer.getNonEquipmentItems()) {
             if (slot.isEmpty()) {
                 room += lot.getMaxStackSize();
             } else if (ItemStack.isSameItemSameComponents(slot, lot)) {
