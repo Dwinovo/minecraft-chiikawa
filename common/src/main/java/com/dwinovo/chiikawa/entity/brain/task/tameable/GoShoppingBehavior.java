@@ -105,7 +105,7 @@ public class GoShoppingBehavior extends Behavior<AbstractPet> {
             return;
         }
         ShopCatalog.Entry entry = wanted.get();
-        ItemStack goods = new ItemStack(entry.item());
+        ItemStack goods = new ItemStack(entry.item(), entry.count());
         boolean forTheOwner = buyingForTheOwner(pet);
         // Paid for only once there is somewhere to put it: a pet with a full bag goes home
         // with its money rather than handing it over for nothing. A present needs no room
