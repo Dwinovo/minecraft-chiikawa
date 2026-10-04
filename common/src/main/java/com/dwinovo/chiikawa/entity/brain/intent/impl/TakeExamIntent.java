@@ -42,9 +42,10 @@ public final class TakeExamIntent implements PetIntent {
         return check(ctx.examDesk(), ctx, PetAnchor::withinReach, "out_of_reach");
     }
 
+    /** Kept at until it gets up: a pet that has just handed its paper in is still in its chair. */
     @Override
     public IntentCheck canContinue(IntentContext ctx) {
-        return check(ctx.examDesk(), ctx, PetAnchor::withinLeash, "out_of_leash");
+        return ctx.seatedAtExam() ? IntentCheck.OK : check(ctx.examDesk(), ctx, PetAnchor::withinLeash, "out_of_leash");
     }
 
     @Override

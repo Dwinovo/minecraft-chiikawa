@@ -49,6 +49,7 @@ import net.minecraft.world.level.Level;
  * @param playingMusic whether the pet is performing
  * @param examDesk the exam desk the pet is signed up at, while it can still sit its exam there
  * @param resultsDesk the exam desk the pet sat an exam at, while it has the results to go and see there this morning
+ * @param seatedAtExam whether the pet is in its chair at an exam desk, at the paper or handing it in
  */
 public record IntentContext(
     GlobalPos petPos,
@@ -71,7 +72,8 @@ public record IntentContext(
     boolean hasPlayableSelection,
     boolean playingMusic,
     Optional<GlobalPos> examDesk,
-    Optional<GlobalPos> resultsDesk
+    Optional<GlobalPos> resultsDesk,
+    boolean seatedAtExam
 ) {
     public static IntentContext capture(AbstractPet pet, PetOwnership ownership) {
         Level level = pet.level();
@@ -101,7 +103,8 @@ public record IntentContext(
             PlayMusicBehavior.playableSelection(pet).isPresent(),
             pet.getActivity() == PetActivity.PLAY_GUITAR,
             examDesk(pet),
-            resultsDesk(pet)
+            resultsDesk(pet),
+            pet.getActivity() == PetActivity.EXAM
         );
     }
 
