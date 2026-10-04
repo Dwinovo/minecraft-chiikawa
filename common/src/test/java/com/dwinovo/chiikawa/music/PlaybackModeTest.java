@@ -35,31 +35,31 @@ class PlaybackModeTest {
     }
 
     @Test
-    void inOrderGoesOnAndWrapsFromTheLastToTheFirst() {
-        assertEquals(Optional.of("b"), PlaybackMode.IN_ORDER.nextTrack(ABC, "a", "a", bound -> 0));
-        assertEquals(Optional.of("c"), PlaybackMode.IN_ORDER.nextTrack(ABC, "a", "b", bound -> 0));
-        assertEquals(Optional.of("a"), PlaybackMode.IN_ORDER.nextTrack(ABC, "a", "c", bound -> 0));
+    void repeatAllGoesOnAndWrapsFromTheLastToTheFirst() {
+        assertEquals(Optional.of("b"), PlaybackMode.REPEAT_ALL.nextTrack(ABC, "a", "a", bound -> 0));
+        assertEquals(Optional.of("c"), PlaybackMode.REPEAT_ALL.nextTrack(ABC, "a", "b", bound -> 0));
+        assertEquals(Optional.of("a"), PlaybackMode.REPEAT_ALL.nextTrack(ABC, "a", "c", bound -> 0));
     }
 
     @Test
-    void inOrderSkipsTracksThatAreNotReady() {
+    void repeatAllSkipsTracksThatAreNotReady() {
         List<MusicTrackView> catalog = List.of(ready("a"), track("b", MusicTrackStatus.IMPORTING),
             track("c", MusicTrackStatus.FAILED), ready("d"));
 
-        assertEquals(Optional.of("d"), PlaybackMode.IN_ORDER.nextTrack(catalog, "a", "a", bound -> 0));
-        assertEquals(Optional.of("a"), PlaybackMode.IN_ORDER.nextTrack(catalog, "a", "d", bound -> 0));
+        assertEquals(Optional.of("d"), PlaybackMode.REPEAT_ALL.nextTrack(catalog, "a", "a", bound -> 0));
+        assertEquals(Optional.of("a"), PlaybackMode.REPEAT_ALL.nextTrack(catalog, "a", "d", bound -> 0));
     }
 
     @Test
-    void inOrderOnASingleReadyTrackPlaysItAgain() {
+    void repeatAllOnASingleReadyTrackPlaysItAgain() {
         List<MusicTrackView> catalog = List.of(track("a", MusicTrackStatus.FAILED), ready("b"));
 
-        assertEquals(Optional.of("b"), PlaybackMode.IN_ORDER.nextTrack(catalog, "b", "b", bound -> 0));
+        assertEquals(Optional.of("b"), PlaybackMode.REPEAT_ALL.nextTrack(catalog, "b", "b", bound -> 0));
     }
 
     @Test
-    void inOrderStartsOverFromTheSelectedTrackWhenTheFinishedOneLeftTheLibrary() {
-        assertEquals(Optional.of("b"), PlaybackMode.IN_ORDER.nextTrack(ABC, "b", "gone", bound -> 0));
+    void repeatAllStartsOverFromTheSelectedTrackWhenTheFinishedOneLeftTheLibrary() {
+        assertEquals(Optional.of("b"), PlaybackMode.REPEAT_ALL.nextTrack(ABC, "b", "gone", bound -> 0));
     }
 
     @Test
@@ -119,8 +119,8 @@ class PlaybackModeTest {
 
     @Test
     void cyclingVisitsEveryModeAndComesBackToOnce() {
-        assertEquals(PlaybackMode.IN_ORDER, PlaybackMode.ONCE.cycle());
-        assertEquals(PlaybackMode.SHUFFLE, PlaybackMode.IN_ORDER.cycle());
+        assertEquals(PlaybackMode.REPEAT_ALL, PlaybackMode.ONCE.cycle());
+        assertEquals(PlaybackMode.SHUFFLE, PlaybackMode.REPEAT_ALL.cycle());
         assertEquals(PlaybackMode.REPEAT_ONE, PlaybackMode.SHUFFLE.cycle());
         assertEquals(PlaybackMode.ONCE, PlaybackMode.REPEAT_ONE.cycle());
     }
