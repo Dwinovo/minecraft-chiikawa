@@ -28,6 +28,7 @@ import com.dwinovo.chiikawa.social.PetInteractionLoader;
 import com.dwinovo.chiikawa.spawn.FabricPetSpawns;
 import com.dwinovo.chiikawa.spawn.PetSpawnLoader;
 import com.dwinovo.chiikawa.task.BoardLevelsLoader;
+import com.dwinovo.chiikawa.whistle.WhistleSettingsLoader;
 import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
 import com.dwinovo.chiikawa.task.PetTaskTypes;
 import com.dwinovo.chiikawa.voice.PetVoiceLoader;
@@ -83,6 +84,7 @@ public class ChiikawaFabricMod implements ModInitializer {
         FabricReloadListeners.register(PackType.SERVER_DATA, PetTaskTypeLoader.ID, new PetTaskTypeLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, ShopCatalogLoader.ID, new ShopCatalogLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, BoardLevelsLoader.ID, new BoardLevelsLoader());
+        FabricReloadListeners.register(PackType.SERVER_DATA, WhistleSettingsLoader.ID, new WhistleSettingsLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, PetSpawnLoader.ID, new PetSpawnLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, PetVoiceLoader.ID, new PetVoiceLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, PetInteractionLoader.ID, new PetInteractionLoader());

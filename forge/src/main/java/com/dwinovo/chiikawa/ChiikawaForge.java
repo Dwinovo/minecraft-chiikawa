@@ -25,6 +25,7 @@ import com.dwinovo.chiikawa.social.PetInteractionLoader;
 import com.dwinovo.chiikawa.spawn.PetSpawnLoader;
 import com.dwinovo.chiikawa.spawn.PetSpawnsBiomeModifier;
 import com.dwinovo.chiikawa.task.BoardLevelsLoader;
+import com.dwinovo.chiikawa.whistle.WhistleSettingsLoader;
 import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
 import com.dwinovo.chiikawa.task.PetTaskTypes;
 import com.dwinovo.chiikawa.voice.PetVoiceLoader;
@@ -85,6 +86,7 @@ public class ChiikawaForge {
             event.addListener(new PetTaskTypeLoader());
             event.addListener(new ShopCatalogLoader());
             event.addListener(new BoardLevelsLoader());
+            event.addListener(new WhistleSettingsLoader());
             event.addListener(new PetSpawnLoader());
             event.addListener(new PetVoiceLoader());
             event.addListener(new PetInteractionLoader());

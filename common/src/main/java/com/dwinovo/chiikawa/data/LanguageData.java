@@ -24,7 +24,7 @@ public final class LanguageData {
             addHandbookPage(adder, "meet", "遇见吉伊",
                 "平原、热带草原、沙漠、沼泽和雪原中会出现野生宠物，手上各拿着工具。",
                 "手持面包、曲奇等食物右键野生宠物，每次有 30% 的几率驯服。",
-                "潜行右键自己的宠物，在跟随、坐下、自由活动之间切换。",
+                "潜行右键宠物切换跟随、坐下、自由活动；吹口哨糖可以一次指挥附近所有宠物。",
                 "直接右键宠物打开界面，可以管理背包、查看状态、切换指令。");
             addHandbookPage(adder, "work", "去打工",
                 "放置劳动公告板后，每天日出时会贴出 3 张工作牌。",
@@ -235,6 +235,14 @@ public final class LanguageData {
             addVoiceLines(adder, "shisa", VoiceMoment.EXAM_FAIL, "不要紧的啦～下次加油！");
             addVoiceLines(adder, "furuhonya", VoiceMoment.EXAM_PASS, "多亏了书呢。");
             addVoiceLines(adder, "furuhonya", VoiceMoment.EXAM_FAIL, "再读一遍吧。");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.WHISTLE, "哇……！");
+            addVoiceLines(adder, "hachiware", VoiceMoment.WHISTLE, "叫我吗～？");
+            addVoiceLines(adder, "usagi", VoiceMoment.WHISTLE, "呀哈——！！");
+            addVoiceLines(adder, "momonga", VoiceMoment.WHISTLE, "给我！");
+            addVoiceLines(adder, "rakko", VoiceMoment.WHISTLE, "……走吧。");
+            addVoiceLines(adder, "shisa", VoiceMoment.WHISTLE, "来啦～！");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.WHISTLE, "来了……");
+            addWhistleTranslations(adder, "口哨糖", "口哨糖（%s）", "按住右键吹：附近的宠物听从当前指令。潜行右键切换指令。", "口哨糖：%s", "%d 只宠物跑过来了", "%d 只宠物坐下了", "%d 只宠物自由活动去了", "%d 只野生宠物好奇地凑了过来", "附近没有宠物听到口哨", "好奇地凑过去", "没听到口哨");
         } else if ("ja_jp".equals(locale)) {
             addCommonTranslations(adder, "ちいかわ", "持ち物", "ついてくる", "おすわり", "自由行動");
             addDollTooltipTranslations(adder, "ぬいぐるみをケーキに置いてみる？");
@@ -243,7 +251,7 @@ public final class LanguageData {
             addHandbookPage(adder, "meet", "ちいかわたちとの出会い",
                 "平原・サバンナ・砂漠・湿地・雪原に、道具を持った野生の子が現れます。",
                 "食べ物を持って野生の子を右クリック。1回につき30%の確率でなつきます。",
-                "スニークしながら右クリックで、ついてくる・おすわり・自由行動を切り替えます。",
+                "スニーク右クリックで、ついてくる・おすわり・自由行動を切替。フエラムネで近くの子みんなに指示できます。",
                 "右クリックで画面を開き、持ち物・状態・指示を確認できます。");
             addHandbookPage(adder, "work", "お仕事へ",
                 "労働掲示板を置くと、毎日日の出に仕事カードが3枚貼り出されます。",
@@ -455,6 +463,14 @@ public final class LanguageData {
             addVoiceLines(adder, "shisa", VoiceMoment.EXAM_FAIL, "なんくるないさー! 次がんばります!");
             addVoiceLines(adder, "furuhonya", VoiceMoment.EXAM_PASS, "本のおかげだね");
             addVoiceLines(adder, "furuhonya", VoiceMoment.EXAM_FAIL, "もう一度読み直そう");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.WHISTLE, "ワッ…!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.WHISTLE, "呼んだ〜？");
+            addVoiceLines(adder, "usagi", VoiceMoment.WHISTLE, "ヤハーッ!!");
+            addVoiceLines(adder, "momonga", VoiceMoment.WHISTLE, "よこせッ");
+            addVoiceLines(adder, "rakko", VoiceMoment.WHISTLE, "…行くか");
+            addVoiceLines(adder, "shisa", VoiceMoment.WHISTLE, "はーい!");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.WHISTLE, "はい…");
+            addWhistleTranslations(adder, "フエラムネ", "フエラムネ（%s）", "長押しで吹く：近くのペットに今の指示を出す。スニーク右クリックで指示を切り替え。", "フエラムネ：%s", "%d匹が駆け寄ってきた", "%d匹がおすわりした", "%d匹が自由行動に戻った", "野生の%d匹が気になって寄ってきた", "近くに聞こえたペットはいない", "気になって寄っていく", "笛は聞こえない");
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
@@ -463,7 +479,7 @@ public final class LanguageData {
             addHandbookPage(adder, "meet", "Meeting Them",
                 "Wild pets roam plains, savannas, deserts, swamps and snowfields.",
                 "Right-click a wild pet with food; each try has a 30% chance to tame it.",
-                "Sneak and right-click your pet to switch: Follow, Sit, Free Roam.",
+                "Sneak + right-click a pet to switch Follow, Sit, Free Roam; a whistle candy orders every pet nearby at once.",
                 "Right-click your pet to open its screen: bag, status and orders.");
             addHandbookPage(adder, "work", "Off to Work",
                 "Place a labor board. Each sunrise it puts up 3 work slips.",
@@ -680,7 +696,31 @@ public final class LanguageData {
             addVoiceLines(adder, "shisa", VoiceMoment.EXAM_FAIL, "Nankurunaisa! I'll try harder next time!");
             addVoiceLines(adder, "furuhonya", VoiceMoment.EXAM_PASS, "All thanks to the books.");
             addVoiceLines(adder, "furuhonya", VoiceMoment.EXAM_FAIL, "I'll read it again.");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.WHISTLE, "Wah...!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.WHISTLE, "Did you call~?");
+            addVoiceLines(adder, "usagi", VoiceMoment.WHISTLE, "Yahaaa!!");
+            addVoiceLines(adder, "momonga", VoiceMoment.WHISTLE, "Gimme!");
+            addVoiceLines(adder, "rakko", VoiceMoment.WHISTLE, "...Let's go.");
+            addVoiceLines(adder, "shisa", VoiceMoment.WHISTLE, "Coming!");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.WHISTLE, "Coming...");
+            addWhistleTranslations(adder, "Whistle Candy", "Whistle Candy (%s)", "Hold to blow: nearby pets take the order shown. Sneak + right-click to change it.", "Whistle candy: %s", "%d pets came running", "%d pets sat down", "%d pets went off to roam", "%d wild pets came over to look", "No pet heard the whistle", "Coming over to look", "No whistle heard");
         }
+    }
+
+    /** The whistle candy: its name with and without an order, the tooltip, and what a blow turned up. */
+    private static void addWhistleTranslations(Adder adder, String name, String withOrder, String tip, String switched,
+            String came, String sat, String roam, String wild, String nobody, String answering, String noWhistle) {
+        adder.add("item.chiikawa.whistle_candy", name);
+        adder.add("item.chiikawa.whistle_candy.with_order", withOrder);
+        adder.add("tooltip.chiikawa.whistle_candy", tip);
+        adder.add("message.chiikawa.whistle_candy.switched", switched);
+        adder.add("message.chiikawa.whistle_candy.follow", came);
+        adder.add("message.chiikawa.whistle_candy.stay", sat);
+        adder.add("message.chiikawa.whistle_candy.free", roam);
+        adder.add("message.chiikawa.whistle_candy.wild", wild);
+        adder.add("message.chiikawa.whistle_candy.nobody", nobody);
+        adder.add("intent.chiikawa.answer_whistle", answering);
+        adder.add("intent.chiikawa.fail.no_whistle", noWhistle);
     }
 
     /** A pet's lines for one moment, numbered from 1 in the order given; see {@link PetVoiceData}. */
