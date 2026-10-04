@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.data;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.qualification.Qualification;
 import com.dwinovo.chiikawa.qualification.QualificationLoader;
 import com.mojang.serialization.JsonOps;
@@ -23,7 +24,7 @@ public final class QualificationProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cache) {
         return CompletableFuture.allOf(QualificationData.all().entrySet().stream()
             .map(entry -> DataProvider.saveStable(cache,
-                Qualification.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(),
+                Qualification.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(false, Constants.LOG::error),
                 pathProvider.json(entry.getKey())))
             .toArray(CompletableFuture[]::new));
     }

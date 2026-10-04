@@ -1140,7 +1140,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     /** Sends the owner's screen what it shows of the pet's licences, when that has changed. Server only. */
     public void showLicences(List<LicenceView> views) {
         CompoundTag tag = new CompoundTag();
-        LicenceView.LIST_CODEC.encodeStart(NbtOps.INSTANCE, views).ifSuccess(encoded -> tag.put("Views", encoded));
+        LicenceView.LIST_CODEC.encodeStart(NbtOps.INSTANCE, views).result().ifPresent(encoded -> tag.put("Views", encoded));
         if (!tag.equals(this.entityData.get(LICENCES))) {
             this.entityData.set(LICENCES, tag);
         }

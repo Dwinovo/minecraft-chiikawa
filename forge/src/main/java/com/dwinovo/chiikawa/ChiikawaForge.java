@@ -123,7 +123,6 @@ public class ChiikawaForge {
             ServerMusicSystem.tickServer(event.getServer());
             PetFollowKeeper.tickServer(event.getServer());
             PetRecall.tickServer(event.getServer());
-            ExamNotices.tickServer(event.getServer());
         }
     }
 

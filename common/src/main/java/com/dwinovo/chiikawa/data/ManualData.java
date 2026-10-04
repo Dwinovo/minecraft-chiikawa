@@ -196,10 +196,10 @@ public final class ManualData {
      */
     private static ManualPage licence() {
         return page("licence", 80,
-            panel(item(Items.SHORT_GRASS).at(0.18F).scale(0.8F),
+            panel(item(Items.GRASS).at(0.18F).scale(0.8F),
                 pet(InitEntity.CHIIKAWA_PET).at(0.38F).facing(20.0F).hold(Items.WOODEN_HOE).action(PetAction.HARVEST).every(24),
-                item(Items.SHORT_GRASS).at(0.28F),
-                item(Items.SHORT_GRASS).at(0.5F).scale(0.9F),
+                item(Items.GRASS).at(0.28F),
+                item(Items.GRASS).at(0.5F).scale(0.9F),
                 item(InitItems.WEEDING_BOOK.get()).at(0.76F).up(0.4F).bob()),
             panel(chair(-30.0F).at(0.42F),
                 prop(InitBlocks.EXAM_DESK.get()).at(0.42F).facing(-30.0F),

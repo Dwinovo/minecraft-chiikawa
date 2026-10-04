@@ -49,7 +49,7 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
 
     public FabricPlatformRegistryAccess() {
         LootItemConditionType qualification = Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, id("qualification"),
-            new LootItemConditionType(QualificationCondition.CODEC));
+            new LootItemConditionType(new QualificationCondition.Serializer()));
         qualificationCondition = () -> qualification;
         petAttackbleEntitySensor = registerSensor("pet_attackble_entity_sensor", new SensorType<>(PetAttackbleEntitySensor::new));
         petFarmerWorkSensor = registerSensor("pet_farmer_work_sensor", new SensorType<>(PetFarmerWorkSensor::new));
