@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Unit;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
@@ -41,6 +42,7 @@ public class PlayMusicBehavior extends Behavior<AbstractPet> {
     private static final Map<MemoryModuleType<?>, MemoryStatus> REQUIRED_MEMORIES = ImmutableMap.of(
         InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get(), MemoryStatus.REGISTERED,
         InitMemory.MUSICIAN_NOW_PLAYING.get(), MemoryStatus.REGISTERED,
+        InitMemory.MUSICIAN_RESTING.get(), MemoryStatus.REGISTERED,
         MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED,
         MemoryModuleType.WALK_TARGET, MemoryStatus.REGISTERED
     );
@@ -56,12 +58,16 @@ public class PlayMusicBehavior extends Behavior<AbstractPet> {
     /**
      * In the default mode a selection plays once, unless the pet carries a street
      * performance slip: then it keeps playing it until the slip is paid. In a continuous
-     * mode it is playable for as long as the selected track is ready.
+     * mode it is playable for as long as the selected track is ready. Either way not while
+     * it is waiting after a song that would not start.
      *
      * @param pet the pet
      * @return the held music box selection, if the pet would play on from it now
      */
     public static Optional<MusicBoxSelection> playableSelection(AbstractPet pet) {
+        if (pet.getBrain().hasMemoryValue(InitMemory.MUSICIAN_RESTING.get())) {
+            return Optional.empty();
+        }
         Optional<MusicBoxSelection> selection = selection(pet);
         PlaybackMode mode = PlaybackMode.get(pet.getMainHandItem());
         if (mode.continuous()) {
@@ -118,6 +124,10 @@ public class PlayMusicBehavior extends Behavior<AbstractPet> {
         lookAtOwner(pet);
 
         if (next.isEmpty() || ServerMusicSystem.streams(level.getServer()).start(pet, activeTrackId).isEmpty()) {
+            // A slip or a continuous mode would ask again the very next tick, and stand the pet
+            // still for good while the streams are all taken.
+            pet.getBrain().setMemoryWithExpiry(InitMemory.MUSICIAN_RESTING.get(), Unit.INSTANCE,
+                library(pet).config().retrySeconds() * (long) TICKS_PER_SECOND);
             activeTrackId = "";
             pet.setActivity(PetActivity.NONE);
             return;
