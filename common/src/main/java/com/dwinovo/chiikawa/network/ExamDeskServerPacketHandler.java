@@ -9,6 +9,7 @@ import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * An exam desk's screen: what it is shown, and the pets signed up from it. The screen shows a
@@ -64,7 +65,7 @@ public final class ExamDeskServerPacketHandler {
 
     /** @return the desk at {@code pos}, while the player is standing at it */
     private static Optional<ExamDeskBlockEntity> deskInReach(BlockPos pos, ServerPlayer player) {
-        if (player.distanceToSqr(pos.getCenter()) > REACH_SQR) {
+        if (player.distanceToSqr(Vec3.atCenterOf(pos)) > REACH_SQR) {
             return Optional.empty();
         }
         return player.level().getBlockEntity(pos, InitBlockEntities.EXAM_DESK.get());

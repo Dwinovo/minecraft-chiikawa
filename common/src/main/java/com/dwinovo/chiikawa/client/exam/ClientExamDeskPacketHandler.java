@@ -10,6 +10,6 @@ public final class ClientExamDeskPacketHandler {
     }
 
     public static void handleView(DeskViewPayload payload) {
-        Minecraft.getInstance().setScreen(new ExamDeskScreen(payload));
+        Minecraft.getInstance().setScreenAndShow(new ExamDeskScreen(payload));
     }
 }
