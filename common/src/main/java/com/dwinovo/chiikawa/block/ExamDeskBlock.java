@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.block;
 
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.network.ExamDeskServerPacketHandler;
+import com.mojang.serialization.MapCodec;
 import java.util.EnumMap;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
@@ -46,6 +47,7 @@ import org.jetbrains.annotations.Nullable;
  * {@link com.dwinovo.chiikawa.qualification.ExamEnrollment}'s business.
  */
 public class ExamDeskBlock extends BaseEntityBlock implements PropAtRest {
+    public static final MapCodec<ExamDeskBlock> CODEC = simpleCodec(ExamDeskBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<DeskPart> PART = EnumProperty.create("part", DeskPart.class);
     /** How high the chair's seat is, in pixels; its model is built to it. */
@@ -74,6 +76,11 @@ public class ExamDeskBlock extends BaseEntityBlock implements PropAtRest {
     public ExamDeskBlock(Properties properties) {
         super(properties);
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(PART, DeskPart.DESK));
+    }
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
     }
 
     /** The chair of a desk at {@code desk} facing {@code facing}: the block behind it. */
@@ -154,7 +161,7 @@ public class ExamDeskBlock extends BaseEntityBlock implements PropAtRest {
      * without dropping anything, as one breaking the foot of a bed takes the head.
      */
     @Override
-    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         if (!level.isClientSide && player.isCreative() && state.getValue(PART) == DeskPart.CHAIR) {
             BlockPos desk = pos.relative(DeskPart.CHAIR.toOther(state.getValue(FACING)));
             BlockState deskState = level.getBlockState(desk);
@@ -163,7 +170,7 @@ public class ExamDeskBlock extends BaseEntityBlock implements PropAtRest {
                 level.levelEvent(player, 2001, desk, Block.getId(deskState));
             }
         }
-        super.playerWillDestroy(level, pos, state, player);
+        return super.playerWillDestroy(level, pos, state, player);
     }
 
     /** Opens the sign-up screen, from either half: the owner's pets nearby, and the odds of each. */
