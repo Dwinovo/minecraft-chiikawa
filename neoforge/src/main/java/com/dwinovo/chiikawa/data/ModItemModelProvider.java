@@ -35,6 +35,7 @@ public final class ModItemModelProvider extends ItemModelProvider {
         basicItem(InitItems.SIMPLE_DISH.get());
         basicItem(InitItems.WEEDING_BOOK.get());
         basicItem(InitItems.PET_BELL.get());
+        basicItem(InitItems.WHISTLE_CANDY.get());
         // The props' item models, the weapons' among them, come from PropItemModelProvider, shared with Fabric.
     }
 }
