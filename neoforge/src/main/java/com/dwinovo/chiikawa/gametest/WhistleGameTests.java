@@ -105,7 +105,7 @@ public final class WhistleGameTests {
         candy.getItem().finishUsingItem(candy, helper.getLevel(), owner);
 
         helper.assertTrue(candy.getCount() == 2, "the candy was not eaten, " + candy.getCount() + " left");
-        helper.assertTrue(owner.getCooldowns().isOnCooldown(candy.getItem()), "the candy can be blown again at once");
+        helper.assertTrue(owner.getCooldowns().isOnCooldown(candy), "the candy can be blown again at once");
         helper.succeed();
     }
 
