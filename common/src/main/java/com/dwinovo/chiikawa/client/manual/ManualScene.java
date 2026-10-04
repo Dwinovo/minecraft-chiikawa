@@ -29,6 +29,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -167,6 +168,16 @@ public final class ManualScene {
         float screenY(Rect area, int groundY) {
             return groundY - actor.y() * area.height();
         }
+
+        /**
+         * From its spot to where it stands, turned the way it faces; the pose is in blocks,
+         * in the frame a pet and a prop are both turned from.
+         */
+        static void offset(PoseStack pose, Vec3 offset, float facing) {
+            pose.mulPose(Axis.YP.rotationDegrees(facing));
+            pose.translate(offset.x / 16.0, offset.y / 16.0, offset.z / 16.0);
+            pose.mulPose(Axis.YP.rotationDegrees(-facing));
+        }
     }
 
     private static final class StagedPet extends Staged {
@@ -207,7 +218,7 @@ public final class ManualScene {
             pet.setXRot(0.0F);
             float partialTick = time - (float) Math.floor(time);
             return Optional.of(new PetActor(ChiikawaEntityRenderer.portraitOf(pet, partialTick),
-                screenX(area), screenY(area, groundY), blockPixels * actor.scale()));
+                screenX(area), screenY(area, groundY), blockPixels * actor.scale(), actor.offset(), actor.facing()));
         }
 
         /** What the pet says, in a bubble near the top of the panel above it. */
@@ -232,18 +243,20 @@ public final class ManualScene {
         @Override
         Optional<ManualStageRenderState.Actor> stage(Rect area, int groundY, float blockPixels, float time) {
             return Optional.of(new PropActor(actor.prop().orElseThrow(), screenX(area), screenY(area, groundY),
-                blockPixels * actor.scale(), actor.facing()));
+                blockPixels * actor.scale(), actor.offset(), actor.facing()));
         }
     }
 
     /** A pet in the page's picture: its state as taken on the screen, drawn standing at {@code (x, y)}. */
-    private record PetActor(EntityRenderState state, float x, float y, float size) implements ManualStageRenderState.Actor {
+    private record PetActor(EntityRenderState state, float x, float y, float size, Vec3 offset, float facing)
+            implements ManualStageRenderState.Actor {
         @Override
         public void draw(PoseStack pose, MultiBufferSource buffers) {
             pose.pushPose();
             pose.translate(x, y, 0.0F);
             pose.scale(size, size, size);
             pose.mulPose(Axis.ZP.rotationDegrees(180.0F));
+            Staged.offset(pose, offset, facing);
             Minecraft.getInstance().getEntityRenderDispatcher().render(state, 0.0, 0.0, 0.0, pose, buffers,
                 LightTexture.FULL_BRIGHT);
             pose.popPose();
@@ -251,7 +264,7 @@ public final class ManualScene {
     }
 
     /** A prop in the page's picture, standing at {@code (x, y)}. */
-    private record PropActor(ResourceLocation id, float x, float y, float size, float facing)
+    private record PropActor(ResourceLocation id, float x, float y, float size, Vec3 offset, float facing)
             implements ManualStageRenderState.Actor {
         private static final float PIXEL = 1.0F / 16.0F;
 
@@ -261,6 +274,7 @@ public final class ManualScene {
             pose.translate(x, y, 0.0F);
             pose.scale(size, size, size);
             pose.mulPose(Axis.ZP.rotationDegrees(180.0F));
+            Staged.offset(pose, offset, facing);
             // Turned the way a pet is, so a prop and a pet given the same facing face alike.
             pose.mulPose(Axis.YP.rotationDegrees(facing));
             pose.scale(PIXEL, PIXEL, PIXEL);

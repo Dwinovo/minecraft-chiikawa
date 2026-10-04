@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.block;
 
 import java.util.Locale;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
 
 /**
@@ -9,8 +10,20 @@ import net.minecraft.util.StringRepresentable;
  * way the desk faces, and the chair behind it that its pet sits on.
  */
 public enum DeskPart implements StringRepresentable {
-    DESK,
-    CHAIR;
+    DESK(""),
+    CHAIR("_chair");
+
+    /** What this half's model is called, after the desk's. */
+    private final String modelSuffix;
+
+    DeskPart(String modelSuffix) {
+        this.modelSuffix = modelSuffix;
+    }
+
+    /** @return the model this half is drawn from, for a desk whose own model is {@code desk} */
+    public ResourceLocation model(ResourceLocation desk) {
+        return desk.withSuffix(modelSuffix);
+    }
 
     /** @return the way from this half to the other, for a desk facing {@code facing} */
     public Direction toOther(Direction facing) {
