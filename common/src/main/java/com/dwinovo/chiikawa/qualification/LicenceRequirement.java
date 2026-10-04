@@ -3,7 +3,7 @@ package com.dwinovo.chiikawa.qualification;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 
 /**
@@ -14,9 +14,9 @@ import net.minecraft.util.ExtraCodecs;
  * @param qualification the licence's id
  * @param minRank the lowest-ranked grade that will do, as the player reads it
  */
-public record LicenceRequirement(ResourceLocation qualification, int minRank) {
+public record LicenceRequirement(Identifier qualification, int minRank) {
     public static final MapCodec<LicenceRequirement> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-        ResourceLocation.CODEC.fieldOf("qualification").forGetter(LicenceRequirement::qualification),
+        Identifier.CODEC.fieldOf("qualification").forGetter(LicenceRequirement::qualification),
         ExtraCodecs.POSITIVE_INT.fieldOf("min_rank").forGetter(LicenceRequirement::minRank)
     ).apply(instance, LicenceRequirement::new));
     public static final Codec<LicenceRequirement> CODEC = MAP_CODEC.codec();

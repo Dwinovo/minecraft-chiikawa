@@ -175,9 +175,6 @@ public class LaborBoardBlockEntity extends BlockEntity {
         ServerLevel level = level();
         return BoardSlips.find(today(), pet.getCapabilityId(), pet.getUUID(),
             PetOwnership.of(pet) instanceof PetOwnership.Wild,
-<<<<<<< HEAD
-            level.getDayTime() % SharedConstants.TICKS_PER_GAME_DAY, level.getGameTime());
-=======
             level.getDayTime() % SharedConstants.TICKS_PER_GAME_DAY, level.getGameTime(), slip -> mayTake(pet, slip));
     }
 
@@ -185,7 +182,6 @@ public class LaborBoardBlockEntity extends BlockEntity {
     private static boolean mayTake(AbstractPet pet, PetTask slip) {
         PetTaskType type = PetTaskTypes.all().get(slip.type());
         return type == null || type.requires().map(requirement -> requirement.metBy(pet.licences())).orElse(true);
->>>>>>> 337ec5f9 (feat(licence): the study guide, licensed pay and the advanced weeding slip)
     }
 
     private void update(int index, UnaryOperator<BoardSlot> change) {

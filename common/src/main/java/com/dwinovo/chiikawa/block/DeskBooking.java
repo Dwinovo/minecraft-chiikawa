@@ -6,7 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Who is signed up at an exam desk: the desk's own note of it, kept so the desk knows it is
@@ -18,12 +18,12 @@ import net.minecraft.resources.ResourceLocation;
  * @param day the day of the exam
  * @param passed how it did, once it has handed the paper in
  */
-public record DeskBooking(UUID pet, String name, ResourceLocation qualification, int rank, long day,
+public record DeskBooking(UUID pet, String name, Identifier qualification, int rank, long day,
                           Optional<Boolean> passed) {
     public static final Codec<DeskBooking> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         UUIDUtil.CODEC.fieldOf("pet").forGetter(DeskBooking::pet),
         Codec.STRING.fieldOf("name").forGetter(DeskBooking::name),
-        ResourceLocation.CODEC.fieldOf("qualification").forGetter(DeskBooking::qualification),
+        Identifier.CODEC.fieldOf("qualification").forGetter(DeskBooking::qualification),
         Codec.INT.fieldOf("rank").forGetter(DeskBooking::rank),
         Codec.LONG.fieldOf("day").forGetter(DeskBooking::day),
         Codec.BOOL.optionalFieldOf("passed").forGetter(DeskBooking::passed)

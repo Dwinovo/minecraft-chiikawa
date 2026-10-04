@@ -12,7 +12,7 @@ import com.mojang.serialization.JsonOps;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.SharedConstants;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -94,7 +94,7 @@ class WhistleTest {
               "curious_ticks": 200, "sound": "minecraft:block.note_block.flute", "pitch": 2.0 }""")).getOrThrow();
 
         assertEquals(new WhistleSettings(32.0, 10, 40, 10, 200,
-            ResourceLocation.withDefaultNamespace("block.note_block.flute"), 2.0F), settings);
+            Identifier.withDefaultNamespace("block.note_block.flute"), 2.0F), settings);
     }
 
     @Test
@@ -109,8 +109,8 @@ class WhistleTest {
 
     @Test
     void aBrokenFileIsSkippedRatherThanTakingTheRestWithIt() {
-        ResourceLocation good = ResourceLocation.fromNamespaceAndPath("chiikawa", "whistle_candy");
-        ResourceLocation broken = ResourceLocation.fromNamespaceAndPath("chiikawa", "broken");
+        Identifier good = Identifier.fromNamespaceAndPath("chiikawa", "whistle_candy");
+        Identifier broken = Identifier.fromNamespaceAndPath("chiikawa", "broken");
         WhistleSettingsLoader.Loaded loaded = WhistleSettingsLoader.load(Map.of(
             good, JsonParser.parseString("""
                 { "range": 8.0, "blow_ticks": 5, "cooldown_ticks": 0, "react_delay_ticks": 0,

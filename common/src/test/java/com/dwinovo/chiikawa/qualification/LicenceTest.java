@@ -11,7 +11,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.InclusiveRange;
 import net.minecraft.util.ProblemReporter;
@@ -24,10 +24,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class LicenceTest {
-    private static final ResourceLocation WEEDING = ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding");
-    private static final ResourceLocation WEEDING_SLIP = ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding");
-    private static final ResourceLocation OTHER_SLIP = ResourceLocation.fromNamespaceAndPath("chiikawa", "street_performance");
-    private static final ResourceLocation OTHER = ResourceLocation.fromNamespaceAndPath("chiikawa", "drinking");
+    private static final Identifier WEEDING = Identifier.fromNamespaceAndPath("chiikawa", "weeding");
+    private static final Identifier WEEDING_SLIP = Identifier.fromNamespaceAndPath("chiikawa", "weeding");
+    private static final Identifier OTHER_SLIP = Identifier.fromNamespaceAndPath("chiikawa", "street_performance");
+    private static final Identifier OTHER = Identifier.fromNamespaceAndPath("chiikawa", "drinking");
     private static GlobalPos board;
 
     @BeforeAll

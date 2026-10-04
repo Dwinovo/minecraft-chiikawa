@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.gametest;
 
+import net.minecraft.SharedConstants;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
@@ -73,17 +74,17 @@ public final class ExamGameTests {
 
     @BeforeBatch(batch = EXAM_DAY)
     public static void examDay(ServerLevel level) {
-        settleWorld(level, Difficulty.PEACEFUL, EXAM_DAY_NUMBER * Level.TICKS_PER_DAY + MORNING);
+        settleWorld(level, Difficulty.PEACEFUL, EXAM_DAY_NUMBER * SharedConstants.TICKS_PER_GAME_DAY + MORNING);
     }
 
     @BeforeBatch(batch = RESULTS_MORNING)
     public static void resultsMorning(ServerLevel level) {
-        settleWorld(level, Difficulty.PEACEFUL, (EXAM_DAY_NUMBER + 1) * Level.TICKS_PER_DAY + MORNING);
+        settleWorld(level, Difficulty.PEACEFUL, (EXAM_DAY_NUMBER + 1) * SharedConstants.TICKS_PER_GAME_DAY + MORNING);
     }
 
     @BeforeBatch(batch = RESULTS_AFTERNOON)
     public static void resultsAfternoon(ServerLevel level) {
-        settleWorld(level, Difficulty.PEACEFUL, (EXAM_DAY_NUMBER + 1) * Level.TICKS_PER_DAY + AFTERNOON);
+        settleWorld(level, Difficulty.PEACEFUL, (EXAM_DAY_NUMBER + 1) * SharedConstants.TICKS_PER_GAME_DAY + AFTERNOON);
     }
 
     /** One diamond, one pet: it is sent to the desk, and the desk is booked for it. */

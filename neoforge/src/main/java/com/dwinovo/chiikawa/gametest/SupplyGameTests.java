@@ -84,7 +84,7 @@ public final class SupplyGameTests {
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void every_activity_is_named_as_it_is_registered(GameTestHelper helper) {
         int ours = 0;
-        for (ResourceLocation id : BuiltInRegistries.ACTIVITY.keySet()) {
+        for (Identifier id : BuiltInRegistries.ACTIVITY.keySet()) {
             if (id.getNamespace().equals(Constants.MOD_ID)) {
                 String name = BuiltInRegistries.ACTIVITY.getValue(id).getName();
                 helper.assertTrue(name.equals(id.toString()), Component.literal("activity " + id + " is named " + name));

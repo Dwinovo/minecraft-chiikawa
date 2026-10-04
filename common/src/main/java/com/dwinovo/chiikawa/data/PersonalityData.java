@@ -216,7 +216,7 @@ public final class PersonalityData {
         private final List<Personality.WeightedItem> likes = new ArrayList<>();
         private float randomness;
         private IdleHabits idle = IdleHabits.DEFAULT;
-        private final Map<ResourceLocation, Personality.Leaning> licences = new HashMap<>();
+        private final Map<Identifier, Personality.Leaning> licences = new HashMap<>();
 
         Builder weigh(float factor, Identifier intent) {
             return weigh(factor, List.of(intent));
@@ -263,17 +263,17 @@ public final class PersonalityData {
          *
          * @param aptitude what its odds of passing are multiplied by
          */
-        Builder licence(ResourceLocation qualification, float aptitude) {
+        Builder licence(Identifier qualification, float aptitude) {
             return licence(qualification, aptitude, 0.0F);
         }
 
         /** @param bookBonus what reading the book adds for it, on top of what it adds for anyone */
-        Builder licence(ResourceLocation qualification, float aptitude, float bookBonus) {
+        Builder licence(Identifier qualification, float aptitude, float bookBonus) {
             return licence(qualification, aptitude, bookBonus, Personality.Leaning.DEFAULT.failReaction());
         }
 
         /** @param failReaction the face it pulls on hearing it failed */
-        Builder licence(ResourceLocation qualification, float aptitude, float bookBonus, PetReaction failReaction) {
+        Builder licence(Identifier qualification, float aptitude, float bookBonus, PetReaction failReaction) {
             licences.put(qualification, new Personality.Leaning(aptitude, bookBonus, failReaction));
             return this;
         }

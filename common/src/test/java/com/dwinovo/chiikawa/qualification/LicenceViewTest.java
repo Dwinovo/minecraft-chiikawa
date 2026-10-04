@@ -8,7 +8,7 @@ import java.util.List;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.InclusiveRange;
 import net.minecraft.world.item.Items;
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class LicenceViewTest {
-    private static final ResourceLocation WEEDING = ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding");
+    private static final Identifier WEEDING = Identifier.fromNamespaceAndPath("chiikawa", "weeding");
     private static final long MORNING = 2000L;
     private static Qualification weeding;
 
@@ -39,7 +39,7 @@ class LicenceViewTest {
         assertEquals(4, gradeFour.rank());
         assertFalse(gradeFour.top());
         assertTrue(gradeOne.top());
-        assertEquals(ResourceLocation.withDefaultNamespace("book"), none.book());
+        assertEquals(Identifier.withDefaultNamespace("book"), none.book());
     }
 
     @Test
@@ -55,6 +55,6 @@ class LicenceViewTest {
     }
 
     private static long at(long day, long timeOfDay) {
-        return day * Level.TICKS_PER_DAY + timeOfDay;
+        return day * SharedConstants.TICKS_PER_GAME_DAY + timeOfDay;
     }
 }

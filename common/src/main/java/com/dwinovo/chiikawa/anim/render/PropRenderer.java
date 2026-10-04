@@ -58,23 +58,17 @@ public final class PropRenderer {
     private PropRenderer() {
     }
 
-<<<<<<< HEAD
-    /** The whole prop, with the pose at its origin, in model pixels. */
-    public static void draw(Identifier id, PoseStack pose, SubmitNodeCollector collector, int light, int overlay) {
-        draw(id, pose, collector, light, overlay, bone -> true);
-=======
     /** The prop at rest, with the pose at its origin, in model pixels. */
-    public static void draw(ResourceLocation id, PoseStack pose, SubmitNodeCollector collector, int light, int overlay) {
+    public static void draw(Identifier id, PoseStack pose, SubmitNodeCollector collector, int light, int overlay) {
         draw(id, pose, collector, light, overlay, atRest(id));
     }
 
     /** Which of a prop's bones it shows at rest: all, unless it is a block that says otherwise. */
-    static Predicate<String> atRest(ResourceLocation id) {
+    static Predicate<String> atRest(Identifier id) {
         return BuiltInRegistries.BLOCK.getOptional(id)
             .filter(PropAtRest.class::isInstance)
             .map(block -> (Predicate<String>) ((PropAtRest) block)::shownAtRest)
             .orElse(bone -> true);
->>>>>>> 44c18882 (feat(manual): a handbook page for the weeding licence, with a pet writing at its desk)
     }
 
     /**

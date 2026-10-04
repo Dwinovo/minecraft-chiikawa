@@ -26,7 +26,7 @@ public final class FabricReloadListeners {
      * @param first the listener that has to have run
      * @param second the listener that needs what the first loaded
      */
-    public static void runBefore(PackType type, ResourceLocation first, ResourceLocation second) {
+    public static void runBefore(PackType type, Identifier first, Identifier second) {
         ResourceLoader.get(type).addReloaderOrdering(first, second);
     }
 }

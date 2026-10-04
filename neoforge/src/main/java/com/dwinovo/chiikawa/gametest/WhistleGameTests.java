@@ -19,7 +19,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
@@ -47,7 +47,7 @@ public final class WhistleGameTests {
     private static final int ANSWER_TICKS = 40;
     /** Long enough to walk over to see who whistled, which a pet in no hurry does at a few blocks a second. */
     private static final int COME_OVER_TICKS = 400;
-    private static final ResourceLocation FLUTE = ResourceLocation.withDefaultNamespace("block.note_block.flute");
+    private static final Identifier FLUTE = Identifier.withDefaultNamespace("block.note_block.flute");
     /** Short enough that the far side of a sixteen block yard is out of earshot. */
     private static final WhistleSettings YARD = new WhistleSettings(14.0, 10, 40, 10, 200, FLUTE, 2.0F);
     private static final WhistleSettings SHORT = new WhistleSettings(6.0, 10, 40, 10, 200, FLUTE, 2.0F);

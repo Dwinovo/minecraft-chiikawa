@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.qualification;
 
+import net.minecraft.SharedConstants;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import java.util.List;
 import java.util.Optional;
@@ -27,12 +28,12 @@ public final class QualificationExam {
 
     /** @return the day number of a time of day, as exams count days */
     public static long day(long dayTime) {
-        return Math.floorDiv(dayTime, Level.TICKS_PER_DAY);
+        return Math.floorDiv(dayTime, SharedConstants.TICKS_PER_GAME_DAY);
     }
 
     /** @return ticks since sunrise */
     public static long timeOfDay(long dayTime) {
-        return Math.floorMod(dayTime, Level.TICKS_PER_DAY);
+        return Math.floorMod(dayTime, SharedConstants.TICKS_PER_GAME_DAY);
     }
 
     /** Whether an owner may sign a pet up now: in the working day, early enough to sit the exam. */

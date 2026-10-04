@@ -12,7 +12,7 @@ import com.dwinovo.chiikawa.shop.Wallet;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -112,7 +112,7 @@ public final class PetInteractHandler {
      * not spent.
      */
     private static InteractionResult handleBook(Level level, AbstractPet pet, Player player, InteractionHand hand,
-            ResourceLocation licence) {
+            Identifier licence) {
         if (!level.isClientSide()) {
             if (!PetExams.read(pet, licence)) {
                 pet.triggerReaction(PetReaction.CONFUSED);

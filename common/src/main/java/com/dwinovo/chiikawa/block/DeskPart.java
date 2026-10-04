@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.block;
 
 import java.util.Locale;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.StringRepresentable;
 
 /**
@@ -21,7 +21,7 @@ public enum DeskPart implements StringRepresentable {
     }
 
     /** @return the model this half is drawn from, for a desk whose own model is {@code desk} */
-    public ResourceLocation model(ResourceLocation desk) {
+    public Identifier model(Identifier desk) {
         return desk.withSuffix(modelSuffix);
     }
 

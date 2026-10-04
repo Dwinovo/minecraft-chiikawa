@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
@@ -51,7 +51,7 @@ public class PropBlockRenderer<T extends BlockEntity> implements BlockEntityRend
     }
 
     /** Which model to draw: the one named after the block, unless the block says otherwise. */
-    protected ResourceLocation model(T block) {
+    protected Identifier model(T block) {
         return BuiltInRegistries.BLOCK.getKey(block.getBlockState().getBlock());
     }
 
@@ -62,7 +62,7 @@ public class PropBlockRenderer<T extends BlockEntity> implements BlockEntityRend
 
     /** What a prop block is drawn from: the block, and which of its bones show. */
     public static class State extends BlockEntityRenderState {
-        public ResourceLocation model;
+        public Identifier model;
         public Predicate<String> shown = bone -> true;
     }
 }
