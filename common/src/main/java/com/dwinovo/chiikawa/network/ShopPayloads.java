@@ -18,17 +18,20 @@ public final class ShopPayloads {
      * One line of a shop's price list, as the screen needs it.
      *
      * @param item what is being priced
-     * @param buy what the customer pays for one; 0 when it is not for sale
-     * @param sell what the shop pays for one; 0 when it does not want any
+     * @param buy what the customer pays for a lot; 0 when it is not for sale
+     * @param sell what the shop pays for a lot; 0 when it does not want any
+     * @param count how many items the price is for, either way
      */
-    public record PriceView(Identifier item, int buy, int sell) {
+    public record PriceView(Identifier item, int buy, int sell, int count) {
         public static final StreamCodec<FriendlyByteBuf, PriceView> STREAM_CODEC = StreamCodec.of(
             (buffer, value) -> {
                 buffer.writeIdentifier(value.item);
                 buffer.writeVarInt(value.buy);
                 buffer.writeVarInt(value.sell);
+                buffer.writeVarInt(value.count);
             },
-            buffer -> new PriceView(buffer.readIdentifier(), buffer.readVarInt(), buffer.readVarInt())
+            buffer -> new PriceView(buffer.readIdentifier(), buffer.readVarInt(), buffer.readVarInt(),
+                buffer.readVarInt())
         );
     }
 
