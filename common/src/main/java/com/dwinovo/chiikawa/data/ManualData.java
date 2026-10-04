@@ -71,7 +71,8 @@ public final class ManualData {
                 item(Items.BREAD).at(0.72F).up(0.35F).bob()),
             panel(pet(InitEntity.CHIIKAWA_PET).at(0.2F).facing(60.0F).walk(),
                 pet(InitEntity.USAGI_PET).at(0.5F).sit(),
-                pet(InitEntity.HACHIWARE_PET).at(0.8F).facing(-30.0F).hold(Items.WOODEN_HOE)),
+                pet(InitEntity.HACHIWARE_PET).at(0.8F).facing(-30.0F).hold(Items.WOODEN_HOE),
+                item(InitItems.WHISTLE_CANDY.get()).at(0.35F).up(0.55F).bob()),
             panel(pet(InitEntity.CHIIKAWA_PET).at(0.35F).facing(20.0F).hold(Items.WOODEN_HOE).bag(InitItems.BACKPACK.get()),
                 item(Items.WHEAT).at(0.66F).up(0.5F),
                 money().at(0.82F).up(0.3F).bob()));

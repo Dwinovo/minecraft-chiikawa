@@ -115,6 +115,8 @@ public final class PetConstraints {
             // Licences are an owner's pet's business: a wild pet holds what it turned up
             // with. A pet told to sit hears its results where it sits.
             case EXAM -> !wild && directive != PetDirective.STAY;
+            // A whistle's order goes straight to a pet's directive; only a stranger to it is curious.
+            case CURIOUS -> wild;
         };
     }
 
