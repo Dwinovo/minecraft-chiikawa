@@ -60,6 +60,10 @@ public final class InitActivity {
     public static final Supplier<Activity> CHECK_RESULTS =
         Services.PLATFORM_REGISTRY.checkResultsActivity();
 
+    // A wild pet going over to see who whistled.
+    public static final Supplier<Activity> ANSWER_WHISTLE =
+        Services.PLATFORM_REGISTRY.answerWhistleActivity();
+
     private InitActivity() {
     }
 
