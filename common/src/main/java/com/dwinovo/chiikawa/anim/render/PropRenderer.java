@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.anim.baked.BakedCube;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
 import com.dwinovo.chiikawa.anim.runtime.PoseSampler;
 import com.dwinovo.chiikawa.init.InitItems;
+import com.dwinovo.chiikawa.block.PropAtRest;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.math.Axis;
@@ -35,6 +36,10 @@ import org.jspecify.annotations.Nullable;
  * transforms are its item model's, which the game applies before handing it over; see
  * {@code PropItemModelProvider}.
  *
+ * <p>Drawn with nothing to say which of its bones to show — as an item, or in the
+ * handbook — a prop shows the bones it has at rest: all of them, unless it is a block that
+ * says otherwise ({@link PropAtRest}).
+ *
  * <p>A sword or a tool is modelled standing up, the end it is held by at the bottom and its
  * front towards {@code -Z} like any prop's.
  */
@@ -49,9 +54,17 @@ public final class PropRenderer {
     private PropRenderer() {
     }
 
-    /** The whole prop, with the pose at its origin, in model pixels. */
+    /** The prop at rest, with the pose at its origin, in model pixels. */
     public static void draw(Identifier id, PoseStack pose, SubmitNodeCollector collector, int light, int overlay) {
-        draw(id, pose, collector, light, overlay, bone -> true, null);
+        draw(id, pose, collector, light, overlay, atRest(id), null);
+    }
+
+    /** Which of a prop's bones it shows at rest: all, unless it is a block that says otherwise. */
+    static Predicate<String> atRest(Identifier id) {
+        return BuiltInRegistries.BLOCK.getOptional(id)
+            .filter(PropAtRest.class::isInstance)
+            .map(block -> (Predicate<String>) ((PropAtRest) block)::shownAtRest)
+            .orElse(bone -> true);
     }
 
     /**
@@ -88,7 +101,7 @@ public final class PropRenderer {
         } else {
             intoSprite(model, isHandheld(item) ? HANDHELD_LEAN : 0.0F, pose);
         }
-        draw(id, model, pose, collector, light, overlay, bone -> true, null);
+        draw(id, model, pose, collector, light, overlay, atRest(id), null);
         pose.popPose();
     }
 
