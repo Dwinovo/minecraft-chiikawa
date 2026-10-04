@@ -30,3 +30,6 @@ repo
 
 # local MCP server config (machine-specific, holds local paths)
 .mcp.json
+
+# Claude Code: local agents, worktrees and settings
+.claude/
