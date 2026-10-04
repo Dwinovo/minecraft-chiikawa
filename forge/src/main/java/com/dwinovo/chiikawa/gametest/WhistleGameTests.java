@@ -9,7 +9,6 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
-import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.item.WhistleCandyItem;
@@ -50,7 +49,7 @@ public final class WhistleGameTests {
     private static final int ANSWER_TICKS = 40;
     /** Long enough to walk over to see who whistled, which a pet in no hurry does at a few blocks a second. */
     private static final int COME_OVER_TICKS = 400;
-    private static final ResourceLocation FLUTE = ResourceLocation.withDefaultNamespace("block.note_block.flute");
+    private static final ResourceLocation FLUTE = new ResourceLocation("block.note_block.flute");
     /** Short enough that the far side of a sixteen block yard is out of earshot. */
     private static final WhistleSettings YARD = new WhistleSettings(14.0, 10, 40, 10, 200, FLUTE, 2.0F);
     private static final WhistleSettings SHORT = new WhistleSettings(6.0, 10, 40, 10, 200, FLUTE, 2.0F);
@@ -122,7 +121,7 @@ public final class WhistleGameTests {
         candy.use(helper.getLevel(), owner, net.minecraft.world.InteractionHand.MAIN_HAND);
         candy.use(helper.getLevel(), owner, net.minecraft.world.InteractionHand.MAIN_HAND);
         helper.assertTrue(WhistleCandyItem.order(candy) == PetDirective.FOLLOW, "free did not go back to follow");
-        helper.assertFalse(candy.has(InitDataComponents.WHISTLE_MODE.get()),
+        helper.assertFalse(WhistleCandyItem.hasOrder(candy),
             "a candy back at follow carries a note, and will not stack with the rest");
         helper.assertTrue(candy.getCount() == 2, "switching ate the candy");
         helper.succeed();

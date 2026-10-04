@@ -1,10 +1,10 @@
 package com.dwinovo.chiikawa.qualification;
 
+import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.InclusiveRange;
@@ -54,7 +54,7 @@ public record Qualification(
     private static final Codec<Float> CHANCE = Codec.floatRange(0.0F, 1.0F);
 
     /** Lazy because the item registry only exists once the game has bootstrapped. */
-    public static final Codec<Qualification> CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.<Qualification>create(
+    public static final Codec<Qualification> CODEC = ExtraCodecs.lazyInitializedCodec(() -> ExtraCodecs.validate(RecordCodecBuilder.<Qualification>create(
         instance -> instance.group(
             Codec.intRange(1, 10).fieldOf("grades").forGetter(Qualification::grades),
             ExamFee.CODEC.fieldOf("fee").forGetter(Qualification::fee),
@@ -65,12 +65,12 @@ public record Qualification(
             CHANCE.fieldOf("practice_cap").forGetter(Qualification::practiceCap),
             CHANCE.fieldOf("fail_bonus").forGetter(Qualification::failBonus),
             CHANCE.fieldOf("fail_cap").forGetter(Qualification::failCap),
-            BuiltInRegistries.ITEM.byNameCodec().fieldOf("book").forGetter(Qualification::book),
+            ModCodecs.ITEM.fieldOf("book").forGetter(Qualification::book),
             CHANCE.fieldOf("book_bonus").forGetter(Qualification::bookBonus),
             CHANCE.fieldOf("max_pass").forGetter(Qualification::maxPass),
             InclusiveRange.codec(Codec.INT, 20, 24000).fieldOf("write_ticks").forGetter(Qualification::writeTicks),
             ExtraCodecs.NON_NEGATIVE_INT.listOf().fieldOf("wild_grades").forGetter(Qualification::wildGrades)
-        ).apply(instance, Qualification::new)).validate(Qualification::validate));
+        ).apply(instance, Qualification::new)), Qualification::validate));
 
     public Qualification {
         basePass = List.copyOf(basePass);

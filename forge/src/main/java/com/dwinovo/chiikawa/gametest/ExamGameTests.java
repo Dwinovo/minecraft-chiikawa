@@ -325,7 +325,7 @@ public final class ExamGameTests {
     /** What a finished weeding slip pays this pet, rolled as a finished slip is. */
     private static int weedingPay(GameTestHelper helper, AbstractPet pet) {
         ServerLevel level = helper.getLevel();
-        LootTable reward = level.getServer().reloadableRegistries().getLootTable(PetTaskTypeData.reward(PetTaskTypeData.WEEDING));
+        LootTable reward = level.getServer().getLootData().getLootTable(PetTaskTypeData.reward(PetTaskTypeData.WEEDING));
         LootParams params = new LootParams.Builder(level)
             .withParameter(LootContextParams.ORIGIN, pet.position())
             .withParameter(LootContextParams.THIS_ENTITY, pet)

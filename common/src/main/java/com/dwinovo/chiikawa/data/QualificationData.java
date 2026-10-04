@@ -15,7 +15,7 @@ import net.minecraft.world.item.Items;
  * weeding slips, and sat whenever an owner pays a diamond at a board to open the exam.
  */
 public final class QualificationData {
-    public static final ResourceLocation WEEDING = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "weeding");
+    public static final ResourceLocation WEEDING = new ResourceLocation(Constants.MOD_ID, "weeding");
 
     private QualificationData() {
     }

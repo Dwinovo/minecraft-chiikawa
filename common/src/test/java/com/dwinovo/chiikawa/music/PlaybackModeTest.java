@@ -3,8 +3,6 @@ package com.dwinovo.chiikawa.music;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.mojang.serialization.JsonOps;
-import io.netty.buffer.Unpooled;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -126,14 +124,9 @@ class PlaybackModeTest {
     }
 
     @Test
-    void codecRoundTripsEveryModeAndReadsAnUnknownOneAsOnce() {
+    void savedAsItsOrdinalEveryModeRoundTripsAndAnUnknownOneReadsAsOnce() {
         for (PlaybackMode mode : PlaybackMode.values()) {
-            assertEquals(mode, PlaybackMode.CODEC.parse(JsonOps.INSTANCE,
-                PlaybackMode.CODEC.encodeStart(JsonOps.INSTANCE, mode).getOrThrow()).getOrThrow());
-
-            var buffer = Unpooled.buffer();
-            PlaybackMode.STREAM_CODEC.encode(buffer, mode);
-            assertEquals(mode, PlaybackMode.STREAM_CODEC.decode(buffer));
+            assertEquals(mode, PlaybackMode.fromId(mode.ordinal()));
         }
         assertEquals(PlaybackMode.ONCE, PlaybackMode.fromId(99));
         assertEquals(PlaybackMode.ONCE, PlaybackMode.fromId(-1));

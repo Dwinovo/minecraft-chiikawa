@@ -137,9 +137,8 @@ public class ExamDeskScreen extends Screen {
      * game dims what is behind the screen and before the buttons, as the labor board draws its
      * own: drawn after them, the panel would cover them.
      */
-    @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+        super.renderBackground(graphics);
         GuiSurface surface = new GuiSurface(graphics, this.font);
         TitledPanel.draw(surface, leftPos, topPos, WIDTH, panelHeight, this.title.getString());
         int x = leftPos + UiStyle.PAD;
@@ -168,6 +167,9 @@ public class ExamDeskScreen extends Screen {
     /** The buttons over the panel, then what the odds of the pet under the cursor come from. */
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        // 1.20.1's Screen.render draws only the widgets: the background, and the panel on
+        // it, go first, as vanilla's own screens draw theirs.
+        renderBackground(graphics, mouseX, mouseY, partialTick);
         super.render(graphics, mouseX, mouseY, partialTick);
         GuiSurface surface = new GuiSurface(graphics, this.font);
         rows.stream().filter(row -> row.area().contains(mouseX, mouseY)).findFirst().ifPresent(row ->

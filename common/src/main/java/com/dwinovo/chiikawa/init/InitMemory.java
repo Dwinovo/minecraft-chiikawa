@@ -77,7 +77,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<Unit>> MUSICIAN_RESTING =
         Services.REGISTRY.<MemoryModuleType<Unit>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "musician_resting"),
+            new ResourceLocation(Constants.MOD_ID, "musician_resting"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -85,7 +85,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<String>> MUSICIAN_NOW_PLAYING =
         Services.REGISTRY.<MemoryModuleType<String>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "musician_now_playing"),
+            new ResourceLocation(Constants.MOD_ID, "musician_now_playing"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -189,7 +189,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<WhistleCall>> WHISTLE_CALL =
         Services.REGISTRY.<MemoryModuleType<WhistleCall>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "whistle_call"),
+            new ResourceLocation(Constants.MOD_ID, "whistle_call"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -197,7 +197,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<WhistleHeard>> WHISTLE_HEARD =
         Services.REGISTRY.<MemoryModuleType<WhistleHeard>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "whistle_heard"),
+            new ResourceLocation(Constants.MOD_ID, "whistle_heard"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 

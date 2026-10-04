@@ -127,7 +127,7 @@ class ShopTest {
         ShopCatalog parsed = ShopCatalog.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("""
             { "entries": [ { "item": "minecraft:cookie", "buy": 1 },
                            { "item": "minecraft:sugar", "buy": 1, "count": 4 } ] }"""))
-            .getOrThrow();
+            .getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
         assertEquals(1, parsed.sale(Items.COOKIE).orElseThrow().count());
         assertEquals(4, parsed.sale(Items.SUGAR).orElseThrow().count());

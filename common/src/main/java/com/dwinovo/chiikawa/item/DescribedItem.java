@@ -8,6 +8,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * An item with nothing to it but a line under its name saying what it is for:
@@ -19,8 +21,8 @@ public class DescribedItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        super.appendHoverText(stack, context, tooltip, flag);
+    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+        super.appendHoverText(stack, level, tooltip, flag);
         ResourceLocation id = BuiltInRegistries.ITEM.getKey(this);
         tooltip.add(Component.translatable("tooltip." + id.getNamespace() + "." + id.getPath())
             .withStyle(ChatFormatting.GRAY));

@@ -17,7 +17,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class QualificationTest {
-    private static final ResourceLocation WEEDING = ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding");
+    private static final ResourceLocation WEEDING = new ResourceLocation("chiikawa", "weeding");
 
     @BeforeAll
     static void bootstrap() {
@@ -27,7 +27,7 @@ class QualificationTest {
 
     @Test
     void aLicenceFileSaysEverythingAboutItsExams() {
-        Qualification weeding = parse(file("[0.4, 0.3, 0.22, 0.15, 0.08]", "[70, 18, 8, 3, 1, 0]")).getOrThrow();
+        Qualification weeding = parse(file("[0.4, 0.3, 0.22, 0.15, 0.08]", "[70, 18, 8, 3, 1, 0]")).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
         assertEquals(5, weeding.grades());
         assertEquals(new ExamFee(Items.DIAMOND, 1), weeding.fee());
@@ -39,16 +39,16 @@ class QualificationTest {
 
     @Test
     void theOddsAndTheWildWeightsMatchTheGrades() {
-        assertTrue(parse(file("[0.4, 0.3]", "[70, 18, 8, 3, 1, 0]")).isError(), "two chances for five grades");
-        assertTrue(parse(file("[0.4, 0.3, 0.22, 0.15, 0.08]", "[70, 18]")).isError(), "two weights for six ranks");
-        assertTrue(parse(file("[0.4, 0.3, 0.22, 0.15, 0.08]", "[0, 0, 0, 0, 0, 0]")).isError(), "every rank weighs nothing");
-        assertTrue(parse(file("[0.4, 0.3, 0.22, 0.15, 1.5]", "[70, 18, 8, 3, 1, 0]")).isError(), "a chance over 1");
+        assertTrue(parse(file("[0.4, 0.3]", "[70, 18, 8, 3, 1, 0]")).error().isPresent(), "two chances for five grades");
+        assertTrue(parse(file("[0.4, 0.3, 0.22, 0.15, 0.08]", "[70, 18]")).error().isPresent(), "two weights for six ranks");
+        assertTrue(parse(file("[0.4, 0.3, 0.22, 0.15, 0.08]", "[0, 0, 0, 0, 0, 0]")).error().isPresent(), "every rank weighs nothing");
+        assertTrue(parse(file("[0.4, 0.3, 0.22, 0.15, 1.5]", "[70, 18, 8, 3, 1, 0]")).error().isPresent(), "a chance over 1");
     }
 
     /** The series counts the grades down: the first one passed is grade 5, the best grade 1. */
     @Test
     void theFirstGradePassedIsGradeFiveAndTheLastGradeOne() {
-        Qualification weeding = parse(file("[0.4, 0.3, 0.22, 0.15, 0.08]", "[70, 18, 8, 3, 1, 0]")).getOrThrow();
+        Qualification weeding = parse(file("[0.4, 0.3, 0.22, 0.15, 0.08]", "[70, 18, 8, 3, 1, 0]")).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
         assertEquals(5, weeding.rank(1));
         assertEquals(1, weeding.rank(5));
@@ -58,7 +58,7 @@ class QualificationTest {
     void theLoaderSkipsWhatDoesNotParseAndWarnsAboutPractiseNoPackHas() {
         Map<ResourceLocation, JsonElement> files = Map.of(
             WEEDING, file("[0.4, 0.3, 0.22, 0.15, 0.08]", "[70, 18, 8, 3, 1, 0]"),
-            ResourceLocation.fromNamespaceAndPath("chiikawa", "broken"), JsonParser.parseString("{}"));
+            new ResourceLocation("chiikawa", "broken"), JsonParser.parseString("{}"));
 
         QualificationLoader.Loaded known = QualificationLoader.load(files, Set.of(WEEDING)::contains);
         assertEquals(Set.of(WEEDING), known.qualifications().keySet());
