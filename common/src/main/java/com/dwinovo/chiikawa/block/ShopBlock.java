@@ -104,7 +104,7 @@ public class ShopBlock extends BaseEntityBlock {
         }
         if (player instanceof ServerPlayer serverPlayer && level.getBlockEntity(pos) instanceof ShopBlockEntity shop) {
             List<PriceView> prices = shop.catalog().entries().stream()
-                .map(entry -> new PriceView(BuiltInRegistries.ITEM.getKey(entry.item()), entry.buy(), entry.sell()))
+                .map(entry -> new PriceView(BuiltInRegistries.ITEM.getKey(entry.item()), entry.buy(), entry.sell(), entry.count()))
                 .toList();
             Services.NETWORK.sendToClient(serverPlayer, new ShopPricesPayload(pos, prices));
         }
