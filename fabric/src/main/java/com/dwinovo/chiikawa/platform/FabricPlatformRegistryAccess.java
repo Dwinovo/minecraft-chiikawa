@@ -43,6 +43,7 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     private final Supplier<Activity> cooperateActivity;
     private final Supplier<Activity> takeExamActivity;
     private final Supplier<Activity> checkResultsActivity;
+    private final Supplier<Activity> answerWhistleActivity;
     private final Supplier<MenuType<PetBackpackMenu>> petBackpackMenu;
     private final Supplier<LootItemConditionType> qualificationCondition;
 
@@ -74,6 +75,7 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
         cooperateActivity = registerActivity("cooperate");
         takeExamActivity = registerActivity("take_exam");
         checkResultsActivity = registerActivity("check_results");
+        answerWhistleActivity = registerActivity("answer_whistle");
 
         petBackpackMenu = registerMenu("pet_backpack", new MenuType<>(PetBackpackMenu::new, net.minecraft.world.flag.FeatureFlags.DEFAULT_FLAGS));
     }
@@ -215,6 +217,11 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     @Override
     public Supplier<Activity> checkResultsActivity() {
         return checkResultsActivity;
+    }
+
+    @Override
+    public Supplier<Activity> answerWhistleActivity() {
+        return answerWhistleActivity;
     }
 
     @Override

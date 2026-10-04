@@ -16,6 +16,7 @@ import com.dwinovo.chiikawa.shop.ShopBasket;
 import com.dwinovo.chiikawa.shop.Wallet;
 import com.dwinovo.chiikawa.social.InteractionPlan;
 import com.dwinovo.chiikawa.task.PetTask;
+import com.dwinovo.chiikawa.whistle.WhistleHeard;
 import com.dwinovo.chiikawa.utils.Utils;
 import java.util.Optional;
 import net.minecraft.core.GlobalPos;
@@ -50,6 +51,7 @@ import net.minecraft.world.level.Level;
  * @param examDesk the exam desk the pet is signed up at, while it can still sit its exam there
  * @param resultsDesk the exam desk the pet sat an exam at, while it has the results to go and see there this morning
  * @param seatedAtExam whether the pet is in its chair at an exam desk, at the paper or handing it in
+ * @param whistleHeard where a whistle was blown that this wild pet has set off for, once it has had time to react
  */
 public record IntentContext(
     GlobalPos petPos,
@@ -73,7 +75,8 @@ public record IntentContext(
     boolean playingMusic,
     Optional<GlobalPos> examDesk,
     Optional<GlobalPos> resultsDesk,
-    boolean seatedAtExam
+    boolean seatedAtExam,
+    Optional<GlobalPos> whistleHeard
 ) {
     public static IntentContext capture(AbstractPet pet, PetOwnership ownership) {
         Level level = pet.level();
@@ -103,7 +106,10 @@ public record IntentContext(
             pet.getActivity() == PetActivity.PLAY_GUITAR,
             examDesk(pet),
             resultsDesk(pet),
-            pet.getActivity() == PetActivity.EXAM
+            pet.getActivity() == PetActivity.EXAM,
+            pet.getBrain().getMemory(InitMemory.WHISTLE_HEARD.get())
+                .filter(heard -> heard.from() <= level.getGameTime())
+                .map(WhistleHeard::where)
         );
     }
 
