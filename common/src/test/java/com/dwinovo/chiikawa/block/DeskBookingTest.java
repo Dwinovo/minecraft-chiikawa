@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 class DeskBookingTest {
     private static final long DAY = 3L;
     private static final DeskBooking SIGNED_UP = new DeskBooking(UUID.randomUUID(), "Chiikawa",
-        ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding"), 5, DAY, Optional.empty());
+        new ResourceLocation("chiikawa", "weeding"), 5, DAY, Optional.empty());
 
     @Test
     void theDeskIsHeldWhileItsPetCanStillSit() {

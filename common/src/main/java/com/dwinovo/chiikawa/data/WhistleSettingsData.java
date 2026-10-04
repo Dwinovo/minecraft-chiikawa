@@ -19,6 +19,6 @@ public final class WhistleSettingsData {
     public static Map<ResourceLocation, WhistleSettings> all() {
         return Map.of(BuiltInRegistries.ITEM.getKey(InitItems.WHISTLE_CANDY.get()),
             new WhistleSettings(32.0, 10, 40, 10, 200,
-                ResourceLocation.withDefaultNamespace("block.note_block.flute"), 2.0F));
+                new ResourceLocation("block.note_block.flute"), 2.0F));
     }
 }

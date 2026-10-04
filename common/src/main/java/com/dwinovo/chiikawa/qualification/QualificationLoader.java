@@ -22,7 +22,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 public final class QualificationLoader extends SimpleJsonResourceReloadListener {
     public static final String DIRECTORY = "pet_qualification";
     /** Id for loaders that register reload listeners by id. */
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
+    public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, DIRECTORY);
 
     private static final String LOG_PREFIX = "[chiikawa-licence] ";
 

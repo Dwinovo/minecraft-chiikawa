@@ -17,7 +17,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class LicenceViewTest {
-    private static final ResourceLocation WEEDING = ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding");
+    private static final ResourceLocation WEEDING = new ResourceLocation("chiikawa", "weeding");
     private static final long MORNING = 2000L;
     private static Qualification weeding;
 
@@ -39,7 +39,7 @@ class LicenceViewTest {
         assertEquals(4, gradeFour.rank());
         assertFalse(gradeFour.top());
         assertTrue(gradeOne.top());
-        assertEquals(ResourceLocation.withDefaultNamespace("book"), none.book());
+        assertEquals(new ResourceLocation("book"), none.book());
     }
 
     @Test

@@ -102,7 +102,7 @@ public final class ExamDeskPayloads {
     public record DeskViewPayload(BlockPos desk, Optional<ExamEnrollment.Refusal> closed, Optional<BookingView> booking,
                                   List<OfferView> offers) implements CustomPacketPayload {
         public static final Type<DeskViewPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "exam_desk_view"));
+            new ResourceLocation(Constants.MOD_ID, "exam_desk_view"));
         public static final StreamCodec<RegistryFriendlyByteBuf, DeskViewPayload> STREAM_CODEC = StreamCodec.of(
             (buffer, value) -> {
                 buffer.writeBlockPos(value.desk);
@@ -130,7 +130,7 @@ public final class ExamDeskPayloads {
      */
     public record SignUpPayload(BlockPos desk, ResourceLocation qualification, UUID pet) implements CustomPacketPayload {
         public static final Type<SignUpPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "exam_desk_sign_up"));
+            new ResourceLocation(Constants.MOD_ID, "exam_desk_sign_up"));
         public static final StreamCodec<RegistryFriendlyByteBuf, SignUpPayload> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC, SignUpPayload::desk,
             ResourceLocation.STREAM_CODEC, SignUpPayload::qualification,
