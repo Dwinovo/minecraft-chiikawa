@@ -4,12 +4,24 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitMemory;
+import com.dwinovo.chiikawa.music.MusicTrackStatus;
+import com.dwinovo.chiikawa.music.MusicTrackView;
+import com.dwinovo.chiikawa.music.ServerMusicLibrary;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.voice.PetVoice;
 import com.dwinovo.chiikawa.voice.PetVoices;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
@@ -245,5 +257,37 @@ public final class GameTestKit {
             }
         }
         return found;
+    }
+
+    /** Low, to keep a song's file small; the library resamples it like any other. */
+    private static final int SONG_RATE = 8000;
+
+    /**
+     * Writes a song of silence — which is all the server ever looks at — into the server's
+     * music folder, unless an earlier run left it there, and has the library look again.
+     * It is imported in its own time; {@link #readySong} says when.
+     */
+    static void addSong(ServerMusicLibrary library, String title, int seconds) {
+        Path file = library.musicDir().resolve(title + ".wav");
+        try {
+            if (!Files.exists(file)) {
+                AudioFormat format = new AudioFormat(SONG_RATE, 16, 1, true, false);
+                byte[] silence = new byte[SONG_RATE * 2 * seconds];
+                try (AudioInputStream song = new AudioInputStream(new ByteArrayInputStream(silence), format,
+                        silence.length / 2)) {
+                    AudioSystem.write(song, AudioFileFormat.Type.WAVE, file.toFile());
+                }
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        library.rescan();
+    }
+
+    /** The song of that title, once it is ready to play. */
+    static Optional<MusicTrackView> readySong(ServerMusicLibrary library, String title) {
+        return library.catalog().stream()
+            .filter(track -> track.title().equals(title) && track.status() == MusicTrackStatus.READY)
+            .findFirst();
     }
 }
