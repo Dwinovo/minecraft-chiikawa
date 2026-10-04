@@ -165,7 +165,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         // single source of truth, so animation data isn't silently overwritten.
         addInterceptor(BoneInterceptor.Stage.LOOK_AT, new HeadLookInterceptor());
         // Default layers shared by all pets.
-        addRenderLayer(new HeldItemLayer());
+        addRenderLayer(new HeldItemLayer(PropBone.bones()));
         addRenderLayer(new BagLayer());
         // A bag's strap is part of the pet's own model, there only while a bag worn
         // that way is on.
