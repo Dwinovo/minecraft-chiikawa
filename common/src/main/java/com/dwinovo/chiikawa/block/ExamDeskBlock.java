@@ -45,7 +45,7 @@ import org.jetbrains.annotations.Nullable;
  * Who is signed up lives in the desk half's {@link ExamDeskBlockEntity}; signing up is
  * {@link com.dwinovo.chiikawa.qualification.ExamEnrollment}'s business.
  */
-public class ExamDeskBlock extends BaseEntityBlock {
+public class ExamDeskBlock extends BaseEntityBlock implements PropAtRest {
     public static final MapCodec<ExamDeskBlock> CODEC = simpleCodec(ExamDeskBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<DeskPart> PART = EnumProperty.create("part", DeskPart.class);
@@ -55,6 +55,11 @@ public class ExamDeskBlock extends BaseEntityBlock {
     public static final int DESK_HEIGHT = 7;
     /** How far from the desk a pet sits on the chair, in pixels: close enough to write on it. */
     public static final int SEAT_INSET = 3;
+    /**
+     * Where on the chair its pet sits, in pixels from the middle of the desk's floor, the
+     * desk facing {@code -Z} as its model does: on the seat, up against the desk.
+     */
+    public static final Vec3 SEAT = new Vec3(0, SEAT_HEIGHT, 8 + SEAT_INSET);
 
     // Every box is given for the desk facing north: the desk to the north, its chair to the south.
     /** The desk's top and legs, out to the edge its pet sits at. */
@@ -82,10 +87,16 @@ public class ExamDeskBlock extends BaseEntityBlock {
         return desk.relative(DeskPart.DESK.toOther(facing));
     }
 
-    /** Where on the chair its pet sits: on the seat, up against the desk. */
+    /** Where on the chair its pet sits, in the world; see {@link #SEAT}. */
     public static Vec3 seatPoint(BlockPos desk, Direction facing) {
-        double out = 0.5 + SEAT_INSET / 16.0;
-        return Vec3.atBottomCenterOf(desk).add(-facing.getStepX() * out, SEAT_HEIGHT / 16.0, -facing.getStepZ() * out);
+        double out = SEAT.z / 16.0;
+        return Vec3.atBottomCenterOf(desk).add(-facing.getStepX() * out, SEAT.y / 16.0, -facing.getStepZ() * out);
+    }
+
+    /** A desk with nobody signed up at it has no sheet on it. */
+    @Override
+    public boolean shownAtRest(String bone) {
+        return !DeskSheet.isSheet(bone);
     }
 
     /** Drawn by each half's block entity renderer from that half's own model; see {@code ExamDeskRenderer}. */
