@@ -48,7 +48,9 @@ public enum VoiceMoment implements StringRepresentable {
      */
     EXAM_PASS,
     /** Hearing it failed one. */
-    EXAM_FAIL;
+    EXAM_FAIL,
+    /** Heard its owner whistle it over. */
+    WHISTLE;
 
     public static final Codec<VoiceMoment> CODEC = StringRepresentable.fromEnum(VoiceMoment::values);
 

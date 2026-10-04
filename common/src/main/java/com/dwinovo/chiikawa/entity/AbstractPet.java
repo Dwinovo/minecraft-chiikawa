@@ -23,6 +23,7 @@ import com.dwinovo.chiikawa.utils.BrainUtils;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
 import com.dwinovo.chiikawa.entity.job.api.PetCapability;
 import com.dwinovo.chiikawa.init.InitMemory;
+import com.dwinovo.chiikawa.whistle.PetWhistle;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.init.InitSensor;
 import com.dwinovo.chiikawa.item.BagItem;
@@ -228,7 +229,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitMemory.CURRENT_INTENT.get(),
         InitMemory.INTENT_REEVALUATE.get(),
         InitMemory.INTENT_SWITCH_LOG.get(),
-        InitMemory.LAST_SAID.get()
+        InitMemory.LAST_SAID.get(),
+        InitMemory.WHISTLE_CALL.get(),
+        InitMemory.WHISTLE_HEARD.get()
     );
     private static final java.util.List<net.minecraft.world.entity.ai.sensing.SensorType<? extends net.minecraft.world.entity.ai.sensing.Sensor<? super AbstractPet>>> SENSOR_TYPES = java.util.List.of(
         net.minecraft.world.entity.ai.sensing.SensorType.HURT_BY,
@@ -608,6 +611,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         BrainUtils.addGiftTasks(brain);
         BrainUtils.addSocialTasks(brain);
         BrainUtils.addExamTasks(brain);
+        BrainUtils.addWhistleTasks(brain);
 
         // Each job's activities — registered once, dormant until the intent
         // selector picks one of that job's intents.
@@ -681,6 +685,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
             applyEagerness();
         }
         PetExams.upkeep(this);
+        PetWhistle.hear(this);
         IntentSelector.tick(this, serverLevel);
         getBrain().tick(serverLevel, this);
         super.customServerAiStep();
