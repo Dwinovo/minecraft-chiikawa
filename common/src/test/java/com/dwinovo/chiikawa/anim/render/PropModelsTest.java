@@ -49,7 +49,7 @@ class PropModelsTest {
     private static final String EXAM_DESK_CHAIR = "exam_desk_chair";
     private static final List<String> BLOCKS = List.of(LABOR_BOARD, SHOP, EXAM_DESK, EXAM_DESK_CHAIR);
     /** Props that are only ever an item in the hand or on a shelf. */
-    private static final List<String> ITEMS = List.of("handbook");
+    private static final List<String> ITEMS = List.of("handbook", "whistle_candy");
     /** Held as vanilla holds a sword, laid corner to corner from a model standing up. */
     private static final List<String> WEAPONS = List.of("chiikawa_weapon", "hachiware_weapon", "usagi_weapon", "rakko_sword");
     /** Vanilla bakes the block atlas four mip levels deep, which it keeps only if every sprite's sides divide by this. */

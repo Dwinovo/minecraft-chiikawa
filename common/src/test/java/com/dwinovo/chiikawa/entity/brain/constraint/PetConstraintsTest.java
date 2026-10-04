@@ -142,7 +142,7 @@ class PetConstraintsTest {
         for (PetDirective directive : PetDirective.values()) {
             assertPermits(directive, PetOwnership.WILD,
                 EnumSet.of(IntentCategory.WANDER, IntentCategory.FORAGE, IntentCategory.COMBAT, IntentCategory.TAKE_TASK,
-                    IntentCategory.SOCIAL));
+                    IntentCategory.SOCIAL, IntentCategory.CURIOUS));
         }
     }
 
