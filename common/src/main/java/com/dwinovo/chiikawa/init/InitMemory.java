@@ -70,6 +70,17 @@ public final class InitMemory {
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
+    /**
+     * Present, with an expiry, after a musician's song would not start (the server's streams
+     * all taken, or music turned off), so it waits a while rather than trying every tick.
+     */
+    public static final Supplier<MemoryModuleType<Unit>> MUSICIAN_RESTING =
+        Services.REGISTRY.<MemoryModuleType<Unit>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "musician_resting"),
+            () -> new MemoryModuleType<>(Optional.empty())
+        );
+
     /** The track the musician last started, which a continuous playback mode follows on from. */
     public static final Supplier<MemoryModuleType<String>> MUSICIAN_NOW_PLAYING =
         Services.REGISTRY.<MemoryModuleType<String>>register(
