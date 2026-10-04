@@ -19,12 +19,10 @@ import com.dwinovo.chiikawa.music.ServerMusicLibrary;
 import com.dwinovo.chiikawa.music.ServerMusicSystem;
 import java.util.concurrent.atomic.AtomicReference;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * What a musician does when a song of its music box ends. The songs are two short ones of
@@ -32,7 +30,6 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
  * runs on the wall clock, so each takes its couple of real seconds to end.
  */
 @GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class MusicGameTests {
     private static final String BATCH = "chiikawa_music";
     /**
@@ -61,13 +58,13 @@ public final class MusicGameTests {
         helper.startSequence()
             .thenWaitUntil(() -> helper.assertTrue(
                 readySong(library, FIRST).isPresent() && readySong(library, SECOND).isPresent(),
-                "the songs were never imported"))
+                Component.literal("the songs were never imported")))
             .thenExecute(() -> hachiware.set(busker(helper, library, PlaybackMode.REPEAT_ALL)))
             .thenWaitUntil(() -> helper.assertTrue(nowPlaying(hachiware.get(), library, FIRST),
-                "Hachiware never started the selected song"))
+                Component.literal("Hachiware never started the selected song")))
             .thenWaitUntil(() -> helper.assertTrue(nowPlaying(hachiware.get(), library, SECOND)
                     && hachiware.get().getActivity() == PetActivity.PLAY_GUITAR,
-                "Hachiware never went on to the next song"))
+                Component.literal("Hachiware never went on to the next song")))
             .thenSucceed();
     }
 
@@ -83,18 +80,18 @@ public final class MusicGameTests {
         helper.startSequence()
             .thenWaitUntil(() -> helper.assertTrue(
                 readySong(library, FIRST).isPresent() && readySong(library, SECOND).isPresent(),
-                "the songs were never imported"))
+                Component.literal("the songs were never imported")))
             .thenExecute(() -> hachiware.set(busker(helper, library, PlaybackMode.ONCE)))
             .thenWaitUntil(() -> helper.assertTrue(hachiware.get().getActivity() == PetActivity.PLAY_GUITAR,
-                "Hachiware never started playing"))
+                Component.literal("Hachiware never started playing")))
             .thenWaitUntil(() -> helper.assertTrue(hachiware.get().getActivity() != PetActivity.PLAY_GUITAR,
-                "the song never ended"))
+                Component.literal("the song never ended")))
             .thenIdle(QUIET_TICKS)
             .thenExecute(() -> {
                 helper.assertTrue(hachiware.get().getActivity() != PetActivity.PLAY_GUITAR,
-                    "Hachiware played on after a song in the once mode");
+                    Component.literal("Hachiware played on after a song in the once mode"));
                 helper.assertTrue(nowPlaying(hachiware.get(), library, FIRST),
-                    "Hachiware played another song in the once mode");
+                    Component.literal("Hachiware played another song in the once mode"));
             })
             .thenSucceed();
     }

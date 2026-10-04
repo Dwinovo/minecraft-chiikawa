@@ -63,10 +63,8 @@ public final class PetLicences {
 
     public void load(CompoundTag tag) {
         byId.clear();
-        if (tag.contains(TAG, Tag.TAG_COMPOUND)) {
-            CODEC.parse(NbtOps.INSTANCE, tag.get(TAG))
-                .ifSuccess(byId::putAll)
-                .ifError(error -> Constants.LOG.warn("[chiikawa-licence] a pet's licences did not load: {}", error.message()));
-        }
+        tag.getCompound(TAG).ifPresent(licences -> CODEC.parse(NbtOps.INSTANCE, licences)
+            .ifSuccess(byId::putAll)
+            .ifError(error -> Constants.LOG.warn("[chiikawa-licence] a pet's licences did not load: {}", error.message())));
     }
 }

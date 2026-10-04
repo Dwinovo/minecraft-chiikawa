@@ -17,17 +17,14 @@ import com.dwinovo.chiikawa.whistle.PetWhistle;
 import com.dwinovo.chiikawa.whistle.WhistleSettings;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The whistle candy: an owner blows it and the pets within earshot take the order, each a
@@ -36,7 +33,6 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
  * checked is the service and the candy, not the right-click that holds one.
  */
 @GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class WhistleGameTests {
     private static final String BATCH = "chiikawa_whistle";
     /**
@@ -74,10 +70,10 @@ public final class WhistleGameTests {
 
         PetWhistle.Heard heard = PetWhistle.blow(owner, PetDirective.FOLLOW, SHORT);
 
-        helper.assertTrue(heard.owned() == 1 && heard.wild() == 0, "heard by " + heard);
+        helper.assertTrue(heard.owned() == 1 && heard.wild() == 0, Component.literal("heard by " + heard));
         helper.succeedWhen(() -> {
-            helper.assertTrue(near.getPetDirective() == PetDirective.FOLLOW, "the pet nearby did not come to heel");
-            helper.assertTrue(far.getPetDirective() == PetDirective.STAY, "the pet out of earshot was called");
+            helper.assertTrue(near.getPetDirective() == PetDirective.FOLLOW, Component.literal("the pet nearby did not come to heel"));
+            helper.assertTrue(far.getPetDirective() == PetDirective.STAY, Component.literal("the pet out of earshot was called"));
         });
     }
 
@@ -90,7 +86,7 @@ public final class WhistleGameTests {
         PetWhistle.blow(owner, PetDirective.STAY, SHORT);
 
         helper.succeedWhen(() ->
-            helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, "the pet was not told to sit"));
+            helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, Component.literal("the pet was not told to sit")));
     }
 
     /** A blow is a blow: the candy is eaten and the next one has to wait, though nobody was near. */
@@ -100,12 +96,12 @@ public final class WhistleGameTests {
         ItemStack candy = new ItemStack(InitItems.WHISTLE_CANDY.get(), 3);
         owner.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, candy);
         helper.assertTrue(WhistleSettings.of(BuiltInRegistries.ITEM.getKey(candy.getItem())).isPresent(),
-            "no whistle settings were loaded for the candy");
+            Component.literal("no whistle settings were loaded for the candy"));
 
         candy.getItem().finishUsingItem(candy, helper.getLevel(), owner);
 
-        helper.assertTrue(candy.getCount() == 2, "the candy was not eaten, " + candy.getCount() + " left");
-        helper.assertTrue(owner.getCooldowns().isOnCooldown(candy), "the candy can be blown again at once");
+        helper.assertTrue(candy.getCount() == 2, Component.literal("the candy was not eaten, " + candy.getCount() + " left"));
+        helper.assertTrue(owner.getCooldowns().isOnCooldown(candy), Component.literal("the candy can be blown again at once"));
         helper.succeed();
     }
 
@@ -118,13 +114,13 @@ public final class WhistleGameTests {
         owner.setShiftKeyDown(true);
 
         candy.use(helper.getLevel(), owner, net.minecraft.world.InteractionHand.MAIN_HAND);
-        helper.assertTrue(WhistleCandyItem.order(candy) == PetDirective.STAY, "follow did not go to stay");
+        helper.assertTrue(WhistleCandyItem.order(candy) == PetDirective.STAY, Component.literal("follow did not go to stay"));
         candy.use(helper.getLevel(), owner, net.minecraft.world.InteractionHand.MAIN_HAND);
         candy.use(helper.getLevel(), owner, net.minecraft.world.InteractionHand.MAIN_HAND);
-        helper.assertTrue(WhistleCandyItem.order(candy) == PetDirective.FOLLOW, "free did not go back to follow");
+        helper.assertTrue(WhistleCandyItem.order(candy) == PetDirective.FOLLOW, Component.literal("free did not go back to follow"));
         helper.assertFalse(candy.has(InitDataComponents.WHISTLE_MODE.get()),
-            "a candy back at follow carries a note, and will not stack with the rest");
-        helper.assertTrue(candy.getCount() == 2, "switching ate the candy");
+            Component.literal("a candy back at follow carries a note, and will not stack with the rest"));
+        helper.assertTrue(candy.getCount() == 2, Component.literal("switching ate the candy"));
         helper.succeed();
     }
 
@@ -137,11 +133,11 @@ public final class WhistleGameTests {
 
         PetWhistle.Heard heard = PetWhistle.blow(owner, PetDirective.FOLLOW, YARD);
 
-        helper.assertTrue(heard.owned() == 0 && heard.wild() == 1, "heard by " + heard);
+        helper.assertTrue(heard.owned() == 0 && heard.wild() == 1, Component.literal("heard by " + heard));
         helper.succeedWhen(() -> {
-            helper.assertTrue(wild.distanceToSqr(owner) < 6.0 * 6.0, "the wild pet did not come over");
-            helper.assertFalse(wild.isTame(), "the whistle tamed the pet");
-            helper.assertTrue(wild.getPetDirective() == before, "the whistle gave a wild pet an order");
+            helper.assertTrue(wild.distanceToSqr(owner) < 6.0 * 6.0, Component.literal("the wild pet did not come over"));
+            helper.assertFalse(wild.isTame(), Component.literal("the whistle tamed the pet"));
+            helper.assertTrue(wild.getPetDirective() == before, Component.literal("the whistle gave a wild pet an order"));
         });
     }
 
@@ -153,9 +149,9 @@ public final class WhistleGameTests {
 
         PetWhistle.Heard heard = PetWhistle.blow(owner, PetDirective.STAY, SHORT);
 
-        helper.assertTrue(heard.nobody(), "heard by " + heard);
+        helper.assertTrue(heard.nobody(), Component.literal("heard by " + heard));
         helper.assertFalse(wild.getBrain().hasMemoryValue(InitMemory.WHISTLE_HEARD.get()),
-            "a wild pet was made curious by an order to sit");
+            Component.literal("a wild pet was made curious by an order to sit"));
         helper.succeed();
     }
 
@@ -168,10 +164,10 @@ public final class WhistleGameTests {
 
         PetWhistle.Heard heard = PetWhistle.blow(owner, PetDirective.FOLLOW, SHORT);
 
-        helper.assertTrue(heard.nobody(), "heard by " + heard);
-        helper.assertFalse(pet.getBrain().hasMemoryValue(InitMemory.WHISTLE_CALL.get()), "an order was left for it");
+        helper.assertTrue(heard.nobody(), Component.literal("heard by " + heard));
+        helper.assertFalse(pet.getBrain().hasMemoryValue(InitMemory.WHISTLE_CALL.get()), Component.literal("an order was left for it"));
         helper.runAfterDelay(ANSWER_TICKS, () -> {
-            helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, "the pet at its desk was called away");
+            helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, Component.literal("the pet at its desk was called away"));
             helper.succeed();
         });
     }

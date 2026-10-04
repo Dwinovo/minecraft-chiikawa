@@ -132,7 +132,7 @@ public class ExamDeskBlock extends BaseEntityBlock implements PropAtRest {
         super.setPlacedBy(level, pos, state, placer, stack);
         if (!level.isClientSide) {
             level.setBlock(chair(pos, state.getValue(FACING)), state.setValue(PART, DeskPart.CHAIR), Block.UPDATE_ALL);
-            level.blockUpdated(pos, Blocks.AIR);
+            level.updateNeighborsAt(pos, Blocks.AIR);
             state.updateNeighbourShapes(level, pos, Block.UPDATE_ALL);
         }
     }

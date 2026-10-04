@@ -147,12 +147,12 @@ public final class ShopGameTests {
 
         ShopServerPacketHandler.handleTrade(
             new ShopTradePayload(helper.absolutePos(counter), BuiltInRegistries.ITEM.getKey(candy), true), customer);
-        helper.assertTrue(customer.getInventory().countItem(candy) == 4, "a bundle was not four candies");
-        helper.assertTrue(Wallet.count(customer.getInventory()) == 1, "a bundle did not cost one emerald");
+        helper.assertTrue(customer.getInventory().countItem(candy) == 4, Component.literal("a bundle was not four candies"));
+        helper.assertTrue(Wallet.count(customer.getInventory()) == 1, Component.literal("a bundle did not cost one emerald"));
 
         ShopServerPacketHandler.handleTrade(
             new ShopTradePayload(helper.absolutePos(counter), BuiltInRegistries.ITEM.getKey(Items.SUGAR), false), customer);
-        helper.assertTrue(customer.getInventory().countItem(candy) == 4, "the shop took what it was not shown");
+        helper.assertTrue(customer.getInventory().countItem(candy) == 4, Component.literal("the shop took what it was not shown"));
         helper.succeed();
     }
 

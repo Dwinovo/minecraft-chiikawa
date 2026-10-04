@@ -86,11 +86,11 @@ public final class SupplyGameTests {
         for (ResourceLocation id : BuiltInRegistries.ACTIVITY.keySet()) {
             if (id.getNamespace().equals(Constants.MOD_ID)) {
                 String name = BuiltInRegistries.ACTIVITY.getValue(id).getName();
-                helper.assertTrue(name.equals(id.toString()), "activity " + id + " is named " + name);
+                helper.assertTrue(name.equals(id.toString()), Component.literal("activity " + id + " is named " + name));
                 ours++;
             }
         }
-        helper.assertTrue(ours > 0, "the mod registers no activities");
+        helper.assertTrue(ours > 0, Component.literal("the mod registers no activities"));
         helper.succeed();
     }
 

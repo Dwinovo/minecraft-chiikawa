@@ -148,11 +148,9 @@ public class ExamDeskBlockEntity extends BlockEntity {
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        booking = tag.contains("Booking", Tag.TAG_COMPOUND)
-            ? DeskBooking.CODEC.parse(NbtOps.INSTANCE, tag.get("Booking")).result()
-            : Optional.empty();
+        booking = tag.read("Booking", DeskBooking.CODEC);
         // A save holds the booking and the sheet follows from it within a second; a player's
         // game is sent the sheet alone.
-        sheet = DeskSheet.byOrdinal(tag.getByte("Sheet"));
+        sheet = DeskSheet.byOrdinal(tag.getByteOr("Sheet", (byte) 0));
     }
 }
