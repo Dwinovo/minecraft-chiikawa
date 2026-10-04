@@ -215,6 +215,21 @@ public final class LanguageData {
             addVoiceLines(adder, "shisa", VoiceMoment.LISTEN, "弹得真好～！");
             addVoiceLines(adder, "furuhonya", VoiceMoment.CRAB_GREETING, "蟹蟹");
             addVoiceLines(adder, "furuhonya", VoiceMoment.GIVEN_COFFEE, "谢谢……");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.EXAM_PASS, "哇……哇啊……！！");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.EXAM_FAIL, "呜……呜……");
+            addVoiceLines(adder, "hachiware", VoiceMoment.EXAM_PASS, "考过了……也就是说！？");
+            addVoiceLines(adder, "hachiware", VoiceMoment.EXAM_FAIL, "下次一定没问题！");
+            addVoiceLines(adder, "usagi", VoiceMoment.EXAM_PASS, "乌拉——！！");
+            addVoiceLines(adder, "usagi", VoiceMoment.EXAM_FAIL, "哈啊？");
+            addVoiceLines(adder, "momonga", VoiceMoment.EXAM_PASS, "考过了！快夸我！！");
+            addVoiceLines(adder, "momonga", VoiceMoment.EXAM_FAIL, "快安慰我。");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.EXAM_PASS, "哈啊——……");
+            addVoiceLines(adder, "rakko", VoiceMoment.EXAM_PASS, "……当然。");
+            addVoiceLines(adder, "rakko", VoiceMoment.EXAM_FAIL, "……还差得远。");
+            addVoiceLines(adder, "shisa", VoiceMoment.EXAM_PASS, "超级开心的说！");
+            addVoiceLines(adder, "shisa", VoiceMoment.EXAM_FAIL, "不要紧的啦～下次加油！");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.EXAM_PASS, "多亏了书呢。");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.EXAM_FAIL, "再读一遍吧。");
         } else if ("ja_jp".equals(locale)) {
             addCommonTranslations(adder, "ちいかわ", "持ち物", "ついてくる", "おすわり", "自由行動");
             addDollTooltipTranslations(adder, "ぬいぐるみをケーキに置いてみる？");
@@ -415,6 +430,21 @@ public final class LanguageData {
             addVoiceLines(adder, "shisa", VoiceMoment.LISTEN, "じょうずですね〜!");
             addVoiceLines(adder, "furuhonya", VoiceMoment.CRAB_GREETING, "カニ");
             addVoiceLines(adder, "furuhonya", VoiceMoment.GIVEN_COFFEE, "ありがとう…");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.EXAM_PASS, "ワ…ワァ…!!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.EXAM_FAIL, "ウッ…ウッ…");
+            addVoiceLines(adder, "hachiware", VoiceMoment.EXAM_PASS, "受かったってコト!?");
+            addVoiceLines(adder, "hachiware", VoiceMoment.EXAM_FAIL, "次はきっと大丈夫!");
+            addVoiceLines(adder, "usagi", VoiceMoment.EXAM_PASS, "ウラーッ!!");
+            addVoiceLines(adder, "usagi", VoiceMoment.EXAM_FAIL, "ハァ？");
+            addVoiceLines(adder, "momonga", VoiceMoment.EXAM_PASS, "受かったゾ! 褒めろ!!");
+            addVoiceLines(adder, "momonga", VoiceMoment.EXAM_FAIL, "慰めろ");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.EXAM_PASS, "ハァ〜…");
+            addVoiceLines(adder, "rakko", VoiceMoment.EXAM_PASS, "…当然だ");
+            addVoiceLines(adder, "rakko", VoiceMoment.EXAM_FAIL, "…まだまだだな");
+            addVoiceLines(adder, "shisa", VoiceMoment.EXAM_PASS, "でーじ嬉しいさー!");
+            addVoiceLines(adder, "shisa", VoiceMoment.EXAM_FAIL, "なんくるないさー! 次がんばります!");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.EXAM_PASS, "本のおかげだね");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.EXAM_FAIL, "もう一度読み直そう");
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
@@ -620,6 +650,21 @@ public final class LanguageData {
             addVoiceLines(adder, "shisa", VoiceMoment.LISTEN, "You play so well~!");
             addVoiceLines(adder, "furuhonya", VoiceMoment.CRAB_GREETING, "Crab");
             addVoiceLines(adder, "furuhonya", VoiceMoment.GIVEN_COFFEE, "Thank you...");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.EXAM_PASS, "Wa... wah...!!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.EXAM_FAIL, "Hic... hic...");
+            addVoiceLines(adder, "hachiware", VoiceMoment.EXAM_PASS, "I passed... does that mean...!?");
+            addVoiceLines(adder, "hachiware", VoiceMoment.EXAM_FAIL, "Next time for sure!");
+            addVoiceLines(adder, "usagi", VoiceMoment.EXAM_PASS, "Uraaa!!");
+            addVoiceLines(adder, "usagi", VoiceMoment.EXAM_FAIL, "Haah?");
+            addVoiceLines(adder, "momonga", VoiceMoment.EXAM_PASS, "I passed! Praise me!!");
+            addVoiceLines(adder, "momonga", VoiceMoment.EXAM_FAIL, "Comfort me.");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.EXAM_PASS, "Haaah...");
+            addVoiceLines(adder, "rakko", VoiceMoment.EXAM_PASS, "...Naturally.");
+            addVoiceLines(adder, "rakko", VoiceMoment.EXAM_FAIL, "...Still a long way to go.");
+            addVoiceLines(adder, "shisa", VoiceMoment.EXAM_PASS, "So, so happy!");
+            addVoiceLines(adder, "shisa", VoiceMoment.EXAM_FAIL, "Nankurunaisa! I'll try harder next time!");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.EXAM_PASS, "All thanks to the books.");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.EXAM_FAIL, "I'll read it again.");
         }
     }
 

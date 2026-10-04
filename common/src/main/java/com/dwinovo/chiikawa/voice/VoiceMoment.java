@@ -42,7 +42,10 @@ public enum VoiceMoment implements StringRepresentable {
     GIVEN_COFFEE,
     /** Listening to Hachiware play: as it sits down, and now and then as it claps along. */
     LISTEN,
-    /** Hearing it passed a licence exam, at the board the morning after or wherever it is by noon. */
+    /**
+     * Hearing it passed a licence exam, at its desk the morning after, or wherever it is if
+     * the desk is gone.
+     */
     EXAM_PASS,
     /** Hearing it failed one. */
     EXAM_FAIL;
