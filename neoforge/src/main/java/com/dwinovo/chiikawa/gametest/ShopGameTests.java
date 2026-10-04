@@ -11,6 +11,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitBlocks;
+import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.network.ShopPayloads.ShopTradePayload;
 import com.dwinovo.chiikawa.network.ShopServerPacketHandler;
 import com.dwinovo.chiikawa.shop.Wallet;
@@ -134,6 +135,26 @@ public final class ShopGameTests {
         BlockPos beside = helper.absolutePos(counter.south());
         customer.teleportTo(beside.getX() + 0.5, beside.getY(), beside.getZ() + 0.5);
         return customer;
+    }
+
+    /** A bundle is one price for several: four whistle candies for an emerald, and four back for one. */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void a_bundle_is_bought_and_sold_whole(GameTestHelper helper) {
+        BlockPos counter = new BlockPos(4, STAND, 4);
+        helper.setBlock(counter, InitBlocks.SHOP.get());
+        ServerPlayer customer = atTheCounter(helper, counter);
+        customer.getInventory().add(new ItemStack(Items.EMERALD, 2));
+        var candy = InitItems.WHISTLE_CANDY.get();
+
+        ShopServerPacketHandler.handleTrade(
+            new ShopTradePayload(helper.absolutePos(counter), BuiltInRegistries.ITEM.getKey(candy), true), customer);
+        helper.assertTrue(customer.getInventory().countItem(candy) == 4, "a bundle was not four candies");
+        helper.assertTrue(Wallet.count(customer.getInventory()) == 1, "a bundle did not cost one emerald");
+
+        ShopServerPacketHandler.handleTrade(
+            new ShopTradePayload(helper.absolutePos(counter), BuiltInRegistries.ITEM.getKey(Items.SUGAR), false), customer);
+        helper.assertTrue(customer.getInventory().countItem(candy) == 4, "the shop took what it was not shown");
+        helper.succeed();
     }
 
     /**

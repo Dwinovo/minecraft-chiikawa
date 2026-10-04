@@ -35,6 +35,7 @@ public final class TestContext {
     private boolean eager;
     private Optional<GlobalPos> examDesk = Optional.empty();
     private Optional<GlobalPos> resultsDesk = Optional.empty();
+    private Optional<GlobalPos> whistleHeard = Optional.empty();
 
     private TestContext(GlobalPos petPos, PetAnchor anchor) {
         this.petPos = petPos;
@@ -122,6 +123,12 @@ public final class TestContext {
         return this;
     }
 
+    /** A whistle this wild pet has heard and set off for. */
+    public TestContext whistleHeard(GlobalPos where) {
+        this.whistleHeard = Optional.of(where);
+        return this;
+    }
+
     public TestContext eager() {
         this.eager = true;
         return this;
@@ -130,6 +137,6 @@ public final class TestContext {
     public IntentContext build() {
         return new IntentContext(petPos, phase, ownership, personality, anchor, targets, task, offeringBoard,
             shopWorthVisiting, takeTaskCoolingDown, shopCoolingDown, socialPartner, playingAlong, carryingGift, eager,
-            false, false, false, false, examDesk, resultsDesk, false);
+            false, false, false, false, examDesk, resultsDesk, false, whistleHeard);
     }
 }

@@ -54,6 +54,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.TREATED, 1)
             .says(VoiceMoment.GIVEN_COFFEE, 1)
             .says(VoiceMoment.LISTEN, 1)
+            .says(VoiceMoment.WHISTLE, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.001F));
@@ -72,6 +73,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.TREATED, 1)
             .says(VoiceMoment.GIVEN_COFFEE, 1)
             .says(VoiceMoment.LISTEN, 1)
+            .says(VoiceMoment.WHISTLE, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.002F));
@@ -88,6 +90,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.CLUNG_TO, 1)
             .says(VoiceMoment.GIVEN_COFFEE, 1)
             .says(VoiceMoment.LISTEN, 1)
+            .says(VoiceMoment.WHISTLE, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.002F));
@@ -108,6 +111,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.CRAB_GREETING, 1)
             .says(VoiceMoment.GIVEN_COFFEE, 1)
             .says(VoiceMoment.LISTEN, 1)
+            .says(VoiceMoment.WHISTLE, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.002F)
@@ -129,6 +133,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.REVIVE, 1)
             .says(VoiceMoment.TREAT, 1)
             .says(VoiceMoment.GIVEN_COFFEE, 1)
+            .says(VoiceMoment.WHISTLE, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .cooldown(2 * COOLDOWN));
@@ -145,6 +150,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.CLUNG_TO, 1)
             .says(VoiceMoment.GIVEN_COFFEE, 1)
             .says(VoiceMoment.LISTEN, 1)
+            .says(VoiceMoment.WHISTLE, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.0015F));
@@ -155,6 +161,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.IDLE, 1)
             .says(VoiceMoment.CRAB_GREETING, 1)
             .says(VoiceMoment.GIVEN_COFFEE, 1)
+            .says(VoiceMoment.WHISTLE, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.0005F)
