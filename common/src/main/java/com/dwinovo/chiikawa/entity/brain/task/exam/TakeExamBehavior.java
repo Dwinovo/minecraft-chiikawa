@@ -99,7 +99,7 @@ public class TakeExamBehavior extends Behavior<AbstractPet> {
         pet.getBrain().eraseMemory(MemoryModuleType.LOOK_TARGET);
         pet.getNavigation().stop();
         Vec3 seat = ExamDeskBlock.seatPoint(desk.getBlockPos(), desk.facing());
-        pet.moveTo(seat.x, seat.y, seat.z, desk.facing().toYRot(), 0.0F);
+        pet.snapTo(seat.x, seat.y, seat.z, desk.facing().toYRot(), 0.0F);
         faceDesk(pet, desk);
         pet.setActivity(PetActivity.EXAM);
         writingUntil = gameTime + Qualifications.get(summons.qualification())

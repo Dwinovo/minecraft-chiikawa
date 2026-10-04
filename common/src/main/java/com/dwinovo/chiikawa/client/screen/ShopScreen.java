@@ -190,7 +190,7 @@ public class ShopScreen extends Screen {
     private static int held(Inventory inventory, PriceView price) {
         Item item = item(price);
         int held = 0;
-        for (ItemStack stack : inventory.items) {
+        for (ItemStack stack : inventory.getNonEquipmentItems()) {
             if (stack.is(item)) {
                 held += stack.getCount();
             }

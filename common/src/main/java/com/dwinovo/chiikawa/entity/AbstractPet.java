@@ -1074,7 +1074,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         if (isEager()) {
             output.putLong("EagerUntil", this.entityData.get(EAGER_UNTIL));
         }
-        licences.save(tag);
+        licences.save(output);
     }
 
     @Override
@@ -1091,7 +1091,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         this.entityData.set(EAGER_UNTIL, input.getLongOr("EagerUntil", 0L));
         applyEagerness();
         refreshJobFromMainhand();
-        licences.load(tag);
+        licences.load(input);
     }
 
     /** @return where this pet stands with every licence */
