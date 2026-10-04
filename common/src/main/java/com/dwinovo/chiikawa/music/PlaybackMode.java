@@ -17,8 +17,8 @@ import org.jetbrains.annotations.Nullable;
 public enum PlaybackMode {
     /** Stops after the selected song, which is what the music box always did. */
     ONCE,
-    /** The next song in the catalog's order, wrapping round to the first. */
-    IN_ORDER,
+    /** The next song in the catalog's order, wrapping round to the first: the whole list on repeat. */
+    REPEAT_ALL,
     /** Any other ready song, never the one that just played while there is a choice. */
     SHUFFLE,
     /** The selected song again. */
@@ -42,7 +42,7 @@ public enum PlaybackMode {
         return id < 0 || id >= values.length ? ONCE : values[id];
     }
 
-    /** The mode the screen's button moves to: once, in order, shuffle, repeat one, once again. */
+    /** The mode the screen's button moves to: once, repeat all, shuffle, repeat one, once again. */
     public PlaybackMode cycle() {
         PlaybackMode[] values = values();
         return values[(ordinal() + 1) % values.length];
@@ -80,13 +80,13 @@ public enum PlaybackMode {
             return Optional.of(selectedId);
         }
         return switch (this) {
-            case IN_ORDER -> inOrder(catalog, selectedId, finishedId);
+            case REPEAT_ALL -> repeatAll(catalog, selectedId, finishedId);
             case SHUFFLE -> shuffle(catalog, finishedId, pick);
             default -> Optional.empty();
         };
     }
 
-    private static Optional<String> inOrder(List<MusicTrackView> catalog, String selectedId, String finishedId) {
+    private static Optional<String> repeatAll(List<MusicTrackView> catalog, String selectedId, String finishedId) {
         int finished = -1;
         for (int i = 0; i < catalog.size(); i++) {
             if (catalog.get(i).trackId().equals(finishedId)) {
