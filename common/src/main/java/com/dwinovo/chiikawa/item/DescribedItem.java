@@ -1,13 +1,14 @@
 package com.dwinovo.chiikawa.item;
 
-import java.util.List;
+import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 
 /**
  * An item with nothing to it but a line under its name saying what it is for:
@@ -19,10 +20,16 @@ public class DescribedItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        super.appendHoverText(stack, context, tooltip, flag);
-        ResourceLocation id = BuiltInRegistries.ITEM.getKey(this);
-        tooltip.add(Component.translatable("tooltip." + id.getNamespace() + "." + id.getPath())
+    public void appendHoverText(
+        ItemStack stack,
+        TooltipContext context,
+        TooltipDisplay tooltipDisplay,
+        Consumer<Component> tooltipAdder,
+        TooltipFlag tooltipFlag
+    ) {
+        super.appendHoverText(stack, context, tooltipDisplay, tooltipAdder, tooltipFlag);
+        Identifier id = BuiltInRegistries.ITEM.getKey(this);
+        tooltipAdder.accept(Component.translatable("tooltip." + id.getNamespace() + "." + id.getPath())
             .withStyle(ChatFormatting.GRAY));
     }
 }

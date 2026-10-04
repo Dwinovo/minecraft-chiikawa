@@ -1,16 +1,17 @@
 package com.dwinovo.chiikawa.whistle;
 
 import com.dwinovo.chiikawa.Constants;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.FileToIdConverter;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 /**
@@ -18,19 +19,20 @@ import net.minecraft.util.profiling.ProfilerFiller;
  * that fails to parse is skipped with a message, and its item can no longer be blown: a
  * whistle with broken settings should do nothing, not take the world down with it.
  */
-public final class WhistleSettingsLoader extends SimpleJsonResourceReloadListener {
+public final class WhistleSettingsLoader extends SimpleJsonResourceReloadListener<JsonElement> {
     public static final String DIRECTORY = "pet_whistle";
     /** Id for loaders that register reload listeners by id. */
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
 
     private static final String LOG_PREFIX = "[chiikawa-whistle] ";
 
     public WhistleSettingsLoader() {
-        super(new Gson(), DIRECTORY);
+        // Read as plain JSON, so each file is decoded here and a bad one is reported by name.
+        super(ExtraCodecs.JSON, FileToIdConverter.json(DIRECTORY));
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
+    protected void apply(Map<Identifier, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
         Loaded loaded = load(files);
         loaded.errors().forEach(Constants.LOG::error);
         WhistleSettings.replaceAll(loaded.settings());
@@ -41,8 +43,8 @@ public final class WhistleSettingsLoader extends SimpleJsonResourceReloadListene
      * @param files parsed JSON by file id, which is the id of the item
      * @return the settings that decoded, and what went wrong with the rest
      */
-    static Loaded load(Map<ResourceLocation, JsonElement> files) {
-        Map<ResourceLocation, WhistleSettings> settings = new HashMap<>();
+    static Loaded load(Map<Identifier, JsonElement> files) {
+        Map<Identifier, WhistleSettings> settings = new HashMap<>();
         List<String> errors = new ArrayList<>();
         files.forEach((id, json) -> WhistleSettings.CODEC.parse(JsonOps.INSTANCE, json)
             .ifSuccess(parsed -> settings.put(id, parsed))
@@ -54,6 +56,6 @@ public final class WhistleSettingsLoader extends SimpleJsonResourceReloadListene
      * @param settings decoded settings by item id
      * @param errors one message per file that could not be decoded
      */
-    record Loaded(Map<ResourceLocation, WhistleSettings> settings, List<String> errors) {
+    record Loaded(Map<Identifier, WhistleSettings> settings, List<String> errors) {
     }
 }

@@ -146,10 +146,10 @@ public final class GameTestKit {
      * never lapses.
      */
     private static void keepSpawnLoaded(ServerLevel level) {
-        ChunkPos spawn = new ChunkPos(level.getSharedSpawnPos());
+        ChunkPos spawn = ChunkPos.containing(level.getRespawnData().pos());
         for (int x = -SPAWN_CHUNKS; x <= SPAWN_CHUNKS; x++) {
             for (int z = -SPAWN_CHUNKS; z <= SPAWN_CHUNKS; z++) {
-                level.setChunkForced(spawn.x + x, spawn.z + z, true);
+                level.setChunkForced(spawn.x() + x, spawn.z() + z, true);
             }
         }
     }

@@ -10,14 +10,14 @@ import com.mojang.serialization.JsonOps;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.SharedConstants;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.item.Items;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class QualificationTest {
-    private static final ResourceLocation WEEDING = ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding");
+    private static final Identifier WEEDING = Identifier.fromNamespaceAndPath("chiikawa", "weeding");
 
     @BeforeAll
     static void bootstrap() {
@@ -56,9 +56,9 @@ class QualificationTest {
 
     @Test
     void theLoaderSkipsWhatDoesNotParseAndWarnsAboutPractiseNoPackHas() {
-        Map<ResourceLocation, JsonElement> files = Map.of(
+        Map<Identifier, JsonElement> files = Map.of(
             WEEDING, file("[0.4, 0.3, 0.22, 0.15, 0.08]", "[70, 18, 8, 3, 1, 0]"),
-            ResourceLocation.fromNamespaceAndPath("chiikawa", "broken"), JsonParser.parseString("{}"));
+            Identifier.fromNamespaceAndPath("chiikawa", "broken"), JsonParser.parseString("{}"));
 
         QualificationLoader.Loaded known = QualificationLoader.load(files, Set.of(WEEDING)::contains);
         assertEquals(Set.of(WEEDING), known.qualifications().keySet());

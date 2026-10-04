@@ -29,7 +29,7 @@ import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.entries.TagEntry;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.advancements.critereon.StatePropertiesPredicate;
+import net.minecraft.advancements.criterion.StatePropertiesPredicate;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -121,8 +121,8 @@ public final class ModLootTableProvider extends LootTableProvider {
          * holds, each coin a pool of its own asked for with {@code chiikawa:qualification},
          * so a pack sees plainly what each grade is worth and can change it.
          */
-        private static void reward(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output, ResourceLocation type,
-                int minPay, int maxPay, Item extra, int minExtra, int maxExtra, ResourceLocation licence) {
+        private static void reward(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output, Identifier type,
+                int minPay, int maxPay, Item extra, int minExtra, int maxExtra, Identifier licence) {
             LootTable.Builder table = slipReward(minPay, maxPay, extra, minExtra, maxExtra);
             Qualification qualification = QualificationData.all().get(licence);
             for (int held = 1; held <= qualification.grades(); held++) {

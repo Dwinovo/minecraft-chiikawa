@@ -47,7 +47,7 @@ public record Personality(
     List<WeightedItem> wildTools,
     List<WeightedItem> likes,
     IdleHabits idle,
-    Map<ResourceLocation, Leaning> qualifications
+    Map<Identifier, Leaning> qualifications
 ) {
     /** No leanings: every multiplier 1, no randomness, nothing held, nothing wanted, no habits of its own. */
     public static final Personality DEFAULT = new Personality(Map.of(), Map.of(), 0.0F, List.of(), List.of(),
@@ -63,7 +63,7 @@ public record Personality(
         WeightedItem.CODEC.listOf().optionalFieldOf("wild_tools", List.of()).forGetter(Personality::wildTools),
         WeightedItem.CODEC.listOf().optionalFieldOf("likes", List.of()).forGetter(Personality::likes),
         IdleHabits.CODEC.optionalFieldOf("idle", IdleHabits.DEFAULT).forGetter(Personality::idle),
-        Codec.unboundedMap(ResourceLocation.CODEC, Leaning.CODEC).optionalFieldOf("qualifications", Map.of())
+        Codec.unboundedMap(Identifier.CODEC, Leaning.CODEC).optionalFieldOf("qualifications", Map.of())
             .forGetter(Personality::qualifications)
     ).apply(instance, Personality::new));
 
@@ -77,7 +77,7 @@ public record Personality(
     }
 
     /** @return how this kind of pet takes to the exams of the licence with this id */
-    public Leaning leaning(ResourceLocation qualification) {
+    public Leaning leaning(Identifier qualification) {
         return qualifications.getOrDefault(qualification, Leaning.DEFAULT);
     }
 

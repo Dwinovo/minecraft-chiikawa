@@ -9,8 +9,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -18,6 +16,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 /**
  * An exam desk's note of who is signed up at it, and the sheet that puts on it. One pet at a
@@ -76,7 +76,7 @@ public class ExamDeskBlockEntity extends BlockEntity {
 
     /** Whether a pet may be signed up here now: nobody is at the desk with their exam still on. */
     public boolean isFree() {
-        return booking.filter(held -> held.holdsDesk(level().getDayTime())).isEmpty();
+        return booking.filter(held -> held.holdsDesk(level().getOverworldClockTime())).isEmpty();
     }
 
     /** {@code pet} is signed up here. */
@@ -98,7 +98,7 @@ public class ExamDeskBlockEntity extends BlockEntity {
 
     /** Lets a booking with nothing more to show lapse, and puts the sheet on the desk that the booking calls for. */
     private void refresh() {
-        long dayTime = level().getDayTime();
+        long dayTime = level().getOverworldClockTime();
         if (booking.isPresent() && !booking.get().current(dayTime)) {
             booking = Optional.empty();
             setChanged();
@@ -139,20 +139,17 @@ public class ExamDeskBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        booking.flatMap(held -> DeskBooking.CODEC.encodeStart(NbtOps.INSTANCE, held).result())
-            .ifPresent(encoded -> tag.put("Booking", encoded));
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        booking.ifPresent(held -> output.store("Booking", DeskBooking.CODEC, held));
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        booking = tag.contains("Booking", Tag.TAG_COMPOUND)
-            ? DeskBooking.CODEC.parse(NbtOps.INSTANCE, tag.get("Booking")).result()
-            : Optional.empty();
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        booking = input.read("Booking", DeskBooking.CODEC);
         // A save holds the booking and the sheet follows from it within a second; a player's
         // game is sent the sheet alone.
-        sheet = DeskSheet.byOrdinal(tag.getByte("Sheet"));
+        sheet = DeskSheet.byOrdinal(input.getByteOr("Sheet", (byte) 0));
     }
 }

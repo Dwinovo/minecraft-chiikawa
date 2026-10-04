@@ -8,6 +8,7 @@ import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -15,12 +16,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -28,7 +29,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
@@ -47,7 +47,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class ExamDeskBlock extends BaseEntityBlock implements PropAtRest {
     public static final MapCodec<ExamDeskBlock> CODEC = simpleCodec(ExamDeskBlock::new);
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<DeskPart> PART = EnumProperty.create("part", DeskPart.class);
     /** How high the chair's seat is, in pixels; its model is built to it. */
     public static final int SEAT_HEIGHT = 4;
@@ -99,12 +99,6 @@ public class ExamDeskBlock extends BaseEntityBlock implements PropAtRest {
         return !DeskSheet.isSheet(bone);
     }
 
-    /** Drawn by each half's block entity renderer from that half's own model; see {@code ExamDeskRenderer}. */
-    @Override
-    protected RenderShape getRenderShape(BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
-    }
-
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return (state.getValue(PART) == DeskPart.DESK ? DESK_OUTLINE : CHAIR_OUTLINE).get(state.getValue(FACING));
@@ -136,23 +130,23 @@ public class ExamDeskBlock extends BaseEntityBlock implements PropAtRest {
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
         super.setPlacedBy(level, pos, state, placer, stack);
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             level.setBlock(chair(pos, state.getValue(FACING)), state.setValue(PART, DeskPart.CHAIR), Block.UPDATE_ALL);
-            level.blockUpdated(pos, Blocks.AIR);
+            level.updateNeighborsAt(pos, Blocks.AIR);
             state.updateNeighbourShapes(level, pos, Block.UPDATE_ALL);
         }
     }
 
     /** Either half goes when the other does, as a bed's do. */
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighbour, LevelAccessor level,
-                                     BlockPos pos, BlockPos neighbourPos) {
+    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos,
+                                     Direction direction, BlockPos neighbourPos, BlockState neighbour, RandomSource random) {
         if (direction == state.getValue(PART).toOther(state.getValue(FACING))) {
             return neighbour.is(this) && neighbour.getValue(PART) != state.getValue(PART)
                 ? state
                 : Blocks.AIR.defaultBlockState();
         }
-        return super.updateShape(state, direction, neighbour, level, pos, neighbourPos);
+        return super.updateShape(state, level, ticks, pos, direction, neighbourPos, neighbour, random);
     }
 
     /**
@@ -161,7 +155,7 @@ public class ExamDeskBlock extends BaseEntityBlock implements PropAtRest {
      */
     @Override
     public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
-        if (!level.isClientSide && player.isCreative() && state.getValue(PART) == DeskPart.CHAIR) {
+        if (!level.isClientSide() && player.preventsBlockDrops() && state.getValue(PART) == DeskPart.CHAIR) {
             BlockPos desk = pos.relative(DeskPart.CHAIR.toOther(state.getValue(FACING)));
             BlockState deskState = level.getBlockState(desk);
             if (deskState.is(this) && deskState.getValue(PART) == DeskPart.DESK) {
@@ -209,7 +203,7 @@ public class ExamDeskBlock extends BaseEntityBlock implements PropAtRest {
 
     @Override
     public <T extends BlockEntity> @Nullable BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide || state.getValue(PART) != DeskPart.DESK ? null
+        return level.isClientSide() || state.getValue(PART) != DeskPart.DESK ? null
             : createTickerHelper(type, InitBlockEntities.EXAM_DESK.get(), ExamDeskBlockEntity::serverTick);
     }
 

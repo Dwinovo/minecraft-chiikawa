@@ -12,7 +12,7 @@ import java.util.Optional;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.InclusiveRange;
 import net.minecraft.world.item.Items;
@@ -30,7 +30,7 @@ class QualificationExamTest {
     static void bootstrap() {
         SharedConstants.tryDetectVersion();
         Bootstrap.bootStrap();
-        weeding = new Qualification(5, new ExamFee(Items.DIAMOND, 1), ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding"),
+        weeding = new Qualification(5, new ExamFee(Items.DIAMOND, 1), Identifier.fromNamespaceAndPath("chiikawa", "weeding"),
             1, List.of(0.40F, 0.30F, 0.22F, 0.15F, 0.08F), 0.03F, 0.30F, 0.05F, 0.20F, Items.BOOK, 0.25F, 0.95F,
             new InclusiveRange<>(480, 560), List.of(70, 18, 8, 3, 1, 0));
         board = GlobalPos.of(Level.OVERWORLD, BlockPos.ZERO);

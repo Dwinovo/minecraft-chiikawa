@@ -178,7 +178,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * What the owner's screen shows of the pet's licences, as {@link LicenceView}s worked
      * out on the server; synced only when something shown changes.
      */
-    private static final EntityDataAccessor<CompoundTag> LICENCES = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.COMPOUND_TAG);
+    private static final EntityDataAccessor<List<LicenceView>> LICENCES = SynchedEntityData.defineId(AbstractPet.class, InitEntityDataSerializers.LICENCE_VIEWS);
     /**
      * The animation the pet holds while it plays its part in a scene with another pet,
      * empty when it is not in one; see {@link #setPerformance}. A level state like
@@ -881,7 +881,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         builder.define(INTENT, "");
         builder.define(GIFT, ItemStack.EMPTY);
         builder.define(EAGER_UNTIL, 0L);
-        builder.define(LICENCES, new CompoundTag());
+        builder.define(LICENCES, List.of());
         builder.define(PERFORMANCE, "");
     }
 
@@ -1068,18 +1068,13 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     /** @return what the owner's screen shows of the pet's licences; on either side */
     public List<LicenceView> licenceViews() {
-        CompoundTag tag = this.entityData.get(LICENCES);
-        return tag.contains("Views")
-            ? LicenceView.LIST_CODEC.parse(NbtOps.INSTANCE, tag.get("Views")).result().orElse(List.of())
-            : List.of();
+        return this.entityData.get(LICENCES);
     }
 
     /** Sends the owner's screen what it shows of the pet's licences, when that has changed. Server only. */
     public void showLicences(List<LicenceView> views) {
-        CompoundTag tag = new CompoundTag();
-        LicenceView.LIST_CODEC.encodeStart(NbtOps.INSTANCE, views).ifSuccess(encoded -> tag.put("Views", encoded));
-        if (!tag.equals(this.entityData.get(LICENCES))) {
-            this.entityData.set(LICENCES, tag);
+        if (!views.equals(this.entityData.get(LICENCES))) {
+            this.entityData.set(LICENCES, List.copyOf(views));
         }
     }
 

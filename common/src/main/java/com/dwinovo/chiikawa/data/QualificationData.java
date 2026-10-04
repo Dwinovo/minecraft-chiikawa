@@ -6,7 +6,7 @@ import com.dwinovo.chiikawa.qualification.ExamFee;
 import com.dwinovo.chiikawa.qualification.Qualification;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.InclusiveRange;
 import net.minecraft.world.item.Items;
 
@@ -15,13 +15,13 @@ import net.minecraft.world.item.Items;
  * weeding slips, and sat whenever an owner pays a diamond at a board to open the exam.
  */
 public final class QualificationData {
-    public static final ResourceLocation WEEDING = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "weeding");
+    public static final Identifier WEEDING = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "weeding");
 
     private QualificationData() {
     }
 
     /** @return licences by id */
-    public static Map<ResourceLocation, Qualification> all() {
+    public static Map<Identifier, Qualification> all() {
         return Map.of(WEEDING, new Qualification(
             5,
             new ExamFee(Items.DIAMOND, 1),

@@ -8,7 +8,7 @@ import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import com.dwinovo.chiikawa.init.InitActivity;
 import com.dwinovo.chiikawa.init.InitMemory;
 import java.util.Set;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.schedule.Activity;
 
@@ -24,7 +24,7 @@ public final class AnswerWhistleIntent implements PetIntent {
     private static final float SCORE = 0.55F;
 
     @Override
-    public ResourceLocation id() {
+    public Identifier id() {
         return PetIntents.ANSWER_WHISTLE;
     }
 

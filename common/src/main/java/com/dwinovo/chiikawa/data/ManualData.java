@@ -220,7 +220,7 @@ public final class ManualData {
 
     /** An exam desk's chair, where it stands behind a desk on the same spot facing the same way. */
     private static Actor chair(float facing) {
-        ResourceLocation desk = BuiltInRegistries.ITEM.getKey(InitItems.EXAM_DESK.get());
+        Identifier desk = BuiltInRegistries.ITEM.getKey(InitItems.EXAM_DESK.get());
         return new Actor().prop(DeskPart.CHAIR.model(desk)).facing(facing).offset(new Vec3(0, 0, 16));
     }
 

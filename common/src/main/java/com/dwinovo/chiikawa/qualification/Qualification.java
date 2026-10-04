@@ -5,7 +5,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.InclusiveRange;
 import net.minecraft.world.item.Item;
@@ -38,7 +38,7 @@ import net.minecraft.world.item.Item;
 public record Qualification(
     int grades,
     ExamFee fee,
-    ResourceLocation practiceTask,
+    Identifier practiceTask,
     int requiredPractice,
     List<Float> basePass,
     float practicePerSlip,
@@ -58,7 +58,7 @@ public record Qualification(
         instance -> instance.group(
             Codec.intRange(1, 10).fieldOf("grades").forGetter(Qualification::grades),
             ExamFee.CODEC.fieldOf("fee").forGetter(Qualification::fee),
-            ResourceLocation.CODEC.fieldOf("practice_task").forGetter(Qualification::practiceTask),
+            Identifier.CODEC.fieldOf("practice_task").forGetter(Qualification::practiceTask),
             ExtraCodecs.NON_NEGATIVE_INT.fieldOf("required_practice").forGetter(Qualification::requiredPractice),
             CHANCE.listOf().fieldOf("base_pass").forGetter(Qualification::basePass),
             CHANCE.fieldOf("practice_per_slip").forGetter(Qualification::practicePerSlip),

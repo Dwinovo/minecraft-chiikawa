@@ -7,7 +7,7 @@ import com.dwinovo.chiikawa.entity.brain.intent.IntentContext;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import com.dwinovo.chiikawa.init.InitActivity;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.schedule.Activity;
 
 /**
@@ -20,7 +20,7 @@ public final class CheckResultsIntent implements PetIntent {
     private static final float SCORE = 0.72F;
 
     @Override
-    public ResourceLocation id() {
+    public Identifier id() {
         return PetIntents.CHECK_RESULTS;
     }
 
