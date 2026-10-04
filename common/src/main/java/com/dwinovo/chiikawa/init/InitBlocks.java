@@ -51,6 +51,7 @@ public final class InitBlocks {
         BuiltInRegistries.BLOCK,
         EXAM_DESK_ID,
         () -> new ExamDeskBlock(BlockBehaviour.Properties.of()
+            .setId(ResourceKey.create(Registries.BLOCK, EXAM_DESK_ID))
             .mapColor(MapColor.WOOD)
             .instrument(NoteBlockInstrument.BASS)
             .strength(2.0F)
