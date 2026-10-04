@@ -92,6 +92,8 @@ public class ChiikawaFabricMod implements ModInitializer {
         FabricReloadListeners.register(PackType.SERVER_DATA, PetInteractionLoader.ID, new PetInteractionLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, QualificationLoader.ID,
             new QualificationLoader(task -> PetTaskTypes.all().containsKey(task)));
+        // A licence is checked against the slip types, which have to be loaded by then.
+        FabricReloadListeners.runBefore(PackType.SERVER_DATA, PetTaskTypeLoader.ID, QualificationLoader.ID);
         ServerTickEvents.END_SERVER_TICK.register(PetReviveRitualManager::tickServer);
         ServerTickEvents.END_SERVER_TICK.register(ServerMusicSystem::tickServer);
         ServerTickEvents.END_SERVER_TICK.register(PetFollowKeeper::tickServer);
