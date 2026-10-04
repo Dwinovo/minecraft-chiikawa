@@ -38,6 +38,11 @@ public final class FabricModNetworking {
                 MusicPayloads.MusicBoxSelectTrackPayload payload = MusicPayloads.MusicBoxSelectTrackPayload.read(buffer);
                 server.execute(() -> MusicServerPacketHandler.handleSelectTrack(payload, player));
             });
+        ServerPlayNetworking.registerGlobalReceiver(MusicPayloads.MUSIC_BOX_SET_MODE,
+            (server, player, handler, buffer, responseSender) -> {
+                MusicPayloads.MusicBoxSetModePayload payload = MusicPayloads.MusicBoxSetModePayload.read(buffer);
+                server.execute(() -> MusicServerPacketHandler.handleSetMode(payload, player));
+            });
         ServerPlayNetworking.registerGlobalReceiver(MusicPayloads.MUSIC_CATALOG_REQUEST,
             (server, player, handler, buffer, responseSender) -> {
                 MusicPayloads.MusicCatalogRequestPayload payload = MusicPayloads.MusicCatalogRequestPayload.read(buffer);

@@ -97,6 +97,13 @@ public final class ForgeModNetworking {
                     MusicServerPacketHandler.handleCatalogRequest(payload, player);
                 }
             });
+        serverbound(MusicPayloads.MusicBoxSetModePayload.class, MusicPayloads.MusicBoxSetModePayload::read,
+            (payload, context) -> {
+                ServerPlayer player = context.getSender();
+                if (player != null) {
+                    MusicServerPacketHandler.handleSetMode(payload, player);
+                }
+            });
         serverbound(MusicPayloads.MusicBoxSelectTrackPayload.class, MusicPayloads.MusicBoxSelectTrackPayload::read,
             (payload, context) -> {
                 ServerPlayer player = context.getSender();

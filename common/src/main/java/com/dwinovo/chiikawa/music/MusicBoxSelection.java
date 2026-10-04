@@ -7,7 +7,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
 
 public record MusicBoxSelection(String trackId, String title, int revision) {
-    private static final String TAG_KEY = "ChiikawaMusicBox";
+    static final String TAG_KEY = "ChiikawaMusicBox";
     private static final String TRACK_ID_KEY = "TrackId";
     private static final String TITLE_KEY = "Title";
     private static final String REVISION_KEY = "Revision";
