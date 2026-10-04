@@ -24,6 +24,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -192,11 +193,24 @@ public class ShopScreen extends Screen {
     private boolean holds(PriceView price) {
         Minecraft minecraft = Minecraft.getInstance();
         return minecraft.player != null
-            && minecraft.player.getInventory().contains(new ItemStack(item(price)));
+            && held(minecraft.player.getInventory(), price) >= price.count();
     }
 
+    private static int held(Inventory inventory, PriceView price) {
+        Item item = item(price);
+        int held = 0;
+        for (ItemStack stack : inventory.items) {
+            if (stack.is(item)) {
+                held += stack.getCount();
+            }
+        }
+        return held;
+    }
+
+    /** The item's name, with how many come for the price when it is a bundle. */
     private static Component name(PriceView price) {
-        return item(price).getDescription();
+        Component name = item(price).getDescription();
+        return price.count() > 1 ? Component.empty().append(name).append(" \u00d7" + price.count()) : name;
     }
 
     private static Item item(PriceView price) {

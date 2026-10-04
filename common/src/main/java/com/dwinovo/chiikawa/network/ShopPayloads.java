@@ -18,18 +18,21 @@ public final class ShopPayloads {
      * One line of a shop's price list, as the screen needs it.
      *
      * @param item what is being priced
-     * @param buy what the customer pays for one; 0 when it is not for sale
-     * @param sell what the shop pays for one; 0 when it does not want any
+     * @param buy what the customer pays for a lot; 0 when it is not for sale
+     * @param sell what the shop pays for a lot; 0 when it does not want any
+     * @param count how many items the price is for, either way
      */
-    public record PriceView(ResourceLocation item, int buy, int sell) {
+    public record PriceView(ResourceLocation item, int buy, int sell, int count) {
         public static PriceView read(FriendlyByteBuf buffer) {
-            return new PriceView(buffer.readResourceLocation(), buffer.readVarInt(), buffer.readVarInt());
+            return new PriceView(buffer.readResourceLocation(), buffer.readVarInt(), buffer.readVarInt(),
+                buffer.readVarInt());
         }
 
         public void write(FriendlyByteBuf buffer) {
             buffer.writeResourceLocation(item);
             buffer.writeVarInt(buy);
             buffer.writeVarInt(sell);
+            buffer.writeVarInt(count);
         }
     }
 
