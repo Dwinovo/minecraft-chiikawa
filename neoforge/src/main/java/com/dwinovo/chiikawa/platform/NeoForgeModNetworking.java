@@ -38,8 +38,7 @@ public final class NeoForgeModNetworking {
                     BoardServerPacketHandler.handleUpgrade(payload, player);
                 }
             });
-        registrar.playToClient(ExamDeskPayloads.DeskViewPayload.TYPE, ExamDeskPayloads.DeskViewPayload.STREAM_CODEC,
-            (payload, context) -> ClientExamDeskPacketHandler.handleView(payload));
+        registrar.playToClient(ExamDeskPayloads.DeskViewPayload.TYPE, ExamDeskPayloads.DeskViewPayload.STREAM_CODEC);
         registrar.playToServer(ExamDeskPayloads.SignUpPayload.TYPE, ExamDeskPayloads.SignUpPayload.STREAM_CODEC,
             (payload, context) -> {
                 if (context.player() instanceof ServerPlayer player) {
@@ -88,6 +87,7 @@ public final class NeoForgeModNetworking {
 
     public static void registerClientPayloads(RegisterClientPayloadHandlersEvent event) {
         event.register(BoardPayloads.BoardSlipsPayload.TYPE, (payload, context) -> ClientBoardPacketHandler.handleSlips(payload));
+        event.register(ExamDeskPayloads.DeskViewPayload.TYPE, (payload, context) -> ClientExamDeskPacketHandler.handleView(payload));
         event.register(ShopPayloads.ShopPricesPayload.TYPE, (payload, context) -> ClientShopPacketHandler.handlePrices(payload));
         event.register(ManualPayloads.OpenHandbookPayload.TYPE, (payload, context) -> ClientManualPacketHandler.open());
         event.register(MusicPayloads.MusicCatalogPayload.TYPE, (payload, context) -> ClientMusicPacketHandler.handleCatalog(payload));
