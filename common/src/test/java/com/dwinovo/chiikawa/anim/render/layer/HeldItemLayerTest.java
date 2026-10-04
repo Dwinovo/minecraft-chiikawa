@@ -1,8 +1,16 @@
 package com.dwinovo.chiikawa.anim.render.layer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.anim.baked.BakedBone;
+import com.dwinovo.chiikawa.anim.baked.BakedCube;
+import com.dwinovo.chiikawa.anim.baked.BakedModel;
+import com.dwinovo.chiikawa.anim.render.ChiikawaRenderState;
 import com.mojang.blaze3d.vertex.PoseStack;
+import java.util.List;
+import java.util.Map;
 import org.joml.Vector3f;
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +18,8 @@ import org.junit.jupiter.api.Test;
  * Which way a held item points once it is in the fist. The model's frame has up up and the
  * pet facing {@code -Z}; vanilla's third-person display transforms expect the item's up to
  * run out of the front of the fist and its back to face the sky — lifted a tenth of a turn,
- * as vanilla lifts an arm that holds something.
+ * as vanilla lifts an arm that holds something. And that it is put away while the pet's
+ * hands are full with something of its own model.
  */
 class HeldItemLayerTest {
     private static final float EPSILON = 1.0E-5F;
@@ -52,6 +61,32 @@ class HeldItemLayerTest {
         float size = pose.last().pose().transformDirection(new Vector3f(1, 0, 0)).length();
 
         assertEquals(true, size > 0.0F && size < 1.0F, "a held item is drawn at a player's size: " + size);
+    }
+
+    @Test
+    void anItemIsPutAwayWhileAPropIsInTheHands() {
+        HeldItemLayer layer = new HeldItemLayer(List.of("ExamPencil"));
+
+        assertTrue(layer.handsFull(frame(false)), "a pet writing its exam still holds its sword");
+        assertFalse(layer.handsFull(frame(true)), "a pet holds nothing while its pencil is put away");
+    }
+
+    @Test
+    void aPetWithoutThePropKeepsItsItem() {
+        HeldItemLayer layer = new HeldItemLayer(List.of("guitar"));
+
+        assertFalse(layer.handsFull(frame(false)), "a pet put its item away for a prop it does not have");
+    }
+
+    /** A frame of a model with a hand and a pencil, the pencil drawn or not. */
+    private static RenderLayerContext frame(boolean pencilHidden) {
+        BakedBone hand = new BakedBone("RightHandLocator", -1, 0, 0, 0, 0, 0, 0, false, 0, 0, new int[0]);
+        BakedBone pencil = new BakedBone("ExamPencil", -1, 0, 0, 0, 0, 0, 0, false, 0, 0, new int[0]);
+        BakedModel model = new BakedModel(new BakedBone[] {hand, pencil}, new BakedCube[0], new int[] {0, 1},
+            Map.of("RightHandLocator", 0, "ExamPencil", 1), 64, 64);
+        ChiikawaRenderState state = new ChiikawaRenderState();
+        state.hiddenBones = new boolean[] {false, pencilHidden};
+        return new RenderLayerContext(model, new float[0], state, new PoseStack(), null, 0, 0);
     }
 
     /** Which way an item's axis ends up, whatever size the hand makes it. */
