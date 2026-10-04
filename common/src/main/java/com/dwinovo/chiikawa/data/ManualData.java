@@ -191,8 +191,7 @@ public final class ManualData {
 
     /**
      * The weeding licence (0.1.2): practice and the study guide, signing a pet up at an exam
-     * desk, the paper written there, and the results — Hachiware passing and Chiikawa not,
-     * as it went for them the first time.
+     * desk, the paper written there, and the results, everybody passing together.
      */
     private static ManualPage licence() {
         return page("licence", 80,
@@ -210,9 +209,12 @@ public final class ManualData {
                 pet(InitEntity.CHIIKAWA_PET).at(0.6F).facing(60.0F).offset(ExamDeskBlock.SEAT).sit()
                     .play("exam").every(80),
                 prop(InitBlocks.EXAM_DESK.get()).at(0.6F).facing(60.0F)),
-            panel(pet(InitEntity.HACHIWARE_PET).at(0.3F).facing(30.0F).reaction(PetReaction.HAPPY).every(40)
+            // Hachiware has no jump of its own, so it claps.
+            panel(pet(InitEntity.HACHIWARE_PET).at(0.2F).facing(30.0F).reaction(PetReaction.HAPPY)
+                    .play("jump", "clap").every(46),
+                pet(InitEntity.CHIIKAWA_PET).at(0.5F).reaction(PetReaction.HAPPY).play("jump").every(40)
                     .say(VoiceMoment.EXAM_PASS),
-                pet(InitEntity.CHIIKAWA_PET).at(0.7F).facing(-30.0F).reaction(PetReaction.HURT).every(40)));
+                pet(InitEntity.USAGI_PET).at(0.8F).facing(-30.0F).reaction(PetReaction.HAPPY).play("jump").every(34)));
     }
 
     /** An exam desk's chair, where it stands behind a desk on the same spot facing the same way. */
