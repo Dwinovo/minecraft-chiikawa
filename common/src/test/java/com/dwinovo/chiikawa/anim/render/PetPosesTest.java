@@ -124,9 +124,9 @@ class PetPosesTest {
         return lowest;
     }
 
-    /** Whether the bone is one of the things a pet has only at an exam, and this is not that. */
+    /** Whether the bone is one of the things a pet has only while it does something, and this is not that. */
     private static boolean hiddenIn(BakedBone bone, String animation) {
-        return ExamProp.of(bone.name).filter(prop -> !prop.shownDuring().animations().contains(animation)).isPresent();
+        return PropBone.of(bone.name).filter(prop -> !prop.shownDuring().animations().contains(animation)).isPresent();
     }
 
     /** The pets: every geo model with an animation file beside it. */
