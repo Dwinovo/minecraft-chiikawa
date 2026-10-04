@@ -11,7 +11,7 @@ import net.minecraft.util.ExtraCodecs;
 /**
  * How a whistle behaves, loaded from {@code data/<namespace>/pet_whistle/<item>.json} by
  * {@link WhistleSettingsLoader}: one file per item that can be blown, named by the item's
- * own id, so a pack can retune the candy or make a whistle of something else.
+ * own id, so a pack can retune how the candy blows.
  *
  * <p>Server-side only: a player's game only has to draw the pose and the hold.
  *
