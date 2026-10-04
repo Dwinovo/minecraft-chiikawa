@@ -10,12 +10,15 @@ import java.util.Optional;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.util.InclusiveRange;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -110,15 +113,15 @@ class LicenceTest {
         PetLicences licences = new PetLicences();
         licences.set(WEEDING, new Licence(2, 3, 1, true, new ExamStage.Sat(board, 13L, false)));
         licences.set(OTHER, Licence.NONE.practised().called(board, 14L));
-        CompoundTag tag = new CompoundTag();
-        licences.save(tag);
+        TagValueOutput output = TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING);
+        licences.save(output);
 
         PetLicences loaded = new PetLicences();
-        loaded.load(tag);
+        loaded.load(TagValueInput.create(ProblemReporter.DISCARDING, RegistryAccess.EMPTY, output.buildResult()));
         assertEquals(licences.get(WEEDING), loaded.get(WEEDING));
         assertEquals(licences.get(OTHER), loaded.get(OTHER));
 
-        CompoundTag none = new CompoundTag();
+        TagValueOutput none = TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING);
         new PetLicences().save(none);
         assertTrue(none.isEmpty());
     }
