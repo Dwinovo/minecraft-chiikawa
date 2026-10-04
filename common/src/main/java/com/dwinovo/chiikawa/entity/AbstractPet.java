@@ -181,7 +181,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * What the owner's screen shows of the pet's licences, as {@link LicenceView}s worked
      * out on the server; synced only when something shown changes.
      */
-    private static final EntityDataAccessor<CompoundTag> LICENCES = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.COMPOUND_TAG);
+    private static final EntityDataAccessor<CompoundTag> LICENCES = SynchedEntityData.defineId(AbstractPet.class, InitDataSerializers.COMPOUND_TAG);
     /**
      * The animation the pet holds while it plays its part in a scene with another pet,
      * empty when it is not in one; see {@link #setPerformance}. A level state like

@@ -27,9 +27,8 @@ import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
@@ -43,8 +42,6 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The weeding licence, end to end: an owner signs one pet up at an exam desk for a diamond;
@@ -99,13 +96,13 @@ public final class ExamGameTests {
 
         Optional<ExamEnrollment.Refusal> refusal = ExamEnrollment.signUp(owner, desk, QualificationData.WEEDING, pet.getUUID());
 
-        helper.assertTrue(refusal.isEmpty(), "the pet was not signed up: " + refusal);
+        helper.assertTrue(refusal.isEmpty(), Component.literal("the pet was not signed up: " + refusal));
         helper.assertTrue(pet.licences().get(QualificationData.WEEDING).call()
-            .filter(call -> call.desk().equals(at(helper, DESK))).isPresent(), "the pet was not sent to the desk");
+            .filter(call -> call.desk().equals(at(helper, DESK))).isPresent(), Component.literal("the pet was not sent to the desk"));
         helper.assertTrue(desk.booking().filter(booking -> booking.pet().equals(pet.getUUID())).isPresent(),
-            "the desk was not booked for the pet");
-        helper.assertTrue(desk.sheet() == DeskSheet.ANSWER, "the desk has no answer sheet on it");
-        helper.assertTrue(owner.getInventory().countItem(Items.DIAMOND) == 1, "the fee was not one diamond");
+            Component.literal("the desk was not booked for the pet"));
+        helper.assertTrue(desk.sheet() == DeskSheet.ANSWER, Component.literal("the desk has no answer sheet on it"));
+        helper.assertTrue(owner.getInventory().countItem(Items.DIAMOND) == 1, Component.literal("the fee was not one diamond"));
         helper.succeed();
     }
 
@@ -121,9 +118,9 @@ public final class ExamGameTests {
         ExamEnrollment.signUp(owner, desk, QualificationData.WEEDING, first.getUUID());
         Optional<ExamEnrollment.Refusal> refusal = ExamEnrollment.signUp(owner, desk, QualificationData.WEEDING, second.getUUID());
 
-        helper.assertTrue(refusal.equals(Optional.of(ExamEnrollment.Refusal.TAKEN)), "refused for " + refusal);
-        helper.assertTrue(second.licences().get(QualificationData.WEEDING).call().isEmpty(), "the second pet was sent too");
-        helper.assertTrue(owner.getInventory().countItem(Items.DIAMOND) == 1, "the second sign-up was paid for");
+        helper.assertTrue(refusal.equals(Optional.of(ExamEnrollment.Refusal.TAKEN)), Component.literal("refused for " + refusal));
+        helper.assertTrue(second.licences().get(QualificationData.WEEDING).call().isEmpty(), Component.literal("the second pet was sent too"));
+        helper.assertTrue(owner.getInventory().countItem(Items.DIAMOND) == 1, Component.literal("the second sign-up was paid for"));
         helper.succeed();
     }
 
@@ -139,12 +136,12 @@ public final class ExamGameTests {
 
         ExamEnrollment.Offer offer = ExamEnrollment.offers(owner, desk).get(0);
         helper.assertTrue(whyNot(offer, unpractised).equals(Optional.of(Ineligible.UNPRACTISED)),
-            "an unpractised pet was offered for " + whyNot(offer, unpractised));
+            Component.literal("an unpractised pet was offered for " + whyNot(offer, unpractised)));
         helper.assertTrue(whyNot(offer, staying).equals(Optional.of(Ineligible.STAYING)),
-            "a staying pet was offered for " + whyNot(offer, staying));
+            Component.literal("a staying pet was offered for " + whyNot(offer, staying)));
         helper.assertTrue(ExamEnrollment.signUp(owner, desk, QualificationData.WEEDING, unpractised.getUUID())
-            .equals(Optional.of(ExamEnrollment.Refusal.INELIGIBLE)), "an unpractised pet was signed up");
-        helper.assertTrue(owner.getInventory().countItem(Items.DIAMOND) == 1, "a refused sign-up was paid for");
+            .equals(Optional.of(ExamEnrollment.Refusal.INELIGIBLE)), Component.literal("an unpractised pet was signed up"));
+        helper.assertTrue(owner.getInventory().countItem(Items.DIAMOND) == 1, Component.literal("a refused sign-up was paid for"));
         helper.succeed();
     }
 
@@ -156,10 +153,10 @@ public final class ExamGameTests {
 
         helper.succeedWhen(() -> {
             Licence licence = pet.licences().get(QualificationData.WEEDING);
-            helper.assertTrue(licence.paper().isPresent(), "the pet has not handed a paper in");
-            helper.assertTrue(licence.held() == 0, "the result was heard on the day of the exam");
+            helper.assertTrue(licence.paper().isPresent(), Component.literal("the pet has not handed a paper in"));
+            helper.assertTrue(licence.held() == 0, Component.literal("the result was heard on the day of the exam"));
             helper.assertTrue(desk.booking().flatMap(DeskBooking::passed).isPresent(),
-                "the desk has not kept the result for the morning");
+                Component.literal("the desk has not kept the result for the morning"));
         });
     }
 
@@ -171,13 +168,13 @@ public final class ExamGameTests {
 
         helper.startSequence()
             .thenWaitUntil(() -> helper.assertTrue(pet.getActivity() == PetActivity.EXAM,
-                "the pet never sat down to the paper"))
+                Component.literal("the pet never sat down to the paper")))
             .thenExecute(() -> helper.destroyBlock(DESK))
             .thenWaitUntil(() -> helper.assertTrue(
                 pet.licences().get(QualificationData.WEEDING).exam() instanceof ExamStage.None,
-                "the pet is still signed up at a desk that is gone"))
+                Component.literal("the pet is still signed up at a desk that is gone")))
             .thenExecute(() -> helper.assertTrue(pet.licences().get(QualificationData.WEEDING).practice() == 1,
-                "losing the desk cost the pet its practice"))
+                Component.literal("losing the desk cost the pet its practice")))
             .thenSucceed();
     }
 
@@ -198,14 +195,14 @@ public final class ExamGameTests {
         pet.licences().set(QualificationData.WEEDING, new Licence(0, 0, 0, false,
             new ExamStage.Sat(at(helper, DESK), EXAM_DAY_NUMBER, true)));
         desk.book(new DeskBooking(pet.getUUID(), "Shisa", QualificationData.WEEDING, 5, EXAM_DAY_NUMBER, Optional.of(true)));
-        helper.assertTrue(desk.sheet() == DeskSheet.PASSED, "the desk does not have the results on it");
+        helper.assertTrue(desk.sheet() == DeskSheet.PASSED, Component.literal("the desk does not have the results on it"));
 
         helper.succeedWhen(() -> {
             helper.assertTrue(pet.licences().get(QualificationData.WEEDING).held() == 1,
-                "the pet has not heard it passed grade 5");
+                Component.literal("the pet has not heard it passed grade 5"));
             BlockPos chair = helper.absolutePos(ExamDeskBlock.chair(DESK, Direction.NORTH));
             helper.assertTrue(pet.distanceToSqr(chair.getX() + 0.5, pet.getY(), chair.getZ() + 0.5) < 2.0 * 2.0,
-                "the pet heard its results without going to the desk");
+                Component.literal("the pet heard its results without going to the desk"));
         });
     }
 
@@ -218,8 +215,8 @@ public final class ExamGameTests {
 
         helper.succeedWhen(() -> {
             Licence licence = pet.licences().get(QualificationData.WEEDING);
-            helper.assertTrue(licence.exam() instanceof ExamStage.None, "the pet is still signed up for yesterday's exam");
-            helper.assertTrue(licence.practice() == 1, "missing the exam cost the pet its practice");
+            helper.assertTrue(licence.exam() instanceof ExamStage.None, Component.literal("the pet is still signed up for yesterday's exam"));
+            helper.assertTrue(licence.practice() == 1, Component.literal("missing the exam cost the pet its practice"));
         });
     }
 
@@ -231,7 +228,7 @@ public final class ExamGameTests {
             new ExamStage.Sat(at(helper, DESK), EXAM_DAY_NUMBER, true)));
 
         helper.succeedWhen(() -> helper.assertTrue(pet.licences().get(QualificationData.WEEDING).held() == 1,
-            "the pet has not heard its results"));
+            Component.literal("the pet has not heard its results")));
     }
 
     /** One told to sit hears by noon where it sits: a fail, and one more fail to try again after. */
@@ -245,8 +242,8 @@ public final class ExamGameTests {
 
         helper.succeedWhen(() -> {
             Licence licence = pet.licences().get(QualificationData.WEEDING);
-            helper.assertTrue(licence.paper().isEmpty(), "the pet has not heard its results");
-            helper.assertTrue(licence.held() == 0 && licence.fails() == 2, "a fail was not counted");
+            helper.assertTrue(licence.paper().isEmpty(), Component.literal("the pet has not heard its results"));
+            helper.assertTrue(licence.held() == 0 && licence.fails() == 2, Component.literal("a fail was not counted"));
         });
     }
 
@@ -262,12 +259,12 @@ public final class ExamGameTests {
         owner.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(InitItems.WEEDING_BOOK.get(), 2));
 
         pet.mobInteract(owner, InteractionHand.MAIN_HAND);
-        helper.assertTrue(pet.licences().get(QualificationData.WEEDING).read(), "the pet did not read the book");
-        helper.assertTrue(owner.getItemInHand(InteractionHand.MAIN_HAND).getCount() == 1, "the book was not spent");
+        helper.assertTrue(pet.licences().get(QualificationData.WEEDING).read(), Component.literal("the pet did not read the book"));
+        helper.assertTrue(owner.getItemInHand(InteractionHand.MAIN_HAND).getCount() == 1, Component.literal("the book was not spent"));
 
         pet.mobInteract(owner, InteractionHand.MAIN_HAND);
         helper.assertTrue(owner.getItemInHand(InteractionHand.MAIN_HAND).getCount() == 1,
-            "a pet that had read the book already took another");
+            Component.literal("a pet that had read the book already took another"));
         helper.succeed();
     }
 
@@ -281,8 +278,8 @@ public final class ExamGameTests {
         // The weeding slip pays one or two coins; five grades add a coin each.
         int plain = weedingPay(helper, unlicensed);
         int licensed = weedingPay(helper, gradeOne);
-        helper.assertTrue(plain >= 1 && plain <= 2, "a pet with no licence was paid " + plain);
-        helper.assertTrue(licensed >= 6 && licensed <= 7, "a grade 1 pet was paid " + licensed);
+        helper.assertTrue(plain >= 1 && plain <= 2, Component.literal("a pet with no licence was paid " + plain));
+        helper.assertTrue(licensed >= 6 && licensed <= 7, Component.literal("a grade 1 pet was paid " + licensed));
         helper.succeed();
     }
 
@@ -291,7 +288,7 @@ public final class ExamGameTests {
         BlockState desk = InitBlocks.EXAM_DESK.get().defaultBlockState().setValue(ExamDeskBlock.FACING, Direction.NORTH);
         helper.setBlock(DESK, desk);
         helper.setBlock(ExamDeskBlock.chair(DESK, Direction.NORTH), desk.setValue(ExamDeskBlock.PART, DeskPart.CHAIR));
-        return (ExamDeskBlockEntity) helper.getBlockEntity(DESK);
+        return helper.getBlockEntity(DESK, ExamDeskBlockEntity.class);
     }
 
     /** A practised pet of a fresh owner's, signed up at the desk. */
@@ -300,7 +297,7 @@ public final class ExamGameTests {
         owner.getInventory().add(new ItemStack(Items.DIAMOND, 1));
         AbstractPet pet = ownersPet(helper, owner, rel, true);
         Optional<ExamEnrollment.Refusal> refusal = ExamEnrollment.signUp(owner, desk, QualificationData.WEEDING, pet.getUUID());
-        helper.assertTrue(refusal.isEmpty(), "the pet was not signed up: " + refusal);
+        helper.assertTrue(refusal.isEmpty(), Component.literal("the pet was not signed up: " + refusal));
         return pet;
     }
 

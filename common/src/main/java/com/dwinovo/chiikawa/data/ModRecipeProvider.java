@@ -119,10 +119,10 @@ public final class ModRecipeProvider extends RecipeProvider {
             .save(this.output);
 
         // Sweets from a sugar spoon: three sugar make four candies you can blow.
-        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, InitItems.WHISTLE_CANDY.get(), 4)
-                .requires(Items.SUGAR, 3)
-                .unlockedBy(getHasName(Items.SUGAR), has(Items.SUGAR))
-                .save(recipeOutput);
+        ShapelessRecipeBuilder.shapeless(itemLookup, RecipeCategory.MISC, InitItems.WHISTLE_CANDY.get(), 4)
+            .requires(Items.SUGAR, 3)
+            .unlockedBy(getHasName(Items.SUGAR), has(Items.SUGAR))
+            .save(this.output);
 
         // A counter: a slab of planks over a chest, with an emerald on the till.
         ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.DECORATIONS, InitItems.SHOP.get())
