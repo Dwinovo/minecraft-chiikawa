@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * One page of the handbook: a strip of four panels, each a little scene and a line under
@@ -70,6 +71,9 @@ public record ManualPage(int order, String title, List<Panel> panels) {
      * @param y up from the ground, as a share of the panel's height
      * @param scale how big, 1 being the usual size
      * @param facing degrees it is turned from facing the reader, towards the panel's right
+     * @param offset how far from its spot it is, in pixels, turned the way it faces: two
+     *               actors on the same spot and facing alike stand as they would in the
+     *               world, such as a pet on the chair of an exam desk
      * @param hold what a pet holds, which is also the job it looks the part for
      * @param bag the bag a pet wears
      * @param sit whether a pet sits
@@ -80,7 +84,7 @@ public record ManualPage(int order, String title, List<Panel> panels) {
      */
     public record Actor(Optional<Identifier> pet, Optional<Identifier> prop,
                         Optional<ExtraCodecs.TagOrElementLocation> item, float x, float y, float scale, float facing,
-                        Optional<ExtraCodecs.TagOrElementLocation> hold, Optional<ExtraCodecs.TagOrElementLocation> bag,
+                        Vec3 offset, Optional<ExtraCodecs.TagOrElementLocation> hold, Optional<ExtraCodecs.TagOrElementLocation> bag,
                         boolean sit, boolean walk, Optional<PetAction> action, Optional<PetReaction> reaction,
                         Motion motion) {
         public static final int EVERY = 40;
@@ -96,6 +100,7 @@ public record ManualPage(int order, String title, List<Panel> panels) {
             Codec.FLOAT.optionalFieldOf("y", 0.0F).forGetter(Actor::y),
             Codec.floatRange(0.0F, 4.0F).optionalFieldOf("scale", 1.0F).forGetter(Actor::scale),
             Codec.FLOAT.optionalFieldOf("facing", 0.0F).forGetter(Actor::facing),
+            Vec3.CODEC.optionalFieldOf("offset", Vec3.ZERO).forGetter(Actor::offset),
             ExtraCodecs.TAG_OR_ELEMENT_ID.optionalFieldOf("hold").forGetter(Actor::hold),
             ExtraCodecs.TAG_OR_ELEMENT_ID.optionalFieldOf("bag").forGetter(Actor::bag),
             Codec.BOOL.optionalFieldOf("sit", false).forGetter(Actor::sit),

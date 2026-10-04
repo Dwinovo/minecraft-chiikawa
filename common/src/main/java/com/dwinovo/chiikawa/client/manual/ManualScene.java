@@ -11,6 +11,10 @@ import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.ui.Rect;
 import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.widget.Bubble;
+import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +31,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -149,10 +154,17 @@ public final class ManualScene {
         /**
          * From the middle of the area to where this stands, in blocks of {@code size} screen
          * pixels: the game draws a thing in a screen from the middle of the area it is given.
+         * The actor's own offset, in the frame a pet and a prop are both turned from, is
+         * turned the way it faces and added.
          */
         Vector3f offset(Rect area, int groundY, float size) {
-            return new Vector3f((screenX(area) - (area.x() + area.right()) / 2.0F) / size,
-                (screenY(area, groundY) - (area.y() + area.bottom()) / 2.0F) / size, 0.0F);
+            Vec3 own = actor.offset();
+            double facing = Math.toRadians(actor.facing());
+            double turnedX = own.x * Math.cos(facing) + own.z * Math.sin(facing);
+            double turnedZ = -own.x * Math.sin(facing) + own.z * Math.cos(facing);
+            return new Vector3f((screenX(area) - (area.x() + area.right()) / 2.0F) / size - (float) (turnedX / 16.0),
+                (screenY(area, groundY) - (area.y() + area.bottom()) / 2.0F) / size - (float) (own.y / 16.0),
+                (float) (turnedZ / 16.0));
         }
     }
 
