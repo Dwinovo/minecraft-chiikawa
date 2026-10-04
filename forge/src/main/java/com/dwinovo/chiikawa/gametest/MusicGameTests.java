@@ -23,15 +23,15 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 
 /**
  * What a musician does when a song of its music box ends. The songs are two short ones of
  * silence written into the server's music folder the way a player adds one; the stream
  * runs on the wall clock, so each takes its couple of real seconds to end.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class MusicGameTests {
     private static final String BATCH = "chiikawa_music";
     /**
