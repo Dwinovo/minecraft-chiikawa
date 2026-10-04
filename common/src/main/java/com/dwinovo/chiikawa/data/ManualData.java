@@ -3,6 +3,8 @@ package com.dwinovo.chiikawa.data;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
+import com.dwinovo.chiikawa.block.DeskPart;
+import com.dwinovo.chiikawa.block.ExamDeskBlock;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
@@ -22,6 +24,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * The generated handbook pages (gameplay doc, "the handbook"): each a four-panel strip the
@@ -45,7 +48,8 @@ public final class ManualData {
             id("supplies"), supplies(),
             id("upgrade"), upgrade(),
             id("safety"), safety(),
-            id("friends"), friends());
+            id("friends"), friends(),
+            id("licence"), licence());
     }
 
     /** A page's title, by the page's name: shared with the wording, which is written to it. */
@@ -185,6 +189,38 @@ public final class ManualData {
                     .play("guitar").every(200)));
     }
 
+    /**
+     * The weeding licence (0.1.2): practice and the study guide, signing a pet up at an exam
+     * desk, the paper written there, and the results — Hachiware passing and Chiikawa not,
+     * as it went for them the first time.
+     */
+    private static ManualPage licence() {
+        return page("licence", 80,
+            panel(item(Items.SHORT_GRASS).at(0.18F).scale(0.8F),
+                pet(InitEntity.CHIIKAWA_PET).at(0.38F).facing(20.0F).hold(Items.WOODEN_HOE).action(PetAction.HARVEST).every(24),
+                item(Items.SHORT_GRASS).at(0.28F),
+                item(Items.SHORT_GRASS).at(0.5F).scale(0.9F),
+                item(InitItems.WEEDING_BOOK.get()).at(0.76F).up(0.4F).bob()),
+            panel(chair(-30.0F).at(0.42F),
+                prop(InitBlocks.EXAM_DESK.get()).at(0.42F).facing(-30.0F),
+                item(Items.DIAMOND).at(0.78F).up(0.4F).bob()),
+            // On the chair as it sits there in the world, side on, so the paper it bends
+            // over and the pencil it writes with show.
+            panel(chair(60.0F).at(0.6F),
+                pet(InitEntity.CHIIKAWA_PET).at(0.6F).facing(60.0F).offset(ExamDeskBlock.SEAT).sit()
+                    .play("exam").every(80),
+                prop(InitBlocks.EXAM_DESK.get()).at(0.6F).facing(60.0F)),
+            panel(pet(InitEntity.HACHIWARE_PET).at(0.3F).facing(30.0F).reaction(PetReaction.HAPPY).every(40)
+                    .say(VoiceMoment.EXAM_PASS),
+                pet(InitEntity.CHIIKAWA_PET).at(0.7F).facing(-30.0F).reaction(PetReaction.HURT).every(40)));
+    }
+
+    /** An exam desk's chair, where it stands behind a desk on the same spot facing the same way. */
+    private static Actor chair(float facing) {
+        ResourceLocation desk = BuiltInRegistries.ITEM.getKey(InitItems.EXAM_DESK.get());
+        return new Actor().prop(DeskPart.CHAIR.model(desk)).facing(facing).offset(new Vec3(0, 0, 16));
+    }
+
     private static ManualPage page(String name, int order, Actor[]... panels) {
         List<ManualPage.Panel> built = new ArrayList<>();
         for (int i = 0; i < panels.length; i++) {
@@ -231,6 +267,7 @@ public final class ManualData {
         private float y;
         private float scale = 1.0F;
         private float facing;
+        private Vec3 offset = Vec3.ZERO;
         private Optional<ExtraCodecs.TagOrElementLocation> hold = Optional.empty();
         private Optional<ExtraCodecs.TagOrElementLocation> bag = Optional.empty();
         private boolean sit;
@@ -274,6 +311,12 @@ public final class ManualData {
 
         Actor facing(float degrees) {
             facing = degrees;
+            return this;
+        }
+
+        /** Off its spot by {@code pixels}, turned the way it faces. */
+        Actor offset(Vec3 pixels) {
+            offset = pixels;
             return this;
         }
 
@@ -334,7 +377,7 @@ public final class ManualData {
         }
 
         ManualPage.Actor build() {
-            return new ManualPage.Actor(pet, prop, item, x, y, scale, facing, hold, bag, sit, walk,
+            return new ManualPage.Actor(pet, prop, item, x, y, scale, facing, offset, hold, bag, sit, walk,
                 action, reaction, new ManualPage.Motion(play, every, say, bob));
         }
     }

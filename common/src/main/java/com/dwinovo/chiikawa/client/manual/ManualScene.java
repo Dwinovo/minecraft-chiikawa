@@ -12,6 +12,7 @@ import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.widget.Bubble;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -144,6 +146,17 @@ public final class ManualScene {
         float screenY(Rect area, int groundY) {
             return groundY - actor.y() * area.height();
         }
+
+        /**
+         * From its spot to where it stands, turned the way it faces; the pose is in blocks,
+         * in the frame a pet and a prop are both turned from.
+         */
+        void offset(PoseStack pose) {
+            Vec3 offset = actor.offset();
+            pose.mulPose(Axis.YP.rotationDegrees(actor.facing()));
+            pose.translate(offset.x / 16.0, offset.y / 16.0, offset.z / 16.0);
+            pose.mulPose(Axis.YP.rotationDegrees(-actor.facing()));
+        }
     }
 
     private static final class StagedPet extends Staged {
@@ -189,6 +202,7 @@ public final class ManualScene {
             // PoseStack.scale would flip the normals too, and turn the inventory light around.
             graphics.pose().mulPoseMatrix(new Matrix4f().scaling(size, size, -size));
             graphics.pose().mulPose(Axis.ZP.rotationDegrees(180.0F));
+            offset(graphics.pose());
             Lighting.setupForEntityInInventory();
             EntityRenderDispatcher dispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
             dispatcher.setRenderShadow(false);
@@ -231,6 +245,7 @@ public final class ManualScene {
             // PoseStack.scale would flip the normals too, and turn the inventory light around.
             graphics.pose().mulPoseMatrix(new Matrix4f().scaling(size, size, -size));
             graphics.pose().mulPose(Axis.ZP.rotationDegrees(180.0F));
+            offset(graphics.pose());
             // Turned the way a pet is, so a prop and a pet given the same facing face alike.
             graphics.pose().mulPose(Axis.YP.rotationDegrees(actor.facing()));
             graphics.pose().scale(PIXEL, PIXEL, PIXEL);

@@ -6,6 +6,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.RecordBuilder;
+import java.util.List;
+import net.minecraft.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
@@ -13,16 +15,18 @@ import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.util.valueproviders.IntProviderType;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * The mod's data read and written the way later versions of the game read and write it, so
  * a data pack is the same files on every version the mod is built for. 1.20.2's own codecs
- * differ in two places the mod's data goes through:
+ * differ in three places the mod's data goes through:
  *
  * <ul>
  *   <li>An item named by an id nobody registered decodes as air rather than failing.
  *   <li>A value provider writes its fields under {@code "value"} instead of beside its
  *       {@code "type"}.
+ *   <li>A {@code Vec3} has no codec; later versions read it as a list of three numbers.
  * </ul>
  */
 public final class ModCodecs {
@@ -47,6 +51,11 @@ public final class ModCodecs {
     /** As {@link #INT_PROVIDER}, never below one. */
     public static final Codec<IntProvider> POSITIVE_INT_PROVIDER =
         ExtraCodecs.lazyInitializedCodec(() -> IntProvider.codec(1, Integer.MAX_VALUE, INT_PROVIDER));
+
+    /** A point or offset: a list of three numbers, as {@code Vec3.CODEC} reads it later. */
+    public static final Codec<Vec3> VEC3 = Codec.DOUBLE.listOf().comapFlatMap(
+        list -> Util.fixedSize(list, 3).map(coords -> new Vec3(coords.get(0), coords.get(1), coords.get(2))),
+        vec -> List.of(vec.x(), vec.y(), vec.z()));
 
     private ModCodecs() {
     }
