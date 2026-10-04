@@ -11,6 +11,7 @@ import com.dwinovo.chiikawa.item.PetBellItem;
 import com.dwinovo.chiikawa.item.PetDollItem;
 import com.dwinovo.chiikawa.item.RakkoSword;
 import com.dwinovo.chiikawa.item.UsagiWeapon;
+import com.dwinovo.chiikawa.item.WhistleCandyItem;
 import com.dwinovo.chiikawa.platform.Services;
 import java.util.function.Function;
 import java.util.List;
@@ -69,6 +70,10 @@ public final class InitItems {
     public static final Supplier<Item> PET_BELL =
         registerItem("pet_bell", PetBellItem::new);
 
+    /** Hold to blow: the pets nearby take the order it is set to; sneak-use to change the order. */
+    public static final Supplier<Item> WHISTLE_CANDY =
+        registerItem("whistle_candy", properties -> new WhistleCandyItem(properties.stacksTo(64)));
+
     public static final Supplier<Item> BACKPACK =
         registerItem("backpack", properties -> new BagItem(properties, BagItem.Wear.ON_BACK));
     public static final Supplier<Item> BEAR_POUCH =
@@ -81,12 +86,12 @@ public final class InitItems {
         registerItem("handbook", HandbookItem::new);
     /**
      * Everything drawn from a Bedrock model of its own, by {@code PropRenderer}: the bags,
-     * the labor board, the shop, the exam desk, the handbook and the pets' weapons. Each loader gives these their special item
+     * the labor board, the shop, the exam desk, the handbook, the whistle candy and the pets' weapons. Each loader gives these their special item
      * renderer, and their item models are generated from this list.
      */
     public static final List<Supplier<? extends Item>> PROPS =
         List.of(BACKPACK, BEAR_POUCH, WHALE_POUCH, STAR_POUCH, LABOR_BOARD, SHOP, EXAM_DESK, HANDBOOK,
-            CHIIKAWA_WEAPON, HACHIWARE_WEAPON, USAGI_WEAPON, RAKKO_SWORD);
+            WHISTLE_CANDY, CHIIKAWA_WEAPON, HACHIWARE_WEAPON, USAGI_WEAPON, RAKKO_SWORD);
 
     public static final Supplier<Item> USAGI_DOLL =
         registerItem("usagi_doll", properties -> new PetDollItem(properties, InitEntity.USAGI_PET));
