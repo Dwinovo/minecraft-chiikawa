@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.qualification;
 
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.block.ExamDeskBlockEntity;
+import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
@@ -45,6 +46,11 @@ public final class PetExams {
             }
         }
         return Optional.empty();
+    }
+
+    /** Whether the pet is in its chair at an exam desk, at the paper or handing it in. */
+    public static boolean seatedAtExam(AbstractPet pet) {
+        return pet.getActivity() == PetActivity.EXAM;
     }
 
     /** The desk this pet sat at and goes back to this morning to see how it did, if any. */
