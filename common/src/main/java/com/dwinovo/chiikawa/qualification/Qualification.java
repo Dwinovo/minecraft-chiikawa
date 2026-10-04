@@ -21,7 +21,7 @@ import net.minecraft.world.item.Item;
  * {@link #rank}.
  *
  * @param grades how many grades there are
- * @param fee what an owner pays at a board to open the exam there
+ * @param fee what an owner pays at an exam desk to sign a pet up there
  * @param practiceTask the slip type whose completion counts as practice
  * @param requiredPractice slips finished since the last exam before a pet may sit the next
  * @param basePass the chance of passing the exam for each grade, the first grade first
