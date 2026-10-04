@@ -12,18 +12,35 @@ import java.util.List;
  * as each face is its own.
  *
  * @param animations the animations that show the bone, by short name
+ * @param unless animations that put it away again while they play over one of those
  */
-public record ShownDuring(List<String> animations) implements BoneVisibilityRule {
+public record ShownDuring(List<String> animations, List<String> unless) implements BoneVisibilityRule {
     public ShownDuring {
         animations = List.copyOf(animations);
+        unless = List.copyOf(unless);
     }
 
     public static ShownDuring any(String... animations) {
-        return new ShownDuring(List.of(animations));
+        return new ShownDuring(List.of(animations), List.of());
+    }
+
+    /** @return the same, put away while any of {@code animations} plays */
+    public ShownDuring unless(String... animations) {
+        return new ShownDuring(this.animations, List.of(animations));
+    }
+
+    /** @return whether the bone shows in a pose made of {@code animation} alone */
+    public boolean shownIn(String animation) {
+        return animations.contains(animation) && !unless.contains(animation);
     }
 
     @Override
     public boolean isVisible(ChiikawaRenderState state, PetAnimContext ctx) {
+        for (String animation : unless) {
+            if (ChiikawaEntityRenderer.isAnyControllerPlaying(state, animation)) {
+                return false;
+            }
+        }
         for (String animation : animations) {
             if (ChiikawaEntityRenderer.isAnyControllerPlaying(state, animation)) {
                 return true;
