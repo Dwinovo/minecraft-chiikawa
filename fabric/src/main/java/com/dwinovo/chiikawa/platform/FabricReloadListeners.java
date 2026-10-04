@@ -1,5 +1,7 @@
 package com.dwinovo.chiikawa.platform;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
@@ -19,12 +21,19 @@ public final class FabricReloadListeners {
      * @param type server data or client resources
      * @param id the listener's name
      * @param listener the vanilla listener to run under it
+     * @param after the listeners that have to have run, which Fabric runs in no order of its own unless told one
      */
-    public static void register(PackType type, ResourceLocation id, PreparableReloadListener listener) {
+    public static void register(PackType type, ResourceLocation id, PreparableReloadListener listener,
+            ResourceLocation... after) {
         ResourceManagerHelper.get(type).registerReloadListener(new IdentifiableResourceReloadListener() {
             @Override
             public ResourceLocation getFabricId() {
                 return id;
+            }
+
+            @Override
+            public Collection<ResourceLocation> getFabricDependencies() {
+                return List.of(after);
             }
 
             @Override
