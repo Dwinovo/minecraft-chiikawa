@@ -51,7 +51,7 @@ public final class MusicGameTests {
 
     /** In order: the song after the selected one plays on its own once the selected one ends. */
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = CASE_TICKS)
-    public static void a_musician_in_order_goes_on_to_the_next_song(GameTestHelper helper) {
+    public static void a_musician_repeating_all_goes_on_to_the_next_song(GameTestHelper helper) {
         quietYard(helper, NOON);
         ServerMusicLibrary library = ServerMusicSystem.library(helper.getLevel().getServer());
         addSong(library, FIRST, SONG_SECONDS);
@@ -62,7 +62,7 @@ public final class MusicGameTests {
             .thenWaitUntil(() -> helper.assertTrue(
                 readySong(library, FIRST).isPresent() && readySong(library, SECOND).isPresent(),
                 "the songs were never imported"))
-            .thenExecute(() -> hachiware.set(busker(helper, library, PlaybackMode.IN_ORDER)))
+            .thenExecute(() -> hachiware.set(busker(helper, library, PlaybackMode.REPEAT_ALL)))
             .thenWaitUntil(() -> helper.assertTrue(nowPlaying(hachiware.get(), library, FIRST),
                 "Hachiware never started the selected song"))
             .thenWaitUntil(() -> helper.assertTrue(nowPlaying(hachiware.get(), library, SECOND)
