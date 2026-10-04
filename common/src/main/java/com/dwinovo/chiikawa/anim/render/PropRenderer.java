@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.anim.api.ModelLibrary;
 import com.dwinovo.chiikawa.anim.baked.BakedCube;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
 import com.dwinovo.chiikawa.anim.runtime.PoseSampler;
+import com.dwinovo.chiikawa.block.PropAtRest;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import java.util.Map;
@@ -33,6 +34,10 @@ import org.joml.Vector3f;
  * a sword or a tool with {@code item/handheld}'s, laid corner to corner as a sword's sprite
  * is drawn; anything else with {@code item/generated}'s. Either of the last two is turned to
  * face the way a sprite does and sized to fill as much of a slot as a sprite does.
+ *
+ * <p>Drawn with nothing to say which of its bones to show — as an item, or in the
+ * handbook — a prop shows the bones it has at rest: all of them, unless it is a block that
+ * says otherwise ({@link PropAtRest}).
  *
  * <p>A sword or a tool is modelled standing up, the end it is held by at the bottom and its
  * front towards {@code -Z} like any prop's.
@@ -79,9 +84,17 @@ public final class PropRenderer {
     private PropRenderer() {
     }
 
-    /** The whole prop, with the pose at its origin, in model pixels. */
+    /** The prop at rest, with the pose at its origin, in model pixels. */
     public static void draw(ResourceLocation id, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
-        draw(id, pose, buffers, light, overlay, bone -> true);
+        draw(id, pose, buffers, light, overlay, atRest(id));
+    }
+
+    /** Which of a prop's bones it shows at rest: all, unless it is a block that says otherwise. */
+    static Predicate<String> atRest(ResourceLocation id) {
+        return BuiltInRegistries.BLOCK.getOptional(id)
+            .filter(PropAtRest.class::isInstance)
+            .map(block -> (Predicate<String>) ((PropAtRest) block)::shownAtRest)
+            .orElse(bone -> true);
     }
 
     /**
@@ -124,7 +137,7 @@ public final class PropRenderer {
         } else {
             intoSprite(model, handheld ? HANDHELD_LEAN : 0.0F, pose);
         }
-        draw(id, model, pose, buffers, light, overlay, bone -> true);
+        draw(id, model, pose, buffers, light, overlay, atRest(id));
         pose.popPose();
     }
 
