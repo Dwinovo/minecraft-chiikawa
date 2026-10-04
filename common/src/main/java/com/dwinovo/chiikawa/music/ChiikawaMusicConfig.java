@@ -11,7 +11,8 @@ public record ChiikawaMusicConfig(
     int opusBitrate,
     int framesPerChunk,
     int jitterBufferChunks,
-    int leadSeconds
+    int leadSeconds,
+    int retrySeconds
 ) {
     public static final ChiikawaMusicConfig DEFAULT = new ChiikawaMusicConfig(
         true,
@@ -21,7 +22,8 @@ public record ChiikawaMusicConfig(
         48000,
         5,
         3,
-        2
+        2,
+        10
     );
 
     public static final Codec<ChiikawaMusicConfig> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -32,7 +34,8 @@ public record ChiikawaMusicConfig(
         Codec.INT.optionalFieldOf("opus_bitrate", DEFAULT.opusBitrate).forGetter(ChiikawaMusicConfig::opusBitrate),
         Codec.INT.optionalFieldOf("frames_per_chunk", DEFAULT.framesPerChunk).forGetter(ChiikawaMusicConfig::framesPerChunk),
         Codec.INT.optionalFieldOf("jitter_buffer_chunks", DEFAULT.jitterBufferChunks).forGetter(ChiikawaMusicConfig::jitterBufferChunks),
-        Codec.INT.optionalFieldOf("lead_seconds", DEFAULT.leadSeconds).forGetter(ChiikawaMusicConfig::leadSeconds)
+        Codec.INT.optionalFieldOf("lead_seconds", DEFAULT.leadSeconds).forGetter(ChiikawaMusicConfig::leadSeconds),
+        Codec.INT.optionalFieldOf("retry_seconds", DEFAULT.retrySeconds).forGetter(ChiikawaMusicConfig::retrySeconds)
     ).apply(instance, ChiikawaMusicConfig::new));
 
     public int frameSamples() {
