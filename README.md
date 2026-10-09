@@ -1,141 +1,78 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/Dwinovo/minecraft-chiikawa/1.21.1/common/src/main/resources/logo.png" alt="Chiikawa Mod" width="320" />
-
 # Chiikawa Mod
 
-**Bring the world of *Chiikawa* into Minecraft — tameable little friends, a job system that lets them work on their own, and a music box that plays your very own songs.**
+[**English**](README.md) · [简体中文](README_ZH.md)
 
-**English** · [简体中文](README_ZH.md)
+![Minecraft](https://img.shields.io/badge/Minecraft-62B47A?style=flat-square)
+![Java](https://img.shields.io/badge/Java-007396?style=flat-square&logo=openjdk&logoColor=white)
+![License](https://img.shields.io/badge/license-CC%20BY--NC--SA%204.0-A8731E?style=flat-square)
+![QQ](https://img.shields.io/badge/QQ-995178570-12B7F5?style=flat-square&logo=qq&logoColor=white)
+[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/wPkgfst5Z)
 
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1%20–%2026.1.2-62B47A?logo=minecraft&logoColor=white)](#supported-versions)
-[![Loaders](https://img.shields.io/badge/Loaders-Fabric%20%7C%20NeoForge%20%7C%20Forge-blue)](#supported-versions)
-[![Modrinth](https://img.shields.io/badge/Download-Modrinth-00AF5C?logo=modrinth&logoColor=white)](https://modrinth.com/mod/pT971QUb)
-[![CurseForge](https://img.shields.io/badge/Download-CurseForge-F16436?logo=curseforge&logoColor=white)](https://www.curseforge.com/minecraft/mc-mods/chiikawa)
-[![License](https://img.shields.io/badge/License-CC--BY--NC--SA--4.0-lightgrey)](LICENSE)
-[![GitHub Stars](https://img.shields.io/github/stars/Dwinovo/minecraft-chiikawa?style=flat&logo=github&label=Star)](https://github.com/Dwinovo/minecraft-chiikawa)
+[**Website**](https://chiikawa.dwinovo.cn/en/) · [**Installation**](#installation) · [**Getting Started**](#getting-started) · [**License and Disclaimer**](#license-and-disclaimer) · [**Thanks**](#thanks)
+
+<img src="assets/branding/chiikawa-hero-2560.webp" alt="Chiikawa Mod" width="100%">
 
 </div>
 
----
+The Chiikawa Mod **brings the world of *Chiikawa* into Minecraft**. Chiikawa, Hachiware, Usagi and their friends move into your world and *take jobs from the labor board, earn emeralds and go shopping*, living the same days they do in the series.
 
-> [!IMPORTANT]
-> ⭐ **Enjoying the mod? [Give it a Star](https://github.com/Dwinovo/minecraft-chiikawa)** — it takes one click and is the best way to show support.
-> 🐛 **Found a bug or have an idea? [Open an issue](https://github.com/Dwinovo/minecraft-chiikawa/issues/new/choose)** — please use GitHub Issues rather than the Modrinth / CurseForge comments, so nothing gets lost.
+> [!TIP]
+> Come and chat on [Discord](https://discord.gg/wPkgfst5Z) or in the QQ group **995178570**. More on the [website](https://chiikawa.dwinovo.cn/en/).
 
-> Chiikawa, Hachiware, Usagi… these healing, slightly goofy little ones now move into your world.
-> Tame them, hand them a tool, and they'll farm, fight, and even **pick up a music box and play your favorite song** for you.
-> They'll be adorable, they'll get hurt, they'll let out their signature squeaks — and when they fall, all it takes is a slice of cake to bring them back. 🎂
+## Installation
 
-<!--
-  📸 Gallery placeholder — strongly recommend dropping 2–4 screenshots / GIFs here.
-  This is what decides whether people click download:
-  - a pack of little ones following the player (shows models + animation)
-  - a Farmer planting and harvesting in a field
-  - Hachiware holding the music box and playing (with a "♪ Now Playing" subtitle)
-  - the moment a doll is placed on a cake to revive
-  Example:
-  <div align="center">
-    <img src="docs/img/farming.gif"  width="45%" />
-    <img src="docs/img/music.gif"    width="45%" />
-  </div>
--->
+The Chiikawa Mod is on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/chiikawa) and [Modrinth](https://modrinth.com/mod/pT971QUb): search for **"Chiikawa"** in your launcher. These versions and loaders are supported:
 
-## ✨ Why you'll want it
+| Minecraft | Loaders | Java |
+|---|---|---|
+| 1.20.1, 1.20.2, 1.20.4 | Fabric, Forge | 17 |
+| 1.20.6, 1.21.1, 1.21.4, 1.21.5, 1.21.6, 1.21.7, 1.21.8, 1.21.10, 1.21.11 | Fabric, NeoForge | 21 |
+| 26.1.2, 26.2 | Fabric, NeoForge | 25 |
 
-- 🐾 **Seven characters from the original**, all tameable — Chiikawa, Hachiware, Usagi, Shisa, Momonga, Kurimanju, and Rakko, each with its own model, textures, and personality.
-- 🧰 **A job system that works on its own** — drop a tool into a pet's backpack, switch it to **Free Roam**, and it gets busy for you: the **Farmer** plants and harvests, the **Fencer** fights up close, the **Archer** picks off enemies at range, and the **Musician** plays for you.
-- 🎵 **A music box that plays your own songs** — drop `.mp3` / `.wav` files into a folder and hear them in-game. Pure-Java decoding, **no external ffmpeg required**; on a multiplayer server, everyone nearby hears the same track.
-- 🔊 **Per-character sounds** — Usagi's signature squeaks, plus tame/hurt voices for the cast, to make them feel alive.
-- 🎒 **Pet backpack** — right-click a pet with an empty hand to open its inventory and manage its tools and gear.
-- 🪆 **Dolls & spawn eggs** — a doll for every character (try placing one on a cake 🎂), and spawn eggs in Creative.
-- ⚔️ **Character weapons** — from the series: Chiikawa's and Hachiware's sasumata and Usagi's subjugation stick, craftable; Rakko's sword comes only with a wild Rakko.
+On Fabric you also need [Fabric API](https://modrinth.com/mod/fabric-api). The mod runs on both sides: on a server, **install it on the server and on every client**.
 
-## 📥 Download
+## Getting Started
 
-| Platform | Link |
-| --- | --- |
-| **Modrinth** | https://modrinth.com/mod/pT971QUb |
-| **CurseForge** | https://www.curseforge.com/minecraft/mc-mods/chiikawa |
+1. **Meet them.** Chiikawa, Hachiware, Usagi, Momonga, Kurimanju, Rakko, Shisa and Furuhonya turn up in plains, sunflower plains, savannas, savanna plateaus, deserts, swamps and snowy plains, often already holding a tool.
+2. **Tame them with food.** Right-click one while holding bread, a cookie, an apple, cooked meat or the like. *Each try has a 30% chance*; hearts mean it worked.
+3. **Give orders.** Sneak and right-click your little friend to switch between three orders:
 
-> **Fabric** players also need the [Fabric API](https://modrinth.com/mod/fabric-api).
+   | Order | What it does |
+   |---|---|
+   | Follow | Stays by your side, and still picks up jobs and goes shopping when a board or shop is on the way |
+   | Stay | Stays where it is |
+   | Free roam | Makes where it stands its home and gets on with its job nearby: takes jobs, goes shopping, brings you presents |
 
-## 🎮 How to Play
+   Right-click it without sneaking to open its screen, with its backpack, its status and its orders.
 
-New here? This section is all you need — most "it's not working" reports come from skipping one of these steps.
+### Jobs
 
-### 🍖 Taming
-Hold **almost any food** (apple, bread, cookie, carrot, potato, cooked meat, melon slice, sweet berries, golden apple…) and **right-click the pet**.
-
-> ⚠️ **Taming is chance-based.** Each feed has a chance to succeed, so keep feeding! **Hearts** = tamed. A **puff of smoke / confused reaction** = not yet, try again. Flowers no longer work — use food.
-
-### 🧭 Three modes — Follow / Sit / Free Roam
-Once it's yours, **Sneak (Shift) + right-click with an empty hand** to cycle through:
-
-- **Follow** — the pet follows you.
-- **Sit** — the pet stays put.
-- **Free Roam** — the pet performs its job around the spot where you set it.
-
-### 💼 Jobs
-A pet's job is decided by the **tool it holds**. Open its backpack (right-click with an empty hand), place a tool inside, then set it to **Free Roam**:
+What a little friend does **depends on the tool in its hand**:
 
 | Job | Give it… | What it does |
-| --- | --- | --- |
-| **Farmer** | a Hoe | plants and harvests nearby crops (modded seeds supported) |
-| **Fencer** | a Sword (or a character's weapon) | attacks hostile mobs in melee |
-| **Archer** | a Bow (keep arrows in the backpack) | attacks hostile mobs at range |
-| **Musician** | a Music Box | plays your imported music |
+|---|---|---|
+| Farmer | A hoe | Plants and harvests the crops nearby, and pulls up weeds |
+| Fencer | A sword, or its own weapon | Fights hostile mobs up close, and looks after you |
+| Archer | A bow (with arrows in its backpack) | Fights hostile mobs from a distance |
+| Musician | A music box (only Hachiware) | Plays the songs you put in the music folder |
 
-> Pets only fight/work while in **Free Roam** — in Follow and Sit they stay peaceful and won't pick fights.
->
-> 🎵 **Note: only Hachiware can currently take the Musician job** — other characters won't play even while holding a music box.
+### And then
 
-### ❤️ Other interactions
-- **Heal** a hurt pet by right-clicking it with food.
-- **Open its backpack** by right-clicking with an empty hand (no sneak).
+- **Work**: put up a labor board and every sunrise it pins up job slips. Your little friends take the ones that fit their job and earn emeralds for them, **then go and spend their savings at the shop**, sometimes on a present for you.
+- **The weeding licence**: place an exam desk and pay a diamond to sign a little friend up for the weeding licence. The higher its grade, the more it earns for weeding.
+- **Whistle candy**: blow one and every little friend nearby follows you, sits down or goes off to play.
+- **Falling and coming back**: a little friend that falls turns into a doll; put the doll on a cake to bring it back. If one gets lost, ring the bell.
 
-### 🌍 Where they spawn
-Pets appear naturally in **Plains, Sunflower Plains, Savanna, Savanna Plateau, Desert, Swamp, and Snowy Plains**. In Creative, use the spawn eggs.
+The first time you join a world you get *Chiikawa's Work Handbook*; right-click it to read. More on the [website](https://chiikawa.dwinovo.cn/en/).
 
-### 🎁 Getting items
-- **Weapons** (the sasumata and the subjugation stick) are **craftable** — check the recipe book (wool + stick + flint). Rakko's sword is not.
-- The **Music Box** is **craftable** too (note block + planks + gold ingot).
-- **Dolls** and **spawn eggs** are in the Creative inventory. A pet also **drops its doll when it dies**, preserving its backpack and data.
+## License and Disclaimer
 
-## 🎵 Music Box: play your own songs
+The Chiikawa Mod is an **unofficial fan-made mod**, not affiliated with or endorsed by Nagano, the creator of *Chiikawa*, or the rights holders. *Chiikawa* and its characters belong to their creator. The models and textures in the mod are our own work; no official assets are used.
 
-1. Open the **Music Box** screen and click **Open Folder** to jump to `config/chiikawa/music`.
-2. Drop your `.mp3` / `.wav` files in, hit **Reload**, and pick a track.
-3. Give the Music Box to **Hachiware** and set it to the **Musician** job — it'll hold the box and play for you.
+The source code and the art (models, textures, animations) are released under [CC BY-NC-SA 4.0](LICENSE): you may share and adapt them with credit, not for commercial use, and under the same license.
 
-Audio is decoded in **pure Java** (mp3spi / JLayer for MP3, the JDK for WAV), encoded with Opus, and streamed from the server to nearby clients — **no external tools needed**.
+## Thanks
 
-> Admins can run `/chiikawa music rescan` to force a rescan of the music folder.
-
-## 🗂️ Supported Versions
-
-| Minecraft | Loaders |
-| --- | --- |
-| 26.1.2 | Fabric · NeoForge |
-| 1.21.11 / 1.21.10 / 1.21.8 / 1.21.7 / 1.21.6 / 1.21.5 / 1.21.4 / 1.21.1 | Fabric · NeoForge |
-| 1.20.6 | Fabric · NeoForge |
-| 1.20.4 / 1.20.2 / 1.20.1 | Fabric · Forge |
-
-Only Minecraft 1.20.1 and newer are maintained.
-
-> Newer snapshot releases (such as the latest 26.x) will be supported once the loader ecosystem stabilizes — please hang tight.
-
-## 🤝 Contributing
-
-Issues and pull requests are welcome.
-
-- Put shared logic in `common`; only loader-specific glue belongs in `fabric` / `neoforge` / `forge`.
-- Run `./gradlew :common:test` before opening a PR.
-- Generated resources under `**/generated/` are git-ignored and recreated by datagen — don't commit them.
-- Each Minecraft version is a separate branch; target the branch your change applies to.
-
-## 📜 License & Credits
-
-- Licensed under [**CC-BY-NC-SA-4.0**](LICENSE).
-- Art support by **zoe_1000**.
-- *Chiikawa* and its characters are the property of **Nagano**. This is a non-commercial fan project, not affiliated with or endorsed by the rights holders.
+Thanks to every player who follows, downloads and plays the Chiikawa Mod, and to the [contributors](https://github.com/Dwinovo/minecraft-chiikawa/graphs/contributors) who reported issues and sent code. Thanks to **zoe_1000** for the art.
