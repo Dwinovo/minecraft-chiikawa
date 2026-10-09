@@ -1,0 +1,26 @@
+Chiikawa Mod - Art & Assets license (CC BY-NC-SA 4.0)
+
+Copyright (c) 2026 Dwinovo.
+
+The source code of the Chiikawa Mod is licensed under LGPL-3.0 (see LICENSE, and
+licenses/GPL-3.0.txt for the GNU GPL it builds on).
+This file covers the project's original art instead, collectively the "Assets":
+
+  - the entity and prop models under
+    `common/src/main/resources/assets/chiikawa/models/`;
+  - the animations under `common/src/main/resources/assets/chiikawa/animations/`;
+  - the textures under `common/src/main/resources/assets/chiikawa/textures/`;
+  - the mod logo `common/src/main/resources/logo.png`;
+  - the branding images under `assets/branding/`.
+
+The Assets are NOT covered by the LGPL-3.0. They are licensed under the
+Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license
+(https://creativecommons.org/licenses/by-nc-sa/4.0/): you may share and adapt
+them, with attribution to "Chiikawa Mod by Dwinovo,
+https://github.com/Dwinovo/minecraft-chiikawa", not for commercial purposes, and
+under the same license.
+
+The Chiikawa Mod is an unofficial fan-made work. Chiikawa and its characters are
+the property of their creator, Nagano, and the rights holders; the Assets are the
+project's own depictions of them, and this license covers only the project's own
+rights in those depictions. No official Chiikawa assets are used.
