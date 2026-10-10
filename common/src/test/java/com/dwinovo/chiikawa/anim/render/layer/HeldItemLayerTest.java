@@ -13,7 +13,9 @@ import com.dwinovo.chiikawa.anim.baked.LoopMode;
 import com.dwinovo.chiikawa.anim.controller.BlendMode;
 import com.dwinovo.chiikawa.anim.controller.ControllerSnapshot;
 import com.dwinovo.chiikawa.anim.render.ChiikawaRenderState;
+import com.dwinovo.chiikawa.anim.render.PetData;
 import com.dwinovo.chiikawa.anim.render.PropBone;
+import com.dwinovo.chiikawa.camera.CameraCarry;
 import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
@@ -92,6 +94,19 @@ class HeldItemLayerTest {
 
         assertFalse(layer.handsFull(frame("idle", false, "camera")), "a camera on the chest took the sword out of the fist");
         assertTrue(layer.handsFull(frame("photo", false, "camera")), "a camera held up to the face is in the hands");
+    }
+
+    @Test
+    void aCameraInTheMainHandIsNotDrawnInTheFist() {
+        ChiikawaRenderState state = new ChiikawaRenderState();
+
+        state.put(PetData.CAMERA_CARRY, CameraCarry.HAND);
+        assertTrue(HeldItemLayer.cameraInHand(state), "a camera in the hand is drawn in the fist as well as on the chest");
+        state.put(PetData.CAMERA_CARRY, CameraCarry.POCKET);
+        assertFalse(HeldItemLayer.cameraInHand(state), "a sword was put away for a camera in a pocket");
+        state.put(PetData.CAMERA_CARRY, CameraCarry.NONE);
+        assertFalse(HeldItemLayer.cameraInHand(state));
+        assertFalse(HeldItemLayer.cameraInHand(new ChiikawaRenderState()), "an unset state keeps the item");
     }
 
     /**
