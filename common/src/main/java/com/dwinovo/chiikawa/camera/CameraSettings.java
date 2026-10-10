@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.RandomSource;
 
 /**
  * How a camera behaves, loaded from {@code data/<namespace>/pet_camera/<item>.json} by
@@ -27,9 +28,15 @@ import net.minecraft.util.ExtraCodecs;
  * @param fov how wide the lens sees, in degrees from top to bottom of the picture
  * @param subjects how much a pet fancies taking each kind of photo
  * @param aimTicks how long a pet holds the camera up before the shutter goes
+ * @param posedChance how often a photo is posed, from 0 (never) to 1 (always): the photographer
+ *                    calls out and whoever is in it turns to the camera and poses; the rest are
+ *                    candid, taken without a word and with everyone going about their business
  */
 public record CameraSettings(ResourceLocation film, double ownerRange, int cooldownTicks, int retryTicks, int width,
-                             int height, int fov, Subjects subjects, int aimTicks) {
+                             int height, int fov, Subjects subjects, int aimTicks, float posedChance) {
+    /** How often a photo is posed, when the data does not say. */
+    public static final float DEFAULT_POSED_CHANCE = 0.5F;
+
     /**
      * How much a pet fancies each kind of photo, as weights: a pet picks among the kinds it
      * has a chance to take now in proportion to these.
@@ -59,8 +66,21 @@ public record CameraSettings(ResourceLocation film, double ownerRange, int coold
         Codec.intRange(16, 1024).fieldOf("height").forGetter(CameraSettings::height),
         Codec.intRange(30, 110).fieldOf("fov").forGetter(CameraSettings::fov),
         Subjects.CODEC.fieldOf("subjects").forGetter(CameraSettings::subjects),
-        ExtraCodecs.POSITIVE_INT.fieldOf("aim_ticks").forGetter(CameraSettings::aimTicks)
-    ).apply(instance, CameraSettings::new));
+        ExtraCodecs.POSITIVE_INT.fieldOf("aim_ticks").forGetter(CameraSettings::aimTicks),
+        // Always written, though a file without it reads as the default: it is a number to change.
+        Codec.floatRange(0.0F, 1.0F).optionalFieldOf("posed_chance")
+            .forGetter(settings -> Optional.of(settings.posedChance()))
+    ).apply(instance, (film, ownerRange, cooldownTicks, retryTicks, width, height, fov, subjects, aimTicks, posed) ->
+        new CameraSettings(film, ownerRange, cooldownTicks, retryTicks, width, height, fov, subjects, aimTicks,
+            posed.orElse(DEFAULT_POSED_CHANCE))));
+
+    /**
+     * Rolls whether one photo is posed. Rolled once per photo, and not at all when it is bound to
+     * go one way, so a camera that always or never poses draws nothing from the pet's random.
+     */
+    public boolean posed(RandomSource random) {
+        return posedChance >= 1.0F || (posedChance > 0.0F && random.nextFloat() < posedChance);
+    }
 
     private static volatile Map<ResourceLocation, CameraSettings> byItem = Collections.emptyMap();
 
@@ -78,7 +98,8 @@ public record CameraSettings(ResourceLocation film, double ownerRange, int coold
         return byItem;
     }
 
-    static void replaceAll(Map<ResourceLocation, CameraSettings> settings) {
+    /** Replaces them all, as a data pack reload does. Public so an in-game case can try another camera. */
+    public static void replaceAll(Map<ResourceLocation, CameraSettings> settings) {
         byItem = Map.copyOf(settings);
     }
 }

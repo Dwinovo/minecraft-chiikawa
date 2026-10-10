@@ -29,15 +29,21 @@ public final class ShopBasket {
      * @param carried how many of an item the pet is carrying, for the likings that depend on it
      * @param random the pet's own random source
      * @return the line of the price list it would buy from, or nothing when it wants for
-     *         nothing here or cannot afford what it wants
+     *         nothing here, cannot afford what it wants, or is saving up for something dearer
      */
     public static Optional<ShopCatalog.Entry> wants(Personality personality, ShopCatalog catalog,
                                                     int money, ToIntFunction<Item> carried, RandomSource random) {
-        List<Personality.WeightedItem> affordable = personality.likes().stream()
-            .filter(liking -> worthBuying(liking, catalog, money, carried))
-            .toList();
-        return WeightedRandom.getRandomItem(random, affordable, Personality.WeightedItem::weight)
+        return WeightedRandom.getRandomItem(random, worthBuying(personality, catalog, money, carried),
+            Personality.WeightedItem::weight)
             .flatMap(liking -> catalog.sale(liking.item()));
+    }
+
+    /**
+     * Whether what the pet buys of this is for the pet itself and never a present. A liking
+     * the personality does not have is nothing special, so it may be a present.
+     */
+    public static boolean isKept(Personality personality, Item item) {
+        return personality.likes().stream().anyMatch(liking -> liking.item() == item && liking.keep());
     }
 
     /**
@@ -46,7 +52,7 @@ public final class ShopBasket {
      */
     public static boolean wantsAnything(Personality personality, ShopCatalog catalog, int money,
                                         ToIntFunction<Item> carried) {
-        return personality.likes().stream().anyMatch(liking -> worthBuying(liking, catalog, money, carried));
+        return !worthBuying(personality, catalog, money, carried).isEmpty();
     }
 
     /**
@@ -57,10 +63,20 @@ public final class ShopBasket {
         return item -> Payment.count(container, stack -> stack.is(item));
     }
 
-    /** Liked now, on the shelf, and within what the pet has to spend. */
-    private static boolean worthBuying(Personality.WeightedItem liking, ShopCatalog catalog, int money,
-                                       ToIntFunction<Item> carried) {
-        return liking.wantedBy(carried)
-            && catalog.sale(liking.item()).filter(entry -> entry.buy() <= money).isPresent();
+    /**
+     * What the pet would buy now: liked, on the shelf and within what it has to spend. Unless
+     * it is saving up: while it wants something it is saving for, and this shop has it on the
+     * shelf, nothing else is worth buying however cheap, and the thing itself only once it can
+     * be paid for.
+     */
+    private static List<Personality.WeightedItem> worthBuying(Personality personality, ShopCatalog catalog, int money,
+                                                              ToIntFunction<Item> carried) {
+        List<Personality.WeightedItem> saving = personality.likes().stream()
+            .filter(liking -> liking.saveUp() && liking.wantedBy(carried) && catalog.sale(liking.item()).isPresent())
+            .toList();
+        return (saving.isEmpty() ? personality.likes() : saving).stream()
+            .filter(liking -> liking.wantedBy(carried)
+                && catalog.sale(liking.item()).filter(entry -> entry.buy() <= money).isPresent())
+            .toList();
     }
 }
