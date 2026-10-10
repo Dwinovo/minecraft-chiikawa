@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.shop;
 
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
+import com.dwinovo.chiikawa.item.GiftReadiness;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.ToIntFunction;
@@ -56,10 +57,12 @@ public final class ShopBasket {
 
     /**
      * What a container holds, by item: the {@code carried} the two questions above ask of a
-     * pet's backpack.
+     * pet's backpack. Not what it has ready to give away, which is no longer something it has:
+     * a full roll of film is not film to take photos on.
      */
     public static ToIntFunction<Item> carriedIn(Container container) {
-        return item -> Payment.count(container, stack -> stack.is(item));
+        return item -> Payment.count(container,
+            stack -> stack.is(item) && !(stack.getItem() instanceof GiftReadiness gift && gift.readyToGive(stack)));
     }
 
     /**
