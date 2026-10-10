@@ -23,8 +23,8 @@ public enum PetData {
     HELD_ITEM_STACK,
     /** Worn {@link net.minecraft.world.item.ItemStack} snapshot consumed by {@code BagLayer} and the strap rules. */
     WORN_BAG,
-    /** Whether the pet has a camera in its backpack, a {@link Boolean}, consumed by the camera's visibility rule. */
-    CARRIES_CAMERA;
+    /** Where the pet has a camera, a {@link com.dwinovo.chiikawa.camera.CameraCarry}, consumed by the camera's visibility rule and {@code HeldItemLayer}. */
+    CAMERA_CARRY;
 
     /** Cached values() to avoid per-frame allocation; treat as immutable. */
     public static final PetData[] VALUES = values();
