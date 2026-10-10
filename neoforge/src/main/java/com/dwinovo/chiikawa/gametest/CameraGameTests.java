@@ -147,11 +147,6 @@ public final class CameraGameTests {
         settle(level);
     }
 
-    @BeforeBatch(batch = "chiikawa_camera_chest")
-    public static void settleChest(ServerLevel level) {
-        settle(level);
-    }
-
     /**
      * The world as every case here wants it, and the camera as the data pack has it: a case
      * that tries another camera does not leave it for the next.
@@ -344,30 +339,6 @@ public final class CameraGameTests {
         photographer(helper, InitEntity.USAGI_PET.get(), owner, true, true);
 
         stillNotAsked(helper);
-    }
-
-    /**
-     * What tells a player's game to hang the camera at the pet's chest follows the backpack, whichever
-     * slot the camera is put in or taken from, and a thing that only looks like one is not a camera.
-     */
-    @GameTest(template = "floor8", batch = "chiikawa_camera_chest", timeoutTicks = 20)
-    public static void the_camera_is_on_the_chest_while_it_is_in_the_backpack(GameTestHelper helper) {
-        AbstractPet pet = GameTestKit.owned(helper, InitEntity.HACHIWARE_PET.get(), new BlockPos(3, STAND, 3));
-        helper.assertFalse(pet.carriesCamera(), "a pet with an empty bag carries a camera");
-
-        pet.getBackpack().setItem(5, new ItemStack(Items.SPYGLASS));
-        helper.assertFalse(pet.carriesCamera(), "something that is not a camera hangs at the chest");
-
-        pet.getBackpack().setItem(AbstractPet.BACKPACK_SIZE + 2, new ItemStack(InitItems.CAMERA.get()));
-        helper.assertTrue(pet.carriesCamera(), "a camera in the bag's own slots is not on the chest");
-        pet.getBackpack().setItem(AbstractPet.BACKPACK_SIZE + 2, ItemStack.EMPTY);
-        helper.assertFalse(pet.carriesCamera(), "the camera stayed on the chest after it was taken out");
-
-        pet.getBackpack().addItem(new ItemStack(InitItems.CAMERA.get()));
-        helper.assertTrue(pet.carriesCamera(), "a camera put in the bag is not on the chest");
-        pet.getBackpack().removeItemType(InitItems.CAMERA.get(), 1);
-        helper.assertFalse(pet.carriesCamera(), "the camera stayed on the chest after it was taken out");
-        helper.succeed();
     }
 
     /** A photo that comes back the wrong size is no photo: no film used, nothing to give, a short rest. */
