@@ -117,6 +117,9 @@ public final class PetConstraints {
             case EXAM -> !wild && directive != PetDirective.STAY;
             // A whistle's order goes straight to a pet's directive; only a stranger to it is curious.
             case CURIOUS -> wild;
+            // A photo is taken for an owner, wherever the pet may walk: at heel it takes one on the
+            // way, free it takes one of the yard. Told to sit it stays where it sits.
+            case PHOTO -> !wild && directive != PetDirective.STAY;
         };
     }
 
