@@ -9,7 +9,10 @@
     "LivingEntityDieMixin",
     "PersistentEntitySectionManagerMixin"
   ],
-  "client": [],
+  "client": [
+    "CameraAccessor",
+    "MinecraftMixin"
+  ],
   "server": [],
   "injectors": {
     "defaultRequire": 1
