@@ -53,11 +53,13 @@ class LanguageDataUiTranslationTest {
         "tooltip.chiikawa.camera",
         "item.chiikawa.film",
         "tooltip.chiikawa.film",
-        "item.chiikawa.photo",
-        "tooltip.chiikawa.photo",
-        "tooltip.chiikawa.photo.scenery",
-        "screen.chiikawa.photo.loading",
-        "screen.chiikawa.photo.missing"
+        "screen.chiikawa.album.caption",
+        "screen.chiikawa.album.caption.scenery",
+        "tooltip.chiikawa.film.shots",
+        "screen.chiikawa.album.loading",
+        "screen.chiikawa.album.missing",
+        "screen.chiikawa.album.previous_page",
+        "screen.chiikawa.album.next_page"
     };
 
     @BeforeAll

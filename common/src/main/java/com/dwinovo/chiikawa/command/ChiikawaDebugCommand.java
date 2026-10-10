@@ -2,11 +2,11 @@ package com.dwinovo.chiikawa.command;
 
 import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
 import com.dwinovo.chiikawa.camera.CameraSettings;
+import com.dwinovo.chiikawa.camera.FilmRolls;
+import com.dwinovo.chiikawa.camera.PhotoScout;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSwitchLog;
-import com.dwinovo.chiikawa.init.InitDataComponents;
-import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.photo.PhotoData;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
@@ -31,7 +31,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -42,7 +42,7 @@ import net.minecraft.world.phys.Vec3;
  * condition and score, and, once {@code log on} is set for that pet, its recent intent
  * switches. {@code /chiikawa debug board} lists the day's slips of the labor board under
  * the crosshair. {@code /chiikawa debug photo <entity>} has the player's game draw a photo
- * from an entity's eyes.
+ * from an entity's eyes, and puts it on the roll of film in hand, or on a roll of its own.
  */
 public final class ChiikawaDebugCommand {
     private static final double TARGET_RANGE = 16.0;
@@ -77,8 +77,9 @@ public final class ChiikawaDebugCommand {
     }
 
     /**
-     * Asks the player's own game to draw a picture from the entity's eyes, and gives them the
-     * photo when it has been sent back and kept. It is the camera's whole path without a pet
+     * Asks the player's own game to draw a picture from the entity's eyes, and puts it on the
+     * roll of film in their hand, if it has room, or gives them a roll with it once it has been
+     * sent back and kept. It is the camera's whole path without a pet
      * in it, for looking at what the picture comes out as.
      */
     private static int takePhoto(CommandSourceStack source, Entity viewpoint) throws CommandSyntaxException {
@@ -93,10 +94,15 @@ public final class ChiikawaDebugCommand {
             @Override
             public void stored(UUID photo) {
                 if (!player.hasDisconnected()) {
-                    ItemStack stack = new ItemStack(InitItems.PHOTO.get());
-                    stack.set(InitDataComponents.PHOTO.get(), PhotoData.taken(photo, PhotoSubject.SCENERY, "",
-                        player.level(), viewpoint.getDisplayName().getString()));
-                    player.getInventory().placeItemBackInInventory(stack);
+                    PhotoData shot = PhotoData.taken(photo, PhotoSubject.SCENERY, "", player.level(),
+                        viewpoint.getDisplayName().getString());
+                    Item film = PhotoScout.filmOf(camera);
+                    // On the roll in hand if it has room, otherwise on a roll of its own.
+                    if (FilmRolls.isOpen(player.getMainHandItem(), film)) {
+                        FilmRolls.add(player.getMainHandItem(), shot);
+                    } else {
+                        player.getInventory().placeItemBackInInventory(FilmRolls.begin(film, camera.exposures(), shot));
+                    }
                     player.sendSystemMessage(Component.literal("[chiikawa-photo] Photo " + photo + " is in the library"));
                 }
             }
