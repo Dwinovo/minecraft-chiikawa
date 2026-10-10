@@ -30,6 +30,8 @@ import com.dwinovo.chiikawa.spawn.FabricPetSpawns;
 import com.dwinovo.chiikawa.spawn.PetSpawnLoader;
 import com.dwinovo.chiikawa.task.BoardLevelsLoader;
 import com.dwinovo.chiikawa.whistle.WhistleSettingsLoader;
+import com.dwinovo.chiikawa.camera.CameraSettingsLoader;
+import com.dwinovo.chiikawa.photo.PhotoSystem;
 import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
 import com.dwinovo.chiikawa.task.PetTaskTypes;
 import com.dwinovo.chiikawa.voice.PetVoiceLoader;
@@ -88,6 +90,7 @@ public class ChiikawaFabricMod implements ModInitializer {
         FabricReloadListeners.register(PackType.SERVER_DATA, ShopCatalogLoader.ID, new ShopCatalogLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, BoardLevelsLoader.ID, new BoardLevelsLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, WhistleSettingsLoader.ID, new WhistleSettingsLoader());
+        FabricReloadListeners.register(PackType.SERVER_DATA, CameraSettingsLoader.ID, new CameraSettingsLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, PetSpawnLoader.ID, new PetSpawnLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, PetVoiceLoader.ID, new PetVoiceLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, PetInteractionLoader.ID, new PetInteractionLoader());
@@ -99,7 +102,9 @@ public class ChiikawaFabricMod implements ModInitializer {
         ServerTickEvents.END_SERVER_TICK.register(ServerMusicSystem::tickServer);
         ServerTickEvents.END_SERVER_TICK.register(PetFollowKeeper::tickServer);
         ServerTickEvents.END_SERVER_TICK.register(PetRecall::tickServer);
+        ServerTickEvents.END_SERVER_TICK.register(PhotoSystem::tickServer);
         ServerLifecycleEvents.SERVER_STOPPED.register(ServerMusicSystem::stopServer);
+        ServerLifecycleEvents.SERVER_STOPPED.register(PhotoSystem::stopServer);
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> SettingsServerPacketHandler.sync(handler.getPlayer()));
         Constants.LOG.info("Hello Chiikawa Fabric world!");
         CommonClass.init();
