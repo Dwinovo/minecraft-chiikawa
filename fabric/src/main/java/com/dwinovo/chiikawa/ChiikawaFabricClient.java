@@ -11,6 +11,7 @@ import com.dwinovo.chiikawa.anim.render.impl.ShisaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.UsagiRenderer;
 import com.dwinovo.chiikawa.client.manual.GuiPropRenderer;
 import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
+import com.dwinovo.chiikawa.client.photo.ClientPhotoCache;
 import com.dwinovo.chiikawa.client.render.ExamDeskRenderer;
 import com.dwinovo.chiikawa.client.render.LaborBoardRenderer;
 import com.dwinovo.chiikawa.client.render.PropBlockRenderer;
@@ -26,6 +27,7 @@ import com.dwinovo.chiikawa.platform.FabricReloadListeners;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.PictureInPictureRendererRegistry;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -57,6 +59,7 @@ public class ChiikawaFabricClient implements ClientModInitializer {
         MenuScreens.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);
         FabricModNetworking.registerClient();
         ClientTickEvents.END_CLIENT_TICK.register(client -> ClientMusicStreamManager.tick());
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> ClientPhotoCache.clear());
 
         FabricReloadListeners.register(PackType.CLIENT_RESOURCES,
             Identifier.fromNamespaceAndPath(Constants.MOD_ID, "anim_loader"), new BedrockResourceLoader());
