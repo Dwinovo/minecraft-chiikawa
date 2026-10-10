@@ -36,6 +36,11 @@ public record ShownDuring(List<String> animations, List<String> unless) implemen
 
     @Override
     public boolean isVisible(ChiikawaRenderState state, PetAnimContext ctx) {
+        return shownIn(state);
+    }
+
+    /** @return whether one of the animations that show the bone plays in {@code state}, and none that put it away */
+    public boolean shownIn(ChiikawaRenderState state) {
         for (String animation : unless) {
             if (ChiikawaEntityRenderer.isAnyControllerPlaying(state, animation)) {
                 return false;
