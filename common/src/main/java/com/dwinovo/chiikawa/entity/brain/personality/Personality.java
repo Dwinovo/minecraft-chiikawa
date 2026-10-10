@@ -146,12 +146,12 @@ public record Personality(
      * camera to put it in, and a camera only while it has none. The tools a wild pet spawns
      * holding have no use for either.
      *
-     * <p>And what it is bought for: a camera is for the pet itself, never a present, and is
-     * worth saving for rather than spending the money on little things first.
+     * <p>And what it is for: a camera is the pet's own, never in the pool it picks presents from, and
+     * is worth saving for rather than spending the money on little things first.
      *
      * @param requires an item the pet has to be carrying for it to want this at all
      * @param limit how many of this the pet may be carrying and still want one more
-     * @param keep whether what it buys of this is always for itself, never a present for its owner
+     * @param keep whether what it buys of this is always its own, never one of the things it may give its owner
      * @param saveUp whether, while it wants this and cannot yet afford it, it buys nothing else, so
      *               that its money builds up; and buys this as soon as it can
      */
@@ -181,7 +181,7 @@ public record Personality(
             return new WeightedItem(item, weight, requires, Optional.of(most), keep, saveUp);
         }
 
-        /** @return the same, always bought for the pet itself */
+        /** @return the same, always the pet's own */
         public WeightedItem kept() {
             return new WeightedItem(item, weight, requires, limit, true, saveUp);
         }
