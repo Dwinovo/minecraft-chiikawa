@@ -143,6 +143,69 @@ class ShopTest {
     }
 
     @Test
+    void whatAPetBuysToKeepIsNeverAPresent() {
+        Personality collector = new Personality(Map.of(), Map.of(), 0.0F, List.of(), List.of(
+            new Personality.WeightedItem(Items.CAKE, 1).kept(),
+            new Personality.WeightedItem(Items.COOKIE, 1)), IdleHabits.DEFAULT, Map.of());
+
+        assertTrue(ShopBasket.isKept(collector, Items.CAKE));
+        assertFalse(ShopBasket.isKept(collector, Items.COOKIE), "a cookie may be a present");
+        assertFalse(ShopBasket.isKept(collector, Items.WHEAT), "something it does not like at all may be a present");
+    }
+
+    @Test
+    void aPetSavingUpBuysNothingElseUntilItCanAffordWhatItIsSavingFor() {
+        // A cake costs three, a cookie one, and the pet is saving for the cake.
+        Personality saver = new Personality(Map.of(), Map.of(), 0.0F, List.of(), List.of(
+            new Personality.WeightedItem(Items.COOKIE, 5),
+            new Personality.WeightedItem(Items.CAKE, 1).savedUpFor()), IdleHabits.DEFAULT, Map.of());
+
+        for (int money = 0; money < 3; money++) {
+            assertFalse(ShopBasket.wantsAnything(saver, SHOP, money, NOTHING), money + " emeralds spent on little things");
+            assertTrue(ShopBasket.wants(saver, SHOP, money, NOTHING, FixedRandom.ints(0)).isEmpty());
+        }
+        // With enough it goes for the cake, however heavily the cookie weighs.
+        assertTrue(ShopBasket.wantsAnything(saver, SHOP, 3, NOTHING));
+        for (int roll = 0; roll < 6; roll++) {
+            assertEquals(Optional.of(Items.CAKE),
+                ShopBasket.wants(saver, SHOP, 3, NOTHING, FixedRandom.ints(roll)).map(ShopCatalog.Entry::item));
+        }
+    }
+
+    @Test
+    void aPetThatHasWhatItWasSavingForSpendsAsUsual() {
+        Personality saver = new Personality(Map.of(), Map.of(), 0.0F, List.of(), List.of(
+            new Personality.WeightedItem(Items.COOKIE, 1),
+            new Personality.WeightedItem(Items.CAKE, 1).limitedTo(1).savedUpFor()), IdleHabits.DEFAULT, Map.of());
+        ToIntFunction<Item> withACake = item -> item == Items.CAKE ? 1 : 0;
+
+        assertEquals(Optional.of(Items.COOKIE),
+            ShopBasket.wants(saver, SHOP, 1, withACake, FixedRandom.ints(0)).map(ShopCatalog.Entry::item));
+    }
+
+    @Test
+    void aPetNotSavingForSomethingTheShopDoesNotSellSpendsAsUsual() {
+        Personality saver = new Personality(Map.of(), Map.of(), 0.0F, List.of(), List.of(
+            new Personality.WeightedItem(Items.COOKIE, 1),
+            new Personality.WeightedItem(Items.DIAMOND, 1).savedUpFor()), IdleHabits.DEFAULT, Map.of());
+
+        assertTrue(ShopBasket.wantsAnything(saver, SHOP, 1, NOTHING));
+    }
+
+    @Test
+    void savingUpAndKeepingAreReadFromAndWrittenToAPersonality() {
+        Personality.WeightedItem liking = new Personality.WeightedItem(Items.CAKE, 2).kept().savedUpFor();
+
+        var json = Personality.WeightedItem.CODEC.encodeStart(JsonOps.INSTANCE, liking).getOrThrow().getAsJsonObject();
+
+        assertTrue(json.get("keep").getAsBoolean());
+        assertTrue(json.get("save_up").getAsBoolean());
+        assertEquals(liking, Personality.WeightedItem.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
+        assertFalse(Personality.WeightedItem.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
+            "{ \"item\": \"minecraft:cake\", \"weight\": 1 }")).getOrThrow().keep(), "keep is off unless asked for");
+    }
+
+    @Test
     void whatAPetCarriesIsCountedAcrossItsBackpack() {
         SimpleContainer bag = new SimpleContainer(3);
         bag.setItem(0, new ItemStack(Items.BOOK, 2));
