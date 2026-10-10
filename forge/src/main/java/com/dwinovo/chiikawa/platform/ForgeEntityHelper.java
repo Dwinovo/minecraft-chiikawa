@@ -11,9 +11,7 @@ import com.dwinovo.chiikawa.entity.impl.UsagiPet;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.platform.services.IEntityHelper;
-import java.util.function.Function;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
+import com.dwinovo.chiikawa.spawn.WildSpawning;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.animal.Animal;
@@ -65,26 +63,8 @@ public class ForgeEntityHelper implements IEntityHelper {
         registerSpawnPlacement(event, InitEntity.FURUHONYA_PET.get());
     }
 
-    private static <T extends Animal> void registerSpawnPlacement(SpawnPlacementRegisterEvent event, EntityType<T> entity) {
-        event.register(entity, SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-            Animal::checkAnimalSpawnRules, SpawnPlacementRegisterEvent.Operation.OR);
-    }
-
-    @Override
-    public Entity changeDimension(Entity entity, ServerLevel destination, Vec3 position, float yRot, float xRot) {
-        // Not through changeDimension(ServerLevel), where a pet notes where it crossed to.
-        return AbstractPet.noteCrossing(entity.changeDimension(destination, new ITeleporter() {
-            @Override
-            public PortalInfo getPortalInfo(Entity moving, ServerLevel level, Function<ServerLevel, PortalInfo> defaultPortalInfo) {
-                return new PortalInfo(position, Vec3.ZERO, yRot, xRot);
-            }
-
-            @Override
-            public Entity placeEntity(Entity moving, ServerLevel from, ServerLevel to, float yaw,
-                    Function<Boolean, Entity> repositionEntity) {
-                // Placed where asked, with no portal or platform built around it.
-                return repositionEntity.apply(false);
-            }
-        }));
+    private static <T extends Animal> void registerSpawnPlacement(RegisterSpawnPlacementsEvent event, EntityType<T> entity) {
+        event.register(entity, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+            WildSpawning::canSpawn, RegisterSpawnPlacementsEvent.Operation.OR);
     }
 }

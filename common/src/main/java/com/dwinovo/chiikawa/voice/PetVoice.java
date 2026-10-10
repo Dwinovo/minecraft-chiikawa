@@ -62,14 +62,19 @@ public record PetVoice(
      * Whether the pet speaks up at this moment and, if it does, which of its lines it says.
      *
      * @param random the pet's random source
+     * @param chatter the world's chatter setting: the chance is multiplied by it, up to certain,
+     *                and a pet in a world with none says nothing at all
      * @return the line's translation key, or nothing when the pet keeps quiet
      */
-    public Optional<String> draw(VoiceMoment moment, RandomSource random) {
+    public Optional<String> draw(VoiceMoment moment, RandomSource random, float chatter) {
         List<Line> said = lines.getOrDefault(moment, List.of());
         if (said.isEmpty()) {
             return Optional.empty();
         }
-        float likely = chance.getOrDefault(moment, 1.0F);
+        float likely = Math.min(1.0F, chance.getOrDefault(moment, 1.0F) * chatter);
+        if (likely <= 0.0F) {
+            return Optional.empty();
+        }
         if (likely < 1.0F && random.nextFloat() >= likely) {
             return Optional.empty();
         }
