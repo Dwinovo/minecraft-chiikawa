@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.client.exam.ClientExamDeskPacketHandler;
 import com.dwinovo.chiikawa.client.manual.ClientManualPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
 import com.dwinovo.chiikawa.client.pet.ClientPetPacketHandler;
+import com.dwinovo.chiikawa.client.settings.ClientSettingsPacketHandler;
 import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.client.voice.ClientVoicePacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
@@ -14,6 +15,8 @@ import com.dwinovo.chiikawa.network.ExamDeskServerPacketHandler;
 import com.dwinovo.chiikawa.network.ManualPayloads;
 import com.dwinovo.chiikawa.network.PetPayloads;
 import com.dwinovo.chiikawa.network.PetServerPacketHandler;
+import com.dwinovo.chiikawa.network.SettingsPayloads;
+import com.dwinovo.chiikawa.network.SettingsServerPacketHandler;
 import com.dwinovo.chiikawa.network.ShopPayloads;
 import com.dwinovo.chiikawa.network.ShopServerPacketHandler;
 import com.dwinovo.chiikawa.network.MusicPayloads;
@@ -83,6 +86,13 @@ public final class NeoForgeModNetworking {
             });
         registrar.playToClient(VoicePayloads.PetSpeechPayload.TYPE, VoicePayloads.PetSpeechPayload.STREAM_CODEC);
         registrar.playToClient(PetPayloads.PetGesturePayload.TYPE, PetPayloads.PetGesturePayload.STREAM_CODEC);
+        registrar.playToClient(SettingsPayloads.WorldSettingsPayload.TYPE, SettingsPayloads.WorldSettingsPayload.STREAM_CODEC);
+        registrar.playToServer(SettingsPayloads.ChangeWorldSettingsPayload.TYPE, SettingsPayloads.ChangeWorldSettingsPayload.STREAM_CODEC,
+            (payload, context) -> {
+                if (context.player() instanceof ServerPlayer player) {
+                    SettingsServerPacketHandler.handleChange(payload, player);
+                }
+            });
     }
 
     public static void registerClientPayloads(RegisterClientPayloadHandlersEvent event) {
@@ -96,5 +106,6 @@ public final class NeoForgeModNetworking {
         event.register(MusicPayloads.MusicStreamStopPayload.TYPE, (payload, context) -> ClientMusicPacketHandler.handleStreamStop(payload));
         event.register(VoicePayloads.PetSpeechPayload.TYPE, (payload, context) -> ClientVoicePacketHandler.handleSpeech(payload));
         event.register(PetPayloads.PetGesturePayload.TYPE, (payload, context) -> ClientPetPacketHandler.handleGesture(payload));
+        event.register(SettingsPayloads.WorldSettingsPayload.TYPE, (payload, context) -> ClientSettingsPacketHandler.handleWorld(payload));
     }
 }
