@@ -15,7 +15,9 @@ import com.dwinovo.chiikawa.camera.PhotoScout;
 import com.dwinovo.chiikawa.data.ShopCatalogData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
+import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
+import com.dwinovo.chiikawa.init.InitActivity;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
@@ -77,6 +79,9 @@ public final class CameraGameTests {
     /** Longer than all of that, for a case about something that does not happen. */
     private static final int WAIT_TICKS = 400;
     private static final int ROLLS = 3;
+    /** How soon after losing its subject a pet must be resting, and how long it is watched after that. */
+    private static final int RESTING_AFTER = 3;
+    private static final int SETTLED_TICKS = 20;
     /** What the camera costs, and a little short of it. */
     private static final int CAMERA_PRICE = 32;
     private static final int SHORT_OF_A_CAMERA = 10;
@@ -144,6 +149,11 @@ public final class CameraGameTests {
 
     @BeforeBatch(batch = "chiikawa_camera_buys_camera")
     public static void settleBuysCamera(ServerLevel level) {
+        settle(level);
+    }
+
+    @BeforeBatch(batch = "chiikawa_camera_lost")
+    public static void settleLost(ServerLevel level) {
         settle(level);
     }
 
@@ -339,6 +349,46 @@ public final class CameraGameTests {
         photographer(helper, InitEntity.USAGI_PET.get(), owner, true, true);
 
         stillNotAsked(helper);
+    }
+
+    /**
+     * Set off to photograph a friend who then is gone, Hachiware gives it up and rests: the rest
+     * is set and nothing is asked for, and it does not set off again in the next tick.
+     */
+    @GameTest(template = "floor16", batch = "chiikawa_camera_lost", timeoutTicks = SHOT_TICKS)
+    public static void a_photo_errand_whose_subject_vanishes_leaves_the_pet_resting(GameTestHelper helper) {
+        ServerPlayer owner = player(helper);
+        BlockPos far = helper.absolutePos(new BlockPos(8, STAND, 8)).offset(40, 0, 0);
+        owner.teleportTo(far.getX() + 0.5, far.getY(), far.getZ() + 0.5);
+        AbstractPet pet = photographer(helper, InitEntity.HACHIWARE_PET.get(), owner, true, true);
+        seenEveryView(pet);
+        AbstractPet friend = pet(helper, InitEntity.CHIIKAWA_PET.get(), new BlockPos(11, STAND, 4), false);
+        friend.setNoAi(true);
+        PhotoSystem photos = PhotoSystem.of(helper.getLevel().getServer());
+        long[] lostAt = {-1};
+
+        helper.onEachTick(() -> {
+            long now = helper.getLevel().getGameTime();
+            boolean walking = pet.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET)
+                && pet.getBrain().getMemory(InitMemory.CURRENT_INTENT.get())
+                    .filter(running -> running.id().equals(PetIntents.TAKE_PHOTO)).isPresent();
+            if (lostAt[0] < 0 && walking && pet.distanceTo(friend) > 6.0F) {
+                friend.discard();
+                lostAt[0] = now;
+            }
+            if (lostAt[0] >= 0 && now - lostAt[0] >= RESTING_AFTER) {
+                helper.assertTrue(pet.getBrain().hasMemoryValue(InitMemory.PHOTO_COOLDOWN.get()),
+                    "the pet is not resting " + (now - lostAt[0]) + " ticks after it lost its subject");
+                helper.assertFalse(pet.getBrain().isActive(InitActivity.TAKE_PHOTO.get()),
+                    "the pet set off again " + (now - lostAt[0]) + " ticks after it lost its subject");
+                helper.assertTrue(photos.waiting().isEmpty(), "the pet asked for a photo of nobody");
+            }
+        });
+        helper.succeedWhen(() -> {
+            helper.assertTrue(lostAt[0] >= 0, "the pet never set off for its friend");
+            helper.assertTrue(helper.getLevel().getGameTime() - lostAt[0] >= RESTING_AFTER + SETTLED_TICKS,
+                "still too soon to say");
+        });
     }
 
     /** A photo that comes back the wrong size is no photo: no film used, nothing to give, a short rest. */
