@@ -26,7 +26,6 @@ public class FabricModItemModelProvider extends FabricModelProvider {
         itemModelGenerator.generateFlatItem(InitItems.PET_BELL.get(), ModelTemplates.FLAT_ITEM);
         itemModelGenerator.generateFlatItem(InitItems.WHISTLE_CANDY.get(), ModelTemplates.FLAT_ITEM);
         itemModelGenerator.generateFlatItem(InitItems.FILM.get(), ModelTemplates.FLAT_ITEM);
-        itemModelGenerator.generateFlatItem(InitItems.PHOTO.get(), ModelTemplates.FLAT_ITEM);
 
         itemModelGenerator.generateFlatItem(InitItems.MUSIC_BOX.get(), ModelTemplates.FLAT_ITEM);
         // The props' item models, the weapons' among them, come from PropItemModelProvider, shared with NeoForge.

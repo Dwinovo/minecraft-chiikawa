@@ -69,10 +69,12 @@ public final class PersonalityData {
             .likes(Items.SUGAR, 2)
             .likes(Items.EGG, 2)
             .likes(Items.WHEAT, 1)
-            // And a camera, one is plenty and worth saving up for, and the film for it once it has
-            // one. Both are for itself, never presents.
+            // And a camera, one is plenty and worth saving up for, and a roll of film for it once it
+            // has one: one at a time, since a roll it has not finished, or not begun, is one it has.
+            // Both are its own, and not to be given away.
             .likes(new Personality.WeightedItem(InitItems.CAMERA.get(), 4).limitedTo(1).kept().savedUpFor())
-            .likes(new Personality.WeightedItem(InitItems.FILM.get(), 4).requiring(InitItems.CAMERA.get()).kept())
+            .likes(new Personality.WeightedItem(InitItems.FILM.get(), 4).requiring(InitItems.CAMERA.get())
+                .limitedTo(1).kept())
             // Friendly and curious, camera at the ready: takes a good long look at everyone.
             .idle(habits()
                 .lookAtPlayer(3, 8.0F, 60, 100)
