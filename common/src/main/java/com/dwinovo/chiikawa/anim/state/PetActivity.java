@@ -85,7 +85,13 @@ public enum PetActivity {
     EXAM(11, 0, "exam", "sit"),
 
     /** Reading the results at the board the morning after an exam, before it hears them. */
-    READ_RESULTS(12, 0, "read_results");
+    READ_RESULTS(12, 0, "read_results"),
+
+    /**
+     * Holding the camera up to take a photo, until the shutter has gone. A pet with no animation
+     * for it just stands there, as it does at rest.
+     */
+    PHOTO(13, 0, "photo");
 
     private static final PetActivity[] BY_NETWORK_ID = buildLookup();
 
