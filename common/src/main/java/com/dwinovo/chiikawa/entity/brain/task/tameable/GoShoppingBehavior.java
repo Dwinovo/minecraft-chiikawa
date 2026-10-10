@@ -35,10 +35,11 @@ import net.minecraft.world.phys.Vec3;
  * paid on the way, or spent on the way, should buy what it can afford when it gets there.
  * Afterwards it rests from shopping for a while, so a pet with a full purse does not stand
  * at the counter buying the shop out one cookie at a time.
+ *
+ * <p>Everything it buys is for itself, and goes into its backpack. What it gives its owner it
+ * picks from the backpack, later and elsewhere.
  */
 public class GoShoppingBehavior extends Behavior<AbstractPet> {
-    /** How often a purchase turns out to be for the owner rather than the pet. */
-    private static final float GIFT_CHANCE = 0.34F;
     /** How long a pet leaves the shop alone after buying something. */
     private static final int REST_TICKS = 600;
     private static final float SPEED = 0.7F;
@@ -106,25 +107,15 @@ public class GoShoppingBehavior extends Behavior<AbstractPet> {
         }
         ShopCatalog.Entry entry = wanted.get();
         ItemStack goods = new ItemStack(entry.item(), entry.count());
-        // What a pet buys to keep is never a present.
-        boolean forTheOwner = !ShopBasket.isKept(PetPersonalities.of(pet.getType()), entry.item())
-            && buyingForTheOwner(pet);
         // Paid for only once there is somewhere to put it: a pet with a full bag goes home
-        // with its money rather than handing it over for nothing. A present needs no room
-        // in the bag — the pet carries that one in its paws.
-        if (!forTheOwner && !pet.getBackpack().canAddItem(goods)) {
+        // with its money rather than handing it over for nothing.
+        if (!pet.getBackpack().canAddItem(goods)) {
             return;
         }
         if (!Wallet.pay(pet.getBackpack(), entry.buy())) {
             return;
         }
-        String news;
-        if (forTheOwner) {
-            pet.setPendingGift(goods);
-            news = "message.chiikawa.shop.bought_gift";
-        } else {
-            news = keep(pet, goods) ? "message.chiikawa.shop.bought_ate" : "message.chiikawa.shop.bought";
-        }
+        String news = keep(pet, goods) ? "message.chiikawa.shop.bought_ate" : "message.chiikawa.shop.bought";
         // Said by name and with the thing itself, which a player can hover over: a pet
         // that spends its wages where nobody can see ought at least to say on what.
         pet.tellOwner(Component.translatable(news, pet.getDisplayName(), entry.buy(), goods.getDisplayName(),
@@ -134,18 +125,6 @@ public class GoShoppingBehavior extends Behavior<AbstractPet> {
             HAPPY_PARTICLES, 0.35, 0.3, 0.35, 0.0);
         pet.triggerReaction(PetReaction.HAPPY);
         PetSpeech.say(pet, VoiceMoment.SHOP);
-    }
-
-    /**
-     * Whether this one is for the owner. About one purchase in three, and only when the
-     * pet has an owner and is not already carrying something for them: a pet turning up
-     * with a present now and then is a pet; one that hands over everything it buys is a
-     * courier.
-     */
-    private static boolean buyingForTheOwner(AbstractPet pet) {
-        return pet.getOwner() != null
-            && pet.getPendingGift().isEmpty()
-            && pet.getRandom().nextFloat() < GIFT_CHANCE;
     }
 
     /**
