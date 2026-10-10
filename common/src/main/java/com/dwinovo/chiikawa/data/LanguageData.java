@@ -244,6 +244,9 @@ public final class LanguageData {
             addVoiceLines(adder, "shisa", VoiceMoment.WHISTLE, "来啦～！");
             addVoiceLines(adder, "furuhonya", VoiceMoment.WHISTLE, "来了……");
             addWhistleTranslations(adder, "口哨糖", "口哨糖（%s）", "按住右键吹：附近的宠物听从当前指令。潜行右键切换指令。", "口哨糖：%s", "%d 只宠物跑过来了", "%d 只宠物坐下了", "%d 只宠物自由活动去了", "%d 只野生宠物好奇地凑了过来", "附近没有宠物听到口哨", "好奇地凑过去", "没听到口哨");
+            addSettingsTranslations(adder, "Chiikawa 设置", "野生宠物生成：%s", "说话频率：%s", "对话气泡：%s", "开", "关",
+                "野生生成和说话频率属于世界，进入世界后才能修改", "野生生成和说话频率只有管理员能修改",
+                "宠物声音的音量，在原版声音设置的“友好生物”里调");
         } else if ("ja_jp".equals(locale)) {
             addCommonTranslations(adder, "ちいかわ", "持ち物", "ついてくる", "おすわり", "自由行動");
             addDollTooltipTranslations(adder, "ぬいぐるみをケーキに置いてみる？");
@@ -473,6 +476,9 @@ public final class LanguageData {
             addVoiceLines(adder, "shisa", VoiceMoment.WHISTLE, "はーい!");
             addVoiceLines(adder, "furuhonya", VoiceMoment.WHISTLE, "はい…");
             addWhistleTranslations(adder, "フエラムネ", "フエラムネ（%s）", "長押しで吹く：近くのペットに今の指示を出す。スニーク右クリックで指示を切り替え。", "フエラムネ：%s", "%d匹が駆け寄ってきた", "%d匹がおすわりした", "%d匹が自由行動に戻った", "野生の%d匹が気になって寄ってきた", "近くに聞こえたペットはいない", "気になって寄っていく", "笛は聞こえない");
+            addSettingsTranslations(adder, "ちいかわの設定", "野生の子の出現：%s", "おしゃべりの頻度：%s", "ふきだし：%s", "オン", "オフ",
+                "出現とおしゃべりはワールドの設定です。ワールドの中で変更できます", "出現とおしゃべりの変更は管理者だけができます",
+                "鳴き声の音量は、バニラのサウンド設定の「友好的なモブ」で調整できます");
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
@@ -707,6 +713,9 @@ public final class LanguageData {
             addVoiceLines(adder, "shisa", VoiceMoment.WHISTLE, "Coming!");
             addVoiceLines(adder, "furuhonya", VoiceMoment.WHISTLE, "Coming...");
             addWhistleTranslations(adder, "Whistle Candy", "Whistle Candy (%s)", "Hold to blow: nearby pets take the order shown. Sneak + right-click to change it.", "Whistle candy: %s", "%d pets came running", "%d pets sat down", "%d pets went off to roam", "%d wild pets came over to look", "No pet heard the whistle", "Coming over to look", "No whistle heard");
+            addSettingsTranslations(adder, "Chiikawa Settings", "Wild pet spawning: %s", "Chatter: %s", "Speech bubbles: %s", "On", "Off",
+                "Spawning and chatter belong to the world; change them from inside a world", "Only operators can change spawning and chatter",
+                "Pet volume is the \"Friendly Creatures\" slider in the vanilla sound settings");
         }
     }
 
@@ -724,6 +733,20 @@ public final class LanguageData {
         adder.add("message.chiikawa.whistle_candy.nobody", nobody);
         adder.add("intent.chiikawa.answer_whistle", answering);
         adder.add("intent.chiikawa.fail.no_whistle", noWhistle);
+    }
+
+    /** The settings screen: its title, a line for each setting, and the notes under them. */
+    private static void addSettingsTranslations(Adder adder, String title, String wildSpawn, String chatter,
+            String speechBubbles, String on, String off, String worldOnly, String readOnly, String volume) {
+        adder.add("screen.chiikawa.settings.title", title);
+        adder.add("screen.chiikawa.settings.wild_spawn", wildSpawn);
+        adder.add("screen.chiikawa.settings.chatter", chatter);
+        adder.add("screen.chiikawa.settings.speech_bubbles", speechBubbles);
+        adder.add("screen.chiikawa.settings.on", on);
+        adder.add("screen.chiikawa.settings.off", off);
+        adder.add("screen.chiikawa.settings.world_only", worldOnly);
+        adder.add("screen.chiikawa.settings.read_only", readOnly);
+        adder.add("screen.chiikawa.settings.volume", volume);
     }
 
     /** A pet's lines for one moment, numbered from 1 in the order given; see {@link PetVoiceData}. */
