@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceLocation;
  * with its owner within sixty-four blocks, so the owner's game has the place in view, and
  * no more than one in half a day, or one in half a minute after one that did not come
  * back; a photo is a 320 by 240 picture through a 70 degree lens, taken after two seconds
- * of aiming, and posed half the time. Friends are what it likes best to take, its owner next, and a view only now
+ * of aiming, and posed half the time; a roll holds eight. Friends are what it likes best to take, its owner next, and a view only now
  * and then.
  */
 public final class CameraSettingsData {
@@ -22,6 +22,6 @@ public final class CameraSettingsData {
     public static Map<ResourceLocation, CameraSettings> all() {
         return Map.of(BuiltInRegistries.ITEM.getKey(InitItems.CAMERA.get()),
             new CameraSettings(BuiltInRegistries.ITEM.getKey(InitItems.FILM.get()), 64.0, 12000, 600, 320, 240, 70,
-                new CameraSettings.Subjects(3, 5, 1), 40, 0.5F));
+                new CameraSettings.Subjects(3, 5, 1), 40, 8, 0.5F));
     }
 }

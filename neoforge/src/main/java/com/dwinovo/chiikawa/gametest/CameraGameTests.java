@@ -10,16 +10,18 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.camera.CameraSettings;
+import com.dwinovo.chiikawa.camera.FilmRolls;
 import com.dwinovo.chiikawa.camera.PhotoScout;
 import com.dwinovo.chiikawa.data.ShopCatalogData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
 import com.dwinovo.chiikawa.init.InitBlocks;
-import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMemory;
+import com.dwinovo.chiikawa.item.FilmItem;
+import com.dwinovo.chiikawa.photo.FilmRoll;
 import com.dwinovo.chiikawa.photo.PhotoChunk;
 import com.dwinovo.chiikawa.photo.PhotoData;
 import com.dwinovo.chiikawa.photo.PhotoRaster;
@@ -30,6 +32,7 @@ import com.dwinovo.chiikawa.shop.Wallet;
 import com.dwinovo.chiikawa.shop.ShopCatalog;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -79,8 +82,6 @@ public final class CameraGameTests {
     private static final int SHORT_OF_A_CAMERA = 10;
     /** Long enough to walk to a counter and buy a few things, and to see nothing bought. */
     private static final int SAVING_TICKS = 1200;
-    /** How many rolls it has to buy for the case to have seen it buy film several times over. */
-    private static final int FILM_BOUGHT = 10;
     /** How far round a yard another yard's pets might be seen from it. */
     private static final double NEIGHBOURHOOD = 40.0;
     /** The cameras as the data pack has them, kept before any case changes them. */
@@ -146,11 +147,6 @@ public final class CameraGameTests {
         settle(level);
     }
 
-    @BeforeBatch(batch = "chiikawa_camera_keeps_film")
-    public static void settleKeepsFilm(ServerLevel level) {
-        settle(level);
-    }
-
     /**
      * The world as every case here wants it, and the camera as the data pack has it: a case
      * that tries another camera does not leave it for the next.
@@ -163,9 +159,9 @@ public final class CameraGameTests {
         CameraSettings.replaceAll(dataPackCameras);
     }
 
-    /** All it needs, and a photo comes of it: one roll used, the photo for its owner, a rest before the next. */
+    /** All it needs, and a photo comes of it: a roll begun with the shot on it, and a rest before the next. */
     @GameTest(template = "floor16", batch = "chiikawa_camera_takes", timeoutTicks = SHOT_TICKS)
-    public static void a_hachiware_with_a_camera_and_film_takes_a_photo_and_gives_it_to_its_owner(GameTestHelper helper) {
+    public static void a_hachiware_with_a_camera_and_film_takes_a_photo_and_starts_a_roll(GameTestHelper helper) {
         ServerPlayer owner = ownerAt(helper, new BlockPos(10, STAND, 10));
         AbstractPet pet = photographer(helper, InitEntity.HACHIWARE_PET.get(), owner, true, true);
         PhotoSystem photos = PhotoSystem.of(helper.getLevel().getServer());
@@ -178,10 +174,14 @@ public final class CameraGameTests {
                 }
             }
             helper.assertFalse(answered.isEmpty(), "Hachiware never asked for a photo");
-            helper.assertTrue(count(pet, InitItems.FILM.get()) == ROLLS - 1, "a photo came back and "
-                + (ROLLS - count(pet, InitItems.FILM.get())) + " rolls of film were used");
-            helper.assertTrue(isPhoto(pet.getPendingGift()) || owner.getInventory().contains(new ItemStack(InitItems.PHOTO.get())),
-                "the photo went nowhere");
+            List<ItemStack> rolls = shotRolls(pet);
+            helper.assertTrue(rolls.size() == 1, "there were " + rolls.size() + " rolls with shots on");
+            FilmRoll roll = FilmItem.rollOf(rolls.get(0));
+            helper.assertTrue(roll.shots().size() == 1 && roll.exposures() == camera().exposures(),
+                "the roll had " + roll.shots().size() + " of " + roll.exposures());
+            helper.assertTrue(rolls.get(0).getMaxStackSize() == 1, "a roll with a shot on it stacks");
+            helper.assertTrue(count(pet, InitItems.FILM.get()) == ROLLS, "the roll was not made of one of the fresh ones");
+            helper.assertTrue(pet.getPendingGift().isEmpty(), "an unfinished roll was a present");
             helper.assertTrue(pet.getBrain().hasMemoryValue(InitMemory.PHOTO_COOLDOWN.get()),
                 "Hachiware took a photo and was ready to take another");
             helper.assertTrue(answered.size() == 1, "Hachiware asked for " + answered.size() + " photos");
@@ -209,7 +209,7 @@ public final class CameraGameTests {
                 }
             }
             helper.assertFalse(answered.isEmpty(), "Hachiware never asked for a photo");
-            PhotoData photo = photoOf(pet, owner);
+            PhotoData photo = photoOf(pet);
             helper.assertTrue(photo.subject() == PhotoSubject.OWNER, "the photo was of " + photo.subject());
             helper.assertTrue(photo.name().equals(owner.getName().getString()), "the photo was of " + photo.name());
             helper.assertTrue(photo.photographer().equals(pet.getDisplayName().getString()),
@@ -244,7 +244,7 @@ public final class CameraGameTests {
                 }
             }
             helper.assertFalse(answered.isEmpty(), "Hachiware never asked for a photo");
-            PhotoData photo = photoOf(pet, owner);
+            PhotoData photo = photoOf(pet);
             helper.assertTrue(photo.subject() == PhotoSubject.FRIEND, "the photo was of " + photo.subject());
             helper.assertTrue(photo.name().equals(friend.getDisplayName().getString()), "the photo was of " + photo.name());
             GameTestKit.assertSaid(helper, friend, VoiceMoment.PHOTOGRAPHED);
@@ -277,25 +277,6 @@ public final class CameraGameTests {
             helper.assertTrue(carries(pet, InitItems.CAMERA.get()), "Hachiware never bought its camera");
             helper.assertTrue(pet.getPendingGift().isEmpty(), "the camera was a present for its owner");
         });
-    }
-
-    /**
-     * Film is bought to keep: however many rolls it buys, none is ever the owner's present. It
-     * would rest from shopping after each, so it is not let to; and it buys sugar and eggs as well,
-     * so it takes a while.
-     */
-    @GameTest(template = "floor16", batch = "chiikawa_camera_keeps_film", timeoutTicks = 2 * SAVING_TICKS)
-    public static void a_hachiware_never_buys_film_as_a_present(GameTestHelper helper) {
-        AbstractPet pet = shopper(helper, true, 64);
-        helper.onEachTick(() -> {
-            pet.getBrain().eraseMemory(InitMemory.SHOP_COOLDOWN.get());
-            ItemStack gift = pet.getPendingGift();
-            helper.assertFalse(gift.is(InitItems.FILM.get()) || gift.is(InitItems.CAMERA.get()),
-                "Hachiware had " + gift + " to give its owner");
-        });
-
-        helper.succeedWhen(() -> helper.assertTrue(count(pet, InitItems.FILM.get()) >= FILM_BOUGHT,
-            "Hachiware has bought no film to speak of: " + count(pet, InitItems.FILM.get())));
     }
 
     /**
@@ -376,8 +357,8 @@ public final class CameraGameTests {
                 }
             }
             helper.assertFalse(answered.isEmpty(), "Hachiware never asked for a photo");
-            helper.assertTrue(count(pet, InitItems.FILM.get()) == ROLLS, "film was used up for a photo that never came");
-            helper.assertFalse(isPhoto(pet.getPendingGift()), "Hachiware had a photo to give that never came");
+            helper.assertTrue(count(pet, InitItems.FILM.get()) == ROLLS && shotRolls(pet).isEmpty(),
+                "a photo that never came was put on a roll");
             helper.assertTrue(pet.getBrain().hasMemoryValue(InitMemory.PHOTO_COOLDOWN.get()),
                 "Hachiware went straight on to another photo");
             helper.assertTrue(photos.waiting().isEmpty(), "the request was still waiting");
@@ -390,21 +371,35 @@ public final class CameraGameTests {
      * loaded them, drawn from many times over.
      */
     @GameTest(template = "floor8", batch = "chiikawa_camera_shopping", timeoutTicks = 100)
-    public static void hachiware_buys_film_only_while_it_has_a_camera(GameTestHelper helper) {
+    public static void hachiware_buys_film_only_while_it_has_none_to_shoot_on(GameTestHelper helper) {
         AbstractPet pet = pet(helper, InitEntity.HACHIWARE_PET.get(), new BlockPos(3, STAND, 3), false);
         ShopCatalog shop = ShopCatalogData.all().get(ShopCatalogData.GENERAL);
         Item film = InitItems.FILM.get();
         Item camera = InitItems.CAMERA.get();
         // Rich enough for anything on the list, so what is left out is left out by taste.
         int money = 64;
+        PhotoData shot = new PhotoData(UUID.randomUUID(), PhotoSubject.SCENERY, "", 1, "Hachiware");
 
-        Set<Item> withoutACamera = bought(pet, shop, money);
-        helper.assertFalse(withoutACamera.contains(film), "Hachiware bought film with no camera to put it in");
+        helper.assertFalse(bought(pet, shop, money).contains(film), "Hachiware bought film with no camera to put it in");
 
         pet.getBackpack().addItem(new ItemStack(camera));
         Set<Item> withACamera = bought(pet, shop, money);
         helper.assertTrue(withACamera.contains(film), "Hachiware with a camera never bought film");
         helper.assertFalse(withACamera.contains(camera), "Hachiware bought a second camera");
+
+        pet.getBackpack().addItem(new ItemStack(film));
+        helper.assertFalse(bought(pet, shop, money).contains(film), "Hachiware bought film with film to shoot on");
+        pet.getBackpack().removeItemType(film, 64);
+
+        ItemStack unfinished = FilmRolls.begin(film, 8, shot);
+        pet.getBackpack().setItem(5, unfinished);
+        helper.assertFalse(bought(pet, shop, money).contains(film), "Hachiware bought film with a roll it had not finished");
+
+        for (int taken = 1; taken < 8; taken++) {
+            FilmRolls.add(unfinished, shot);
+        }
+        helper.assertTrue(FilmItem.rollOf(unfinished).full(), "the roll is not full");
+        helper.assertTrue(bought(pet, shop, money).contains(film), "Hachiware with only a full roll never bought film");
         helper.succeed();
     }
 
@@ -502,20 +497,28 @@ public final class CameraGameTests {
         CameraSettings camera = camera();
         CameraSettings.replaceAll(Map.of(BuiltInRegistries.ITEM.getKey(InitItems.CAMERA.get()), new CameraSettings(
             camera.film(), camera.ownerRange(), camera.cooldownTicks(), camera.retryTicks(), camera.width(),
-            camera.height(), camera.fov(), camera.subjects(), camera.aimTicks(), chance)));
+            camera.height(), camera.fov(), camera.subjects(), camera.aimTicks(), camera.exposures(), chance)));
     }
 
-    /** The photo the pet has to give its owner, in its paws or already in the owner's hands. */
-    private static PhotoData photoOf(AbstractPet pet, ServerPlayer owner) {
-        if (isPhoto(pet.getPendingGift())) {
-            return pet.getPendingGift().get(InitDataComponents.PHOTO.get());
-        }
-        for (ItemStack stack : owner.getInventory().items) {
-            if (isPhoto(stack)) {
-                return stack.get(InitDataComponents.PHOTO.get());
+    /** The rolls in the pet's bag that have shots on them. */
+    private static List<ItemStack> shotRolls(AbstractPet pet) {
+        List<ItemStack> rolls = new ArrayList<>();
+        for (int slot = 0; slot < pet.getBackpack().getContainerSize(); slot++) {
+            ItemStack stack = pet.getBackpack().getItem(slot);
+            if (stack.is(InitItems.FILM.get()) && FilmItem.rollOf(stack).started()) {
+                rolls.add(stack);
             }
         }
-        throw new GameTestAssertException("there is no photo to give");
+        return rolls;
+    }
+
+    /** The first shot on the pet's roll. */
+    private static PhotoData photoOf(AbstractPet pet) {
+        List<ItemStack> rolls = shotRolls(pet);
+        if (rolls.isEmpty()) {
+            throw new GameTestAssertException("there is no photo on any roll");
+        }
+        return FilmItem.rollOf(rolls.get(0)).shots().get(0);
     }
 
     /** Remembers every biome as photographed, so a view is never what it would take a photo of. */
@@ -532,11 +535,6 @@ public final class CameraGameTests {
     private static void clearNeighbours(GameTestHelper helper) {
         helper.getLevel().getEntitiesOfClass(AbstractPet.class, helper.getBounds().inflate(NEIGHBOURHOOD))
             .forEach(Entity::discard);
-    }
-
-    private static boolean isPhoto(ItemStack stack) {
-        PhotoData data = stack.get(InitDataComponents.PHOTO.get());
-        return stack.is(InitItems.PHOTO.get()) && data != null;
     }
 
     private static CameraSettings camera() {

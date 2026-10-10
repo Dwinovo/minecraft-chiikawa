@@ -5,11 +5,11 @@ import com.dwinovo.chiikawa.item.BagItem;
 import com.dwinovo.chiikawa.item.ChiikawaWeapon;
 import com.dwinovo.chiikawa.item.HachiwareWeapon;
 import com.dwinovo.chiikawa.item.DescribedItem;
+import com.dwinovo.chiikawa.item.FilmItem;
 import com.dwinovo.chiikawa.item.HandbookItem;
 import com.dwinovo.chiikawa.item.MusicBoxItem;
 import com.dwinovo.chiikawa.item.PetBellItem;
 import com.dwinovo.chiikawa.item.PetDollItem;
-import com.dwinovo.chiikawa.item.PhotoItem;
 import com.dwinovo.chiikawa.item.RakkoSword;
 import com.dwinovo.chiikawa.item.UsagiWeapon;
 import com.dwinovo.chiikawa.item.WhistleCandyItem;
@@ -75,16 +75,12 @@ public final class InitItems {
     public static final Supplier<Item> WHISTLE_CANDY =
         registerItem("whistle_candy", properties -> new WhistleCandyItem(properties.stacksTo(64)));
 
-    /** A photo a pet took: stack of one, not made by any recipe, and looked at by using it. */
-    public static final Supplier<Item> PHOTO =
-        registerItem("photo", () -> new PhotoItem(new Item.Properties()));
-
     /** Hachiware's camera: kept in its backpack with film, it takes photos of its own accord. */
     public static final Supplier<Item> CAMERA =
         registerItem("camera", () -> new DescribedItem(new Item.Properties().stacksTo(1)));
-    /** What a photo is taken on, a roll to a photo. */
+    /** What photos are taken on, and once a roll has some on it, the album of them: use it to look. */
     public static final Supplier<Item> FILM =
-        registerItem("film", () -> new DescribedItem(new Item.Properties()));
+        registerItem("film", () -> new FilmItem(new Item.Properties()));
 
     public static final Supplier<Item> BACKPACK =
         registerItem("backpack", properties -> new BagItem(properties, BagItem.Wear.ON_BACK));
