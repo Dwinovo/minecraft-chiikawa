@@ -243,12 +243,23 @@ public final class LanguageData {
             addVoiceLines(adder, "rakko", VoiceMoment.WHISTLE, "……走吧。");
             addVoiceLines(adder, "shisa", VoiceMoment.WHISTLE, "来啦～！");
             addVoiceLines(adder, "furuhonya", VoiceMoment.WHISTLE, "来了……");
+            addVoiceLines(adder, "hachiware", VoiceMoment.PHOTO, "拍啦～！");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.PHOTOGRAPHED, "嗯……");
+            addVoiceLines(adder, "usagi", VoiceMoment.PHOTOGRAPHED, "呀哈——！");
+            addVoiceLines(adder, "momonga", VoiceMoment.PHOTOGRAPHED, "要拍得可爱哦。");
+            addVoiceLines(adder, "rakko", VoiceMoment.PHOTOGRAPHED, "……拍吧。");
+            addVoiceLines(adder, "shisa", VoiceMoment.PHOTOGRAPHED, "拍好看一点哦～");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.PHOTOGRAPHED, "蟹蟹");
             addWhistleTranslations(adder, "口哨糖", "口哨糖（%s）", "按住右键吹：附近的宠物听从当前指令。潜行右键切换指令。", "口哨糖：%s", "%d 只宠物跑过来了", "%d 只宠物坐下了", "%d 只宠物自由活动去了", "%d 只野生宠物好奇地凑了过来", "附近没有宠物听到口哨", "好奇地凑过去", "没听到口哨");
             addSettingsTranslations(adder, "Chiikawa 设置", "野生宠物生成：%s", "说话频率：%s", "对话气泡：%s", "开", "关",
                 "野生生成和说话频率属于世界，进入世界后才能修改", "野生生成和说话频率只有管理员能修改",
                 "宠物声音的音量，在原版声音设置的“友好生物”里调");
             addPhotoTranslations(adder, "照片", "%1$s 拍的 · 第 %2$s 天 · %3$s", "%1$s 拍的 · 第 %2$s 天 · 风景",
                 "冲洗中……", "这张照片找不到了");
+            addCameraTranslations(adder, "小八的相机", "放进小八的背包，有胶卷的时候它会自己找时机拍照", "胶卷",
+                "一卷拍一张照片，放进带着相机的小八的背包");
+            addPhotoIntentTranslations(adder, "拍照", "只有小八会拍照", "背包里没有相机", "背包里没有胶卷", "主人离得太远",
+                "主人现在顾不上", "刚拍过，歇一会儿", "现在没有想拍的");
         } else if ("ja_jp".equals(locale)) {
             addCommonTranslations(adder, "ちいかわ", "持ち物", "ついてくる", "おすわり", "自由行動");
             addDollTooltipTranslations(adder, "ぬいぐるみをケーキに置いてみる？");
@@ -477,12 +488,23 @@ public final class LanguageData {
             addVoiceLines(adder, "rakko", VoiceMoment.WHISTLE, "…行くか");
             addVoiceLines(adder, "shisa", VoiceMoment.WHISTLE, "はーい!");
             addVoiceLines(adder, "furuhonya", VoiceMoment.WHISTLE, "はい…");
+            addVoiceLines(adder, "hachiware", VoiceMoment.PHOTO, "撮るよ〜!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.PHOTOGRAPHED, "ン…");
+            addVoiceLines(adder, "usagi", VoiceMoment.PHOTOGRAPHED, "ヤハーッ!");
+            addVoiceLines(adder, "momonga", VoiceMoment.PHOTOGRAPHED, "かわいく撮れ");
+            addVoiceLines(adder, "rakko", VoiceMoment.PHOTOGRAPHED, "…撮れ");
+            addVoiceLines(adder, "shisa", VoiceMoment.PHOTOGRAPHED, "きれいに撮ってくださいね〜");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.PHOTOGRAPHED, "カニ");
             addWhistleTranslations(adder, "フエラムネ", "フエラムネ（%s）", "長押しで吹く：近くのペットに今の指示を出す。スニーク右クリックで指示を切り替え。", "フエラムネ：%s", "%d匹が駆け寄ってきた", "%d匹がおすわりした", "%d匹が自由行動に戻った", "野生の%d匹が気になって寄ってきた", "近くに聞こえたペットはいない", "気になって寄っていく", "笛は聞こえない");
             addSettingsTranslations(adder, "ちいかわの設定", "野生の子の出現：%s", "おしゃべりの頻度：%s", "ふきだし：%s", "オン", "オフ",
                 "出現とおしゃべりはワールドの設定です。ワールドの中で変更できます", "出現とおしゃべりの変更は管理者だけができます",
                 "鳴き声の音量は、バニラのサウンド設定の「友好的なモブ」で調整できます");
             addPhotoTranslations(adder, "写真", "%1$sが撮影 · %2$s日目 · %3$s", "%1$sが撮影 · %2$s日目 · 風景",
                 "現像中…", "この写真は見つかりません");
+            addCameraTranslations(adder, "ハチワレのカメラ", "ハチワレのリュックに入れると、フィルムがあれば自分でシャッターチャンスを探します", "フィルム",
+                "1本で写真1枚。カメラを持ったハチワレのリュックに入れてください");
+            addPhotoIntentTranslations(adder, "写真を撮る", "写真を撮るのはハチワレだけ", "リュックにカメラがない", "リュックにフィルムがない",
+                "飼い主が遠すぎる", "飼い主が忙しそう", "さっき撮ったばかり", "撮りたいものがない");
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
@@ -716,12 +738,24 @@ public final class LanguageData {
             addVoiceLines(adder, "rakko", VoiceMoment.WHISTLE, "...Let's go.");
             addVoiceLines(adder, "shisa", VoiceMoment.WHISTLE, "Coming!");
             addVoiceLines(adder, "furuhonya", VoiceMoment.WHISTLE, "Coming...");
+            addVoiceLines(adder, "hachiware", VoiceMoment.PHOTO, "Say cheese~!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.PHOTOGRAPHED, "Mm...");
+            addVoiceLines(adder, "usagi", VoiceMoment.PHOTOGRAPHED, "Yahaaa!");
+            addVoiceLines(adder, "momonga", VoiceMoment.PHOTOGRAPHED, "Make me look cute.");
+            addVoiceLines(adder, "rakko", VoiceMoment.PHOTOGRAPHED, "...Go ahead.");
+            addVoiceLines(adder, "shisa", VoiceMoment.PHOTOGRAPHED, "Make it a nice one~");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.PHOTOGRAPHED, "Crab");
             addWhistleTranslations(adder, "Whistle Candy", "Whistle Candy (%s)", "Hold to blow: nearby pets take the order shown. Sneak + right-click to change it.", "Whistle candy: %s", "%d pets came running", "%d pets sat down", "%d pets went off to roam", "%d wild pets came over to look", "No pet heard the whistle", "Coming over to look", "No whistle heard");
             addSettingsTranslations(adder, "Chiikawa Settings", "Wild pet spawning: %s", "Chatter: %s", "Speech bubbles: %s", "On", "Off",
                 "Spawning and chatter belong to the world; change them from inside a world", "Only operators can change spawning and chatter",
                 "Pet volume is the \"Friendly Creatures\" slider in the vanilla sound settings");
             addPhotoTranslations(adder, "Photo", "Taken by %1$s · Day %2$s · %3$s", "Taken by %1$s · Day %2$s · Scenery",
                 "Developing...", "This photo can't be found");
+            addCameraTranslations(adder, "Hachiware's Camera", "Put it in Hachiware's backpack with some film, and it will look for good moments to take photos", "Film",
+                "One roll, one photo. Put it in the backpack of a Hachiware that has a camera");
+            addPhotoIntentTranslations(adder, "Take a photo", "Only Hachiware takes photos", "No camera in its backpack",
+                "No film in its backpack", "Its owner is too far away", "Its owner is busy", "Just took one, resting",
+                "Nothing worth a photo right now");
         }
     }
 
@@ -753,6 +787,27 @@ public final class LanguageData {
         adder.add("screen.chiikawa.settings.world_only", worldOnly);
         adder.add("screen.chiikawa.settings.read_only", readOnly);
         adder.add("screen.chiikawa.settings.volume", volume);
+    }
+
+    /** The camera and its film: their names, and a line under each saying what it is for. */
+    private static void addCameraTranslations(Adder adder, String camera, String cameraTip, String film, String filmTip) {
+        adder.add("item.chiikawa.camera", camera);
+        adder.add("tooltip.chiikawa.camera", cameraTip);
+        adder.add("item.chiikawa.film", film);
+        adder.add("tooltip.chiikawa.film", filmTip);
+    }
+
+    /** Taking photos as an intent: its name, and why a pet is not taking one, for the debug command. */
+    private static void addPhotoIntentTranslations(Adder adder, String name, String notPhotographer, String noCamera,
+            String noFilm, String ownerFar, String ownerBusy, String resting, String nothingToShoot) {
+        adder.add("intent.chiikawa.take_photo", name);
+        adder.add("intent.chiikawa.fail.not_photographer", notPhotographer);
+        adder.add("intent.chiikawa.fail.no_camera", noCamera);
+        adder.add("intent.chiikawa.fail.no_film", noFilm);
+        adder.add("intent.chiikawa.fail.owner_far", ownerFar);
+        adder.add("intent.chiikawa.fail.owner_busy", ownerBusy);
+        adder.add("intent.chiikawa.fail.photo_resting", resting);
+        adder.add("intent.chiikawa.fail.nothing_to_shoot", nothingToShoot);
     }
 
     /** The photo item: its name, the line under a photo, and what the photo screen says while it waits. */

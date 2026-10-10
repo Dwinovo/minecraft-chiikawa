@@ -2,6 +2,8 @@ package com.dwinovo.chiikawa.entity.brain.intent;
 
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.block.ExamDeskBlockEntity;
+import com.dwinovo.chiikawa.camera.PhotoOutlook;
+import com.dwinovo.chiikawa.camera.PhotoScout;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
@@ -52,6 +54,7 @@ import net.minecraft.world.level.Level;
  * @param resultsDesk the exam desk the pet sat an exam at, while it has the results to go and see there this morning
  * @param seatedAtExam whether the pet is in its chair at an exam desk, at the paper or handing it in
  * @param whistleHeard where a whistle was blown that this wild pet has set off for, once it has had time to react
+ * @param photo whether the pet could take a photo now, and of what
  */
 public record IntentContext(
     GlobalPos petPos,
@@ -76,7 +79,8 @@ public record IntentContext(
     Optional<GlobalPos> examDesk,
     Optional<GlobalPos> resultsDesk,
     boolean seatedAtExam,
-    Optional<GlobalPos> whistleHeard
+    Optional<GlobalPos> whistleHeard,
+    PhotoOutlook photo
 ) {
     public static IntentContext capture(AbstractPet pet, PetOwnership ownership) {
         Level level = pet.level();
@@ -109,7 +113,8 @@ public record IntentContext(
             PetExams.seatedAtExam(pet),
             pet.getBrain().getMemory(InitMemory.WHISTLE_HEARD.get())
                 .filter(heard -> heard.from() <= level.getGameTime())
-                .map(WhistleHeard::where)
+                .map(WhistleHeard::where),
+            PhotoScout.outlook(pet)
         );
     }
 
@@ -135,7 +140,7 @@ public record IntentContext(
             .filter(level::isLoaded)
             .flatMap(pos -> level.getBlockEntity(pos, InitBlockEntities.SHOP.get()))
             .filter(shop -> ShopBasket.wantsAnything(PetPersonalities.of(pet.getType()), shop.catalog(),
-                Wallet.count(pet.getBackpack())))
+                Wallet.count(pet.getBackpack()), ShopBasket.carriedIn(pet.getBackpack())))
             .map(shop -> GlobalPos.of(level.dimension(), shop.getBlockPos()));
     }
 

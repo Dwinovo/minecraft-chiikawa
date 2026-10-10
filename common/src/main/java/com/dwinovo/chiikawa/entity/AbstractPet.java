@@ -234,7 +234,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitMemory.INTENT_SWITCH_LOG.get(),
         InitMemory.LAST_SAID.get(),
         InitMemory.WHISTLE_CALL.get(),
-        InitMemory.WHISTLE_HEARD.get()
+        InitMemory.WHISTLE_HEARD.get(),
+        InitMemory.PHOTO_COOLDOWN.get(),
+        InitMemory.PHOTOGRAPHED_BIOMES.get()
     );
     private static final java.util.List<net.minecraft.world.entity.ai.sensing.SensorType<? extends net.minecraft.world.entity.ai.sensing.Sensor<? super AbstractPet>>> SENSOR_TYPES = java.util.List.of(
         net.minecraft.world.entity.ai.sensing.SensorType.HURT_BY,
@@ -612,6 +614,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         BrainUtils.addSocialTasks(brain);
         BrainUtils.addExamTasks(brain);
         BrainUtils.addWhistleTasks(brain);
+        BrainUtils.addPhotoTasks(brain);
 
         // Each job's activities — registered once, dormant until the intent
         // selector picks one of that job's intents.

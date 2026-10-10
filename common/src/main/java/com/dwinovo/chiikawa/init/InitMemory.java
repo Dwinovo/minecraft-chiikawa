@@ -11,6 +11,7 @@ import com.dwinovo.chiikawa.task.FinishedSlip;
 import com.dwinovo.chiikawa.whistle.WhistleCall;
 import com.dwinovo.chiikawa.whistle.WhistleHeard;
 import com.dwinovo.chiikawa.voice.PetSpeech;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
@@ -199,6 +200,25 @@ public final class InitMemory {
             BuiltInRegistries.MEMORY_MODULE_TYPE,
             new ResourceLocation(Constants.MOD_ID, "whistle_heard"),
             () -> new MemoryModuleType<>(Optional.empty())
+        );
+
+    /**
+     * Present, with an expiry, after a pet took a photo or tried to, so it does not take
+     * another straight away. Saved with the pet: half a day is longer than a game is kept open.
+     */
+    public static final Supplier<MemoryModuleType<Unit>> PHOTO_COOLDOWN =
+        Services.REGISTRY.<MemoryModuleType<Unit>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "photo_cooldown"),
+            () -> new MemoryModuleType<>(Optional.of(Unit.CODEC))
+        );
+
+    /** The biomes the pet has taken a photo in, so a new one is worth a photo of its own. */
+    public static final Supplier<MemoryModuleType<List<ResourceLocation>>> PHOTOGRAPHED_BIOMES =
+        Services.REGISTRY.<MemoryModuleType<List<ResourceLocation>>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "photographed_biomes"),
+            () -> new MemoryModuleType<>(Optional.of(ResourceLocation.CODEC.listOf()))
         );
 
     private InitMemory() {
