@@ -62,7 +62,7 @@ public final class FabricModNetworking {
         PayloadTypeRegistry.playC2S().register(PhotoPayloads.UploadPhotoPayload.TYPE, PhotoPayloads.UploadPhotoPayload.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(PhotoPayloads.RequestPhotoPayload.TYPE, PhotoPayloads.RequestPhotoPayload.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(PhotoPayloads.DownloadPhotoPayload.TYPE, PhotoPayloads.DownloadPhotoPayload.STREAM_CODEC);
-        PayloadTypeRegistry.playS2C().register(PhotoPayloads.OpenPhotoPayload.TYPE, PhotoPayloads.OpenPhotoPayload.STREAM_CODEC);
+        PayloadTypeRegistry.playS2C().register(PhotoPayloads.OpenAlbumPayload.TYPE, PhotoPayloads.OpenAlbumPayload.STREAM_CODEC);
         ServerPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicBoxSelectTrackPayload.TYPE,
             (payload, context) -> context.server().execute(() -> MusicServerPacketHandler.handleSelectTrack(payload, context.player())));
         ServerPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicBoxSetModePayload.TYPE,
@@ -112,7 +112,7 @@ public final class FabricModNetworking {
             (payload, context) -> context.client().execute(() -> ClientPhotoPacketHandler.handleTake(payload)));
         ClientPlayNetworking.registerGlobalReceiver(PhotoPayloads.DownloadPhotoPayload.TYPE,
             (payload, context) -> context.client().execute(() -> ClientPhotoPacketHandler.handleDownload(payload)));
-        ClientPlayNetworking.registerGlobalReceiver(PhotoPayloads.OpenPhotoPayload.TYPE,
+        ClientPlayNetworking.registerGlobalReceiver(PhotoPayloads.OpenAlbumPayload.TYPE,
             (payload, context) -> context.client().execute(() -> ClientPhotoPacketHandler.handleOpen(payload)));
     }
 }

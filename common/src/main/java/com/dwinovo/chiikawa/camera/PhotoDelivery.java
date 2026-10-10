@@ -1,13 +1,10 @@
 package com.dwinovo.chiikawa.camera;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.init.InitDataComponents;
-import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.photo.PhotoData;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
 import com.dwinovo.chiikawa.photo.PhotoUploads;
-import com.dwinovo.chiikawa.shop.Payment;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -16,20 +13,18 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Unit;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 
 /**
  * What happens to a pet when the photo it took is back, or is not coming.
  *
- * <p>Back: a roll of film is used up, the pet has a photo to give its owner, and it rests
- * from photos for the camera's cooldown. Not coming: nothing is used up, and it rests only
- * a little before it tries again. Either way the pet is looked up afresh, since a minute is
- * long enough for it to have wandered off into a chunk nobody has loaded; a pet that is
- * gone is a photo nobody comes to hand over.
+ * <p>Back: the shot goes on the roll in its bag that has some room left, or on a roll begun from
+ * fresh film, and it rests from photos for the camera's cooldown. Not coming: nothing is put on
+ * any roll, and it rests only a little before it tries again. Either way the pet is looked up
+ * afresh, since a minute is long enough for it to have wandered off into a chunk nobody has
+ * loaded; a pet that is gone is a photo nobody records.
  *
- * <p>The photo goes the way a present does: into the pet's paws to be taken to its owner if
- * they are empty, and otherwise into its bag, or on the ground at its feet if that is full.
+ * <p>A roll that is full is not the pet's to keep: it is a present like any other thing in its
+ * bag, and the pet's own idea of when to give one is what sees to it.
  */
 public final class PhotoDelivery implements PhotoUploads.Listener {
     private final ServerLevel level;
@@ -59,16 +54,14 @@ public final class PhotoDelivery implements PhotoUploads.Listener {
     @Override
     public void stored(UUID photo) {
         photographer().ifPresent(pet -> {
-            Item film = PhotoScout.filmOf(camera);
-            // The film is used up as the photo is kept, not as the shutter goes; if the bag
-            // was emptied of it in the meantime there is nothing to use up and no photo.
-            if (!Payment.take(pet.getBackpack(), 1, stack -> stack.is(film))) {
+            PhotoData shot = PhotoData.taken(photo, kind, name, level, pet.getDisplayName().getString());
+            // The shot is put on a roll only now that it is kept; if the bag was emptied of film in
+            // the meantime there is no roll to put it on, and it is a photo nobody has.
+            if (!FilmRolls.record(pet.getBackpack(), PhotoScout.filmOf(camera), camera.exposures(), shot,
+                    pet::spawnAtLocation)) {
+                failed(photo);
                 return;
             }
-            ItemStack item = new ItemStack(InitItems.PHOTO.get());
-            item.set(InitDataComponents.PHOTO.get(),
-                PhotoData.taken(photo, kind, name, level, pet.getDisplayName().getString()));
-            give(pet, item);
             pet.getBrain().setMemoryWithExpiry(InitMemory.PHOTO_COOLDOWN.get(), Unit.INSTANCE, camera.cooldownTicks());
             biome.ifPresent(place -> {
                 List<ResourceLocation> places = new ArrayList<>(PhotoScout.photographed(pet));
@@ -90,16 +83,5 @@ public final class PhotoDelivery implements PhotoUploads.Listener {
         Entity found = level.getEntity(pet);
         return found instanceof AbstractPet photographer && photographer.isAlive()
             ? Optional.of(photographer) : Optional.empty();
-    }
-
-    private static void give(AbstractPet pet, ItemStack photo) {
-        if (pet.getPendingGift().isEmpty()) {
-            pet.setPendingGift(photo);
-            return;
-        }
-        ItemStack left = pet.getBackpack().addItem(photo);
-        if (!left.isEmpty()) {
-            pet.spawnAtLocation(left);
-        }
     }
 }
