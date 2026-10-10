@@ -213,6 +213,17 @@ public final class InitMemory {
             () -> new MemoryModuleType<>(Optional.of(Unit.CODEC))
         );
 
+    /**
+     * Present, with an expiry, after a pet has given its owner a present, so it does not give
+     * another straight away. Saved with the pet: a day is longer than a game is kept open.
+     */
+    public static final Supplier<MemoryModuleType<Unit>> GIFT_COOLDOWN =
+        Services.REGISTRY.<MemoryModuleType<Unit>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "gift_cooldown"),
+            () -> new MemoryModuleType<>(Optional.of(Unit.CODEC))
+        );
+
     /** The biomes the pet has taken a photo in, so a new one is worth a photo of its own. */
     public static final Supplier<MemoryModuleType<List<ResourceLocation>>> PHOTOGRAPHED_BIOMES =
         Services.REGISTRY.<MemoryModuleType<List<ResourceLocation>>>register(
