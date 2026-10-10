@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -60,6 +61,11 @@ public final class PhotoUploads {
 
     public boolean isWaitingFor(UUID photo) {
         return waiting.containsKey(photo);
+    }
+
+    /** @return every photo being waited for, for tests and commands */
+    public Set<UUID> waiting() {
+        return Set.copyOf(waiting.keySet());
     }
 
     /**
