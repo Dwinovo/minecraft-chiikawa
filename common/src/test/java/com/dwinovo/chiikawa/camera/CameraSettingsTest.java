@@ -1,9 +1,11 @@
 package com.dwinovo.chiikawa.camera;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.photo.PhotoSubject;
+import com.dwinovo.chiikawa.testing.FixedRandom;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import java.util.Map;
@@ -17,7 +19,8 @@ import org.junit.jupiter.api.Test;
 class CameraSettingsTest {
     private static final String GOOD = """
         { "film": "chiikawa:film", "owner_range": 64.0, "cooldown_ticks": 12000, "retry_ticks": 600, "width": 320, "height": 240,
-          "fov": 70, "subjects": { "owner": 3, "friend": 5, "scenery": 1 }, "aim_ticks": 40 }""";
+          "fov": 70, "subjects": { "owner": 3, "friend": 5, "scenery": 1 }, "aim_ticks": 40,
+          "posed_chance": 0.25 }""";
 
     @BeforeAll
     static void bootstrap() {
@@ -30,7 +33,47 @@ class CameraSettingsTest {
         CameraSettings settings = CameraSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(GOOD)).getOrThrow();
 
         assertEquals(new CameraSettings(ResourceLocation.fromNamespaceAndPath("chiikawa", "film"), 64.0, 12000, 600,
-            320, 240, 70, new CameraSettings.Subjects(3, 5, 1), 40), settings);
+            320, 240, 70, new CameraSettings.Subjects(3, 5, 1), 40, 0.25F), settings);
+    }
+
+    @Test
+    void aFileWithoutAPosedChanceIsPosedHalfTheTimeAndTheChanceIsWrittenAnyway() {
+        CameraSettings settings = CameraSettings.CODEC.parse(JsonOps.INSTANCE,
+            JsonParser.parseString(GOOD.replace("posed_chance", "something_else"))).getOrThrow();
+
+        assertEquals(0.5F, settings.posedChance());
+        assertEquals(0.5F, CameraSettings.CODEC.encodeStart(JsonOps.INSTANCE, settings).getOrThrow()
+            .getAsJsonObject().get("posed_chance").getAsFloat(), "the chance is not in the file to be changed");
+    }
+
+    @Test
+    void aPosedChanceOutsideZeroAndOneIsRejected() {
+        assertTrue(CameraSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
+            GOOD.replace("0.25", "1.5"))).isError());
+        assertTrue(CameraSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
+            GOOD.replace("0.25", "-0.1"))).isError());
+    }
+
+    @Test
+    void aPhotoIsPosedByARollBelowTheChance() {
+        CameraSettings settings = withPosedChance(0.25F);
+
+        assertTrue(settings.posed(FixedRandom.floats(0.24F)));
+        assertFalse(settings.posed(FixedRandom.floats(0.25F)));
+        assertFalse(settings.posed(FixedRandom.floats(0.9F)));
+    }
+
+    @Test
+    void aCameraThatAlwaysOrNeverPosesRollsNothing() {
+        // A random source with nothing in it throws if anything is drawn from it.
+        assertTrue(withPosedChance(1.0F).posed(FixedRandom.floats()));
+        assertFalse(withPosedChance(0.0F).posed(FixedRandom.floats()));
+    }
+
+    private static CameraSettings withPosedChance(float chance) {
+        CameraSettings settings = CameraSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(GOOD)).getOrThrow();
+        return new CameraSettings(settings.film(), settings.ownerRange(), settings.cooldownTicks(), settings.retryTicks(),
+            settings.width(), settings.height(), settings.fov(), settings.subjects(), settings.aimTicks(), chance);
     }
 
     @Test
