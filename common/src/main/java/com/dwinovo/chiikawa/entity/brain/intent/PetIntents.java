@@ -12,6 +12,7 @@ import com.dwinovo.chiikawa.entity.brain.intent.impl.PlayMusicIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.ShopIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.SocializeIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.TakeExamIntent;
+import com.dwinovo.chiikawa.entity.brain.intent.impl.TakePhotoIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.TakeTaskIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.TargetIntent;
 import com.dwinovo.chiikawa.init.InitActivity;
@@ -33,7 +34,8 @@ import org.jetbrains.annotations.Nullable;
  * over foraging (0.5) over picking up items (0.4) over playing a scene with another pet
  * (0.35), everything over wandering (0.05); a wild pet curious about a whistle (0.55) goes over
  * before it forages; a pet another one is coming over to plays
- * along (0.5).
+ * along (0.5); and a photo (0.45), taken only with a camera and a good moment, goes over picking
+ * things up and playing a scene.
  * Work the pet's slip counts is raised by {@link IntentSelector#TASK_BONUS}, and a pet's
  * personality weighs them all. The farmer's strict order that 0.0.9 hard-coded as an if-chain, harvest before
  * plant before deliver, is not a preference, so it is expressed by
@@ -41,26 +43,27 @@ import org.jetbrains.annotations.Nullable;
  * close.
  */
 public final class PetIntents {
-    public static final Identifier FOLLOW_OWNER = id("follow_owner");
-    public static final Identifier STAY = id("stay");
-    public static final Identifier WANDER = id("wander");
-    public static final Identifier PICK_UP_ITEM = id("pick_up_item");
-    public static final Identifier HARVEST = id("harvest");
-    public static final Identifier PLANT = id("plant");
-    public static final Identifier DELIVER = id("deliver");
-    public static final Identifier WEED = id("weed");
-    public static final Identifier PICK_MUSHROOM = id("pick_mushroom");
-    public static final Identifier MELEE = id("melee");
-    public static final Identifier RANGED = id("ranged");
-    public static final Identifier PLAY_MUSIC = id("play_music");
-    public static final Identifier TAKE_TASK = id("take_task");
-    public static final Identifier SHOP = id("shop");
-    public static final Identifier GIFT_OWNER = id("gift_owner");
-    public static final Identifier SOCIALIZE = id("socialize");
-    public static final Identifier COOPERATE = id("cooperate");
-    public static final Identifier TAKE_EXAM = id("take_exam");
-    public static final Identifier CHECK_RESULTS = id("check_results");
-    public static final Identifier ANSWER_WHISTLE = id("answer_whistle");
+    public static final ResourceLocation FOLLOW_OWNER = id("follow_owner");
+    public static final ResourceLocation STAY = id("stay");
+    public static final ResourceLocation WANDER = id("wander");
+    public static final ResourceLocation PICK_UP_ITEM = id("pick_up_item");
+    public static final ResourceLocation HARVEST = id("harvest");
+    public static final ResourceLocation PLANT = id("plant");
+    public static final ResourceLocation DELIVER = id("deliver");
+    public static final ResourceLocation WEED = id("weed");
+    public static final ResourceLocation PICK_MUSHROOM = id("pick_mushroom");
+    public static final ResourceLocation MELEE = id("melee");
+    public static final ResourceLocation RANGED = id("ranged");
+    public static final ResourceLocation PLAY_MUSIC = id("play_music");
+    public static final ResourceLocation TAKE_TASK = id("take_task");
+    public static final ResourceLocation SHOP = id("shop");
+    public static final ResourceLocation GIFT_OWNER = id("gift_owner");
+    public static final ResourceLocation SOCIALIZE = id("socialize");
+    public static final ResourceLocation COOPERATE = id("cooperate");
+    public static final ResourceLocation TAKE_EXAM = id("take_exam");
+    public static final ResourceLocation CHECK_RESULTS = id("check_results");
+    public static final ResourceLocation ANSWER_WHISTLE = id("answer_whistle");
+    public static final ResourceLocation TAKE_PHOTO = id("take_photo");
 
     private static final Map<Identifier, PetIntent> BY_ID = new LinkedHashMap<>();
 
@@ -78,7 +81,8 @@ public final class PetIntents {
         register(new CooperateIntent()),
         register(new TakeExamIntent()),
         register(new CheckResultsIntent()),
-        register(new AnswerWhistleIntent())
+        register(new AnswerWhistleIntent()),
+        register(new TakePhotoIntent())
     );
 
     static {

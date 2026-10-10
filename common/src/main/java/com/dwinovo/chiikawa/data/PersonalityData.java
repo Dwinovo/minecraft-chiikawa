@@ -69,6 +69,9 @@ public final class PersonalityData {
             .likes(Items.SUGAR, 2)
             .likes(Items.EGG, 2)
             .likes(Items.WHEAT, 1)
+            // And a camera, one is plenty, and the film for it once it has one.
+            .likesUpTo(InitItems.CAMERA.get(), 4, 1)
+            .likesWith(InitItems.FILM.get(), 4, InitItems.CAMERA.get())
             // Friendly and curious, camera at the ready: takes a good long look at everyone.
             .idle(habits()
                 .lookAtPlayer(3, 8.0F, 60, 100)
@@ -250,6 +253,18 @@ public final class PersonalityData {
         /** Something this kind of pet would buy for itself, given the money and a shop. */
         Builder likes(ItemLike item, int weight) {
             likes.add(new Personality.WeightedItem(item.asItem(), weight));
+            return this;
+        }
+
+        /** The same, but only for a pet that is carrying something else already, like film for a camera. */
+        Builder likesWith(ItemLike item, int weight, ItemLike needs) {
+            likes.add(new Personality.WeightedItem(item.asItem(), weight).requiring(needs.asItem()));
+            return this;
+        }
+
+        /** The same, but only for a pet that does not have {@code most} of it already: one camera is enough. */
+        Builder likesUpTo(ItemLike item, int weight, int most) {
+            likes.add(new Personality.WeightedItem(item.asItem(), weight).limitedTo(most));
             return this;
         }
 

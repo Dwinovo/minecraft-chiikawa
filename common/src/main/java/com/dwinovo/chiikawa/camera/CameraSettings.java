@@ -21,14 +21,15 @@ import net.minecraft.util.ExtraCodecs;
  * @param ownerRange how far from its owner a pet may be and still take a photo, in blocks;
  *                   the picture is drawn by the owner's game, which only has what is near it
  * @param cooldownTicks the least time between two photos a pet takes
+ * @param retryTicks how long a pet waits before trying again after a photo that did not come back
  * @param width how wide a photo is, in pixels
  * @param height how tall
  * @param fov how wide the lens sees, in degrees from top to bottom of the picture
  * @param subjects how much a pet fancies taking each kind of photo
  * @param aimTicks how long a pet holds the camera up before the shutter goes
  */
-public record CameraSettings(ResourceLocation film, double ownerRange, int cooldownTicks, int width, int height,
-                             int fov, Subjects subjects, int aimTicks) {
+public record CameraSettings(ResourceLocation film, double ownerRange, int cooldownTicks, int retryTicks, int width,
+                             int height, int fov, Subjects subjects, int aimTicks) {
     /**
      * How much a pet fancies each kind of photo, as weights: a pet picks among the kinds it
      * has a chance to take now in proportion to these.
@@ -53,6 +54,7 @@ public record CameraSettings(ResourceLocation film, double ownerRange, int coold
         ResourceLocation.CODEC.fieldOf("film").forGetter(CameraSettings::film),
         Codec.doubleRange(1.0, 256.0).fieldOf("owner_range").forGetter(CameraSettings::ownerRange),
         ExtraCodecs.NON_NEGATIVE_INT.fieldOf("cooldown_ticks").forGetter(CameraSettings::cooldownTicks),
+        ExtraCodecs.NON_NEGATIVE_INT.fieldOf("retry_ticks").forGetter(CameraSettings::retryTicks),
         Codec.intRange(16, 1024).fieldOf("width").forGetter(CameraSettings::width),
         Codec.intRange(16, 1024).fieldOf("height").forGetter(CameraSettings::height),
         Codec.intRange(30, 110).fieldOf("fov").forGetter(CameraSettings::fov),
