@@ -10,6 +10,7 @@ import com.dwinovo.chiikawa.entity.impl.ShisaPet;
 import com.dwinovo.chiikawa.entity.impl.UsagiPet;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.platform.services.IEntityHelper;
+import com.dwinovo.chiikawa.spawn.WildSpawning;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.entity.SpawnPlacements;
@@ -48,6 +49,6 @@ public class FabricEntityHelper implements IEntityHelper {
 
     private static <T extends Animal> void registerSpawnPlacement(net.minecraft.world.entity.EntityType<T> type) {
         SpawnPlacements.register(type, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-            Animal::checkAnimalSpawnRules);
+            WildSpawning::canSpawn);
     }
 }
