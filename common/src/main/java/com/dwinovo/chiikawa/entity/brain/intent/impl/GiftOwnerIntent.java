@@ -10,12 +10,17 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.schedule.Activity;
 
 /**
- * Takes what the pet bought for its owner over to them.
+ * Takes the owner a present out of the pet's bag. It runs when the pet is carrying one already, or
+ * has one in mind: its owner is about, its last present was long enough ago and there is something
+ * in its bag it may give; picking the thing is the behavior's, as it sets off.
  *
  * <p>Scored above everything a pet does for itself. A gift is the one errand where the
  * pet wants to be seen doing it, and a cake handed over three chores later is not the
  * same cake — an owner has to be able to connect the present to the pet standing in front
  * of them holding it.
+ *
+ * <p>Only while the pet is carrying one does it go on: once the present is handed over, or put back
+ * in the bag, the errand is done.
  */
 public final class GiftOwnerIntent implements PetIntent {
     private static final float SCORE = 0.85F;
@@ -37,12 +42,12 @@ public final class GiftOwnerIntent implements PetIntent {
 
     @Override
     public IntentCheck canRun(IntentContext ctx) {
-        return ctx.carryingGift() ? IntentCheck.OK : IntentCheck.fail("no_gift");
+        return ctx.carryingGift() || ctx.presentToGive() ? IntentCheck.OK : IntentCheck.fail("no_gift");
     }
 
     @Override
     public IntentCheck canContinue(IntentContext ctx) {
-        return canRun(ctx);
+        return ctx.carryingGift() ? IntentCheck.OK : IntentCheck.fail("no_gift");
     }
 
     @Override
