@@ -37,13 +37,16 @@ import com.dwinovo.chiikawa.entity.brain.task.farmer.crop.FarmRegistry;
 import com.dwinovo.chiikawa.item.PetDollItem;
 import com.dwinovo.chiikawa.item.PetReviveRitualManager;
 import com.dwinovo.chiikawa.music.ServerMusicSystem;
+import com.dwinovo.chiikawa.network.SettingsServerPacketHandler;
 import com.dwinovo.chiikawa.platform.NeoForgeModNetworking;
 import com.dwinovo.chiikawa.platform.NeoForgePlatformRegistryAccess;
 import com.dwinovo.chiikawa.platform.Services;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -86,6 +89,11 @@ public class Chiikawa {
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> PetFollowKeeper.tickServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> PetRecall.tickServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener((ServerStoppingEvent event) -> ServerMusicSystem.stopServer(event.getServer()));
+        NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent event) -> {
+            if (event.getEntity() instanceof ServerPlayer player) {
+                SettingsServerPacketHandler.sync(player);
+            }
+        });
         NeoForge.EVENT_BUS.addListener(Chiikawa::registerCommands);
         NeoForge.EVENT_BUS.addListener((AddServerReloadListenersEvent event) -> {
             event.addListener(PetPersonalityLoader.ID, new PetPersonalityLoader());

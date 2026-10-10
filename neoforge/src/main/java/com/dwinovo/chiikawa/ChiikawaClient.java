@@ -5,6 +5,7 @@ import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
@@ -12,8 +13,9 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
-import net.neoforged.neoforge.client.event.RegisterPictureInPictureRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import com.dwinovo.chiikawa.anim.compile.BedrockResourceLoader;
 import com.dwinovo.chiikawa.anim.render.PropRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.ChiikawaRenderer;
@@ -30,6 +32,7 @@ import com.dwinovo.chiikawa.client.render.LaborBoardRenderer;
 import com.dwinovo.chiikawa.client.render.PropBlockRenderer;
 import com.dwinovo.chiikawa.client.render.PropPictureRenderer;
 import com.dwinovo.chiikawa.client.screen.PetBackpackScreen;
+import com.dwinovo.chiikawa.client.screen.SettingsScreen;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitMenu;
@@ -42,6 +45,11 @@ import net.neoforged.neoforge.common.NeoForge;
 // Auto-register @SubscribeEvent methods.
 @EventBusSubscriber(modid = Chiikawa.MODID, value = Dist.CLIENT)
 public class ChiikawaClient {
+    public ChiikawaClient(ModContainer container) {
+        // The mod list's config button opens the settings screen.
+        container.registerExtensionPoint(IConfigScreenFactory.class, (mod, parent) -> new SettingsScreen(parent));
+    }
+
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {

@@ -1,7 +1,6 @@
 package com.dwinovo.chiikawa.client.voice;
 
-import com.dwinovo.chiikawa.anim.render.ChiikawaRenderState;
-import com.dwinovo.chiikawa.anim.render.PetData;
+import com.dwinovo.chiikawa.client.settings.ClientSettingsStore;
 import com.dwinovo.chiikawa.client.ui.mc.WorldSurface;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.ui.widget.Bubble;
@@ -17,8 +16,9 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * What a pet is saying, in a bubble over its head, for everyone near enough to have heard
- * it — whoever the pet belongs to. F1 hides it with the rest of the HUD, and it fades at
- * the end.
+ * it — whoever the pet belongs to. F1 hides it with the rest of the HUD, a player who has
+ * turned speech bubbles off in the settings does not get it at all, and it fades at the end.
+ * The pet opens its mouth either way: that is the pet's, not the bubble's.
  *
  * <p>It always sits at the same height: one line above the spot where the game draws a
  * name tag, whether a name tag is showing there or not. So it clears a named pet's name
@@ -35,12 +35,9 @@ public final class SpeechBubbleRenderer {
     /** How long a line takes to fade at the end of its time, in ticks. */
     private static final float FADE_TICKS = 10.0F;
 
-    /** A line up over a pet this frame: its words, the pet's name-tag spot, and how much of it shows. */
-    public record Shown(String line, Vec3 nameTag, float alpha) {
-    }
-
-    public void extract(AbstractPet pet, ChiikawaRenderState state, float partialTick) {
-        if (Minecraft.getInstance().options.hideGui) {
+    public void render(AbstractPet pet, PoseStack poseStack, MultiBufferSource bufferSource, Font font,
+                       Quaternionf cameraOrientation, float partialTick) {
+        if (Minecraft.getInstance().options.hideGui || !ClientSettingsStore.current().speechBubbles()) {
             return;
         }
         pet.getSpeech().ifPresent(speech -> {
