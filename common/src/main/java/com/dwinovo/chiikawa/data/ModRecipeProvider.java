@@ -161,6 +161,13 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy(getHasName(Items.BOOK), has(Items.BOOK))
                 .save(recipeOutput);
 
+        // The weeding study guide, for one who would rather not buy it: a book and a tuft of grass.
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, InitItems.WEEDING_BOOK.get())
+                .requires(Items.BOOK)
+                .requires(Items.SHORT_GRASS)
+                .unlockedBy(getHasName(Items.BOOK), has(Items.BOOK))
+                .save(recipeOutput);
+
         // Sweets from a sugar spoon: three sugar make four candies you can blow.
         ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, InitItems.WHISTLE_CANDY.get(), 4)
                 .requires(Items.SUGAR, 3)
