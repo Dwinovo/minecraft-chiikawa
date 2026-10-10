@@ -49,6 +49,8 @@ public final class GiftGameTests {
     private static final int NOTHING_TICKS = 600;
     private static final int SHOP_TICKS = 3600;
     private static final int WAGES = 8;
+    /** Long enough for a pet beside its owner to give a present, and to give a second if it were going to. */
+    private static final int THINKING_TICKS = 200;
 
     @BeforeBatch(batch = BATCH)
     public static void settle(ServerLevel level) {
@@ -175,6 +177,28 @@ public final class GiftGameTests {
             helper.assertTrue(count(pet, Items.COOKIE) == 2, "the pet has " + count(pet, Items.COOKIE) + " cookies, not the two");
             helper.assertFalse(owner.getInventory().contains(new ItemStack(Items.COOKIE)), "the owner was given the cookie");
             helper.assertFalse(pet.getBrain().hasMemoryValue(InitMemory.GIFT_COOLDOWN.get()), "a present never given tired the pet");
+        });
+    }
+
+    /**
+     * One present, then a rest: with the owner right beside it and five cookies in its bag, a pet
+     * hands over one and thinks of no other, however long it is left. The errand must not start
+     * again in the tick after the hand-over, before the pet has chosen what to do anew.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = NOTHING_TICKS)
+    public static void a_pet_gives_one_present_and_then_rests(GameTestHelper helper) {
+        ServerPlayer owner = player(helper);
+        BlockPos beside = helper.absolutePos(new BlockPos(4, STAND, 3));
+        owner.teleportTo(beside.getX() + 0.5, beside.getY(), beside.getZ() + 0.5);
+        AbstractPet pet = ownedBy(helper, InitEntity.USAGI_PET.get(), owner);
+        pet.getBackpack().setItem(2, new ItemStack(Items.COOKIE, 5));
+
+        helper.runAfterDelay(THINKING_TICKS, () -> {
+            helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 1,
+                "the owner has " + owner.getInventory().countItem(Items.COOKIE) + " cookies, not the one");
+            helper.assertTrue(count(pet, Items.COOKIE) == 4, "the pet has " + count(pet, Items.COOKIE) + " cookies left, not four");
+            helper.assertTrue(pet.getPendingGift().isEmpty(), "the pet is carrying another present");
+            helper.succeed();
         });
     }
 
