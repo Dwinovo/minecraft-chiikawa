@@ -254,10 +254,10 @@ public final class LanguageData {
             addSettingsTranslations(adder, "Chiikawa 设置", "野生宠物生成：%s", "说话频率：%s", "对话气泡：%s", "开", "关",
                 "野生生成和说话频率属于世界，进入世界后才能修改", "野生生成和说话频率只有管理员能修改",
                 "宠物声音的音量，在原版声音设置的“友好生物”里调");
-            addPhotoTranslations(adder, "照片", "%1$s 拍的 · 第 %2$s 天 · %3$s", "%1$s 拍的 · 第 %2$s 天 · 风景",
-                "冲洗中……", "这张照片找不到了");
+            addAlbumTranslations(adder, "%1$s 拍的 · 第 %2$s 天 · %3$s", "%1$s 拍的 · 第 %2$s 天 · 风景", "已拍 %1$s/%2$s",
+                "冲洗中……", "这张照片找不到了", "上一张", "下一张");
             addCameraTranslations(adder, "小八的相机", "放进小八的背包，有胶卷的时候它会自己找时机拍照", "胶卷",
-                "一卷拍一张照片，放进带着相机的小八的背包");
+                "一卷拍几张照片，拍满了小八会送给你；右键看拍了什么。放进带着相机的小八的背包");
             addPhotoIntentTranslations(adder, "拍照", "只有小八会拍照", "背包里没有相机", "背包里没有胶卷", "主人离得太远",
                 "主人现在顾不上", "刚拍过，歇一会儿", "现在没有想拍的");
         } else if ("ja_jp".equals(locale)) {
@@ -499,10 +499,10 @@ public final class LanguageData {
             addSettingsTranslations(adder, "ちいかわの設定", "野生の子の出現：%s", "おしゃべりの頻度：%s", "ふきだし：%s", "オン", "オフ",
                 "出現とおしゃべりはワールドの設定です。ワールドの中で変更できます", "出現とおしゃべりの変更は管理者だけができます",
                 "鳴き声の音量は、バニラのサウンド設定の「友好的なモブ」で調整できます");
-            addPhotoTranslations(adder, "写真", "%1$sが撮影 · %2$s日目 · %3$s", "%1$sが撮影 · %2$s日目 · 風景",
-                "現像中…", "この写真は見つかりません");
+            addAlbumTranslations(adder, "%1$sが撮影 · %2$s日目 · %3$s", "%1$sが撮影 · %2$s日目 · 風景", "撮影済み %1$s/%2$s",
+                "現像中…", "この写真は見つかりません", "前の写真", "次の写真");
             addCameraTranslations(adder, "ハチワレのカメラ", "ハチワレのリュックに入れると、フィルムがあれば自分でシャッターチャンスを探します", "フィルム",
-                "1本で写真1枚。カメラを持ったハチワレのリュックに入れてください");
+                "1本で何枚か撮れて、いっぱいになるとハチワレが渡してくれます。右クリックで写真を見られます。カメラを持ったハチワレのリュックに入れてください");
             addPhotoIntentTranslations(adder, "写真を撮る", "写真を撮るのはハチワレだけ", "リュックにカメラがない", "リュックにフィルムがない",
                 "飼い主が遠すぎる", "飼い主が忙しそう", "さっき撮ったばかり", "撮りたいものがない");
         } else {
@@ -749,10 +749,10 @@ public final class LanguageData {
             addSettingsTranslations(adder, "Chiikawa Settings", "Wild pet spawning: %s", "Chatter: %s", "Speech bubbles: %s", "On", "Off",
                 "Spawning and chatter belong to the world; change them from inside a world", "Only operators can change spawning and chatter",
                 "Pet volume is the \"Friendly Creatures\" slider in the vanilla sound settings");
-            addPhotoTranslations(adder, "Photo", "Taken by %1$s · Day %2$s · %3$s", "Taken by %1$s · Day %2$s · Scenery",
-                "Developing...", "This photo can't be found");
+            addAlbumTranslations(adder, "Taken by %1$s · Day %2$s · %3$s", "Taken by %1$s · Day %2$s · Scenery", "Shot %1$s/%2$s",
+                "Developing...", "This photo can't be found", "Previous photo", "Next photo");
             addCameraTranslations(adder, "Hachiware's Camera", "Put it in Hachiware's backpack with some film, and it will look for good moments to take photos", "Film",
-                "One roll, one photo. Put it in the backpack of a Hachiware that has a camera");
+                "A roll holds several shots, and Hachiware gives you the roll once it is full; right-click to look through it. Put it in the backpack of a Hachiware that has a camera");
             addPhotoIntentTranslations(adder, "Take a photo", "Only Hachiware takes photos", "No camera in its backpack",
                 "No film in its backpack", "Its owner is too far away", "Its owner is busy", "Just took one, resting",
                 "Nothing worth a photo right now");
@@ -810,14 +810,16 @@ public final class LanguageData {
         adder.add("intent.chiikawa.fail.nothing_to_shoot", nothingToShoot);
     }
 
-    /** The photo item: its name, the line under a photo, and what the photo screen says while it waits. */
-    private static void addPhotoTranslations(Adder adder, String name, String caption, String sceneryCaption,
-            String loading, String missing) {
-        adder.add("item.chiikawa.photo", name);
-        adder.add("tooltip.chiikawa.photo", caption);
-        adder.add("tooltip.chiikawa.photo.scenery", sceneryCaption);
-        adder.add("screen.chiikawa.photo.loading", loading);
-        adder.add("screen.chiikawa.photo.missing", missing);
+    /** The album: the line under a shot, what a roll says of itself, and what a page says while it waits. */
+    private static void addAlbumTranslations(Adder adder, String caption, String sceneryCaption, String shots,
+            String loading, String missing, String previousPage, String nextPage) {
+        adder.add("screen.chiikawa.album.caption", caption);
+        adder.add("screen.chiikawa.album.caption.scenery", sceneryCaption);
+        adder.add("tooltip.chiikawa.film.shots", shots);
+        adder.add("screen.chiikawa.album.loading", loading);
+        adder.add("screen.chiikawa.album.missing", missing);
+        adder.add("screen.chiikawa.album.previous_page", previousPage);
+        adder.add("screen.chiikawa.album.next_page", nextPage);
     }
 
     /** A pet's lines for one moment, numbered from 1 in the order given; see {@link PetVoiceData}. */

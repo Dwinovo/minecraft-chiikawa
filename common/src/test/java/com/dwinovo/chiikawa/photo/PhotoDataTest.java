@@ -64,7 +64,7 @@ class PhotoDataTest {
     void theCaptionNamesWhoTookItWhenAndWhoIsInIt() {
         TranslatableContents caption = (TranslatableContents) FRIEND.caption().getContents();
 
-        assertEquals("tooltip.chiikawa.photo", caption.getKey());
+        assertEquals("screen.chiikawa.album.caption", caption.getKey());
         assertEquals("Hachiware", caption.getArgs()[0]);
         assertEquals(12L, caption.getArgs()[1]);
         assertEquals("Chiikawa", caption.getArgs()[2]);
@@ -74,7 +74,7 @@ class PhotoDataTest {
     void aViewHasNobodyInItToName() {
         TranslatableContents caption = (TranslatableContents) VIEW.caption().getContents();
 
-        assertEquals("tooltip.chiikawa.photo.scenery", caption.getKey());
+        assertEquals("screen.chiikawa.album.caption.scenery", caption.getKey());
         assertEquals(2, caption.getArgs().length);
         assertTrue(VIEW.name().isEmpty());
     }
