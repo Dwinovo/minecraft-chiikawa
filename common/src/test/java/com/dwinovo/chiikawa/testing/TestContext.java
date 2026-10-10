@@ -38,6 +38,7 @@ public final class TestContext {
     private Optional<GlobalPos> resultsDesk = Optional.empty();
     private Optional<GlobalPos> whistleHeard = Optional.empty();
     private PhotoOutlook photo = PhotoOutlook.NONE;
+    private boolean presentToGive;
 
     private TestContext(GlobalPos petPos, PetAnchor anchor) {
         this.petPos = petPos;
@@ -131,6 +132,12 @@ public final class TestContext {
         return this;
     }
 
+    /** The pet has something in its bag it may give its owner, and is ready to. */
+    public TestContext presentToGive() {
+        this.presentToGive = true;
+        return this;
+    }
+
     /** What the pet could take a photo of, and whether it may. */
     public TestContext photo(PhotoOutlook photo) {
         this.photo = photo;
@@ -145,6 +152,6 @@ public final class TestContext {
     public IntentContext build() {
         return new IntentContext(petPos, phase, ownership, personality, anchor, targets, task, offeringBoard,
             shopWorthVisiting, takeTaskCoolingDown, shopCoolingDown, socialPartner, playingAlong, carryingGift, eager,
-            false, false, false, false, examDesk, resultsDesk, false, whistleHeard, photo);
+            false, false, false, false, examDesk, resultsDesk, false, whistleHeard, photo, presentToGive);
     }
 }
