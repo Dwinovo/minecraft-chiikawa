@@ -6,6 +6,7 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.NativeImage;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import net.minecraft.client.Camera;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
@@ -24,13 +25,15 @@ import org.jetbrains.annotations.Nullable;
  *
  * <p>Everything about the player's game that the frame has to differ in is changed, and put
  * back before this returns, whatever happens in between: whose eyes it is, how the camera
- * sits there, the lens, and that the interface, the hand and the block outline are not
+ * sits there, that the lens is the camera's own, and that the interface, the hand and the block outline are not
  * drawn. The game's own way of switching whose eyes it looks through is not used, because it
  * also resets the screen effect the player has on.
  */
 public final class PhotoCapture {
     /** The target the frame is being drawn into, while it is. */
     private static volatile RenderTarget inUse;
+    /** The lens it is being drawn through, in degrees, while it is. */
+    private static volatile double lens = Double.NaN;
 
     /** What was drawn, as the game keeps pixels: one int each, alpha highest, then blue, green, red. */
     public record Frame(int[] abgr, int width, int height) {
@@ -43,6 +46,15 @@ public final class PhotoCapture {
     @Nullable
     public static RenderTarget targetInUse() {
         return inUse;
+    }
+
+    /**
+     * @return the field of view the game is to draw with now, from top to bottom of the picture,
+     *         or nothing when no photo is being taken and the player's own is used
+     */
+    public static OptionalDouble lensInUse() {
+        double fov = lens;
+        return Double.isNaN(fov) ? OptionalDouble.empty() : OptionalDouble.of(fov);
     }
 
     /**
@@ -67,7 +79,6 @@ public final class PhotoCapture {
         float eyeHeightOld = eyes.chiikawa$getEyeHeightOld();
         boolean hideGui = options.hideGui;
         CameraType cameraType = options.getCameraType();
-        int lens = options.fov().get();
         // Drawing the level looks at whatever the cursor is on, from wherever it is drawn from.
         HitResult hit = minecraft.hitResult;
         Entity pointedAt = minecraft.crosshairPickEntity;
@@ -80,7 +91,7 @@ public final class PhotoCapture {
 
             options.hideGui = true;
             options.setCameraType(CameraType.FIRST_PERSON);
-            options.fov().set(fov);
+            lens = fov;
             renderer.setRenderBlockOutline(false);
             minecraft.cameraEntity = viewpoint;
             // At the new eyes' height at once, not eased to it over the next few ticks.
@@ -110,7 +121,7 @@ public final class PhotoCapture {
             camera.reset();
             options.hideGui = hideGui;
             options.setCameraType(cameraType);
-            options.fov().set(lens);
+            lens = Double.NaN;
             renderer.setRenderBlockOutline(true);
             minecraft.hitResult = hit;
             minecraft.crosshairPickEntity = pointedAt;
