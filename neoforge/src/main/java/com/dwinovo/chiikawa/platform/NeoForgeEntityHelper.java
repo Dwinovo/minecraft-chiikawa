@@ -10,6 +10,7 @@ import com.dwinovo.chiikawa.entity.impl.ShisaPet;
 import com.dwinovo.chiikawa.entity.impl.UsagiPet;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.platform.services.IEntityHelper;
+import com.dwinovo.chiikawa.spawn.WildSpawning;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.entity.animal.Animal;
@@ -60,6 +61,6 @@ public class NeoForgeEntityHelper implements IEntityHelper {
 
     private static <T extends Animal> void registerSpawnPlacement(SpawnPlacementRegisterEvent event, EntityType<T> entity) {
         event.register(entity, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-            Animal::checkAnimalSpawnRules, SpawnPlacementRegisterEvent.Operation.OR);
+            WildSpawning::canSpawn, SpawnPlacementRegisterEvent.Operation.OR);
     }
 }

@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.client.voice;
 
+import com.dwinovo.chiikawa.client.settings.ClientSettingsStore;
 import com.dwinovo.chiikawa.client.ui.mc.WorldSurface;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.ui.widget.Bubble;
@@ -15,8 +16,9 @@ import org.joml.Quaternionf;
 
 /**
  * What a pet is saying, in a bubble over its head, for everyone near enough to have heard
- * it — whoever the pet belongs to. F1 hides it with the rest of the HUD, and it fades at
- * the end.
+ * it — whoever the pet belongs to. F1 hides it with the rest of the HUD, a player who has
+ * turned speech bubbles off in the settings does not get it at all, and it fades at the end.
+ * The pet opens its mouth either way: that is the pet's, not the bubble's.
  *
  * <p>It always sits at the same height: one line above the spot where the game draws a
  * name tag, whether a name tag is showing there or not. So it clears a named pet's name
@@ -32,7 +34,7 @@ public final class SpeechBubbleRenderer {
 
     public void render(AbstractPet pet, PoseStack poseStack, MultiBufferSource bufferSource, Font font,
                        Quaternionf cameraOrientation, float partialTick) {
-        if (Minecraft.getInstance().options.hideGui) {
+        if (Minecraft.getInstance().options.hideGui || !ClientSettingsStore.current().speechBubbles()) {
             return;
         }
         pet.getSpeech().ifPresent(speech -> {

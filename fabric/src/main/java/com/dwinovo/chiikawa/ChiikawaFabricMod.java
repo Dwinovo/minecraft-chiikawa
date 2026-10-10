@@ -36,12 +36,14 @@ import com.dwinovo.chiikawa.entity.brain.task.farmer.crop.FarmRegistry;
 import com.dwinovo.chiikawa.item.PetDollItem;
 import com.dwinovo.chiikawa.item.PetReviveRitualManager;
 import com.dwinovo.chiikawa.music.ServerMusicSystem;
+import com.dwinovo.chiikawa.network.SettingsServerPacketHandler;
 import com.dwinovo.chiikawa.platform.FabricModNetworking;
 import com.dwinovo.chiikawa.platform.Services;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
@@ -95,6 +97,7 @@ public class ChiikawaFabricMod implements ModInitializer {
         ServerTickEvents.END_SERVER_TICK.register(PetFollowKeeper::tickServer);
         ServerTickEvents.END_SERVER_TICK.register(PetRecall::tickServer);
         ServerLifecycleEvents.SERVER_STOPPED.register(ServerMusicSystem::stopServer);
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> SettingsServerPacketHandler.sync(handler.getPlayer()));
         Constants.LOG.info("Hello Chiikawa Fabric world!");
         CommonClass.init();
     }
