@@ -33,20 +33,20 @@ import com.dwinovo.chiikawa.entity.brain.task.farmer.crop.FarmRegistry;
 import com.dwinovo.chiikawa.item.PetDollItem;
 import com.dwinovo.chiikawa.item.PetReviveRitualManager;
 import com.dwinovo.chiikawa.music.ServerMusicSystem;
-import com.dwinovo.chiikawa.platform.ForgeModNetworking;
-import com.dwinovo.chiikawa.platform.ForgePlatformRegistryAccess;
+import com.dwinovo.chiikawa.network.SettingsServerPacketHandler;
+import com.dwinovo.chiikawa.platform.NeoForgeModNetworking;
+import com.dwinovo.chiikawa.platform.NeoForgePlatformRegistryAccess;
 import com.dwinovo.chiikawa.platform.Services;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 @Mod(ChiikawaForge.MODID)
 public class ChiikawaForge {
@@ -75,13 +75,20 @@ public class ChiikawaForge {
         Services.REGISTRY.registerToEventBus(modEventBus);
         Services.ENTITY.registerToEventBus(modEventBus);
         PetSpawnsBiomeModifier.register(modEventBus);
-        ForgeModNetworking.register();
-
-        MinecraftForge.EVENT_BUS.addListener(ChiikawaForge::onRightClickBlock);
-        MinecraftForge.EVENT_BUS.addListener(ChiikawaForge::onServerTick);
-        MinecraftForge.EVENT_BUS.addListener(ChiikawaForge::onServerStopping);
-        MinecraftForge.EVENT_BUS.addListener(ChiikawaForge::registerCommands);
-        MinecraftForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> {
+        modEventBus.addListener(NeoForgeModNetworking::registerPayloads);
+        NeoForge.EVENT_BUS.addListener(Chiikawa::onRightClickBlock);
+        NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> PetReviveRitualManager.tickServer(event.getServer()));
+        NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> ServerMusicSystem.tickServer(event.getServer()));
+        NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> PetFollowKeeper.tickServer(event.getServer()));
+        NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> PetRecall.tickServer(event.getServer()));
+        NeoForge.EVENT_BUS.addListener((ServerStoppingEvent event) -> ServerMusicSystem.stopServer(event.getServer()));
+        NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent event) -> {
+            if (event.getEntity() instanceof ServerPlayer player) {
+                SettingsServerPacketHandler.sync(player);
+            }
+        });
+        NeoForge.EVENT_BUS.addListener(Chiikawa::registerCommands);
+        NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> {
             event.addListener(new PetPersonalityLoader());
             event.addListener(new PetTaskTypeLoader());
             event.addListener(new ShopCatalogLoader());
