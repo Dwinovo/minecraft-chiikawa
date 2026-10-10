@@ -7,6 +7,7 @@ import com.dwinovo.chiikawa.camera.PhotoOutlook;
 import com.dwinovo.chiikawa.camera.PhotoScout;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetGesture;
+import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.photo.PhotoSystem;
 import com.dwinovo.chiikawa.photo.PhotoUploads;
@@ -71,7 +72,7 @@ public class TakePhotoBehavior extends Behavior<AbstractPet> {
     private boolean finished;
     /** Whether the owner's game was asked for a picture. */
     private boolean requested;
-    /** Whether it set off for somebody and could not get to them. */
+    /** Whether it went without taking the photo: it had nobody to take one of, could not get to them, or lost them. */
     private boolean gaveUp;
 
     public TakePhotoBehavior() {
@@ -95,13 +96,14 @@ public class TakePhotoBehavior extends Behavior<AbstractPet> {
         stage = Stage.WALKING;
         since = gameTime;
         PhotoOutlook outlook = PhotoScout.outlook(pet);
+        camera = outlook.camera().orElseThrow();
         Optional<PhotoScout.Shot> plan = PhotoScout.plan(pet, outlook, pet.getRandom());
         if (plan.isEmpty()) {
+            gaveUp = true;
             finished = true;
             return;
         }
         shot = plan.get();
-        camera = outlook.camera().orElseThrow();
         // Not left over from some other walk: only a path this one could not find counts against it.
         pet.getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
         shot.target().ifPresentOrElse(
@@ -117,6 +119,7 @@ public class TakePhotoBehavior extends Behavior<AbstractPet> {
     @Override
     protected void tick(ServerLevel level, AbstractPet pet, long gameTime) {
         if (shot.target().filter(target -> !target.isAlive()).isPresent()) {
+            gaveUp = true;
             finished = true;
             return;
         }
@@ -154,13 +157,16 @@ public class TakePhotoBehavior extends Behavior<AbstractPet> {
             // is PhotoDelivery's to say.
             pet.getBrain().setMemoryWithExpiry(InitMemory.PHOTO_COOLDOWN.get(), Unit.INSTANCE, PhotoUploads.WAIT_TICKS);
         } else if (gaveUp) {
-            // Somebody it could not get to is somebody it would try again for, tick after tick,
-            // were it not to rest.
+            // Somebody it could not get to, or lost, is somebody it would try again for, tick after
+            // tick, were it not to rest.
             pet.getBrain().setMemoryWithExpiry(InitMemory.PHOTO_COOLDOWN.get(), Unit.INSTANCE, camera.retryTicks());
         }
         pet.setActivity(PetActivity.NONE);
         pet.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
         pet.getBrain().eraseMemory(MemoryModuleType.LOOK_TARGET);
+        // Over: the pet picks what to do next now, and not at its next turn, which would find the
+        // photo still its activity.
+        IntentSelector.requestReevaluate(pet);
     }
 
     /**
