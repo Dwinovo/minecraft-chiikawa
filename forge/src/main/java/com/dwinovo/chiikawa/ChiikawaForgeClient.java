@@ -16,6 +16,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
@@ -33,6 +34,7 @@ import com.dwinovo.chiikawa.anim.render.impl.RakkoRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.ShisaRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.UsagiRenderer;
 import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
+import com.dwinovo.chiikawa.client.photo.ClientPhotoCache;
 import com.dwinovo.chiikawa.client.render.ExamDeskRenderer;
 import com.dwinovo.chiikawa.client.render.LaborBoardRenderer;
 import com.dwinovo.chiikawa.client.render.PropBlockRenderer;
@@ -84,8 +86,8 @@ public class ChiikawaClient {
             EntityRenderers.register(InitEntity.KURIMANJU_PET.get(), KurimanjuRenderer::new);
             EntityRenderers.register(InitEntity.RAKKO_PET.get(), RakkoRenderer::new);
             EntityRenderers.register(InitEntity.FURUHONYA_PET.get(), FuruhonyaRenderer::new);
-            MenuScreens.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);
-            registerItemExtensions();
+            NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post tick) -> ClientMusicStreamManager.tick());
+            NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut logout) -> ClientPhotoCache.clear());
         });
         MinecraftForge.EVENT_BUS.addListener(ChiikawaForgeClient::onClientTick);
     }
