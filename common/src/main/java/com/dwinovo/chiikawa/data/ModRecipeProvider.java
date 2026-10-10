@@ -16,13 +16,21 @@ import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 
-public final class ModRecipeProvider extends RecipeProvider {
-    public ModRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
-        super(registries, output);
+public class ModRecipeProvider extends RecipeProvider {
+    /** Any seed, by the convention tag every loader and most mods agree on. */
+    private static final TagKey<Item> SEEDS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "seeds"));
+
+    private final CompletableFuture<HolderLookup.Provider> registriesFuture;
+
+    public ModRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
+        super(output, registries);
+        this.registriesFuture = registries;
     }
 
     @Override
@@ -118,10 +126,10 @@ public final class ModRecipeProvider extends RecipeProvider {
             .unlockedBy(getHasName(Items.BOOK), has(Items.BOOK))
             .save(this.output);
 
-        // The weeding study guide, for one who would rather not buy it: a book and a tuft of grass.
+        // The weeding study guide, for one who would rather not buy it: a book and any seed.
         ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, InitItems.WEEDING_BOOK.get())
                 .requires(Items.BOOK)
-                .requires(Items.SHORT_GRASS)
+                .requires(SEEDS)
                 .unlockedBy(getHasName(Items.BOOK), has(Items.BOOK))
                 .save(recipeOutput);
 
