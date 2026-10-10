@@ -11,6 +11,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterPictureInPictureRenderersEvent;
@@ -28,6 +29,7 @@ import com.dwinovo.chiikawa.anim.render.impl.UsagiRenderer;
 import com.dwinovo.chiikawa.client.manual.ManualStageRenderState;
 import com.dwinovo.chiikawa.client.manual.ManualStageRenderer;
 import com.dwinovo.chiikawa.client.music.ClientMusicStreamManager;
+import com.dwinovo.chiikawa.client.photo.ClientPhotoCache;
 import com.dwinovo.chiikawa.client.render.ExamDeskRenderer;
 import com.dwinovo.chiikawa.client.render.LaborBoardRenderer;
 import com.dwinovo.chiikawa.client.render.PropBlockRenderer;
@@ -64,6 +66,7 @@ public class ChiikawaClient {
             EntityRenderers.register(InitEntity.RAKKO_PET.get(), RakkoRenderer::new);
             EntityRenderers.register(InitEntity.FURUHONYA_PET.get(), FuruhonyaRenderer::new);
             NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post tick) -> ClientMusicStreamManager.tick());
+            NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut logout) -> ClientPhotoCache.clear());
         });
     }
 

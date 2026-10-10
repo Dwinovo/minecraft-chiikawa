@@ -63,7 +63,8 @@ public final class InitTabs {
         InitItems.SIMPLE_DISH,
         InitItems.WEEDING_BOOK,
         InitItems.PET_BELL,
-        InitItems.WHISTLE_CANDY
+        InitItems.WHISTLE_CANDY,
+        InitItems.PHOTO
     );
 
     private InitTabs() {
