@@ -29,6 +29,9 @@ import com.dwinovo.chiikawa.social.PetInteractionLoader;
 import com.dwinovo.chiikawa.spawn.PetSpawnLoader;
 import com.dwinovo.chiikawa.spawn.PetSpawnsBiomeModifier;
 import com.dwinovo.chiikawa.task.BoardLevelsLoader;
+import com.dwinovo.chiikawa.whistle.WhistleSettingsLoader;
+import com.dwinovo.chiikawa.camera.CameraSettingsLoader;
+import com.dwinovo.chiikawa.photo.PhotoSystem;
 import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
 import com.dwinovo.chiikawa.task.PetTaskTypes;
 import com.dwinovo.chiikawa.voice.PetVoiceLoader;
@@ -88,23 +91,26 @@ public class Chiikawa {
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> ServerMusicSystem.tickServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> PetFollowKeeper.tickServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> PetRecall.tickServer(event.getServer()));
+        NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> PhotoSystem.tickServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener((ServerStoppingEvent event) -> ServerMusicSystem.stopServer(event.getServer()));
+        NeoForge.EVENT_BUS.addListener((ServerStoppingEvent event) -> PhotoSystem.stopServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent event) -> {
             if (event.getEntity() instanceof ServerPlayer player) {
                 SettingsServerPacketHandler.sync(player);
             }
         });
         NeoForge.EVENT_BUS.addListener(Chiikawa::registerCommands);
-        NeoForge.EVENT_BUS.addListener((AddServerReloadListenersEvent event) -> {
-            event.addListener(PetPersonalityLoader.ID, new PetPersonalityLoader());
-            event.addListener(PetTaskTypeLoader.ID, new PetTaskTypeLoader());
-            event.addListener(ShopCatalogLoader.ID, new ShopCatalogLoader());
-            event.addListener(BoardLevelsLoader.ID, new BoardLevelsLoader());
-            event.addListener(WhistleSettingsLoader.ID, new WhistleSettingsLoader());
-            event.addListener(PetSpawnLoader.ID, new PetSpawnLoader());
-            event.addListener(PetVoiceLoader.ID, new PetVoiceLoader());
-            event.addListener(PetInteractionLoader.ID, new PetInteractionLoader());
-            event.addListener(QualificationLoader.ID, new QualificationLoader(task -> PetTaskTypes.all().containsKey(task)));
+        NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> {
+            event.addListener(new PetPersonalityLoader());
+            event.addListener(new PetTaskTypeLoader());
+            event.addListener(new ShopCatalogLoader());
+            event.addListener(new BoardLevelsLoader());
+            event.addListener(new WhistleSettingsLoader());
+            event.addListener(new CameraSettingsLoader());
+            event.addListener(new PetSpawnLoader());
+            event.addListener(new PetVoiceLoader());
+            event.addListener(new PetInteractionLoader());
+            event.addListener(new QualificationLoader(task -> PetTaskTypes.all().containsKey(task)));
         });
 
         InitCapabilities.register(modEventBus);

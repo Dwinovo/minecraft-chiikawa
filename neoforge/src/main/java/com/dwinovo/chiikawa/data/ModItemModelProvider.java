@@ -26,11 +26,21 @@ public final class ModItemModelProvider extends ModelProvider {
         generateSpawnEggs(itemModels);
         generateDolls(itemModels);
 
-        itemModels.generateFlatItem(InitItems.MUSIC_BOX.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(InitItems.SIMPLE_DISH.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(InitItems.WEEDING_BOOK.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(InitItems.PET_BELL.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(InitItems.WHISTLE_CANDY.get(), ModelTemplates.FLAT_ITEM);
+        basicItem(InitItems.USAGI_DOLL.get());
+        basicItem(InitItems.HACHIWARE_DOLL.get());
+        basicItem(InitItems.CHIIKAWA_DOLL.get());
+        basicItem(InitItems.SHISA_DOLL.get());
+        basicItem(InitItems.MOMONGA_DOLL.get());
+        basicItem(InitItems.KURIMANJU_DOLL.get());
+        basicItem(InitItems.RAKKO_DOLL.get());
+        basicItem(InitItems.FURUHONYA_DOLL.get());
+
+        basicItem(InitItems.MUSIC_BOX.get());
+        basicItem(InitItems.SIMPLE_DISH.get());
+        basicItem(InitItems.WEEDING_BOOK.get());
+        basicItem(InitItems.PET_BELL.get());
+        basicItem(InitItems.WHISTLE_CANDY.get());
+        basicItem(InitItems.PHOTO.get());
         // The props' item models, the weapons' among them, come from PropItemModelProvider, shared with Fabric.
     }
 
