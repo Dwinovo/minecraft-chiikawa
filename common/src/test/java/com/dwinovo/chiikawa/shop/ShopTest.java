@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 import net.minecraft.SharedConstants;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
@@ -31,6 +32,9 @@ class ShopTest {
         new ShopCatalog.Entry(Items.COOKIE, 1, 0),
         new ShopCatalog.Entry(Items.CAKE, 3, 0),
         new ShopCatalog.Entry(Items.WHEAT, 2, 1)));
+
+    /** A pet that is carrying nothing but its money. */
+    private static final ToIntFunction<Item> NOTHING = item -> 0;
 
     @BeforeAll
     static void bootstrap() {
@@ -80,24 +84,71 @@ class ShopTest {
     void aPetBuysWhatItLikesAndCanAfford() {
         Personality fussy = likes(Items.CAKE);
 
-        assertTrue(ShopBasket.wants(fussy, SHOP, 2, FixedRandom.ints(0)).isEmpty(),
+        assertTrue(ShopBasket.wants(fussy, SHOP, 2, NOTHING, FixedRandom.ints(0)).isEmpty(),
             "a pet with two emeralds bought a cake costing three");
         assertEquals(Optional.of(Items.CAKE),
-            ShopBasket.wants(fussy, SHOP, 3, FixedRandom.ints(0)).map(ShopCatalog.Entry::item));
+            ShopBasket.wants(fussy, SHOP, 3, NOTHING, FixedRandom.ints(0)).map(ShopCatalog.Entry::item));
     }
 
     @Test
     void aPetDoesNotBuyWhatItDoesNotWant() {
         Personality fussy = likes(Items.DIAMOND);
 
-        assertTrue(ShopBasket.wants(fussy, SHOP, 64, FixedRandom.ints(0)).isEmpty(),
+        assertTrue(ShopBasket.wants(fussy, SHOP, 64, NOTHING, FixedRandom.ints(0)).isEmpty(),
             "a pet bought something off a list it wanted nothing from");
-        assertFalse(ShopBasket.wantsAnything(fussy, SHOP, 64));
+        assertFalse(ShopBasket.wantsAnything(fussy, SHOP, 64, NOTHING));
     }
 
     @Test
     void aPetWithNoLikingsBuysNothing() {
-        assertFalse(ShopBasket.wantsAnything(Personality.DEFAULT, SHOP, 64));
+        assertFalse(ShopBasket.wantsAnything(Personality.DEFAULT, SHOP, 64, NOTHING));
+    }
+
+    @Test
+    void aLikingThatNeedsSomethingIsOnlyWantedWhileThePetHasIt() {
+        // Film, for a pet with a camera to put it in.
+        Personality photographer = new Personality(Map.of(), Map.of(), 0.0F, List.of(),
+            List.of(new Personality.WeightedItem(Items.CAKE, 1).requiring(Items.BOOK)), IdleHabits.DEFAULT, Map.of());
+        ToIntFunction<Item> withABook = item -> item == Items.BOOK ? 1 : 0;
+
+        assertFalse(ShopBasket.wantsAnything(photographer, SHOP, 64, NOTHING), "film for a pet with no camera");
+        assertTrue(ShopBasket.wants(photographer, SHOP, 64, NOTHING, FixedRandom.ints(0)).isEmpty());
+        assertTrue(ShopBasket.wantsAnything(photographer, SHOP, 64, withABook));
+        assertEquals(Optional.of(Items.CAKE),
+            ShopBasket.wants(photographer, SHOP, 64, withABook, FixedRandom.ints(0)).map(ShopCatalog.Entry::item));
+    }
+
+    @Test
+    void aLikingWithALimitStopsBeingWantedOnceThePetHasEnough() {
+        // A camera is only worth one.
+        Personality collector = new Personality(Map.of(), Map.of(), 0.0F, List.of(),
+            List.of(new Personality.WeightedItem(Items.CAKE, 1).limitedTo(2)), IdleHabits.DEFAULT, Map.of());
+
+        assertTrue(ShopBasket.wantsAnything(collector, SHOP, 64, item -> item == Items.CAKE ? 1 : 0));
+        assertFalse(ShopBasket.wantsAnything(collector, SHOP, 64, item -> item == Items.CAKE ? 2 : 0),
+            "a pet that already had as many as it wants bought another");
+    }
+
+    @Test
+    void aLikingThatIsNotWantedLeavesTheOthersToBeDrawn() {
+        Personality picky = new Personality(Map.of(), Map.of(), 0.0F, List.of(), List.of(
+            new Personality.WeightedItem(Items.CAKE, 5).requiring(Items.BOOK),
+            new Personality.WeightedItem(Items.COOKIE, 1)), IdleHabits.DEFAULT, Map.of());
+
+        // However heavily the cake weighs, it is not in the draw for a pet with no book.
+        assertEquals(Optional.of(Items.COOKIE),
+            ShopBasket.wants(picky, SHOP, 64, NOTHING, FixedRandom.ints(0)).map(ShopCatalog.Entry::item));
+    }
+
+    @Test
+    void whatAPetCarriesIsCountedAcrossItsBackpack() {
+        SimpleContainer bag = new SimpleContainer(3);
+        bag.setItem(0, new ItemStack(Items.BOOK, 2));
+        bag.setItem(2, new ItemStack(Items.BOOK, 3));
+        bag.setItem(1, new ItemStack(Items.CAKE));
+
+        assertEquals(5, ShopBasket.carriedIn(bag).applyAsInt(Items.BOOK));
+        assertEquals(0, ShopBasket.carriedIn(bag).applyAsInt(Items.COOKIE));
     }
 
     @Test

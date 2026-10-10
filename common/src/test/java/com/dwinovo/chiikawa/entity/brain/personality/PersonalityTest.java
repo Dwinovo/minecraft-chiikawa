@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.personality;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.entity.brain.intent.DayPhase;
@@ -10,6 +11,7 @@ import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import net.minecraft.SharedConstants;
 import net.minecraft.resources.Identifier;
@@ -48,6 +50,52 @@ class PersonalityTest {
         assertEquals(0.1F, personality.randomness(), 1.0E-6F);
         assertEquals(List.of(Items.WOODEN_HOE, Items.AIR), personality.wildTools().stream().map(Personality.WeightedItem::item).toList());
         assertEquals(Set.of(HARVEST, WANDER), personality.intentIds());
+    }
+
+    @Test
+    void aLikingMayNeedSomethingAndHaveALimit() {
+        Personality personality = parse("""
+            {
+              "likes": [
+                { "item": "minecraft:cookie", "weight": 1 },
+                { "item": "minecraft:book", "weight": 3, "requires": "minecraft:paper", "limit": 2 }
+              ]
+            }
+            """);
+
+        Personality.WeightedItem plain = personality.likes().get(0);
+        Personality.WeightedItem conditional = personality.likes().get(1);
+        assertTrue(plain.requires().isEmpty() && plain.limit().isEmpty(), "a liking with no conditions has some");
+        assertEquals(Optional.of(Items.PAPER), conditional.requires());
+        assertEquals(Optional.of(2), conditional.limit());
+    }
+
+    @Test
+    void whatALikingNeedsIsWrittenWhenItIsSaved() {
+        Personality.WeightedItem liking = new Personality.WeightedItem(Items.BOOK, 3).requiring(Items.PAPER).limitedTo(2);
+
+        JsonElement json = Personality.WeightedItem.CODEC.encodeStart(JsonOps.INSTANCE, liking).getOrThrow();
+
+        assertEquals(liking, Personality.WeightedItem.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
+        assertEquals("minecraft:paper", json.getAsJsonObject().get("requires").getAsString());
+    }
+
+    @Test
+    void aLikingNeedsOnlyWhatItSaysItNeeds() {
+        Personality.WeightedItem film = new Personality.WeightedItem(Items.BOOK, 1).requiring(Items.PAPER);
+        Personality.WeightedItem camera = new Personality.WeightedItem(Items.PAPER, 1).limitedTo(1);
+
+        assertFalse(film.wantedBy(item -> 0));
+        assertTrue(film.wantedBy(item -> item == Items.PAPER ? 1 : 0));
+        assertTrue(camera.wantedBy(item -> 0));
+        assertFalse(camera.wantedBy(item -> item == Items.PAPER ? 1 : 0));
+        assertTrue(new Personality.WeightedItem(Items.BOOK, 1).wantedBy(item -> 99), "no conditions, no refusals");
+    }
+
+    @Test
+    void rejectsALimitOfNothing() {
+        assertTrue(decode("{ \"likes\": [ { \"item\": \"minecraft:cookie\", \"weight\": 1, \"limit\": 0 } ] }").isError());
+        assertTrue(decode("{ \"likes\": [ { \"item\": \"minecraft:cookie\", \"weight\": 1, \"requires\": \"minecraft:nothing_like_it\" } ] }").isError());
     }
 
     @Test
