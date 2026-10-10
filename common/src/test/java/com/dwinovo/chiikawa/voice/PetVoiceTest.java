@@ -59,7 +59,7 @@ class PetVoiceTest {
             200, 3, 60, 16.0);
 
         // A random source with nothing in it throws if anything is drawn from it.
-        assertEquals(Optional.empty(), voice.draw(VoiceMoment.HUNT, FixedRandom.floats()));
+        assertEquals(Optional.empty(), voice.draw(VoiceMoment.HUNT, FixedRandom.floats(), 1.0F));
     }
 
     @Test
@@ -67,8 +67,8 @@ class PetVoiceTest {
         PetVoice voice = new PetVoice(Map.of(VoiceMoment.HURT,
             List.of(new PetVoice.Line(YADA, 3), new PetVoice.Line(SOB, 1))), Map.of(), 200, 3, 60, 16.0);
 
-        assertEquals(Optional.of(YADA), voice.draw(VoiceMoment.HURT, FixedRandom.ints(2)));
-        assertEquals(Optional.of(SOB), voice.draw(VoiceMoment.HURT, FixedRandom.ints(3)));
+        assertEquals(Optional.of(YADA), voice.draw(VoiceMoment.HURT, FixedRandom.ints(2), 1.0F));
+        assertEquals(Optional.of(SOB), voice.draw(VoiceMoment.HURT, FixedRandom.ints(3), 1.0F));
     }
 
     @Test
@@ -76,8 +76,37 @@ class PetVoiceTest {
         PetVoice voice = new PetVoice(Map.of(VoiceMoment.IDLE, List.of(new PetVoice.Line(NNSHO, 1))),
             Map.of(VoiceMoment.IDLE, 0.25F), 200, 3, 60, 16.0);
 
-        assertEquals(Optional.empty(), voice.draw(VoiceMoment.IDLE, FixedRandom.floats(0.25F)));
-        assertEquals(Optional.of(NNSHO), voice.draw(VoiceMoment.IDLE, FixedRandom.of(new float[] {0.2F}, 0)));
+        assertEquals(Optional.empty(), voice.draw(VoiceMoment.IDLE, FixedRandom.floats(0.25F), 1.0F));
+        assertEquals(Optional.of(NNSHO), voice.draw(VoiceMoment.IDLE, FixedRandom.of(new float[] {0.2F}, 0), 1.0F));
+    }
+
+    @Test
+    void chatterIsAMultiplierOnTheChanceUpToCertain() {
+        PetVoice voice = new PetVoice(Map.of(VoiceMoment.IDLE, List.of(new PetVoice.Line(NNSHO, 1))),
+            Map.of(VoiceMoment.IDLE, 0.25F), 200, 3, 60, 16.0);
+
+        // Twice as chatty: a chance of a half, so a roll of 0.4 that failed now succeeds.
+        assertEquals(Optional.empty(), voice.draw(VoiceMoment.IDLE, FixedRandom.floats(0.4F), 1.0F));
+        assertEquals(Optional.of(NNSHO), voice.draw(VoiceMoment.IDLE, FixedRandom.of(new float[] {0.4F}, 0), 2.0F));
+        // Half as chatty: an eighth.
+        assertEquals(Optional.empty(), voice.draw(VoiceMoment.IDLE, FixedRandom.floats(0.2F), 0.5F));
+    }
+
+    @Test
+    void aCertainMomentStaysCertainWhateverTheChatter() {
+        PetVoice voice = new PetVoice(Map.of(VoiceMoment.HURT, List.of(new PetVoice.Line(YADA, 1))), Map.of(),
+            200, 3, 60, 16.0);
+
+        // Certain is certain: nothing is rolled, whatever the setting, so a source with nothing in it is fine.
+        assertEquals(Optional.of(YADA), voice.draw(VoiceMoment.HURT, FixedRandom.ints(1), 2.0F));
+    }
+
+    @Test
+    void noChatterIsSilenceWithoutRollingAnything() {
+        PetVoice voice = new PetVoice(Map.of(VoiceMoment.HURT, List.of(new PetVoice.Line(YADA, 1))), Map.of(),
+            200, 3, 60, 16.0);
+
+        assertEquals(Optional.empty(), voice.draw(VoiceMoment.HURT, FixedRandom.floats(), 0.0F));
     }
 
     @Test
