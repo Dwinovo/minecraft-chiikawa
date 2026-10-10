@@ -7,7 +7,6 @@ import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import com.dwinovo.chiikawa.entity.impl.HachiwarePet;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
-import com.dwinovo.chiikawa.shop.Payment;
 import com.dwinovo.chiikawa.social.InteractionPlan;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -78,10 +77,7 @@ public final class PhotoScout {
             return PhotoOutlook.NONE;
         }
         Optional<CameraSettings> camera = cameraOf(pet);
-        boolean hasFilm = camera.filter(settings -> {
-            Item film = filmOf(settings);
-            return Payment.count(pet.getBackpack(), stack -> stack.is(film)) > 0;
-        }).isPresent();
+        boolean hasFilm = camera.filter(settings -> FilmRolls.hasRoom(pet.getBackpack(), filmOf(settings))).isPresent();
         LivingEntity owner = pet.getOwner();
         boolean ownerInRange = owner instanceof ServerPlayer && owner.isAlive()
             && camera.filter(settings -> pet.distanceTo(owner) <= settings.ownerRange()).isPresent();

@@ -112,7 +112,7 @@ public final class NeoForgeModNetworking {
             });
         registrar.playToClient(PhotoPayloads.DownloadPhotoPayload.TYPE, PhotoPayloads.DownloadPhotoPayload.STREAM_CODEC,
             (payload, context) -> ClientPhotoPacketHandler.handleDownload(payload));
-        registrar.playToClient(PhotoPayloads.OpenPhotoPayload.TYPE, PhotoPayloads.OpenPhotoPayload.STREAM_CODEC,
+        registrar.playToClient(PhotoPayloads.OpenAlbumPayload.TYPE, PhotoPayloads.OpenAlbumPayload.STREAM_CODEC,
             (payload, context) -> ClientPhotoPacketHandler.handleOpen(payload));
     }
 
