@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.camera.PhotoOutlook;
 import com.dwinovo.chiikawa.camera.PhotoScout;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
+import com.dwinovo.chiikawa.gifting.GiftPool;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
@@ -23,6 +24,7 @@ import com.dwinovo.chiikawa.utils.Utils;
 import java.util.Optional;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 /**
@@ -55,6 +57,8 @@ import net.minecraft.world.level.Level;
  * @param seatedAtExam whether the pet is in its chair at an exam desk, at the paper or handing it in
  * @param whistleHeard where a whistle was blown that this wild pet has set off for, once it has had time to react
  * @param photo whether the pet could take a photo now, and of what
+ * @param presentToGive whether the pet has something in its bag to give its owner, and is ready to
+ *                      think of giving them something
  */
 public record IntentContext(
     GlobalPos petPos,
@@ -80,7 +84,8 @@ public record IntentContext(
     Optional<GlobalPos> resultsDesk,
     boolean seatedAtExam,
     Optional<GlobalPos> whistleHeard,
-    PhotoOutlook photo
+    PhotoOutlook photo,
+    boolean presentToGive
 ) {
     public static IntentContext capture(AbstractPet pet, PetOwnership ownership) {
         Level level = pet.level();
@@ -115,8 +120,19 @@ public record IntentContext(
             pet.getBrain().getMemory(InitMemory.WHISTLE_HEARD.get())
                 .filter(heard -> heard.from() <= level.getGameTime())
                 .map(WhistleHeard::where),
-            PhotoScout.outlook(pet)
+            PhotoScout.outlook(pet),
+            presentToGive(pet)
         );
+    }
+
+    /**
+     * Whether the pet has a present in mind: its owner is about to be given it, its last present was
+     * long enough ago, and there is something in its bag it may give.
+     */
+    private static boolean presentToGive(AbstractPet pet) {
+        return pet.getOwner() instanceof Player
+            && !pet.getBrain().hasMemoryValue(InitMemory.GIFT_COOLDOWN.get())
+            && !GiftPool.of(pet).isEmpty();
     }
 
     private static Optional<GlobalPos> examDesk(AbstractPet pet) {
