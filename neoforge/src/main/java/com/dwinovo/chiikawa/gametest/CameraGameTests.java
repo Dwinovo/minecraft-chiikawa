@@ -9,6 +9,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
+import com.dwinovo.chiikawa.camera.CameraCarry;
 import com.dwinovo.chiikawa.camera.CameraSettings;
 import com.dwinovo.chiikawa.camera.FilmRolls;
 import com.dwinovo.chiikawa.camera.PhotoScout;
@@ -347,49 +348,56 @@ public final class CameraGameTests {
     }
 
     /**
-     * What tells a player's game to hang the camera at the pet's chest follows the backpack, whichever
-     * slot the camera is put in or taken from, and a thing that only looks like one is not a camera.
+     * What tells a player's game to hang the camera at the pet's chest follows the backpack: in
+     * a pocket or in the bag's own slots, and none once it is taken out. A thing that only looks
+     * like a camera is none.
      */
     @GameTest(template = "floor8", batch = "chiikawa_camera_chest", timeoutTicks = 20)
     public static void the_camera_is_on_the_chest_while_it_is_in_the_backpack(GameTestHelper helper) {
         AbstractPet pet = GameTestKit.owned(helper, InitEntity.HACHIWARE_PET.get(), new BlockPos(3, STAND, 3));
-        helper.assertFalse(pet.carriesCamera(), "a pet with an empty bag carries a camera");
+        assertCarry(helper, pet, CameraCarry.NONE, "a pet with an empty bag");
 
         pet.getBackpack().setItem(5, new ItemStack(Items.SPYGLASS));
-        helper.assertFalse(pet.carriesCamera(), "something that is not a camera hangs at the chest");
+        assertCarry(helper, pet, CameraCarry.NONE, "a pet with a spyglass");
 
         pet.getBackpack().setItem(AbstractPet.BACKPACK_SIZE + 2, new ItemStack(InitItems.CAMERA.get()));
-        helper.assertTrue(pet.carriesCamera(), "a camera in the bag's own slots is not on the chest");
+        assertCarry(helper, pet, CameraCarry.POCKET, "a camera in the bag's own slots");
         pet.getBackpack().setItem(AbstractPet.BACKPACK_SIZE + 2, ItemStack.EMPTY);
-        helper.assertFalse(pet.carriesCamera(), "the camera stayed on the chest after it was taken out");
+        assertCarry(helper, pet, CameraCarry.NONE, "a camera taken out of the bag");
 
-        pet.getBackpack().addItem(new ItemStack(InitItems.CAMERA.get()));
-        helper.assertTrue(pet.carriesCamera(), "a camera put in the bag is not on the chest");
+        pet.getBackpack().setItem(5, new ItemStack(InitItems.CAMERA.get()));
+        assertCarry(helper, pet, CameraCarry.POCKET, "a camera put in a pocket");
         pet.getBackpack().removeItemType(InitItems.CAMERA.get(), 1);
-        helper.assertFalse(pet.carriesCamera(), "the camera stayed on the chest after it was taken out");
+        assertCarry(helper, pet, CameraCarry.NONE, "a camera taken out of a pocket");
         helper.succeed();
     }
 
     /**
-     * A camera hangs on the chest whichever slot it is in, so it is never what the pet is told to
-     * hold in its fist: with it in the main hand the held stack that is published is empty, though
-     * the camera is still in the slot. A tool in the hand is published as it is.
+     * A camera in the main-hand slot hangs on the chest like any other, and the state says it is in
+     * the hand, so that it is not drawn in the fist too. What the pet holds is what is in the slot.
      */
     @GameTest(template = "floor8", batch = "chiikawa_camera_chest", timeoutTicks = 20)
-    public static void a_camera_in_the_main_hand_is_not_held_in_the_fist(GameTestHelper helper) {
+    public static void a_camera_in_the_main_hand_is_said_to_be_in_the_hand(GameTestHelper helper) {
         AbstractPet pet = GameTestKit.owned(helper, InitEntity.HACHIWARE_PET.get(), new BlockPos(3, STAND, 3));
 
         pet.getBackpack().setItem(AbstractPet.MAINHAND_SLOT, new ItemStack(InitItems.CAMERA.get()));
-        helper.assertTrue(pet.carriesCamera(), "a camera in the hand is not on the chest");
-        helper.assertTrue(pet.getMainHandItem().isEmpty(), "the camera is published as held: " + pet.getMainHandItem());
-        helper.assertTrue(pet.getBackpack().getItem(AbstractPet.MAINHAND_SLOT).is(InitItems.CAMERA.get()),
-            "the camera is no longer in the main-hand slot");
+        assertCarry(helper, pet, CameraCarry.HAND, "a camera in the main hand");
+        helper.assertTrue(pet.getMainHandItem().is(InitItems.CAMERA.get()), "what the pet holds is not what is in its hand");
 
         pet.getBackpack().setItem(AbstractPet.MAINHAND_SLOT, new ItemStack(Items.IRON_SWORD));
         pet.getBackpack().setItem(5, new ItemStack(InitItems.CAMERA.get()));
-        helper.assertTrue(pet.carriesCamera(), "a camera in a pocket is not on the chest");
-        helper.assertTrue(pet.getMainHandItem().is(Items.IRON_SWORD), "the sword is not what the pet holds: " + pet.getMainHandItem());
+        assertCarry(helper, pet, CameraCarry.POCKET, "a sword in the hand and a camera in a pocket");
+        helper.assertTrue(pet.getMainHandItem().is(Items.IRON_SWORD), "the sword is not what the pet holds");
+
+        pet.getBackpack().setItem(AbstractPet.MAINHAND_SLOT, ItemStack.EMPTY);
+        assertCarry(helper, pet, CameraCarry.POCKET, "an empty hand and a camera in a pocket");
+        pet.getBackpack().setItem(5, ItemStack.EMPTY);
+        assertCarry(helper, pet, CameraCarry.NONE, "nothing at all");
         helper.succeed();
+    }
+
+    private static void assertCarry(GameTestHelper helper, AbstractPet pet, CameraCarry expected, String what) {
+        helper.assertTrue(pet.cameraCarry() == expected, what + " is " + pet.cameraCarry() + ", not " + expected);
     }
 
     /** A photo that comes back the wrong size is no photo: no film used, nothing to give, a short rest. */
