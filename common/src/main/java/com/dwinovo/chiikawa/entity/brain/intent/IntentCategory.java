@@ -30,5 +30,7 @@ public enum IntentCategory {
      */
     EXAM,
     /** A wild pet going over to see who whistled. Wild pets only: an owner's pet takes the order itself. */
-    CURIOUS
+    CURIOUS,
+    /** Taking a photo of the owner, a friend or the view, where the pet may walk. */
+    PHOTO
 }

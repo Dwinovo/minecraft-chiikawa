@@ -98,8 +98,8 @@ public class GoShoppingBehavior extends Behavior<AbstractPet> {
 
     /** Hands the money over and takes the goods. Nothing happens unless both can. */
     private void buy(ServerLevel level, AbstractPet pet, ShopCatalog catalog) {
-        Optional<ShopCatalog.Entry> wanted = ShopBasket.wants(
-            PetPersonalities.of(pet.getType()), catalog, Wallet.count(pet.getBackpack()), pet.getRandom());
+        Optional<ShopCatalog.Entry> wanted = ShopBasket.wants(PetPersonalities.of(pet.getType()), catalog,
+            Wallet.count(pet.getBackpack()), ShopBasket.carriedIn(pet.getBackpack()), pet.getRandom());
         if (wanted.isEmpty()) {
             return;
         }
@@ -166,8 +166,8 @@ public class GoShoppingBehavior extends Behavior<AbstractPet> {
 
     /** What the pet would buy at the shop it remembers, if anything. */
     private static Optional<ShopCatalog.Entry> wants(ServerLevel level, AbstractPet pet) {
-        return shop(level, pet).flatMap(shop -> ShopBasket.wants(
-            PetPersonalities.of(pet.getType()), shop.catalog(), Wallet.count(pet.getBackpack()), pet.getRandom()));
+        return shop(level, pet).flatMap(shop -> ShopBasket.wants(PetPersonalities.of(pet.getType()), shop.catalog(),
+            Wallet.count(pet.getBackpack()), ShopBasket.carriedIn(pet.getBackpack()), pet.getRandom()));
     }
 
     private static Optional<ShopBlockEntity> shop(ServerLevel level, AbstractPet pet) {
