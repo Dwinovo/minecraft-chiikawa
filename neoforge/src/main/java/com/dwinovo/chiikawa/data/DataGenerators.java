@@ -47,6 +47,7 @@ public final class DataGenerators {
         event.getGenerator().addProvider(server, new LaborBoardLevelProvider(output));
         event.getGenerator().addProvider(server, new WhistleSettingsProvider(output));
         event.getGenerator().addProvider(server, new CameraSettingsProvider(output));
+        event.getGenerator().addProvider(server, new GiftingSettingsProvider(output));
         event.getGenerator().addProvider(server, new PetSpawnProvider(output));
         event.getGenerator().addProvider(server, new PetInteractionProvider(output));
         event.getGenerator().addProvider(server, new QualificationProvider(output));
