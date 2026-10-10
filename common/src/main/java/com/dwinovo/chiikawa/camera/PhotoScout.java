@@ -55,17 +55,15 @@ public final class PhotoScout {
     /** The settings of the camera a pet carries, the first it comes to. */
     public static Optional<CameraSettings> cameraOf(AbstractPet pet) {
         for (int slot = 0; slot < pet.getBackpack().getContainerSize(); slot++) {
-            Optional<CameraSettings> camera = cameraOf(pet.getBackpack().getItem(slot));
-            if (camera.isPresent()) {
-                return camera;
+            ItemStack stack = pet.getBackpack().getItem(slot);
+            if (!stack.isEmpty()) {
+                Optional<CameraSettings> camera = CameraSettings.of(BuiltInRegistries.ITEM.getKey(stack.getItem()));
+                if (camera.isPresent()) {
+                    return camera;
+                }
             }
         }
         return Optional.empty();
-    }
-
-    /** The settings of the camera this stack is, nothing when it is not one. */
-    public static Optional<CameraSettings> cameraOf(ItemStack stack) {
-        return stack.isEmpty() ? Optional.empty() : CameraSettings.of(BuiltInRegistries.ITEM.getKey(stack.getItem()));
     }
 
     /** The film a camera takes: air, which no pet carries, when a pack names an item there is none of. */
