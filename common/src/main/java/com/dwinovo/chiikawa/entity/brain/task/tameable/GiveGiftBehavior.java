@@ -2,6 +2,8 @@ package com.dwinovo.chiikawa.entity.brain.task.tameable;
 
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
+import com.dwinovo.chiikawa.gifting.GiftErrand;
 import com.dwinovo.chiikawa.gifting.GiftPool;
 import com.dwinovo.chiikawa.gifting.GiftingSettings;
 import com.dwinovo.chiikawa.init.InitMemory;
@@ -52,8 +54,7 @@ public class GiveGiftBehavior extends Behavior<AbstractPet> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, AbstractPet pet) {
-        return pet.getOwner() instanceof Player
-            && (!pet.getPendingGift().isEmpty() || !GiftPool.of(pet).isEmpty());
+        return GiftErrand.mayBegin(pet);
     }
 
     @Override
@@ -90,6 +91,9 @@ public class GiveGiftBehavior extends Behavior<AbstractPet> {
         if (!given && !pet.getPendingGift().isEmpty()) {
             putBack(pet);
         }
+        // Over, handed across or put back: the pet picks what to do next now, not at its next
+        // turn, which would find the errand still its activity and set off on it again.
+        IntentSelector.requestReevaluate(pet);
     }
 
     /** The errand is off: what was being carried goes back in the bag, or on the ground if the bag is full. */

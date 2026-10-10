@@ -6,7 +6,7 @@ import com.dwinovo.chiikawa.camera.PhotoOutlook;
 import com.dwinovo.chiikawa.camera.PhotoScout;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
-import com.dwinovo.chiikawa.gifting.GiftPool;
+import com.dwinovo.chiikawa.gifting.GiftErrand;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
@@ -24,7 +24,6 @@ import com.dwinovo.chiikawa.utils.Utils;
 import java.util.Optional;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 /**
@@ -120,18 +119,8 @@ public record IntentContext(
                 .filter(heard -> heard.from() <= level.getGameTime())
                 .map(WhistleHeard::where),
             PhotoScout.outlook(pet),
-            presentToGive(pet)
+            GiftErrand.thinksOfAnother(pet)
         );
-    }
-
-    /**
-     * Whether the pet has a present in mind: its owner is about to be given it, its last present was
-     * long enough ago, and there is something in its bag it may give.
-     */
-    private static boolean presentToGive(AbstractPet pet) {
-        return pet.getOwner() instanceof Player
-            && !pet.getBrain().hasMemoryValue(InitMemory.GIFT_COOLDOWN.get())
-            && !GiftPool.of(pet).isEmpty();
     }
 
     private static Optional<GlobalPos> examDesk(AbstractPet pet) {
