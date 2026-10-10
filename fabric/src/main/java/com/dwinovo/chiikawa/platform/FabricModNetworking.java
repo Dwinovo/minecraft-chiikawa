@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.client.exam.ClientExamDeskPacketHandler;
 import com.dwinovo.chiikawa.client.manual.ClientManualPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
 import com.dwinovo.chiikawa.client.pet.ClientPetPacketHandler;
+import com.dwinovo.chiikawa.client.photo.ClientPhotoPacketHandler;
 import com.dwinovo.chiikawa.client.settings.ClientSettingsPacketHandler;
 import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.client.voice.ClientVoicePacketHandler;
@@ -15,6 +16,8 @@ import com.dwinovo.chiikawa.network.ExamDeskServerPacketHandler;
 import com.dwinovo.chiikawa.network.ManualPayloads;
 import com.dwinovo.chiikawa.network.PetPayloads;
 import com.dwinovo.chiikawa.network.PetServerPacketHandler;
+import com.dwinovo.chiikawa.network.PhotoPayloads;
+import com.dwinovo.chiikawa.network.PhotoServerPacketHandler;
 import com.dwinovo.chiikawa.network.SettingsPayloads;
 import com.dwinovo.chiikawa.network.SettingsServerPacketHandler;
 import com.dwinovo.chiikawa.network.ShopPayloads;
@@ -51,6 +54,11 @@ public final class FabricModNetworking {
         PayloadTypeRegistry.clientboundPlay().register(PetPayloads.PetGesturePayload.TYPE, PetPayloads.PetGesturePayload.STREAM_CODEC);
         PayloadTypeRegistry.clientboundPlay().register(SettingsPayloads.WorldSettingsPayload.TYPE, SettingsPayloads.WorldSettingsPayload.STREAM_CODEC);
         PayloadTypeRegistry.serverboundPlay().register(SettingsPayloads.ChangeWorldSettingsPayload.TYPE, SettingsPayloads.ChangeWorldSettingsPayload.STREAM_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(PhotoPayloads.TakePhotoPayload.TYPE, PhotoPayloads.TakePhotoPayload.STREAM_CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(PhotoPayloads.UploadPhotoPayload.TYPE, PhotoPayloads.UploadPhotoPayload.STREAM_CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(PhotoPayloads.RequestPhotoPayload.TYPE, PhotoPayloads.RequestPhotoPayload.STREAM_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(PhotoPayloads.DownloadPhotoPayload.TYPE, PhotoPayloads.DownloadPhotoPayload.STREAM_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(PhotoPayloads.OpenPhotoPayload.TYPE, PhotoPayloads.OpenPhotoPayload.STREAM_CODEC);
         ServerPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicBoxSelectTrackPayload.TYPE,
             (payload, context) -> context.server().execute(() -> MusicServerPacketHandler.handleSelectTrack(payload, context.player())));
         ServerPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicBoxSetModePayload.TYPE,
@@ -67,6 +75,10 @@ public final class FabricModNetworking {
             (payload, context) -> context.server().execute(() -> ShopServerPacketHandler.handleTrade(payload, context.player())));
         ServerPlayNetworking.registerGlobalReceiver(SettingsPayloads.ChangeWorldSettingsPayload.TYPE,
             (payload, context) -> context.server().execute(() -> SettingsServerPacketHandler.handleChange(payload, context.player())));
+        ServerPlayNetworking.registerGlobalReceiver(PhotoPayloads.UploadPhotoPayload.TYPE,
+            (payload, context) -> context.server().execute(() -> PhotoServerPacketHandler.handleUpload(payload, context.player())));
+        ServerPlayNetworking.registerGlobalReceiver(PhotoPayloads.RequestPhotoPayload.TYPE,
+            (payload, context) -> context.server().execute(() -> PhotoServerPacketHandler.handleRequest(payload, context.player())));
     }
 
     public static void registerClient() {
@@ -92,5 +104,11 @@ public final class FabricModNetworking {
             (payload, context) -> context.client().execute(() -> ClientPetPacketHandler.handleGesture(payload)));
         ClientPlayNetworking.registerGlobalReceiver(SettingsPayloads.WorldSettingsPayload.TYPE,
             (payload, context) -> context.client().execute(() -> ClientSettingsPacketHandler.handleWorld(payload)));
+        ClientPlayNetworking.registerGlobalReceiver(PhotoPayloads.TakePhotoPayload.TYPE,
+            (payload, context) -> context.client().execute(() -> ClientPhotoPacketHandler.handleTake(payload)));
+        ClientPlayNetworking.registerGlobalReceiver(PhotoPayloads.DownloadPhotoPayload.TYPE,
+            (payload, context) -> context.client().execute(() -> ClientPhotoPacketHandler.handleDownload(payload)));
+        ClientPlayNetworking.registerGlobalReceiver(PhotoPayloads.OpenPhotoPayload.TYPE,
+            (payload, context) -> context.client().execute(() -> ClientPhotoPacketHandler.handleOpen(payload)));
     }
 }

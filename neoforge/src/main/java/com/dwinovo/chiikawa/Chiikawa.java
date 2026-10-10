@@ -30,6 +30,8 @@ import com.dwinovo.chiikawa.spawn.PetSpawnsBiomeModifier;
 import com.dwinovo.chiikawa.gametest.GameTestRegistration;
 import com.dwinovo.chiikawa.task.BoardLevelsLoader;
 import com.dwinovo.chiikawa.whistle.WhistleSettingsLoader;
+import com.dwinovo.chiikawa.camera.CameraSettingsLoader;
+import com.dwinovo.chiikawa.photo.PhotoSystem;
 import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
 import com.dwinovo.chiikawa.task.PetTaskTypes;
 import com.dwinovo.chiikawa.voice.PetVoiceLoader;
@@ -89,7 +91,9 @@ public class Chiikawa {
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> ServerMusicSystem.tickServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> PetFollowKeeper.tickServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> PetRecall.tickServer(event.getServer()));
+        NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> PhotoSystem.tickServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener((ServerStoppingEvent event) -> ServerMusicSystem.stopServer(event.getServer()));
+        NeoForge.EVENT_BUS.addListener((ServerStoppingEvent event) -> PhotoSystem.stopServer(event.getServer()));
         NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent event) -> {
             if (event.getEntity() instanceof ServerPlayer player) {
                 SettingsServerPacketHandler.sync(player);
@@ -103,6 +107,7 @@ public class Chiikawa {
             event.addListener(ShopCatalogLoader.ID, new ShopCatalogLoader());
             event.addListener(BoardLevelsLoader.ID, new BoardLevelsLoader());
             event.addListener(WhistleSettingsLoader.ID, new WhistleSettingsLoader());
+            event.addListener(CameraSettingsLoader.ID, new CameraSettingsLoader());
             event.addListener(PetSpawnLoader.ID, new PetSpawnLoader());
             event.addListener(PetVoiceLoader.ID, new PetVoiceLoader());
             event.addListener(PetInteractionLoader.ID, new PetInteractionLoader());

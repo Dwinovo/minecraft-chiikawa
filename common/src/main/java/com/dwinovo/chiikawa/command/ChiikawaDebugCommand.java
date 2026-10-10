@@ -1,25 +1,37 @@
 package com.dwinovo.chiikawa.command;
 
 import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
+import com.dwinovo.chiikawa.camera.CameraSettings;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSwitchLog;
+import com.dwinovo.chiikawa.init.InitDataComponents;
+import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMemory;
+import com.dwinovo.chiikawa.photo.PhotoData;
+import com.dwinovo.chiikawa.photo.PhotoSubject;
+import com.dwinovo.chiikawa.photo.PhotoSystem;
+import com.dwinovo.chiikawa.photo.PhotoUploads;
 import com.dwinovo.chiikawa.task.BoardSlot;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -29,7 +41,8 @@ import net.minecraft.world.phys.Vec3;
  * player's crosshair: the slip it carries, every candidate with its permission,
  * condition and score, and, once {@code log on} is set for that pet, its recent intent
  * switches. {@code /chiikawa debug board} lists the day's slips of the labor board under
- * the crosshair.
+ * the crosshair. {@code /chiikawa debug photo <entity>} has the player's game draw a photo
+ * from an entity's eyes.
  */
 public final class ChiikawaDebugCommand {
     private static final double TARGET_RANGE = 16.0;
@@ -37,6 +50,11 @@ public final class ChiikawaDebugCommand {
         new SimpleCommandExceptionType(Component.literal("[chiikawa-intent] Look at a pet within 16 blocks"));
     private static final SimpleCommandExceptionType NO_BOARD =
         new SimpleCommandExceptionType(Component.literal("[chiikawa-board] Look at a labor board within 16 blocks"));
+
+    private static final SimpleCommandExceptionType NO_CAMERA =
+        new SimpleCommandExceptionType(Component.literal("[chiikawa-photo] No camera settings are loaded"));
+    private static final SimpleCommandExceptionType OTHER_DIMENSION =
+        new SimpleCommandExceptionType(Component.literal("[chiikawa-photo] That entity is in another dimension"));
 
     private ChiikawaDebugCommand() {
     }
@@ -52,7 +70,45 @@ public final class ChiikawaDebugCommand {
                         .then(Commands.literal("on").executes(context -> setLogging(context.getSource(), true)))
                         .then(Commands.literal("off").executes(context -> setLogging(context.getSource(), false)))))
                 .then(Commands.literal("board")
-                    .executes(context -> showBoard(context.getSource())))));
+                    .executes(context -> showBoard(context.getSource())))
+                .then(Commands.literal("photo")
+                    .then(Commands.argument("entity", EntityArgument.entity())
+                        .executes(context -> takePhoto(context.getSource(), EntityArgument.getEntity(context, "entity")))))));
+    }
+
+    /**
+     * Asks the player's own game to draw a picture from the entity's eyes, and gives them the
+     * photo when it has been sent back and kept. It is the camera's whole path without a pet
+     * in it, for looking at what the picture comes out as.
+     */
+    private static int takePhoto(CommandSourceStack source, Entity viewpoint) throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
+        // Whichever camera is loaded first by name: what is being looked at is the picture, not the camera.
+        CameraSettings camera = CameraSettings.all().entrySet().stream().min(Map.Entry.comparingByKey())
+            .map(Map.Entry::getValue).orElseThrow(NO_CAMERA::create);
+        if (viewpoint.level() != player.level()) {
+            throw OTHER_DIMENSION.create();
+        }
+        PhotoSystem.of(source.getServer()).request(player, viewpoint, camera, new PhotoUploads.Listener() {
+            @Override
+            public void stored(UUID photo) {
+                if (!player.hasDisconnected()) {
+                    ItemStack stack = new ItemStack(InitItems.PHOTO.get());
+                    stack.set(InitDataComponents.PHOTO.get(), PhotoData.taken(photo, PhotoSubject.SCENERY, "",
+                        player.level(), viewpoint.getDisplayName().getString()));
+                    player.getInventory().placeItemBackInInventory(stack);
+                    player.sendSystemMessage(Component.literal("[chiikawa-photo] Photo " + photo + " is in the library"));
+                }
+            }
+
+            @Override
+            public void failed(UUID photo) {
+                player.sendSystemMessage(Component.literal("[chiikawa-photo] Photo " + photo + " did not come back"));
+            }
+        });
+        source.sendSuccess(() -> Component.literal("[chiikawa-photo] Asked your game for a photo from ")
+            .append(viewpoint.getDisplayName()).append("'s eyes"), false);
+        return 1;
     }
 
     private static int showCandidates(CommandSourceStack source) throws CommandSyntaxException {
