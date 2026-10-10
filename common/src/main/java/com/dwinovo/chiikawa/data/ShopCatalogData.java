@@ -60,9 +60,9 @@ public final class ShopCatalogData {
             sells(InitItems.WHALE_POUCH.get(), 12),
             sells(InitItems.STAR_POUCH.get(), 12),
             sells(InitItems.PET_BELL.get(), 16),
-            // Hachiware's camera, and film for it: two rolls to the emerald.
+            // Hachiware's camera, and a roll of film for it.
             sells(InitItems.CAMERA.get(), 32),
-            sells(InitItems.FILM.get(), 1, 2),
+            sells(InitItems.FILM.get(), 2),
             // Reading.
             sells(Items.PAPER, 1),
             sells(Items.BOOK, 2),

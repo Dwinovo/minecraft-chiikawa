@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.camera;
 
+import com.dwinovo.chiikawa.photo.FilmRoll;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -28,14 +29,17 @@ import net.minecraft.util.RandomSource;
  * @param fov how wide the lens sees, in degrees from top to bottom of the picture
  * @param subjects how much a pet fancies taking each kind of photo
  * @param aimTicks how long a pet holds the camera up before the shutter goes
+ * @param exposures how many shots a roll of film holds
  * @param posedChance how often a photo is posed, from 0 (never) to 1 (always): the photographer
  *                    calls out and whoever is in it turns to the camera and poses; the rest are
  *                    candid, taken without a word and with everyone going about their business
  */
 public record CameraSettings(ResourceLocation film, double ownerRange, int cooldownTicks, int retryTicks, int width,
-                             int height, int fov, Subjects subjects, int aimTicks, float posedChance) {
+                             int height, int fov, Subjects subjects, int aimTicks, int exposures, float posedChance) {
     /** How often a photo is posed, when the data does not say. */
     public static final float DEFAULT_POSED_CHANCE = 0.5F;
+    /** How many shots a roll holds, when the data does not say. */
+    public static final int DEFAULT_EXPOSURES = 8;
 
     /**
      * How much a pet fancies each kind of photo, as weights: a pet picks among the kinds it
@@ -67,12 +71,14 @@ public record CameraSettings(ResourceLocation film, double ownerRange, int coold
         Codec.intRange(30, 110).fieldOf("fov").forGetter(CameraSettings::fov),
         Subjects.CODEC.fieldOf("subjects").forGetter(CameraSettings::subjects),
         ExtraCodecs.POSITIVE_INT.fieldOf("aim_ticks").forGetter(CameraSettings::aimTicks),
-        // Always written, though a file without it reads as the default: it is a number to change.
+        // Always written, though a file without them reads as the default: they are numbers to change.
+        Codec.intRange(1, FilmRoll.MOST_EXPOSURES).optionalFieldOf("exposures")
+            .forGetter(settings -> Optional.of(settings.exposures())),
         Codec.floatRange(0.0F, 1.0F).optionalFieldOf("posed_chance")
             .forGetter(settings -> Optional.of(settings.posedChance()))
-    ).apply(instance, (film, ownerRange, cooldownTicks, retryTicks, width, height, fov, subjects, aimTicks, posed) ->
+    ).apply(instance, (film, ownerRange, cooldownTicks, retryTicks, width, height, fov, subjects, aimTicks, exposures, posed) ->
         new CameraSettings(film, ownerRange, cooldownTicks, retryTicks, width, height, fov, subjects, aimTicks,
-            posed.orElse(DEFAULT_POSED_CHANCE))));
+            exposures.orElse(DEFAULT_EXPOSURES), posed.orElse(DEFAULT_POSED_CHANCE))));
 
     /**
      * Rolls whether one photo is posed. Rolled once per photo, and not at all when it is bound to

@@ -110,7 +110,7 @@ public final class NeoForgeModNetworking {
                 }
             });
         registrar.playToClient(PhotoPayloads.DownloadPhotoPayload.TYPE, PhotoPayloads.DownloadPhotoPayload.STREAM_CODEC);
-        registrar.playToClient(PhotoPayloads.OpenPhotoPayload.TYPE, PhotoPayloads.OpenPhotoPayload.STREAM_CODEC);
+        registrar.playToClient(PhotoPayloads.OpenAlbumPayload.TYPE, PhotoPayloads.OpenAlbumPayload.STREAM_CODEC);
     }
 
     public static void registerClientPayloads(RegisterClientPayloadHandlersEvent event) {
@@ -127,6 +127,6 @@ public final class NeoForgeModNetworking {
         event.register(SettingsPayloads.WorldSettingsPayload.TYPE, (payload, context) -> ClientSettingsPacketHandler.handleWorld(payload));
         event.register(PhotoPayloads.TakePhotoPayload.TYPE, (payload, context) -> ClientPhotoPacketHandler.handleTake(payload));
         event.register(PhotoPayloads.DownloadPhotoPayload.TYPE, (payload, context) -> ClientPhotoPacketHandler.handleDownload(payload));
-        event.register(PhotoPayloads.OpenPhotoPayload.TYPE, (payload, context) -> ClientPhotoPacketHandler.handleOpen(payload));
+        event.register(PhotoPayloads.OpenAlbumPayload.TYPE, (payload, context) -> ClientPhotoPacketHandler.handleOpen(payload));
     }
 }
