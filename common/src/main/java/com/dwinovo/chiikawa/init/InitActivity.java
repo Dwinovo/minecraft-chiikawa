@@ -64,6 +64,10 @@ public final class InitActivity {
     public static final Supplier<Activity> ANSWER_WHISTLE =
         Services.PLATFORM_REGISTRY.answerWhistleActivity();
 
+    // Taking a photo.
+    public static final Supplier<Activity> TAKE_PHOTO =
+        Services.PLATFORM_REGISTRY.takePhotoActivity();
+
     private InitActivity() {
     }
 
