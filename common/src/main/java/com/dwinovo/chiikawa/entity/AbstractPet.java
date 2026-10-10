@@ -736,11 +736,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     @Override
     public ItemStack getItemBySlot(EquipmentSlot slot) {
         if (slot == EquipmentSlot.MAINHAND) {
-            ItemStack held = backpack.getItem(MAINHAND_SLOT);
-            // A camera hangs at the chest wherever it is carried, so it is never what the pet holds
-            // in its fist. What a player's game is told the pet holds is this, and that game does not
-            // know which items are cameras: only the server does.
-            return PhotoScout.cameraOf(held).isPresent() ? ItemStack.EMPTY : held;
+            return backpack.getItem(MAINHAND_SLOT);
         }
         if (slot == EquipmentSlot.CHEST) {
             return backpack.getItem(BAG_SLOT);
