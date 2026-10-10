@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.anim.render.layer;
 
 import com.dwinovo.chiikawa.anim.render.PetData;
+import com.dwinovo.chiikawa.anim.render.PropBone;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
@@ -36,10 +37,9 @@ import java.util.List;
  * its blade backwards.
  *
  * <h2>Hands full</h2>
- * While the pet has something of its own model in its hands — a bone named among
- * {@code handsFullWith}, drawn this frame — the item is put away while it is. Whether
- * such a bone is drawn is its own visibility rule's call, so the layer follows the
- * animation without knowing it.
+ * While the pet has a {@link PropBone} of its own model in its hands, the item is put away.
+ * A prop is in the hands while the animation that shows it plays, and its bone is drawn: a
+ * prop that is drawn for another reason, the camera hanging at the chest, leaves them free.
  */
 public final class HeldItemLayer implements RenderLayer {
 
@@ -47,15 +47,15 @@ public final class HeldItemLayer implements RenderLayer {
     public static final String DEFAULT_BONE = "RightHandLocator";
 
     private final String boneName;
-    private final List<String> handsFullWith;
+    private final List<PropBone> handsFullWith;
     private final BoneTransformWalker walker = new BoneTransformWalker();
 
-    /** @param handsFullWith bones that, while drawn, are in the pet's hands instead */
-    public HeldItemLayer(List<String> handsFullWith) {
+    /** @param handsFullWith props that, while they are out, are in the pet's hands instead */
+    public HeldItemLayer(List<PropBone> handsFullWith) {
         this(DEFAULT_BONE, handsFullWith);
     }
 
-    public HeldItemLayer(String boneName, List<String> handsFullWith) {
+    public HeldItemLayer(String boneName, List<PropBone> handsFullWith) {
         this.boneName = boneName;
         this.handsFullWith = List.copyOf(handsFullWith);
     }
@@ -90,9 +90,9 @@ public final class HeldItemLayer implements RenderLayer {
     }
 
     boolean handsFull(RenderLayerContext ctx) {
-        for (String bone : handsFullWith) {
-            Integer idx = ctx.model().boneIndex.get(bone);
-            if (idx != null && !ctx.isHidden(idx)) return true;
+        for (PropBone prop : handsFullWith) {
+            Integer idx = ctx.model().boneIndex.get(prop.bone());
+            if (idx != null && !ctx.isHidden(idx) && prop.shownDuring().shownIn(ctx.state())) return true;
         }
         return false;
     }
