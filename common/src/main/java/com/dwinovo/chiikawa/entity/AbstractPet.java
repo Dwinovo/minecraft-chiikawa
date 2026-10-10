@@ -10,7 +10,6 @@ import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.anim.state.PetAnimContext;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
-import com.dwinovo.chiikawa.camera.PhotoScout;
 import com.dwinovo.chiikawa.entity.brain.handler.ArcherJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.FarmerJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.FencerJobHandler;
@@ -186,11 +185,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * {@link #ACTIVITY}, but named by data rather than by code.
      */
     private static final EntityDataAccessor<String> PERFORMANCE = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.STRING);
-    /**
-     * Whether a camera is anywhere in the pet's backpack; see {@link #carriesCamera}. Synced so a
-     * player's game can hang it at the pet's chest, as the backpack itself is not.
-     */
-    private static final EntityDataAccessor<Boolean> CARRIES_CAMERA = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.BOOLEAN);
 
     /** Legacy animation-id namespace for {@link #ANIM_TRIGGER}'s low byte. */
     public static final int TRIGGER_NONE         = 0;
@@ -269,7 +263,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         public void setChanged() {
             super.setChanged();
             AbstractPet.this.refreshJobFromMainhand();
-            AbstractPet.this.refreshCarriesCamera();
         }
     };
 
@@ -808,18 +801,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         return BagItem.isBag(backpack.getItem(BAG_SLOT));
     }
 
-    /** @return whether a camera is anywhere in the pet's backpack, which is what hangs one at its chest */
-    public boolean carriesCamera() {
-        return this.entityData.get(CARRIES_CAMERA);
-    }
-
-    /** Server side: the synced flag follows what is in the backpack now. */
-    private void refreshCarriesCamera() {
-        if (!level().isClientSide()) {
-            this.entityData.set(CARRIES_CAMERA, PhotoScout.cameraOf(this).isPresent());
-        }
-    }
-
     /**
      * Empties the bag's own slots onto the floor. Called when the bag comes off: what was
      * in it has to go somewhere a player can see, rather than vanishing or being quietly
@@ -832,7 +813,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
                 spawnAtLocation(server, stack);
             }
         }
-        refreshCarriesCamera();
     }
 
     @Override
@@ -907,7 +887,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         builder.define(EAGER_UNTIL, 0L);
         builder.define(LICENCES, List.of());
         builder.define(PERFORMANCE, "");
-        builder.define(CARRIES_CAMERA, false);
     }
 
     /**
@@ -1075,7 +1054,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         input.child("Backpack").ifPresent(backpackInput -> {
             ContainerHelper.loadAllItems(backpackInput, backpack.getItems());
             clearBagSlotOfOldStorage();
-            refreshCarriesCamera();
         });
         input.getInt("PetJob").ifPresent(this::setPetJobId);
         this.entityData.set(PET_MODE, input.getByteOr("PetMode", this.entityData.get(PET_MODE)));
