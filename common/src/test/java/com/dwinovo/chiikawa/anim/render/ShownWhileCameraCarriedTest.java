@@ -11,18 +11,19 @@ import com.dwinovo.chiikawa.anim.controller.BlendMode;
 import com.dwinovo.chiikawa.anim.controller.ControllerSnapshot;
 import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
 import com.dwinovo.chiikawa.anim.state.PetAnimContext;
+import com.dwinovo.chiikawa.camera.CameraCarry;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /** A camera hangs at the chest while it is carried, and is lifted, or put away, by what the pet is doing. */
-class ShownWhileCarriedTest {
-    private static final ShownWhileCarried RULE =
-        new ShownWhileCarried(PetData.CARRIES_CAMERA, PropBone.animationsClashingWithCamera());
+class ShownWhileCameraCarriedTest {
+    private static final ShownWhileCameraCarried RULE =
+        new ShownWhileCameraCarried(PropBone.animationsClashingWithCamera());
 
-    private static ChiikawaRenderState state(boolean carried, String... playing) {
+    private static ChiikawaRenderState state(CameraCarry carry, String... playing) {
         ChiikawaRenderState state = new ChiikawaRenderState();
-        state.put(PetData.CARRIES_CAMERA, carried);
+        state.put(PetData.CAMERA_CARRY, carry);
         ControllerSnapshot[] snapshots = new ControllerSnapshot[playing.length];
         for (int i = 0; i < playing.length; i++) {
             BakedAnimation animation = new BakedAnimation(playing[i], 1f, LoopMode.LOOP, new BakedBoneChannel[0]);
@@ -46,16 +47,22 @@ class ShownWhileCarriedTest {
 
     @Test
     void aCameraHangsAtTheChestWhileCarried() {
-        assertTrue(shown(state(true)));
-        assertTrue(shown(state(true, "idle")));
-        assertTrue(shown(state(true, "walk")));
+        assertTrue(shown(state(CameraCarry.POCKET)));
+        assertTrue(shown(state(CameraCarry.POCKET, "idle")));
+        assertTrue(shown(state(CameraCarry.POCKET, "walk")));
+    }
+
+    @Test
+    void aCameraInTheHandHangsAtTheChestToo() {
+        assertTrue(shown(state(CameraCarry.HAND)));
+        assertFalse(shown(state(CameraCarry.HAND, "guitar")));
     }
 
     @Test
     void withoutACameraThereIsNothingAtTheChest() {
-        assertFalse(shown(state(false)));
-        assertFalse(shown(state(false, "idle")));
-        assertFalse(drawn(state(false, "idle")));
+        assertFalse(shown(state(CameraCarry.NONE)));
+        assertFalse(shown(state(CameraCarry.NONE, "idle")));
+        assertFalse(drawn(state(CameraCarry.NONE, "idle")));
     }
 
     @Test
@@ -66,14 +73,14 @@ class ShownWhileCarriedTest {
     @Test
     void theGuitarAndTheExamPutItAway() {
         for (String animation : List.of("guitar", "exam", "hand_in", "read_results")) {
-            assertFalse(shown(state(true, animation)), animation + " leaves the camera on the chest");
-            assertFalse(drawn(state(true, animation)), animation + " leaves the camera on the chest");
+            assertFalse(shown(state(CameraCarry.POCKET, animation)), animation + " leaves the camera on the chest");
+            assertFalse(drawn(state(CameraCarry.POCKET, animation)), animation + " leaves the camera on the chest");
         }
     }
 
     @Test
     void thePhotoLiftsItWhateverElseIsGoingOn() {
-        assertTrue(drawn(state(true, "photo")));
+        assertTrue(drawn(state(CameraCarry.POCKET, "photo")));
     }
 
     @Test
