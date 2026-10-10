@@ -6,15 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.anim.baked.BakedBone;
 import com.dwinovo.chiikawa.anim.baked.BakedCube;
-import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
-import com.dwinovo.chiikawa.anim.baked.BakedBoneChannel;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
-import com.dwinovo.chiikawa.anim.baked.LoopMode;
-import com.dwinovo.chiikawa.anim.controller.BlendMode;
-import com.dwinovo.chiikawa.anim.controller.ControllerSnapshot;
 import com.dwinovo.chiikawa.anim.render.ChiikawaRenderState;
-import com.dwinovo.chiikawa.anim.render.PropBone;
-import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
 import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.List;
 import java.util.Map;
@@ -72,47 +65,27 @@ class HeldItemLayerTest {
 
     @Test
     void anItemIsPutAwayWhileAPropIsInTheHands() {
-        HeldItemLayer layer = new HeldItemLayer(List.of(PropBone.EXAM_PENCIL));
+        HeldItemLayer layer = new HeldItemLayer(List.of("ExamPencil"));
 
-        assertTrue(layer.handsFull(frame("exam", false)), "a pet writing its exam still holds its sword");
-        assertFalse(layer.handsFull(frame("idle", false)), "a pet holds nothing while no prop is out");
-        assertFalse(layer.handsFull(frame("exam", true)), "a pet holds nothing while its pencil is put away");
+        assertTrue(layer.handsFull(frame(false)), "a pet writing its exam still holds its sword");
+        assertFalse(layer.handsFull(frame(true)), "a pet holds nothing while its pencil is put away");
     }
 
     @Test
     void aPetWithoutThePropKeepsItsItem() {
-        HeldItemLayer layer = new HeldItemLayer(List.of(PropBone.GUITAR));
+        HeldItemLayer layer = new HeldItemLayer(List.of("guitar"));
 
-        assertFalse(layer.handsFull(frame("guitar", false)), "a pet put its item away for a prop it does not have");
+        assertFalse(layer.handsFull(frame(false)), "a pet put its item away for a prop it does not have");
     }
 
-    @Test
-    void aCameraHangingAtTheChestLeavesTheHandsFree() {
-        HeldItemLayer layer = new HeldItemLayer(List.of(PropBone.CAMERA));
-
-        assertFalse(layer.handsFull(frame("idle", false, "camera")), "a camera on the chest took the sword out of the fist");
-        assertTrue(layer.handsFull(frame("photo", false, "camera")), "a camera held up to the face is in the hands");
-    }
-
-    /**
-     * A frame of a model with a hand, a pencil and a camera, the pencil drawn or not, while the
-     * pet plays an animation.
-     */
-    private static RenderLayerContext frame(String animation, boolean pencilHidden) {
-        return frame(animation, pencilHidden, "ExamPencil");
-    }
-
-    /** As above, with the bone named {@code prop} in place of the pencil, drawn or not. */
-    private static RenderLayerContext frame(String animation, boolean hidden, String prop) {
+    /** A frame of a model with a hand and a pencil, the pencil drawn or not. */
+    private static RenderLayerContext frame(boolean pencilHidden) {
         BakedBone hand = new BakedBone("RightHandLocator", -1, 0, 0, 0, 0, 0, 0, false, 0, 0, new int[0]);
-        BakedBone other = new BakedBone(prop, -1, 0, 0, 0, 0, 0, 0, false, 0, 0, new int[0]);
-        BakedModel model = new BakedModel(new BakedBone[] {hand, other}, new BakedCube[0], new int[] {0, 1},
-            Map.of("RightHandLocator", 0, prop, 1), 64, 64);
+        BakedBone pencil = new BakedBone("ExamPencil", -1, 0, 0, 0, 0, 0, 0, false, 0, 0, new int[0]);
+        BakedModel model = new BakedModel(new BakedBone[] {hand, pencil}, new BakedCube[0], new int[] {0, 1},
+            Map.of("RightHandLocator", 0, "ExamPencil", 1), 64, 64);
         ChiikawaRenderState state = new ChiikawaRenderState();
-        state.hiddenBones = new boolean[] {false, hidden};
-        BakedAnimation baked = new BakedAnimation(animation, 1f, LoopMode.LOOP, new BakedBoneChannel[0]);
-        state.controllerSnapshots = new ControllerSnapshot[] {new ControllerSnapshot("main", BlendMode.OVERRIDE,
-            new AnimationChannel(baked, 0L, true), null, 0L, 0f, false)};
+        state.hiddenBones = new boolean[] {false, pencilHidden};
         return new RenderLayerContext(model, new float[0], state, new PoseStack(), null, 0, 0);
     }
 
