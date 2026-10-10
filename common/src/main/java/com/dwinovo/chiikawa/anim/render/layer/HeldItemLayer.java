@@ -1,7 +1,9 @@
 package com.dwinovo.chiikawa.anim.render.layer;
 
+import com.dwinovo.chiikawa.anim.render.ChiikawaRenderState;
 import com.dwinovo.chiikawa.anim.render.PetData;
 import com.dwinovo.chiikawa.anim.render.PropBone;
+import com.dwinovo.chiikawa.camera.CameraCarry;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
@@ -65,6 +67,7 @@ public final class HeldItemLayer implements RenderLayer {
     public void submit(RenderLayerContext ctx) {
         ItemStack stack = ctx.state().get(PetData.HELD_ITEM_STACK);
         if (stack == null || stack.isEmpty()) return;
+        if (cameraInHand(ctx.state())) return;
         Integer targetIdx = ctx.model().boneIndex.get(boneName);
         if (targetIdx == null) return;
         // If the hand is hidden, so is what it holds.
@@ -92,6 +95,14 @@ public final class HeldItemLayer implements RenderLayer {
         itemRenderState.render(ctx.poseStack(), ctx.bufferSource(), ctx.packedLight(),
                 OverlayTexture.NO_OVERLAY);
         ctx.poseStack().popPose();
+    }
+
+    /**
+     * A camera always hangs at the chest, so what is in the main-hand slot is not drawn in the fist
+     * as well: the server says so, as only it knows which items are cameras.
+     */
+    static boolean cameraInHand(ChiikawaRenderState state) {
+        return state.get(PetData.CAMERA_CARRY) == CameraCarry.HAND;
     }
 
     boolean handsFull(RenderLayerContext ctx) {

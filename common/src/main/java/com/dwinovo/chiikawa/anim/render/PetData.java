@@ -25,8 +25,8 @@ public enum PetData {
     WORN_BAG,
     /** What the pet is saying, consumed by {@code SpeechBubbleRenderer}; {@code null} when it says nothing. */
     SPEECH,
-    /** Whether the pet has a camera in its backpack, a {@link Boolean}, consumed by the camera's visibility rule. */
-    CARRIES_CAMERA;
+    /** Where the pet has a camera, a {@link com.dwinovo.chiikawa.camera.CameraCarry}, consumed by the camera's visibility rule and {@code HeldItemLayer}. */
+    CAMERA_CARRY;
 
     /** Cached values() to avoid per-frame allocation; treat as immutable. */
     public static final PetData[] VALUES = values();
