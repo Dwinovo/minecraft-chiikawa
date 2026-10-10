@@ -83,6 +83,8 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
         ACTIVITIES.register("check_results", () -> new Activity(PetActivities.name("check_results")));
     private static final DeferredHolder<Activity, Activity> ANSWER_WHISTLE =
         ACTIVITIES.register("answer_whistle", () -> new Activity(PetActivities.name("answer_whistle")));
+    private static final DeferredHolder<Activity, Activity> TAKE_PHOTO =
+        ACTIVITIES.register("take_photo", () -> new Activity(PetActivities.name("take_photo")));
 
     private static final DeferredHolder<MenuType<?>, MenuType<PetBackpackMenu>> PET_BACKPACK =
         MENUS.register("pet_backpack", () -> IMenuTypeExtension.create((containerId, inventory, buf) ->
@@ -219,6 +221,11 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
     @Override
     public Supplier<Activity> answerWhistleActivity() {
         return ANSWER_WHISTLE;
+    }
+
+    @Override
+    public Supplier<Activity> takePhotoActivity() {
+        return TAKE_PHOTO;
     }
 
     @Override

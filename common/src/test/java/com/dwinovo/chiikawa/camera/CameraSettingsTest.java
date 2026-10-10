@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 /** The settings a pack gives a camera, and what the loader does with a file that is wrong. */
 class CameraSettingsTest {
     private static final String GOOD = """
-        { "film": "chiikawa:film", "owner_range": 64.0, "cooldown_ticks": 12000, "width": 320, "height": 240,
+        { "film": "chiikawa:film", "owner_range": 64.0, "cooldown_ticks": 12000, "retry_ticks": 600, "width": 320, "height": 240,
           "fov": 70, "subjects": { "owner": 3, "friend": 5, "scenery": 1 }, "aim_ticks": 40 }""";
 
     @BeforeAll
@@ -29,8 +29,8 @@ class CameraSettingsTest {
     void settingsParseFromTheGeneratedShape() {
         CameraSettings settings = CameraSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(GOOD)).getOrThrow();
 
-        assertEquals(new CameraSettings(ResourceLocation.fromNamespaceAndPath("chiikawa", "film"), 64.0, 12000, 320,
-            240, 70, new CameraSettings.Subjects(3, 5, 1), 40), settings);
+        assertEquals(new CameraSettings(ResourceLocation.fromNamespaceAndPath("chiikawa", "film"), 64.0, 12000, 600,
+            320, 240, 70, new CameraSettings.Subjects(3, 5, 1), 40), settings);
     }
 
     @Test

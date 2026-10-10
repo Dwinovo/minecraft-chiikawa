@@ -64,6 +64,8 @@ public final class InitTabs {
         InitItems.WEEDING_BOOK,
         InitItems.PET_BELL,
         InitItems.WHISTLE_CANDY,
+        InitItems.CAMERA,
+        InitItems.FILM,
         InitItems.PHOTO
     );
 
