@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.testing;
 
+import com.dwinovo.chiikawa.camera.PhotoOutlook;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.intent.DayPhase;
@@ -36,6 +37,7 @@ public final class TestContext {
     private Optional<GlobalPos> examDesk = Optional.empty();
     private Optional<GlobalPos> resultsDesk = Optional.empty();
     private Optional<GlobalPos> whistleHeard = Optional.empty();
+    private PhotoOutlook photo = PhotoOutlook.NONE;
 
     private TestContext(GlobalPos petPos, PetAnchor anchor) {
         this.petPos = petPos;
@@ -129,6 +131,12 @@ public final class TestContext {
         return this;
     }
 
+    /** What the pet could take a photo of, and whether it may. */
+    public TestContext photo(PhotoOutlook photo) {
+        this.photo = photo;
+        return this;
+    }
+
     public TestContext eager() {
         this.eager = true;
         return this;
@@ -137,6 +145,6 @@ public final class TestContext {
     public IntentContext build() {
         return new IntentContext(petPos, phase, ownership, personality, anchor, targets, task, offeringBoard,
             shopWorthVisiting, takeTaskCoolingDown, shopCoolingDown, socialPartner, playingAlong, carryingGift, eager,
-            false, false, false, false, examDesk, resultsDesk, false, whistleHeard);
+            false, false, false, false, examDesk, resultsDesk, false, whistleHeard, photo);
     }
 }

@@ -79,6 +79,13 @@ public final class InitItems {
     public static final Supplier<Item> PHOTO =
         registerItem("photo", () -> new PhotoItem(new Item.Properties()));
 
+    /** Hachiware's camera: kept in its backpack with film, it takes photos of its own accord. */
+    public static final Supplier<Item> CAMERA =
+        registerItem("camera", () -> new DescribedItem(new Item.Properties().stacksTo(1)));
+    /** What a photo is taken on, a roll to a photo. */
+    public static final Supplier<Item> FILM =
+        registerItem("film", () -> new DescribedItem(new Item.Properties()));
+
     public static final Supplier<Item> BACKPACK =
         registerItem("backpack", properties -> new BagItem(properties, BagItem.Wear.ON_BACK));
     public static final Supplier<Item> BEAR_POUCH =
@@ -91,11 +98,11 @@ public final class InitItems {
         registerItem("handbook", HandbookItem::new);
     /**
      * Everything drawn from a Bedrock model of its own, by {@code PropRenderer}: the bags,
-     * the labor board, the shop, the exam desk, the handbook and the pets' weapons. Each loader gives these their built-in item
+     * the labor board, the shop, the exam desk, the handbook, the camera and the pets' weapons. Each loader gives these their built-in item
      * renderer, and their item models are generated from this list.
      */
     public static final List<Supplier<? extends Item>> PROPS =
-        List.of(BACKPACK, BEAR_POUCH, WHALE_POUCH, STAR_POUCH, LABOR_BOARD, SHOP, EXAM_DESK, HANDBOOK,
+        List.of(BACKPACK, BEAR_POUCH, WHALE_POUCH, STAR_POUCH, LABOR_BOARD, SHOP, EXAM_DESK, HANDBOOK, CAMERA,
             CHIIKAWA_WEAPON, HACHIWARE_WEAPON, USAGI_WEAPON, RAKKO_SWORD);
     /**
      * The props that are the pets' weapons: swords, held as vanilla holds its swords and worn
