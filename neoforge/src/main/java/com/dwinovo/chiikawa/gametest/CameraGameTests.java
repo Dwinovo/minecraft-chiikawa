@@ -370,6 +370,28 @@ public final class CameraGameTests {
         helper.succeed();
     }
 
+    /**
+     * A camera hangs on the chest whichever slot it is in, so it is never what the pet is told to
+     * hold in its fist: with it in the main hand the held stack that is published is empty, though
+     * the camera is still in the slot. A tool in the hand is published as it is.
+     */
+    @GameTest(template = "floor8", batch = "chiikawa_camera_chest", timeoutTicks = 20)
+    public static void a_camera_in_the_main_hand_is_not_held_in_the_fist(GameTestHelper helper) {
+        AbstractPet pet = GameTestKit.owned(helper, InitEntity.HACHIWARE_PET.get(), new BlockPos(3, STAND, 3));
+
+        pet.getBackpack().setItem(AbstractPet.MAINHAND_SLOT, new ItemStack(InitItems.CAMERA.get()));
+        helper.assertTrue(pet.carriesCamera(), "a camera in the hand is not on the chest");
+        helper.assertTrue(pet.getMainHandItem().isEmpty(), "the camera is published as held: " + pet.getMainHandItem());
+        helper.assertTrue(pet.getBackpack().getItem(AbstractPet.MAINHAND_SLOT).is(InitItems.CAMERA.get()),
+            "the camera is no longer in the main-hand slot");
+
+        pet.getBackpack().setItem(AbstractPet.MAINHAND_SLOT, new ItemStack(Items.IRON_SWORD));
+        pet.getBackpack().setItem(5, new ItemStack(InitItems.CAMERA.get()));
+        helper.assertTrue(pet.carriesCamera(), "a camera in a pocket is not on the chest");
+        helper.assertTrue(pet.getMainHandItem().is(Items.IRON_SWORD), "the sword is not what the pet holds: " + pet.getMainHandItem());
+        helper.succeed();
+    }
+
     /** A photo that comes back the wrong size is no photo: no film used, nothing to give, a short rest. */
     @GameTest(template = "floor16", batch = "chiikawa_camera_failed", timeoutTicks = SHOT_TICKS)
     public static void a_photo_that_does_not_come_back_costs_nothing(GameTestHelper helper) {
