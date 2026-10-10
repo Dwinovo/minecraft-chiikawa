@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.music.MusicBoxSelection;
 import com.dwinovo.chiikawa.music.PlaybackMode;
+import com.dwinovo.chiikawa.photo.PhotoData;
 import com.dwinovo.chiikawa.platform.Services;
 import java.util.function.Supplier;
 import net.minecraft.core.component.DataComponentType;
@@ -44,6 +45,17 @@ public final class InitDataComponents {
             () -> DataComponentType.<PetDirective>builder()
                 .persistent(PetDirective.CODEC)
                 .networkSynchronized(PetDirective.STREAM_CODEC)
+                .build()
+        );
+
+    /** What a photo is of and where its picture is kept; a photo item without it has no picture. */
+    public static final Supplier<DataComponentType<PhotoData>> PHOTO =
+        Services.REGISTRY.register(
+            BuiltInRegistries.DATA_COMPONENT_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "photo"),
+            () -> DataComponentType.<PhotoData>builder()
+                .persistent(PhotoData.CODEC)
+                .networkSynchronized(PhotoData.STREAM_CODEC)
                 .build()
         );
 

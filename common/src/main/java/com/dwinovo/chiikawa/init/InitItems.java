@@ -9,6 +9,7 @@ import com.dwinovo.chiikawa.item.HandbookItem;
 import com.dwinovo.chiikawa.item.MusicBoxItem;
 import com.dwinovo.chiikawa.item.PetBellItem;
 import com.dwinovo.chiikawa.item.PetDollItem;
+import com.dwinovo.chiikawa.item.PhotoItem;
 import com.dwinovo.chiikawa.item.RakkoSword;
 import com.dwinovo.chiikawa.item.UsagiWeapon;
 import com.dwinovo.chiikawa.item.WhistleCandyItem;
@@ -70,6 +71,10 @@ public final class InitItems {
     /** Hold to blow: the pets nearby take the order it is set to; sneak-use to change the order. */
     public static final Supplier<Item> WHISTLE_CANDY =
         registerItem("whistle_candy", () -> new WhistleCandyItem(new Item.Properties().stacksTo(64)));
+
+    /** A photo a pet took: stack of one, not made by any recipe, and looked at by using it. */
+    public static final Supplier<Item> PHOTO =
+        registerItem("photo", () -> new PhotoItem(new Item.Properties()));
 
     public static final Supplier<Item> BACKPACK =
         registerItem("backpack", () -> new BagItem(new Item.Properties(), BagItem.Wear.ON_BACK));
