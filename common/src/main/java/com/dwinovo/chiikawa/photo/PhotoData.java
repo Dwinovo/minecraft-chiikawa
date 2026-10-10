@@ -11,9 +11,9 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.level.Level;
 
 /**
- * What a photo item remembers about its photo: which one, who is in it, when it was taken
+ * What a roll of film remembers about one shot: which photo, who is in it, when it was taken
  * and by whom. The picture itself is not in here but in the world's {@link PhotoLibrary},
- * where the id leads to it; the item stays small however big the photo is.
+ * where the id leads to it; the roll stays small however big the photos are.
  *
  * @param photo the id the picture is kept under
  * @param subject what the photo is of
@@ -43,10 +43,10 @@ public record PhotoData(UUID photo, PhotoSubject subject, String name, long day,
         return new PhotoData(photo, subject, name, level.getDayTime() / Level.TICKS_PER_DAY + 1, photographer);
     }
 
-    /** "Taken by Hachiware · Day 12 · Chiikawa", the line under a photo and on its item. */
+    /** "Taken by Hachiware · Day 12 · Chiikawa", the line under a photo in the album. */
     public Component caption() {
         return subject == PhotoSubject.SCENERY
-            ? Component.translatable("tooltip.chiikawa.photo.scenery", photographer, day)
-            : Component.translatable("tooltip.chiikawa.photo", photographer, day, name);
+            ? Component.translatable("screen.chiikawa.album.caption.scenery", photographer, day)
+            : Component.translatable("screen.chiikawa.album.caption", photographer, day, name);
     }
 }
