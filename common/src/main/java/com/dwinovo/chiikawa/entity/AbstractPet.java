@@ -12,7 +12,6 @@ import com.dwinovo.chiikawa.anim.state.PetAnimContext;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.camera.PhotoScout;
 import com.dwinovo.chiikawa.entity.brain.PetTargeting;
-import com.dwinovo.chiikawa.camera.CameraCarry;
 import com.dwinovo.chiikawa.entity.brain.handler.ArcherJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.FarmerJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.FencerJobHandler;
@@ -191,10 +190,10 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      */
     private static final EntityDataAccessor<String> PERFORMANCE = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.STRING);
     /**
-     * The {@link CameraCarry} ordinal; see {@link #cameraCarry}. Synced so a player's game can hang
-     * a camera at the pet's chest, and keep it out of the fist, as the backpack itself is not.
+     * Whether a camera is anywhere in the pet's backpack; see {@link #carriesCamera}. Synced so a
+     * player's game can hang it at the pet's chest, as the backpack itself is not.
      */
-    private static final EntityDataAccessor<Byte> CAMERA_CARRY = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.BYTE);
+    private static final EntityDataAccessor<Boolean> CARRIES_CAMERA = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.BOOLEAN);
 
     /** Legacy animation-id namespace for {@link #ANIM_TRIGGER}'s low byte. */
     public static final int TRIGGER_NONE         = 0;
@@ -271,7 +270,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         public void setChanged() {
             super.setChanged();
             AbstractPet.this.refreshJobFromMainhand();
-            AbstractPet.this.refreshCameraCarry();
+            AbstractPet.this.refreshCarriesCamera();
         }
     };
 
@@ -736,7 +735,11 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     @Override
     public ItemStack getItemBySlot(EquipmentSlot slot) {
         if (slot == EquipmentSlot.MAINHAND) {
-            return backpack.getItem(MAINHAND_SLOT);
+            ItemStack held = backpack.getItem(MAINHAND_SLOT);
+            // A camera hangs at the chest wherever it is carried, so it is never what the pet holds
+            // in its fist. What a player's game is told the pet holds is this, and that game does not
+            // know which items are cameras: only the server does.
+            return PhotoScout.cameraOf(held).isPresent() ? ItemStack.EMPTY : held;
         }
         if (slot == EquipmentSlot.CHEST) {
             return backpack.getItem(BAG_SLOT);
@@ -837,15 +840,15 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         return BagItem.isBag(backpack.getItem(BAG_SLOT));
     }
 
-    /** @return where the pet has a camera, which is what hangs one at its chest */
-    public CameraCarry cameraCarry() {
-        return CameraCarry.fromId(this.entityData.get(CAMERA_CARRY));
+    /** @return whether a camera is anywhere in the pet's backpack, which is what hangs one at its chest */
+    public boolean carriesCamera() {
+        return this.entityData.get(CARRIES_CAMERA);
     }
 
-    /** Server side: the synced state follows what is in the backpack now. */
-    private void refreshCameraCarry() {
+    /** Server side: the synced flag follows what is in the backpack now. */
+    private void refreshCarriesCamera() {
         if (!level().isClientSide()) {
-            this.entityData.set(CAMERA_CARRY, (byte) CameraCarry.of(backpack).ordinal());
+            this.entityData.set(CARRIES_CAMERA, PhotoScout.cameraOf(this).isPresent());
         }
     }
 
@@ -861,7 +864,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
                 spawnAtLocation(server, stack);
             }
         }
-        refreshCameraCarry();
+        refreshCarriesCamera();
     }
 
     @Override
@@ -936,7 +939,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         builder.define(EAGER_UNTIL, 0L);
         builder.define(LICENCES, new CompoundTag());
         builder.define(PERFORMANCE, "");
-        builder.define(CAMERA_CARRY, (byte) CameraCarry.NONE.ordinal());
+        builder.define(CARRIES_CAMERA, false);
     }
 
     /**
@@ -1107,7 +1110,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         tag.getCompound("Backpack").ifPresent(backpackTag -> {
             ContainerHelper.loadAllItems(backpackTag, backpack.getItems(), level().registryAccess());
             clearBagSlotOfOldStorage();
-            refreshCameraCarry();
+            refreshCarriesCamera();
         });
         tag.getInt("PetJob").ifPresent(this::setPetJobId);
         tag.getByte("PetMode").ifPresent(value -> this.entityData.set(PET_MODE, value));
