@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 /** When a pet may take a photo, as the intent asks it. */
 class PhotoOutlookTest {
     private static final CameraSettings CAMERA = new CameraSettings(ResourceLocation.fromNamespaceAndPath("chiikawa", "film"),
-        64.0, 12000, 600, 320, 240, 70, new CameraSettings.Subjects(3, 5, 1), 40, 0.5F);
+        64.0, 12000, 600, 320, 240, 70, new CameraSettings.Subjects(3, 5, 1), 40, 8, 0.5F);
     /** Ready to go: a camera, film, an owner near and calm, and an owner to take a photo of. */
     private static final PhotoOutlook READY = new PhotoOutlook(true, Optional.of(CAMERA), true, true, true, false,
         Set.of(PhotoSubject.OWNER));

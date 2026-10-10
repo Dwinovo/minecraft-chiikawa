@@ -1,9 +1,9 @@
 package com.dwinovo.chiikawa.client.photo;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.client.screen.PhotoScreen;
+import com.dwinovo.chiikawa.client.screen.AlbumScreen;
 import com.dwinovo.chiikawa.network.PhotoPayloads.DownloadPhotoPayload;
-import com.dwinovo.chiikawa.network.PhotoPayloads.OpenPhotoPayload;
+import com.dwinovo.chiikawa.network.PhotoPayloads.OpenAlbumPayload;
 import com.dwinovo.chiikawa.network.PhotoPayloads.TakePhotoPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
@@ -33,7 +33,7 @@ public final class ClientPhotoPacketHandler {
         ClientPhotoCache.accept(payload.chunk());
     }
 
-    public static void handleOpen(OpenPhotoPayload payload) {
-        Minecraft.getInstance().setScreen(new PhotoScreen(payload.photo()));
+    public static void handleOpen(OpenAlbumPayload payload) {
+        Minecraft.getInstance().setScreen(new AlbumScreen(payload.shots()));
     }
 }
