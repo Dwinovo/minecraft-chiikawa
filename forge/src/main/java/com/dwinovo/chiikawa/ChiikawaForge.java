@@ -27,6 +27,7 @@ import com.dwinovo.chiikawa.spawn.PetSpawnsBiomeModifier;
 import com.dwinovo.chiikawa.task.BoardLevelsLoader;
 import com.dwinovo.chiikawa.whistle.WhistleSettingsLoader;
 import com.dwinovo.chiikawa.camera.CameraSettingsLoader;
+import com.dwinovo.chiikawa.gifting.GiftingSettingsLoader;
 import com.dwinovo.chiikawa.photo.PhotoSystem;
 import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
 import com.dwinovo.chiikawa.task.PetTaskTypes;
@@ -99,6 +100,7 @@ public class ChiikawaForge {
             event.addListener(new BoardLevelsLoader());
             event.addListener(new WhistleSettingsLoader());
             event.addListener(new CameraSettingsLoader());
+            event.addListener(new GiftingSettingsLoader());
             event.addListener(new PetSpawnLoader());
             event.addListener(new PetVoiceLoader());
             event.addListener(new PetInteractionLoader());

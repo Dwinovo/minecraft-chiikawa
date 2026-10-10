@@ -121,7 +121,6 @@ public final class LanguageData {
                 "性格 ×%s", "通过率 %s（最高 %s%%）");
             addPetNewsTranslations(adder, "%1$s 花 %2$s 个%4$s买了 %3$s",
                     "%1$s 花 %2$s 个%4$s买了 %3$s，当场吃掉了",
-                    "%1$s 花 %2$s 个%4$s买了 %3$s，说要送给你",
                     "%1$s 把 %2$s 送给了你");
             addRecallTranslations(adder, "叫回了 %s 只宠物", "你没有宠物可叫",
                     "%s 没有应声，上次见到它的地方已经没它了");
@@ -366,7 +365,6 @@ public final class LanguageData {
                 "性格 ×%s", "合格率 %s（最高 %s%%）");
             addPetNewsTranslations(adder, "%1$sが%4$s%2$s個で%3$sを買った",
                     "%1$sが%4$s%2$s個で%3$sを買って、その場で食べた",
-                    "%1$sが%4$s%2$s個で%3$sを買った。あなたへのプレゼントだって",
                     "%1$sが%2$sをくれた");
             addRecallTranslations(adder, "ペットが%s匹戻ってきた", "呼べるペットがいない",
                     "%sから返事がない。最後に見かけた場所にはもういない");
@@ -614,7 +612,6 @@ public final class LanguageData {
                 "Personality ×%s", "Pass chance %s (best %s%%)");
             addPetNewsTranslations(adder, "%1$s spent %2$s × %4$s on %3$s",
                     "%1$s spent %2$s × %4$s on %3$s and ate it on the spot",
-                    "%1$s spent %2$s × %4$s on %3$s, and says it is for you",
                     "%1$s gave you %2$s");
             addRecallTranslations(adder, "%s came running", "You have no pets to call",
                     "%s did not answer; it is gone from where it was last seen");
@@ -1024,11 +1021,9 @@ public final class LanguageData {
      * thing; and the present it hands over. Numbered, since the languages put them in
      * different orders.
      */
-    private static void addPetNewsTranslations(Adder adder, String bought, String boughtAte, String boughtGift,
-            String given) {
+    private static void addPetNewsTranslations(Adder adder, String bought, String boughtAte, String given) {
         adder.add("message.chiikawa.shop.bought", bought);
         adder.add("message.chiikawa.shop.bought_ate", boughtAte);
-        adder.add("message.chiikawa.shop.bought_gift", boughtGift);
         adder.add("message.chiikawa.gift.given", given);
     }
 
