@@ -177,7 +177,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         }
         // A camera hangs at the chest for as long as the pet carries one, and is lifted for a photo.
         addBoneVisibilityRule(PropBone.CAMERA.bone(),
-            new ShownWhileCarried(PetData.CARRIES_CAMERA, PropBone.animationsClashingWithCamera()));
+            new ShownWhileCameraCarried(PropBone.animationsClashingWithCamera()));
 
         // Default controllers shared by all pets, in priority-from-low order:
         //   "main"     state-driven base loop
@@ -391,7 +391,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
 
         if (entity instanceof AbstractPet pet) {
             state.put(PetData.WORN_BAG, pet.getItemBySlot(EquipmentSlot.CHEST));
-            state.put(PetData.CARRIES_CAMERA, pet.carriesCamera());
+            state.put(PetData.CAMERA_CARRY, pet.cameraCarry());
         }
 
         if (entity instanceof ChiikawaAnimated animated) {
