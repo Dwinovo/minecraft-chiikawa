@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.network.VoicePayloads.PetSpeechPayload;
 import com.dwinovo.chiikawa.platform.Services;
+import com.dwinovo.chiikawa.settings.WorldSettingsStore;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.server.level.ServerLevel;
@@ -41,7 +42,7 @@ public final class PetSpeech {
         if (coolingDown) {
             return Optional.empty();
         }
-        Optional<String> line = voice.draw(moment, pet.getRandom());
+        Optional<String> line = voice.draw(moment, pet.getRandom(), WorldSettingsStore.of(level).get().chatter());
         double range = voice.hearingRange();
         if (line.isEmpty() || talkingNearby(level, pet, now, range) >= voice.crowdLimit()) {
             return Optional.empty();

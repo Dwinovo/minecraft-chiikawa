@@ -39,7 +39,16 @@ class LanguageDataUiTranslationTest {
         "screen.chiikawa.pet.order.stay.hint",
         "screen.chiikawa.pet.order.free",
         "screen.chiikawa.pet.order.free.hint",
-        "block.chiikawa.labor_board"
+        "block.chiikawa.labor_board",
+        "screen.chiikawa.settings.title",
+        "screen.chiikawa.settings.wild_spawn",
+        "screen.chiikawa.settings.chatter",
+        "screen.chiikawa.settings.speech_bubbles",
+        "screen.chiikawa.settings.on",
+        "screen.chiikawa.settings.off",
+        "screen.chiikawa.settings.world_only",
+        "screen.chiikawa.settings.read_only",
+        "screen.chiikawa.settings.volume"
     };
 
     @BeforeAll
