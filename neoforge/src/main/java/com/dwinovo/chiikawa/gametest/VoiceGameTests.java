@@ -185,6 +185,39 @@ public final class VoiceGameTests {
         });
     }
 
+    /** Hachiware says its word as it presses the shutter. */
+    @GameTest(template = "floor8", batch = "chiikawa_voice_photo", timeoutTicks = 100)
+    public static void hachiware_says_something_as_it_takes_a_photo(GameTestHelper helper) {
+        quietYard(helper, NOON);
+        AbstractPet pet = still(pet(helper, InitEntity.HACHIWARE_PET.get(), new BlockPos(3, STAND, 3), false));
+
+        PetSpeech.say(pet, VoiceMoment.PHOTO);
+
+        assertSaid(helper, pet, VoiceMoment.PHOTO);
+        helper.succeed();
+    }
+
+    /** Whoever a photo is taken of has a word for the camera, but for Kurimanju, who is quiet. */
+    @GameTest(template = "floor8", batch = "chiikawa_voice_photographed", timeoutTicks = 100)
+    public static void a_pet_has_a_word_for_the_camera(GameTestHelper helper) {
+        quietYard(helper, NOON);
+        List<EntityType<? extends AbstractPet>> posers = List.of(InitEntity.CHIIKAWA_PET.get(),
+            InitEntity.USAGI_PET.get(), InitEntity.MOMONGA_PET.get(), InitEntity.RAKKO_PET.get(),
+            InitEntity.SHISA_PET.get(), InitEntity.FURUHONYA_PET.get());
+        for (EntityType<? extends AbstractPet> type : posers) {
+            // One at a time: pets within earshot of each other take turns.
+            AbstractPet pet = still(pet(helper, type, new BlockPos(3, STAND, 3), false));
+            PetSpeech.say(pet, VoiceMoment.PHOTOGRAPHED);
+            assertSaid(helper, pet, VoiceMoment.PHOTOGRAPHED);
+            pet.discard();
+            quietYard(helper, NOON);
+        }
+        AbstractPet kurimanju = still(pet(helper, InitEntity.KURIMANJU_PET.get(), new BlockPos(3, STAND, 3), false));
+        PetSpeech.say(kurimanju, VoiceMoment.PHOTOGRAPHED);
+        helper.assertFalse(said(kurimanju).isPresent(), "Kurimanju said something for the camera");
+        helper.succeed();
+    }
+
     /** A pet left standing: nothing it thinks of doing gets in the way of what a case does to it. */
     private static AbstractPet still(AbstractPet pet) {
         pet.setNoAi(true);

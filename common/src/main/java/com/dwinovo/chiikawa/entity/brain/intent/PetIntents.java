@@ -12,6 +12,7 @@ import com.dwinovo.chiikawa.entity.brain.intent.impl.PlayMusicIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.ShopIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.SocializeIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.TakeExamIntent;
+import com.dwinovo.chiikawa.entity.brain.intent.impl.TakePhotoIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.TakeTaskIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.TargetIntent;
 import com.dwinovo.chiikawa.init.InitActivity;
@@ -33,7 +34,8 @@ import org.jetbrains.annotations.Nullable;
  * over foraging (0.5) over picking up items (0.4) over playing a scene with another pet
  * (0.35), everything over wandering (0.05); a wild pet curious about a whistle (0.55) goes over
  * before it forages; a pet another one is coming over to plays
- * along (0.5).
+ * along (0.5); and a photo (0.45), taken only with a camera and a good moment, goes over picking
+ * things up and playing a scene.
  * Work the pet's slip counts is raised by {@link IntentSelector#TASK_BONUS}, and a pet's
  * personality weighs them all. The farmer's strict order that 0.0.9 hard-coded as an if-chain, harvest before
  * plant before deliver, is not a preference, so it is expressed by
@@ -61,6 +63,7 @@ public final class PetIntents {
     public static final ResourceLocation TAKE_EXAM = id("take_exam");
     public static final ResourceLocation CHECK_RESULTS = id("check_results");
     public static final ResourceLocation ANSWER_WHISTLE = id("answer_whistle");
+    public static final ResourceLocation TAKE_PHOTO = id("take_photo");
 
     private static final Map<ResourceLocation, PetIntent> BY_ID = new LinkedHashMap<>();
 
@@ -78,7 +81,8 @@ public final class PetIntents {
         register(new CooperateIntent()),
         register(new TakeExamIntent()),
         register(new CheckResultsIntent()),
-        register(new AnswerWhistleIntent())
+        register(new AnswerWhistleIntent()),
+        register(new TakePhotoIntent())
     );
 
     static {

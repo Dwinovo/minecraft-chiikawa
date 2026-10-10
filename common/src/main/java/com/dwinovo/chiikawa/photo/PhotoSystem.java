@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.network.PhotoPayloads.TakePhotoPayload;
 import com.dwinovo.chiikawa.platform.Services;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import net.minecraft.server.MinecraftServer;
@@ -49,6 +50,11 @@ public final class PhotoSystem {
 
     public PhotoLibrary library() {
         return library;
+    }
+
+    /** @return the photos asked for and not yet in, for tests and commands */
+    public Set<UUID> waiting() {
+        return uploads.waiting();
     }
 
     /**
