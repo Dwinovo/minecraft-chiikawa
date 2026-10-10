@@ -48,7 +48,12 @@ class LanguageDataUiTranslationTest {
         "screen.chiikawa.settings.off",
         "screen.chiikawa.settings.world_only",
         "screen.chiikawa.settings.read_only",
-        "screen.chiikawa.settings.volume"
+        "screen.chiikawa.settings.volume",
+        "item.chiikawa.photo",
+        "tooltip.chiikawa.photo",
+        "tooltip.chiikawa.photo.scenery",
+        "screen.chiikawa.photo.loading",
+        "screen.chiikawa.photo.missing"
     };
 
     @BeforeAll
