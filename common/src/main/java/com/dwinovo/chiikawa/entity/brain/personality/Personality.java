@@ -148,31 +148,49 @@ public record Personality(
      * camera to put it in, and a camera only while it has none. The tools a wild pet spawns
      * holding have no use for either.
      *
+     * <p>And what it is bought for: a camera is for the pet itself, never a present, and is
+     * worth saving for rather than spending the money on little things first.
+     *
      * @param requires an item the pet has to be carrying for it to want this at all
      * @param limit how many of this the pet may be carrying and still want one more
+     * @param keep whether what it buys of this is always for itself, never a present for its owner
+     * @param saveUp whether, while it wants this and cannot yet afford it, it buys nothing else, so
+     *               that its money builds up; and buys this as soon as it can
      */
-    public record WeightedItem(Item item, Weight weight, Optional<Item> requires, Optional<Integer> limit)
-            implements WeightedEntry {
+    public record WeightedItem(Item item, Weight weight, Optional<Item> requires, Optional<Integer> limit,
+                               boolean keep, boolean saveUp) implements WeightedEntry {
         /** Lazy because the item registry only exists once the game has bootstrapped. */
         public static final Codec<WeightedItem> CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.create(instance -> instance.group(
             BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(WeightedItem::item),
             ExtraCodecs.POSITIVE_INT.xmap(Weight::of, Weight::asInt).fieldOf("weight").forGetter(WeightedItem::weight),
             BuiltInRegistries.ITEM.byNameCodec().optionalFieldOf("requires").forGetter(WeightedItem::requires),
-            ExtraCodecs.POSITIVE_INT.optionalFieldOf("limit").forGetter(WeightedItem::limit)
+            ExtraCodecs.POSITIVE_INT.optionalFieldOf("limit").forGetter(WeightedItem::limit),
+            Codec.BOOL.optionalFieldOf("keep", false).forGetter(WeightedItem::keep),
+            Codec.BOOL.optionalFieldOf("save_up", false).forGetter(WeightedItem::saveUp)
         ).apply(instance, WeightedItem::new)));
 
         public WeightedItem(Item item, int weight) {
-            this(item, Weight.of(weight), Optional.empty(), Optional.empty());
+            this(item, Weight.of(weight), Optional.empty(), Optional.empty(), false, false);
         }
 
         /** @return the same, wanted only while the pet carries {@code item} */
         public WeightedItem requiring(Item item) {
-            return new WeightedItem(this.item, weight, Optional.of(item), limit);
+            return new WeightedItem(this.item, weight, Optional.of(item), limit, keep, saveUp);
         }
 
         /** @return the same, no longer wanted once the pet carries {@code most} of it */
         public WeightedItem limitedTo(int most) {
-            return new WeightedItem(item, weight, requires, Optional.of(most));
+            return new WeightedItem(item, weight, requires, Optional.of(most), keep, saveUp);
+        }
+
+        /** @return the same, always bought for the pet itself */
+        public WeightedItem kept() {
+            return new WeightedItem(item, weight, requires, limit, true, saveUp);
+        }
+
+        /** @return the same, saved up for */
+        public WeightedItem savedUpFor() {
+            return new WeightedItem(item, weight, requires, limit, keep, true);
         }
 
         /**
