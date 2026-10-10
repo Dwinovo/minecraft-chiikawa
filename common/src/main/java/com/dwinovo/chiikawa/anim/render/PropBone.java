@@ -8,8 +8,8 @@ import java.util.Optional;
  * Things a pet has with it only while it does something: bones of its model, under the same
  * name for every pet that has one, there only while one of their animations plays. The
  * pencil in its hand while it writes an exam, put down as it hands the paper in; the sheet it
- * pushes across the desk as it hands it in, which takes the place of the desk's own; and
- * Hachiware's guitar while it plays. A pet whose model lacks one goes without.
+ * pushes across the desk as it hands it in, which takes the place of the desk's own;
+ * Hachiware's guitar while it plays; and its camera while it takes a photo. A pet whose model lacks one goes without.
  *
  * <p>Each of these is in the pet's hands while it is out, so whatever it holds is put away
  * meanwhile: a sword does not stay in the fist that writes, nor sit across the guitar.
@@ -17,7 +17,8 @@ import java.util.Optional;
 public enum PropBone {
     EXAM_PAPER("ExamPaper", ShownDuring.any("hand_in")),
     EXAM_PENCIL("ExamPencil", ShownDuring.any("exam").unless("hand_in")),
-    GUITAR("guitar", ShownDuring.any("guitar"));
+    GUITAR("guitar", ShownDuring.any("guitar")),
+    CAMERA("camera", ShownDuring.any("photo"));
 
     private final String bone;
     private final ShownDuring shownDuring;

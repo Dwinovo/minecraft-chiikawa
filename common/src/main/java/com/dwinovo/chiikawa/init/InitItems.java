@@ -79,6 +79,13 @@ public final class InitItems {
     public static final Supplier<Item> PHOTO =
         registerItem("photo", () -> new PhotoItem(new Item.Properties()));
 
+    /** Hachiware's camera: kept in its backpack with film, it takes photos of its own accord. */
+    public static final Supplier<Item> CAMERA =
+        registerItem("camera", properties -> new DescribedItem(properties.stacksTo(1)));
+    /** What a photo is taken on, a roll to a photo. */
+    public static final Supplier<Item> FILM =
+        registerItem("film", DescribedItem::new);
+
     public static final Supplier<Item> BACKPACK =
         registerItem("backpack", properties -> new BagItem(properties, BagItem.Wear.ON_BACK));
     public static final Supplier<Item> BEAR_POUCH =
@@ -91,11 +98,11 @@ public final class InitItems {
         registerItem("handbook", HandbookItem::new);
     /**
      * Everything drawn from a Bedrock model of its own, by {@code PropRenderer}: the bags,
-     * the labor board, the shop, the exam desk, the handbook and the pets' weapons. Each loader registers the special model renderer
+     * the labor board, the shop, the exam desk, the handbook, the camera and the pets' weapons. Each loader registers the special model renderer
      * their item definitions name, and their item models are generated from this list.
      */
     public static final List<Supplier<? extends Item>> PROPS =
-        List.of(BACKPACK, BEAR_POUCH, WHALE_POUCH, STAR_POUCH, LABOR_BOARD, SHOP, EXAM_DESK, HANDBOOK,
+        List.of(BACKPACK, BEAR_POUCH, WHALE_POUCH, STAR_POUCH, LABOR_BOARD, SHOP, EXAM_DESK, HANDBOOK, CAMERA,
             CHIIKAWA_WEAPON, HACHIWARE_WEAPON, USAGI_WEAPON, RAKKO_SWORD);
 
     public static final Supplier<Item> USAGI_DOLL =

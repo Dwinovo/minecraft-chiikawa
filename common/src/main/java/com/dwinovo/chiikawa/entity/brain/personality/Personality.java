@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -140,12 +141,45 @@ public record Personality(
      * An item with a weight: one entry of a list a pet draws from. Both the tools a wild
      * pet turns up holding and the things it would buy are drawn the same way, so they are
      * the same shape.
+     *
+     * <p>What a pet would buy can depend on what it already has: film only while it has a
+     * camera to put it in, and a camera only while it has none. The tools a wild pet spawns
+     * holding have no use for either.
+     *
+     * @param requires an item the pet has to be carrying for it to want this at all
+     * @param limit how many of this the pet may be carrying and still want one more
      */
-    public record WeightedItem(Item item, int weight) {
+    public record WeightedItem(Item item, int weight, Optional<Item> requires, Optional<Integer> limit) {
         /** Lazy because the item registry only exists once the game has bootstrapped. */
         public static final Codec<WeightedItem> CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.create(instance -> instance.group(
             BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(WeightedItem::item),
-            ExtraCodecs.POSITIVE_INT.fieldOf("weight").forGetter(WeightedItem::weight)
+            ExtraCodecs.POSITIVE_INT.fieldOf("weight").forGetter(WeightedItem::weight),
+            BuiltInRegistries.ITEM.byNameCodec().optionalFieldOf("requires").forGetter(WeightedItem::requires),
+            ExtraCodecs.POSITIVE_INT.optionalFieldOf("limit").forGetter(WeightedItem::limit)
         ).apply(instance, WeightedItem::new)));
+
+        public WeightedItem(Item item, int weight) {
+            this(item, weight, Optional.empty(), Optional.empty());
+        }
+
+        /** @return the same, wanted only while the pet carries {@code item} */
+        public WeightedItem requiring(Item item) {
+            return new WeightedItem(this.item, weight, Optional.of(item), limit);
+        }
+
+        /** @return the same, no longer wanted once the pet carries {@code most} of it */
+        public WeightedItem limitedTo(int most) {
+            return new WeightedItem(item, weight, requires, Optional.of(most));
+        }
+
+        /**
+         * @param carried how many of an item the pet is carrying
+         * @return whether the pet wants this now: what it needs to have it has, and it does
+         *         not have as many as it wants
+         */
+        public boolean wantedBy(ToIntFunction<Item> carried) {
+            return requires.map(needed -> carried.applyAsInt(needed) > 0).orElse(true)
+                && limit.map(most -> carried.applyAsInt(item) < most).orElse(true);
+        }
     }
 }
