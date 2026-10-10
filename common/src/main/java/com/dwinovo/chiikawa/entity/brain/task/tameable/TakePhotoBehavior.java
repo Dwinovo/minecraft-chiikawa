@@ -33,8 +33,11 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
  * is {@link PhotoDelivery}'s, so the pet is free of it as soon as the shutter has gone and
  * has held the pose a little while after.
  *
- * <p>Whoever is being photographed, if it is a pet, turns to look at the camera and strikes
- * a pose of its own, with a word to go with it.
+ * <p>A photo is posed or candid, rolled each time (see {@link CameraSettings#posed}). Posed,
+ * Hachiware calls out, and whoever is being photographed, if it is a pet, turns to look at the
+ * camera and strikes a pose of its own, with a word to go with it. Candid, Hachiware says
+ * nothing and a pet being photographed is left entirely alone: it goes on with what it was
+ * doing, which is what the photo is of.
  */
 public class TakePhotoBehavior extends Behavior<AbstractPet> {
     private static final float SPEED = 0.7F;
@@ -188,15 +191,17 @@ public class TakePhotoBehavior extends Behavior<AbstractPet> {
     }
 
     /**
-     * The shutter: whoever is in the photo turns to the camera and poses, both say something,
-     * and the owner's game is asked for the picture.
+     * The shutter: when it is posed, whoever is in the photo turns to the camera and poses, both say
+     * something, and the owner's game is asked for the picture.
      */
     private void shutter(ServerLevel level, AbstractPet pet, long gameTime) {
         stage = Stage.HOLDING;
         since = gameTime;
-        PetSpeech.say(pet, VoiceMoment.PHOTO);
-        shot.target().filter(target -> target instanceof AbstractPet).map(target -> (AbstractPet) target)
-            .ifPresent(friend -> pose(friend, pet));
+        if (camera.posed(pet.getRandom())) {
+            PetSpeech.say(pet, VoiceMoment.PHOTO);
+            shot.target().filter(target -> target instanceof AbstractPet).map(target -> (AbstractPet) target)
+                .ifPresent(friend -> pose(friend, pet));
+        }
         if (!(pet.getOwner() instanceof ServerPlayer owner)) {
             return;
         }
