@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.client.exam.ClientExamDeskPacketHandler;
 import com.dwinovo.chiikawa.client.manual.ClientManualPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
 import com.dwinovo.chiikawa.client.pet.ClientPetPacketHandler;
+import com.dwinovo.chiikawa.client.photo.ClientPhotoPacketHandler;
 import com.dwinovo.chiikawa.client.settings.ClientSettingsPacketHandler;
 import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.client.voice.ClientVoicePacketHandler;
@@ -15,6 +16,8 @@ import com.dwinovo.chiikawa.network.ExamDeskServerPacketHandler;
 import com.dwinovo.chiikawa.network.ManualPayloads;
 import com.dwinovo.chiikawa.network.PetPayloads;
 import com.dwinovo.chiikawa.network.PetServerPacketHandler;
+import com.dwinovo.chiikawa.network.PhotoPayloads;
+import com.dwinovo.chiikawa.network.PhotoServerPacketHandler;
 import com.dwinovo.chiikawa.network.SettingsPayloads;
 import com.dwinovo.chiikawa.network.SettingsServerPacketHandler;
 import com.dwinovo.chiikawa.network.ShopPayloads;
@@ -103,6 +106,24 @@ public final class NeoForgeModNetworking {
                     SettingsServerPacketHandler.handleChange(payload, player);
                 }
             });
+        registrar.playToClient(PhotoPayloads.TakePhotoPayload.TYPE, PhotoPayloads.TakePhotoPayload.STREAM_CODEC,
+            (payload, context) -> ClientPhotoPacketHandler.handleTake(payload));
+        registrar.playToServer(PhotoPayloads.UploadPhotoPayload.TYPE, PhotoPayloads.UploadPhotoPayload.STREAM_CODEC,
+            (payload, context) -> {
+                if (context.player() instanceof ServerPlayer player) {
+                    PhotoServerPacketHandler.handleUpload(payload, player);
+                }
+            });
+        registrar.playToServer(PhotoPayloads.RequestPhotoPayload.TYPE, PhotoPayloads.RequestPhotoPayload.STREAM_CODEC,
+            (payload, context) -> {
+                if (context.player() instanceof ServerPlayer player) {
+                    PhotoServerPacketHandler.handleRequest(payload, player);
+                }
+            });
+        registrar.playToClient(PhotoPayloads.DownloadPhotoPayload.TYPE, PhotoPayloads.DownloadPhotoPayload.STREAM_CODEC,
+            (payload, context) -> ClientPhotoPacketHandler.handleDownload(payload));
+        registrar.playToClient(PhotoPayloads.OpenPhotoPayload.TYPE, PhotoPayloads.OpenPhotoPayload.STREAM_CODEC,
+            (payload, context) -> ClientPhotoPacketHandler.handleOpen(payload));
     }
 
 }
