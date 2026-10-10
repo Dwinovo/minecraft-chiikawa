@@ -162,7 +162,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         // single source of truth, so animation data isn't silently overwritten.
         addInterceptor(BoneInterceptor.Stage.LOOK_AT, new HeadLookInterceptor());
         // Default layers shared by all pets.
-        addRenderLayer(new HeldItemLayer(List.of(PropBone.values())));
+        addRenderLayer(new HeldItemLayer(PropBone.bones()));
         addRenderLayer(new BagLayer());
         // A bag's strap is part of the pet's own model, there only while a bag worn
         // that way is on.
@@ -173,9 +173,6 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         for (PropBone prop : PropBone.values()) {
             addBoneVisibilityRule(prop.bone(), prop.shownDuring());
         }
-        // A camera hangs at the chest for as long as the pet carries one, and is lifted for a photo.
-        addBoneVisibilityRule(PropBone.CAMERA.bone(),
-            new ShownWhileCarried(PetData.CARRIES_CAMERA, PropBone.animationsClashingWithCamera()));
 
         // Default controllers shared by all pets, in priority-from-low order:
         //   "main"     state-driven base loop
@@ -389,7 +386,6 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
 
         if (entity instanceof AbstractPet pet) {
             state.put(PetData.WORN_BAG, pet.getItemBySlot(EquipmentSlot.CHEST));
-            state.put(PetData.CARRIES_CAMERA, pet.carriesCamera());
         }
 
         // Taken with the rest of the state, as a name tag's text is; a pet drawn as a picture
