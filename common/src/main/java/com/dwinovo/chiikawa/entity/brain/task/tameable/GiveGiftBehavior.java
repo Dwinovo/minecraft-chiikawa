@@ -2,12 +2,16 @@ package com.dwinovo.chiikawa.entity.brain.task.tameable;
 
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.gifting.GiftPool;
+import com.dwinovo.chiikawa.gifting.GiftingSettings;
+import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Unit;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
@@ -22,6 +26,10 @@ import net.minecraft.world.item.ItemStack;
  * <p>Into their hands where there is room and at their feet where there is not, but
  * handed over either way: a gift the pet keeps hold of because the owner's inventory was
  * full is a gift nobody ever finds out about.
+ *
+ * <p>The present is drawn from the pet's bag as it sets off, one of the thing, and carried in its
+ * paws. If the errand is dropped on the way, because the owner has gone or the pet was told to sit,
+ * it goes back in the bag. Once it is handed over the pet thinks of no other for a while.
  */
 public class GiveGiftBehavior extends Behavior<AbstractPet> {
     private static final float SPEED = 1.0F;
@@ -44,18 +52,23 @@ public class GiveGiftBehavior extends Behavior<AbstractPet> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, AbstractPet pet) {
-        return !pet.getPendingGift().isEmpty() && pet.getOwner() instanceof Player;
+        return pet.getOwner() instanceof Player
+            && (!pet.getPendingGift().isEmpty() || !GiftPool.of(pet).isEmpty());
     }
 
     @Override
     protected void start(ServerLevel level, AbstractPet pet, long gameTime) {
         given = false;
+        if (pet.getPendingGift().isEmpty()) {
+            GiftPool.draw(GiftPool.of(pet), pet.getRandom())
+                .ifPresent(chosen -> pet.setPendingGift(pet.getBackpack().removeItem(chosen.slot(), 1)));
+        }
         walkToOwner(pet);
     }
 
     @Override
     protected boolean canStillUse(ServerLevel level, AbstractPet pet, long gameTime) {
-        return !given && checkExtraStartConditions(level, pet);
+        return !given && !pet.getPendingGift().isEmpty() && pet.getOwner() instanceof Player;
     }
 
     @Override
@@ -74,6 +87,18 @@ public class GiveGiftBehavior extends Behavior<AbstractPet> {
     @Override
     protected void stop(ServerLevel level, AbstractPet pet, long gameTime) {
         pet.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
+        if (!given && !pet.getPendingGift().isEmpty()) {
+            putBack(pet);
+        }
+    }
+
+    /** The errand is off: what was being carried goes back in the bag, or on the ground if the bag is full. */
+    private static void putBack(AbstractPet pet) {
+        ItemStack left = pet.getBackpack().addItem(pet.getPendingGift());
+        if (!left.isEmpty()) {
+            pet.spawnAtLocation(left);
+        }
+        pet.setPendingGift(ItemStack.EMPTY);
     }
 
     private void hand(ServerLevel level, AbstractPet pet, Player player) {
@@ -83,6 +108,8 @@ public class GiveGiftBehavior extends Behavior<AbstractPet> {
         }
         pet.setPendingGift(ItemStack.EMPTY);
         given = true;
+        GiftingSettings.current().ifPresent(settings ->
+            pet.getBrain().setMemoryWithExpiry(InitMemory.GIFT_COOLDOWN.get(), Unit.INSTANCE, settings.cooldownTicks()));
         pet.tellOwner(Component.translatable("message.chiikawa.gift.given", pet.getDisplayName(), gift.getDisplayName()));
         pet.getNavigation().stop();
         level.sendParticles(ParticleTypes.HEART, pet.getX(), pet.getY() + pet.getBbHeight() * 0.9, pet.getZ(),

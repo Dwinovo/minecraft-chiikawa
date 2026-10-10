@@ -236,6 +236,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitMemory.WHISTLE_CALL.get(),
         InitMemory.WHISTLE_HEARD.get(),
         InitMemory.PHOTO_COOLDOWN.get(),
+        InitMemory.GIFT_COOLDOWN.get(),
         InitMemory.PHOTOGRAPHED_BIOMES.get()
     );
     private static final java.util.List<net.minecraft.world.entity.ai.sensing.SensorType<? extends net.minecraft.world.entity.ai.sensing.Sensor<? super AbstractPet>>> SENSOR_TYPES = java.util.List.of(
