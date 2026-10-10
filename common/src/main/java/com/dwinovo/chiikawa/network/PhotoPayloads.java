@@ -1,8 +1,10 @@
 package com.dwinovo.chiikawa.network;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.photo.FilmRoll;
 import com.dwinovo.chiikawa.photo.PhotoChunk;
 import com.dwinovo.chiikawa.photo.PhotoData;
+import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -82,11 +84,12 @@ public final class PhotoPayloads {
         }
     }
 
-    /** Opens the photo screen. The picture is not in it: the game fetches that by the id. */
-    public record OpenPhotoPayload(PhotoData photo) implements CustomPacketPayload {
-        public static final Type<OpenPhotoPayload> TYPE = payloadType("open_photo");
-        public static final StreamCodec<RegistryFriendlyByteBuf, OpenPhotoPayload> STREAM_CODEC =
-            StreamCodec.composite(PhotoData.STREAM_CODEC, OpenPhotoPayload::photo, OpenPhotoPayload::new);
+    /** Opens the album screen on the shots of a roll. The pictures are not in it: the game fetches those by id. */
+    public record OpenAlbumPayload(List<PhotoData> shots) implements CustomPacketPayload {
+        public static final Type<OpenAlbumPayload> TYPE = payloadType("open_album");
+        public static final StreamCodec<RegistryFriendlyByteBuf, OpenAlbumPayload> STREAM_CODEC =
+            StreamCodec.composite(PhotoData.STREAM_CODEC.apply(ByteBufCodecs.list(FilmRoll.MOST_EXPOSURES)),
+                OpenAlbumPayload::shots, OpenAlbumPayload::new);
 
         @Override
         public Type<? extends CustomPacketPayload> type() {
