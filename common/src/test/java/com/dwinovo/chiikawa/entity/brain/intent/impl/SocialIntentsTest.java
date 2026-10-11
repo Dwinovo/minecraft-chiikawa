@@ -7,6 +7,7 @@ import com.dwinovo.chiikawa.entity.brain.constraint.AnchorDistances;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCategory;
 import com.dwinovo.chiikawa.testing.TestContext;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;
@@ -32,11 +33,14 @@ class SocialIntentsTest {
     }
 
     @Test
-    void aPetAtHeelOnlyGoesOverToAPartnerAroundItsOwnersFeet() {
+    void aPetGoesOverToThePartnerItHasThoughtOf() {
         assertTrue(socialize.canRun(partnerAt(10).build()).ok());
-        assertEquals("intent.chiikawa.fail.out_of_reach", socialize.canRun(partnerAt(14).build()).reasonKey());
-        assertTrue(socialize.canContinue(partnerAt(14).build()).ok(), "a partner that moved a little is still there");
-        assertEquals("intent.chiikawa.fail.out_of_leash", socialize.canContinue(partnerAt(20).build()).reasonKey());
+        assertEquals(Optional.of(GlobalPos.of(OVERWORLD, OWNER.pos().east(10))), socialize.destination(partnerAt(10).build()));
+    }
+
+    @Test
+    void thePartnerOfASceneStaysWhereItIs() {
+        assertEquals(Optional.empty(), cooperate.destination(TestContext.at(OWNER, AT_HEEL).playingAlong().build()));
     }
 
     @Test

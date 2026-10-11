@@ -157,6 +157,11 @@ public final class CameraGameTests {
         settle(level);
     }
 
+    @BeforeBatch(batch = "chiikawa_camera_beyond")
+    public static void settleBeyond(ServerLevel level) {
+        settle(level);
+    }
+
     /**
      * The world as every case here wants it, and the camera as the data pack has it: a case
      * that tries another camera does not leave it for the next.
@@ -204,7 +209,7 @@ public final class CameraGameTests {
      */
     @GameTest(template = "floor16", batch = "chiikawa_camera_owner", timeoutTicks = SHOT_TICKS)
     public static void a_hachiware_walks_over_to_photograph_its_owner(GameTestHelper helper) {
-        ServerPlayer owner = ownerAt(helper, new BlockPos(14, STAND, 14));
+        ServerPlayer owner = ownerAt(helper, new BlockPos(12, STAND, 12));
         AbstractPet pet = photographer(helper, InitEntity.HACHIWARE_PET.get(), owner, true, true);
         seenEveryView(pet);
         PhotoSystem photos = PhotoSystem.of(helper.getLevel().getServer());
@@ -389,6 +394,24 @@ public final class CameraGameTests {
             helper.assertTrue(helper.getLevel().getGameTime() - lostAt[0] >= RESTING_AFTER + SETTLED_TICKS,
                 "still too soon to say");
         });
+    }
+
+    /**
+     * A free-roaming Hachiware keeps to its own area for a photo as for any errand: a friend in
+     * sight but outside it is not walked out to, and none is asked for.
+     */
+    @GameTest(template = "floor16", batch = "chiikawa_camera_beyond", timeoutTicks = WAIT_TICKS + 20)
+    public static void a_free_hachiware_does_not_walk_out_of_its_area_for_a_photo(GameTestHelper helper) {
+        ServerPlayer owner = player(helper);
+        BlockPos far = helper.absolutePos(new BlockPos(8, STAND, 8)).offset(40, 0, 0);
+        owner.teleportTo(far.getX() + 0.5, far.getY(), far.getZ() + 0.5);
+        AbstractPet pet = photographer(helper, InitEntity.HACHIWARE_PET.get(), owner, true, true);
+        seenEveryView(pet);
+        // Sixteen blocks off on the diagonal of the yard: in sight, and beyond the thirteen it reaches.
+        AbstractPet friend = pet(helper, InitEntity.CHIIKAWA_PET.get(), new BlockPos(15, STAND, 15), false);
+        friend.setNoAi(true);
+
+        stillNotAsked(helper);
     }
 
     /** A photo that comes back the wrong size is no photo: no film used, nothing to give, a short rest. */
