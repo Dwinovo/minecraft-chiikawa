@@ -70,7 +70,7 @@ public class GiveGiftBehavior extends Behavior<AbstractPet> {
 
     @Override
     protected boolean canStillUse(ServerLevel level, AbstractPet pet, long gameTime) {
-        return !given && GiftErrand.mayContinue(pet);
+        return !given && !pet.getPendingGift().isEmpty() && pet.getOwner() instanceof Player;
     }
 
     @Override
