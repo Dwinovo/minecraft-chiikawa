@@ -86,9 +86,7 @@ public final class LanguageData {
                 "已经是最高级", "还要再干些活", "已报名或在等成绩", "在待命", "离得太远");
             addExamDeskOddsTranslations(adder, "基础 %s%%", "多干活 +%s%%", "之前落榜 +%s%%", "读过参考书 +%s%%",
                 "性格 ×%s", "通过率 %s（最高 %s%%）");
-            addPetNewsTranslations(adder, "%1$s 花 %2$s 个%4$s买了 %3$s",
-                    "%1$s 花 %2$s 个%4$s买了 %3$s，当场吃掉了",
-                    "%1$s 把 %2$s 送给了你");
+            addPetNewsTranslations(adder, "%1$s 把 %2$s 送给了你");
             addRecallTranslations(adder, "叫回了 %s 只宠物", "你没有宠物可叫",
                     "%s 没有应声，上次见到它的地方已经没它了");
             addShopScreenTranslations(adder, "商店", "买 %s", "卖 %s", "今天什么都不卖",
@@ -298,9 +296,7 @@ public final class LanguageData {
                 "もう最上級", "もう少し働かないと", "申し込み済みか結果待ち", "待機中", "遠すぎる");
             addExamDeskOddsTranslations(adder, "基本 %s%%", "よく働いた +%s%%", "前に落ちた +%s%%", "参考書を読んだ +%s%%",
                 "性格 ×%s", "合格率 %s（最高 %s%%）");
-            addPetNewsTranslations(adder, "%1$sが%4$s%2$s個で%3$sを買った",
-                    "%1$sが%4$s%2$s個で%3$sを買って、その場で食べた",
-                    "%1$sが%2$sをくれた");
+            addPetNewsTranslations(adder, "%1$sが%2$sをくれた");
             addRecallTranslations(adder, "ペットが%s匹戻ってきた", "呼べるペットがいない",
                     "%sから返事がない。最後に見かけた場所にはもういない");
             addShopScreenTranslations(adder, "お店", "買う %s", "売る %s", "今日は売り物がありません",
@@ -513,9 +509,7 @@ public final class LanguageData {
                 "Too far away");
             addExamDeskOddsTranslations(adder, "Base %s%%", "Work done +%s%%", "Failed before +%s%%", "Read the guide +%s%%",
                 "Personality ×%s", "Pass chance %s (best %s%%)");
-            addPetNewsTranslations(adder, "%1$s spent %2$s × %4$s on %3$s",
-                    "%1$s spent %2$s × %4$s on %3$s and ate it on the spot",
-                    "%1$s gave you %2$s");
+            addPetNewsTranslations(adder, "%1$s gave you %2$s");
             addRecallTranslations(adder, "%s came running", "You have no pets to call",
                     "%s did not answer; it is gone from where it was last seen");
             addShopScreenTranslations(adder, "Shop", "Buy %s", "Sell %s", "Nothing for sale today",
@@ -920,13 +914,10 @@ public final class LanguageData {
     }
 
     /**
-     * What a pet tells its owner in chat about its own spending: the pet, the price, the
-     * thing; and the present it hands over. Numbered, since the languages put them in
-     * different orders.
+     * What a pet tells its owner in chat: the present it hands over, by the pet and the thing.
+     * Numbered, since the languages put them in different orders.
      */
-    private static void addPetNewsTranslations(Adder adder, String bought, String boughtAte, String given) {
-        adder.add("message.chiikawa.shop.bought", bought);
-        adder.add("message.chiikawa.shop.bought_ate", boughtAte);
+    private static void addPetNewsTranslations(Adder adder, String given) {
         adder.add("message.chiikawa.gift.given", given);
     }
 
