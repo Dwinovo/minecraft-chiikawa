@@ -3,7 +3,11 @@ package com.dwinovo.chiikawa.entity.brain.intent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.photo.PhotoSubject;
 import com.dwinovo.chiikawa.testing.TestAnchors;
+import com.dwinovo.chiikawa.camera.CameraSettings;
+import com.dwinovo.chiikawa.camera.PhotoOutlook;
+import com.dwinovo.chiikawa.camera.PhotoPlan;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.Candidate;
 import com.dwinovo.chiikawa.testing.TestContext;
@@ -14,6 +18,7 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -112,6 +117,33 @@ class IntentAdmissionTest {
         assertEquals(Optional.empty(), PetIntents.get(PetIntents.COOPERATE).destination(ctx));
         assertEquals(Optional.empty(), PetIntents.get(PetIntents.PLAY_MUSIC).destination(ctx));
         assertEquals(Optional.empty(), PetIntents.get(PetIntents.TAKE_PHOTO).destination(ctx));
+    }
+
+    @Test
+    void aPhotoIsWalkedToItsSubjectAndTakenOfAViewWhereThePetStands() {
+        PetIntent photo = PetIntents.get(PetIntents.TAKE_PHOTO);
+
+        assertEquals(Optional.of(east(8)), photo.destination(photoOf(Optional.of(east(8))).build()));
+        assertEquals(Optional.empty(), photo.destination(photoOf(Optional.empty()).build()));
+    }
+
+    @Test
+    void aPhotoOfSomebodyBeyondTheAreaDoesNotStartAndEndsBeyondTheLeash() {
+        PetIntent photo = PetIntents.get(PetIntents.TAKE_PHOTO);
+
+        assertTrue(only(photo, photoOf(Optional.of(east(10))).build(), false).eligible());
+        assertEquals("intent.chiikawa.fail.out_of_reach", only(photo, photoOf(Optional.of(east(16))).build(), false).check().reasonKey());
+        assertTrue(only(photo, photoOf(Optional.of(east(16))).build(), true).eligible(), "a friend a little further on");
+        assertEquals("intent.chiikawa.fail.out_of_leash", only(photo, photoOf(Optional.of(east(25))).build(), true).check().reasonKey());
+        assertTrue(only(photo, photoOf(Optional.empty()).build(), false).eligible(), "a view is taken where it stands");
+    }
+
+    private static TestContext photoOf(Optional<GlobalPos> where) {
+        PhotoOutlook outlook = new PhotoOutlook(true, Optional.of(new CameraSettings(
+            ResourceLocation.fromNamespaceAndPath("chiikawa", "film"), 64.0, 12000, 600, 320, 240, 70,
+            new CameraSettings.Subjects(1, 1, 1), 40, 8, 0.5F)), true, true, true, false,
+            Optional.of(new PhotoPlan(PhotoSubject.FRIEND, Optional.empty(), "", Vec3.ZERO, where)));
+        return TestContext.at(HOME, FREE).photo(outlook);
     }
 
     @Test

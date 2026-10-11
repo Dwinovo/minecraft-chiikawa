@@ -88,7 +88,7 @@ public final class IntentSelector {
         PetIntent previous = current == null ? null : PetIntents.get(current.id());
         PetIntent next = decision.next() == null ? null : PetIntents.get(decision.next());
         String cause = decision.ended() != null ? decision.ended().name() : trigger.name();
-        switchIntent(pet, level, previous, next, now, cause, decision.ranking());
+        switchIntent(pet, level, previous, next, now, cause, decision.ranking(), evaluation.context());
     }
 
     /**
@@ -265,7 +265,7 @@ public final class IntentSelector {
      * sit does not release its drawn arrow.
      */
     private static void switchIntent(AbstractPet pet, ServerLevel level, @Nullable PetIntent previous,
-            @Nullable PetIntent next, long now, String cause, List<Scored> ranking) {
+            @Nullable PetIntent next, long now, String cause, List<Scored> ranking, IntentContext ctx) {
         Brain<AbstractPet> brain = pet.getBrain();
         if (previous != null) {
             previous.onStop(new IntentRuntime(pet, level, brain));
@@ -291,6 +291,9 @@ public final class IntentSelector {
             brain.eraseMemory(InitMemory.CURRENT_INTENT.get());
         }
         pet.setIntent(next == null ? null : next.id());
+        if (next != null) {
+            next.onStart(new IntentRuntime(pet, level, brain), ctx);
+        }
         brain.getMemory(InitMemory.INTENT_SWITCH_LOG.get()).ifPresent(log -> log.record(
             now, previous == null ? null : previous.id(), next == null ? null : next.id(), cause, ranking));
         // Setting off to fight, rather than turning from one way of fighting to another, is
