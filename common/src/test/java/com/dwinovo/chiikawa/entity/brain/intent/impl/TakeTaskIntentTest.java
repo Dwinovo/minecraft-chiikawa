@@ -9,6 +9,7 @@ import com.dwinovo.chiikawa.entity.brain.intent.IntentCategory;
 import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.dwinovo.chiikawa.testing.TestContext;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.registries.Registries;
@@ -27,16 +28,10 @@ class TakeTaskIntentTest {
     private final TakeTaskIntent intent = new TakeTaskIntent();
 
     @Test
-    void takesASlipFromABoardWithinReach() {
+    void takesASlipFromABoardAndGoesToIt() {
         assertEquals(IntentCategory.TAKE_TASK, intent.category());
         assertTrue(intent.canRun(boardAt(10).build()).ok());
-        assertEquals("intent.chiikawa.fail.out_of_reach", intent.canRun(boardAt(15).build()).reasonKey());
-    }
-
-    @Test
-    void keepsGoingWhileTheBoardIsWithinTheLeash() {
-        assertTrue(intent.canContinue(boardAt(15).build()).ok());
-        assertEquals("intent.chiikawa.fail.out_of_leash", intent.canContinue(boardAt(25).build()).reasonKey());
+        assertEquals(Optional.of(GlobalPos.of(OVERWORLD, HOME.pos().east(10))), intent.destination(boardAt(10).build()));
     }
 
     @Test

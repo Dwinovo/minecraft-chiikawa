@@ -1,12 +1,13 @@
 package com.dwinovo.chiikawa.entity.brain.intent.impl;
 
-import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCategory;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCheck;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentContext;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import com.dwinovo.chiikawa.init.InitActivity;
+import java.util.Optional;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.schedule.Activity;
 
@@ -36,12 +37,12 @@ public final class CheckResultsIntent implements PetIntent {
 
     @Override
     public IntentCheck canRun(IntentContext ctx) {
-        return TakeExamIntent.check(ctx.resultsDesk(), ctx, PetAnchor::withinReach, "out_of_reach");
+        return ctx.resultsDesk().isPresent() ? IntentCheck.OK : IntentCheck.fail("no_desk");
     }
 
     @Override
-    public IntentCheck canContinue(IntentContext ctx) {
-        return TakeExamIntent.check(ctx.resultsDesk(), ctx, PetAnchor::withinLeash, "out_of_leash");
+    public Optional<GlobalPos> destination(IntentContext ctx) {
+        return ctx.resultsDesk();
     }
 
     @Override
