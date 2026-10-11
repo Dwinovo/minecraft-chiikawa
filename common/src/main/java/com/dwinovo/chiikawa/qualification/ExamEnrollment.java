@@ -147,7 +147,7 @@ public final class ExamEnrollment {
             return Optional.of(Ineligible.STAYING);
         }
         GlobalPos chair = GlobalPos.of(desk.getLevel().dimension(), desk.chair());
-        return PetConstraints.anchorOf(pet, ownership).withinReach(chair) ? Optional.empty() : Optional.of(Ineligible.OUT_OF_REACH);
+        return PetConstraints.anchorOf(pet, ownership).admits(chair, true) ? Optional.empty() : Optional.of(Ineligible.OUT_OF_REACH);
     }
 
     private static List<AbstractPet> ownersPetsAround(ExamDeskBlockEntity desk, UUID owner) {

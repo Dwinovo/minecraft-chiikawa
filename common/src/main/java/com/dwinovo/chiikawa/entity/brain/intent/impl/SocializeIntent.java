@@ -1,13 +1,12 @@
 package com.dwinovo.chiikawa.entity.brain.intent.impl;
 
-import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCategory;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCheck;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentContext;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import com.dwinovo.chiikawa.init.InitActivity;
-import java.util.function.BiPredicate;
+import java.util.Optional;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.schedule.Activity;
@@ -41,22 +40,16 @@ public final class SocializeIntent implements PetIntent {
 
     @Override
     public IntentCheck canRun(IntentContext ctx) {
-        return check(ctx, PetAnchor::withinReach, "out_of_reach");
+        return ctx.socialPartner().isPresent() ? IntentCheck.OK : IntentCheck.fail("no_partner");
     }
 
     @Override
-    public IntentCheck canContinue(IntentContext ctx) {
-        return check(ctx, PetAnchor::withinLeash, "out_of_leash");
+    public Optional<GlobalPos> destination(IntentContext ctx) {
+        return ctx.socialPartner();
     }
 
     @Override
     public float score(IntentContext ctx) {
         return SCORE;
-    }
-
-    private static IntentCheck check(IntentContext ctx, BiPredicate<PetAnchor, GlobalPos> inRange, String outOfRange) {
-        return ctx.socialPartner()
-            .map(partner -> inRange.test(ctx.anchor(), partner) ? IntentCheck.OK : IntentCheck.fail(outOfRange))
-            .orElseGet(() -> IntentCheck.fail("no_partner"));
     }
 }
