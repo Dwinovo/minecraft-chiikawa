@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.data.PetSpawnData;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import java.util.Map;
@@ -40,6 +41,21 @@ class PetSpawnTest {
         assertFalse(spawn.covers(biome("desert"), tag -> false));
         assertEquals(EntityTypes.PIG, spawn.spawners().get(0).value().type());
         assertEquals(2, spawn.spawners().get(0).value().count().maxInclusive());
+    }
+
+    @Test
+    void wildPetsSpawnInTheConventionalTagsForPlainsSavannaDesertSwampAndSnow() {
+        PetSpawn wild = new PetSpawn(PetSpawnData.biomes(), java.util.List.of());
+
+        assertEquals(java.util.List.of("#c:is_plains", "#c:is_savanna", "#c:is_desert", "#c:is_swamp", "#c:is_snowy_plains"),
+            wild.biomes().stream().map(entry -> (entry.tag() ? "#" : "") + entry.id()).toList());
+        // A biome from a mod that is in the plains tag is a plains, and a forest is not.
+        ResourceKey<Biome> moddedPlains = ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("examplemod", "meadow_flats"));
+        TagKey<Biome> isPlains = TagKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("c", "is_plains"));
+        assertTrue(wild.covers(moddedPlains, isPlains::equals), "a modded plains does not count");
+        assertFalse(wild.covers(FOREST, tag -> tag.location().getNamespace().equals("c") && tag.location().getPath().equals("is_forest")),
+            "a forest counts");
+        assertFalse(wild.covers(PLAINS, tag -> false), "a plains is named by id, not by tag");
     }
 
     @Test
