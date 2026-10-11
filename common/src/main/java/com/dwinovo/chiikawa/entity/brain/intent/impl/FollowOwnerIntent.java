@@ -1,6 +1,5 @@
 package com.dwinovo.chiikawa.entity.brain.intent.impl;
 
-import com.dwinovo.chiikawa.entity.brain.constraint.AnchorDistances;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCategory;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCheck;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentContext;
@@ -17,7 +16,7 @@ import net.minecraft.world.entity.schedule.Activity;
  * anchor follows the owner (owner online, pet not leashed); otherwise the pet just
  * wanders.
  *
- * <p>Starts at {@link AnchorDistances#FOLLOW_START} and keeps going until the pet
+ * <p>Starts at the follow distance the anchor settings give and keeps going until the pet
  * has arrived, like 0.0.9. The score grows with distance, so the further the owner
  * gets the more it outweighs anything done on the way.
  */
@@ -45,7 +44,7 @@ public final class FollowOwnerIntent implements PetIntent {
         if (!ctx.anchor().followsOwner()) {
             return IntentCheck.fail("owner_unavailable");
         }
-        return distanceToOwner(ctx) >= AnchorDistances.FOLLOW_START ? IntentCheck.OK : IntentCheck.fail("owner_nearby");
+        return distanceToOwner(ctx) >= ctx.follow().start() ? IntentCheck.OK : IntentCheck.fail("owner_nearby");
     }
 
     @Override
@@ -53,7 +52,7 @@ public final class FollowOwnerIntent implements PetIntent {
         if (!ctx.anchor().followsOwner()) {
             return IntentCheck.fail("owner_unavailable");
         }
-        return ctx.petPos().pos().distManhattan(ctx.anchor().center().pos()) > AnchorDistances.FOLLOW_ARRIVE
+        return ctx.petPos().pos().distManhattan(ctx.anchor().center().pos()) > ctx.follow().arrive()
             ? IntentCheck.OK
             : IntentCheck.fail("owner_reached");
     }
@@ -66,8 +65,7 @@ public final class FollowOwnerIntent implements PetIntent {
 
     @Override
     public float score(IntentContext ctx) {
-        double progress = (distanceToOwner(ctx) - AnchorDistances.FOLLOW_START)
-            / (AnchorDistances.FOLLOW_REACH - AnchorDistances.FOLLOW_START);
+        double progress = (distanceToOwner(ctx) - ctx.follow().start()) / (ctx.follow().reach() - ctx.follow().start());
         return MIN_SCORE + (MAX_SCORE - MIN_SCORE) * (float) Math.max(0.0, Math.min(1.0, progress));
     }
 

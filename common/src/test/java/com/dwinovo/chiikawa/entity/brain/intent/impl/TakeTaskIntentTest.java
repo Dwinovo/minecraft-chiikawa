@@ -3,7 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.intent.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.dwinovo.chiikawa.entity.brain.constraint.AnchorDistances;
+import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCategory;
 import com.dwinovo.chiikawa.task.PetTask;
@@ -23,7 +23,7 @@ class TakeTaskIntentTest {
         ResourceKey.createRegistryKey(Identifier.withDefaultNamespace("dimension")),
         Identifier.withDefaultNamespace("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
-    private static final PetAnchor FREE = new PetAnchor(HOME, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, false, true);
+    private static final PetAnchor FREE = TestAnchors.free(HOME);
 
     private final TakeTaskIntent intent = new TakeTaskIntent();
 

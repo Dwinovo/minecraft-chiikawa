@@ -9,7 +9,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.PetFollowKeeper;
-import com.dwinovo.chiikawa.entity.brain.constraint.AnchorDistances;
+import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
@@ -119,6 +119,7 @@ public final class FollowGameTests {
 
     /** Whether the pet is near enough its owner to count as having caught up. */
     private static boolean caughtUp(AbstractPet pet, ServerPlayer owner) {
-        return pet.distanceToSqr(owner) < AnchorDistances.FOLLOW_TELEPORT * AnchorDistances.FOLLOW_TELEPORT;
+        double teleport = AnchorSettings.current().orElseThrow().follow().teleport();
+        return pet.distanceToSqr(owner) < teleport * teleport;
     }
 }
