@@ -3,7 +3,7 @@ package com.dwinovo.chiikawa.manual;
 import java.util.List;
 
 /**
- * The handbook's pages as the resource packs have them now, in reading order. Client side;
+ * The handbook's chapters (pages of the book) as the resource packs have them now, in reading order. Client side;
  * replaced whole on every resource reload.
  */
 public final class ManualPages {
@@ -12,7 +12,7 @@ public final class ManualPages {
     private ManualPages() {
     }
 
-    /** @return every page, in reading order */
+    /** @return every chapter, in reading order */
     public static List<ManualPage> all() {
         return pages;
     }
