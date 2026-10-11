@@ -2,6 +2,8 @@ package com.dwinovo.chiikawa.camera;
 
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
+import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.intent.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import com.dwinovo.chiikawa.entity.impl.HachiwarePet;
@@ -14,6 +16,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -119,10 +122,16 @@ public final class PhotoScout {
             && owner.getLastDamageSource() == null;
     }
 
+    /**
+     * The kinds of photo there is a good moment for. Which one the pet takes is picked as it sets
+     * about it, so the area it acts in is kept to here: a person is a moment only where the pet's
+     * anchor admits going to them, as it does for any errand, while a view is taken from where it stands.
+     */
     private static Set<PhotoSubject> moments(AbstractPet pet, LivingEntity owner) {
         Set<PhotoSubject> moments = EnumSet.noneOf(PhotoSubject.class);
         Optional<NearestVisibleLivingEntities> visible = pet.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
-        if (owner != null && visible.filter(seen -> seen.contains(owner)).isPresent()) {
+        if (owner != null && visible.filter(seen -> seen.contains(owner)).isPresent()
+                && admitted(pet, owner)) {
             moments.add(PhotoSubject.OWNER);
         }
         if (friend(pet).isPresent()) {
@@ -142,7 +151,8 @@ public final class PhotoScout {
         List<AbstractPet> seen = pet.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES)
             .map(visible -> {
                 List<AbstractPet> pets = new ArrayList<>();
-                for (LivingEntity entity : visible.findAll(other -> other instanceof AbstractPet && other != pet && other.isAlive())) {
+                for (LivingEntity entity : visible.findAll(other -> other instanceof AbstractPet && other != pet && other.isAlive()
+                        && admitted(pet, other))) {
                     pets.add((AbstractPet) entity);
                 }
                 return pets;
@@ -150,6 +160,12 @@ public final class PhotoScout {
         Comparator<AbstractPet> nearest = Comparator.comparingDouble(pet::distanceToSqr);
         Optional<AbstractPet> inAMoment = seen.stream().filter(PhotoScout::inAMoment).min(nearest);
         return inAMoment.isPresent() ? inAMoment : seen.stream().filter(PhotoScout::idle).min(nearest);
+    }
+
+    /** Whether the pet's anchor admits setting off for somebody: the one rule every errand goes by. */
+    private static boolean admitted(AbstractPet pet, LivingEntity subject) {
+        return PetConstraints.anchorOf(pet, PetOwnership.of(pet))
+            .admits(GlobalPos.of(subject.level().dimension(), subject.blockPosition()), true);
     }
 
     /** In a scene with another pet, listening to music (which is one), or reading the results of an exam. */
