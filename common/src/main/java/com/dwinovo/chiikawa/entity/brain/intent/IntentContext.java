@@ -44,7 +44,8 @@ import net.minecraft.world.level.Level;
  * @param shopCoolingDown whether the pet has just bought something
  * @param socialPartner the pet this one has thought of playing a scene with
  * @param playingAlong whether another pet is on its way to play a scene with this one
- * @param carryingGift whether the pet has something for its owner that it has not handed over
+ * @param carryingGift whether the pet has something for its owner that it has not handed over, and
+ *                     its owner is still where it may walk it to
  * @param eager whether the pet is still in the mood after a proper meal
  * @param takeTaskCoolingDown whether the pet recently failed to take a slip
  * @param attackCoolingDown whether the pet's attack cooldown is running
@@ -56,8 +57,8 @@ import net.minecraft.world.level.Level;
  * @param seatedAtExam whether the pet is in its chair at an exam desk, at the paper or handing it in
  * @param whistleHeard where a whistle was blown that this wild pet has set off for, once it has had time to react
  * @param photo whether the pet could take a photo now, and of what
- * @param presentToGive whether the pet has something in its bag to give its owner, and is ready to
- *                      think of giving them something
+ * @param presentToGive whether the pet has something in its bag to give its owner, is ready to
+ *                      think of giving them something, and its owner is at home to be given it
  */
 public record IntentContext(
     GlobalPos petPos,
@@ -107,7 +108,7 @@ public record IntentContext(
                 .filter(AbstractPet::isAlive)
                 .map(partner -> GlobalPos.of(partner.level().dimension(), partner.blockPosition())),
             pet.getBrain().hasMemoryValue(InitMemory.INTERACTION_RESERVATION.get()),
-            !pet.getPendingGift().isEmpty(),
+            GiftErrand.mayContinue(pet),
             pet.isEager(),
             pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_COOLING_DOWN),
             !Utils.getArrow(pet).isEmpty(),
