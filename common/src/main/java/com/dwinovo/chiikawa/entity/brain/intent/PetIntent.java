@@ -53,6 +53,13 @@ public interface PetIntent {
         return Optional.empty();
     }
 
+    /**
+     * Called when the selector switches to this intent, with what it saw when it chose it: for an
+     * intent whose behavior carries out a choice made then, so that it does what was admitted.
+     */
+    default void onStart(IntentRuntime runtime, IntentContext ctx) {
+    }
+
     /** Called when the selector switches away from this intent, before its behaviors are stopped. */
     default void onStop(IntentRuntime runtime) {
     }
