@@ -3,7 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.intent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.dwinovo.chiikawa.entity.brain.constraint.AnchorDistances;
+import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.task.PetTask;
@@ -23,7 +23,7 @@ class ForageIntentsTest {
         ResourceKey.createRegistryKey(new ResourceLocation("dimension")),
         new ResourceLocation("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
-    private static final PetAnchor WILD_ANCHOR = new PetAnchor(HOME, AnchorDistances.WILD_REACH, AnchorDistances.WILD_LEASH, false, true);
+    private static final PetAnchor WILD_ANCHOR = TestAnchors.wild(HOME);
 
     private final PetIntent weed = PetIntents.get(PetIntents.WEED);
     private final PetIntent mushroom = PetIntents.get(PetIntents.PICK_MUSHROOM);

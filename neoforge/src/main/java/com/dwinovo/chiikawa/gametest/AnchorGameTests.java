@@ -8,7 +8,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.brain.constraint.AnchorDistances;
+import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
@@ -54,8 +54,9 @@ public final class AnchorGameTests {
         BlockPos stray = helper.absolutePos(STRAY);
         pet.teleportTo(stray.getX() + 0.5, stray.getY(), stray.getZ() + 0.5);
 
+        double reach = AnchorSettings.current().orElseThrow().free().reach();
         helper.succeedWhen(() -> helper.assertTrue(
-            pet.blockPosition().distSqr(home) < AnchorDistances.FREE_REACH * AnchorDistances.FREE_REACH,
+            pet.blockPosition().distSqr(home) < reach * reach,
             "the pet stayed out at the far corner instead of going home"));
     }
 

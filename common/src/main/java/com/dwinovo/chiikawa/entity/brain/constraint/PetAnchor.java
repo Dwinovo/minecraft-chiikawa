@@ -44,11 +44,11 @@ public record PetAnchor(GlobalPos center, double reach, double leash, boolean fo
 
     /**
      * @param pos the pet's position
-     * @return whether the pet has fallen {@link AnchorDistances#FOLLOW_TELEPORT} behind
-     *         the owner it follows
+     * @param teleport how far behind its owner a following pet is fetched
+     * @return whether the pet has fallen that far behind the owner it follows
      */
-    public boolean beyondTeleport(GlobalPos pos) {
-        return followsOwner && !within(pos, AnchorDistances.FOLLOW_TELEPORT);
+    public boolean beyondTeleport(GlobalPos pos, double teleport) {
+        return followsOwner && !within(pos, teleport);
     }
 
     private boolean within(GlobalPos pos, double radius) {
