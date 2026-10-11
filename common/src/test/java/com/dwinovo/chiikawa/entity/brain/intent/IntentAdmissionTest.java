@@ -3,7 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.intent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.dwinovo.chiikawa.entity.brain.constraint.AnchorDistances;
+import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.Candidate;
 import com.dwinovo.chiikawa.testing.TestContext;
@@ -27,7 +27,7 @@ class IntentAdmissionTest {
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     /** Reach 13, leash 20, round its home. */
     private static final PetAnchor FREE =
-        new PetAnchor(HOME, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, false, true);
+        TestAnchors.free(HOME);
 
     private static GlobalPos east(int blocks) {
         return GlobalPos.of(OVERWORLD, HOME.pos().east(blocks));
@@ -126,7 +126,7 @@ class IntentAdmissionTest {
     @Test
     void aFollowingPetsOwnerIsTheMiddleOfItsAreaSoItIsAlwaysAdmitted() {
         GlobalPos owner = east(500);
-        PetAnchor following = new PetAnchor(owner, AnchorDistances.FOLLOW_REACH, AnchorDistances.FOLLOW_LEASH, true, true);
+        PetAnchor following = TestAnchors.following(owner);
         IntentContext ctx = TestContext.at(HOME, following).build();
         PetIntent follow = PetIntents.get(PetIntents.FOLLOW_OWNER);
 

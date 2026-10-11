@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.task.tameable;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.brain.constraint.AnchorDistances;
+import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import net.minecraft.server.level.ServerLevel;
@@ -47,7 +47,8 @@ public class FollowOwnerBehavior extends Behavior<AbstractPet> {
     private static void walkToOwner(AbstractPet pet) {
         LivingEntity owner = pet.getOwner();
         if (owner != null) {
-            BehaviorUtils.setWalkAndLookTargetMemories(pet, owner, SPEED, AnchorDistances.FOLLOW_ARRIVE);
+            AnchorSettings.current().ifPresent(settings ->
+                BehaviorUtils.setWalkAndLookTargetMemories(pet, owner, SPEED, settings.follow().arrive()));
         }
     }
 }
