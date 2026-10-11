@@ -8,10 +8,8 @@ import com.dwinovo.chiikawa.block.ExamDeskBlock;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
-import com.dwinovo.chiikawa.init.InitTag;
 import com.dwinovo.chiikawa.manual.ManualPage;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -27,10 +25,10 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * The generated handbook pages (gameplay doc, "the handbook"): each a four-panel strip the
- * pets act out, one page for each thing there is to know.
+ * The generated handbook chapters (gameplay doc, "the handbook"): six, each one little scene
+ * the pets act out, a short text and the page of the website it goes on about.
  *
- * <p>A pet in a panel says one of its own lines, the words it says in the world at that
+ * <p>A pet in a scene says one of its own lines, the words it says in the world at that
  * moment ({@link PetVoiceData}): the handbook never puts words in a pet's mouth that the
  * pet would not say. Usagi says "ウラ", not "here you are"; Rakko does not cry out.
  */
@@ -38,184 +36,77 @@ public final class ManualData {
     private ManualData() {
     }
 
-    /** @return pages by id */
+    /** @return chapters by id, in the order the handbook lists them: {@link ManualPage#order} */
     public static Map<ResourceLocation, ManualPage> all() {
         return Map.of(
             id("meet"), meet(),
             id("work"), work(),
             id("shop"), shop(),
-            id("presents"), presents(),
-            id("supplies"), supplies(),
-            id("upgrade"), upgrade(),
-            id("safety"), safety(),
-            id("friends"), friends(),
+            id("care"), care(),
+            id("camera"), camera(),
             id("licence"), licence());
     }
 
-    /** A page's title, by the page's name: shared with the wording, which is written to it. */
-    public static String titleKey(String page) {
-        return "manual.chiikawa." + page + ".title";
+    /** A chapter's title, by the chapter's name: shared with the wording, which is written to it. */
+    public static String titleKey(String chapter) {
+        return "manual.chiikawa." + chapter + ".title";
     }
 
-    /** The line under a page's panel, counted from 1. */
-    public static String captionKey(String page, int panel) {
-        return "manual.chiikawa." + page + "." + panel;
+    /** A chapter's text. */
+    public static String textKey(String chapter) {
+        return "manual.chiikawa." + chapter + ".text";
     }
 
-    /** Meeting them: out in the wild, tamed with food, three orders, and their screen. */
+    /** Meeting them: tamed with food, and it says so. */
     private static ManualPage meet() {
-        return page("meet", 5,
-            panel(pet(InitEntity.CHIIKAWA_PET).at(0.3F).facing(60.0F).hold(Items.WOODEN_HOE).walk(),
-                pet(InitEntity.HACHIWARE_PET).at(0.72F).facing(-40.0F).hold(InitItems.HACHIWARE_WEAPON.get()).walk()),
-            panel(pet(InitEntity.CHIIKAWA_PET).at(0.42F).facing(-20.0F).play("tame", "eat").say(VoiceMoment.TAME),
-                item(Items.BREAD).at(0.72F).up(0.35F).bob()),
-            panel(pet(InitEntity.CHIIKAWA_PET).at(0.2F).facing(60.0F).walk(),
-                pet(InitEntity.USAGI_PET).at(0.5F).sit(),
-                pet(InitEntity.HACHIWARE_PET).at(0.8F).facing(-30.0F).hold(Items.WOODEN_HOE),
-                item(InitItems.WHISTLE_CANDY.get()).at(0.35F).up(0.55F).bob()),
-            panel(pet(InitEntity.CHIIKAWA_PET).at(0.35F).facing(20.0F).hold(Items.WOODEN_HOE).bag(InitItems.BACKPACK.get()),
-                item(Items.WHEAT).at(0.66F).up(0.5F),
-                money().at(0.82F).up(0.3F).bob()));
+        return chapter("meet", 10, "play/taming",
+            pet(InitEntity.CHIIKAWA_PET).at(0.42F).facing(-20.0F).play("tame", "eat").say(VoiceMoment.TAME),
+            item(Items.BREAD).at(0.72F).up(0.35F).bob());
     }
 
-    /** Off to work: a board goes up, a pet takes a slip, does the work and gets paid. */
+    /** Off to work: a pet takes a slip from the board while another walks up. */
     private static ManualPage work() {
-        return page("work", 10,
-            panel(prop(InitBlocks.LABOR_BOARD.get()).at(0.66F).facing(-25.0F),
-                pet(InitEntity.CHIIKAWA_PET).at(0.26F).facing(30.0F).hold(Items.WOODEN_HOE).say(VoiceMoment.IDLE)),
-            panel(prop(InitBlocks.LABOR_BOARD.get()).at(0.74F).facing(-30.0F).scale(0.85F),
-                pet(InitEntity.CHIIKAWA_PET).at(0.47F).facing(60.0F).hold(Items.WOODEN_HOE).action(PetAction.PICKUP),
-                pet(InitEntity.USAGI_PET).at(0.17F).facing(50.0F).hold(InitItems.USAGI_WEAPON.get()).walk()),
-            // Standing in the grass it is pulling up: the tufts at its feet are drawn over it.
-            panel(item(Items.SHORT_GRASS).at(0.2F).scale(0.8F),
-                item(Items.SHORT_GRASS).at(0.84F).scale(0.7F),
-                pet(InitEntity.CHIIKAWA_PET).at(0.5F).facing(20.0F).hold(Items.WOODEN_HOE).action(PetAction.HARVEST).every(24),
-                item(Items.SHORT_GRASS).at(0.37F),
-                item(Items.SHORT_GRASS).at(0.47F).scale(0.9F),
-                item(Items.SHORT_GRASS).at(0.6F),
-                item(Items.SHORT_GRASS).at(0.7F).scale(0.8F)),
-            panel(pet(InitEntity.CHIIKAWA_PET).at(0.42F).facing(15.0F).hold(Items.WOODEN_HOE)
-                    .play("jump", "tame").every(30).say(VoiceMoment.PAID),
-                money().at(0.72F).up(0.45F).bob()));
+        return chapter("work", 20, "play/work",
+            prop(InitBlocks.LABOR_BOARD.get()).at(0.74F).facing(-30.0F).scale(0.85F),
+            pet(InitEntity.CHIIKAWA_PET).at(0.47F).facing(60.0F).hold(Items.WOODEN_HOE).action(PetAction.PICKUP),
+            pet(InitEntity.USAGI_PET).at(0.17F).facing(50.0F).hold(InitItems.USAGI_WEAPON.get()).walk());
     }
 
-    /** The shop: a pet spends its savings on what it likes, the owner trades, pocket money. */
+    /** The shop and presents: a pet brings a flower and says so. */
     private static ManualPage shop() {
-        return page("shop", 20,
-            panel(prop(InitBlocks.SHOP.get()).at(0.68F).facing(-25.0F),
-                pet(InitEntity.CHIIKAWA_PET).at(0.26F).facing(40.0F).walk()),
-            panel(prop(InitBlocks.SHOP.get()).at(0.72F).facing(-30.0F).scale(0.9F),
-                pet(InitEntity.CHIIKAWA_PET).at(0.38F).facing(50.0F).action(PetAction.PICKUP),
-                item(Items.COOKIE).at(0.5F).up(0.55F).bob()),
-            panel(item(Items.WHEAT).at(0.18F).up(0.35F),
-                prop(InitBlocks.SHOP.get()).at(0.5F),
-                money().at(0.82F).up(0.35F).bob()),
-            panel(pet(InitEntity.CHIIKAWA_PET).at(0.42F).play("tame", "jump").every(30).say(VoiceMoment.PAID),
-                money().at(0.72F).up(0.4F).bob()));
+        return chapter("shop", 30, "play/shop",
+            pet(InitEntity.USAGI_PET).at(0.5F).hold(Items.POPPY).play("open_mouth1").say(VoiceMoment.GIFT));
     }
 
-    /** Presents: picked out at the shop, carried over, handed to you, told of in chat. */
-    private static ManualPage presents() {
-        return page("presents", 30,
-            panel(prop(InitBlocks.SHOP.get()).at(0.7F).facing(-25.0F),
-                pet(InitEntity.USAGI_PET).at(0.34F).facing(45.0F).action(PetAction.PICKUP),
-                item(Items.POPPY).at(0.5F).up(0.55F).bob()),
-            panel(pet(InitEntity.USAGI_PET).at(0.5F).facing(-70.0F).hold(Items.POPPY).walk()),
-            panel(pet(InitEntity.USAGI_PET).at(0.5F).hold(Items.POPPY).play("open_mouth1").say(VoiceMoment.GIFT)),
-            panel(pet(InitEntity.CHIIKAWA_PET).at(0.3F).facing(20.0F).hold(Items.COOKIE),
-                pet(InitEntity.USAGI_PET).at(0.7F).facing(-20.0F).hold(Items.POPPY)));
-    }
-
-    /** Bags and treats: a rucksack, the three pouches, a simple dish and a name tag. */
-    private static ManualPage supplies() {
-        return page("supplies", 40,
-            // Turned away from the reader, so the rucksack on its back is what shows.
-            panel(pet(InitEntity.CHIIKAWA_PET).at(0.5F).facing(150.0F).bag(InitItems.BACKPACK.get())),
-            panel(pet(InitEntity.CHIIKAWA_PET).at(0.2F).facing(20.0F).bag(InitItems.BEAR_POUCH.get()),
-                pet(InitEntity.HACHIWARE_PET).at(0.5F).bag(InitItems.WHALE_POUCH.get()),
-                pet(InitEntity.USAGI_PET).at(0.8F).facing(-20.0F).bag(InitItems.STAR_POUCH.get())),
-            panel(pet(InitEntity.HACHIWARE_PET).at(0.42F).facing(20.0F).play("eat"),
-                item(InitItems.SIMPLE_DISH.get()).at(0.72F).up(0.2F)),
-            panel(pet(InitEntity.CHIIKAWA_PET).at(0.4F).facing(15.0F),
-                item(Items.NAME_TAG).at(0.7F).up(0.45F).bob()));
-    }
-
-    /** A better board: paid up, it puts up more slips and hunting, which pays best and can fail. */
-    private static ManualPage upgrade() {
-        return page("upgrade", 50,
-            panel(money().at(0.25F).up(0.45F).bob(),
-                prop(InitBlocks.LABOR_BOARD.get()).at(0.62F).facing(-15.0F)),
-            panel(prop(InitBlocks.LABOR_BOARD.get()).at(0.72F).facing(-30.0F).scale(0.85F),
-                pet(InitEntity.RAKKO_PET).at(0.38F).facing(50.0F).hold(Items.IRON_SWORD).walk()),
-            panel(pet(InitEntity.RAKKO_PET).at(0.3F).facing(40.0F).hold(Items.IRON_SWORD).action(PetAction.SLASH).every(20),
-                // Usagi, not Momonga, at the bow: Momonga has never been one for a fight.
-                pet(InitEntity.USAGI_PET).at(0.72F).facing(-40.0F).hold(Items.BOW).action(PetAction.BOW_DRAW).every(30)),
-            // Chiikawa takes the hit, not Rakko: Rakko never cries out, and Chiikawa cries.
-            panel(pet(InitEntity.CHIIKAWA_PET).at(0.5F).hold(InitItems.CHIIKAWA_WEAPON.get()).play("attacked").every(30)
-                .say(VoiceMoment.HURT, 2)));
-    }
-
-    /** Falling and coming back: the doll, the cake, backing off, and the bell. */
-    private static ManualPage safety() {
-        return page("safety", 60,
-            panel(item(InitItems.CHIIKAWA_DOLL.get()).at(0.5F).up(0.15F).scale(1.6F).bob()),
-            panel(item(Items.CAKE).at(0.3F).scale(1.4F),
-                item(InitItems.CHIIKAWA_DOLL.get()).at(0.3F).up(0.45F).bob(),
-                pet(InitEntity.CHIIKAWA_PET).at(0.7F).facing(-20.0F).play("tame", "jump").every(30)
-                    .say(VoiceMoment.REVIVE)),
-            panel(pet(InitEntity.CHIIKAWA_PET).at(0.45F).facing(-70.0F).hold(Items.WOODEN_SWORD).walk()),
-            panel(item(InitItems.PET_BELL.get()).at(0.2F).up(0.5F).bob(),
-                pet(InitEntity.CHIIKAWA_PET).at(0.55F).facing(-60.0F).walk(),
-                pet(InitEntity.USAGI_PET).at(0.82F).facing(-60.0F).walk()));
+    /** Looking after them: the doll on a cake, and the pet back. */
+    private static ManualPage care() {
+        return chapter("care", 40, "play/care",
+            item(Items.CAKE).at(0.3F).scale(1.4F),
+            item(InitItems.CHIIKAWA_DOLL.get()).at(0.3F).up(0.45F).bob(),
+            pet(InitEntity.CHIIKAWA_PET).at(0.7F).facing(-20.0F).play("tame", "jump").every(30)
+                .say(VoiceMoment.REVIVE));
     }
 
     /**
-     * Among friends (0.1.1): catchphrases in a bubble, and pets meeting pets — Momonga
-     * clinging on, a treat, coffee and the crab greeting, and an audience for a busker.
+     * Hachiware's camera: Hachiware lifts it to take a photo, which is the one time its camera
+     * shows in a scene, and Chiikawa poses for it.
      */
-    private static ManualPage friends() {
-        return page("friends", 70,
-            panel(pet(InitEntity.HACHIWARE_PET).at(0.5F).facing(10.0F).hold(InitItems.HACHIWARE_WEAPON.get())
-                .play("open_mouth1").say(VoiceMoment.HUNT)),
-            panel(pet(InitEntity.MOMONGA_PET).at(0.36F).facing(60.0F).play("cling").every(60),
-                pet(InitEntity.CHIIKAWA_PET).at(0.64F).facing(-40.0F).reaction(PetReaction.HURT).every(60)
-                    .say(VoiceMoment.CLUNG_TO)),
-            panel(pet(InitEntity.RAKKO_PET).at(0.34F).facing(60.0F).hold(Items.COOKIE),
-                pet(InitEntity.CHIIKAWA_PET).at(0.66F).facing(-40.0F).reaction(PetReaction.HAPPY)
-                    .say(VoiceMoment.TREATED)),
-            panel(pet(InitEntity.CHIIKAWA_PET).at(0.2F).facing(50.0F).sit().play("clap").every(30)
-                    .say(VoiceMoment.LISTEN),
-                pet(InitEntity.USAGI_PET).at(0.43F).facing(40.0F).sit().play("clap").every(37),
-                pet(InitEntity.HACHIWARE_PET).at(0.75F).facing(-30.0F).hold(InitItems.MUSIC_BOX.get())
-                    .play("guitar").every(200)));
+    private static ManualPage camera() {
+        return chapter("camera", 50, "play/camera",
+            pet(InitEntity.HACHIWARE_PET).at(0.35F).facing(30.0F).play("photo").every(60),
+            pet(InitEntity.CHIIKAWA_PET).at(0.7F).facing(-40.0F).play("photographed").every(60)
+                .say(VoiceMoment.PHOTOGRAPHED));
     }
 
-    /**
-     * The weeding licence (0.1.2): practice and the study guide, signing a pet up at an exam
-     * desk, the paper written there, and the results, everybody passing together.
-     */
+    /** The weeding licence: Chiikawa on the chair of an exam desk, writing. */
     private static ManualPage licence() {
-        return page("licence", 80,
-            panel(item(Items.SHORT_GRASS).at(0.18F).scale(0.8F),
-                pet(InitEntity.CHIIKAWA_PET).at(0.38F).facing(20.0F).hold(Items.WOODEN_HOE).action(PetAction.HARVEST).every(24),
-                item(Items.SHORT_GRASS).at(0.28F),
-                item(Items.SHORT_GRASS).at(0.5F).scale(0.9F),
-                item(InitItems.WEEDING_BOOK.get()).at(0.76F).up(0.4F).bob()),
-            panel(chair(-30.0F).at(0.42F),
-                prop(InitBlocks.EXAM_DESK.get()).at(0.42F).facing(-30.0F),
-                item(Items.DIAMOND).at(0.78F).up(0.4F).bob()),
-            // On the chair as it sits there in the world, side on, so the paper it bends
-            // over and the pencil it writes with show.
-            panel(chair(60.0F).at(0.6F),
-                pet(InitEntity.CHIIKAWA_PET).at(0.6F).facing(60.0F).offset(ExamDeskBlock.SEAT).sit()
-                    .play("exam").every(80),
-                prop(InitBlocks.EXAM_DESK.get()).at(0.6F).facing(60.0F)),
-            // Hachiware has no jump of its own, so it claps.
-            panel(pet(InitEntity.HACHIWARE_PET).at(0.2F).facing(30.0F).reaction(PetReaction.HAPPY)
-                    .play("jump", "clap").every(46),
-                pet(InitEntity.CHIIKAWA_PET).at(0.5F).reaction(PetReaction.HAPPY).play("jump").every(40)
-                    .say(VoiceMoment.EXAM_PASS),
-                pet(InitEntity.USAGI_PET).at(0.8F).facing(-30.0F).reaction(PetReaction.HAPPY).play("jump").every(34)));
+        // On the chair as it sits there in the world, side on, so the paper it bends
+        // over and the pencil it writes with show.
+        return chapter("licence", 60, "play/licence",
+            chair(60.0F).at(0.6F),
+            pet(InitEntity.CHIIKAWA_PET).at(0.6F).facing(60.0F).offset(ExamDeskBlock.SEAT).sit()
+                .play("exam").every(80),
+            prop(InitBlocks.EXAM_DESK.get()).at(0.6F).facing(60.0F));
     }
 
     /** An exam desk's chair, where it stands behind a desk on the same spot facing the same way. */
@@ -224,16 +115,9 @@ public final class ManualData {
         return new Actor().prop(DeskPart.CHAIR.model(desk)).facing(facing).offset(new Vec3(0, 0, 16));
     }
 
-    private static ManualPage page(String name, int order, Actor[]... panels) {
-        List<ManualPage.Panel> built = new ArrayList<>();
-        for (int i = 0; i < panels.length; i++) {
-            built.add(new ManualPage.Panel(captionKey(name, i + 1), Arrays.stream(panels[i]).map(Actor::build).toList()));
-        }
-        return new ManualPage(order, titleKey(name), built);
-    }
-
-    private static Actor[] panel(Actor... actors) {
-        return actors;
+    private static ManualPage chapter(String name, int order, String link, Actor... scene) {
+        return new ManualPage(order, titleKey(name), new ManualPage.Scene(Arrays.stream(scene).map(Actor::build).toList()),
+            textKey(name), link);
     }
 
     private static Actor pet(Supplier<? extends EntityType<?>> type) {
@@ -248,10 +132,6 @@ public final class ManualData {
         return new Actor().item(element(item));
     }
 
-    /** Whatever money is, as the currency tag has it. */
-    private static Actor money() {
-        return new Actor().item(new ExtraCodecs.TagOrElementLocation(InitTag.CURRENCY.location(), true));
-    }
 
     private static ExtraCodecs.TagOrElementLocation element(Item item) {
         return new ExtraCodecs.TagOrElementLocation(BuiltInRegistries.ITEM.getKey(item), false);
