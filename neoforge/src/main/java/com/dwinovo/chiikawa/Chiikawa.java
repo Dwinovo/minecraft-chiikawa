@@ -29,6 +29,7 @@ import com.dwinovo.chiikawa.spawn.PetSpawnsBiomeModifier;
 import com.dwinovo.chiikawa.task.BoardLevelsLoader;
 import com.dwinovo.chiikawa.whistle.WhistleSettingsLoader;
 import com.dwinovo.chiikawa.camera.CameraSettingsLoader;
+import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettingsLoader;
 import com.dwinovo.chiikawa.gifting.GiftingSettingsLoader;
 import com.dwinovo.chiikawa.photo.PhotoSystem;
 import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
@@ -105,6 +106,7 @@ public class Chiikawa {
             event.addListener(WhistleSettingsLoader.ID, new WhistleSettingsLoader());
             event.addListener(CameraSettingsLoader.ID, new CameraSettingsLoader());
             event.addListener(GiftingSettingsLoader.ID, new GiftingSettingsLoader());
+            event.addListener(AnchorSettingsLoader.ID, new AnchorSettingsLoader());
             event.addListener(PetSpawnLoader.ID, new PetSpawnLoader());
             event.addListener(PetVoiceLoader.ID, new PetVoiceLoader());
             event.addListener(PetInteractionLoader.ID, new PetInteractionLoader());
