@@ -35,7 +35,7 @@ import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix4f;
 
 /**
- * One panel of the handbook, put on stage: the pets in it made and dressed once, then
+ * One chapter's scene of the handbook, put on stage: the pets in it made and dressed once, then
  * moved along a tick at a time and drawn where the panel says. The pets never join the
  * world — nothing thinks for them — so what they do is only what the panel asks: sit,
  * walk, and play their moves over and over.
@@ -55,10 +55,10 @@ public final class ManualScene {
         this.cast = List.copyOf(cast);
     }
 
-    /** Puts a panel's actors on stage; one that cannot be — an id nothing answers to — is left out. */
-    public static ManualScene of(ManualPage.Panel panel) {
+    /** Puts a scene's actors on stage; one that cannot be — an id nothing answers to — is left out. */
+    public static ManualScene of(ManualPage.Scene scene) {
         List<Staged> cast = new ArrayList<>();
-        for (ManualPage.Actor actor : panel.actors()) {
+        for (ManualPage.Actor actor : scene.actors()) {
             stage(actor).ifPresent(cast::add);
         }
         return new ManualScene(cast);

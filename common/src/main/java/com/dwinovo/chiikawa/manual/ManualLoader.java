@@ -16,7 +16,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 
 /**
  * Client resource reload listener for {@code assets/<namespace>/manual/<id>.json}: the
- * handbook's pages. A page that fails to parse is left out with a message, and the rest of
+ * handbook's chapters. A chapter that fails to parse is left out with a message, and the rest of
  * the book is still there to read.
  */
 public final class ManualLoader extends SimpleJsonResourceReloadListener {
@@ -35,7 +35,7 @@ public final class ManualLoader extends SimpleJsonResourceReloadListener {
         Loaded loaded = load(files);
         loaded.errors().forEach(Constants.LOG::error);
         ManualPages.replaceAll(loaded.pages());
-        Constants.LOG.info(LOG_PREFIX + "loaded {} handbook pages", loaded.pages().size());
+        Constants.LOG.info(LOG_PREFIX + "loaded {} handbook chapters", loaded.pages().size());
     }
 
     /**
