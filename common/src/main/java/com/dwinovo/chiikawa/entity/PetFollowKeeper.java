@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.entity;
 
+import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
@@ -67,7 +68,9 @@ public final class PetFollowKeeper {
             return false;
         }
         PetAnchor anchor = PetConstraints.anchorOf(pet, PetOwnership.of(pet));
-        return anchor.canMove()
-            && anchor.beyondTeleport(GlobalPos.of(pet.level().dimension(), pet.blockPosition()));
+        return anchor.canMove() && AnchorSettings.current()
+            .filter(settings -> anchor.beyondTeleport(GlobalPos.of(pet.level().dimension(), pet.blockPosition()),
+                settings.follow().teleport()))
+            .isPresent();
     }
 }
