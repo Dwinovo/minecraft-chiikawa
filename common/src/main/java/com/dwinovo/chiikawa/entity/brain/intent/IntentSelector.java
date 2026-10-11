@@ -177,10 +177,11 @@ public final class IntentSelector {
             Predicate<IntentCategory> allows) {
         List<Candidate> candidates = new ArrayList<>(offered.size());
         for (PetIntent intent : offered) {
+            boolean starting = !intent.id().equals(running);
             candidates.add(new Candidate(
                 intent.id(),
                 allows.test(intent.category()),
-                intent.id().equals(running) ? intent.canContinue(ctx) : intent.canRun(ctx),
+                admitted(intent, ctx, starting),
                 (intent.score(ctx)
                     + (carriesSlipFor(intent, ctx) ? TASK_BONUS : 0.0F)
                     + (eagerFor(intent, ctx) ? EAGER_BONUS : 0.0F))
@@ -188,6 +189,22 @@ public final class IntentSelector {
             ));
         }
         return candidates;
+    }
+
+    /**
+     * The intent's own condition and then the one rule for where it may go: an errand with a
+     * destination starts only within the anchor's reach and goes on only within its leash, whatever
+     * the errand is. The only place that is checked.
+     */
+    private static IntentCheck admitted(PetIntent intent, IntentContext ctx, boolean starting) {
+        IntentCheck check = starting ? intent.canRun(ctx) : intent.canContinue(ctx);
+        if (!check.ok()) {
+            return check;
+        }
+        return intent.destination(ctx)
+            .filter(destination -> !ctx.anchor().admits(destination, starting))
+            .map(destination -> IntentCheck.fail(starting ? "out_of_reach" : "out_of_leash"))
+            .orElse(IntentCheck.OK);
     }
 
     /** Whether this is work, and the pet has just been fed something worth working off. */

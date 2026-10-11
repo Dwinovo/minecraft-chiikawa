@@ -24,6 +24,7 @@ import com.dwinovo.chiikawa.utils.Utils;
 import java.util.Optional;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
 /**
@@ -58,6 +59,7 @@ import net.minecraft.world.level.Level;
  * @param photo whether the pet could take a photo now, and of what
  * @param presentToGive whether the pet has something in its bag to give its owner, and is ready to
  *                      think of giving them something
+ * @param ownerPos where its owner is, while the owner is a player in the pet's level
  */
 public record IntentContext(
     GlobalPos petPos,
@@ -84,7 +86,8 @@ public record IntentContext(
     boolean seatedAtExam,
     Optional<GlobalPos> whistleHeard,
     PhotoOutlook photo,
-    boolean presentToGive
+    boolean presentToGive,
+    Optional<GlobalPos> ownerPos
 ) {
     public static IntentContext capture(AbstractPet pet, PetOwnership ownership) {
         Level level = pet.level();
@@ -120,8 +123,14 @@ public record IntentContext(
                 .filter(heard -> heard.from() <= level.getGameTime())
                 .map(WhistleHeard::where),
             PhotoScout.outlook(pet),
-            GiftErrand.thinksOfAnother(pet)
+            GiftErrand.thinksOfAnother(pet),
+            ownerPos(pet)
         );
+    }
+
+    private static Optional<GlobalPos> ownerPos(AbstractPet pet) {
+        return pet.getOwner() instanceof Player owner
+            ? Optional.of(GlobalPos.of(owner.level().dimension(), owner.blockPosition())) : Optional.empty();
     }
 
     private static Optional<GlobalPos> examDesk(AbstractPet pet) {
