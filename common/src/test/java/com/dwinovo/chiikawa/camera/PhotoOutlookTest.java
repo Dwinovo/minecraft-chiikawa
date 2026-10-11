@@ -10,13 +10,14 @@ import com.dwinovo.chiikawa.entity.brain.intent.impl.TakePhotoIntent;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
 import com.dwinovo.chiikawa.testing.TestContext;
 import java.util.Optional;
-import java.util.Set;
+import java.util.UUID;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
+import net.minecraft.world.phys.Vec3;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +27,7 @@ class PhotoOutlookTest {
         64.0, 12000, 600, 320, 240, 70, new CameraSettings.Subjects(3, 5, 1), 40, 8, 0.5F);
     /** Ready to go: a camera, film, an owner near and calm, and an owner to take a photo of. */
     private static final PhotoOutlook READY = new PhotoOutlook(true, Optional.of(CAMERA), true, true, true, false,
-        Set.of(PhotoSubject.OWNER));
+        Optional.of(new PhotoPlan(PhotoSubject.OWNER, Optional.of(UUID.randomUUID()), "Owner", Vec3.ZERO, Optional.empty())));
 
     @BeforeAll
     static void bootstrap() {
@@ -53,30 +54,30 @@ class PhotoOutlookTest {
     @Test
     void itNeedsACameraAndFilmForIt() {
         assertEquals("no_camera", reason(new PhotoOutlook(true, Optional.empty(), false, true, true, false,
-            READY.moments()).canStart()));
+            READY.plan()).canStart()));
         assertEquals("no_film", reason(new PhotoOutlook(true, Optional.of(CAMERA), false, true, true, false,
-            READY.moments()).canStart()));
+            READY.plan()).canStart()));
     }
 
     @Test
     void itNeedsItsOwnerNearAndInNoStateToBeDisturbed() {
         assertEquals("owner_far", reason(new PhotoOutlook(true, Optional.of(CAMERA), true, false, true, false,
-            READY.moments()).canStart()));
+            READY.plan()).canStart()));
         assertEquals("owner_busy", reason(new PhotoOutlook(true, Optional.of(CAMERA), true, true, false, false,
-            READY.moments()).canStart()));
+            READY.plan()).canStart()));
     }
 
     @Test
     void itRestsAfterAPhotoAndWithNothingToTakeOneOfItDoesNotStart() {
         assertEquals("photo_resting", reason(new PhotoOutlook(true, Optional.of(CAMERA), true, true, true, true,
-            READY.moments()).canStart()));
+            READY.plan()).canStart()));
         assertEquals("nothing_to_shoot", reason(new PhotoOutlook(true, Optional.of(CAMERA), true, true, true, false,
-            Set.of()).canStart()));
+            Optional.empty()).canStart()));
     }
 
     @Test
     void aMomentThatPassesWhileItAimsDoesNotPutTheCameraAway() {
-        PhotoOutlook momentOver = new PhotoOutlook(true, Optional.of(CAMERA), true, true, true, false, Set.of());
+        PhotoOutlook momentOver = new PhotoOutlook(true, Optional.of(CAMERA), true, true, true, false, Optional.empty());
 
         assertTrue(momentOver.canContinue().ok());
         assertFalse(momentOver.canStart().ok());
@@ -84,7 +85,7 @@ class PhotoOutlookTest {
 
     @Test
     void theRestAfterTheShutterEndsTheIntentSoThePetIsNotLeftHoldingTheCameraUp() {
-        PhotoOutlook shot = new PhotoOutlook(true, Optional.of(CAMERA), true, true, true, true, READY.moments());
+        PhotoOutlook shot = new PhotoOutlook(true, Optional.of(CAMERA), true, true, true, true, READY.plan());
 
         assertEquals("photo_resting", reason(shot.canContinue()));
     }
@@ -92,9 +93,9 @@ class PhotoOutlookTest {
     @Test
     void theFilmRunningOutOrTheOwnerLeavingStopsAPhotoInTheMiddle() {
         assertEquals("no_film", reason(new PhotoOutlook(true, Optional.of(CAMERA), false, true, true, false,
-            READY.moments()).canContinue()));
+            READY.plan()).canContinue()));
         assertEquals("owner_far", reason(new PhotoOutlook(true, Optional.of(CAMERA), true, false, true, false,
-            READY.moments()).canContinue()));
+            READY.plan()).canContinue()));
     }
 
     @Test
