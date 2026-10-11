@@ -31,6 +31,18 @@ public record PetAnchor(GlobalPos center, double reach, double leash, boolean fo
     }
 
     /**
+     * The one rule for whether an errand may take the pet somewhere, asked by every caller that
+     * needs to know: the selector for each intent, and whatever tells a player beforehand.
+     *
+     * @param destination where the errand goes
+     * @param starting whether the pet is setting off, which asks for the reach, or is on its way,
+     *                 which allows the leash
+     */
+    public boolean admits(GlobalPos destination, boolean starting) {
+        return starting ? withinReach(destination) : withinLeash(destination);
+    }
+
+    /**
      * @param pos the pet's position
      * @return whether the pet has fallen {@link AnchorDistances#FOLLOW_TELEPORT} behind
      *         the owner it follows
