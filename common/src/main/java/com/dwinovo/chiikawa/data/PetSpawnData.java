@@ -21,7 +21,7 @@ public final class PetSpawnData {
     public static final ResourceLocation WILD_PETS = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "wild_pets");
     private static final List<String> BIOMES = List.of(
         "plains", "sunflower_plains", "savanna", "savanna_plateau", "desert", "swamp", "snowy_plains");
-    private static final int WEIGHT = 20;
+    private static final int WEIGHT = 3;
 
     private PetSpawnData() {
     }
