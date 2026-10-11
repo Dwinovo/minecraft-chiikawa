@@ -107,8 +107,10 @@ public class GiveGiftBehavior extends Behavior<AbstractPet> {
 
     private void hand(ServerLevel level, AbstractPet pet, Player player) {
         ItemStack gift = pet.getPendingGift();
-        if (!player.getInventory().add(gift.copy())) {
-            player.drop(gift.copy(), false);
+        // What the inventory takes is taken from the copy, so what it could not is what is dropped.
+        ItemStack handed = gift.copy();
+        if (!player.getInventory().add(handed)) {
+            player.drop(handed, false);
         }
         pet.setPendingGift(ItemStack.EMPTY);
         given = true;
