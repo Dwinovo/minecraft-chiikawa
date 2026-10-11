@@ -39,6 +39,8 @@ public final class TestContext {
     private Optional<GlobalPos> whistleHeard = Optional.empty();
     private PhotoOutlook photo = PhotoOutlook.NONE;
     private boolean presentToGive;
+    private boolean seatedAtExam;
+    private Optional<GlobalPos> ownerPos = Optional.empty();
 
     private TestContext(GlobalPos petPos, PetAnchor anchor) {
         this.petPos = petPos;
@@ -144,6 +146,18 @@ public final class TestContext {
         return this;
     }
 
+    /** The pet is in its chair at an exam desk. */
+    public TestContext seatedAtExam() {
+        this.seatedAtExam = true;
+        return this;
+    }
+
+    /** Where the pet's owner is. */
+    public TestContext ownerPos(GlobalPos owner) {
+        this.ownerPos = Optional.of(owner);
+        return this;
+    }
+
     public TestContext eager() {
         this.eager = true;
         return this;
@@ -152,6 +166,6 @@ public final class TestContext {
     public IntentContext build() {
         return new IntentContext(petPos, phase, ownership, personality, anchor, targets, task, offeringBoard,
             shopWorthVisiting, takeTaskCoolingDown, shopCoolingDown, socialPartner, playingAlong, carryingGift, eager,
-            false, false, false, false, examDesk, resultsDesk, false, whistleHeard, photo, presentToGive);
+            false, false, false, false, examDesk, resultsDesk, seatedAtExam, whistleHeard, photo, presentToGive, ownerPos);
     }
 }
