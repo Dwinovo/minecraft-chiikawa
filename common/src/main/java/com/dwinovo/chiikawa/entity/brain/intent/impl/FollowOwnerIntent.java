@@ -7,6 +7,8 @@ import com.dwinovo.chiikawa.entity.brain.intent.IntentContext;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import com.dwinovo.chiikawa.init.InitActivity;
+import java.util.Optional;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.schedule.Activity;
 
@@ -54,6 +56,12 @@ public final class FollowOwnerIntent implements PetIntent {
         return ctx.petPos().pos().distManhattan(ctx.anchor().center().pos()) > AnchorDistances.FOLLOW_ARRIVE
             ? IntentCheck.OK
             : IntentCheck.fail("owner_reached");
+    }
+
+    /** The owner, who is the middle of the area it acts in, and so is always admitted. */
+    @Override
+    public Optional<GlobalPos> destination(IntentContext ctx) {
+        return ctx.anchor().followsOwner() ? Optional.of(ctx.anchor().center()) : Optional.empty();
     }
 
     @Override
