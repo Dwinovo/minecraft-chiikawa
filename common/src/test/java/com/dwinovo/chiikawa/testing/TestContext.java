@@ -166,6 +166,6 @@ public final class TestContext {
     public IntentContext build() {
         return new IntentContext(petPos, phase, ownership, personality, anchor, targets, task, offeringBoard,
             shopWorthVisiting, takeTaskCoolingDown, shopCoolingDown, socialPartner, playingAlong, carryingGift, eager,
-            false, false, false, false, examDesk, resultsDesk, seatedAtExam, whistleHeard, photo, presentToGive, ownerPos);
+            false, false, false, false, examDesk, resultsDesk, seatedAtExam, whistleHeard, photo, presentToGive, ownerPos, TestAnchors.SETTINGS.follow());
     }
 }
