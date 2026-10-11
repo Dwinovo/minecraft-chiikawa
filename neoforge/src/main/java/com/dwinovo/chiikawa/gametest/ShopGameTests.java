@@ -10,6 +10,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.network.ShopPayloads.ShopTradePayload;
@@ -37,12 +38,18 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 @PrefixGameTestTemplate(false)
 public final class ShopGameTests {
     private static final String BATCH = "chiikawa_shop";
+    private static final String AREA_BATCH = "chiikawa_shop_area";
     private static final int SHOP_TICKS = 3600;
     private static final int LEAVE_IT_TICKS = 600;
 
     private static final int STAND = 2;
     /** Enough for anything on the list, so the case is about wanting rather than affording. */
     private static final int WAGES = 8;
+
+    @BeforeBatch(batch = AREA_BATCH)
+    public static void settleArea(ServerLevel level) {
+        settleWorld(level, Difficulty.NORMAL, NOON);
+    }
 
     @BeforeBatch(batch = BATCH)
     public static void settle(ServerLevel level) {
@@ -158,6 +165,25 @@ public final class ShopGameTests {
             new ShopTradePayload(helper.absolutePos(counter), BuiltInRegistries.ITEM.getKey(Items.SUGAR), false), customer);
         helper.assertTrue(customer.getInventory().countItem(candy) == 4, "the shop took what it was not shown");
         helper.succeed();
+    }
+
+    /**
+     * A shop beyond the area a free pet acts in is not one it goes to, wages or no wages: the
+     * same reach every errand goes by, so a pet told to keep to the garden is not found in town.
+     * A batch of its own: a pet goes to the nearest shop, and another case's would be nearer.
+     */
+    @GameTest(template = "floor32", batch = AREA_BATCH, timeoutTicks = LEAVE_IT_TICKS + 100)
+    public static void a_free_pet_does_not_go_to_a_shop_outside_its_area(GameTestHelper helper) {
+        helper.setBlock(new BlockPos(22, STAND, 3), InitBlocks.SHOP.get());
+        AbstractPet pet = holding(worker(helper, new BlockPos(3, STAND, 3)), Items.WOODEN_HOE);
+        pet.getBackpack().addItem(new ItemStack(Items.EMERALD, WAGES));
+
+        helper.onEachTick(() -> helper.assertFalse(pet.getIntent().filter(PetIntents.SHOP::equals).isPresent(),
+            "the pet set off for a shop outside its area"));
+        helper.runAtTickTime(LEAVE_IT_TICKS, () -> {
+            helper.assertTrue(Wallet.count(pet.getBackpack()) == WAGES, "the pet went to a shop outside its area");
+            helper.succeed();
+        });
     }
 
     /**

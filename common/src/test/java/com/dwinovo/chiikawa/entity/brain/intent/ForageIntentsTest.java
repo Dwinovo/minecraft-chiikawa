@@ -37,11 +37,12 @@ class ForageIntentsTest {
     }
 
     @Test
-    void wildFarmerPullsWeedsWithinReachAtAnyTime() {
+    void wildFarmerPullsWeedsAtAnyTimeAndTheSelectorKeepsItWithinReach() {
         for (DayPhase phase : DayPhase.values()) {
             assertTrue(weed.canRun(ctx(PetOwnership.WILD, phase, 20).build()).ok(), phase::name);
         }
-        assertEquals("intent.chiikawa.fail.out_of_reach", weed.canRun(ctx(PetOwnership.WILD, DayPhase.DAY, 24).build()).reasonKey());
+        assertEquals(Optional.of(GlobalPos.of(OVERWORLD, HOME.pos().east(24))),
+            weed.destination(ctx(PetOwnership.WILD, DayPhase.DAY, 24).build()));
         assertEquals("intent.chiikawa.fail.no_weed",
             weed.canRun(TestContext.at(HOME, WILD_ANCHOR).ownership(PetOwnership.WILD).build()).reasonKey());
     }
