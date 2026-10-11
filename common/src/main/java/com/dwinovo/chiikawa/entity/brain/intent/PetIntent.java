@@ -2,7 +2,8 @@ package com.dwinovo.chiikawa.entity.brain.intent;
 
 import java.util.Optional;
 import java.util.Set;
-import net.minecraft.resources.Identifier;
+import net.minecraft.core.GlobalPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.schedule.Activity;
 
@@ -28,6 +29,16 @@ public interface PetIntent {
     /** Condition to keep running; may be looser than {@link #canRun}. */
     default IntentCheck canContinue(IntentContext ctx) {
         return canRun(ctx);
+    }
+
+    /**
+     * Where this errand takes the pet, as the context has it: the shop, the board, the owner, whoever
+     * it goes to see. The selector admits the intent only if the pet's anchor allows the pet there, so
+     * no intent checks the area itself. Nothing for one that goes nowhere in particular: wandering,
+     * sitting, playing where it stands.
+     */
+    default Optional<GlobalPos> destination(IntentContext ctx) {
+        return Optional.empty();
     }
 
     /** Base score from 0 to 1. */
