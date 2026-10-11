@@ -71,9 +71,12 @@ public final class TargetIntent implements PetIntent {
                 return check;
             }
         }
-        return target.apply(ctx.targets())
-            .map(pos -> ctx.anchor().withinReach(pos) ? IntentCheck.OK : IntentCheck.fail("out_of_reach"))
-            .orElseGet(() -> IntentCheck.fail(missingReason));
+        return target.apply(ctx.targets()).isPresent() ? IntentCheck.OK : IntentCheck.fail(missingReason);
+    }
+
+    @Override
+    public Optional<GlobalPos> destination(IntentContext ctx) {
+        return target.apply(ctx.targets());
     }
 
     @Override

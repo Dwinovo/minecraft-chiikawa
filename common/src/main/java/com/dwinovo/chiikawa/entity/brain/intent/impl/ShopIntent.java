@@ -1,13 +1,12 @@
 package com.dwinovo.chiikawa.entity.brain.intent.impl;
 
-import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCategory;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCheck;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentContext;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import com.dwinovo.chiikawa.init.InitActivity;
-import java.util.function.BiPredicate;
+import java.util.Optional;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.schedule.Activity;
@@ -20,8 +19,8 @@ import net.minecraft.world.entity.schedule.Activity;
  * loop: a pet that has just been paid goes and spends a little before starting the next
  * job, and one with nothing in its pocket goes back to work without ever setting off.
  *
- * <p>Only starts on a shop within the anchor's reach, and keeps going while it stays
- * within the leash — the same rule the labor board goes by, so an owner who told a pet to
+ * <p>The shop is where it goes, so the selector starts it only on a shop within the anchor's
+ * reach and keeps it going while the shop stays within the leash: an owner who told a pet to
  * keep to the garden does not find it in town.
  */
 public final class ShopIntent implements PetIntent {
@@ -44,26 +43,19 @@ public final class ShopIntent implements PetIntent {
 
     @Override
     public IntentCheck canRun(IntentContext ctx) {
-        return check(ctx, PetAnchor::withinReach, "out_of_reach");
+        if (ctx.shopCoolingDown()) {
+            return IntentCheck.fail("shop_resting");
+        }
+        return ctx.shopWorthVisiting().isPresent() ? IntentCheck.OK : IntentCheck.fail("nothing_to_buy");
     }
 
     @Override
-    public IntentCheck canContinue(IntentContext ctx) {
-        return check(ctx, PetAnchor::withinLeash, "out_of_leash");
+    public Optional<GlobalPos> destination(IntentContext ctx) {
+        return ctx.shopWorthVisiting();
     }
 
     @Override
     public float score(IntentContext ctx) {
         return SCORE;
-    }
-
-    private static IntentCheck check(IntentContext ctx,
-            BiPredicate<PetAnchor, GlobalPos> inRange, String outOfRange) {
-        if (ctx.shopCoolingDown()) {
-            return IntentCheck.fail("shop_resting");
-        }
-        return ctx.shopWorthVisiting()
-            .map(shop -> inRange.test(ctx.anchor(), shop) ? IntentCheck.OK : IntentCheck.fail(outOfRange))
-            .orElseGet(() -> IntentCheck.fail("nothing_to_buy"));
     }
 }
