@@ -26,6 +26,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
@@ -48,6 +49,9 @@ public final class GiftGameTests {
     private static final int NOTHING_TICKS = 600;
     private static final int SHOP_TICKS = 3600;
     private static final int WAGES = 8;
+    private static final int TEN = 10;
+    /** How much money a bag that is otherwise full has room for. */
+    private static final int ROOM = 4;
     /** Long enough for a pet beside its owner to give a present, and to give a second if it were going to. */
     private static final int THINKING_TICKS = 200;
 
@@ -234,6 +238,64 @@ public final class GiftGameTests {
         helper.assertTrue(Wallet.count(pet.getBackpack()) == POCKET_MONEY,
             "the pet did not take the money it was handed");
         helper.assertTrue(carries(pet, Items.EMERALD), "the money went somewhere other than its bag");
+        helper.succeed();
+    }
+
+    /** In survival the emeralds leave the owner's hand: what the pet gets, the owner no longer has. */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void money_handed_over_in_survival_leaves_the_owners_hand(GameTestHelper helper) {
+        ServerPlayer owner = player(helper);
+        owner.setGameMode(GameType.SURVIVAL);
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        owner.setShiftKeyDown(false);
+        owner.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.EMERALD, TEN));
+
+        pet.mobInteract(owner, InteractionHand.MAIN_HAND);
+
+        helper.assertTrue(Wallet.count(pet.getBackpack()) == TEN, "the pet has " + Wallet.count(pet.getBackpack()) + " emeralds, not ten");
+        helper.assertTrue(owner.getItemInHand(InteractionHand.MAIN_HAND).isEmpty(),
+            "the owner still holds " + owner.getItemInHand(InteractionHand.MAIN_HAND));
+        helper.succeed();
+    }
+
+    /** With room for only some of it, the owner keeps the rest, and not an emerald is made or lost. */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void money_that_does_not_fit_stays_with_the_owner(GameTestHelper helper) {
+        ServerPlayer owner = player(helper);
+        owner.setGameMode(GameType.SURVIVAL);
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        for (int slot = 0; slot < pet.getBackpack().getContainerSize(); slot++) {
+            pet.getBackpack().setItem(slot, new ItemStack(Items.DIRT, Items.DIRT.getDefaultMaxStackSize()));
+        }
+        pet.getBackpack().setItem(4, new ItemStack(Items.EMERALD, Items.EMERALD.getDefaultMaxStackSize() - ROOM));
+        owner.setShiftKeyDown(false);
+        owner.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.EMERALD, TEN));
+
+        pet.mobInteract(owner, InteractionHand.MAIN_HAND);
+
+        int held = owner.getItemInHand(InteractionHand.MAIN_HAND).getCount();
+        helper.assertTrue(Wallet.count(pet.getBackpack()) == Items.EMERALD.getDefaultMaxStackSize(),
+            "the pet has " + Wallet.count(pet.getBackpack()) + " emeralds");
+        helper.assertTrue(held == TEN - ROOM, "the owner is left with " + held + " emeralds, not " + (TEN - ROOM));
+        helper.succeed();
+    }
+
+    /** In creative the hand is left as it was, and the pet still gets the money. */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void money_handed_over_in_creative_leaves_the_owners_hand_alone(GameTestHelper helper) {
+        ServerPlayer owner = player(helper);
+        owner.setGameMode(GameType.CREATIVE);
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        owner.setShiftKeyDown(false);
+        owner.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.EMERALD, TEN));
+
+        pet.mobInteract(owner, InteractionHand.MAIN_HAND);
+
+        helper.assertTrue(Wallet.count(pet.getBackpack()) == TEN, "the pet has " + Wallet.count(pet.getBackpack()) + " emeralds, not ten");
+        helper.assertTrue(owner.getItemInHand(InteractionHand.MAIN_HAND).getCount() == TEN, "the creative owner's hand changed");
         helper.succeed();
     }
 

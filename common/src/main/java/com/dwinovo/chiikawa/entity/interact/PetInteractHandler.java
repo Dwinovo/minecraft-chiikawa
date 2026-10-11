@@ -135,15 +135,15 @@ public final class PetInteractHandler {
     private static InteractionResult handleGiveMoney(Level level, AbstractPet pet, Player player, InteractionHand hand) {
         if (!level.isClientSide()) {
             ItemStack held = player.getItemInHand(hand);
-            ItemStack given = player.getAbilities().instabuild ? held.copy() : held;
-            ItemStack left = pet.getBackpack().addItem(given);
-            if (left.getCount() == given.getCount()) {
+            // The container copies what it is given and hands back what did not fit, leaving the
+            // stack in the hand as it was: what the pet took is taken from the hand here.
+            ItemStack left = pet.getBackpack().addItem(held);
+            if (left.getCount() == held.getCount()) {
                 // Nowhere to put it: nothing changes hands rather than the coins vanishing.
                 return InteractionResult.PASS;
             }
-            if (player.getAbilities().instabuild) {
-                // The stack in a creative hand is untouched, but what the pet took is real.
-                pet.getBackpack().setChanged();
+            if (!player.getAbilities().instabuild) {
+                player.setItemInHand(hand, left);
             }
             pet.triggerReaction(PetReaction.HAPPY);
             pet.playTameSound();
