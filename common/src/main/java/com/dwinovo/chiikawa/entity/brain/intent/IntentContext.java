@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.block.ExamDeskBlockEntity;
 import com.dwinovo.chiikawa.camera.PhotoOutlook;
 import com.dwinovo.chiikawa.camera.PhotoScout;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.gifting.GiftErrand;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
@@ -60,6 +61,7 @@ import net.minecraft.world.level.Level;
  * @param presentToGive whether the pet has something in its bag to give its owner, and is ready to
  *                      think of giving them something
  * @param ownerPos where its owner is, while the owner is a player in the pet's level
+ * @param follow how far a pet at heel walks back from, as the anchor settings have it
  */
 public record IntentContext(
     GlobalPos petPos,
@@ -87,7 +89,8 @@ public record IntentContext(
     Optional<GlobalPos> whistleHeard,
     PhotoOutlook photo,
     boolean presentToGive,
-    Optional<GlobalPos> ownerPos
+    Optional<GlobalPos> ownerPos,
+    AnchorSettings.Follow follow
 ) {
     public static IntentContext capture(AbstractPet pet, PetOwnership ownership) {
         Level level = pet.level();
@@ -123,7 +126,8 @@ public record IntentContext(
                 .map(WhistleHeard::where),
             PhotoScout.outlook(pet),
             GiftErrand.thinksOfAnother(pet),
-            ownerPos(pet)
+            ownerPos(pet),
+            AnchorSettings.current().map(AnchorSettings::follow).orElse(AnchorSettings.Follow.NONE)
         );
     }
 

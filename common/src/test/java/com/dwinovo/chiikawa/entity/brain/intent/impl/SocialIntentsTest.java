@@ -3,7 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.intent.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.dwinovo.chiikawa.entity.brain.constraint.AnchorDistances;
+import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCategory;
 import com.dwinovo.chiikawa.testing.TestContext;
@@ -21,7 +21,7 @@ class SocialIntentsTest {
         ResourceLocation.withDefaultNamespace("overworld"));
     private static final GlobalPos OWNER = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     private static final PetAnchor AT_HEEL =
-        new PetAnchor(OWNER, AnchorDistances.FOLLOW_REACH, AnchorDistances.FOLLOW_LEASH, true, true);
+        TestAnchors.following(OWNER);
 
     private final SocializeIntent socialize = new SocializeIntent();
     private final CooperateIntent cooperate = new CooperateIntent();

@@ -32,7 +32,8 @@ public final class PetConstraints {
             GlobalPos.of(pet.level().dimension(), pet.blockPosition()),
             followableOwnerPos(pet),
             pet.getBrain().getMemory(MemoryModuleType.HOME),
-            pet.isLeashed() || pet.isPassenger()
+            pet.isLeashed() || pet.isPassenger(),
+            AnchorSettings.current()
         );
     }
 
@@ -51,20 +52,26 @@ public final class PetConstraints {
      *                 spectating and in the pet's level
      * @param home the {@code HOME} memory
      * @param tethered whether the pet is leashed or riding
+     * @param loaded how big the areas are, when a data pack says; without it no pet has an area to
+     *               act in and every one stays where it is, as a sitting one does
      * @return the anchor
      */
     static PetAnchor anchorOf(PetDirective directive, PetOwnership ownership, GlobalPos petPos,
-            Optional<GlobalPos> ownerPos, Optional<GlobalPos> home, boolean tethered) {
+            Optional<GlobalPos> ownerPos, Optional<GlobalPos> home, boolean tethered, Optional<AnchorSettings> loaded) {
+        if (loaded.isEmpty()) {
+            return new PetAnchor(petPos, 0.0, PetAnchor.UNLEASHED, false, false);
+        }
+        AnchorSettings settings = loaded.get();
         if (ownership instanceof PetOwnership.Wild) {
-            return homeAnchor(petPos, home, AnchorDistances.WILD_REACH, AnchorDistances.WILD_LEASH, tethered);
+            return homeAnchor(petPos, home, settings.wild(), tethered);
         }
         return switch (directive) {
             case FOLLOW -> ownerPos
                 .filter(owner -> !tethered && owner.dimension().equals(petPos.dimension()))
-                .map(owner -> new PetAnchor(owner, AnchorDistances.FOLLOW_REACH, AnchorDistances.FOLLOW_LEASH, true, true))
+                .map(owner -> new PetAnchor(owner, settings.follow().reach(), settings.follow().leash(), true, true))
                 .orElseGet(() -> new PetAnchor(petPos, 0.0, PetAnchor.UNLEASHED, false, true));
             case STAY -> new PetAnchor(petPos, 0.0, PetAnchor.UNLEASHED, false, false);
-            case FREE -> homeAnchor(petPos, home, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, tethered);
+            case FREE -> homeAnchor(petPos, home, settings.free(), tethered);
         };
     }
 
@@ -72,10 +79,10 @@ public final class PetConstraints {
      * Roaming around {@code HOME}, or around the pet itself when it has no home in its
      * level.
      */
-    private static PetAnchor homeAnchor(GlobalPos petPos, Optional<GlobalPos> home, double reach, double leash,
+    private static PetAnchor homeAnchor(GlobalPos petPos, Optional<GlobalPos> home, AnchorSettings.Area area,
             boolean tethered) {
         GlobalPos center = home.filter(pos -> pos.dimension().equals(petPos.dimension())).orElse(petPos);
-        return new PetAnchor(center, reach, tethered ? PetAnchor.UNLEASHED : leash, false, true);
+        return new PetAnchor(center, area.reach(), tethered ? PetAnchor.UNLEASHED : area.leash(), false, true);
     }
 
     /**
