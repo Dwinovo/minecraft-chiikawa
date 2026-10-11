@@ -83,9 +83,10 @@ public class TakePhotoBehavior extends Behavior<AbstractPet> {
         ), GIVE_UP_TICKS);
     }
 
+    /** Able to, and with the photo it was sent to take: the selector chose it, and admitted going there. */
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, AbstractPet pet) {
-        return PhotoScout.outlook(pet).canStart().ok();
+        return PhotoScout.outlook(pet).canContinue().ok() && pet.getBrain().hasMemoryValue(InitMemory.PHOTO_PLAN.get());
     }
 
     @Override
@@ -97,13 +98,15 @@ public class TakePhotoBehavior extends Behavior<AbstractPet> {
         since = gameTime;
         PhotoOutlook outlook = PhotoScout.outlook(pet);
         camera = outlook.camera().orElseThrow();
-        Optional<PhotoScout.Shot> plan = PhotoScout.plan(pet, outlook, pet.getRandom());
-        if (plan.isEmpty()) {
+        // Who it was sent to, unless they are gone by the time it sets off.
+        Optional<PhotoScout.Shot> planned = pet.getBrain().getMemory(InitMemory.PHOTO_PLAN.get())
+            .flatMap(plan -> PhotoScout.resolve(level, plan));
+        if (planned.isEmpty()) {
             gaveUp = true;
             finished = true;
             return;
         }
-        shot = plan.get();
+        shot = planned.get();
         // Not left over from some other walk: only a path this one could not find counts against it.
         pet.getBrain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
         shot.target().ifPresentOrElse(

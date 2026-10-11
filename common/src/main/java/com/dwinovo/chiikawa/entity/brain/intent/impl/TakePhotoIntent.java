@@ -2,10 +2,15 @@ package com.dwinovo.chiikawa.entity.brain.intent.impl;
 
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCategory;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCheck;
+import com.dwinovo.chiikawa.camera.PhotoPlan;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentContext;
+import com.dwinovo.chiikawa.entity.brain.intent.IntentRuntime;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import com.dwinovo.chiikawa.init.InitActivity;
+import com.dwinovo.chiikawa.init.InitMemory;
+import java.util.Optional;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.schedule.Activity;
 
@@ -45,6 +50,23 @@ public final class TakePhotoIntent implements PetIntent {
     @Override
     public IntentCheck canContinue(IntentContext ctx) {
         return ctx.photo().canContinue();
+    }
+
+    /** Who it goes to for the photo: nowhere for a view, which it takes from where it stands. */
+    @Override
+    public Optional<GlobalPos> destination(IntentContext ctx) {
+        return ctx.photo().plan().flatMap(PhotoPlan::where);
+    }
+
+    /** What it was admitted to do is what it does: the plan goes into its memory for the behavior. */
+    @Override
+    public void onStart(IntentRuntime runtime, IntentContext ctx) {
+        ctx.photo().plan().ifPresent(plan -> runtime.brain().setMemory(InitMemory.PHOTO_PLAN.get(), plan));
+    }
+
+    @Override
+    public void onStop(IntentRuntime runtime) {
+        runtime.brain().eraseMemory(InitMemory.PHOTO_PLAN.get());
     }
 
     @Override
