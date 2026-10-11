@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.dwinovo.chiikawa.entity.brain.constraint.AnchorDistances;
+import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentContext;
 import com.dwinovo.chiikawa.testing.TestContext;
@@ -20,8 +20,7 @@ class FollowOwnerIntentTest {
         ResourceKey.createRegistryKey(new ResourceLocation("dimension")),
         new ResourceLocation("overworld"));
     private static final GlobalPos OWNER = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
-    private static final PetAnchor FOLLOWING = new PetAnchor(OWNER, AnchorDistances.FOLLOW_REACH,
-        AnchorDistances.FOLLOW_LEASH, true, true);
+    private static final PetAnchor FOLLOWING = TestAnchors.following(OWNER);
 
     private final FollowOwnerIntent intent = new FollowOwnerIntent();
 
@@ -53,7 +52,7 @@ class FollowOwnerIntentTest {
         assertTrue(intent.canRun(petAt(7, FOLLOWING)).ok());
 
         assertTrue(intent.canContinue(petAt(3, FOLLOWING)).ok());
-        assertFalse(intent.canContinue(petAt(AnchorDistances.FOLLOW_ARRIVE, FOLLOWING)).ok());
+        assertFalse(intent.canContinue(petAt(TestAnchors.SETTINGS.follow().arrive(), FOLLOWING)).ok());
     }
 
     @Test
