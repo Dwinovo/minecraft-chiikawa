@@ -16,44 +16,37 @@ import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * One page of the handbook: a strip of four panels, each a little scene and a line under
- * it. Loaded from {@code assets/<namespace>/manual/<id>.json} by {@link ManualLoader}, so a
- * resource pack can add pages or redo the mod's own; the mod's are generated.
+ * One chapter of the handbook: a title, one little scene and a short text. Loaded from
+ * {@code assets/<namespace>/manual/<id>.json} by {@link ManualLoader}, so a resource pack can
+ * add chapters or redo the mod's own; the mod's are generated.
  *
- * <p>A scene is not a picture but the pets themselves, acting it out: a panel names who is
- * in it, what they hold and what they do, and the handbook puts them on stage.
+ * <p>A scene is not a picture but the pets themselves, acting it out: it names who is in it,
+ * what they hold and what they do, and the handbook puts them on stage.
  *
- * @param order where the page comes, lowest first
- * @param title the page's name, a translation key
- * @param panels read left to right, top to bottom
+ * @param order where the chapter comes, lowest first
+ * @param title the chapter's name, a translation key
+ * @param scene the illustration
+ * @param text what to say about it, a translation key
+ * @param link the chapter's page on the website, such as {@code play/work}
  */
-public record ManualPage(int order, String title, List<Panel> panels) {
-    /** How many panels a page lays out: two rows of two, the way a four-panel strip reads. */
-    public static final int PANELS = 4;
-
-    public static final Codec<ManualPage> CODEC = ExtraCodecs.validate(RecordCodecBuilder.<ManualPage>create(instance -> instance.group(
-        ExtraCodecs.strictOptionalField(Codec.INT, "order", 0).forGetter(ManualPage::order),
+public record ManualPage(int order, String title, Scene scene, String text, String link) {
+    public static final Codec<ManualPage> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+        Codec.INT.optionalFieldOf("order", 0).forGetter(ManualPage::order),
         Codec.STRING.fieldOf("title").forGetter(ManualPage::title),
-        ExtraCodecs.nonEmptyList(Panel.CODEC.listOf()).fieldOf("panels").forGetter(ManualPage::panels)
-    ).apply(instance, ManualPage::new)), page -> page.panels.size() <= PANELS
-        ? DataResult.success(page)
-        : DataResult.error(() -> "a page has " + PANELS + " panels at most, not " + page.panels.size()));
-
-    public ManualPage {
-        panels = List.copyOf(panels);
-    }
+        Scene.CODEC.fieldOf("scene").forGetter(ManualPage::scene),
+        Codec.STRING.fieldOf("text").forGetter(ManualPage::text),
+        Codec.STRING.fieldOf("link").forGetter(ManualPage::link)
+    ).apply(instance, ManualPage::new));
 
     /**
-     * @param caption the line under the panel, a translation key
      * @param actors who and what is in it, drawn in this order
      */
-    public record Panel(String caption, List<Actor> actors) {
-        public static final Codec<Panel> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.STRING.fieldOf("caption").forGetter(Panel::caption),
-            ExtraCodecs.strictOptionalField(Actor.CODEC.listOf(), "actors", List.of()).forGetter(Panel::actors)
-        ).apply(instance, Panel::new));
+    public record Scene(List<Actor> actors) {
+        public static final Codec<Scene> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Actor.CODEC.listOf().optionalFieldOf("actors", List.of()).forGetter(Scene::actors)
+        ).apply(instance, Scene::new));
 
-        public Panel {
+        public Scene {
             actors = List.copyOf(actors);
         }
     }
