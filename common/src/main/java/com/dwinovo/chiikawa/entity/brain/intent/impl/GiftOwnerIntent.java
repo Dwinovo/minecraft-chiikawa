@@ -6,6 +6,8 @@ import com.dwinovo.chiikawa.entity.brain.intent.IntentContext;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import com.dwinovo.chiikawa.init.InitActivity;
+import java.util.Optional;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.schedule.Activity;
 
@@ -48,6 +50,11 @@ public final class GiftOwnerIntent implements PetIntent {
     @Override
     public IntentCheck canContinue(IntentContext ctx) {
         return ctx.carryingGift() ? IntentCheck.OK : IntentCheck.fail("no_gift");
+    }
+
+    @Override
+    public Optional<GlobalPos> destination(IntentContext ctx) {
+        return ctx.ownerPos();
     }
 
     @Override
