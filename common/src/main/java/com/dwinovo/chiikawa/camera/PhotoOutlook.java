@@ -1,9 +1,7 @@
 package com.dwinovo.chiikawa.camera;
 
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCheck;
-import com.dwinovo.chiikawa.photo.PhotoSubject;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Whether a pet could take a photo now, as plain facts, the way the rest of what an intent
@@ -17,17 +15,14 @@ import java.util.Set;
  * @param ownerCalm whether its owner is in no state for it: not hurt just now, riding, or flying, where the
  *                  game that has to draw the picture is working hard enough already
  * @param coolingDown whether it took a photo, or tried to, a moment ago
- * @param moments the kinds of photo there is a good moment for now
+ * @param plan what it has chosen to take a photo of: a plan it already has, or one drawn from the
+ *             moments there are by what it fancies
  */
 public record PhotoOutlook(boolean photographer, Optional<CameraSettings> camera, boolean hasFilm,
-                           boolean ownerInRange, boolean ownerCalm, boolean coolingDown, Set<PhotoSubject> moments) {
+                           boolean ownerInRange, boolean ownerCalm, boolean coolingDown, Optional<PhotoPlan> plan) {
     /** What a pet that takes no photos has. */
     public static final PhotoOutlook NONE = new PhotoOutlook(false, Optional.empty(), false, false, false, false,
-        Set.of());
-
-    public PhotoOutlook {
-        moments = Set.copyOf(moments);
-    }
+        Optional.empty());
 
     /** Whether it may set about taking a photo. */
     public IntentCheck canStart() {
@@ -35,7 +30,7 @@ public record PhotoOutlook(boolean photographer, Optional<CameraSettings> camera
         if (!able.ok()) {
             return able;
         }
-        return moments.isEmpty() ? IntentCheck.fail("nothing_to_shoot") : IntentCheck.OK;
+        return plan.isEmpty() ? IntentCheck.fail("nothing_to_shoot") : IntentCheck.OK;
     }
 
     /**
