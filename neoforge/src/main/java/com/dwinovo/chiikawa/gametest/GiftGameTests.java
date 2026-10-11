@@ -51,6 +51,10 @@ public final class GiftGameTests {
     private static final int SHOP_TICKS = 3600;
     private static final int WAGES = 8;
     private static final int TEN = 10;
+    /** How long a pet is watched with its owner away, how far away that is, and how long to see it rest. */
+    private static final int AWAY_TICKS = 300;
+    private static final int AWAY_BLOCKS = 30;
+    private static final int SETTLED_TICKS = 40;
     /** How much money a bag that is otherwise full has room for. */
     private static final int ROOM = 4;
     /** Long enough for a pet beside its owner to give a present, and to give a second if it were going to. */
@@ -161,6 +165,79 @@ public final class GiftGameTests {
     }
 
     /**
+     * A pet that roams free gives a present only to an owner who is at home: with the owner well
+     * outside the area it acts in, the cookie stays in the bag; once the owner stands near, it is
+     * given.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = AWAY_TICKS + WALK_TICKS)
+    public static void a_free_pet_gives_its_present_once_its_owner_is_home(GameTestHelper helper) {
+        ServerPlayer owner = ownerAcross(helper);
+        teleportAway(helper, owner);
+        AbstractPet pet = ownedBy(helper, InitEntity.USAGI_PET.get(), owner);
+        pet.getBackpack().setItem(2, new ItemStack(Items.COOKIE, 2));
+        boolean[] home = {false};
+
+        helper.onEachTick(() -> {
+            if (!home[0]) {
+                helper.assertTrue(pet.getPendingGift().isEmpty(), "the pet set off with a present for an owner far from home");
+                helper.assertFalse(owner.getInventory().contains(new ItemStack(Items.COOKIE)), "the owner far away was given a cookie");
+                helper.assertTrue(count(pet, Items.COOKIE) == 2, "the pet has " + count(pet, Items.COOKIE) + " cookies, not the two");
+            }
+        });
+        helper.runAfterDelay(AWAY_TICKS, () -> {
+            home[0] = true;
+            BlockPos near = helper.absolutePos(new BlockPos(4, STAND, 3));
+            owner.teleportTo(near.getX() + 0.5, near.getY(), near.getZ() + 0.5);
+        });
+        helper.succeedWhen(() -> {
+            helper.assertTrue(home[0], "the owner has not come home");
+            helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 1, "the owner at home was not given a cookie");
+        });
+    }
+
+    /**
+     * Following, a pet is with its owner wherever that is: an owner who is further off than a free
+     * pet would walk a present to is no reason to wait.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WALK_TICKS)
+    public static void a_following_pet_still_gives_its_present_to_an_owner_far_away(GameTestHelper helper) {
+        ServerPlayer owner = player(helper);
+        BlockPos corner = helper.absolutePos(new BlockPos(14, STAND, 14));
+        owner.teleportTo(corner.getX() + 0.5, corner.getY(), corner.getZ() + 0.5);
+        AbstractPet pet = ownedBy(helper, InitEntity.USAGI_PET.get(), owner);
+        pet.setPetDirective(PetDirective.FOLLOW);
+        pet.getBackpack().setItem(2, new ItemStack(Items.COOKIE, 2));
+
+        helper.succeedWhen(() -> helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 1,
+            "the owner was not given a cookie"));
+    }
+
+    /**
+     * An owner who leaves the pet's home on the way ends the errand: what the pet was carrying
+     * goes back in its bag, and it does not set off again while the owner is away.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WALK_TICKS)
+    public static void a_present_is_put_back_when_the_owner_leaves_home(GameTestHelper helper) {
+        ServerPlayer owner = ownerAcross(helper);
+        AbstractPet pet = ownedBy(helper, InitEntity.USAGI_PET.get(), owner);
+        pet.getBackpack().setItem(2, new ItemStack(Items.COOKIE, 2));
+        boolean[] left = {false};
+        int[] settled = {0};
+
+        helper.succeedWhen(() -> {
+            if (!left[0] && !pet.getPendingGift().isEmpty()) {
+                left[0] = true;
+                teleportAway(helper, owner);
+            }
+            helper.assertTrue(left[0], "the pet never set off with a present");
+            helper.assertTrue(pet.getPendingGift().isEmpty(), "the pet still carries the cookie");
+            helper.assertTrue(count(pet, Items.COOKIE) == 2, "the pet has " + count(pet, Items.COOKIE) + " cookies, not the two");
+            helper.assertFalse(owner.getInventory().contains(new ItemStack(Items.COOKIE)), "the owner was given the cookie");
+            helper.assertTrue(++settled[0] > SETTLED_TICKS, "too soon to say it does not set off again");
+        });
+    }
+
+    /**
      * Told to sit on the way, the pet puts what it was carrying back in its bag: nobody was given
      * it, and so the pet is not tired of giving.
      */
@@ -206,12 +283,21 @@ public final class GiftGameTests {
         });
     }
 
-    /** The owner, across the yard from where the pet stands, so that the pet has a walk to make. */
+    /**
+     * The owner, across the yard from where the pet stands, so that the pet has a walk to make:
+     * well inside the area a free pet acts in round its home.
+     */
     private static ServerPlayer ownerAcross(GameTestHelper helper) {
         ServerPlayer owner = player(helper);
-        BlockPos across = helper.absolutePos(new BlockPos(12, STAND, 12));
+        BlockPos across = helper.absolutePos(new BlockPos(10, STAND, 10));
         owner.teleportTo(across.getX() + 0.5, across.getY(), across.getZ() + 0.5);
         return owner;
+    }
+
+    /** Far outside the area a pet acts in, in the same level. */
+    private static void teleportAway(GameTestHelper helper, ServerPlayer owner) {
+        BlockPos far = helper.absolutePos(new BlockPos(8, STAND, 8)).offset(AWAY_BLOCKS, 0, 0);
+        owner.teleportTo(far.getX() + 0.5, far.getY(), far.getZ() + 0.5);
     }
 
     private static AbstractPet ownedBy(GameTestHelper helper, EntityType<? extends AbstractPet> type, ServerPlayer owner) {
