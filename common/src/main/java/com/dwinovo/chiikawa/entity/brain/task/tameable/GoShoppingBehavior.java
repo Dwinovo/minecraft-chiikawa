@@ -17,7 +17,6 @@ import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Unit;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -115,11 +114,7 @@ public class GoShoppingBehavior extends Behavior<AbstractPet> {
         if (!Wallet.pay(pet.getBackpack(), entry.buy())) {
             return;
         }
-        String news = keep(pet, goods) ? "message.chiikawa.shop.bought_ate" : "message.chiikawa.shop.bought";
-        // Said by name and with the thing itself, which a player can hover over: a pet
-        // that spends its wages where nobody can see ought at least to say on what.
-        pet.tellOwner(Component.translatable(news, pet.getDisplayName(), entry.buy(), goods.getDisplayName(),
-            Wallet.coins(1).getHoverName()));
+        keep(pet, goods);
         bought = true;
         level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pet.getX(), pet.getY() + pet.getBbHeight() * 0.8, pet.getZ(),
             HAPPY_PARTICLES, 0.35, 0.3, 0.35, 0.0);
@@ -131,19 +126,16 @@ public class GoShoppingBehavior extends Behavior<AbstractPet> {
      * Keeps what it bought for itself — and eats it there and then if it is food and the
      * pet is the worse for wear. A pet that buys a cake and carries it about while limping
      * is a pet that has misunderstood what money is for.
-     *
-     * @return whether it was eaten rather than kept
      */
-    private static boolean keep(AbstractPet pet, ItemStack goods) {
+    private static void keep(AbstractPet pet, ItemStack goods) {
         if (pet.getHealth() < pet.getMaxHealth() && goods.has(DataComponents.FOOD)) {
             pet.heal(PetInteractHandler.FEED_HEAL);
-            return true;
+            return;
         }
         ItemStack remainder = pet.getBackpack().addItem(goods);
         if (!remainder.isEmpty() && pet.level() instanceof ServerLevel server) {
             pet.spawnAtLocation(server, remainder);
         }
-        return false;
     }
 
     /** What the pet would buy at the shop it remembers, if anything. */
