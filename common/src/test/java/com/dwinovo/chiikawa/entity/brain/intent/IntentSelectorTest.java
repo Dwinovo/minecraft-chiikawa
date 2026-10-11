@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.dwinovo.chiikawa.entity.brain.constraint.AnchorDistances;
+import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.Candidate;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.Decision;
@@ -212,7 +212,7 @@ class IntentSelectorTest {
         PetTask weeding = new PetTask(id("weeding"), id("farmer"), PetWorkCounters.WEED, PetTask.NO_ICON, 8,
             id("pet_task/weeding"), 0);
         Optional<GlobalPos> near = near(true, 1);
-        IntentContext ctx = TestContext.at(PET, new PetAnchor(PET, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, false, true))
+        IntentContext ctx = TestContext.at(PET, TestAnchors.free(PET))
             .targets(new PerceivedTargets(Optional.empty(), near, Optional.empty(), Optional.empty(), near, Optional.empty(),
                 Optional.empty()))
             .task(weeding)
@@ -253,7 +253,7 @@ class IntentSelectorTest {
     /** A free pet with a crop in sight, either freshly fed or not. */
     private static IntentContext fed(PerceivedTargets targets, boolean eager) {
         TestContext ctx = TestContext.at(PET,
-                new PetAnchor(PET, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, false, true))
+                TestAnchors.free(PET))
             .targets(targets);
         return (eager ? ctx.eager() : ctx).build();
     }
@@ -261,7 +261,7 @@ class IntentSelectorTest {
     /** Wander, harvest, plant and deliver, as a free farmer sees them. */
     private static List<Candidate> farmCandidates(Personality personality, DayPhase phase, PerceivedTargets targets,
             ResourceLocation running) {
-        IntentContext ctx = TestContext.at(PET, new PetAnchor(PET, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, false, true))
+        IntentContext ctx = TestContext.at(PET, TestAnchors.free(PET))
             .phase(phase)
             .personality(personality)
             .targets(targets)

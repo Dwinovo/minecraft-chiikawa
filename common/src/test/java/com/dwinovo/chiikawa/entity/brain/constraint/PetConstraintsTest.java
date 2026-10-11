@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCategory;
+import com.dwinovo.chiikawa.testing.TestAnchors;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
@@ -29,6 +30,7 @@ class PetConstraintsTest {
     private static final PetOwnership OWNED = new PetOwnership.Owned(UUID.fromString("00000000-0000-0000-0000-000000000001"));
     private static final GlobalPos PET = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     private static final GlobalPos OWNER = GlobalPos.of(OVERWORLD, new BlockPos(5, 64, 0));
+    private static final double TELEPORT = TestAnchors.SETTINGS.follow().teleport();
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(-8, 64, 3));
 
     // ---- anchor table ----------------------------------------------------------
@@ -37,7 +39,7 @@ class PetConstraintsTest {
     void followingAnOnlineOwnerAnchorsOnTheOwner() {
         PetAnchor anchor = anchor(PetDirective.FOLLOW, OWNED, Optional.of(OWNER), Optional.empty(), false);
 
-        assertEquals(new PetAnchor(OWNER, AnchorDistances.FOLLOW_REACH, AnchorDistances.FOLLOW_LEASH, true, true), anchor);
+        assertEquals(TestAnchors.following(OWNER), anchor);
     }
 
     @Test
@@ -69,7 +71,7 @@ class PetConstraintsTest {
     void freePetAnchorsOnItsHome() {
         PetAnchor anchor = anchor(PetDirective.FREE, OWNED, Optional.of(OWNER), Optional.of(HOME), false);
 
-        assertEquals(new PetAnchor(HOME, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, false, true), anchor);
+        assertEquals(TestAnchors.free(HOME), anchor);
     }
 
     @Test
@@ -78,7 +80,7 @@ class PetConstraintsTest {
         PetAnchor homeElsewhere = anchor(PetDirective.FREE, OWNED, Optional.empty(),
             Optional.of(GlobalPos.of(NETHER, HOME.pos())), false);
 
-        PetAnchor expected = new PetAnchor(PET, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, false, true);
+        PetAnchor expected = TestAnchors.free(PET);
         assertEquals(expected, noHome);
         assertEquals(expected, homeElsewhere);
     }
@@ -87,12 +89,12 @@ class PetConstraintsTest {
     void leashedFreePetKeepsItsReachButIsNotPulledHome() {
         PetAnchor anchor = anchor(PetDirective.FREE, OWNED, Optional.empty(), Optional.of(HOME), true);
 
-        assertEquals(new PetAnchor(HOME, AnchorDistances.FREE_REACH, PetAnchor.UNLEASHED, false, true), anchor);
+        assertEquals(new PetAnchor(HOME, TestAnchors.SETTINGS.free().reach(), PetAnchor.UNLEASHED, false, true), anchor);
     }
 
     @Test
     void wildPetRoamsAroundItsSpawnHomeWhateverItsDirective() {
-        PetAnchor expected = new PetAnchor(HOME, AnchorDistances.WILD_REACH, AnchorDistances.WILD_LEASH, false, true);
+        PetAnchor expected = TestAnchors.wild(HOME);
         for (PetDirective directive : PetDirective.values()) {
             assertEquals(expected, anchor(directive, PetOwnership.WILD, Optional.empty(), Optional.of(HOME), false));
         }
@@ -104,7 +106,7 @@ class PetConstraintsTest {
         PetAnchor homeElsewhere = anchor(PetDirective.FREE, PetOwnership.WILD, Optional.empty(),
             Optional.of(GlobalPos.of(NETHER, HOME.pos())), false);
 
-        PetAnchor expected = new PetAnchor(PET, AnchorDistances.WILD_REACH, AnchorDistances.WILD_LEASH, false, true);
+        PetAnchor expected = TestAnchors.wild(PET);
         assertEquals(expected, noHome);
         assertEquals(expected, homeElsewhere);
     }
@@ -113,7 +115,7 @@ class PetConstraintsTest {
     void leashedWildPetKeepsItsReachButIsNotPulledHome() {
         PetAnchor anchor = anchor(PetDirective.FREE, PetOwnership.WILD, Optional.empty(), Optional.of(HOME), true);
 
-        assertEquals(new PetAnchor(HOME, AnchorDistances.WILD_REACH, PetAnchor.UNLEASHED, false, true), anchor);
+        assertEquals(new PetAnchor(HOME, TestAnchors.SETTINGS.wild().reach(), PetAnchor.UNLEASHED, false, true), anchor);
     }
 
     // ---- permission table ------------------------------------------------------
@@ -156,16 +158,28 @@ class PetConstraintsTest {
         assertFalse(anchor.withinReach(GlobalPos.of(OVERWORLD, new BlockPos(12, 64, 0))));
         assertTrue(anchor.withinLeash(GlobalPos.of(OVERWORLD, new BlockPos(15, 64, 0))));
         assertFalse(anchor.withinLeash(GlobalPos.of(OVERWORLD, new BlockPos(16, 64, 0))));
-        assertFalse(anchor.beyondTeleport(GlobalPos.of(OVERWORLD, new BlockPos(19, 64, 0))));
-        assertTrue(anchor.beyondTeleport(GlobalPos.of(OVERWORLD, new BlockPos(20, 64, 0))));
+        assertFalse(anchor.beyondTeleport(GlobalPos.of(OVERWORLD, new BlockPos(19, 64, 0)), TELEPORT));
+        assertTrue(anchor.beyondTeleport(GlobalPos.of(OVERWORLD, new BlockPos(20, 64, 0)), TELEPORT));
         assertFalse(anchor.withinReach(GlobalPos.of(NETHER, PET.pos())));
     }
 
     @Test
     void onlyAnAnchorThatFollowsTheOwnerTeleports() {
-        PetAnchor home = new PetAnchor(PET, AnchorDistances.FREE_REACH, AnchorDistances.FREE_LEASH, false, true);
+        PetAnchor home = TestAnchors.free(PET);
 
-        assertFalse(home.beyondTeleport(GlobalPos.of(OVERWORLD, new BlockPos(100, 64, 0))));
+        assertFalse(home.beyondTeleport(GlobalPos.of(OVERWORLD, new BlockPos(100, 64, 0)), TELEPORT));
+    }
+
+    @Test
+    void withoutSettingsNoPetHasAnAreaAndEveryOneStaysWhereItIs() {
+        PetAnchor stays = new PetAnchor(PET, 0.0, PetAnchor.UNLEASHED, false, false);
+
+        for (PetDirective directive : PetDirective.values()) {
+            assertEquals(stays, PetConstraints.anchorOf(directive, OWNED, PET, Optional.of(OWNER), Optional.of(HOME), false,
+                Optional.empty()));
+            assertEquals(stays, PetConstraints.anchorOf(directive, PetOwnership.WILD, PET, Optional.empty(),
+                Optional.of(HOME), false, Optional.empty()));
+        }
     }
 
     @Test
@@ -174,12 +188,12 @@ class PetConstraintsTest {
 
         assertFalse(anchor.withinReach(PET));
         assertTrue(anchor.withinLeash(GlobalPos.of(OVERWORLD, new BlockPos(100000, 64, 0))));
-        assertFalse(anchor.beyondTeleport(GlobalPos.of(OVERWORLD, new BlockPos(100000, 64, 0))));
+        assertFalse(anchor.beyondTeleport(GlobalPos.of(OVERWORLD, new BlockPos(100000, 64, 0)), TELEPORT));
     }
 
     private static PetAnchor anchor(PetDirective directive, PetOwnership ownership, Optional<GlobalPos> ownerPos,
             Optional<GlobalPos> home, boolean tethered) {
-        return PetConstraints.anchorOf(directive, ownership, PET, ownerPos, home, tethered);
+        return PetConstraints.anchorOf(directive, ownership, PET, ownerPos, home, tethered, Optional.of(TestAnchors.SETTINGS));
     }
 
     private static void assertPermits(PetDirective directive, PetOwnership ownership, Set<IntentCategory> permitted) {
