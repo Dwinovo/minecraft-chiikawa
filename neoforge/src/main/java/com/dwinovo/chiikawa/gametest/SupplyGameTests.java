@@ -13,10 +13,13 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTabs;
 import com.dwinovo.chiikawa.item.BagItem;
+import com.dwinovo.chiikawa.manual.ManualPage;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.voice.PetVoices;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 import net.minecraft.advancements.AdvancementHolder;
@@ -96,21 +99,37 @@ public final class SupplyGameTests {
     }
 
     /**
-     * Every word the handbook's own pages show is written in every language: a title, a
-     * caption or a bubble left out shows its raw key on the page.
+     * The handbook has the six chapters, in this order, each with its page on the website. A
+     * chapter that is not listed is a chapter nobody can reach from the index.
+     */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void the_handbook_has_its_six_chapters_in_order(GameTestHelper helper) {
+        List<Map.Entry<ResourceLocation, ManualPage>> chapters = ManualData.all().entrySet().stream()
+            .sorted(Comparator.comparingInt(entry -> entry.getValue().order())).toList();
+        helper.assertTrue(chapters.stream().map(entry -> entry.getKey().getPath()).toList()
+            .equals(List.of("meet", "work", "shop", "care", "camera", "licence")),
+            "the chapters are " + chapters.stream().map(entry -> entry.getKey().getPath()).toList());
+        helper.assertTrue(chapters.stream().map(entry -> entry.getValue().link()).toList().equals(List.of(
+            "play/taming", "play/work", "play/shop", "play/care", "play/camera", "play/licence")),
+            "the links are " + chapters.stream().map(entry -> entry.getValue().link()).toList());
+        helper.succeed();
+    }
+
+    /**
+     * Every word the handbook's own chapters show is written in every language: a title, a
+     * text or a bubble left out shows its raw key on the page, and so does the link line.
      */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void every_handbook_word_is_written_in_every_language(GameTestHelper helper) {
         for (String locale : LanguageData.LOCALES) {
             Set<String> written = new HashSet<>();
             LanguageData.addTranslations(locale, (key, value) -> written.add(key));
+            helper.assertTrue(written.contains("manual.chiikawa.more"), locale + " has no link line");
             ManualData.all().forEach((id, page) -> {
-                helper.assertTrue(written.contains(page.title()), Component.literal(locale + " has no " + page.title()));
-                page.panels().forEach(panel -> {
-                    helper.assertTrue(written.contains(panel.caption()), Component.literal(locale + " has no " + panel.caption()));
-                    panel.actors().forEach(actor -> actor.motion().say().ifPresent(say ->
-                        helper.assertTrue(written.contains(say), Component.literal(locale + " has no " + say))));
-                });
+                helper.assertTrue(written.contains(page.title()), locale + " has no " + page.title());
+                helper.assertTrue(written.contains(page.text()), locale + " has no " + page.text());
+                page.scene().actors().forEach(actor -> actor.motion().say().ifPresent(say ->
+                    helper.assertTrue(written.contains(say), locale + " has no " + say)));
             });
         }
         helper.succeed();
@@ -122,13 +141,13 @@ public final class SupplyGameTests {
      */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void every_pet_in_the_handbook_speaks_in_its_own_words(GameTestHelper helper) {
-        ManualData.all().forEach((id, page) -> page.panels().forEach(panel -> panel.actors().forEach(actor ->
+        ManualData.all().forEach((id, page) -> page.scene().actors().forEach(actor ->
             actor.pet().ifPresent(pet -> actor.motion().say().ifPresent(say -> {
                 Set<String> own = new HashSet<>();
                 PetVoices.of(BuiltInRegistries.ENTITY_TYPE.getValue(pet)).lines().values()
                     .forEach(lines -> lines.forEach(line -> own.add(line.text())));
-                helper.assertTrue(own.contains(say), Component.literal(pet + " says " + say + " on " + id + ", not a line of its own"));
-            })))));
+                helper.assertTrue(own.contains(say), pet + " says " + say + " on " + id + ", not a line of its own");
+            }))));
         helper.succeed();
     }
 
