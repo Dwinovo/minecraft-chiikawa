@@ -5,7 +5,7 @@ import java.util.List;
 
 public final class LanguageData {
     /** The languages the mod is written in; English is also what the others are held to. */
-    public static final List<String> LOCALES = List.of("en_us", "zh_cn", "ja_jp");
+    public static final List<String> LOCALES = List.of("en_us", "zh_cn", "ja_jp", "ko_kr");
 
     private LanguageData() {
     }
@@ -473,6 +473,236 @@ public final class LanguageData {
             addVoiceLines(adder, "shisa", VoiceMoment.WHISTLE, "はーい!");
             addVoiceLines(adder, "furuhonya", VoiceMoment.WHISTLE, "はい…");
             addWhistleTranslations(adder, "フエラムネ", "フエラムネ（%s）", "長押しで吹く：近くのペットに今の指示を出す。スニーク右クリックで指示を切り替え。", "フエラムネ：%s", "%d匹が駆け寄ってきた", "%d匹がおすわりした", "%d匹が自由行動に戻った", "野生の%d匹が気になって寄ってきた", "近くに聞こえたペットはいない", "気になって寄っていく", "笛は聞こえない");
+        } else if ("ko_kr".equals(locale)) {
+            addCommonTranslations(adder, "치이카와", "가방", "따라오기", "앉아", "자유 행동");
+            addDollTooltipTranslations(adder, "인형을 케이크 위에 놓아 볼래?");
+            addHandbookTranslations(adder, "치이카와의 알바 수첩", "우클릭해서 열어. 펫을 어떻게 쓰는지 적혀 있어", "이 수첩은 아직 비어 있어",
+                "이전 페이지", "다음 페이지");
+            addHandbookPage(adder, "meet", "치이카와를 만나기",
+                "평원, 사바나, 사막, 늪, 눈 덮인 벌판에 야생 펫이 나와. 각자 도구를 들고 있어.",
+                "빵이나 쿠키 같은 음식을 들고 야생 펫을 우클릭해. 한 번에 길들여질 확률은 30%야.",
+                "웅크리고 우클릭하면 따라오기, 앉아, 자유 행동을 바꿔. 피리 사탕은 근처 펫에게 한 번에 지시해.",
+                "펫을 우클릭하면 가방, 상태, 지시를 볼 수 있어.");
+            addHandbookPage(adder, "work", "일하러 가기",
+                "알바 게시판을 놓으면 해 뜰 때마다 전표가 3장 붙어.",
+                "펫은 손에 든 도구에 맞는 전표를 받아. 괭이면 잡초 뽑기야.",
+                "전표를 받으면 적힌 양만큼 일을 해.",
+                "보상은 펫 가방으로 들어가. 화면을 열면 꺼낼 수 있어.");
+            addHandbookPage(adder, "shop", "상점",
+                "상점을 놓으면 자유 행동 중인 펫이 가방의 에메랄드로 물건을 사.",
+                "누구는 무엇을 사는지가 달라. 치이카와는 간식을 제일 자주 사.",
+                "계산대를 우클릭하면 가격표가 열려. 플레이어도 사고팔 수 있어.",
+                "에메랄드를 들고 자기 펫을 우클릭하면 용돈을 줘.");
+            addHandbookPage(adder, "presents", "선물",
+                "펫이 쇼핑할 때 가끔 주인을 위해 선물을 같이 사.",
+                "사면 선물을 들고 주인에게 걸어와.",
+                "선물은 인벤토리로 들어가. 가득 차면 발밑에 놓여.",
+                "살 때와 건넬 때 채팅으로 알려 줘.");
+            addHandbookPage(adder, "supplies", "가방과 간식",
+                "배낭을 입히면 가방이 10칸 늘어.",
+                "곰 가방, 고래 가방, 별 가방도 10칸이야. 어느 펫이나 멜 수 있어.",
+                "간단한 요리를 먹이면 5분 동안 더 빠르고 일도 더 하려 해.",
+                "이름표로 펫 이름을 지을 수 있어.");
+            addHandbookPage(adder, "upgrade", "게시판 강화",
+                "게시판 화면에서 에메랄드를 쓰면 레벨이 오르고, 하루에 전표가 한 장 더 붙어.",
+                "2레벨부터 토벌 전표가 나와.",
+                "검을 든 펫은 가까이서 토벌하고, 활을 든 펫은 멀리서 토벌해.",
+                "토벌 보상이 제일 크지만, 펫이 쓰러지면 그 전표는 실패야.");
+            addHandbookPage(adder, "safety", "쓰러짐과 불러오기",
+                "펫이 쓰러지면 인형이 되고, 가방 안 물건은 인형에 남아.",
+                "놓인 케이크를 인형으로 우클릭하면 물건을 가진 채 돌아와.",
+                "체력이 35% 아래로 내려가면 싸움에서 빠지고, 60%가 되면 다시 가.",
+                "펫 방울을 쓰면 다른 차원에 있어도 모든 펫이 네 옆으로 와.");
+            addHandbookPage(adder, "friends", "친구끼리",
+                "펫이 말하면 머리 위에 말풍선이 떠. 16칸 안의 플레이어가 봐.",
+                "둘 다 한가하면 가끔 원작 장면을 해. 모몽가가 치이카와에게 매달리는 식이야.",
+                "랏코는 치이카와와 하치와레에게 먹을 것을 주고, 쿠리만쥬는 잡초를 뽑은 펫에게 커피를 줘.",
+                "하치와레가 길에서 연주하면 근처의 한가한 펫이 앉아 듣고 박수를 쳐.");
+            addHandbookPage(adder, "licence", "잡초 뽑기 자격증",
+                "게시판의 잡초 뽑기 전표가 연습이야. 참고서를 들고 우클릭하면 펫이 읽어.",
+                "시험 책상을 놓고 우클릭해서 펫 한 마리를 접수해. 다이아몬드 1개가 필요해. 책상 하나에는 한 마리만.",
+                "낮에 책상 앞에 앉아 답안을 쓰고, 다음 날 아침에 결과가 나와. 책상을 부수면 시험은 취소야.",
+                "합격하면 한 등급 오르고 보수가 늘어. 3급부터 넓은 잡초 뽑기 전표를 받아.");
+            addJobTranslations(adder, "직업", "없음", "농부", "검사", "궁수", "음악가", "알 수 없음");
+            addEntityTranslations(adder, "우사기", "하치와레", "치이카와", "시사", "모몽가", "쿠리만쥬", "랏코", "후루혼야");
+            addItemTagTranslations(adder, "농부 도구", "검사 도구", "궁수 도구", "음악가 도구", "길들이기 음식", "심을 작물", "배달 아이템", "주울 수 있는 아이템", "펫 간식");
+            addItemTranslations(
+                adder,
+                "우사기 생성 알",
+                "하치와레 생성 알",
+                "치이카와 생성 알",
+                "시사 생성 알",
+                "모몽가 생성 알",
+                "쿠리만쥬 생성 알",
+                "랏코 생성 알",
+                "후루혼야 생성 알",
+                "우사기 인형",
+                "하치와레 인형",
+                "치이카와 인형",
+                "시사 인형",
+                "모몽가 인형",
+                "쿠리만쥬 인형",
+                "랏코 인형",
+                "후루혼야 인형",
+                "우사기의 토벌봉",
+                "하치와레의 사수마타",
+                "치이카와의 사수마타",
+                "랏코의 검"
+            );
+            addMusicBoxTranslations(adder, "오르골", "선택된 곡 없음", "곡: %s", "곡 고르기", "가져오는 중", "실패", "재생할 곡이 없어",
+                "폴더에 MP3 / WAV를 넣고 새로고침해", "일부 곡을 가져오지 못했어", "MP3 파일을 써 줘", "폴더 열기", "새로고침", "이전 페이지", "다음 페이지");
+            addMusicBoxModeTranslations(adder, "재생: %s", "한 번 재생", "목록 반복", "무작위", "한 곡 반복");
+            addIntentFailureTranslations(adder, "주인을 따라갈 수 없어", "주인이 바로 옆에 있어", "이미 주인 곁이야", "목표가 범위 밖이야",
+                "목표가 활동 범위를 벗어났어", "주울 물건이 없어", "수확할 작물이 없어", "심을 밭이 없어", "넣을 상자가 없어",
+                "공격할 대상이 없어", "공격 대기 중이야", "화살이 없어", "새로 연주할 곡이 없어", "곡이 끝났어", "더 급한 일이 먼저야",
+                "근처에 잡초가 없어", "근처에 버섯이 없어", "맞는 전표를 받아야 해", "밤에만 해",
+                "이미 전표를 들고 있어", "전표를 못 받아서 잠시 쉬는 중이야", "근처 게시판에 맞는 전표가 없어",
+                "방금 물건을 샀어", "사고 싶고 살 수 있는 물건이 없어", "건넬 것이 없어");
+            addBlockTranslations(adder, "알바 게시판", "상점");
+            addSupplyTranslations(adder, "배낭", "곰 가방", "고래 가방", "별 가방", "펫에게 입히면 가방이 10칸 늘어",
+                    "간단한 요리", "펫에게 먹이면 한동안 일을 더 하려 해",
+                    "펫 방울", "펫을 불러. 다른 차원에서도 들려. 한 번 울리면 30초를 기다려");
+            addLicenceTranslations(adder, "잡초 뽑기 자격증 참고서", "들고 자기 펫을 우클릭하면 읽어. 다음 잡초 뽑기 자격 시험 확률이 올라. 시험이 끝나면 사라져",
+                "잡초 뽑기 자격증", "%1$s(이)가 %2$s %3$s급 시험에 합격했어", "%1$s(이)가 %2$s %3$s급 시험에 떨어졌어",
+                "%1$s(을)를 %2$s %3$s급 시험에 접수했어", "%1$s(이)가 %2$s 답안을 냈어. 결과는 내일 아침", "%1$s(이)가 오늘 %2$s 시험을 놓쳤어",
+                "시험 책상이 없어서 %1$s의 %2$s 시험이 취소됐어",
+                "시험 보러 가는 중", "결과 보러 가는 중", "갈 수 있는 시험 책상이 없어");
+            addLicenceScreenTranslations(adder, "%s급", "없음", "%s: %s급", "%s: 아직 없음", "이미 최고 등급이야",
+                "결과는 내일 아침", "오늘 시험을 봐", "조금 더 일해야 응시할 수 있어", "준비됨: 시험 책상에서 접수해");
+            addExamDeskStatusTranslations(adder, "시험 책상", "접수할 펫을 골라", "낮에만 접수할 수 있어", "이 책상은 시험 중이야",
+                "책상 뒤가 막혀서 앉을 곳이 없어", "%1$s(이)가 %2$s %3$s급 시험 중", "%1$s(이)가 답안을 냈어. 결과는 내일 아침",
+                "%1$s, %2$s %3$s급: 합격", "%1$s, %2$s %3$s급: 불합격");
+            addExamDeskPetTranslations(adder, "응시료 %s", "%s 접수", "%s급", "근처에 네 펫이 없어", " (%s급)", " (자격증 없음)",
+                "이미 최고 등급이야", "일을 더 해야 해", "접수했거나 결과를 기다리는 중", "대기 중", "너무 멀어");
+            addExamDeskOddsTranslations(adder, "기초 %s%%", "일한 양 +%s%%", "이전에 낙방 +%s%%", "참고서를 읽음 +%s%%",
+                "성격 ×%s", "합격 확률 %s (최대 %s%%)");
+            addPetNewsTranslations(adder, "%1$s(이)가 %4$s %2$s개로 %3$s을(를) 샀어",
+                    "%1$s(이)가 %4$s %2$s개로 %3$s을(를) 사서 그 자리에서 먹었어",
+                    "%1$s(이)가 %4$s %2$s개로 %3$s을(를) 샀어. 너에게 주는 거라며",
+                    "%1$s(이)가 %2$s을(를) 줬어");
+            addRecallTranslations(adder, "%s마리가 달려왔어", "부를 펫이 없어",
+                    "%s(은)는 대답이 없어. 마지막으로 본 곳에 없어");
+            addShopScreenTranslations(adder, "상점", "%s 사기", "%s 팔기", "오늘은 파는 게 없어",
+                    "이전 페이지", "다음 페이지");
+            addIntentNameTranslations(adder, "주인 따라가기", "앉아 있기", "어슬렁", "물건 줍기",
+                "전표 받으러 가기", "수확", "심기", "배달", "잡초 뽑기", "버섯 따기",
+                "토벌", "활 쏘기", "연주", "쇼핑", "선물 전달");
+            addSocialTranslations(adder, "친구 만나러", "같이 놀기", "같이 놀 친구가 근처에 없어",
+                "아무도 안 왔어");
+            addTaskTypeTranslations(adder, "잡초 뽑기", "잡초 %s포기", "길거리 연주", "%s초",
+                "근접 토벌", "원거리 토벌", "%s마리", "상급 잡초 뽑기");
+            addBoardScreenTranslations(adder, "알바 게시판", "%s장", "오늘은 전표가 없어",
+                    "%s만", "모집", "수락", "%s(이)가 받음",
+                    "Lv.%s", "하루 %s장", "강화 %s",
+                    "Lv.%1$s이면 하루 %2$s장", "새 일: %s",
+                    "최고 레벨", "%2$s %1$s개 보유");
+            addPetStatusTranslations(adder, "한가함", "배낭이나 가방을 메면 10칸이 더 생겨");
+            addPetScreenTranslations(adder, "가방", "상태", "지시",
+                    "받은 전표가 없어",
+                    "일할 기분: %s 남음",
+                    "용돈: %2$s %1$s개",
+                    "너에게 줄 선물",
+                    "직접 가져올 거야",
+                    "옆에 있다가 공격받으면 나서",
+                    "그 자리에 있어",
+                    "집 근처에서 일하고, 쇼핑하고, 전표를 받아");
+            // What the pets say, in the words Korean-speaking fans know the lines by.
+            addVoiceLines(adder, "chiikawa", VoiceMoment.TAME, "와아...");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.HURT, "싫어!!", "윽... 윽...");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.HUNT, "야아!!!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.PAID, "!!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.SHOP, "와아...!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.GIFT, "응...!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.REVIVE, "핫...!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.IDLE, "영차...", "후우...");
+            addVoiceLines(adder, "hachiware", VoiceMoment.TAME, "라는 거야!?");
+            addVoiceLines(adder, "hachiware", VoiceMoment.HURT, "아야야...");
+            addVoiceLines(adder, "hachiware", VoiceMoment.HUNT, "어떻게든 될 거야!!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.PAID, "해냈다~!!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.SHOP, "이거... 최고잖아!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.GIFT, "자, 이거!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.REVIVE, "울어버렸어!!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.IDLE, "흐음흐음~♪");
+            addVoiceLines(adder, "usagi", VoiceMoment.TAME, "야하!");
+            addVoiceLines(adder, "usagi", VoiceMoment.HURT, "하아?");
+            addVoiceLines(adder, "usagi", VoiceMoment.HUNT, "우나아!!");
+            addVoiceLines(adder, "usagi", VoiceMoment.PAID, "푸루루루");
+            addVoiceLines(adder, "usagi", VoiceMoment.SHOP, "푸루야");
+            addVoiceLines(adder, "usagi", VoiceMoment.GIFT, "우나");
+            addVoiceLines(adder, "usagi", VoiceMoment.REVIVE, "야하아!!");
+            addVoiceLines(adder, "usagi", VoiceMoment.IDLE, "훈", "푸루루루", "우나");
+            addVoiceLines(adder, "momonga", VoiceMoment.TAME, "드디어 해냈다!!");
+            addVoiceLines(adder, "momonga", VoiceMoment.HURT, "위로해.");
+            addVoiceLines(adder, "momonga", VoiceMoment.PAID, "칭찬해.");
+            addVoiceLines(adder, "momonga", VoiceMoment.SHOP, "내놔!");
+            addVoiceLines(adder, "momonga", VoiceMoment.GIFT, "칭찬해.");
+            addVoiceLines(adder, "momonga", VoiceMoment.REVIVE, "위로해.");
+            addVoiceLines(adder, "momonga", VoiceMoment.IDLE, "칭찬해.", "내놔!");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.SHOP, "하아...");
+            addVoiceLines(adder, "rakko", VoiceMoment.TAME, "...나쁘지 않군.");
+            addVoiceLines(adder, "rakko", VoiceMoment.HUNT, "간다.");
+            addVoiceLines(adder, "rakko", VoiceMoment.PAID, "훗.");
+            addVoiceLines(adder, "rakko", VoiceMoment.SHOP, "...맛있군.");
+            addVoiceLines(adder, "rakko", VoiceMoment.GIFT, "...가져.");
+            addVoiceLines(adder, "rakko", VoiceMoment.REVIVE, "...아직 멀었다.");
+            addVoiceLines(adder, "shisa", VoiceMoment.TAME, "하이사이!", "잘 부탁해!");
+            addVoiceLines(adder, "shisa", VoiceMoment.HURT, "아얏!");
+            addVoiceLines(adder, "shisa", VoiceMoment.HUNT, "히, 힘낼게요...!");
+            addVoiceLines(adder, "shisa", VoiceMoment.PAID, "기쁘시사!");
+            addVoiceLines(adder, "shisa", VoiceMoment.SHOP, "잘 먹겠습니다!");
+            addVoiceLines(adder, "shisa", VoiceMoment.GIFT, "이거, 받으세요!");
+            addVoiceLines(adder, "shisa", VoiceMoment.REVIVE, "난쿠루나이사~");
+            addVoiceLines(adder, "shisa", VoiceMoment.IDLE, "하이사이!", "산핀차가 마시고 싶어~");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.TAME, "카니!");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.GIFT, "여기...");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.IDLE, "카니");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.CLUNG_TO, "싫어!!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.TREATED, "와아...!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.GIVEN_COFFEE, "와아...");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.LISTEN, "와아...");
+            addVoiceLines(adder, "hachiware", VoiceMoment.CLUNG_TO, "어, 뭐야 뭐야!?");
+            addVoiceLines(adder, "hachiware", VoiceMoment.CRAB_GREETING, "카니~!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.TREATED, "감사합니다, 선생님!!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.GIVEN_COFFEE, "고마워~!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.LISTEN, "좋은 곡이잖아!");
+            addVoiceLines(adder, "usagi", VoiceMoment.CLUNG_TO, "하아?");
+            addVoiceLines(adder, "usagi", VoiceMoment.GIVEN_COFFEE, "야하");
+            addVoiceLines(adder, "usagi", VoiceMoment.LISTEN, "푸루루루");
+            addVoiceLines(adder, "momonga", VoiceMoment.CLING, "칭찬해.");
+            addVoiceLines(adder, "momonga", VoiceMoment.TURNED_DOWN, "위로해.");
+            addVoiceLines(adder, "momonga", VoiceMoment.CRAB_GREETING, "카닛!");
+            addVoiceLines(adder, "momonga", VoiceMoment.GIVEN_COFFEE, "더 내놔!");
+            addVoiceLines(adder, "momonga", VoiceMoment.LISTEN, "한 곡 더!");
+            addVoiceLines(adder, "rakko", VoiceMoment.TREAT, "...먹어.");
+            addVoiceLines(adder, "rakko", VoiceMoment.GIVEN_COFFEE, "...도움이 되는군.");
+            addVoiceLines(adder, "shisa", VoiceMoment.CLUNG_TO, "저, 저기...");
+            addVoiceLines(adder, "shisa", VoiceMoment.GIVEN_COFFEE, "감사합니다!");
+            addVoiceLines(adder, "shisa", VoiceMoment.LISTEN, "잘 치시네요~!");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.CRAB_GREETING, "카니");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.GIVEN_COFFEE, "고마워...");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.EXAM_PASS, "와... 와아...!!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.EXAM_FAIL, "윽... 윽...");
+            addVoiceLines(adder, "hachiware", VoiceMoment.EXAM_PASS, "합격... 라는 거야!?");
+            addVoiceLines(adder, "hachiware", VoiceMoment.EXAM_FAIL, "다음엔 꼭 될 거야!");
+            addVoiceLines(adder, "usagi", VoiceMoment.EXAM_PASS, "우나아!!");
+            addVoiceLines(adder, "usagi", VoiceMoment.EXAM_FAIL, "하아?");
+            addVoiceLines(adder, "momonga", VoiceMoment.EXAM_PASS, "합격했어! 칭찬해!!");
+            addVoiceLines(adder, "momonga", VoiceMoment.EXAM_FAIL, "위로해.");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.EXAM_PASS, "하아아...");
+            addVoiceLines(adder, "rakko", VoiceMoment.EXAM_PASS, "...당연하지.");
+            addVoiceLines(adder, "rakko", VoiceMoment.EXAM_FAIL, "...아직 멀었다.");
+            addVoiceLines(adder, "shisa", VoiceMoment.EXAM_PASS, "엄청 기뻐서!");
+            addVoiceLines(adder, "shisa", VoiceMoment.EXAM_FAIL, "난쿠루나이사~! 다음에 더 힘낼게요!");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.EXAM_PASS, "책 덕분이야.");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.EXAM_FAIL, "한 번 더 읽어 보자.");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.WHISTLE, "와아...!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.WHISTLE, "불렀어~?");
+            addVoiceLines(adder, "usagi", VoiceMoment.WHISTLE, "야하아!!");
+            addVoiceLines(adder, "momonga", VoiceMoment.WHISTLE, "내놔!");
+            addVoiceLines(adder, "rakko", VoiceMoment.WHISTLE, "...가자.");
+            addVoiceLines(adder, "shisa", VoiceMoment.WHISTLE, "네에~!");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.WHISTLE, "갈게...");
+            addWhistleTranslations(adder, "피리 사탕", "피리 사탕 (%s)", "길게 눌러 불어. 근처 펫이 표시된 지시를 따라. 웅크리고 우클릭하면 지시를 바꿔.", "피리 사탕: %s", "펫 %d마리가 달려왔어", "펫 %d마리가 앉았어", "펫 %d마리가 자유롭게 돌아다녀", "야생 펫 %d마리가 구경하러 왔어", "호루라기를 들은 펫이 없어", "구경하러 가는 중", "호루라기가 안 들려");
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
