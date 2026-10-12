@@ -9,6 +9,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitMemory;
+import com.dwinovo.chiikawa.utils.Utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
@@ -61,6 +62,72 @@ public final class FarmGameTests {
         helper.setBlock(bed, Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE));
 
         helper.succeedWhen(() -> helper.assertBlockPresent(Blocks.WHEAT, bed.above()));
+    }
+
+    /** Not only wheat: a farmer sows beetroot seeds, potatoes and carrots as well. */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WORK_TICKS)
+    public static void a_farmer_sows_beetroot_seeds(GameTestHelper helper) {
+        sows(helper, Items.BEETROOT_SEEDS, Blocks.BEETROOTS, Blocks.FARMLAND.defaultBlockState()
+            .setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE));
+    }
+
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WORK_TICKS)
+    public static void a_farmer_plants_potatoes(GameTestHelper helper) {
+        sows(helper, Items.POTATO, Blocks.POTATOES, Blocks.FARMLAND.defaultBlockState()
+            .setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE));
+    }
+
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WORK_TICKS)
+    public static void a_farmer_plants_carrots(GameTestHelper helper) {
+        sows(helper, Items.CARROT, Blocks.CARROTS, Blocks.FARMLAND.defaultBlockState()
+            .setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE));
+    }
+
+    /** Nether wart goes on soul sand, not farmland. */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WORK_TICKS)
+    public static void a_farmer_replants_nether_wart_on_soul_sand(GameTestHelper helper) {
+        sows(helper, Items.NETHER_WART, Blocks.NETHER_WART, Blocks.SOUL_SAND.defaultBlockState());
+    }
+
+    private static void sows(GameTestHelper helper, net.minecraft.world.item.Item seed, net.minecraft.world.level.block.Block crop,
+            net.minecraft.world.level.block.state.BlockState soil) {
+        AbstractPet pet = holding(worker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
+        pet.getBackpack().addItem(new ItemStack(seed, 8));
+        BlockPos bed = new BlockPos(7, STAND - 1, 4);
+        helper.setBlock(bed, soil);
+
+        helper.succeedWhen(() -> helper.assertBlockPresent(crop, bed.above()));
+    }
+
+    /**
+     * Planting needs no player behind it: put straight into the world, one seed used up, for any
+     * seed and with nobody to ask where they are looking. A space already taken, or soil that is gone
+     * as when it was broken in the moment before the pet came to plant, is left alone and the seed kept.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = 100)
+    public static void planting_needs_no_player_and_leaves_a_taken_space_alone(GameTestHelper helper) {
+        AbstractPet pet = worker(helper, new BlockPos(4, STAND, 4));
+        BlockPos bed = new BlockPos(7, STAND - 1, 4);
+        helper.setBlock(bed, Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE));
+        ItemStack seeds = new ItemStack(Items.WHEAT_SEEDS, 3);
+
+        helper.assertTrue(Utils.plantSeed(helper.getLevel(), pet, helper.absolutePos(bed), seeds), "the seed was not planted");
+        helper.assertBlockPresent(Blocks.WHEAT, bed.above());
+        helper.assertTrue(seeds.getCount() == 2, "the seeds left are " + seeds.getCount());
+
+        helper.assertFalse(Utils.plantSeed(helper.getLevel(), pet, helper.absolutePos(bed), seeds), "planted where a crop already stands");
+        helper.assertTrue(seeds.getCount() == 2, "a seed was used up for nothing");
+
+        helper.setBlock(bed.above(), Blocks.STONE);
+        helper.assertFalse(Utils.plantSeed(helper.getLevel(), pet, helper.absolutePos(bed), seeds), "planted in solid stone");
+        helper.setBlock(bed.above(), Blocks.AIR);
+        helper.assertTrue(Utils.plantSeed(helper.getLevel(), pet, helper.absolutePos(bed), seeds), "the space was free again");
+
+        // The soil gone, as when it is broken just before the pet comes to plant: nothing to plant in.
+        helper.setBlock(bed.above(), Blocks.AIR);
+        helper.setBlock(bed, Blocks.AIR);
+        helper.assertFalse(Utils.plantSeed(helper.getLevel(), pet, helper.absolutePos(bed), seeds), "planted in the air");
+        helper.succeed();
     }
 
     /** A chest within reach is where the crop goes, not the pet's own bag. */
