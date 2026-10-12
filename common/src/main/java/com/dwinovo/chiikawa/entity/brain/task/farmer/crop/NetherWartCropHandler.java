@@ -18,8 +18,8 @@ import net.minecraft.world.level.gameevent.GameEvent;
  * a worked example of extending {@link DefaultCropHandler}. Nether wart grows on
  * soul sand (not farmland) and uses its own {@code AGE} property instead of
  * {@code CropBlock}'s, so seed detection, soil and harvest/replant are overridden;
- * planting reuses the default native placement (the nether wart item is a normal
- * {@code BlockItem} that places onto soul sand).
+ * planting reuses the default (the nether wart item is a normal {@code BlockItem}
+ * whose block survives on soul sand).
  */
 public class NetherWartCropHandler extends DefaultCropHandler {
 
