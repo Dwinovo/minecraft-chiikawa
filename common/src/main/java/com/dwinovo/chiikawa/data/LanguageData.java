@@ -5,7 +5,7 @@ import java.util.List;
 
 public final class LanguageData {
     /** The languages the mod is written in; English is also what the others are held to. */
-    public static final List<String> LOCALES = List.of("en_us", "zh_cn", "ja_jp");
+    public static final List<String> LOCALES = List.of("en_us", "zh_cn", "ja_jp", "pt_br");
 
     private LanguageData() {
     }
@@ -434,7 +434,223 @@ public final class LanguageData {
                 "1本で何枚か撮れて、いっぱいになるとハチワレが渡してくれます。右クリックで写真を見られます。カメラを持ったハチワレのリュックに入れてください");
             addPhotoIntentTranslations(adder, "写真を撮る", "写真を撮るのはハチワレだけ", "リュックにカメラがない", "リュックにフィルムがない",
                 "飼い主が遠すぎる", "飼い主が忙しそう", "さっき撮ったばかり", "撮りたいものがない");
-        } else {
+        } else if ("pt_br".equals(locale)) {
+            addCommonTranslations(adder, "Chiikawa", "Mochila do Pet", "Seguir", "Sentar", "Livre");
+            addDollTooltipTranslations(adder, "Que tal colocar a pelúcia em cima de um bolo?");
+            addHandbookTranslations(adder, "Manual de Trabalho do Chiikawa", "Clique com o botão direito para abrir: como tudo funciona",
+                "Este manual ainda está em branco");
+            addHandbookChapter(adder, "meet", "Conhecendo o Chiikawa",
+                "Pets selvagens vivem em planícies, savanas, desertos, pântanos e planícies nevadas. Clique com o botão direito em um deles com comida, como pão ou biscoito, e você pode domá-lo. Agache e clique com o botão direito para alternar entre Seguir, Sentar e Livre; clique com o botão direito para abrir a tela dele. Sopre uma Bala de Apito para dar a mesma ordem a todos os pets por perto.");
+            addHandbookChapter(adder, "work", "Ao Trabalho",
+                "Coloque um Quadro de Trabalho e ele afixa algumas fichas a cada nascer do sol. Os pets pegam fichas de acordo com a ferramenta na mão: enxada para capina, espada ou arco para caça e, com a Caixa de Música, o Hachiware faz apresentações de rua. O pagamento vai direto para a mochila do pet. Gaste esmeraldas no quadro para melhorá-lo: mais fichas por dia e fichas de caça a partir do nível 2.");
+            addHandbookChapter(adder, "shop", "A Loja e os Presentes",
+                "Coloque uma Loja e seus pets gastam as esmeraldas das mochilas deles em coisas de que gostam. Clique com o botão direito em um pet com uma esmeralda para dar uma mesada a ele. De vez em quando, ele escolhe algo da mochila e traz para você de presente. Você também pode comprar e vender na Loja.");
+            addHandbookChapter(adder, "care", "Cuidando dos Pets",
+                "Uma Mochila de Costas ou uma bolsa dá ao pet mais 10 espaços, e um Prato Simples deixa o pet mais disposto a trabalhar. Um pet que cai vira uma pelúcia: clique com o botão direito em um bolo colocado, com a pelúcia na mão, e ele volta. Se algum se perder, toque o Sino do Pet.");
+            addHandbookChapter(adder, "camera", "A Câmera do Hachiware",
+                "Dê uma câmera e filme ao Hachiware, e ele tira fotos de você, dos amigos dele e da paisagem quando surge o momento certo. Um rolo tem 8 fotos, e o rolo cheio chega até você de presente. Clique com o botão direito em um rolo para ver as fotos dele.");
+            addHandbookChapter(adder, "licence", "A Licença de Capina",
+                "Coloque uma Mesa de Exame e clique com o botão direito nela para inscrever um pet por 1 diamante. Ele faz a prova durante o dia e recebe o resultado na manhã seguinte. Fichas de capina e o guia de estudo aumentam as chances. Um pet com licença ganha mais com a capina e, a partir do grau 3, pode pegar fichas de Capina Avançada.");
+            adder.add("manual.chiikawa.more", "Mais no site →");
+            addJobTranslations(adder, "Trabalho", "Nenhum", "Fazendeiro", "Espadachim", "Arqueiro", "Músico", "Desconhecido");
+            addEntityTranslations(adder, "Usagi", "Hachiware", "Chiikawa", "Shisa", "Momonga", "Kurimanju", "Rakko", "Furuhonya");
+            addItemTagTranslations(adder, "Ferramentas de Fazendeiro", "Ferramentas de Espadachim", "Ferramentas de Arqueiro", "Ferramentas de Músico", "Comidas para Domar", "Cultivos para Plantar", "Itens para Entregar", "Itens Coletáveis", "Petiscos para Pets");
+            addItemTranslations(
+                adder,
+                "Ovo de Usagi",
+                "Ovo de Hachiware",
+                "Ovo de Chiikawa",
+                "Ovo de Shisa",
+                "Ovo de Momonga",
+                "Ovo de Kurimanju",
+                "Ovo de Rakko",
+                "Ovo de Furuhonya",
+                "Pelúcia de Usagi",
+                "Pelúcia de Hachiware",
+                "Pelúcia de Chiikawa",
+                "Pelúcia de Shisa",
+                "Pelúcia de Momonga",
+                "Pelúcia de Kurimanju",
+                "Pelúcia de Rakko",
+                "Pelúcia de Furuhonya",
+                "Bastão de Subjugação do Usagi",
+                "Sasumata do Hachiware",
+                "Sasumata do Chiikawa",
+                "Espada do Rakko"
+            );
+            addMusicBoxTranslations(adder, "Caixa de Música", "Nenhuma música selecionada", "Música: %s", "Escolher Música", "Importando", "Falhou", "Nenhuma música para tocar",
+                "Coloque arquivos MP3 / WAV na pasta e depois recarregue", "Algumas músicas não puderam ser importadas", "Use arquivos de áudio MP3", "Abrir Pasta", "Recarregar", "Página anterior", "Próxima página");
+            addMusicBoxModeTranslations(adder, "Reprodução: %s", "Tocar uma vez", "Repetir tudo", "Aleatório", "Repetir uma");
+            addIntentFailureTranslations(adder, "Não consegue seguir o dono", "O dono está por perto", "De volta com o dono", "O alvo está fora de alcance",
+                "O alvo saiu da área permitida", "Nenhum item para pegar", "Nenhuma plantação para colher", "Nenhuma terra arada para plantar", "Nenhum recipiente para entregar",
+                "Nenhum alvo para atacar", "O ataque está recarregando", "Sem flechas", "Nenhuma música nova para tocar", "A música acabou",
+                "Algo mais urgente vem primeiro", "Sem ervas daninhas por perto", "Sem cogumelos por perto",
+                "Só com uma ficha compatível", "Só se faz à noite",
+                "Já está com uma ficha", "Descansando depois de perder uma ficha", "Nenhuma ficha para ele em um quadro por perto",
+                "Acabou de comprar algo", "Nada aqui que ele queira e possa pagar", "Nada para dar");
+            addBlockTranslations(adder, "Quadro de Trabalho", "Loja");
+            addSupplyTranslations(adder, "Mochila de Costas", "Bolsa do Urso", "Bolsa da Baleia", "Bolsa da Estrela", "Usada por um pet: mais dez espaços",
+                    "Prato Simples", "Dado a um pet: mais disposto a trabalhar por um tempo",
+                    "Sino do Pet", "Chama seus pets para casa, até de outra dimensão; meio minuto entre os toques");
+            addLicenceTranslations(adder, "Guia de Estudo da Licença de Capina", "Clique com o botão direito no seu pet com ele na mão para que o leia: mais chances na próxima prova da licença de capina; é consumido na prova",
+                "Licença de Capina", "%1$s passou na prova de %2$s, grau %3$s", "%1$s não passou na prova de %2$s, grau %3$s",
+                "Você inscreveu %1$s na prova de %2$s, grau %3$s", "%1$s entregou a prova de %2$s; resultado amanhã de manhã",
+                "%1$s perdeu a prova de %2$s de hoje", "A mesa de exame sumiu; a prova de %2$s de %1$s foi cancelada",
+                "A caminho de uma prova", "A caminho de ver o resultado", "Nenhuma mesa de exame para ir");
+            addLicenceScreenTranslations(adder, "Grau %s", "Nenhum", "%s: grau %s", "%s: ainda nenhum", "Tem o grau máximo",
+                "Resultado amanhã de manhã", "Fazendo a prova hoje", "Precisa de um pouco mais de prática para fazer a prova",
+                "Pronto: inscreva em uma mesa de exame");
+            addExamDeskStatusTranslations(adder, "Mesa de Exame", "Escolha um pet para inscrever", "Inscrições só durante o dia",
+                "Alguém está fazendo uma prova aqui", "Tem algo no caminho atrás da mesa",
+                "%1$s está fazendo a prova de %2$s, grau %3$s", "%1$s entregou; resultado amanhã de manhã",
+                "%1$s, %2$s grau %3$s: passou", "%1$s, %2$s grau %3$s: não passou");
+            addExamDeskPetTranslations(adder, "Taxa %s", "Inscrever %s", "Grau %s", "Nenhum dos seus pets por perto", " (grau %s)",
+                " (sem licença ainda)", "Tem o grau máximo", "Precisa de mais prática", "Inscrito ou aguardando o resultado", "Mandado ficar parado",
+                "Longe demais");
+            addExamDeskOddsTranslations(adder, "Base %s%%", "Trabalho feito +%s%%", "Reprovações anteriores +%s%%", "Leu o guia +%s%%",
+                "Personalidade ×%s", "Chance de passar %s (máx. %s%%)");
+            addPetNewsTranslations(adder, "%1$s deu %2$s para você");
+            addRecallTranslations(adder, "%s veio correndo", "Você não tem pets para chamar",
+                    "%s não respondeu; sumiu de onde foi visto pela última vez");
+            addShopScreenTranslations(adder, "Loja", "Comprar %s", "Vender %s", "Nada à venda hoje",
+                    "Página anterior", "Próxima página");
+            addIntentNameTranslations(adder, "Seguindo o dono", "Sentado", "Passeando", "Pegando um item",
+                "Buscando uma ficha", "Colhendo", "Plantando", "Entregando", "Arrancando ervas daninhas", "Colhendo cogumelos",
+                "Lutando", "Atirando", "Se apresentando", "Fazendo compras", "Trazendo um presente");
+            addSocialTranslations(adder, "Visitando um amigo", "Brincando junto", "Ninguém por perto com quem queira brincar",
+                "Ninguém está vindo");
+            addTaskTypeTranslations(adder, "Capina", "%s ervas daninhas", "Apresentação de Rua", "%ss",
+                "Caça a Monstros", "Tiro em Monstros", "%s abatidos", "Capina Avançada");
+            addBoardScreenTranslations(adder, "Quadro de Trabalho", "%s no quadro", "Nenhuma ficha hoje",
+                    "Só %s", "Aberta", "Pega", "Pega por %s",
+                    "Nv.%s", "%s por dia", "Melhorar %s",
+                    "No Nv.%1$s: %2$s por dia", "Novo trabalho: %s",
+                    "Totalmente melhorado", "Você tem %1$s × %2$s");
+            addPetStatusTranslations(adder, "Parado", "Uma mochila de costas ou uma bolsa adiciona mais dez espaços");
+            addPetScreenTranslations(adder, "Mochila", "Status", "Ordens",
+                    "Nenhuma ficha pega",
+                    "Disposto a trabalhar: faltam %s",
+                    "Mesada: %1$s × %2$s",
+                    "Um presente para você",
+                    "Ele mesmo vai trazer",
+                    "Fica com você e entra em ação quando algo ataca",
+                    "Fica exatamente onde está",
+                    "Trabalha, faz compras e pega fichas perto de casa");
+            // What the pets say (design 0.1.1, section 3), in Portuguese: the sounds stay as they are and the words carry the same meaning.
+            addVoiceLines(adder, "chiikawa", VoiceMoment.TAME, "Wah...");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.HURT, "Nooo!!", "Hic... hic...");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.HUNT, "Yaaah!!!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.PAID, "!!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.SHOP, "Wah...!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.GIFT, "Mm...!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.REVIVE, "Hah...!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.IDLE, "Hup...", "Phew...");
+            addVoiceLines(adder, "hachiware", VoiceMoment.TAME, "Isso quer dizer...!?");
+            addVoiceLines(adder, "hachiware", VoiceMoment.HURT, "Ai, ai, ai...");
+            addVoiceLines(adder, "hachiware", VoiceMoment.HUNT, "Vai dar certo de algum jeito!!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.PAID, "Eeeba!!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.SHOP, "Isso não é... o melhor!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.GIFT, "Toma, é pra você!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.REVIVE, "Estou chorando!!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.IDLE, "Hmm hmm~♪");
+            addVoiceLines(adder, "usagi", VoiceMoment.TAME, "Yaha!");
+            addVoiceLines(adder, "usagi", VoiceMoment.HURT, "Haah?");
+            addVoiceLines(adder, "usagi", VoiceMoment.HUNT, "Uraaa!!");
+            addVoiceLines(adder, "usagi", VoiceMoment.PAID, "Prrrrr");
+            addVoiceLines(adder, "usagi", VoiceMoment.SHOP, "Purya");
+            addVoiceLines(adder, "usagi", VoiceMoment.GIFT, "Ura");
+            addVoiceLines(adder, "usagi", VoiceMoment.REVIVE, "Yahaaa!!");
+            addVoiceLines(adder, "usagi", VoiceMoment.IDLE, "Hmmn", "Prrrrr", "Ura");
+            addVoiceLines(adder, "momonga", VoiceMoment.TAME, "Finalmente consegui!!");
+            addVoiceLines(adder, "momonga", VoiceMoment.HURT, "Me consola.");
+            addVoiceLines(adder, "momonga", VoiceMoment.PAID, "Me elogia.");
+            addVoiceLines(adder, "momonga", VoiceMoment.SHOP, "Me dá!");
+            addVoiceLines(adder, "momonga", VoiceMoment.GIFT, "Me elogia.");
+            addVoiceLines(adder, "momonga", VoiceMoment.REVIVE, "Me consola.");
+            addVoiceLines(adder, "momonga", VoiceMoment.IDLE, "Me elogia.", "Me dá!");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.SHOP, "Haaah...");
+            addVoiceLines(adder, "rakko", VoiceMoment.TAME, "...Nada mal.");
+            addVoiceLines(adder, "rakko", VoiceMoment.HUNT, "Vamos.");
+            addVoiceLines(adder, "rakko", VoiceMoment.PAID, "Heh.");
+            addVoiceLines(adder, "rakko", VoiceMoment.SHOP, "...Gostoso.");
+            addVoiceLines(adder, "rakko", VoiceMoment.GIFT, "...Toma.");
+            addVoiceLines(adder, "rakko", VoiceMoment.REVIVE, "...Ainda falta muito.");
+            addVoiceLines(adder, "shisa", VoiceMoment.TAME, "Haisai!", "Muito prazer!");
+            addVoiceLines(adder, "shisa", VoiceMoment.HURT, "Ai!");
+            addVoiceLines(adder, "shisa", VoiceMoment.HUNT, "E-eu vou me esforçar...!");
+            addVoiceLines(adder, "shisa", VoiceMoment.PAID, "Feliz-shisa!");
+            addVoiceLines(adder, "shisa", VoiceMoment.SHOP, "Obrigada pelo agrado!");
+            addVoiceLines(adder, "shisa", VoiceMoment.GIFT, "Por favor, aceite isto!");
+            addVoiceLines(adder, "shisa", VoiceMoment.REVIVE, "Vai dar tudo certo~");
+            addVoiceLines(adder, "shisa", VoiceMoment.IDLE, "Haisai!", "Que vontade de um chá sanpin~");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.TAME, "Caranguejo!");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.GIFT, "Para você...");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.IDLE, "Caranguejo");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.CLUNG_TO, "Nooo!!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.TREATED, "Wah...!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.GIVEN_COFFEE, "Wah...");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.LISTEN, "Wah...");
+            addVoiceLines(adder, "hachiware", VoiceMoment.CLUNG_TO, "Hã, o que foi!?");
+            addVoiceLines(adder, "hachiware", VoiceMoment.CRAB_GREETING, "Caranguejo~!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.TREATED, "Obrigado, Sensei!!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.GIVEN_COFFEE, "Valeu~!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.LISTEN, "Que música!");
+            addVoiceLines(adder, "usagi", VoiceMoment.CLUNG_TO, "Haah?");
+            addVoiceLines(adder, "usagi", VoiceMoment.GIVEN_COFFEE, "Yaha");
+            addVoiceLines(adder, "usagi", VoiceMoment.LISTEN, "Prrrrr");
+            addVoiceLines(adder, "momonga", VoiceMoment.CLING, "Me elogia.");
+            addVoiceLines(adder, "momonga", VoiceMoment.TURNED_DOWN, "Me consola.");
+            addVoiceLines(adder, "momonga", VoiceMoment.CRAB_GREETING, "Caranguejo!");
+            addVoiceLines(adder, "momonga", VoiceMoment.GIVEN_COFFEE, "Mais! Me dá!");
+            addVoiceLines(adder, "momonga", VoiceMoment.LISTEN, "Toca outra!");
+            addVoiceLines(adder, "rakko", VoiceMoment.TREAT, "...Come.");
+            addVoiceLines(adder, "rakko", VoiceMoment.GIVEN_COFFEE, "...Agradecido.");
+            addVoiceLines(adder, "shisa", VoiceMoment.CLUNG_TO, "A-ah...");
+            addVoiceLines(adder, "shisa", VoiceMoment.GIVEN_COFFEE, "Muito obrigada!");
+            addVoiceLines(adder, "shisa", VoiceMoment.LISTEN, "Você toca tão bem~!");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.CRAB_GREETING, "Caranguejo");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.GIVEN_COFFEE, "Obrigado...");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.EXAM_PASS, "Wa... wah...!!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.EXAM_FAIL, "Hic... hic...");
+            addVoiceLines(adder, "hachiware", VoiceMoment.EXAM_PASS, "Passei... isso quer dizer...!?");
+            addVoiceLines(adder, "hachiware", VoiceMoment.EXAM_FAIL, "Da próxima, com certeza!");
+            addVoiceLines(adder, "usagi", VoiceMoment.EXAM_PASS, "Uraaa!!");
+            addVoiceLines(adder, "usagi", VoiceMoment.EXAM_FAIL, "Haah?");
+            addVoiceLines(adder, "momonga", VoiceMoment.EXAM_PASS, "Passei! Me elogia!!");
+            addVoiceLines(adder, "momonga", VoiceMoment.EXAM_FAIL, "Me consola.");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.EXAM_PASS, "Haaah...");
+            addVoiceLines(adder, "rakko", VoiceMoment.EXAM_PASS, "...Naturalmente.");
+            addVoiceLines(adder, "rakko", VoiceMoment.EXAM_FAIL, "...Ainda falta muito.");
+            addVoiceLines(adder, "shisa", VoiceMoment.EXAM_PASS, "Tão, tão feliz!");
+            addVoiceLines(adder, "shisa", VoiceMoment.EXAM_FAIL, "Nankurunaisa! Vou me esforçar mais da próxima vez!");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.EXAM_PASS, "Tudo graças aos livros.");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.EXAM_FAIL, "Vou ler de novo.");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.WHISTLE, "Wah...!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.WHISTLE, "Me chamou~?");
+            addVoiceLines(adder, "usagi", VoiceMoment.WHISTLE, "Yahaaa!!");
+            addVoiceLines(adder, "momonga", VoiceMoment.WHISTLE, "Me dá!");
+            addVoiceLines(adder, "rakko", VoiceMoment.WHISTLE, "...Vamos.");
+            addVoiceLines(adder, "shisa", VoiceMoment.WHISTLE, "Já vou!");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.WHISTLE, "Já vou...");
+            addVoiceLines(adder, "hachiware", VoiceMoment.PHOTO, "Digam xis~!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.PHOTOGRAPHED, "Mm...");
+            addVoiceLines(adder, "usagi", VoiceMoment.PHOTOGRAPHED, "Yahaaa!");
+            addVoiceLines(adder, "momonga", VoiceMoment.PHOTOGRAPHED, "Me deixa fofinho.");
+            addVoiceLines(adder, "rakko", VoiceMoment.PHOTOGRAPHED, "...Pode ir.");
+            addVoiceLines(adder, "shisa", VoiceMoment.PHOTOGRAPHED, "Faz uma bem bonita~");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.PHOTOGRAPHED, "Caranguejo");
+            addWhistleTranslations(adder, "Bala de Apito", "Bala de Apito (%s)", "Segure para soprar: os pets por perto seguem a ordem mostrada. Agache + clique com o botão direito para mudá-la.", "Bala de apito: %s", "%d pets vieram correndo", "%d pets se sentaram", "%d pets saíram para passear", "%d pets selvagens vieram dar uma olhada", "Nenhum pet ouviu o apito", "Indo dar uma olhada", "Nenhum apito ouvido");
+            addSettingsTranslations(adder, "Configurações do Chiikawa", "Aparição de pets selvagens: %s", "Conversa: %s", "Balões de fala: %s", "Ligado", "Desligado",
+                "A aparição e a conversa pertencem ao mundo; mude-as de dentro de um mundo", "Só operadores podem mudar a aparição e a conversa",
+                "O volume dos pets é o controle \"Criaturas Amigáveis\" nas configurações de som do jogo");
+            addAlbumTranslations(adder, "Foto de %1$s · Dia %2$s · %3$s", "Foto de %1$s · Dia %2$s · Paisagem", "Foto %1$s/%2$s",
+                "Revelando...", "Esta foto não foi encontrada", "Foto anterior", "Próxima foto");
+            addCameraTranslations(adder, "A Câmera do Hachiware", "Coloque na mochila do Hachiware com um pouco de filme, e ele vai procurar bons momentos para tirar fotos", "Filme",
+                "Um rolo tem várias fotos, e o Hachiware entrega o rolo a você quando ele estiver cheio; clique com o botão direito para ver as fotos. Coloque na mochila de um Hachiware que tenha uma câmera");
+            addPhotoIntentTranslations(adder, "Tirar uma foto", "Só o Hachiware tira fotos", "Sem câmera na mochila",
+                "Sem filme na mochila", "O dono está longe demais", "O dono está ocupado", "Acabou de tirar uma, descansando",
+                "Nada que valha uma foto agora");
+            } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
             addHandbookTranslations(adder, "Chiikawa's Work Handbook", "Right-click to open: how everything works",
