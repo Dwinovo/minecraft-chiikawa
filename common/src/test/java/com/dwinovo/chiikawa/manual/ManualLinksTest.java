@@ -14,11 +14,12 @@ class ManualLinksTest {
     }
 
     @Test
-    void japaneseGetsJapaneseAndAnythingElseEnglish() {
+    void japaneseGetsJapanesePortugueseGetsPortugueseAndAnythingElseEnglish() {
         assertEquals("ja", ManualLinks.folder("ja_jp"));
         assertEquals("en", ManualLinks.folder("en_us"));
         assertEquals("en", ManualLinks.folder("fr_fr"));
-        assertEquals("en", ManualLinks.folder("pt_br"), "the site has no Portuguese");
+        assertEquals("pt", ManualLinks.folder("pt_br"));
+        assertEquals("pt", ManualLinks.folder("pt_pt"));
         assertEquals("en", ManualLinks.folder(""));
     }
 
@@ -27,5 +28,6 @@ class ManualLinksTest {
         assertEquals("https://chiikawa.dwinovo.cn/zh/play/work.html", ManualLinks.url("zh_cn", "play/work"));
         assertEquals("https://chiikawa.dwinovo.cn/ja/play/camera.html", ManualLinks.url("ja_jp", "play/camera"));
         assertEquals("https://chiikawa.dwinovo.cn/en/play/taming.html", ManualLinks.url("en_us", "play/taming"));
+        assertEquals("https://chiikawa.dwinovo.cn/pt/play/shop.html", ManualLinks.url("pt_br", "play/shop"));
     }
 }
