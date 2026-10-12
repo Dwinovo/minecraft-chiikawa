@@ -452,9 +452,9 @@ public final class LanguageData {
             addHandbookChapter(adder, "licence", "A Licença de Capina",
                 "Coloque uma Mesa de Exame e clique com o botão direito nela para inscrever um pet por 1 diamante. O pet faz a prova durante o dia e recebe o resultado na manhã seguinte. Fichas de capina e o guia de estudo aumentam as chances. Um pet com licença ganha mais com a capina e, a partir do grau 3, pode pegar fichas de Capina Avançada.");
             adder.add("manual.chiikawa.more", "Mais no site →");
-            addJobTranslations(adder, "Trabalho", "Nenhum", "Fazendeiro", "Espadachim", "Arqueiro", "Músico", "Desconhecido");
+            addJobTranslations(adder, "Trabalho", "Nenhum", "Agricultura", "Esgrima", "Arqueria", "Música", "Desconhecido");
             addEntityTranslations(adder, "Usagi", "Hachiware", "Chiikawa", "Shisa", "Momonga", "Kurimanju", "Rakko", "Furuhonya");
-            addItemTagTranslations(adder, "Ferramentas de Fazendeiro", "Ferramentas de Espadachim", "Ferramentas de Arqueiro", "Ferramentas de Músico", "Comidas para Domar", "Cultivos para Plantar", "Itens para Entregar", "Itens Coletáveis", "Petiscos para Pets");
+            addItemTagTranslations(adder, "Ferramentas de Agricultura", "Ferramentas de Esgrima", "Ferramentas de Arqueria", "Ferramentas de Música", "Comidas para Domar", "Cultivos para Plantar", "Itens para Entregar", "Itens Coletáveis", "Petiscos para Pets");
             addItemTranslations(
                 adder,
                 "Ovo de Usagi",
