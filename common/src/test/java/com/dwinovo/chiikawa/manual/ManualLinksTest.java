@@ -18,6 +18,7 @@ class ManualLinksTest {
         assertEquals("ja", ManualLinks.folder("ja_jp"));
         assertEquals("en", ManualLinks.folder("en_us"));
         assertEquals("en", ManualLinks.folder("fr_fr"));
+        assertEquals("en", ManualLinks.folder("pt_br"), "the site has no Portuguese");
         assertEquals("en", ManualLinks.folder(""));
     }
 
