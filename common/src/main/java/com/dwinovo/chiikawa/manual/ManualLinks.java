@@ -14,14 +14,18 @@ public final class ManualLinks {
 
     /**
      * @param languageCode the client's language, such as {@code zh_cn} or {@code ja_jp}
-     * @return the website's language folder for it: Chinese for any Chinese, Japanese, else English
+     * @return the website's language folder for it: Chinese for any Chinese, Japanese, Portuguese for
+     *         any Portuguese, else English
      */
     public static String folder(String languageCode) {
         String code = languageCode.toLowerCase(Locale.ROOT);
         if (code.startsWith("zh")) {
             return "zh";
         }
-        return code.startsWith("ja") ? "ja" : "en";
+        if (code.startsWith("ja")) {
+            return "ja";
+        }
+        return code.startsWith("pt") ? "pt" : "en";
     }
 
     /**
