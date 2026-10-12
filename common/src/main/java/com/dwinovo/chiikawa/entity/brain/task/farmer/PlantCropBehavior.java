@@ -88,8 +88,8 @@ public class PlantCropBehavior extends Behavior<AbstractPet>{
         // in the backpack.
         ItemStack seed = Utils.getSeedForBase(world, pet, farmlandPos);
         if (!seed.isEmpty()) {
-            // Native placement: runs the seed's own BlockItem.place, so the crop's
-            // placement rules/state apply and the seed stack is consumed on success.
+            // The handler puts the seed's block in the space above the soil if it can survive
+            // there, and consumes one seed on success.
             if (Utils.plantSeed(world, pet, farmlandPos, seed)) {
                 pet.triggerAction(PetAction.PLANT);
             }
