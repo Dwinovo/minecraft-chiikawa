@@ -3,22 +3,19 @@ package com.dwinovo.chiikawa.entity.brain.task.farmer.crop;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitTag;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.InteractionHand;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.LevelEvent;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.StemBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
 
 /**
  * Standard farming behaviour for crops that follow vanilla conventions. Used as
@@ -32,8 +29,8 @@ import net.minecraft.world.phys.Vec3;
  *       in the {@code c:seeds} convention tag).</li>
  *   <li><b>Harvest</b>: a {@link CropBlock} at max age, stem fruit, or anything
  *       in {@link InitTag#ENTITY_HARVEST_CROPS}.</li>
- *   <li><b>Planting</b>: native {@link BlockItem#place} so the crop's own
- *       placement rules and survival checks apply.</li>
+ *   <li><b>Planting</b>: the seed block's own state in the space above the soil, if it
+ *       can survive there, as a farmer villager does.</li>
  *   <li><b>Collection</b>: loot-table drops (with the held tool, so Fortune
  *       applies) go straight into the backpack; mature crops are replanted in
  *       place by resetting to age 0 rather than destroyed.</li>
@@ -95,18 +92,28 @@ public class DefaultCropHandler implements CropHandler {
         return baseState.is(Blocks.FARMLAND);
     }
 
+    /**
+     * Plants the way a farmer villager does ({@code HarvestFarmland}): the seed block's own state, put
+     * in the empty space above the farmland if it can survive there. No placement context is built,
+     * as one needs a player and a mod that listens for placements may ask it where it is looking.
+     */
     @Override
     public boolean plant(ServerLevel level, AbstractPet pet, BlockPos farmlandPos, BlockState farmlandState, ItemStack seed) {
         if (!(seed.getItem() instanceof BlockItem blockItem)) {
             return false;
         }
-        // Aim at the top face of the farmland; BlockPlaceContext resolves the
-        // placement to the empty block above it.
-        Vec3 hitVec = new Vec3(farmlandPos.getX() + 0.5D, farmlandPos.getY() + 1.0D, farmlandPos.getZ() + 0.5D);
-        BlockHitResult hit = new BlockHitResult(hitVec, Direction.UP, farmlandPos, false);
-        // The (Level, Player, ...) constructor is protected in vanilla, so reach it
-        // through an anonymous subclass — lets us place with no player behind it.
-        BlockPlaceContext context = new BlockPlaceContext(level, null, InteractionHand.MAIN_HAND, seed, hit) {};
-        return blockItem.place(context).consumesAction();
+        BlockPos cropPos = farmlandPos.above();
+        BlockState there = level.getBlockState(cropPos);
+        BlockState crop = blockItem.getBlock().defaultBlockState();
+        if (!(there.isAir() || there.canBeReplaced()) || !there.getFluidState().isEmpty() || !crop.canSurvive(level, cropPos)) {
+            return false;
+        }
+        level.setBlockAndUpdate(cropPos, crop);
+        level.gameEvent(GameEvent.BLOCK_PLACE, cropPos, GameEvent.Context.of(pet, crop));
+        SoundType sound = crop.getSoundType();
+        level.playSound(null, cropPos, sound.getPlaceSound(), SoundSource.BLOCKS, (sound.getVolume() + 1.0F) / 2.0F,
+            sound.getPitch() * 0.8F);
+        seed.shrink(1);
+        return true;
     }
 }
