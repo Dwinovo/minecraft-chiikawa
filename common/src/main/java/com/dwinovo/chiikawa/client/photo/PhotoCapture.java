@@ -83,10 +83,10 @@ public final class PhotoCapture {
         HitResult hit = minecraft.hitResult;
         Entity pointedAt = minecraft.crosshairPickEntity;
 
-        RenderTarget target = new TextureTarget(width, height, true, Minecraft.ON_OSX);
+        RenderTarget target = new TextureTarget(width, height, true);
         try {
             target.setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
-            target.clear(Minecraft.ON_OSX);
+            target.clear();
             inUse = target;
 
             options.hideGui = true;
@@ -99,13 +99,12 @@ public final class PhotoCapture {
             eyes.chiikawa$setEyeHeightOld(viewpoint.getEyeHeight());
             camera.reset();
 
-            minecraft.levelRenderer.graphicsChanged();
             target.bindWrite(false);
-            renderer.renderLevel(minecraft.getTimer());
+            renderer.renderLevel(minecraft.getDeltaTracker());
 
             NativeImage image = Screenshot.takeScreenshot(target);
             try {
-                return Optional.of(new Frame(image.getPixelsRGBA(), image.getWidth(), image.getHeight()));
+                return Optional.of(new Frame(image.getPixelsABGR(), image.getWidth(), image.getHeight()));
             } finally {
                 image.close();
             }
@@ -125,7 +124,6 @@ public final class PhotoCapture {
             renderer.setRenderBlockOutline(true);
             minecraft.hitResult = hit;
             minecraft.crosshairPickEntity = pointedAt;
-            minecraft.levelRenderer.graphicsChanged();
             minecraft.getMainRenderTarget().bindWrite(true);
         }
     }

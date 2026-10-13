@@ -18,10 +18,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class GameRendererMixin {
     @Inject(method = "getFov", at = @At("RETURN"), cancellable = true)
     private void chiikawa$fixedLens(Camera camera, float partialTick, boolean useFovSetting,
-            CallbackInfoReturnable<Double> cir) {
+            CallbackInfoReturnable<Float> cir) {
         OptionalDouble lens = PhotoCapture.lensInUse();
         if (lens.isPresent()) {
-            cir.setReturnValue(lens.getAsDouble());
+            cir.setReturnValue((float) lens.getAsDouble());
         }
     }
 }

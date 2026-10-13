@@ -40,8 +40,6 @@ public final class DataGenerators {
         event.getGenerator().addProvider(true,
                 new ModItemTagsProvider(output, lookupProvider));
         event.getGenerator().addProvider(true,
-                new ModItemTagsProvider(output, lookupProvider, existingFileHelper));
-        event.getGenerator().addProvider(true, new ModRecipeProvider(output, lookupProvider));
                 new ModRecipeProvider.Runner(output, lookupProvider));
         event.getGenerator().addProvider(true, new PetPersonalityProvider(output));
         event.getGenerator().addProvider(true, new PetVoiceProvider(output));
@@ -58,7 +56,6 @@ public final class DataGenerators {
         event.getGenerator().addProvider(true, new QualificationProvider(output));
         event.getGenerator().addProvider(true, new ModAdvancementProvider(output, lookupProvider));
         event.getGenerator().addProvider(true, new ModLootTableProvider(output, lookupProvider));
-        ModBlockTagsProvider blockTagsProvider = new ModBlockTagsProvider(output, lookupProvider, existingFileHelper);
         // Entity tags.
         event.getGenerator().addProvider(true, 
             new ModEntityTagsProvider(
