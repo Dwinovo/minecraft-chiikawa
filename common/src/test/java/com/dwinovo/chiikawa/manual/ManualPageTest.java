@@ -41,27 +41,27 @@ class ManualPageTest {
     @Test
     void aChapterNeedsATextAndALink() {
         assertFalse(ManualPage.CODEC.parse(JsonOps.INSTANCE, json("""
-            { "title": "t", "link": "play/work", "scene": {} }""")).isSuccess(), "no text");
+            { "title": "t", "link": "play/work", "scene": {} }""")).result().isPresent(), "no text");
         assertFalse(ManualPage.CODEC.parse(JsonOps.INSTANCE, json("""
-            { "title": "t", "text": "x", "scene": {} }""")).isSuccess(), "no link");
+            { "title": "t", "text": "x", "scene": {} }""")).result().isPresent(), "no link");
         assertTrue(ManualPage.CODEC.parse(JsonOps.INSTANCE, json("""
-            { "title": "t", "text": "x", "link": "play/work", "scene": {} }""")).isSuccess(), "an empty scene is a scene");
+            { "title": "t", "text": "x", "link": "play/work", "scene": {} }""")).result().isPresent(), "an empty scene is a scene");
     }
 
     @Test
     void anActorIsExactlyOneThing() {
         assertFalse(ManualPage.CODEC.parse(JsonOps.INSTANCE, json("""
             { "title": "t", "text": "x", "link": "l", "scene": { "actors": [
-                { "pet": "chiikawa:usagi", "prop": "chiikawa:shop" } ] } }""")).isSuccess());
+                { "pet": "chiikawa:usagi", "prop": "chiikawa:shop" } ] } }""")).result().isPresent());
         assertFalse(ManualPage.CODEC.parse(JsonOps.INSTANCE, json("""
-            { "title": "t", "text": "x", "link": "l", "scene": { "actors": [ { "x": 0.2 } ] } }""")).isSuccess());
+            { "title": "t", "text": "x", "link": "l", "scene": { "actors": [ { "x": 0.2 } ] } }""")).result().isPresent());
     }
 
     @Test
     void aMoveNobodyKnowsIsRefused() {
         assertFalse(ManualPage.CODEC.parse(JsonOps.INSTANCE, json("""
             { "title": "t", "text": "x", "link": "l", "scene": { "actors": [
-                { "pet": "chiikawa:usagi", "action": "moonwalk" } ] } }""")).isSuccess());
+                { "pet": "chiikawa:usagi", "action": "moonwalk" } ] } }""")).result().isPresent());
     }
 
     @Test

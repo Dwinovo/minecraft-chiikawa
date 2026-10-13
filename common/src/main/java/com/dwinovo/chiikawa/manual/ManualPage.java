@@ -31,7 +31,7 @@ import net.minecraft.world.phys.Vec3;
  */
 public record ManualPage(int order, String title, Scene scene, String text, String link) {
     public static final Codec<ManualPage> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        Codec.INT.optionalFieldOf("order", 0).forGetter(ManualPage::order),
+        ModCodecs.strictOptionalField(Codec.INT, "order", 0).forGetter(ManualPage::order),
         Codec.STRING.fieldOf("title").forGetter(ManualPage::title),
         Scene.CODEC.fieldOf("scene").forGetter(ManualPage::scene),
         Codec.STRING.fieldOf("text").forGetter(ManualPage::text),
@@ -43,7 +43,7 @@ public record ManualPage(int order, String title, Scene scene, String text, Stri
      */
     public record Scene(List<Actor> actors) {
         public static final Codec<Scene> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Actor.CODEC.listOf().optionalFieldOf("actors", List.of()).forGetter(Scene::actors)
+            ModCodecs.strictOptionalField(Actor.CODEC.listOf(), "actors", List.of()).forGetter(Scene::actors)
         ).apply(instance, Scene::new));
 
         public Scene {

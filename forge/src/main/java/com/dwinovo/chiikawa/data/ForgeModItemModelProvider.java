@@ -22,6 +22,7 @@ public class ForgeModItemModelProvider extends ItemModelProvider {
         generatedItem(InitItems.WEEDING_BOOK.get());
         generatedItem(InitItems.WHISTLE_CANDY.get());
         generatedItem(InitItems.PET_BELL.get());
+        generatedItem(InitItems.FILM.get());
         // The props' item models, the weapons' among them, come from PropItemModelProvider, shared with Fabric.
     }
 

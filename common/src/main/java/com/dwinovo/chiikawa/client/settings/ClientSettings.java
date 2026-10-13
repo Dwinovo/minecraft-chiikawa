@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.client.settings;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -31,7 +32,7 @@ public record ClientSettings(boolean speechBubbles) {
      * file whenever it has the default value.
      */
     public static final Codec<ClientSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        Codec.BOOL.optionalFieldOf("speech_bubbles").forGetter(settings -> Optional.of(settings.speechBubbles()))
+        ModCodecs.strictOptionalField(Codec.BOOL, "speech_bubbles").forGetter(settings -> Optional.of(settings.speechBubbles()))
     ).apply(instance, speechBubbles -> new ClientSettings(speechBubbles.orElse(DEFAULT.speechBubbles))));
 
     /**
@@ -58,7 +59,7 @@ public record ClientSettings(boolean speechBubbles) {
             Files.createDirectories(file.getParent());
             try (Writer writer = Files.newBufferedWriter(file)) {
                 new GsonBuilder().setPrettyPrinting().create()
-                    .toJson(CODEC.encodeStart(JsonOps.INSTANCE, this).getOrThrow(), writer);
+                    .toJson(CODEC.encodeStart(JsonOps.INSTANCE, this).getOrThrow(false, Constants.LOG::error), writer);
             }
         } catch (IOException ex) {
             Constants.LOG.warn("[chiikawa-settings] Could not write {}", file, ex);

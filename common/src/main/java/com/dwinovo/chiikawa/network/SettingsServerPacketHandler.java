@@ -31,7 +31,7 @@ public final class SettingsServerPacketHandler {
 
     /** Tells a player what the settings are, and whether they can change them. */
     public static void sync(ServerPlayer player) {
-        if (Services.NETWORK.canReceive(player, WorldSettingsPayload.TYPE)) {
+        if (Services.NETWORK.canReceive(player, SettingsPayloads.WORLD_SETTINGS)) {
             Services.NETWORK.sendToClient(player, new WorldSettingsPayload(
                 WorldSettingsStore.of(player.server).get(), canChange(player)));
         }

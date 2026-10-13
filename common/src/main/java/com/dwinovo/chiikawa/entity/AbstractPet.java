@@ -905,19 +905,19 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
-        super.defineSynchedData(builder);
-        builder.define(PET_MODE, (byte) PetDirective.FOLLOW.ordinal());
-        builder.define(PET_JOB, InitRegistry.NONE_ID);
-        builder.define(ANIM_TRIGGER, 0);
-        builder.define(REACTION_TRIGGER, 0);
-        builder.define(ACTIVITY, (byte) PetActivity.NONE.networkId());
-        builder.define(TASK, new CompoundTag());
-        builder.define(INTENT, "");
-        builder.define(GIFT, ItemStack.EMPTY);
-        builder.define(EAGER_UNTIL, 0L);
-        builder.define(LICENCES, new CompoundTag());
-        builder.define(PERFORMANCE, "");
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(PET_MODE, (byte) PetDirective.FOLLOW.ordinal());
+        this.entityData.define(PET_JOB, InitRegistry.NONE_ID);
+        this.entityData.define(ANIM_TRIGGER, 0);
+        this.entityData.define(REACTION_TRIGGER, 0);
+        this.entityData.define(ACTIVITY, (byte) PetActivity.NONE.networkId());
+        this.entityData.define(TASK, new CompoundTag());
+        this.entityData.define(INTENT, "");
+        this.entityData.define(GIFT, ItemStack.EMPTY);
+        this.entityData.define(EAGER_UNTIL, 0L);
+        this.entityData.define(LICENCES, new CompoundTag());
+        this.entityData.define(PERFORMANCE, "");
     }
 
     /**

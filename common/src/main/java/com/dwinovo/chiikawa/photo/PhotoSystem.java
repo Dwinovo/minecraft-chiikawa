@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.photo;
 
 import com.dwinovo.chiikawa.camera.CameraSettings;
+import com.dwinovo.chiikawa.network.PhotoPayloads;
 import com.dwinovo.chiikawa.network.PhotoPayloads.DownloadPhotoPayload;
 import com.dwinovo.chiikawa.network.PhotoPayloads.TakePhotoPayload;
 import com.dwinovo.chiikawa.platform.Services;
@@ -72,7 +73,7 @@ public final class PhotoSystem {
         uploads.expect(new PhotoUploads.Request(photo, owner.getUUID(), camera.width(), camera.height()),
             server.getTickCount(), listener);
         // A game that cannot take the request is left to let it lapse, as one that is slow is.
-        if (Services.NETWORK.canReceive(owner, TakePhotoPayload.TYPE)) {
+        if (Services.NETWORK.canReceive(owner, PhotoPayloads.TAKE_PHOTO)) {
             Services.NETWORK.sendToClient(owner,
                 new TakePhotoPayload(photo, viewpoint.getId(), camera.width(), camera.height(), camera.fov()));
         }
@@ -95,7 +96,7 @@ public final class PhotoSystem {
 
     /** Sends a player a photo from the library, piece by piece, or the word that there is none. */
     public void send(ServerPlayer player, UUID photo) {
-        if (!Services.NETWORK.canReceive(player, DownloadPhotoPayload.TYPE)) {
+        if (!Services.NETWORK.canReceive(player, PhotoPayloads.DOWNLOAD_PHOTO)) {
             return;
         }
         Optional<byte[]> png = library.read(photo);

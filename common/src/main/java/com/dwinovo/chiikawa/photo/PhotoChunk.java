@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import net.minecraft.core.UUIDUtil;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.FriendlyByteBuf;
 
 /**
  * One piece of a photo's PNG on its way between the player's game and the server. A packet
@@ -25,12 +22,16 @@ public record PhotoChunk(UUID photo, int index, int total, byte[] bytes) {
     /** The most a whole photo may come to, 512 KiB: a 320 by 240 picture is a fraction of it. */
     public static final int MAX_PHOTO_BYTES = 512 * 1024;
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, PhotoChunk> STREAM_CODEC = StreamCodec.composite(
-        UUIDUtil.STREAM_CODEC, PhotoChunk::photo,
-        ByteBufCodecs.VAR_INT, PhotoChunk::index,
-        ByteBufCodecs.VAR_INT, PhotoChunk::total,
-        ByteBufCodecs.byteArray(MAX_BYTES), PhotoChunk::bytes,
-        PhotoChunk::new);
+    public static PhotoChunk read(FriendlyByteBuf buffer) {
+        return new PhotoChunk(buffer.readUUID(), buffer.readVarInt(), buffer.readVarInt(), buffer.readByteArray(MAX_BYTES));
+    }
+
+    public void write(FriendlyByteBuf buffer) {
+        buffer.writeUUID(photo);
+        buffer.writeVarInt(index);
+        buffer.writeVarInt(total);
+        buffer.writeByteArray(bytes);
+    }
 
     /**
      * An answer to a request for a photo the server has none of: no pieces at all, which

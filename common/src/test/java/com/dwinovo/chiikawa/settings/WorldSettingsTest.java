@@ -3,9 +3,9 @@ package com.dwinovo.chiikawa.settings;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import org.junit.jupiter.api.Test;
 
 class WorldSettingsTest {
@@ -32,20 +32,20 @@ class WorldSettingsTest {
 
     @Test
     void whatIsSentIsWhatIsRead() {
-        ByteBuf buffer = Unpooled.buffer();
+        FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
 
-        WorldSettings.STREAM_CODEC.encode(buffer, new WorldSettings(0.25F, 1.5F));
+        new WorldSettings(0.25F, 1.5F).write(buffer);
 
-        assertEquals(new WorldSettings(0.25F, 1.5F), WorldSettings.STREAM_CODEC.decode(buffer));
+        assertEquals(new WorldSettings(0.25F, 1.5F), WorldSettings.read(buffer));
     }
 
     @Test
     void whatIsSentOutOfRangeIsClampedWhereItIsRead() {
-        ByteBuf buffer = Unpooled.buffer();
+        FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
         buffer.writeFloat(9.0F);
         buffer.writeFloat(9.0F);
 
-        assertEquals(new WorldSettings(1.0F, WorldSettings.MAX_CHATTER), WorldSettings.STREAM_CODEC.decode(buffer));
+        assertEquals(new WorldSettings(1.0F, WorldSettings.MAX_CHATTER), WorldSettings.read(buffer));
     }
 
     @Test
@@ -53,7 +53,7 @@ class WorldSettingsTest {
         WorldSettingsStore store = new WorldSettingsStore();
         store.set(new WorldSettings(0.4F, 0.0F));
 
-        WorldSettingsStore loaded = WorldSettingsStore.load(store.save(new CompoundTag(), null), null);
+        WorldSettingsStore loaded = WorldSettingsStore.load(store.save(new CompoundTag()));
 
         assertEquals(new WorldSettings(0.4F, 0.0F), loaded.get());
     }
@@ -63,7 +63,7 @@ class WorldSettingsTest {
         CompoundTag tag = new CompoundTag();
         tag.putFloat("Chatter", 0.5F);
 
-        WorldSettingsStore loaded = WorldSettingsStore.load(tag, null);
+        WorldSettingsStore loaded = WorldSettingsStore.load(tag);
 
         assertEquals(new WorldSettings(1.0F, 0.5F), loaded.get());
     }

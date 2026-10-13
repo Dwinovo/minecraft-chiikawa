@@ -14,8 +14,8 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Rolls of film: where a shot goes in a bag, when a roll is full, and what stacks. These are
@@ -43,7 +43,7 @@ public final class FilmGameTests {
 
         helper.assertTrue(fresh.getMaxStackSize() == 64, "fresh film stacks to " + fresh.getMaxStackSize());
         helper.assertTrue(roll.getMaxStackSize() == 1, "a roll stacks to " + roll.getMaxStackSize());
-        helper.assertFalse(ItemStack.isSameItemSameComponents(fresh, roll), "a roll is the same as fresh film");
+        helper.assertFalse(ItemStack.isSameItemSameTags(fresh, roll), "a roll is the same as fresh film");
         helper.succeed();
     }
 

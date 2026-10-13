@@ -31,13 +31,13 @@ public record AnchorSettings(Follow follow, Area free, Area wild) {
         /** What a pet that follows nobody reads; no anchor follows when there are no settings, so it is never used. */
         public static final Follow NONE = new Follow(0.0, 0, 0.0, 0.0, 0.0);
 
-        public static final Codec<Follow> CODEC = RecordCodecBuilder.<Follow>create(instance -> instance.group(
+        public static final Codec<Follow> CODEC = ExtraCodecs.validate(RecordCodecBuilder.<Follow>create(instance -> instance.group(
             Codec.doubleRange(0.0, 256.0).fieldOf("start").forGetter(Follow::start),
             ExtraCodecs.NON_NEGATIVE_INT.fieldOf("arrive").forGetter(Follow::arrive),
             Codec.doubleRange(0.0, 256.0).fieldOf("reach").forGetter(Follow::reach),
             Codec.doubleRange(0.0, 256.0).fieldOf("leash").forGetter(Follow::leash),
             Codec.doubleRange(0.0, 256.0).fieldOf("teleport").forGetter(Follow::teleport)
-        ).apply(instance, Follow::new)).validate(follow -> follow.start <= follow.reach
+        ).apply(instance, Follow::new)), follow -> follow.start <= follow.reach
                 && follow.reach <= follow.leash && follow.leash <= follow.teleport
             ? DataResult.success(follow)
             : DataResult.error(() -> "a following pet's distances run start, reach, leash, teleport, from nearest to furthest"));
@@ -48,10 +48,10 @@ public record AnchorSettings(Follow follow, Area free, Area wild) {
      * @param leash how far it may go on, past which the pet is walked back
      */
     public record Area(double reach, double leash) {
-        public static final Codec<Area> CODEC = RecordCodecBuilder.<Area>create(instance -> instance.group(
+        public static final Codec<Area> CODEC = ExtraCodecs.validate(RecordCodecBuilder.<Area>create(instance -> instance.group(
             Codec.doubleRange(0.0, 256.0).fieldOf("reach").forGetter(Area::reach),
             Codec.doubleRange(0.0, 256.0).fieldOf("leash").forGetter(Area::leash)
-        ).apply(instance, Area::new)).validate(area -> area.reach <= area.leash
+        ).apply(instance, Area::new)), area -> area.reach <= area.leash
             ? DataResult.success(area)
             : DataResult.error(() -> "the leash is no shorter than the reach"));
     }

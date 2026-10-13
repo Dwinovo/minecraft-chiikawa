@@ -12,9 +12,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import net.minecraft.SharedConstants;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.UUIDUtil;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.Bootstrap;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -34,8 +32,8 @@ class PhotoChunkTest {
         return data;
     }
 
-    private static RegistryFriendlyByteBuf buffer() {
-        return new RegistryFriendlyByteBuf(Unpooled.buffer(), RegistryAccess.EMPTY);
+    private static FriendlyByteBuf buffer() {
+        return new FriendlyByteBuf(Unpooled.buffer());
     }
 
     @Test
@@ -77,10 +75,10 @@ class PhotoChunkTest {
     @Test
     void aPieceSurvivesTheWire() {
         PhotoChunk chunk = PhotoChunk.split(PHOTO, random(100)).get(0);
-        RegistryFriendlyByteBuf buffer = buffer();
+        FriendlyByteBuf buffer = buffer();
 
-        PhotoChunk.STREAM_CODEC.encode(buffer, chunk);
-        PhotoChunk read = PhotoChunk.STREAM_CODEC.decode(buffer);
+        chunk.write(buffer);
+        PhotoChunk read = PhotoChunk.read(buffer);
 
         assertEquals(chunk.photo(), read.photo());
         assertEquals(chunk.index(), read.index());
@@ -90,19 +88,19 @@ class PhotoChunkTest {
 
     @Test
     void aPieceBiggerThanAPieceMayBeIsNotReadAtAll() {
-        RegistryFriendlyByteBuf largest = buffer();
-        PhotoChunk.STREAM_CODEC.encode(largest, new PhotoChunk(PHOTO, 0, 1, new byte[PhotoChunk.MAX_BYTES]));
-        assertEquals(PhotoChunk.MAX_BYTES, PhotoChunk.STREAM_CODEC.decode(largest).bytes().length);
+        FriendlyByteBuf largest = buffer();
+        new PhotoChunk(PHOTO, 0, 1, new byte[PhotoChunk.MAX_BYTES]).write(largest);
+        assertEquals(PhotoChunk.MAX_BYTES, PhotoChunk.read(largest).bytes().length);
 
-        RegistryFriendlyByteBuf tooBig = buffer();
+        FriendlyByteBuf tooBig = buffer();
         // Written by hand: a well-behaved game never makes one this size.
-        UUIDUtil.STREAM_CODEC.encode(tooBig, PHOTO);
+        tooBig.writeUUID(PHOTO);
         tooBig.writeVarInt(0);
         tooBig.writeVarInt(1);
         tooBig.writeVarInt(PhotoChunk.MAX_BYTES + 1);
         tooBig.writeBytes(new byte[PhotoChunk.MAX_BYTES + 1]);
 
-        assertThrows(DecoderException.class, () -> PhotoChunk.STREAM_CODEC.decode(tooBig));
+        assertThrows(DecoderException.class, () -> PhotoChunk.read(tooBig));
     }
 
     @Test
@@ -111,8 +109,8 @@ class PhotoChunkTest {
 
         assertTrue(missing.isMissing());
         assertFalse(PhotoChunk.split(PHOTO, random(10)).get(0).isMissing());
-        RegistryFriendlyByteBuf buffer = buffer();
-        PhotoChunk.STREAM_CODEC.encode(buffer, missing);
-        assertTrue(PhotoChunk.STREAM_CODEC.decode(buffer).isMissing());
+        FriendlyByteBuf buffer = buffer();
+        missing.write(buffer);
+        assertTrue(PhotoChunk.read(buffer).isMissing());
     }
 }

@@ -1,28 +1,5 @@
 package com.dwinovo.chiikawa;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import java.util.function.Supplier;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.EntityRenderers;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
-import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
-import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import com.dwinovo.chiikawa.anim.compile.BedrockResourceLoader;
 import com.dwinovo.chiikawa.anim.render.PropRenderer;
 import com.dwinovo.chiikawa.anim.render.impl.ChiikawaRenderer;
@@ -40,6 +17,7 @@ import com.dwinovo.chiikawa.client.render.LaborBoardRenderer;
 import com.dwinovo.chiikawa.client.render.PropBlockRenderer;
 import com.dwinovo.chiikawa.client.screen.PetBackpackScreen;
 import com.dwinovo.chiikawa.client.screen.SettingsScreen;
+import com.dwinovo.chiikawa.forge.mixin.ItemAccessor;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
@@ -56,27 +34,25 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.ConfigScreenHandler;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
-// Client-only mod entry.
-@Mod(value = Chiikawa.MODID, dist = Dist.CLIENT)
-// Auto-register @SubscribeEvent methods.
-@EventBusSubscriber(modid = Chiikawa.MODID, value = Dist.CLIENT)
-public class ChiikawaClient {
-    public ChiikawaClient(ModContainer container) {
-        // The mod list's config button opens the settings screen.
-        container.registerExtensionPoint(IConfigScreenFactory.class, (mod, parent) -> new SettingsScreen(parent));
-    }
-
+@Mod.EventBusSubscriber(modid = ChiikawaForge.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+public class ChiikawaForgeClient {
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
+        // The mod list's config button opens the settings screen.
+        ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
+            () -> new ConfigScreenHandler.ConfigScreenFactory((minecraft, parent) -> new SettingsScreen(parent)));
         event.enqueueWork(() -> {
             EntityRenderers.register(InitEntity.USAGI_PET.get(), UsagiRenderer::new);
             EntityRenderers.register(InitEntity.HACHIWARE_PET.get(), HachiwareRenderer::new);
@@ -86,8 +62,9 @@ public class ChiikawaClient {
             EntityRenderers.register(InitEntity.KURIMANJU_PET.get(), KurimanjuRenderer::new);
             EntityRenderers.register(InitEntity.RAKKO_PET.get(), RakkoRenderer::new);
             EntityRenderers.register(InitEntity.FURUHONYA_PET.get(), FuruhonyaRenderer::new);
-            NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post tick) -> ClientMusicStreamManager.tick());
-            NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut logout) -> ClientPhotoCache.clear());
+            MenuScreens.register(InitMenu.PET_BACKPACK.get(), PetBackpackScreen::new);
+            registerItemExtensions();
+            MinecraftForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut logout) -> ClientPhotoCache.clear());
         });
         MinecraftForge.EVENT_BUS.addListener(ChiikawaForgeClient::onClientTick);
     }

@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.data;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
 import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettingsLoader;
 import com.mojang.serialization.JsonOps;
@@ -23,7 +24,7 @@ public final class AnchorSettingsProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cache) {
         return CompletableFuture.allOf(AnchorSettingsData.all().entrySet().stream()
             .map(entry -> DataProvider.saveStable(cache,
-                AnchorSettings.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(),
+                AnchorSettings.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(false, Constants.LOG::error),
                 pathProvider.json(entry.getKey())))
             .toArray(CompletableFuture[]::new));
     }
