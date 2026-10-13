@@ -96,8 +96,7 @@ public final class NeoForgeModNetworking {
                     SettingsServerPacketHandler.handleChange(payload, player);
                 }
             });
-        registrar.playToClient(PhotoPayloads.TakePhotoPayload.TYPE, PhotoPayloads.TakePhotoPayload.STREAM_CODEC,
-            (payload, context) -> ClientPhotoPacketHandler.handleTake(payload));
+        registrar.playToClient(PhotoPayloads.TakePhotoPayload.TYPE, PhotoPayloads.TakePhotoPayload.STREAM_CODEC);
         registrar.playToServer(PhotoPayloads.UploadPhotoPayload.TYPE, PhotoPayloads.UploadPhotoPayload.STREAM_CODEC,
             (payload, context) -> {
                 if (context.player() instanceof ServerPlayer player) {
@@ -110,10 +109,8 @@ public final class NeoForgeModNetworking {
                     PhotoServerPacketHandler.handleRequest(payload, player);
                 }
             });
-        registrar.playToClient(PhotoPayloads.DownloadPhotoPayload.TYPE, PhotoPayloads.DownloadPhotoPayload.STREAM_CODEC,
-            (payload, context) -> ClientPhotoPacketHandler.handleDownload(payload));
-        registrar.playToClient(PhotoPayloads.OpenAlbumPayload.TYPE, PhotoPayloads.OpenAlbumPayload.STREAM_CODEC,
-            (payload, context) -> ClientPhotoPacketHandler.handleOpen(payload));
+        registrar.playToClient(PhotoPayloads.DownloadPhotoPayload.TYPE, PhotoPayloads.DownloadPhotoPayload.STREAM_CODEC);
+        registrar.playToClient(PhotoPayloads.OpenAlbumPayload.TYPE, PhotoPayloads.OpenAlbumPayload.STREAM_CODEC);
     }
 
     public static void registerClientPayloads(RegisterClientPayloadHandlersEvent event) {
@@ -128,5 +125,8 @@ public final class NeoForgeModNetworking {
         event.register(VoicePayloads.PetSpeechPayload.TYPE, (payload, context) -> ClientVoicePacketHandler.handleSpeech(payload));
         event.register(PetPayloads.PetGesturePayload.TYPE, (payload, context) -> ClientPetPacketHandler.handleGesture(payload));
         event.register(SettingsPayloads.WorldSettingsPayload.TYPE, (payload, context) -> ClientSettingsPacketHandler.handleWorld(payload));
+        event.register(PhotoPayloads.TakePhotoPayload.TYPE, (payload, context) -> ClientPhotoPacketHandler.handleTake(payload));
+        event.register(PhotoPayloads.DownloadPhotoPayload.TYPE, (payload, context) -> ClientPhotoPacketHandler.handleDownload(payload));
+        event.register(PhotoPayloads.OpenAlbumPayload.TYPE, (payload, context) -> ClientPhotoPacketHandler.handleOpen(payload));
     }
 }
