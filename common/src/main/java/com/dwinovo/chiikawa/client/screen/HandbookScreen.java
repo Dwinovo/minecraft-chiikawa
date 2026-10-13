@@ -114,7 +114,7 @@ public class HandbookScreen extends Screen {
     private void openWebsite() {
         String url = ManualLinks.url(this.minecraft.getLanguageManager().getSelected(), current().link());
         // Before 1.21 the confirm screen does not open the link itself: the callback does, as vanilla's helper has it.
-        ConfirmLinkScreen.confirmLinkNow(url, this, true);
+        ConfirmLinkScreen.confirmLinkNow(this, url);
     }
 
     private int contentLeft() {
