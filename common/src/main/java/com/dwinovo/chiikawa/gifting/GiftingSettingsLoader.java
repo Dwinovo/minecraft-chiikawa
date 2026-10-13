@@ -1,14 +1,15 @@
 package com.dwinovo.chiikawa.gifting;
 
 import com.dwinovo.chiikawa.Constants;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 /**
@@ -16,7 +17,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
  * fails to parse is reported and ignored, and with it no pet gives presents: a pack that has
  * broken the settings should not have pets guessing.
  */
-public final class GiftingSettingsLoader extends SimpleJsonResourceReloadListener {
+public final class GiftingSettingsLoader extends SimpleJsonResourceReloadListener<JsonElement> {
     public static final String DIRECTORY = "pet_gifting";
     /** Id for loaders that register reload listeners by id. */
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
@@ -26,7 +27,7 @@ public final class GiftingSettingsLoader extends SimpleJsonResourceReloadListene
     private static final String LOG_PREFIX = "[chiikawa-gifting] ";
 
     public GiftingSettingsLoader() {
-        super(new Gson(), DIRECTORY);
+        super(ExtraCodecs.JSON, FileToIdConverter.json(DIRECTORY));
     }
 
     @Override
