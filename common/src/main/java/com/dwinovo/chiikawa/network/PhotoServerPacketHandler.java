@@ -14,10 +14,10 @@ public final class PhotoServerPacketHandler {
     }
 
     public static void handleUpload(UploadPhotoPayload payload, ServerPlayer player) {
-        PhotoSystem.of(player.server).receive(player, payload.chunk());
+        PhotoSystem.of(player.getServer()).receive(player, payload.chunk());
     }
 
     public static void handleRequest(RequestPhotoPayload payload, ServerPlayer player) {
-        PhotoSystem.of(player.server).send(player, payload.photo());
+        PhotoSystem.of(player.getServer()).send(player, payload.photo());
     }
 }

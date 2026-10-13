@@ -15,7 +15,7 @@ import com.dwinovo.chiikawa.ui.widget.TitledPanel;
 import java.util.List;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -131,7 +131,7 @@ public class AlbumScreen extends Screen {
         double scale = Math.min((double) frame.width() / picture.width(), (double) frame.height() / picture.height());
         int width = Math.max(1, (int) (picture.width() * scale));
         int height = Math.max(1, (int) (picture.height() * scale));
-        graphics.blit(RenderType::guiTextured, picture.texture(), frame.x() + (frame.width() - width) / 2,
+        graphics.blit(RenderPipelines.GUI_TEXTURED, picture.texture(), frame.x() + (frame.width() - width) / 2,
             frame.y() + (frame.height() - height) / 2, 0.0F, 0.0F, width, height, picture.width(), picture.height(),
             picture.width(), picture.height());
     }

@@ -112,13 +112,13 @@ public final class SettingsGameTests {
             helper.assertTrue(store.get().equals(before), Component.literal("a stranger's change was taken"));
 
             // A game master, spelled out: the level a plain op gets is whatever the server's settings say.
-            stranger.server.getPlayerList().getOps()
+            stranger.getServer().getPlayerList().getOps()
                 .add(new ServerOpListEntry(stranger.getGameProfile(), GAME_MASTER, false));
             helper.assertTrue(SettingsServerPacketHandler.canChange(stranger), Component.literal("an operator may not change the world"));
             SettingsServerPacketHandler.handleChange(new ChangeWorldSettingsPayload(asked), stranger);
             helper.assertTrue(store.get().equals(asked), Component.literal("an operator's change was not taken"));
         } finally {
-            stranger.server.getPlayerList().getOps().remove(stranger.getGameProfile());
+            stranger.getServer().getPlayerList().getOps().remove(stranger.getGameProfile());
             store.set(before);
         }
         helper.succeed();
