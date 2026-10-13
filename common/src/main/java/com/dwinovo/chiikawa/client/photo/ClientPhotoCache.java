@@ -99,10 +99,15 @@ public final class ClientPhotoCache {
         }
     }
 
-    /** Lets go of every photo, on leaving the world. */
+    /**
+     * Lets go of every photo, on leaving the world. The game only lets go of a texture on its
+     * own thread, and Fabric says the world has been left from the connection's.
+     */
     public static void clear() {
-        ENTRIES.values().stream().map(entry -> entry.picture).filter(Objects::nonNull)
-            .forEach(picture -> Minecraft.getInstance().getTextureManager().release(picture.texture()));
-        ENTRIES.clear();
+        Minecraft.getInstance().execute(() -> {
+            ENTRIES.values().stream().map(entry -> entry.picture).filter(Objects::nonNull)
+                .forEach(picture -> Minecraft.getInstance().getTextureManager().release(picture.texture()));
+            ENTRIES.clear();
+        });
     }
 }
