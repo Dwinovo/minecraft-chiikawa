@@ -26,19 +26,19 @@ public final class SettingsServerPacketHandler {
      */
     public static boolean canChange(ServerPlayer player) {
         return player.hasPermissions(OPERATOR_LEVEL)
-            || player.server.isSingleplayerOwner(player.getGameProfile());
+            || player.getServer().isSingleplayerOwner(player.getGameProfile());
     }
 
     /** Tells a player what the settings are, and whether they can change them. */
     public static void sync(ServerPlayer player) {
         if (Services.NETWORK.canReceive(player, WorldSettingsPayload.TYPE)) {
             Services.NETWORK.sendToClient(player, new WorldSettingsPayload(
-                WorldSettingsStore.of(player.server).get(), canChange(player)));
+                WorldSettingsStore.of(player.getServer()).get(), canChange(player)));
         }
     }
 
     public static void handleChange(ChangeWorldSettingsPayload payload, ServerPlayer player) {
-        MinecraftServer server = player.server;
+        MinecraftServer server = player.getServer();
         if (!canChange(player)) {
             // A screen that offered the change had it wrong; put it right.
             sync(player);
