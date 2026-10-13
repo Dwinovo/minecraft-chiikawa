@@ -84,7 +84,7 @@ public final class ClientPhotoCache {
                 int width = image.getWidth();
                 int height = image.getHeight();
                 // The texture owns the image from here, and closes it when it is let go of.
-                DynamicTexture texture = new DynamicTexture(image);
+                DynamicTexture texture = new DynamicTexture(() -> "Chiikawa photo " + chunk.photo(), image);
                 // Smoothed, because a photo is shown at whatever size the window has room for.
                 texture.setFilter(true, false);
                 ResourceLocation location = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,

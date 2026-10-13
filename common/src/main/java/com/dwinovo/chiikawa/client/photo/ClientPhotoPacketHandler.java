@@ -25,8 +25,8 @@ public final class ClientPhotoPacketHandler {
             Constants.LOG.debug("[chiikawa-photo] No entity {} here to take photo {} from", payload.viewpoint(), payload.photo());
             return;
         }
-        PhotoCapture.take(viewpoint, payload.fov())
-            .ifPresent(frame -> PhotoUploader.upload(payload.photo(), frame, payload.width(), payload.height()));
+        PhotoCapture.take(viewpoint, payload.fov(),
+            frame -> PhotoUploader.upload(payload.photo(), frame, payload.width(), payload.height()));
     }
 
     public static void handleDownload(DownloadPhotoPayload payload) {
