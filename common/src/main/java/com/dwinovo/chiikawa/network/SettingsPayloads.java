@@ -22,7 +22,7 @@ public final class SettingsPayloads {
      */
     public record WorldSettingsPayload(WorldSettings settings, boolean canChange) implements CustomPacketPayload {
         public static final Type<WorldSettingsPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "world_settings"));
+            new ResourceLocation(Constants.MOD_ID, "world_settings"));
         public static final StreamCodec<RegistryFriendlyByteBuf, WorldSettingsPayload> STREAM_CODEC =
             StreamCodec.composite(
                 WorldSettings.STREAM_CODEC, WorldSettingsPayload::settings,
@@ -41,7 +41,7 @@ public final class SettingsPayloads {
      */
     public record ChangeWorldSettingsPayload(WorldSettings settings) implements CustomPacketPayload {
         public static final Type<ChangeWorldSettingsPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "change_world_settings"));
+            new ResourceLocation(Constants.MOD_ID, "change_world_settings"));
         public static final StreamCodec<RegistryFriendlyByteBuf, ChangeWorldSettingsPayload> STREAM_CODEC =
             StreamCodec.composite(
                 WorldSettings.STREAM_CODEC, ChangeWorldSettingsPayload::settings,

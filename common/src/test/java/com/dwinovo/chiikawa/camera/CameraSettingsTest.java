@@ -32,7 +32,7 @@ class CameraSettingsTest {
     void settingsParseFromTheGeneratedShape() {
         CameraSettings settings = CameraSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(GOOD)).getOrThrow();
 
-        assertEquals(new CameraSettings(ResourceLocation.fromNamespaceAndPath("chiikawa", "film"), 64.0, 12000, 600,
+        assertEquals(new CameraSettings(new ResourceLocation("chiikawa", "film"), 64.0, 12000, 600,
             320, 240, 70, new CameraSettings.Subjects(3, 5, 1), 40, 12, 0.25F), settings);
     }
 
@@ -127,8 +127,8 @@ class CameraSettingsTest {
 
     @Test
     void aBrokenFileIsSkippedRatherThanTakingTheRestWithIt() {
-        ResourceLocation good = ResourceLocation.fromNamespaceAndPath("chiikawa", "camera");
-        ResourceLocation broken = ResourceLocation.fromNamespaceAndPath("chiikawa", "broken");
+        ResourceLocation good = new ResourceLocation("chiikawa", "camera");
+        ResourceLocation broken = new ResourceLocation("chiikawa", "broken");
 
         CameraSettingsLoader.Loaded loaded = CameraSettingsLoader.load(Map.of(
             good, JsonParser.parseString(GOOD),

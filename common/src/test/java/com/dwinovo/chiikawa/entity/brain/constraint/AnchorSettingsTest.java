@@ -56,7 +56,7 @@ class AnchorSettingsTest {
 
     @Test
     void theLoaderTakesTheOneFileAndNothingElse() {
-        ResourceLocation other = ResourceLocation.fromNamespaceAndPath("chiikawa", "other");
+        ResourceLocation other = new ResourceLocation("chiikawa", "other");
 
         assertTrue(AnchorSettingsLoader.load(Map.of(AnchorSettingsLoader.FILE, json(GOOD))).isPresent());
         assertEquals(Optional.empty(), AnchorSettingsLoader.load(Map.of(other, json(GOOD))), "a file of another name");

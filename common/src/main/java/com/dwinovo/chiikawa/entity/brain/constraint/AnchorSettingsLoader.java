@@ -19,9 +19,9 @@ import net.minecraft.util.profiling.ProfilerFiller;
 public final class AnchorSettingsLoader extends SimpleJsonResourceReloadListener {
     public static final String DIRECTORY = "pet_anchor";
     /** Id for loaders that register reload listeners by id. */
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
+    public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, DIRECTORY);
     /** The one file the settings are in. */
-    public static final ResourceLocation FILE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "anchor");
+    public static final ResourceLocation FILE = new ResourceLocation(Constants.MOD_ID, "anchor");
 
     private static final String LOG_PREFIX = "[chiikawa-anchor] ";
 

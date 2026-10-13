@@ -34,7 +34,7 @@ public final class PhotoGameTests {
     private static final int WIDTH = 32;
     private static final int HEIGHT = 24;
     private static final CameraSettings CAMERA = new CameraSettings(
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "film"), 64.0, 12000, 600, WIDTH, HEIGHT, 70,
+        new ResourceLocation(Constants.MOD_ID, "film"), 64.0, 12000, 600, WIDTH, HEIGHT, 70,
         new CameraSettings.Subjects(3, 5, 1), 40, 8, 0.5F);
 
     /** What a request was told, in order. */

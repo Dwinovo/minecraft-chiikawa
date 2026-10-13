@@ -33,7 +33,7 @@ class GiftingSettingsTest {
         assertEquals(2, settings.weights().size());
         assertTrue(settings.weights().get(0).match().right().isPresent());
         assertTrue(settings.weights().get(1).match().left().isPresent());
-        assertEquals(ResourceLocation.fromNamespaceAndPath("chiikawa", "currency"),
+        assertEquals(new ResourceLocation("chiikawa", "currency"),
             settings.weights().get(1).match().left().orElseThrow().location());
     }
 
@@ -62,7 +62,7 @@ class GiftingSettingsTest {
 
     @Test
     void theLoaderTakesTheOneFileAndNothingElse() {
-        ResourceLocation other = ResourceLocation.fromNamespaceAndPath("chiikawa", "other");
+        ResourceLocation other = new ResourceLocation("chiikawa", "other");
         JsonElement good = JsonParser.parseString(GOOD);
 
         assertTrue(GiftingSettingsLoader.load(Map.of(GiftingSettingsLoader.FILE, good)).isPresent());

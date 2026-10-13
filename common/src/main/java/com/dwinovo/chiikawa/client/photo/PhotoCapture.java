@@ -101,7 +101,7 @@ public final class PhotoCapture {
 
             minecraft.levelRenderer.graphicsChanged();
             target.bindWrite(false);
-            renderer.renderLevel(minecraft.getTimer());
+            renderer.renderLevel(minecraft.getFrameTime(), 0L);
 
             NativeImage image = Screenshot.takeScreenshot(target);
             try {
