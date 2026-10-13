@@ -93,9 +93,18 @@ public class AlbumScreen extends Screen {
         this.frame = new Rect(leftPos + UiStyle.PAD, TitledPanel.contentY(topPos), pictureWidth, pictureHeight);
     }
 
+    /**
+     * 1.20.1's {@code Screen.render} draws only the widgets, so the background, with the
+     * panel on it, goes first here, as vanilla's own screens draw theirs.
+     */
     @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        renderBackground(graphics, mouseX, mouseY, partialTick);
+        super.render(graphics, mouseX, mouseY, partialTick);
+    }
+
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+        super.renderBackground(graphics);
         DrawSurface surface = new GuiSurface(graphics, this.font);
         TitledPanel.draw(surface, leftPos, topPos, panelWidth, panelHeight, this.title.getString());
         if (shots.isEmpty()) {

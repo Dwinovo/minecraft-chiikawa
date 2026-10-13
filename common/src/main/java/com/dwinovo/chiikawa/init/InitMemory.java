@@ -12,6 +12,7 @@ import com.dwinovo.chiikawa.task.FinishedSlip;
 import com.dwinovo.chiikawa.whistle.WhistleCall;
 import com.dwinovo.chiikawa.whistle.WhistleHeard;
 import com.dwinovo.chiikawa.voice.PetSpeech;
+import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -210,8 +211,8 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<Unit>> PHOTO_COOLDOWN =
         Services.REGISTRY.<MemoryModuleType<Unit>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "photo_cooldown"),
-            () -> new MemoryModuleType<>(Optional.of(Unit.CODEC))
+            new ResourceLocation(Constants.MOD_ID, "photo_cooldown"),
+            () -> new MemoryModuleType<>(Optional.of(Codec.unit(Unit.INSTANCE)))
         );
 
     /**
@@ -221,8 +222,8 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<Unit>> GIFT_COOLDOWN =
         Services.REGISTRY.<MemoryModuleType<Unit>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "gift_cooldown"),
-            () -> new MemoryModuleType<>(Optional.of(Unit.CODEC))
+            new ResourceLocation(Constants.MOD_ID, "gift_cooldown"),
+            () -> new MemoryModuleType<>(Optional.of(Codec.unit(Unit.INSTANCE)))
         );
 
     /**
@@ -232,7 +233,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<PhotoPlan>> PHOTO_PLAN =
         Services.REGISTRY.<MemoryModuleType<PhotoPlan>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "photo_plan"),
+            new ResourceLocation(Constants.MOD_ID, "photo_plan"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -240,7 +241,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<List<ResourceLocation>>> PHOTOGRAPHED_BIOMES =
         Services.REGISTRY.<MemoryModuleType<List<ResourceLocation>>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "photographed_biomes"),
+            new ResourceLocation(Constants.MOD_ID, "photographed_biomes"),
             () -> new MemoryModuleType<>(Optional.of(ResourceLocation.CODEC.listOf()))
         );
 

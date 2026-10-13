@@ -194,13 +194,13 @@ class ShopTest {
     void savingUpAndKeepingAreReadFromAndWrittenToAPersonality() {
         Personality.WeightedItem liking = new Personality.WeightedItem(Items.CAKE, 2).kept().savedUpFor();
 
-        var json = Personality.WeightedItem.CODEC.encodeStart(JsonOps.INSTANCE, liking).getOrThrow().getAsJsonObject();
+        var json = Personality.WeightedItem.CODEC.encodeStart(JsonOps.INSTANCE, liking).getOrThrow(false, org.junit.jupiter.api.Assertions::fail).getAsJsonObject();
 
         assertTrue(json.get("keep").getAsBoolean());
         assertTrue(json.get("save_up").getAsBoolean());
-        assertEquals(liking, Personality.WeightedItem.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
+        assertEquals(liking, Personality.WeightedItem.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow(false, org.junit.jupiter.api.Assertions::fail));
         assertFalse(Personality.WeightedItem.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            "{ \"item\": \"minecraft:cake\", \"weight\": 1 }")).getOrThrow().keep(), "keep is off unless asked for");
+            "{ \"item\": \"minecraft:cake\", \"weight\": 1 }")).getOrThrow(false, org.junit.jupiter.api.Assertions::fail).keep(), "keep is off unless asked for");
     }
 
     @Test

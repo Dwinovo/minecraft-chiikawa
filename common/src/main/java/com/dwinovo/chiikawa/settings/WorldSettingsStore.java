@@ -1,6 +1,5 @@
 package com.dwinovo.chiikawa.settings;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -18,7 +17,7 @@ public class WorldSettingsStore extends SavedData {
 
     public static WorldSettingsStore of(MinecraftServer server) {
         return server.overworld().getDataStorage()
-            .computeIfAbsent(new SavedData.Factory<>(WorldSettingsStore::new, WorldSettingsStore::load, null), FILE);
+            .computeIfAbsent(WorldSettingsStore::load, WorldSettingsStore::new, FILE);
     }
 
     public static WorldSettingsStore of(ServerLevel level) {
@@ -36,7 +35,7 @@ public class WorldSettingsStore extends SavedData {
         }
     }
 
-    static WorldSettingsStore load(CompoundTag tag, HolderLookup.Provider registries) {
+    static WorldSettingsStore load(CompoundTag tag) {
         WorldSettingsStore store = new WorldSettingsStore();
         // A file written before a field existed keeps that field as it was by default.
         store.settings = new WorldSettings(
@@ -46,7 +45,7 @@ public class WorldSettingsStore extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+    public CompoundTag save(CompoundTag tag) {
         tag.putFloat("WildSpawn", settings.wildSpawn());
         tag.putFloat("Chatter", settings.chatter());
         return tag;

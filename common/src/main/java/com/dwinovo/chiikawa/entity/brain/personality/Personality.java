@@ -160,13 +160,13 @@ public record Personality(
     public record WeightedItem(Item item, Weight weight, Optional<Item> requires, Optional<Integer> limit,
                                boolean keep, boolean saveUp) implements WeightedEntry {
         /** Lazy because the item registry only exists once the game has bootstrapped. */
-        public static final Codec<WeightedItem> CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.create(instance -> instance.group(
-            BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(WeightedItem::item),
+        public static final Codec<WeightedItem> CODEC = ExtraCodecs.lazyInitializedCodec(() -> RecordCodecBuilder.create(instance -> instance.group(
+            ModCodecs.ITEM.fieldOf("item").forGetter(WeightedItem::item),
             ExtraCodecs.POSITIVE_INT.xmap(Weight::of, Weight::asInt).fieldOf("weight").forGetter(WeightedItem::weight),
-            BuiltInRegistries.ITEM.byNameCodec().optionalFieldOf("requires").forGetter(WeightedItem::requires),
-            ExtraCodecs.POSITIVE_INT.optionalFieldOf("limit").forGetter(WeightedItem::limit),
-            Codec.BOOL.optionalFieldOf("keep", false).forGetter(WeightedItem::keep),
-            Codec.BOOL.optionalFieldOf("save_up", false).forGetter(WeightedItem::saveUp)
+            ModCodecs.strictOptionalField(ModCodecs.ITEM, "requires").forGetter(WeightedItem::requires),
+            ModCodecs.strictOptionalField(ExtraCodecs.POSITIVE_INT, "limit").forGetter(WeightedItem::limit),
+            ModCodecs.strictOptionalField(Codec.BOOL, "keep", false).forGetter(WeightedItem::keep),
+            ModCodecs.strictOptionalField(Codec.BOOL, "save_up", false).forGetter(WeightedItem::saveUp)
         ).apply(instance, WeightedItem::new)));
 
         public WeightedItem(Item item, int weight) {

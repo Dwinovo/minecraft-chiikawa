@@ -1,11 +1,11 @@
 package com.dwinovo.chiikawa.gifting;
 
+import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
@@ -32,8 +32,8 @@ public record GiftingSettings(int cooldownTicks, List<Weighted> weights) {
      */
     public record Weighted(Either<TagKey<Item>, Item> match, int weight) {
         /** Lazy because the item registry only exists once the game has bootstrapped. */
-        public static final Codec<Weighted> CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.create(instance -> instance.group(
-            Codec.either(TagKey.hashedCodec(Registries.ITEM), BuiltInRegistries.ITEM.byNameCodec())
+        public static final Codec<Weighted> CODEC = ExtraCodecs.lazyInitializedCodec(() -> RecordCodecBuilder.create(instance -> instance.group(
+            Codec.either(TagKey.hashedCodec(Registries.ITEM), ModCodecs.ITEM)
                 .fieldOf("item").forGetter(Weighted::match),
             ExtraCodecs.POSITIVE_INT.fieldOf("weight").forGetter(Weighted::weight)
         ).apply(instance, Weighted::new)));

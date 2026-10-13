@@ -39,80 +39,139 @@ public final class FabricModNetworking {
     }
 
     public static void registerServer() {
-        PayloadTypeRegistry.playS2C().register(BoardPayloads.BoardSlipsPayload.TYPE, BoardPayloads.BoardSlipsPayload.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(BoardPayloads.BoardUpgradePayload.TYPE, BoardPayloads.BoardUpgradePayload.STREAM_CODEC);
-        PayloadTypeRegistry.playS2C().register(ExamDeskPayloads.DeskViewPayload.TYPE, ExamDeskPayloads.DeskViewPayload.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(ExamDeskPayloads.SignUpPayload.TYPE, ExamDeskPayloads.SignUpPayload.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(PetPayloads.PetDirectivePayload.TYPE, PetPayloads.PetDirectivePayload.STREAM_CODEC);
-        PayloadTypeRegistry.playS2C().register(ShopPayloads.ShopPricesPayload.TYPE, ShopPayloads.ShopPricesPayload.STREAM_CODEC);
-        PayloadTypeRegistry.playS2C().register(ManualPayloads.OpenHandbookPayload.TYPE, ManualPayloads.OpenHandbookPayload.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(ShopPayloads.ShopTradePayload.TYPE, ShopPayloads.ShopTradePayload.STREAM_CODEC);
-        PayloadTypeRegistry.playS2C().register(MusicPayloads.MusicCatalogPayload.TYPE, MusicPayloads.MusicCatalogPayload.STREAM_CODEC);
-        PayloadTypeRegistry.playS2C().register(MusicPayloads.MusicStreamStartPayload.TYPE, MusicPayloads.MusicStreamStartPayload.STREAM_CODEC);
-        PayloadTypeRegistry.playS2C().register(MusicPayloads.MusicStreamChunkPayload.TYPE, MusicPayloads.MusicStreamChunkPayload.STREAM_CODEC);
-        PayloadTypeRegistry.playS2C().register(MusicPayloads.MusicStreamStopPayload.TYPE, MusicPayloads.MusicStreamStopPayload.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(MusicPayloads.MusicBoxSelectTrackPayload.TYPE, MusicPayloads.MusicBoxSelectTrackPayload.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(MusicPayloads.MusicBoxSetModePayload.TYPE, MusicPayloads.MusicBoxSetModePayload.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(MusicPayloads.MusicCatalogRequestPayload.TYPE, MusicPayloads.MusicCatalogRequestPayload.STREAM_CODEC);
-        PayloadTypeRegistry.playS2C().register(VoicePayloads.PetSpeechPayload.TYPE, VoicePayloads.PetSpeechPayload.STREAM_CODEC);
-        PayloadTypeRegistry.playS2C().register(PetPayloads.PetGesturePayload.TYPE, PetPayloads.PetGesturePayload.STREAM_CODEC);
-        PayloadTypeRegistry.playS2C().register(SettingsPayloads.WorldSettingsPayload.TYPE, SettingsPayloads.WorldSettingsPayload.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(SettingsPayloads.ChangeWorldSettingsPayload.TYPE, SettingsPayloads.ChangeWorldSettingsPayload.STREAM_CODEC);
-        PayloadTypeRegistry.playS2C().register(PhotoPayloads.TakePhotoPayload.TYPE, PhotoPayloads.TakePhotoPayload.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(PhotoPayloads.UploadPhotoPayload.TYPE, PhotoPayloads.UploadPhotoPayload.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(PhotoPayloads.RequestPhotoPayload.TYPE, PhotoPayloads.RequestPhotoPayload.STREAM_CODEC);
-        PayloadTypeRegistry.playS2C().register(PhotoPayloads.DownloadPhotoPayload.TYPE, PhotoPayloads.DownloadPhotoPayload.STREAM_CODEC);
-        PayloadTypeRegistry.playS2C().register(PhotoPayloads.OpenAlbumPayload.TYPE, PhotoPayloads.OpenAlbumPayload.STREAM_CODEC);
-        ServerPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicBoxSelectTrackPayload.TYPE,
-            (payload, context) -> context.server().execute(() -> MusicServerPacketHandler.handleSelectTrack(payload, context.player())));
-        ServerPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicBoxSetModePayload.TYPE,
-            (payload, context) -> context.server().execute(() -> MusicServerPacketHandler.handleSetMode(payload, context.player())));
-        ServerPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicCatalogRequestPayload.TYPE,
-            (payload, context) -> context.server().execute(() -> MusicServerPacketHandler.handleCatalogRequest(payload, context.player())));
-        ServerPlayNetworking.registerGlobalReceiver(BoardPayloads.BoardUpgradePayload.TYPE,
-            (payload, context) -> context.server().execute(() -> BoardServerPacketHandler.handleUpgrade(payload, context.player())));
-        ServerPlayNetworking.registerGlobalReceiver(ExamDeskPayloads.SignUpPayload.TYPE,
-            (payload, context) -> context.server().execute(() -> ExamDeskServerPacketHandler.handleSignUp(payload, context.player())));
-        ServerPlayNetworking.registerGlobalReceiver(PetPayloads.PetDirectivePayload.TYPE,
-            (payload, context) -> context.server().execute(() -> PetServerPacketHandler.handleDirective(payload, context.player())));
-        ServerPlayNetworking.registerGlobalReceiver(ShopPayloads.ShopTradePayload.TYPE,
-            (payload, context) -> context.server().execute(() -> ShopServerPacketHandler.handleTrade(payload, context.player())));
-        ServerPlayNetworking.registerGlobalReceiver(SettingsPayloads.ChangeWorldSettingsPayload.TYPE,
-            (payload, context) -> context.server().execute(() -> SettingsServerPacketHandler.handleChange(payload, context.player())));
-        ServerPlayNetworking.registerGlobalReceiver(PhotoPayloads.UploadPhotoPayload.TYPE,
-            (payload, context) -> context.server().execute(() -> PhotoServerPacketHandler.handleUpload(payload, context.player())));
-        ServerPlayNetworking.registerGlobalReceiver(PhotoPayloads.RequestPhotoPayload.TYPE,
-            (payload, context) -> context.server().execute(() -> PhotoServerPacketHandler.handleRequest(payload, context.player())));
+        ServerPlayNetworking.registerGlobalReceiver(MusicPayloads.MUSIC_BOX_SELECT_TRACK,
+            (server, player, handler, buffer, responseSender) -> {
+                MusicPayloads.MusicBoxSelectTrackPayload payload = MusicPayloads.MusicBoxSelectTrackPayload.read(buffer);
+                server.execute(() -> MusicServerPacketHandler.handleSelectTrack(payload, player));
+            });
+        ServerPlayNetworking.registerGlobalReceiver(MusicPayloads.MUSIC_BOX_SET_MODE,
+            (server, player, handler, buffer, responseSender) -> {
+                MusicPayloads.MusicBoxSetModePayload payload = MusicPayloads.MusicBoxSetModePayload.read(buffer);
+                server.execute(() -> MusicServerPacketHandler.handleSetMode(payload, player));
+            });
+        ServerPlayNetworking.registerGlobalReceiver(MusicPayloads.MUSIC_CATALOG_REQUEST,
+            (server, player, handler, buffer, responseSender) -> {
+                MusicPayloads.MusicCatalogRequestPayload payload = MusicPayloads.MusicCatalogRequestPayload.read(buffer);
+                server.execute(() -> MusicServerPacketHandler.handleCatalogRequest(payload, player));
+            });
+        ServerPlayNetworking.registerGlobalReceiver(BoardPayloads.BOARD_UPGRADE,
+            (server, player, handler, buffer, responseSender) -> {
+                BoardPayloads.BoardUpgradePayload payload = BoardPayloads.BoardUpgradePayload.read(buffer);
+                server.execute(() -> BoardServerPacketHandler.handleUpgrade(payload, player));
+            });
+        ServerPlayNetworking.registerGlobalReceiver(ExamDeskPayloads.EXAM_DESK_SIGN_UP,
+            (server, player, handler, buffer, responseSender) -> {
+                ExamDeskPayloads.SignUpPayload payload = ExamDeskPayloads.SignUpPayload.read(buffer);
+                server.execute(() -> ExamDeskServerPacketHandler.handleSignUp(payload, player));
+            });
+        ServerPlayNetworking.registerGlobalReceiver(PetPayloads.PET_DIRECTIVE,
+            (server, player, handler, buffer, responseSender) -> {
+                PetPayloads.PetDirectivePayload payload = PetPayloads.PetDirectivePayload.read(buffer);
+                server.execute(() -> PetServerPacketHandler.handleDirective(payload, player));
+            });
+        ServerPlayNetworking.registerGlobalReceiver(ShopPayloads.SHOP_TRADE,
+            (server, player, handler, buffer, responseSender) -> {
+                ShopPayloads.ShopTradePayload payload = ShopPayloads.ShopTradePayload.read(buffer);
+                server.execute(() -> ShopServerPacketHandler.handleTrade(payload, player));
+            });
+        ServerPlayNetworking.registerGlobalReceiver(SettingsPayloads.CHANGE_WORLD_SETTINGS,
+            (server, player, handler, buffer, responseSender) -> {
+                SettingsPayloads.ChangeWorldSettingsPayload payload = SettingsPayloads.ChangeWorldSettingsPayload.read(buffer);
+                server.execute(() -> SettingsServerPacketHandler.handleChange(payload, player));
+            });
+        ServerPlayNetworking.registerGlobalReceiver(PhotoPayloads.UPLOAD_PHOTO,
+            (server, player, handler, buffer, responseSender) -> {
+                PhotoPayloads.UploadPhotoPayload payload = PhotoPayloads.UploadPhotoPayload.read(buffer);
+                server.execute(() -> PhotoServerPacketHandler.handleUpload(payload, player));
+            });
+        ServerPlayNetworking.registerGlobalReceiver(PhotoPayloads.REQUEST_PHOTO,
+            (server, player, handler, buffer, responseSender) -> {
+                PhotoPayloads.RequestPhotoPayload payload = PhotoPayloads.RequestPhotoPayload.read(buffer);
+                server.execute(() -> PhotoServerPacketHandler.handleRequest(payload, player));
+            });
     }
 
     public static void registerClient() {
-        ClientPlayNetworking.registerGlobalReceiver(BoardPayloads.BoardSlipsPayload.TYPE,
-            (payload, context) -> context.client().execute(() -> ClientBoardPacketHandler.handleSlips(payload)));
-        ClientPlayNetworking.registerGlobalReceiver(ExamDeskPayloads.DeskViewPayload.TYPE,
-            (payload, context) -> context.client().execute(() -> ClientExamDeskPacketHandler.handleView(payload)));
-        ClientPlayNetworking.registerGlobalReceiver(ShopPayloads.ShopPricesPayload.TYPE,
-            (payload, context) -> context.client().execute(() -> ClientShopPacketHandler.handlePrices(payload)));
-        ClientPlayNetworking.registerGlobalReceiver(ManualPayloads.OpenHandbookPayload.TYPE,
-            (payload, context) -> context.client().execute(ClientManualPacketHandler::open));
-        ClientPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicCatalogPayload.TYPE,
-            (payload, context) -> context.client().execute(() -> ClientMusicPacketHandler.handleCatalog(payload)));
-        ClientPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicStreamStartPayload.TYPE,
-            (payload, context) -> context.client().execute(() -> ClientMusicPacketHandler.handleStreamStart(payload)));
-        ClientPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicStreamChunkPayload.TYPE,
-            (payload, context) -> context.client().execute(() -> ClientMusicPacketHandler.handleStreamChunk(payload)));
-        ClientPlayNetworking.registerGlobalReceiver(MusicPayloads.MusicStreamStopPayload.TYPE,
-            (payload, context) -> context.client().execute(() -> ClientMusicPacketHandler.handleStreamStop(payload)));
-        ClientPlayNetworking.registerGlobalReceiver(VoicePayloads.PetSpeechPayload.TYPE,
-            (payload, context) -> context.client().execute(() -> ClientVoicePacketHandler.handleSpeech(payload)));
-        ClientPlayNetworking.registerGlobalReceiver(PetPayloads.PetGesturePayload.TYPE,
-            (payload, context) -> context.client().execute(() -> ClientPetPacketHandler.handleGesture(payload)));
-        ClientPlayNetworking.registerGlobalReceiver(SettingsPayloads.WorldSettingsPayload.TYPE,
-            (payload, context) -> context.client().execute(() -> ClientSettingsPacketHandler.handleWorld(payload)));
-        ClientPlayNetworking.registerGlobalReceiver(PhotoPayloads.TakePhotoPayload.TYPE,
-            (payload, context) -> context.client().execute(() -> ClientPhotoPacketHandler.handleTake(payload)));
-        ClientPlayNetworking.registerGlobalReceiver(PhotoPayloads.DownloadPhotoPayload.TYPE,
-            (payload, context) -> context.client().execute(() -> ClientPhotoPacketHandler.handleDownload(payload)));
-        ClientPlayNetworking.registerGlobalReceiver(PhotoPayloads.OpenAlbumPayload.TYPE,
-            (payload, context) -> context.client().execute(() -> ClientPhotoPacketHandler.handleOpen(payload)));
+        ClientPlayNetworking.registerGlobalReceiver(BoardPayloads.BOARD_SLIPS,
+            (client, handler, buffer, responseSender) -> {
+                BoardPayloads.BoardSlipsPayload payload = BoardPayloads.BoardSlipsPayload.read(buffer);
+                client.execute(() -> ClientBoardPacketHandler.handleSlips(payload));
+            });
+        ClientPlayNetworking.registerGlobalReceiver(ExamDeskPayloads.EXAM_DESK_VIEW,
+            (client, handler, buffer, responseSender) -> {
+                ExamDeskPayloads.DeskViewPayload payload = ExamDeskPayloads.DeskViewPayload.read(buffer);
+                client.execute(() -> ClientExamDeskPacketHandler.handleView(payload));
+            });
+        ClientPlayNetworking.registerGlobalReceiver(ShopPayloads.SHOP_PRICES,
+            (client, handler, buffer, responseSender) -> {
+                ShopPayloads.ShopPricesPayload payload = ShopPayloads.ShopPricesPayload.read(buffer);
+                client.execute(() -> ClientShopPacketHandler.handlePrices(payload));
+            });
+        ClientPlayNetworking.registerGlobalReceiver(ManualPayloads.OPEN_HANDBOOK,
+            (client, handler, buffer, responseSender) -> client.execute(ClientManualPacketHandler::open));
+        ClientPlayNetworking.registerGlobalReceiver(MusicPayloads.MUSIC_CATALOG,
+            (client, handler, buffer, responseSender) -> {
+                MusicPayloads.MusicCatalogPayload payload = MusicPayloads.MusicCatalogPayload.read(buffer);
+                client.execute(() -> ClientMusicPacketHandler.handleCatalog(payload));
+            });
+        ClientPlayNetworking.registerGlobalReceiver(MusicPayloads.MUSIC_STREAM_START,
+            (client, handler, buffer, responseSender) -> {
+                MusicPayloads.MusicStreamStartPayload payload = MusicPayloads.MusicStreamStartPayload.read(buffer);
+                client.execute(() -> ClientMusicPacketHandler.handleStreamStart(payload));
+            });
+        ClientPlayNetworking.registerGlobalReceiver(MusicPayloads.MUSIC_STREAM_CHUNK,
+            (client, handler, buffer, responseSender) -> {
+                MusicPayloads.MusicStreamChunkPayload payload = MusicPayloads.MusicStreamChunkPayload.read(buffer);
+                client.execute(() -> ClientMusicPacketHandler.handleStreamChunk(payload));
+            });
+        ClientPlayNetworking.registerGlobalReceiver(MusicPayloads.MUSIC_STREAM_STOP,
+            (client, handler, buffer, responseSender) -> {
+                MusicPayloads.MusicStreamStopPayload payload = MusicPayloads.MusicStreamStopPayload.read(buffer);
+                client.execute(() -> ClientMusicPacketHandler.handleStreamStop(payload));
+            });
+        ClientPlayNetworking.registerGlobalReceiver(VoicePayloads.PET_SPEECH,
+            (client, handler, buffer, responseSender) -> {
+                VoicePayloads.PetSpeechPayload payload = VoicePayloads.PetSpeechPayload.read(buffer);
+                client.execute(() -> ClientVoicePacketHandler.handleSpeech(payload));
+            });
+        ClientPlayNetworking.registerGlobalReceiver(PetPayloads.PET_GESTURE,
+            (client, handler, buffer, responseSender) -> {
+                PetPayloads.PetGesturePayload payload = PetPayloads.PetGesturePayload.read(buffer);
+                client.execute(() -> ClientPetPacketHandler.handleGesture(payload));
+            });
+        ClientPlayNetworking.registerGlobalReceiver(SettingsPayloads.WORLD_SETTINGS,
+            (client, handler, buffer, responseSender) -> {
+                SettingsPayloads.WorldSettingsPayload payload = SettingsPayloads.WorldSettingsPayload.read(buffer);
+                client.execute(() -> ClientSettingsPacketHandler.handleWorld(payload));
+            });
+        ClientPlayNetworking.registerGlobalReceiver(PhotoPayloads.TAKE_PHOTO,
+            (client, handler, buffer, responseSender) -> {
+                PhotoPayloads.TakePhotoPayload payload = PhotoPayloads.TakePhotoPayload.read(buffer);
+                client.execute(() -> ClientPhotoPacketHandler.handleTake(payload));
+            });
+        ClientPlayNetworking.registerGlobalReceiver(PhotoPayloads.DOWNLOAD_PHOTO,
+            (client, handler, buffer, responseSender) -> {
+                PhotoPayloads.DownloadPhotoPayload payload = PhotoPayloads.DownloadPhotoPayload.read(buffer);
+                client.execute(() -> ClientPhotoPacketHandler.handleDownload(payload));
+            });
+        ClientPlayNetworking.registerGlobalReceiver(PhotoPayloads.OPEN_ALBUM,
+            (client, handler, buffer, responseSender) -> {
+                PhotoPayloads.OpenAlbumPayload payload = PhotoPayloads.OpenAlbumPayload.read(buffer);
+                client.execute(() -> ClientPhotoPacketHandler.handleOpen(payload));
+            });
+    }
+
+    public static void sendToClient(ServerPlayer player, MusicPayloads.Payload payload) {
+        ServerPlayNetworking.send(player, payload.id(), write(payload));
+    }
+
+    public static void sendToServer(MusicPayloads.Payload payload) {
+        ClientPlayNetworking.send(payload.id(), write(payload));
+    }
+
+    private static FriendlyByteBuf write(MusicPayloads.Payload payload) {
+        FriendlyByteBuf buffer = PacketByteBufs.create();
+        payload.write(buffer);
+        return buffer;
     }
 }

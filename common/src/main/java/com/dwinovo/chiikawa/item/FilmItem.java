@@ -1,11 +1,13 @@
 package com.dwinovo.chiikawa.item;
 
-import com.dwinovo.chiikawa.init.InitDataComponents;
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.network.PhotoPayloads;
 import com.dwinovo.chiikawa.photo.FilmRoll;
 import com.dwinovo.chiikawa.platform.Services;
 import java.util.List;
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -14,6 +16,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A roll of film, which is also the album of what was taken on it. Fresh film stacks and does
@@ -24,13 +27,22 @@ import net.minecraft.world.level.Level;
  * the roll, as it does for the handbook: the item never has to know the screen.
  */
 public class FilmItem extends DescribedItem implements GiftReadiness {
+    /** The stack's own tag, as the music box keeps its selection in one. */
+    private static final String ROLL_KEY = "ChiikawaFilm";
+
     public FilmItem(Properties properties) {
         super(properties);
     }
 
     /** @return what is on this roll, nothing for fresh film */
     public static FilmRoll rollOf(ItemStack stack) {
-        return stack.getOrDefault(InitDataComponents.FILM_ROLL.get(), FilmRoll.NONE);
+        CompoundTag tag = stack.getTagElement(ROLL_KEY);
+        return tag == null ? FilmRoll.NONE : FilmRoll.CODEC.parse(NbtOps.INSTANCE, tag).result().orElse(FilmRoll.NONE);
+    }
+
+    /** Puts what is on the roll on its stack. */
+    public static void setRoll(ItemStack stack, FilmRoll roll) {
+        stack.addTagElement(ROLL_KEY, FilmRoll.CODEC.encodeStart(NbtOps.INSTANCE, roll).getOrThrow(false, Constants.LOG::error));
     }
 
     /** A pet's own film is not given away until it has been used up: a full roll is a present, the rest is film. */
@@ -53,13 +65,13 @@ public class FilmItem extends DescribedItem implements GiftReadiness {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         FilmRoll roll = rollOf(stack);
         if (roll.started()) {
             tooltip.add(Component.translatable("tooltip.chiikawa.film.shots", roll.shots().size(), roll.exposures())
                 .withStyle(ChatFormatting.GRAY));
         } else {
-            super.appendHoverText(stack, context, tooltip, flag);
+            super.appendHoverText(stack, level, tooltip, flag);
         }
     }
 }

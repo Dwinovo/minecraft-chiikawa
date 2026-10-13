@@ -27,23 +27,23 @@ class GiftingSettingsTest {
 
     @Test
     void settingsParseAnItemOrAHashAndATag() {
-        GiftingSettings settings = GiftingSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(GOOD)).getOrThrow();
+        GiftingSettings settings = GiftingSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(GOOD)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
         assertEquals(24000, settings.cooldownTicks());
         assertEquals(2, settings.weights().size());
         assertTrue(settings.weights().get(0).match().right().isPresent());
         assertTrue(settings.weights().get(1).match().left().isPresent());
-        assertEquals(ResourceLocation.fromNamespaceAndPath("chiikawa", "currency"),
+        assertEquals(new ResourceLocation("chiikawa", "currency"),
             settings.weights().get(1).match().left().orElseThrow().location());
     }
 
     @Test
     void settingsEncodeToWhatTheyParseFrom() {
-        GiftingSettings settings = GiftingSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(GOOD)).getOrThrow();
+        GiftingSettings settings = GiftingSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(GOOD)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
-        JsonElement json = GiftingSettings.CODEC.encodeStart(JsonOps.INSTANCE, settings).getOrThrow();
+        JsonElement json = GiftingSettings.CODEC.encodeStart(JsonOps.INSTANCE, settings).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
-        assertEquals(settings, GiftingSettings.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
+        assertEquals(settings, GiftingSettings.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow(false, org.junit.jupiter.api.Assertions::fail));
         assertEquals("#chiikawa:currency", json.getAsJsonObject().getAsJsonArray("weights").get(1)
             .getAsJsonObject().get("item").getAsString());
     }
@@ -51,18 +51,18 @@ class GiftingSettingsTest {
     @Test
     void settingsThatCannotBeRightAreRejected() {
         assertTrue(GiftingSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            GOOD.replace("24000", "-1"))).isError(), "a cooldown before the beginning of time");
+            GOOD.replace("24000", "-1"))).result().isEmpty(), "a cooldown before the beginning of time");
         assertTrue(GiftingSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            GOOD.replace("\"weight\": 5", "\"weight\": 0"))).isError(), "a present weighing nothing");
+            GOOD.replace("\"weight\": 5", "\"weight\": 0"))).result().isEmpty(), "a present weighing nothing");
         assertTrue(GiftingSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            GOOD.replace("minecraft:cookie", "minecraft:no_such_thing"))).isError());
+            GOOD.replace("minecraft:cookie", "minecraft:no_such_thing"))).result().isEmpty());
         assertTrue(GiftingSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            "{ \"cooldown_ticks\": 1 }")).isError(), "no weights at all");
+            "{ \"cooldown_ticks\": 1 }")).result().isEmpty(), "no weights at all");
     }
 
     @Test
     void theLoaderTakesTheOneFileAndNothingElse() {
-        ResourceLocation other = ResourceLocation.fromNamespaceAndPath("chiikawa", "other");
+        ResourceLocation other = new ResourceLocation("chiikawa", "other");
         JsonElement good = JsonParser.parseString(GOOD);
 
         assertTrue(GiftingSettingsLoader.load(Map.of(GiftingSettingsLoader.FILE, good)).isPresent());

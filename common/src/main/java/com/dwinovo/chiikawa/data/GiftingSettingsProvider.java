@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.data;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.gifting.GiftingSettings;
 import com.dwinovo.chiikawa.gifting.GiftingSettingsLoader;
 import com.mojang.serialization.JsonOps;
@@ -23,7 +24,7 @@ public final class GiftingSettingsProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cache) {
         return CompletableFuture.allOf(GiftingSettingsData.all().entrySet().stream()
             .map(entry -> DataProvider.saveStable(cache,
-                GiftingSettings.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(),
+                GiftingSettings.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(false, Constants.LOG::error),
                 pathProvider.json(entry.getKey())))
             .toArray(CompletableFuture[]::new));
     }

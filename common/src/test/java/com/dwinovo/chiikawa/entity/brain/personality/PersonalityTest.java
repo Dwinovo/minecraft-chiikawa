@@ -74,9 +74,9 @@ class PersonalityTest {
     void whatALikingNeedsIsWrittenWhenItIsSaved() {
         Personality.WeightedItem liking = new Personality.WeightedItem(Items.BOOK, 3).requiring(Items.PAPER).limitedTo(2);
 
-        JsonElement json = Personality.WeightedItem.CODEC.encodeStart(JsonOps.INSTANCE, liking).getOrThrow();
+        JsonElement json = Personality.WeightedItem.CODEC.encodeStart(JsonOps.INSTANCE, liking).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
-        assertEquals(liking, Personality.WeightedItem.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
+        assertEquals(liking, Personality.WeightedItem.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow(false, org.junit.jupiter.api.Assertions::fail));
         assertEquals("minecraft:paper", json.getAsJsonObject().get("requires").getAsString());
     }
 
@@ -94,8 +94,8 @@ class PersonalityTest {
 
     @Test
     void rejectsALimitOfNothing() {
-        assertTrue(decode("{ \"likes\": [ { \"item\": \"minecraft:cookie\", \"weight\": 1, \"limit\": 0 } ] }").isError());
-        assertTrue(decode("{ \"likes\": [ { \"item\": \"minecraft:cookie\", \"weight\": 1, \"requires\": \"minecraft:nothing_like_it\" } ] }").isError());
+        assertTrue(decode("{ \"likes\": [ { \"item\": \"minecraft:cookie\", \"weight\": 1, \"limit\": 0 } ] }").result().isEmpty());
+        assertTrue(decode("{ \"likes\": [ { \"item\": \"minecraft:cookie\", \"weight\": 1, \"requires\": \"minecraft:nothing_like_it\" } ] }").result().isEmpty());
     }
 
     @Test

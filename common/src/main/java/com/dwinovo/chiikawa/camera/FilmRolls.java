@@ -1,11 +1,9 @@
 package com.dwinovo.chiikawa.camera;
 
-import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.item.FilmItem;
 import com.dwinovo.chiikawa.photo.FilmRoll;
 import com.dwinovo.chiikawa.photo.PhotoData;
 import java.util.function.Consumer;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.Item;
@@ -45,15 +43,13 @@ public final class FilmRolls {
     /** A roll with its first shot on it. */
     public static ItemStack begin(Item film, int exposures, PhotoData shot) {
         ItemStack roll = new ItemStack(film);
-        roll.set(InitDataComponents.FILM_ROLL.get(), FilmRoll.begun(exposures, shot));
-        // A roll is one to a stack, whatever the film it was made from stacks to.
-        roll.set(DataComponents.MAX_STACK_SIZE, 1);
+        FilmItem.setRoll(roll, FilmRoll.begun(exposures, shot));
         return roll;
     }
 
     /** Puts a shot on a roll that has room for it. */
     public static void add(ItemStack roll, PhotoData shot) {
-        roll.set(InitDataComponents.FILM_ROLL.get(), FilmItem.rollOf(roll).with(shot));
+        FilmItem.setRoll(roll, FilmItem.rollOf(roll).with(shot));
     }
 
     /**

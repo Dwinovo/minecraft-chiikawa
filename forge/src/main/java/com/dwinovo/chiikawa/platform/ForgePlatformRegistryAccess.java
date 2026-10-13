@@ -90,7 +90,7 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
         ACTIVITIES.register("check_results", () -> new Activity(PetActivities.name("check_results")));
     private static final RegistryObject<Activity> ANSWER_WHISTLE =
         ACTIVITIES.register("answer_whistle", () -> new Activity(PetActivities.name("answer_whistle")));
-    private static final DeferredHolder<Activity, Activity> TAKE_PHOTO =
+    private static final RegistryObject<Activity> TAKE_PHOTO =
         ACTIVITIES.register("take_photo", () -> new Activity(PetActivities.name("take_photo")));
 
     // Menu registrations

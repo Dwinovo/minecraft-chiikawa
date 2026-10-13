@@ -47,15 +47,17 @@ class PetSpawnTest {
     void wildPetsSpawnInTheConventionalTagsForPlainsSavannaDesertSwampAndSnow() {
         PetSpawn wild = new PetSpawn(PetSpawnData.biomes(), java.util.List.of());
 
-        assertEquals(java.util.List.of("#c:is_plains", "#c:is_savanna", "#c:is_desert", "#c:is_swamp", "#c:is_snowy_plains"),
+        assertEquals(java.util.List.of("#c:plains", "#c:savanna", "#c:desert", "#c:swamp", "#c:snowy_plains",
+                "#forge:is_desert", "#forge:is_swamp", "#minecraft:is_savanna",
+                "minecraft:plains", "minecraft:sunflower_plains", "minecraft:snowy_plains"),
             wild.biomes().stream().map(entry -> (entry.tag() ? "#" : "") + entry.id()).toList());
         // A biome from a mod that is in the plains tag is a plains, and a forest is not.
-        ResourceKey<Biome> moddedPlains = ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("examplemod", "meadow_flats"));
-        TagKey<Biome> isPlains = TagKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("c", "is_plains"));
+        ResourceKey<Biome> moddedPlains = ResourceKey.create(Registries.BIOME, new ResourceLocation("examplemod", "meadow_flats"));
+        TagKey<Biome> isPlains = TagKey.create(Registries.BIOME, new ResourceLocation("c", "plains"));
         assertTrue(wild.covers(moddedPlains, isPlains::equals), "a modded plains does not count");
-        assertFalse(wild.covers(FOREST, tag -> tag.location().getNamespace().equals("c") && tag.location().getPath().equals("is_forest")),
+        assertFalse(wild.covers(FOREST, tag -> tag.location().getNamespace().equals("c") && tag.location().getPath().equals("forest")),
             "a forest counts");
-        assertFalse(wild.covers(PLAINS, tag -> false), "a plains is named by id, not by tag");
+        assertTrue(wild.covers(PLAINS, tag -> false), "Forge's plains tag holds the meadow, so a plains is named by id");
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.data;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.camera.CameraSettings;
 import com.dwinovo.chiikawa.camera.CameraSettingsLoader;
 import com.mojang.serialization.JsonOps;
@@ -23,7 +24,7 @@ public final class CameraSettingsProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cache) {
         return CompletableFuture.allOf(CameraSettingsData.all().entrySet().stream()
             .map(entry -> DataProvider.saveStable(cache,
-                CameraSettings.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(),
+                CameraSettings.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(false, Constants.LOG::error),
                 pathProvider.json(entry.getKey())))
             .toArray(CompletableFuture[]::new));
     }

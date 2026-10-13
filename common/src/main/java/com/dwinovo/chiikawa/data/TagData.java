@@ -56,6 +56,11 @@ public final class TagData {
             Items.COOKED_MUTTON, Items.COOKED_PORKCHOP, Items.COOKED_RABBIT, Items.COOKED_SALMON, Items.COOKIE, Items.GLOW_BERRIES,
             Items.GOLDEN_APPLE, Items.GOLDEN_CARROT, Items.HONEY_BOTTLE, Items.MELON_SLICE, Items.MUSHROOM_STEW, Items.PUMPKIN_PIE,
             Items.POTATO, Items.BEETROOT, Items.RABBIT_STEW, Items.SWEET_BERRIES);
+        tags.add(InitTag.SEEDS,
+            Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.WHEAT_SEEDS, Items.BEETROOT_SEEDS, Items.TORCHFLOWER_SEEDS,
+            Items.PITCHER_POD);
+        tags.addOptionalTag(InitTag.SEEDS, new ResourceLocation("c", "seeds"));
+        tags.addOptionalTag(InitTag.SEEDS, new ResourceLocation("forge", "seeds"));
         tags.add(InitTag.ENTITY_PLANT_CROPS,
             Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.WHEAT_SEEDS, Items.BEETROOT_SEEDS, Items.POTATO, Items.CARROT);
         // Pull in the cross-loader seeds convention tag so well-behaved farming mods

@@ -8,8 +8,7 @@ import com.mojang.serialization.JsonOps;
 import io.netty.buffer.Unpooled;
 import java.util.UUID;
 import net.minecraft.SharedConstants;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.server.Bootstrap;
 import org.junit.jupiter.api.BeforeAll;
@@ -29,20 +28,20 @@ class PhotoDataTest {
     @Test
     void whatIsSavedIsWhatIsRead() {
         for (PhotoData photo : new PhotoData[] {FRIEND, VIEW}) {
-            JsonElement saved = PhotoData.CODEC.encodeStart(JsonOps.INSTANCE, photo).getOrThrow();
+            JsonElement saved = PhotoData.CODEC.encodeStart(JsonOps.INSTANCE, photo).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
-            assertEquals(photo, PhotoData.CODEC.parse(JsonOps.INSTANCE, saved).getOrThrow());
+            assertEquals(photo, PhotoData.CODEC.parse(JsonOps.INSTANCE, saved).getOrThrow(false, org.junit.jupiter.api.Assertions::fail));
         }
     }
 
     @Test
     void whatIsSentIsWhatIsRead() {
         for (PhotoData photo : new PhotoData[] {FRIEND, VIEW}) {
-            RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), RegistryAccess.EMPTY);
+            FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
 
-            PhotoData.STREAM_CODEC.encode(buffer, photo);
+            photo.write(buffer);
 
-            assertEquals(photo, PhotoData.STREAM_CODEC.decode(buffer));
+            assertEquals(photo, PhotoData.read(buffer));
         }
     }
 
@@ -50,13 +49,13 @@ class PhotoDataTest {
     void everyKindOfSubjectIsSavedAndSent() {
         for (PhotoSubject subject : PhotoSubject.values()) {
             PhotoData photo = new PhotoData(UUID.randomUUID(), subject, "x", 1, "y");
-            RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), RegistryAccess.EMPTY);
+            FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
 
-            PhotoData.STREAM_CODEC.encode(buffer, photo);
+            photo.write(buffer);
 
-            assertEquals(subject, PhotoData.STREAM_CODEC.decode(buffer).subject());
+            assertEquals(subject, PhotoData.read(buffer).subject());
             assertEquals(subject, PhotoData.CODEC.parse(JsonOps.INSTANCE,
-                PhotoData.CODEC.encodeStart(JsonOps.INSTANCE, photo).getOrThrow()).getOrThrow().subject());
+                PhotoData.CODEC.encodeStart(JsonOps.INSTANCE, photo).getOrThrow(false, org.junit.jupiter.api.Assertions::fail)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail).subject());
         }
     }
 

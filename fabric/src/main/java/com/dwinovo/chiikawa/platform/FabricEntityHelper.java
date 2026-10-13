@@ -11,6 +11,7 @@ import com.dwinovo.chiikawa.entity.impl.UsagiPet;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.platform.services.IEntityHelper;
 import com.dwinovo.chiikawa.spawn.WildSpawning;
+import net.fabricmc.fabric.api.dimension.v1.FabricDimensions;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -51,7 +52,8 @@ public class FabricEntityHelper implements IEntityHelper {
     }
 
     private static <T extends Animal> void registerSpawnPlacement(net.minecraft.world.entity.EntityType<T> type) {
-        SpawnPlacements.register(type, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+        // 1.20.1: use SpawnPlacements.Type enum instead of SpawnPlacementTypes
+        SpawnPlacements.register(type, SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
             WildSpawning::canSpawn);
     }
 

@@ -25,7 +25,7 @@ class AnchorSettingsTest {
 
     @Test
     void settingsParseTheThreeAreas() {
-        AnchorSettings settings = AnchorSettings.CODEC.parse(JsonOps.INSTANCE, json(GOOD)).getOrThrow();
+        AnchorSettings settings = AnchorSettings.CODEC.parse(JsonOps.INSTANCE, json(GOOD)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
         assertEquals(new AnchorSettings.Follow(7.0, 2, 12.0, 16.0, 20.0), settings.follow());
         assertEquals(new AnchorSettings.Area(13.0, 20.0), settings.free());
@@ -34,29 +34,29 @@ class AnchorSettingsTest {
 
     @Test
     void settingsEncodeToWhatTheyParseFrom() {
-        AnchorSettings settings = AnchorSettings.CODEC.parse(JsonOps.INSTANCE, json(GOOD)).getOrThrow();
+        AnchorSettings settings = AnchorSettings.CODEC.parse(JsonOps.INSTANCE, json(GOOD)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
-        JsonElement encoded = AnchorSettings.CODEC.encodeStart(JsonOps.INSTANCE, settings).getOrThrow();
+        JsonElement encoded = AnchorSettings.CODEC.encodeStart(JsonOps.INSTANCE, settings).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
-        assertEquals(settings, AnchorSettings.CODEC.parse(JsonOps.INSTANCE, encoded).getOrThrow());
+        assertEquals(settings, AnchorSettings.CODEC.parse(JsonOps.INSTANCE, encoded).getOrThrow(false, org.junit.jupiter.api.Assertions::fail));
     }
 
     @Test
     void distancesThatCannotBeRightAreRejected() {
-        assertTrue(AnchorSettings.CODEC.parse(JsonOps.INSTANCE, json(GOOD.replace("\"leash\": 20", "\"leash\": 10"))).isError(),
+        assertTrue(AnchorSettings.CODEC.parse(JsonOps.INSTANCE, json(GOOD.replace("\"leash\": 20", "\"leash\": 10"))).result().isEmpty(),
             "a leash shorter than the reach");
-        assertTrue(AnchorSettings.CODEC.parse(JsonOps.INSTANCE, json(GOOD.replace("\"teleport\": 20", "\"teleport\": 14"))).isError(),
+        assertTrue(AnchorSettings.CODEC.parse(JsonOps.INSTANCE, json(GOOD.replace("\"teleport\": 20", "\"teleport\": 14"))).result().isEmpty(),
             "a pet fetched before it is let off the leash");
-        assertTrue(AnchorSettings.CODEC.parse(JsonOps.INSTANCE, json(GOOD.replace("\"start\": 7", "\"start\": 15"))).isError(),
+        assertTrue(AnchorSettings.CODEC.parse(JsonOps.INSTANCE, json(GOOD.replace("\"start\": 7", "\"start\": 15"))).result().isEmpty(),
             "a pet that starts walking back after its owner is out of reach");
-        assertTrue(AnchorSettings.CODEC.parse(JsonOps.INSTANCE, json(GOOD.replace("\"reach\": 13", "\"reach\": -1"))).isError());
-        assertTrue(AnchorSettings.CODEC.parse(JsonOps.INSTANCE, json("{ \"free\": { \"reach\": 1, \"leash\": 2 } }")).isError(),
+        assertTrue(AnchorSettings.CODEC.parse(JsonOps.INSTANCE, json(GOOD.replace("\"reach\": 13", "\"reach\": -1"))).result().isEmpty());
+        assertTrue(AnchorSettings.CODEC.parse(JsonOps.INSTANCE, json("{ \"free\": { \"reach\": 1, \"leash\": 2 } }")).result().isEmpty(),
             "an area missing");
     }
 
     @Test
     void theLoaderTakesTheOneFileAndNothingElse() {
-        ResourceLocation other = ResourceLocation.fromNamespaceAndPath("chiikawa", "other");
+        ResourceLocation other = new ResourceLocation("chiikawa", "other");
 
         assertTrue(AnchorSettingsLoader.load(Map.of(AnchorSettingsLoader.FILE, json(GOOD))).isPresent());
         assertEquals(Optional.empty(), AnchorSettingsLoader.load(Map.of(other, json(GOOD))), "a file of another name");
