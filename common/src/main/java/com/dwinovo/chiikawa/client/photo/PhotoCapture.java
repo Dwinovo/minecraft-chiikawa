@@ -4,9 +4,9 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.mixin.CameraAccessor;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
-import com.mojang.blaze3d.platform.NativeImage;
-import java.util.Optional;
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.OptionalDouble;
+import java.util.function.Consumer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
@@ -60,14 +60,15 @@ public final class PhotoCapture {
     /**
      * @param viewpoint whose eyes the world is drawn from
      * @param fov how wide the lens sees, in degrees from top to bottom
-     * @return the frame, or nothing when it could not be drawn
+     * @param done told the frame once it has been read back, on the game's thread, a few frames
+     *             after this returns; never told when the frame could not be drawn
      */
-    public static Optional<Frame> take(Entity viewpoint, int fov) {
+    public static void take(Entity viewpoint, int fov, Consumer<Frame> done) {
         Minecraft minecraft = Minecraft.getInstance();
         int width = minecraft.getWindow().getWidth();
         int height = minecraft.getWindow().getHeight();
         if (minecraft.level == null || minecraft.player == null || width <= 0 || height <= 0) {
-            return Optional.empty();
+            return;
         }
         GameRenderer renderer = minecraft.gameRenderer;
         Camera camera = renderer.getMainCamera();
@@ -83,10 +84,11 @@ public final class PhotoCapture {
         HitResult hit = minecraft.hitResult;
         Entity pointedAt = minecraft.crosshairPickEntity;
 
-        RenderTarget target = new TextureTarget(width, height, true);
+        RenderTarget target = new TextureTarget("Chiikawa photo", width, height, true);
+        boolean read = false;
         try {
-            target.setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
-            target.clear();
+            RenderSystem.getDevice().createCommandEncoder()
+                .clearColorAndDepthTextures(target.getColorTexture(), 0, target.getDepthTexture(), 1.0);
             inUse = target;
 
             options.hideGui = true;
@@ -99,21 +101,24 @@ public final class PhotoCapture {
             eyes.chiikawa$setEyeHeightOld(viewpoint.getEyeHeight());
             camera.reset();
 
-            target.bindWrite(false);
             renderer.renderLevel(minecraft.getDeltaTracker());
 
-            NativeImage image = Screenshot.takeScreenshot(target);
-            try {
-                return Optional.of(new Frame(image.getPixelsABGR(), image.getWidth(), image.getHeight()));
-            } finally {
-                image.close();
-            }
+            // The game hands the pixels over once the graphics card has finished with them, a few frames on.
+            Screenshot.takeScreenshot(target, image -> {
+                try (image) {
+                    done.accept(new Frame(image.getPixelsABGR(), image.getWidth(), image.getHeight()));
+                } finally {
+                    target.destroyBuffers();
+                }
+            });
+            read = true;
         } catch (RuntimeException ex) {
             Constants.LOG.error("[chiikawa-photo] Could not draw a photo", ex);
-            return Optional.empty();
         } finally {
             inUse = null;
-            target.destroyBuffers();
+            if (!read) {
+                target.destroyBuffers();
+            }
             minecraft.cameraEntity = cameraEntity;
             eyes.chiikawa$setEyeHeight(eyeHeight);
             eyes.chiikawa$setEyeHeightOld(eyeHeightOld);
@@ -124,7 +129,6 @@ public final class PhotoCapture {
             renderer.setRenderBlockOutline(true);
             minecraft.hitResult = hit;
             minecraft.crosshairPickEntity = pointedAt;
-            minecraft.getMainRenderTarget().bindWrite(true);
         }
     }
 }

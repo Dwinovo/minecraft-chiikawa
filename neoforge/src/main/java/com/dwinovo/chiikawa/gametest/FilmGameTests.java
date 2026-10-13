@@ -9,13 +9,11 @@ import com.dwinovo.chiikawa.photo.PhotoSubject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Rolls of film: where a shot goes in a bag, when a roll is full, and what stacks. These are
@@ -23,7 +21,6 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
  * rather than unit tests.
  */
 @GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class FilmGameTests {
     private static final int EXPOSURES = 3;
 
@@ -41,9 +38,9 @@ public final class FilmGameTests {
         ItemStack fresh = new ItemStack(film(), 5);
         ItemStack roll = FilmRolls.begin(film(), EXPOSURES, shot());
 
-        helper.assertTrue(fresh.getMaxStackSize() == 64, "fresh film stacks to " + fresh.getMaxStackSize());
-        helper.assertTrue(roll.getMaxStackSize() == 1, "a roll stacks to " + roll.getMaxStackSize());
-        helper.assertFalse(ItemStack.isSameItemSameComponents(fresh, roll), "a roll is the same as fresh film");
+        helper.assertTrue(fresh.getMaxStackSize() == 64, Component.literal("fresh film stacks to " + fresh.getMaxStackSize()));
+        helper.assertTrue(roll.getMaxStackSize() == 1, Component.literal("a roll stacks to " + roll.getMaxStackSize()));
+        helper.assertFalse(ItemStack.isSameItemSameComponents(fresh, roll), Component.literal("a roll is the same as fresh film"));
         helper.succeed();
     }
 
@@ -57,9 +54,9 @@ public final class FilmGameTests {
 
         boolean recorded = FilmRolls.record(bag, film(), EXPOSURES, shot(), dropped -> { });
 
-        helper.assertTrue(recorded, "the shot was not recorded");
-        helper.assertTrue(FilmItem.rollOf(open).shots().size() == 2, "the open roll has " + FilmItem.rollOf(open).shots().size());
-        helper.assertTrue(bag.getItem(2).getCount() == 3, "a fresh roll was begun while one had room");
+        helper.assertTrue(recorded, Component.literal("the shot was not recorded"));
+        helper.assertTrue(FilmItem.rollOf(open).shots().size() == 2, Component.literal("the open roll has " + FilmItem.rollOf(open).shots().size()));
+        helper.assertTrue(bag.getItem(2).getCount() == 3, Component.literal("a fresh roll was begun while one had room"));
         helper.succeed();
     }
 
@@ -71,12 +68,12 @@ public final class FilmGameTests {
 
         boolean recorded = FilmRolls.record(bag, film(), EXPOSURES, shot(), dropped -> { });
 
-        helper.assertTrue(recorded, "the shot was not recorded");
+        helper.assertTrue(recorded, Component.literal("the shot was not recorded"));
         helper.assertTrue(bag.getItem(4).getCount() == 2 && !FilmItem.rollOf(bag.getItem(4)).started(),
-            "the pile was not one fewer: " + bag.getItem(4));
+            Component.literal("the pile was not one fewer: " + bag.getItem(4)));
         List<ItemStack> rolls = rollsIn(bag);
         helper.assertTrue(rolls.size() == 1 && FilmItem.rollOf(rolls.get(0)).shots().size() == 1
-            && FilmItem.rollOf(rolls.get(0)).exposures() == EXPOSURES, "there should be one roll with one shot: " + rolls);
+            && FilmItem.rollOf(rolls.get(0)).exposures() == EXPOSURES, Component.literal("there should be one roll with one shot: " + rolls));
         helper.succeed();
     }
 
@@ -88,7 +85,7 @@ public final class FilmGameTests {
 
         FilmRolls.record(bag, film(), EXPOSURES, shot(), dropped -> { });
 
-        helper.assertTrue(FilmItem.rollOf(bag.getItem(1)).started() && rollsIn(bag).size() == 1, "the roll is not where the film was");
+        helper.assertTrue(FilmItem.rollOf(bag.getItem(1)).started() && rollsIn(bag).size() == 1, Component.literal("the roll is not where the film was"));
         helper.succeed();
     }
 
@@ -99,14 +96,14 @@ public final class FilmGameTests {
         ItemStack full = FilmRolls.begin(film(), 1, shot());
         bag.setItem(0, full);
 
-        helper.assertTrue(FilmItem.rollOf(full).full(), "a roll of one is not full with one shot");
-        helper.assertFalse(FilmRolls.hasRoom(bag, film()), "a full roll has room");
-        helper.assertFalse(FilmRolls.record(bag, film(), EXPOSURES, shot(), dropped -> { }), "a shot went on a full roll");
+        helper.assertTrue(FilmItem.rollOf(full).full(), Component.literal("a roll of one is not full with one shot"));
+        helper.assertFalse(FilmRolls.hasRoom(bag, film()), Component.literal("a full roll has room"));
+        helper.assertFalse(FilmRolls.record(bag, film(), EXPOSURES, shot(), dropped -> { }), Component.literal("a shot went on a full roll"));
 
         bag.setItem(3, new ItemStack(film()));
-        helper.assertTrue(FilmRolls.hasRoom(bag, film()), "fresh film has no room");
-        helper.assertTrue(FilmRolls.record(bag, film(), EXPOSURES, shot(), dropped -> { }), "no new roll was begun");
-        helper.assertTrue(FilmItem.rollOf(full).shots().size() == 1, "the full roll took another shot");
+        helper.assertTrue(FilmRolls.hasRoom(bag, film()), Component.literal("fresh film has no room"));
+        helper.assertTrue(FilmRolls.record(bag, film(), EXPOSURES, shot(), dropped -> { }), Component.literal("no new roll was begun"));
+        helper.assertTrue(FilmItem.rollOf(full).shots().size() == 1, Component.literal("the full roll took another shot"));
         helper.succeed();
     }
 
@@ -120,7 +117,7 @@ public final class FilmGameTests {
         boolean recorded = FilmRolls.record(bag, film(), EXPOSURES, shot(), dropped::add);
 
         helper.assertTrue(recorded && dropped.size() == 1 && FilmItem.rollOf(dropped.get(0)).started(),
-            "the roll was lost: " + dropped);
+            Component.literal("the roll was lost: " + dropped));
         helper.succeed();
     }
 
@@ -130,10 +127,10 @@ public final class FilmGameTests {
         FilmItem item = (FilmItem) film();
         ItemStack roll = FilmRolls.begin(film(), 2, shot());
 
-        helper.assertFalse(item.readyToGive(new ItemStack(film())), "fresh film is ready to give");
-        helper.assertFalse(item.readyToGive(roll), "an unfinished roll is ready to give");
+        helper.assertFalse(item.readyToGive(new ItemStack(film())), Component.literal("fresh film is ready to give"));
+        helper.assertFalse(item.readyToGive(roll), Component.literal("an unfinished roll is ready to give"));
         FilmRolls.add(roll, shot());
-        helper.assertTrue(item.readyToGive(roll), "a full roll is not ready to give");
+        helper.assertTrue(item.readyToGive(roll), Component.literal("a full roll is not ready to give"));
         helper.succeed();
     }
 

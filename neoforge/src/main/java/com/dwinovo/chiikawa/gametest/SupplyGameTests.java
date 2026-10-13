@@ -107,10 +107,10 @@ public final class SupplyGameTests {
             .sorted(Comparator.comparingInt(entry -> entry.getValue().order())).toList();
         helper.assertTrue(chapters.stream().map(entry -> entry.getKey().getPath()).toList()
             .equals(List.of("meet", "work", "shop", "care", "camera", "licence")),
-            "the chapters are " + chapters.stream().map(entry -> entry.getKey().getPath()).toList());
+            Component.literal("the chapters are " + chapters.stream().map(entry -> entry.getKey().getPath()).toList()));
         helper.assertTrue(chapters.stream().map(entry -> entry.getValue().link()).toList().equals(List.of(
             "play/taming", "play/work", "play/shop", "play/care", "play/camera", "play/licence")),
-            "the links are " + chapters.stream().map(entry -> entry.getValue().link()).toList());
+            Component.literal("the links are " + chapters.stream().map(entry -> entry.getValue().link()).toList()));
         helper.succeed();
     }
 
