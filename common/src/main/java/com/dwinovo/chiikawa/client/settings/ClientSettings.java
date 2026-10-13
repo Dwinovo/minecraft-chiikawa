@@ -1,7 +1,6 @@
 package com.dwinovo.chiikawa.client.settings;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -14,6 +13,7 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import net.minecraft.util.ExtraCodecs;
 
 /**
  * What a player chooses for their own game, whatever world they are in: kept in
@@ -32,7 +32,7 @@ public record ClientSettings(boolean speechBubbles) {
      * file whenever it has the default value.
      */
     public static final Codec<ClientSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        ModCodecs.strictOptionalField(Codec.BOOL, "speech_bubbles").forGetter(settings -> Optional.of(settings.speechBubbles()))
+        ExtraCodecs.strictOptionalField(Codec.BOOL, "speech_bubbles").forGetter(settings -> Optional.of(settings.speechBubbles()))
     ).apply(instance, speechBubbles -> new ClientSettings(speechBubbles.orElse(DEFAULT.speechBubbles))));
 
     /**

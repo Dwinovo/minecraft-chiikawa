@@ -20,15 +20,15 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 
 /**
  * The photo library as the server runs it: a photo is asked for, and kept only when the player
  * it was asked of sends all of it, at the size it was asked for, within a minute. There is no
  * game on the other end of these cases, so the pieces a game would send are sent from here.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class PhotoGameTests {
     private static final int STAND = 2;
     private static final int WIDTH = 32;

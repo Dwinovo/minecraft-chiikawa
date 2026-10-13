@@ -2,7 +2,6 @@ package com.dwinovo.chiikawa.camera;
 
 import com.dwinovo.chiikawa.photo.FilmRoll;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
-import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Collections;
@@ -73,9 +72,9 @@ public record CameraSettings(ResourceLocation film, double ownerRange, int coold
         Subjects.CODEC.fieldOf("subjects").forGetter(CameraSettings::subjects),
         ExtraCodecs.POSITIVE_INT.fieldOf("aim_ticks").forGetter(CameraSettings::aimTicks),
         // Always written, though a file without them reads as the default: they are numbers to change.
-        ModCodecs.strictOptionalField(Codec.intRange(1, FilmRoll.MOST_EXPOSURES), "exposures")
+        ExtraCodecs.strictOptionalField(Codec.intRange(1, FilmRoll.MOST_EXPOSURES), "exposures")
             .forGetter(settings -> Optional.of(settings.exposures())),
-        ModCodecs.strictOptionalField(Codec.floatRange(0.0F, 1.0F), "posed_chance")
+        ExtraCodecs.strictOptionalField(Codec.floatRange(0.0F, 1.0F), "posed_chance")
             .forGetter(settings -> Optional.of(settings.posedChance()))
     ).apply(instance, (film, ownerRange, cooldownTicks, retryTicks, width, height, fov, subjects, aimTicks, exposures, posed) ->
         new CameraSettings(film, ownerRange, cooldownTicks, retryTicks, width, height, fov, subjects, aimTicks,

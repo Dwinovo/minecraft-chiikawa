@@ -17,7 +17,7 @@ public class WorldSettingsStore extends SavedData {
 
     public static WorldSettingsStore of(MinecraftServer server) {
         return server.overworld().getDataStorage()
-            .computeIfAbsent(WorldSettingsStore::load, WorldSettingsStore::new, FILE);
+            .computeIfAbsent(new SavedData.Factory<>(WorldSettingsStore::new, WorldSettingsStore::load, null), FILE);
     }
 
     public static WorldSettingsStore of(ServerLevel level) {

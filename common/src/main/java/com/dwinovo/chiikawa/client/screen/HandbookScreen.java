@@ -113,7 +113,7 @@ public class HandbookScreen extends Screen {
 
     private void openWebsite() {
         String url = ManualLinks.url(this.minecraft.getLanguageManager().getSelected(), current().link());
-        // Before 1.20.3 the confirm screen does not open the link itself: the callback does, as vanilla's helper has it.
+        // Before 1.21 the confirm screen does not open the link itself: the callback does, as vanilla's helper has it.
         ConfirmLinkScreen.confirmLinkNow(url, this, true);
     }
 
@@ -211,12 +211,12 @@ public class HandbookScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (!chapters.isEmpty() && maxScroll() > 0) {
-            scroll = Mth.clamp(scroll - (int) Math.signum(delta) * SCROLL_LINES * UiStyle.LINE, 0, maxScroll());
+            scroll = Mth.clamp(scroll - (int) Math.signum(scrollY) * SCROLL_LINES * UiStyle.LINE, 0, maxScroll());
             return true;
         }
-        return super.mouseScrolled(mouseX, mouseY, delta);
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override

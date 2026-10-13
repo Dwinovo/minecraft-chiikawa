@@ -27,7 +27,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 
 /**
  * The world's settings, as the server applies them: chatter silences a pet at a moment it
@@ -39,8 +39,8 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
  * the client's, which these cases have none of; the handler's logic is called as the
  * handler calls it.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class SettingsGameTests {
     private static final int STAND = 2;
     /** The permission level of a game master. */
