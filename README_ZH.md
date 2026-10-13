@@ -8,7 +8,7 @@
 ![Java](https://img.shields.io/badge/Java-007396?style=flat-square&logo=openjdk&logoColor=white)
 ![License](https://img.shields.io/badge/code-LGPL--3.0-A8731E?style=flat-square)
 ![QQ](https://img.shields.io/badge/QQ%E7%BE%A4-995178570-12B7F5?style=flat-square&logo=qq&logoColor=white)
-[![Discord](https://img.shields.io/badge/Discord-%E5%8A%A0%E5%85%A5-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/wPkgfst5Z)
+[![Discord](https://img.shields.io/badge/Discord-%E5%8A%A0%E5%85%A5-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/p3B9jJXVba)
 
 [**官网**](https://chiikawa.dwinovo.cn/zh/) · [**安装**](#安装) · [**快速开始**](#快速开始) · [**许可与声明**](#许可与声明) · [**致谢**](#致谢)
 
@@ -19,7 +19,7 @@
 Chiikawa 模组是一个**把 [Chiikawa](https://chiikawa-info.jp/) 的世界带进 Minecraft** 的模组，Chiikawa 里的角色们会来到你的世界里生活，让你在 Minecraft 里体验 Chiikawa 的世界。
 
 > [!TIP]
-> 欢迎加入 QQ 交流群 **995178570** 或 [Discord](https://discord.gg/wPkgfst5Z) 交流。更多详情请见[官网](https://chiikawa.dwinovo.cn/zh/)。
+> 欢迎加入 QQ 交流群 **995178570** 或 [Discord](https://discord.gg/p3B9jJXVba) 交流。更多详情请见[官网](https://chiikawa.dwinovo.cn/zh/)。
 
 ## 安装
 
