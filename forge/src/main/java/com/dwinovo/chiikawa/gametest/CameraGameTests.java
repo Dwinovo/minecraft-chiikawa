@@ -59,7 +59,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 
 /**
  * Hachiware's camera: it takes a photo only with a camera and film in its bag, an owner
@@ -71,8 +71,8 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
  * case is a batch of its own: a pet in the next yard over is a friend to photograph, and
  * the one case would then be about two cases' pets.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class CameraGameTests {
     private static final int STAND = 2;
     /** Long enough to cross a yard, aim and press the shutter. */

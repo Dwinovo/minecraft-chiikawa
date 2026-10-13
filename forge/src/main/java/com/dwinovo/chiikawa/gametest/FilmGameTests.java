@@ -15,15 +15,15 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestDontPrefix;
 
 /**
  * Rolls of film: where a shot goes in a bag, when a roll is full, and what stacks. These are
  * about the film as an item, which needs the game's own registries, so they are cases here
  * rather than unit tests.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class FilmGameTests {
     private static final int EXPOSURES = 3;
 

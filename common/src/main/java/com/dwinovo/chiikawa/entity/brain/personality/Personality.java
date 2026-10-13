@@ -163,10 +163,10 @@ public record Personality(
         public static final Codec<WeightedItem> CODEC = ExtraCodecs.lazyInitializedCodec(() -> RecordCodecBuilder.create(instance -> instance.group(
             ModCodecs.ITEM.fieldOf("item").forGetter(WeightedItem::item),
             ExtraCodecs.POSITIVE_INT.xmap(Weight::of, Weight::asInt).fieldOf("weight").forGetter(WeightedItem::weight),
-            ModCodecs.strictOptionalField(ModCodecs.ITEM, "requires").forGetter(WeightedItem::requires),
-            ModCodecs.strictOptionalField(ExtraCodecs.POSITIVE_INT, "limit").forGetter(WeightedItem::limit),
-            ModCodecs.strictOptionalField(Codec.BOOL, "keep", false).forGetter(WeightedItem::keep),
-            ModCodecs.strictOptionalField(Codec.BOOL, "save_up", false).forGetter(WeightedItem::saveUp)
+            ExtraCodecs.strictOptionalField(ModCodecs.ITEM, "requires").forGetter(WeightedItem::requires),
+            ExtraCodecs.strictOptionalField(ExtraCodecs.POSITIVE_INT, "limit").forGetter(WeightedItem::limit),
+            ExtraCodecs.strictOptionalField(Codec.BOOL, "keep", false).forGetter(WeightedItem::keep),
+            ExtraCodecs.strictOptionalField(Codec.BOOL, "save_up", false).forGetter(WeightedItem::saveUp)
         ).apply(instance, WeightedItem::new)));
 
         public WeightedItem(Item item, int weight) {
