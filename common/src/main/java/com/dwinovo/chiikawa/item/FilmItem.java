@@ -4,7 +4,7 @@ import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.network.PhotoPayloads;
 import com.dwinovo.chiikawa.photo.FilmRoll;
 import com.dwinovo.chiikawa.platform.Services;
-import java.util.List;
+import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -13,6 +13,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
 /**
@@ -53,13 +54,14 @@ public class FilmItem extends DescribedItem implements GiftReadiness {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay,
+                                Consumer<Component> tooltip, TooltipFlag flag) {
         FilmRoll roll = rollOf(stack);
         if (roll.started()) {
-            tooltip.add(Component.translatable("tooltip.chiikawa.film.shots", roll.shots().size(), roll.exposures())
+            tooltip.accept(Component.translatable("tooltip.chiikawa.film.shots", roll.shots().size(), roll.exposures())
                 .withStyle(ChatFormatting.GRAY));
         } else {
-            super.appendHoverText(stack, context, tooltip, flag);
+            super.appendHoverText(stack, context, tooltipDisplay, tooltip, flag);
         }
     }
 }
