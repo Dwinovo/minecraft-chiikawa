@@ -22,12 +22,6 @@ public final class InitTag {
      * a pack puts here, each worth one; the first is what is paid out and pictured.
      */
     public static final TagKey<Item> CURRENCY = tag("currency");
-    /**
-     * Any seed. 1.20.1 has no one convention tag for them that both loaders fill: Forge has
-     * {@code forge:seeds} and Fabric none, so the vanilla seeds are named here and the
-     * loaders' tags are included for the seeds of other mods.
-     */
-    public static final TagKey<Item> SEEDS = tag("seeds");
     /** What a pet treats another to out of its own backpack, see {@code pet_interaction}. */
     public static final TagKey<Item> PET_TREATS = tag("pet_treats");
 

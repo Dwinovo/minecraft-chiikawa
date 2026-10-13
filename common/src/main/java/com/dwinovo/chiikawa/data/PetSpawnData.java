@@ -18,7 +18,7 @@ import net.minecraft.world.level.biome.MobSpawnSettings;
  * conventional biome tags rather than biomes by name, so a modded biome of the same kind counts.
  */
 public final class PetSpawnData {
-    public static final ResourceLocation WILD_PETS = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "wild_pets");
+    public static final ResourceLocation WILD_PETS = new ResourceLocation(Constants.MOD_ID, "wild_pets");
     /** Every vanilla biome the list used to name is in one of these, on both loaders. */
     private static final List<String> BIOME_TAGS = List.of(
         "is_plains", "is_savanna", "is_desert", "is_swamp", "is_snowy_plains");
@@ -30,7 +30,7 @@ public final class PetSpawnData {
     /** @return where wild pets spawn: the conventional tags of the kinds of biome they live in */
     public static List<ExtraCodecs.TagOrElementLocation> biomes() {
         return BIOME_TAGS.stream()
-            .map(path -> new ExtraCodecs.TagOrElementLocation(ResourceLocation.fromNamespaceAndPath("c", path), true))
+            .map(path -> new ExtraCodecs.TagOrElementLocation(new ResourceLocation("c", path), true))
             .toList();
     }
 
