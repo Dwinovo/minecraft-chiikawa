@@ -8,7 +8,7 @@
 ![Java](https://img.shields.io/badge/Java-007396?style=flat-square&logo=openjdk&logoColor=white)
 ![License](https://img.shields.io/badge/code-LGPL--3.0-A8731E?style=flat-square)
 ![QQ](https://img.shields.io/badge/QQ-995178570-12B7F5?style=flat-square&logo=qq&logoColor=white)
-[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/wPkgfst5Z)
+[![Discord](https://img.shields.io/badge/Discord-Join-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/p3B9jJXVba)
 
 [**Website**](https://chiikawa.dwinovo.cn/en/) · [**Installation**](#installation) · [**Getting Started**](#getting-started) · [**License and Disclaimer**](#license-and-disclaimer) · [**Thanks**](#thanks)
 
@@ -19,7 +19,7 @@
 The Chiikawa Mod **brings the world of [Chiikawa](https://chiikawa-info.jp/) into Minecraft**: the characters of Chiikawa come to live in your world, so you can experience the world of Chiikawa in Minecraft.
 
 > [!TIP]
-> Come and chat on [Discord](https://discord.gg/wPkgfst5Z) or in the QQ group **995178570**. More on the [website](https://chiikawa.dwinovo.cn/en/).
+> Come and chat on [Discord](https://discord.gg/p3B9jJXVba) or in the QQ group **995178570**. More on the [website](https://chiikawa.dwinovo.cn/en/).
 
 ## Installation
 
