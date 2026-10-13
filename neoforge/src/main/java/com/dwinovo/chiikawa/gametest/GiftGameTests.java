@@ -96,11 +96,11 @@ public final class GiftGameTests {
 
         helper.succeedWhen(() -> {
             helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 1,
-                "the owner has " + owner.getInventory().countItem(Items.COOKIE) + " cookies, not the one");
-            helper.assertTrue(count(pet, Items.COOKIE) == 2, "the pet has " + count(pet, Items.COOKIE) + " cookies left");
-            helper.assertTrue(pet.getPendingGift().isEmpty(), "the pet handed the cookie over and kept hold of it too");
+                Component.literal("the owner has " + owner.getInventory().countItem(Items.COOKIE) + " cookies, not the one"));
+            helper.assertTrue(count(pet, Items.COOKIE) == 2, Component.literal("the pet has " + count(pet, Items.COOKIE) + " cookies left"));
+            helper.assertTrue(pet.getPendingGift().isEmpty(), Component.literal("the pet handed the cookie over and kept hold of it too"));
             helper.assertTrue(pet.getBrain().hasMemoryValue(InitMemory.GIFT_COOLDOWN.get()),
-                "the pet is ready to think of a second present at once");
+                Component.literal("the pet is ready to think of a second present at once"));
         });
     }
 
@@ -118,13 +118,13 @@ public final class GiftGameTests {
 
         helper.runAfterDelay(NOTHING_TICKS, () -> {
             // The handbook is the advancement's, on the owner's joining.
-            List<ItemStack> given = owner.getInventory().items.stream()
+            List<ItemStack> given = owner.getInventory().getNonEquipmentItems().stream()
                 .filter(stack -> !stack.isEmpty() && !stack.is(InitItems.HANDBOOK.get())).toList();
-            helper.assertTrue(given.isEmpty(), "the owner was given something: " + given);
-            helper.assertTrue(pet.getPendingGift().isEmpty(), "the pet was carrying something over");
-            helper.assertFalse(pet.getBrain().hasMemoryValue(InitMemory.GIFT_COOLDOWN.get()), "the pet gave a present");
+            helper.assertTrue(given.isEmpty(), Component.literal("the owner was given something: " + given));
+            helper.assertTrue(pet.getPendingGift().isEmpty(), Component.literal("the pet was carrying something over"));
+            helper.assertFalse(pet.getBrain().hasMemoryValue(InitMemory.GIFT_COOLDOWN.get()), Component.literal("the pet gave a present"));
             helper.assertTrue(carries(pet, InitItems.CAMERA.get()) && Wallet.count(pet.getBackpack()) == POCKET_MONEY
-                && carries(pet, InitItems.FILM.get()), "the pet no longer has all that it had");
+                && carries(pet, InitItems.FILM.get()), Component.literal("the pet no longer has all that it had"));
             helper.succeed();
         });
     }
@@ -140,11 +140,11 @@ public final class GiftGameTests {
         pet.getBackpack().setItem(3, roll);
 
         helper.succeedWhen(() -> {
-            ItemStack given = owner.getInventory().items.stream().filter(stack -> stack.is(InitItems.FILM.get()))
+            ItemStack given = owner.getInventory().getNonEquipmentItems().stream().filter(stack -> stack.is(InitItems.FILM.get()))
                 .findFirst().orElse(ItemStack.EMPTY);
-            helper.assertFalse(given.isEmpty(), "the owner never got the roll");
-            helper.assertTrue(FilmItem.rollOf(given).full(), "the owner was given a roll that was not full");
-            helper.assertTrue(carries(pet, InitItems.CAMERA.get()), "the camera went with it");
+            helper.assertFalse(given.isEmpty(), Component.literal("the owner never got the roll"));
+            helper.assertTrue(FilmItem.rollOf(given).full(), Component.literal("the owner was given a roll that was not full"));
+            helper.assertTrue(carries(pet, InitItems.CAMERA.get()), Component.literal("the camera went with it"));
         });
     }
 
@@ -158,8 +158,8 @@ public final class GiftGameTests {
         helper.succeedWhen(() -> {
             // Back to the counter as soon as it has left it.
             pet.getBrain().eraseMemory(InitMemory.SHOP_COOLDOWN.get());
-            helper.assertTrue(pet.getPendingGift().isEmpty(), "shopping left the pet with a present: " + pet.getPendingGift());
-            helper.assertTrue(Wallet.count(pet.getBackpack()) < WAGES, "the pet has not spent anything yet");
+            helper.assertTrue(pet.getPendingGift().isEmpty(), Component.literal("shopping left the pet with a present: " + pet.getPendingGift()));
+            helper.assertTrue(Wallet.count(pet.getBackpack()) < WAGES, Component.literal("the pet has not spent anything yet"));
         });
     }
 
@@ -178,9 +178,9 @@ public final class GiftGameTests {
 
         helper.onEachTick(() -> {
             if (!home[0]) {
-                helper.assertTrue(pet.getPendingGift().isEmpty(), "the pet set off with a present for an owner far from home");
-                helper.assertFalse(owner.getInventory().contains(new ItemStack(Items.COOKIE)), "the owner far away was given a cookie");
-                helper.assertTrue(count(pet, Items.COOKIE) == 2, "the pet has " + count(pet, Items.COOKIE) + " cookies, not the two");
+                helper.assertTrue(pet.getPendingGift().isEmpty(), Component.literal("the pet set off with a present for an owner far from home"));
+                helper.assertFalse(owner.getInventory().contains(new ItemStack(Items.COOKIE)), Component.literal("the owner far away was given a cookie"));
+                helper.assertTrue(count(pet, Items.COOKIE) == 2, Component.literal("the pet has " + count(pet, Items.COOKIE) + " cookies, not the two"));
             }
         });
         helper.runAfterDelay(AWAY_TICKS, () -> {
@@ -189,8 +189,8 @@ public final class GiftGameTests {
             owner.teleportTo(near.getX() + 0.5, near.getY(), near.getZ() + 0.5);
         });
         helper.succeedWhen(() -> {
-            helper.assertTrue(home[0], "the owner has not come home");
-            helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 1, "the owner at home was not given a cookie");
+            helper.assertTrue(home[0], Component.literal("the owner has not come home"));
+            helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 1, Component.literal("the owner at home was not given a cookie"));
         });
     }
 
@@ -208,7 +208,7 @@ public final class GiftGameTests {
         pet.getBackpack().setItem(2, new ItemStack(Items.COOKIE, 2));
 
         helper.succeedWhen(() -> helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 1,
-            "the owner was not given a cookie"));
+            Component.literal("the owner was not given a cookie")));
     }
 
     /**
@@ -228,11 +228,11 @@ public final class GiftGameTests {
                 left[0] = true;
                 teleportAway(helper, owner);
             }
-            helper.assertTrue(left[0], "the pet never set off with a present");
-            helper.assertTrue(pet.getPendingGift().isEmpty(), "the pet still carries the cookie");
-            helper.assertTrue(count(pet, Items.COOKIE) == 2, "the pet has " + count(pet, Items.COOKIE) + " cookies, not the two");
-            helper.assertFalse(owner.getInventory().contains(new ItemStack(Items.COOKIE)), "the owner was given the cookie");
-            helper.assertTrue(++settled[0] > SETTLED_TICKS, "too soon to say it does not set off again");
+            helper.assertTrue(left[0], Component.literal("the pet never set off with a present"));
+            helper.assertTrue(pet.getPendingGift().isEmpty(), Component.literal("the pet still carries the cookie"));
+            helper.assertTrue(count(pet, Items.COOKIE) == 2, Component.literal("the pet has " + count(pet, Items.COOKIE) + " cookies, not the two"));
+            helper.assertFalse(owner.getInventory().contains(new ItemStack(Items.COOKIE)), Component.literal("the owner was given the cookie"));
+            helper.assertTrue(++settled[0] > SETTLED_TICKS, Component.literal("too soon to say it does not set off again"));
         });
     }
 
@@ -252,11 +252,11 @@ public final class GiftGameTests {
                 told[0] = true;
                 pet.setPetDirective(PetDirective.STAY);
             }
-            helper.assertTrue(told[0], "the pet never set off with a present");
-            helper.assertTrue(pet.getPendingGift().isEmpty(), "the pet still carries the cookie");
-            helper.assertTrue(count(pet, Items.COOKIE) == 2, "the pet has " + count(pet, Items.COOKIE) + " cookies, not the two");
-            helper.assertFalse(owner.getInventory().contains(new ItemStack(Items.COOKIE)), "the owner was given the cookie");
-            helper.assertFalse(pet.getBrain().hasMemoryValue(InitMemory.GIFT_COOLDOWN.get()), "a present never given tired the pet");
+            helper.assertTrue(told[0], Component.literal("the pet never set off with a present"));
+            helper.assertTrue(pet.getPendingGift().isEmpty(), Component.literal("the pet still carries the cookie"));
+            helper.assertTrue(count(pet, Items.COOKIE) == 2, Component.literal("the pet has " + count(pet, Items.COOKIE) + " cookies, not the two"));
+            helper.assertFalse(owner.getInventory().contains(new ItemStack(Items.COOKIE)), Component.literal("the owner was given the cookie"));
+            helper.assertFalse(pet.getBrain().hasMemoryValue(InitMemory.GIFT_COOLDOWN.get()), Component.literal("a present never given tired the pet"));
         });
     }
 
@@ -275,9 +275,9 @@ public final class GiftGameTests {
 
         helper.runAfterDelay(THINKING_TICKS, () -> {
             helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 1,
-                "the owner has " + owner.getInventory().countItem(Items.COOKIE) + " cookies, not the one");
-            helper.assertTrue(count(pet, Items.COOKIE) == 4, "the pet has " + count(pet, Items.COOKIE) + " cookies left, not four");
-            helper.assertTrue(pet.getPendingGift().isEmpty(), "the pet is carrying another present");
+                Component.literal("the owner has " + owner.getInventory().countItem(Items.COOKIE) + " cookies, not the one"));
+            helper.assertTrue(count(pet, Items.COOKIE) == 4, Component.literal("the pet has " + count(pet, Items.COOKIE) + " cookies left, not four"));
+            helper.assertTrue(pet.getPendingGift().isEmpty(), Component.literal("the pet is carrying another present"));
             helper.succeed();
         });
     }
@@ -339,9 +339,9 @@ public final class GiftGameTests {
 
         pet.mobInteract(owner, InteractionHand.MAIN_HAND);
 
-        helper.assertTrue(Wallet.count(pet.getBackpack()) == TEN, "the pet has " + Wallet.count(pet.getBackpack()) + " emeralds, not ten");
+        helper.assertTrue(Wallet.count(pet.getBackpack()) == TEN, Component.literal("the pet has " + Wallet.count(pet.getBackpack()) + " emeralds, not ten"));
         helper.assertTrue(owner.getItemInHand(InteractionHand.MAIN_HAND).isEmpty(),
-            "the owner still holds " + owner.getItemInHand(InteractionHand.MAIN_HAND));
+            Component.literal("the owner still holds " + owner.getItemInHand(InteractionHand.MAIN_HAND)));
         helper.succeed();
     }
 
@@ -363,8 +363,8 @@ public final class GiftGameTests {
 
         int held = owner.getItemInHand(InteractionHand.MAIN_HAND).getCount();
         helper.assertTrue(Wallet.count(pet.getBackpack()) == Items.EMERALD.getDefaultMaxStackSize(),
-            "the pet has " + Wallet.count(pet.getBackpack()) + " emeralds");
-        helper.assertTrue(held == TEN - ROOM, "the owner is left with " + held + " emeralds, not " + (TEN - ROOM));
+            Component.literal("the pet has " + Wallet.count(pet.getBackpack()) + " emeralds"));
+        helper.assertTrue(held == TEN - ROOM, Component.literal("the owner is left with " + held + " emeralds, not " + (TEN - ROOM)));
         helper.succeed();
     }
 
@@ -380,8 +380,8 @@ public final class GiftGameTests {
 
         pet.mobInteract(owner, InteractionHand.MAIN_HAND);
 
-        helper.assertTrue(Wallet.count(pet.getBackpack()) == TEN, "the pet has " + Wallet.count(pet.getBackpack()) + " emeralds, not ten");
-        helper.assertTrue(owner.getItemInHand(InteractionHand.MAIN_HAND).getCount() == TEN, "the creative owner's hand changed");
+        helper.assertTrue(Wallet.count(pet.getBackpack()) == TEN, Component.literal("the pet has " + Wallet.count(pet.getBackpack()) + " emeralds, not ten"));
+        helper.assertTrue(owner.getItemInHand(InteractionHand.MAIN_HAND).getCount() == TEN, Component.literal("the creative owner's hand changed"));
         helper.succeed();
     }
 

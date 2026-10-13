@@ -175,9 +175,9 @@ public final class ShopGameTests {
         pet.getBackpack().addItem(new ItemStack(Items.EMERALD, WAGES));
 
         helper.onEachTick(() -> helper.assertFalse(pet.getIntent().filter(PetIntents.SHOP::equals).isPresent(),
-            "the pet set off for a shop outside its area"));
+            Component.literal("the pet set off for a shop outside its area")));
         helper.runAtTickTime(LEAVE_IT_TICKS, () -> {
-            helper.assertTrue(Wallet.count(pet.getBackpack()) == WAGES, "the pet went to a shop outside its area");
+            helper.assertTrue(Wallet.count(pet.getBackpack()) == WAGES, Component.literal("the pet went to a shop outside its area"));
             helper.succeed();
         });
     }

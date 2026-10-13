@@ -211,7 +211,7 @@ public final class VoiceGameTests {
         }
         AbstractPet kurimanju = still(pet(helper, InitEntity.KURIMANJU_PET.get(), new BlockPos(3, STAND, 3), false));
         PetSpeech.say(kurimanju, VoiceMoment.PHOTOGRAPHED);
-        helper.assertFalse(said(kurimanju).isPresent(), "Kurimanju said something for the camera");
+        helper.assertFalse(said(kurimanju).isPresent(), Component.literal("Kurimanju said something for the camera"));
         helper.succeed();
     }
 
