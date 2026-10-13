@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 class PetSpawnTest {
     private static final ResourceKey<Biome> PLAINS = biome("plains");
     private static final ResourceKey<Biome> FOREST = biome("forest");
-    private static final TagKey<Biome> IS_FOREST = TagKey.create(Registries.BIOME, new ResourceLocation("is_forest"));
+    private static final TagKey<Biome> IS_FOREST = TagKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace("is_forest"));
 
     @BeforeAll
     static void bootstrap() {
@@ -47,17 +47,15 @@ class PetSpawnTest {
     void wildPetsSpawnInTheConventionalTagsForPlainsSavannaDesertSwampAndSnow() {
         PetSpawn wild = new PetSpawn(PetSpawnData.biomes(), java.util.List.of());
 
-        assertEquals(java.util.List.of("#c:plains", "#c:savanna", "#c:desert", "#c:swamp", "#c:snowy_plains",
-                "#forge:is_desert", "#forge:is_swamp", "#minecraft:is_savanna",
-                "minecraft:plains", "minecraft:sunflower_plains", "minecraft:snowy_plains"),
+        assertEquals(java.util.List.of("#c:is_plains", "#c:is_savanna", "#c:is_desert", "#c:is_swamp", "#c:is_snowy_plains"),
             wild.biomes().stream().map(entry -> (entry.tag() ? "#" : "") + entry.id()).toList());
         // A biome from a mod that is in the plains tag is a plains, and a forest is not.
-        ResourceKey<Biome> moddedPlains = ResourceKey.create(Registries.BIOME, new ResourceLocation("examplemod", "meadow_flats"));
-        TagKey<Biome> isPlains = TagKey.create(Registries.BIOME, new ResourceLocation("c", "plains"));
+        ResourceKey<Biome> moddedPlains = ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("examplemod", "meadow_flats"));
+        TagKey<Biome> isPlains = TagKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("c", "is_plains"));
         assertTrue(wild.covers(moddedPlains, isPlains::equals), "a modded plains does not count");
-        assertFalse(wild.covers(FOREST, tag -> tag.location().getNamespace().equals("c") && tag.location().getPath().equals("forest")),
+        assertFalse(wild.covers(FOREST, tag -> tag.location().getNamespace().equals("c") && tag.location().getPath().equals("is_forest")),
             "a forest counts");
-        assertTrue(wild.covers(PLAINS, tag -> false), "Forge's plains tag holds the meadow, so a plains is named by id");
+        assertFalse(wild.covers(PLAINS, tag -> false), "a plains is named by id, not by tag");
     }
 
     @Test
@@ -91,14 +89,14 @@ class PetSpawnTest {
     }
 
     private static PetSpawn parse(String json) {
-        return PetSpawn.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(json)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
+        return PetSpawn.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(json)).getOrThrow();
     }
 
     private static ResourceKey<Biome> biome(String path) {
-        return ResourceKey.create(Registries.BIOME, new ResourceLocation(path));
+        return ResourceKey.create(Registries.BIOME, ResourceLocation.withDefaultNamespace(path));
     }
 
     private static ResourceLocation id(String path) {
-        return new ResourceLocation("chiikawa", path);
+        return ResourceLocation.fromNamespaceAndPath("chiikawa", path);
     }
 }

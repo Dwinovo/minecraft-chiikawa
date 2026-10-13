@@ -18,23 +18,10 @@ import net.minecraft.world.level.biome.MobSpawnSettings;
  * conventional biome tags rather than biomes by name, so a modded biome of the same kind counts.
  */
 public final class PetSpawnData {
-    public static final ResourceLocation WILD_PETS = new ResourceLocation(Constants.MOD_ID, "wild_pets");
-    /**
-     * 1.20.1 has no one convention: Fabric's tags are {@code c:plains} and the like, Forge's
-     * {@code forge:is_desert} and {@code forge:is_swamp}, and the savannas are vanilla's own tag.
-     * Each loader finds its own, the other's being empty there. Every vanilla biome the list used
-     * to name is in one of them, on both loaders.
-     */
-    private static final List<ResourceLocation> BIOME_TAGS = List.of(
-        new ResourceLocation("c", "plains"), new ResourceLocation("c", "savanna"), new ResourceLocation("c", "desert"),
-        new ResourceLocation("c", "swamp"), new ResourceLocation("c", "snowy_plains"),
-        new ResourceLocation("forge", "is_desert"), new ResourceLocation("forge", "is_swamp"),
-        new ResourceLocation("minecraft", "is_savanna"));
-    /**
-     * Forge's plains tag also holds the meadow, where the pets do not live, and it has none for
-     * snowy plains, so those are named. A modded plains is only there through Fabric's tag.
-     */
-    private static final List<String> BIOMES = List.of("plains", "sunflower_plains", "snowy_plains");
+    public static final ResourceLocation WILD_PETS = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "wild_pets");
+    /** Every vanilla biome the list used to name is in one of these, on both loaders. */
+    private static final List<String> BIOME_TAGS = List.of(
+        "is_plains", "is_savanna", "is_desert", "is_swamp", "is_snowy_plains");
     private static final int WEIGHT = 3;
 
     private PetSpawnData() {
@@ -42,9 +29,8 @@ public final class PetSpawnData {
 
     /** @return where wild pets spawn: the conventional tags of the kinds of biome they live in */
     public static List<ExtraCodecs.TagOrElementLocation> biomes() {
-        return Stream.concat(
-                BIOME_TAGS.stream().map(tag -> new ExtraCodecs.TagOrElementLocation(tag, true)),
-                BIOMES.stream().map(path -> new ExtraCodecs.TagOrElementLocation(new ResourceLocation(path), false)))
+        return BIOME_TAGS.stream()
+            .map(path -> new ExtraCodecs.TagOrElementLocation(ResourceLocation.fromNamespaceAndPath("c", path), true))
             .toList();
     }
 
