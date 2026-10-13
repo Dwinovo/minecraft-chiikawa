@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.data;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
@@ -56,6 +57,11 @@ public final class TagData {
             Items.COOKED_MUTTON, Items.COOKED_PORKCHOP, Items.COOKED_RABBIT, Items.COOKED_SALMON, Items.COOKIE, Items.GLOW_BERRIES,
             Items.GOLDEN_APPLE, Items.GOLDEN_CARROT, Items.HONEY_BOTTLE, Items.MELON_SLICE, Items.MUSHROOM_STEW, Items.PUMPKIN_PIE,
             Items.POTATO, Items.BEETROOT, Items.RABBIT_STEW, Items.SWEET_BERRIES);
+        // Any vanilla seed, as later versions' c:seeds has them: Fabric's API ships none for 1.20.6, and
+        // NeoForge's leaves out the torchflower's and the pitcher plant's. A pack's own seeds join it.
+        tags.add(TagKey.create(Registries.ITEM, new ResourceLocation("c", "seeds")),
+            Items.WHEAT_SEEDS, Items.BEETROOT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.TORCHFLOWER_SEEDS,
+            Items.PITCHER_POD);
         tags.add(InitTag.ENTITY_PLANT_CROPS,
             Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.WHEAT_SEEDS, Items.BEETROOT_SEEDS, Items.POTATO, Items.CARROT);
         // Pull in the cross-loader seeds convention tag so well-behaved farming mods
