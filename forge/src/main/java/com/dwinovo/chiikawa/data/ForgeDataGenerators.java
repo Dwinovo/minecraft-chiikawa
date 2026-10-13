@@ -37,6 +37,7 @@ public class ForgeDataGenerators {
         generator.addProvider(event.includeServer(), blockTagsProvider);
         generator.addProvider(event.includeServer(), new ForgeModItemTagsProvider(output, lookupProvider, blockTagsProvider.contentsGetter(), existingFileHelper));
         generator.addProvider(event.includeServer(), new ForgeModEntityTagsProvider(output, lookupProvider, existingFileHelper));
+        generator.addProvider(event.includeServer(), new ForgeModBiomeTagsProvider(output, lookupProvider, existingFileHelper));
         
         // Recipe provider
         generator.addProvider(event.includeServer(), new ModRecipeProvider(output));

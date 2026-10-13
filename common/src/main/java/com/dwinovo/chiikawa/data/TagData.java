@@ -3,12 +3,16 @@ package com.dwinovo.chiikawa.data;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
@@ -28,6 +32,14 @@ public final class TagData {
          */
         default void addOptionalTag(TagKey<T> key, ResourceLocation includedTagId) {
         }
+    }
+
+    /** Biome tags name biomes by key: there is no biome object for datagen to hold. */
+    public interface BiomeTagAppender {
+        @SuppressWarnings("unchecked")
+        void add(TagKey<Biome> key, ResourceKey<Biome>... biomes);
+
+        void addOptionalTag(TagKey<Biome> key, ResourceLocation includedTagId);
     }
 
     public static void addBlockTags(TagAppenderProvider<Block> tags) {
@@ -56,11 +68,12 @@ public final class TagData {
             Items.COOKED_MUTTON, Items.COOKED_PORKCHOP, Items.COOKED_RABBIT, Items.COOKED_SALMON, Items.COOKIE, Items.GLOW_BERRIES,
             Items.GOLDEN_APPLE, Items.GOLDEN_CARROT, Items.HONEY_BOTTLE, Items.MELON_SLICE, Items.MUSHROOM_STEW, Items.PUMPKIN_PIE,
             Items.POTATO, Items.BEETROOT, Items.RABBIT_STEW, Items.SWEET_BERRIES);
-        tags.add(InitTag.SEEDS,
-            Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.WHEAT_SEEDS, Items.BEETROOT_SEEDS, Items.TORCHFLOWER_SEEDS,
-            Items.PITCHER_POD);
-        tags.addOptionalTag(InitTag.SEEDS, new ResourceLocation("c", "seeds"));
-        tags.addOptionalTag(InitTag.SEEDS, new ResourceLocation("forge", "seeds"));
+        // The vanilla seeds are in no tag that both loaders have: Forge's is forge:seeds and Fabric's
+        // API has none, whereas later versions ship c:seeds. So it is made here, as they have it.
+        TagKey<Item> seeds = TagKey.create(Registries.ITEM, new ResourceLocation("c", "seeds"));
+        tags.add(seeds, Items.WHEAT_SEEDS, Items.BEETROOT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS,
+            Items.TORCHFLOWER_SEEDS, Items.PITCHER_POD);
+        tags.addOptionalTag(seeds, new ResourceLocation("forge", "seeds"));
         tags.add(InitTag.ENTITY_PLANT_CROPS,
             Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.WHEAT_SEEDS, Items.BEETROOT_SEEDS, Items.POTATO, Items.CARROT);
         // Pull in the cross-loader seeds convention tag so well-behaved farming mods
@@ -78,6 +91,37 @@ public final class TagData {
             Items.COOKED_BEEF, Items.PUMPKIN_PIE, Items.SWEET_BERRIES, Items.COOKIE, Items.BREAD, Items.BAKED_POTATO);
         tags.add(InitTag.ENTITY_PICKABLE_ITEMS,
             Items.WHEAT, Items.WHEAT_SEEDS, Items.POTATO, Items.CARROT, Items.BEETROOT, Items.MELON_SLICE, Items.PUMPKIN);
+    }
+
+    /**
+     * The conventional biome tags that wild pets spawn by, which later versions ship in the form
+     * {@code c:is_plains}: Forge's are {@code forge:is_desert} and the like, Fabric's
+     * {@code c:desert}, and neither names the savanna or snowy plains the same. They are made here from
+     * what each loader has, so a pack and the {@code pet_spawn} data read the same on every version.
+     * Forge's plains tag is left out because it holds the meadow too, where the pets do not live.
+     */
+    public static void addBiomeTags(BiomeTagAppender tags) {
+        TagKey<Biome> plains = conventional("is_plains");
+        tags.add(plains, Biomes.PLAINS, Biomes.SUNFLOWER_PLAINS);
+        tags.addOptionalTag(plains, new ResourceLocation("c", "plains"));
+        TagKey<Biome> savanna = conventional("is_savanna");
+        tags.addOptionalTag(savanna, new ResourceLocation("minecraft", "is_savanna"));
+        tags.addOptionalTag(savanna, new ResourceLocation("c", "savanna"));
+        TagKey<Biome> desert = conventional("is_desert");
+        tags.add(desert, Biomes.DESERT);
+        tags.addOptionalTag(desert, new ResourceLocation("forge", "is_desert"));
+        tags.addOptionalTag(desert, new ResourceLocation("c", "desert"));
+        TagKey<Biome> swamp = conventional("is_swamp");
+        tags.add(swamp, Biomes.SWAMP, Biomes.MANGROVE_SWAMP);
+        tags.addOptionalTag(swamp, new ResourceLocation("forge", "is_swamp"));
+        tags.addOptionalTag(swamp, new ResourceLocation("c", "swamp"));
+        TagKey<Biome> snowyPlains = conventional("is_snowy_plains");
+        tags.add(snowyPlains, Biomes.SNOWY_PLAINS);
+        tags.addOptionalTag(snowyPlains, new ResourceLocation("c", "snowy_plains"));
+    }
+
+    private static TagKey<Biome> conventional(String path) {
+        return TagKey.create(Registries.BIOME, new ResourceLocation("c", path));
     }
 
     public static void addEntityTags(TagAppenderProvider<EntityType<?>> tags) {

@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
 import java.util.function.Consumer;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeCategory;
@@ -12,10 +13,14 @@ import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 
 public class ModRecipeProvider extends RecipeProvider {
+    /** Any seed, by the convention tag every loader and most mods agree on. */
+    private static final TagKey<Item> SEEDS = TagKey.create(Registries.ITEM, new ResourceLocation("c", "seeds"));
 
     public ModRecipeProvider(PackOutput output) {
         super(output);
@@ -120,7 +125,7 @@ public class ModRecipeProvider extends RecipeProvider {
         // The weeding study guide, for one who would rather not buy it: a book and any seed.
         ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, InitItems.WEEDING_BOOK.get())
                 .requires(Items.BOOK)
-                .requires(InitTag.SEEDS)
+                .requires(SEEDS)
                 .unlockedBy(getHasName(Items.BOOK), has(Items.BOOK))
                 .save(recipeOutput);
 
