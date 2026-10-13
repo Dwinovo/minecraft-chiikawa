@@ -155,12 +155,12 @@ public record Personality(
      * @param saveUp whether, while it wants this and cannot yet afford it, it buys nothing else, so
      *               that its money builds up; and buys this as soon as it can
      */
-    public record WeightedItem(Item item, Weight weight, Optional<Item> requires, Optional<Integer> limit,
-                               boolean keep, boolean saveUp) implements WeightedEntry {
+    public record WeightedItem(Item item, int weight, Optional<Item> requires, Optional<Integer> limit,
+                               boolean keep, boolean saveUp) {
         /** Lazy because the item registry only exists once the game has bootstrapped. */
         public static final Codec<WeightedItem> CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.create(instance -> instance.group(
             BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(WeightedItem::item),
-            ExtraCodecs.POSITIVE_INT.xmap(Weight::of, Weight::asInt).fieldOf("weight").forGetter(WeightedItem::weight),
+            ExtraCodecs.POSITIVE_INT.fieldOf("weight").forGetter(WeightedItem::weight),
             BuiltInRegistries.ITEM.byNameCodec().optionalFieldOf("requires").forGetter(WeightedItem::requires),
             ExtraCodecs.POSITIVE_INT.optionalFieldOf("limit").forGetter(WeightedItem::limit),
             Codec.BOOL.optionalFieldOf("keep", false).forGetter(WeightedItem::keep),
@@ -168,7 +168,7 @@ public record Personality(
         ).apply(instance, WeightedItem::new)));
 
         public WeightedItem(Item item, int weight) {
-            this(item, Weight.of(weight), Optional.empty(), Optional.empty(), false, false);
+            this(item, weight, Optional.empty(), Optional.empty(), false, false);
         }
 
         /** @return the same, wanted only while the pet carries {@code item} */
@@ -199,11 +199,6 @@ public record Personality(
         public boolean wantedBy(ToIntFunction<Item> carried) {
             return requires.map(needed -> carried.applyAsInt(needed) > 0).orElse(true)
                 && limit.map(most -> carried.applyAsInt(item) < most).orElse(true);
-        }
-
-        @Override
-        public Weight getWeight() {
-            return weight;
         }
     }
 }

@@ -43,10 +43,9 @@ import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestAssertException;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -57,8 +56,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Hachiware's camera: it takes a photo only with a camera and film in its bag, an owner
@@ -71,7 +68,6 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
  * the one case would then be about two cases' pets.
  */
 @GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class CameraGameTests {
     private static final int STAND = 2;
     /** Long enough to cross a yard, aim and press the shutter. */
@@ -164,10 +160,13 @@ public final class CameraGameTests {
 
     /**
      * The world as every case here wants it, and the camera as the data pack has it: a case
-     * that tries another camera does not leave it for the next.
+     * that tries another camera does not leave it for the next. And no photo still asked for
+     * by a pet of some case before, which holds the request for a minute and which cases here
+     * that count what is asked for would find.
      */
     private static void settle(ServerLevel level) {
         settleWorld(level, Difficulty.NORMAL, NOON);
+        PhotoSystem.stopServer(level.getServer());
         if (dataPackCameras == null) {
             dataPackCameras = CameraSettings.all();
         }
@@ -188,18 +187,18 @@ public final class CameraGameTests {
                     send(photos, owner, asked, validPicture());
                 }
             }
-            helper.assertFalse(answered.isEmpty(), "Hachiware never asked for a photo");
+            helper.assertFalse(answered.isEmpty(), Component.literal("Hachiware never asked for a photo"));
             List<ItemStack> rolls = shotRolls(pet);
-            helper.assertTrue(rolls.size() == 1, "there were " + rolls.size() + " rolls with shots on");
+            helper.assertTrue(rolls.size() == 1, Component.literal("there were " + rolls.size() + " rolls with shots on"));
             FilmRoll roll = FilmItem.rollOf(rolls.get(0));
             helper.assertTrue(roll.shots().size() == 1 && roll.exposures() == camera().exposures(),
-                "the roll had " + roll.shots().size() + " of " + roll.exposures());
-            helper.assertTrue(rolls.get(0).getMaxStackSize() == 1, "a roll with a shot on it stacks");
-            helper.assertTrue(count(pet, InitItems.FILM.get()) == ROLLS, "the roll was not made of one of the fresh ones");
-            helper.assertTrue(pet.getPendingGift().isEmpty(), "an unfinished roll was a present");
+                Component.literal("the roll had " + roll.shots().size() + " of " + roll.exposures()));
+            helper.assertTrue(rolls.get(0).getMaxStackSize() == 1, Component.literal("a roll with a shot on it stacks"));
+            helper.assertTrue(count(pet, InitItems.FILM.get()) == ROLLS, Component.literal("the roll was not made of one of the fresh ones"));
+            helper.assertTrue(pet.getPendingGift().isEmpty(), Component.literal("an unfinished roll was a present"));
             helper.assertTrue(pet.getBrain().hasMemoryValue(InitMemory.PHOTO_COOLDOWN.get()),
-                "Hachiware took a photo and was ready to take another");
-            helper.assertTrue(answered.size() == 1, "Hachiware asked for " + answered.size() + " photos");
+                Component.literal("Hachiware took a photo and was ready to take another"));
+            helper.assertTrue(answered.size() == 1, Component.literal("Hachiware asked for " + answered.size() + " photos"));
         });
     }
 
@@ -218,17 +217,17 @@ public final class CameraGameTests {
         helper.succeedWhen(() -> {
             for (UUID asked : photos.waiting()) {
                 if (answered.add(asked)) {
-                    helper.assertTrue(pet.distanceTo(owner) < 6.0F, "Hachiware pressed the shutter from "
-                        + pet.distanceTo(owner) + " blocks away");
+                    helper.assertTrue(pet.distanceTo(owner) < 6.0F, Component.literal("Hachiware pressed the shutter from "
+                        + pet.distanceTo(owner) + " blocks away"));
                     send(photos, owner, asked, validPicture());
                 }
             }
-            helper.assertFalse(answered.isEmpty(), "Hachiware never asked for a photo");
-            PhotoData photo = photoOf(pet);
-            helper.assertTrue(photo.subject() == PhotoSubject.OWNER, "the photo was of " + photo.subject());
-            helper.assertTrue(photo.name().equals(owner.getName().getString()), "the photo was of " + photo.name());
+            helper.assertFalse(answered.isEmpty(), Component.literal("Hachiware never asked for a photo"));
+            PhotoData photo = photoOf(helper, pet);
+            helper.assertTrue(photo.subject() == PhotoSubject.OWNER, Component.literal("the photo was of " + photo.subject()));
+            helper.assertTrue(photo.name().equals(owner.getName().getString()), Component.literal("the photo was of " + photo.name()));
             helper.assertTrue(photo.photographer().equals(pet.getDisplayName().getString()),
-                "the photo was taken by " + photo.photographer());
+                Component.literal("the photo was taken by " + photo.photographer()));
         });
     }
 
@@ -253,15 +252,15 @@ public final class CameraGameTests {
         helper.succeedWhen(() -> {
             for (UUID asked : photos.waiting()) {
                 if (answered.add(asked)) {
-                    helper.assertTrue(pet.distanceTo(friend) < 6.0F, "Hachiware pressed the shutter from "
-                        + pet.distanceTo(friend) + " blocks away");
+                    helper.assertTrue(pet.distanceTo(friend) < 6.0F, Component.literal("Hachiware pressed the shutter from "
+                        + pet.distanceTo(friend) + " blocks away"));
                     send(photos, owner, asked, validPicture());
                 }
             }
-            helper.assertFalse(answered.isEmpty(), "Hachiware never asked for a photo");
-            PhotoData photo = photoOf(pet);
-            helper.assertTrue(photo.subject() == PhotoSubject.FRIEND, "the photo was of " + photo.subject());
-            helper.assertTrue(photo.name().equals(friend.getDisplayName().getString()), "the photo was of " + photo.name());
+            helper.assertFalse(answered.isEmpty(), Component.literal("Hachiware never asked for a photo"));
+            PhotoData photo = photoOf(helper, pet);
+            helper.assertTrue(photo.subject() == PhotoSubject.FRIEND, Component.literal("the photo was of " + photo.subject()));
+            helper.assertTrue(photo.name().equals(friend.getDisplayName().getString()), Component.literal("the photo was of " + photo.name()));
             GameTestKit.assertSaid(helper, friend, VoiceMoment.PHOTOGRAPHED);
         });
     }
@@ -275,10 +274,10 @@ public final class CameraGameTests {
         AbstractPet pet = shopper(helper, false, SHORT_OF_A_CAMERA);
 
         helper.runAfterDelay(SAVING_TICKS, () -> {
-            helper.assertTrue(Wallet.count(pet.getBackpack()) == SHORT_OF_A_CAMERA, "Hachiware spent what it was saving: "
-                + Wallet.count(pet.getBackpack()) + " emeralds left");
+            helper.assertTrue(Wallet.count(pet.getBackpack()) == SHORT_OF_A_CAMERA, Component.literal("Hachiware spent what it was saving: "
+                + Wallet.count(pet.getBackpack()) + " emeralds left"));
             helper.assertFalse(carries(pet, Items.SUGAR) || carries(pet, Items.EGG) || carries(pet, Items.WHEAT),
-                "Hachiware bought something while it was saving up");
+                Component.literal("Hachiware bought something while it was saving up"));
             helper.succeed();
         });
     }
@@ -289,8 +288,8 @@ public final class CameraGameTests {
         AbstractPet pet = shopper(helper, false, CAMERA_PRICE + 8);
 
         helper.succeedWhen(() -> {
-            helper.assertTrue(carries(pet, InitItems.CAMERA.get()), "Hachiware never bought its camera");
-            helper.assertTrue(pet.getPendingGift().isEmpty(), "the camera was a present for its owner");
+            helper.assertTrue(carries(pet, InitItems.CAMERA.get()), Component.literal("Hachiware never bought its camera"));
+            helper.assertTrue(pet.getPendingGift().isEmpty(), Component.literal("the camera was a present for its owner"));
         });
     }
 
@@ -303,19 +302,19 @@ public final class CameraGameTests {
         photographFriend(helper, 1.0F, (pet, shotFriend) -> {
             GameTestKit.assertSaid(helper, shotFriend, VoiceMoment.PHOTOGRAPHED);
             helper.assertTrue(shotFriend.getBrain().hasMemoryValue(MemoryModuleType.LOOK_TARGET),
-                "the friend did not turn to the camera");
+                Component.literal("the friend did not turn to the camera"));
         });
     }
 
     @GameTest(template = "floor16", batch = "chiikawa_camera_candid", timeoutTicks = SHOT_TICKS)
     public static void a_candid_photo_leaves_the_friend_alone(GameTestHelper helper) {
         photographFriend(helper, 0.0F, (pet, friend) -> {
-            helper.assertFalse(GameTestKit.said(friend).isPresent(), "the friend said " + GameTestKit.said(friend));
+            helper.assertFalse(GameTestKit.said(friend).isPresent(), Component.literal("the friend said " + GameTestKit.said(friend)));
             helper.assertFalse(friend.getBrain().hasMemoryValue(MemoryModuleType.LOOK_TARGET),
-                "the friend was turned to the camera");
-            helper.assertTrue(friend.getActivity() == PetActivity.READ_RESULTS, "the friend was taken from what it was doing");
+                Component.literal("the friend was turned to the camera"));
+            helper.assertTrue(friend.getActivity() == PetActivity.READ_RESULTS, Component.literal("the friend was taken from what it was doing"));
             helper.assertFalse(GameTestKit.said(pet).filter(line -> GameTestKit.isLine(pet, VoiceMoment.PHOTO, line)).isPresent(),
-                "Hachiware called out over a candid photo");
+                Component.literal("Hachiware called out over a candid photo"));
         });
     }
 
@@ -383,16 +382,16 @@ public final class CameraGameTests {
             }
             if (lostAt[0] >= 0 && now - lostAt[0] >= RESTING_AFTER) {
                 helper.assertTrue(pet.getBrain().hasMemoryValue(InitMemory.PHOTO_COOLDOWN.get()),
-                    "the pet is not resting " + (now - lostAt[0]) + " ticks after it lost its subject");
+                    Component.literal("the pet is not resting " + (now - lostAt[0]) + " ticks after it lost its subject"));
                 helper.assertFalse(pet.getBrain().isActive(InitActivity.TAKE_PHOTO.get()),
-                    "the pet set off again " + (now - lostAt[0]) + " ticks after it lost its subject");
-                helper.assertTrue(photos.waiting().isEmpty(), "the pet asked for a photo of nobody");
+                    Component.literal("the pet set off again " + (now - lostAt[0]) + " ticks after it lost its subject"));
+                helper.assertTrue(photos.waiting().isEmpty(), Component.literal("the pet asked for a photo of nobody"));
             }
         });
         helper.succeedWhen(() -> {
-            helper.assertTrue(lostAt[0] >= 0, "the pet never set off for its friend");
+            helper.assertTrue(lostAt[0] >= 0, Component.literal("the pet never set off for its friend"));
             helper.assertTrue(helper.getLevel().getGameTime() - lostAt[0] >= RESTING_AFTER + SETTLED_TICKS,
-                "still too soon to say");
+                Component.literal("still too soon to say"));
         });
     }
 
@@ -429,12 +428,12 @@ public final class CameraGameTests {
                     send(photos, owner, asked, wrongPicture());
                 }
             }
-            helper.assertFalse(answered.isEmpty(), "Hachiware never asked for a photo");
+            helper.assertFalse(answered.isEmpty(), Component.literal("Hachiware never asked for a photo"));
             helper.assertTrue(count(pet, InitItems.FILM.get()) == ROLLS && shotRolls(pet).isEmpty(),
-                "a photo that never came was put on a roll");
+                Component.literal("a photo that never came was put on a roll"));
             helper.assertTrue(pet.getBrain().hasMemoryValue(InitMemory.PHOTO_COOLDOWN.get()),
-                "Hachiware went straight on to another photo");
-            helper.assertTrue(photos.waiting().isEmpty(), "the request was still waiting");
+                Component.literal("Hachiware went straight on to another photo"));
+            helper.assertTrue(photos.waiting().isEmpty(), Component.literal("the request was still waiting"));
         });
     }
 
@@ -453,26 +452,26 @@ public final class CameraGameTests {
         int money = 64;
         PhotoData shot = new PhotoData(UUID.randomUUID(), PhotoSubject.SCENERY, "", 1, "Hachiware");
 
-        helper.assertFalse(bought(pet, shop, money).contains(film), "Hachiware bought film with no camera to put it in");
+        helper.assertFalse(bought(pet, shop, money).contains(film), Component.literal("Hachiware bought film with no camera to put it in"));
 
         pet.getBackpack().addItem(new ItemStack(camera));
         Set<Item> withACamera = bought(pet, shop, money);
-        helper.assertTrue(withACamera.contains(film), "Hachiware with a camera never bought film");
-        helper.assertFalse(withACamera.contains(camera), "Hachiware bought a second camera");
+        helper.assertTrue(withACamera.contains(film), Component.literal("Hachiware with a camera never bought film"));
+        helper.assertFalse(withACamera.contains(camera), Component.literal("Hachiware bought a second camera"));
 
         pet.getBackpack().addItem(new ItemStack(film));
-        helper.assertFalse(bought(pet, shop, money).contains(film), "Hachiware bought film with film to shoot on");
+        helper.assertFalse(bought(pet, shop, money).contains(film), Component.literal("Hachiware bought film with film to shoot on"));
         pet.getBackpack().removeItemType(film, 64);
 
         ItemStack unfinished = FilmRolls.begin(film, 8, shot);
         pet.getBackpack().setItem(5, unfinished);
-        helper.assertFalse(bought(pet, shop, money).contains(film), "Hachiware bought film with a roll it had not finished");
+        helper.assertFalse(bought(pet, shop, money).contains(film), Component.literal("Hachiware bought film with a roll it had not finished"));
 
         for (int taken = 1; taken < 8; taken++) {
             FilmRolls.add(unfinished, shot);
         }
-        helper.assertTrue(FilmItem.rollOf(unfinished).full(), "the roll is not full");
-        helper.assertTrue(bought(pet, shop, money).contains(film), "Hachiware with only a full roll never bought film");
+        helper.assertTrue(FilmItem.rollOf(unfinished).full(), Component.literal("the roll is not full"));
+        helper.assertTrue(bought(pet, shop, money).contains(film), Component.literal("Hachiware with only a full roll never bought film"));
         helper.succeed();
     }
 
@@ -512,7 +511,7 @@ public final class CameraGameTests {
                     send(photos, owner, asked, validPicture());
                 }
             }
-            helper.assertFalse(answered.isEmpty(), "Hachiware never asked for a photo");
+            helper.assertFalse(answered.isEmpty(), Component.literal("Hachiware never asked for a photo"));
             afterwards.accept(pet, friend);
         });
     }
@@ -533,7 +532,7 @@ public final class CameraGameTests {
     private static void stillNotAsked(GameTestHelper helper) {
         PhotoSystem photos = PhotoSystem.of(helper.getLevel().getServer());
         helper.runAfterDelay(WAIT_TICKS, () -> {
-            helper.assertTrue(photos.waiting().isEmpty(), "Hachiware asked for a photo");
+            helper.assertTrue(photos.waiting().isEmpty(), Component.literal("Hachiware asked for a photo"));
             helper.succeed();
         });
     }
@@ -586,10 +585,10 @@ public final class CameraGameTests {
     }
 
     /** The first shot on the pet's roll. */
-    private static PhotoData photoOf(AbstractPet pet) {
+    private static PhotoData photoOf(GameTestHelper helper, AbstractPet pet) {
         List<ItemStack> rolls = shotRolls(pet);
         if (rolls.isEmpty()) {
-            throw new GameTestAssertException("there is no photo on any roll");
+            throw new GameTestAssertException(Component.literal("there is no photo on any roll"), (int) helper.getTick());
         }
         return FilmItem.rollOf(rolls.get(0)).shots().get(0);
     }

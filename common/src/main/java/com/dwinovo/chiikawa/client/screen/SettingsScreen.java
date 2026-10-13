@@ -17,6 +17,8 @@ import com.dwinovo.chiikawa.ui.widget.TitledPanel;
 import java.util.List;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
@@ -168,16 +170,16 @@ public class SettingsScreen extends Screen {
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        boolean handled = super.mouseReleased(mouseX, mouseY, button);
+    public boolean mouseReleased(MouseButtonEvent event) {
+        boolean handled = super.mouseReleased(event);
         // Let go anywhere: a drag that ends outside the slider is still a change.
         send();
         return handled;
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        boolean handled = super.keyPressed(keyCode, scanCode, modifiers);
+    public boolean keyPressed(KeyEvent event) {
+        boolean handled = super.keyPressed(event);
         send();
         return handled;
     }

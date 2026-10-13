@@ -22,7 +22,13 @@ public enum PetData {
     /** Mainhand {@link net.minecraft.world.item.ItemStack} snapshot consumed by {@code HeldItemLayer}. */
     HELD_ITEM_STACK,
     /** Worn {@link net.minecraft.world.item.ItemStack} snapshot consumed by {@code BagLayer} and the strap rules. */
-    WORN_BAG;
+    WORN_BAG,
+    /**
+     * The line a pet is saying, drawn in a bubble over its head by
+     * {@link com.dwinovo.chiikawa.client.voice.SpeechBubbleRenderer}; set only while it has
+     * one up. Worked out at extract time, as vanilla works out a name tag.
+     */
+    SPEECH;
 
     /** Cached values() to avoid per-frame allocation; treat as immutable. */
     public static final PetData[] VALUES = values();

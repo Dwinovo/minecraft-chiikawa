@@ -17,17 +17,15 @@ import com.dwinovo.chiikawa.spawn.WildSpawning;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.ServerOpListEntry;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The world's settings, as the server applies them: chatter silences a pet at a moment it
@@ -40,7 +38,6 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
  * handler calls it.
  */
 @GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class SettingsGameTests {
     private static final int STAND = 2;
     /** The permission level of a game master. */
@@ -55,11 +52,11 @@ public final class SettingsGameTests {
         WorldSettings before = store.get();
         try {
             store.set(new WorldSettings(before.wildSpawn(), 0.0F));
-            helper.assertFalse(PetSpeech.say(pet, VoiceMoment.HURT).isPresent(), "Chiikawa spoke in a world with no chatter");
+            helper.assertFalse(PetSpeech.say(pet, VoiceMoment.HURT).isPresent(), Component.literal("Chiikawa spoke in a world with no chatter"));
 
             store.set(new WorldSettings(before.wildSpawn(), 1.0F));
             helper.assertTrue(PetSpeech.say(pet, VoiceMoment.HURT).isPresent(),
-                "Chiikawa stayed quiet once the chatter was turned back up");
+                Component.literal("Chiikawa stayed quiet once the chatter was turned back up"));
         } finally {
             store.set(before);
         }
@@ -83,18 +80,18 @@ public final class SettingsGameTests {
         WorldSettings before = store.get();
         try {
             store.set(new WorldSettings(1.0F, before.chatter()));
-            helper.assertTrue(WildSpawning.canSpawn(type, level, MobSpawnType.NATURAL, at, level.getRandom()),
-                "the spot is not one an animal may spawn on, so this case proves nothing");
+            helper.assertTrue(WildSpawning.canSpawn(type, level, EntitySpawnReason.NATURAL, at, level.getRandom()),
+                Component.literal("the spot is not one an animal may spawn on, so this case proves nothing"));
 
             store.set(new WorldSettings(0.0F, before.chatter()));
-            helper.assertFalse(WildSpawning.canSpawn(type, level, MobSpawnType.NATURAL, at, level.getRandom()),
-                "a natural spawn went through with wild spawning at nothing");
-            helper.assertFalse(WildSpawning.canSpawn(type, level, MobSpawnType.CHUNK_GENERATION, at, level.getRandom()),
-                "a spawn while the chunk was made went through with wild spawning at nothing");
-            helper.assertTrue(WildSpawning.canSpawn(type, level, MobSpawnType.SPAWN_EGG, at, level.getRandom()),
-                "a spawn egg was refused");
-            Animal born = type.spawn(level, at.above(), MobSpawnType.SPAWN_EGG);
-            helper.assertTrue(born != null, "a spawn egg spawned nothing");
+            helper.assertFalse(WildSpawning.canSpawn(type, level, EntitySpawnReason.NATURAL, at, level.getRandom()),
+                Component.literal("a natural spawn went through with wild spawning at nothing"));
+            helper.assertFalse(WildSpawning.canSpawn(type, level, EntitySpawnReason.CHUNK_GENERATION, at, level.getRandom()),
+                Component.literal("a spawn while the chunk was made went through with wild spawning at nothing"));
+            helper.assertTrue(WildSpawning.canSpawn(type, level, EntitySpawnReason.SPAWN_ITEM_USE, at, level.getRandom()),
+                Component.literal("a spawn egg was refused"));
+            Animal born = type.spawn(level, at.above(), EntitySpawnReason.SPAWN_ITEM_USE);
+            helper.assertTrue(born != null, Component.literal("a spawn egg spawned nothing"));
             born.discard();
         } finally {
             store.set(before);
@@ -110,18 +107,18 @@ public final class SettingsGameTests {
         WorldSettings before = store.get();
         WorldSettings asked = new WorldSettings(0.25F, 0.75F);
         try {
-            helper.assertFalse(SettingsServerPacketHandler.canChange(stranger), "a stranger may change the world");
+            helper.assertFalse(SettingsServerPacketHandler.canChange(stranger), Component.literal("a stranger may change the world"));
             SettingsServerPacketHandler.handleChange(new ChangeWorldSettingsPayload(asked), stranger);
-            helper.assertTrue(store.get().equals(before), "a stranger's change was taken");
+            helper.assertTrue(store.get().equals(before), Component.literal("a stranger's change was taken"));
 
             // A game master, spelled out: the level a plain op gets is whatever the server's settings say.
-            stranger.server.getPlayerList().getOps()
-                .add(new ServerOpListEntry(stranger.getGameProfile(), GAME_MASTER, false));
-            helper.assertTrue(SettingsServerPacketHandler.canChange(stranger), "an operator may not change the world");
+            stranger.level().getServer().getPlayerList().getOps()
+                .add(new ServerOpListEntry(stranger.nameAndId(), GAME_MASTER, false));
+            helper.assertTrue(SettingsServerPacketHandler.canChange(stranger), Component.literal("an operator may not change the world"));
             SettingsServerPacketHandler.handleChange(new ChangeWorldSettingsPayload(asked), stranger);
-            helper.assertTrue(store.get().equals(asked), "an operator's change was not taken");
+            helper.assertTrue(store.get().equals(asked), Component.literal("an operator's change was not taken"));
         } finally {
-            stranger.server.getPlayerList().getOps().remove(stranger.getGameProfile());
+            stranger.level().getServer().getPlayerList().getOps().remove(stranger.nameAndId());
             store.set(before);
         }
         helper.succeed();

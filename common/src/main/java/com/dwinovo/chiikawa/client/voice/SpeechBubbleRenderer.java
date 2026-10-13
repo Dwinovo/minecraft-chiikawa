@@ -1,5 +1,7 @@
 package com.dwinovo.chiikawa.client.voice;
 
+import com.dwinovo.chiikawa.anim.render.ChiikawaRenderState;
+import com.dwinovo.chiikawa.anim.render.PetData;
 import com.dwinovo.chiikawa.client.settings.ClientSettingsStore;
 import com.dwinovo.chiikawa.client.ui.mc.WorldSurface;
 import com.dwinovo.chiikawa.entity.AbstractPet;
@@ -35,8 +37,11 @@ public final class SpeechBubbleRenderer {
     /** How long a line takes to fade at the end of its time, in ticks. */
     private static final float FADE_TICKS = 10.0F;
 
-    public void render(AbstractPet pet, PoseStack poseStack, MultiBufferSource bufferSource, Font font,
-                       Quaternionf cameraOrientation, float partialTick) {
+    /** A line up over a pet this frame: its words, the pet's name-tag spot, and how much of it shows. */
+    public record Shown(String line, Vec3 nameTag, float alpha) {
+    }
+
+    public void extract(AbstractPet pet, ChiikawaRenderState state, float partialTick) {
         if (Minecraft.getInstance().options.hideGui || !ClientSettingsStore.current().speechBubbles()) {
             return;
         }

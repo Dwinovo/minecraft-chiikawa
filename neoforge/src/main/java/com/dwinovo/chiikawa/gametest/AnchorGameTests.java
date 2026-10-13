@@ -54,7 +54,7 @@ public final class AnchorGameTests {
         double reach = AnchorSettings.current().orElseThrow().free().reach();
         helper.succeedWhen(() -> helper.assertTrue(
             pet.blockPosition().distSqr(home) < reach * reach,
-            "the pet stayed out at the far corner instead of going home"));
+            Component.literal("the pet stayed out at the far corner instead of going home")));
     }
 
     /**

@@ -84,7 +84,7 @@ public final class ClientPhotoCache {
                 int width = image.getWidth();
                 int height = image.getHeight();
                 // The texture owns the image from here, and closes it when it is let go of.
-                DynamicTexture texture = new DynamicTexture(image);
+                DynamicTexture texture = new DynamicTexture(() -> "Chiikawa photo " + chunk.photo(), image);
                 // Smoothed, because a photo is shown at whatever size the window has room for.
                 texture.setFilter(true, false);
                 ResourceLocation location = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,
@@ -99,10 +99,15 @@ public final class ClientPhotoCache {
         }
     }
 
-    /** Lets go of every photo, on leaving the world. */
+    /**
+     * Lets go of every photo, on leaving the world. The game only lets go of a texture on its
+     * own thread, and Fabric says the world has been left from the connection's.
+     */
     public static void clear() {
-        ENTRIES.values().stream().map(entry -> entry.picture).filter(Objects::nonNull)
-            .forEach(picture -> Minecraft.getInstance().getTextureManager().release(picture.texture()));
-        ENTRIES.clear();
+        Minecraft.getInstance().execute(() -> {
+            ENTRIES.values().stream().map(entry -> entry.picture).filter(Objects::nonNull)
+                .forEach(picture -> Minecraft.getInstance().getTextureManager().release(picture.texture()));
+            ENTRIES.clear();
+        });
     }
 }

@@ -37,7 +37,7 @@ public final class PetSpawnData {
 
     /** @return spawn lists by id */
     public static Map<ResourceLocation, PetSpawn> all() {
-        List<MobSpawnSettings.SpawnerData> spawners = Stream.<Supplier<? extends EntityType<?>>>of(
+        List<Weighted<MobSpawnSettings.SpawnerData>> spawners = Stream.<Supplier<? extends EntityType<?>>>of(
                 InitEntity.USAGI_PET, InitEntity.HACHIWARE_PET, InitEntity.CHIIKAWA_PET, InitEntity.SHISA_PET,
                 InitEntity.MOMONGA_PET, InitEntity.KURIMANJU_PET, InitEntity.RAKKO_PET, InitEntity.FURUHONYA_PET)
             .map(type -> new Weighted<>(new MobSpawnSettings.SpawnerData(type.get(), 1, 1), WEIGHT))

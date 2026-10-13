@@ -50,7 +50,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
@@ -102,19 +102,19 @@ public class Chiikawa {
             }
         });
         NeoForge.EVENT_BUS.addListener(Chiikawa::registerCommands);
-        NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> {
-            event.addListener(new PetPersonalityLoader());
-            event.addListener(new PetTaskTypeLoader());
-            event.addListener(new ShopCatalogLoader());
-            event.addListener(new BoardLevelsLoader());
-            event.addListener(new WhistleSettingsLoader());
-            event.addListener(new CameraSettingsLoader());
-            event.addListener(new GiftingSettingsLoader());
-            event.addListener(new AnchorSettingsLoader());
-            event.addListener(new PetSpawnLoader());
-            event.addListener(new PetVoiceLoader());
-            event.addListener(new PetInteractionLoader());
-            event.addListener(new QualificationLoader(task -> PetTaskTypes.all().containsKey(task)));
+        NeoForge.EVENT_BUS.addListener((AddServerReloadListenersEvent event) -> {
+            event.addListener(PetPersonalityLoader.ID, new PetPersonalityLoader());
+            event.addListener(PetTaskTypeLoader.ID, new PetTaskTypeLoader());
+            event.addListener(ShopCatalogLoader.ID, new ShopCatalogLoader());
+            event.addListener(BoardLevelsLoader.ID, new BoardLevelsLoader());
+            event.addListener(WhistleSettingsLoader.ID, new WhistleSettingsLoader());
+            event.addListener(CameraSettingsLoader.ID, new CameraSettingsLoader());
+            event.addListener(GiftingSettingsLoader.ID, new GiftingSettingsLoader());
+            event.addListener(AnchorSettingsLoader.ID, new AnchorSettingsLoader());
+            event.addListener(PetSpawnLoader.ID, new PetSpawnLoader());
+            event.addListener(PetVoiceLoader.ID, new PetVoiceLoader());
+            event.addListener(PetInteractionLoader.ID, new PetInteractionLoader());
+            event.addListener(QualificationLoader.ID, new QualificationLoader(task -> PetTaskTypes.all().containsKey(task)));
         });
 
         InitCapabilities.register(modEventBus);
