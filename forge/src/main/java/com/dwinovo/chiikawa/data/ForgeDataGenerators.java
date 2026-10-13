@@ -61,6 +61,9 @@ public class ForgeDataGenerators {
         generator.addProvider(event.includeServer(), new PetInteractionProvider(output));
         generator.addProvider(event.includeServer(), new QualificationProvider(output));
         generator.addProvider(event.includeServer(), new WhistleSettingsProvider(output));
+        generator.addProvider(event.includeServer(), new CameraSettingsProvider(output));
+        generator.addProvider(event.includeServer(), new GiftingSettingsProvider(output));
+        generator.addProvider(event.includeServer(), new AnchorSettingsProvider(output));
         generator.addProvider(event.includeServer(), new ModAdvancementProvider(output, lookupProvider));
         generator.addProvider(event.includeServer(), new ModLootTableProvider(output));
         

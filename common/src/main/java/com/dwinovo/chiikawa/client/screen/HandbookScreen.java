@@ -174,7 +174,7 @@ public class HandbookScreen extends Screen {
 
         // The screen is handed the time since the last frame, not how far into the tick
         // this frame is; the pets move by the tick, so they ask the game's own clock.
-        float sceneTick = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
+        float sceneTick = Minecraft.getInstance().getFrameTime();
         Rect picture = sceneArea();
         drawFrame(surface, picture);
         scene.draw(graphics, surface, picture, sceneTick);
@@ -210,12 +210,12 @@ public class HandbookScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         if (!chapters.isEmpty() && maxScroll() > 0) {
-            scroll = Mth.clamp(scroll - (int) Math.signum(scrollY) * SCROLL_LINES * UiStyle.LINE, 0, maxScroll());
+            scroll = Mth.clamp(scroll - (int) Math.signum(delta) * SCROLL_LINES * UiStyle.LINE, 0, maxScroll());
             return true;
         }
-        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        return super.mouseScrolled(mouseX, mouseY, delta);
     }
 
     @Override

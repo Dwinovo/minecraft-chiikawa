@@ -4,10 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.UUID;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.level.Level;
 
 /**
@@ -30,13 +28,18 @@ public record PhotoData(UUID photo, PhotoSubject subject, String name, long day,
         Codec.STRING.fieldOf("photographer").forGetter(PhotoData::photographer)
     ).apply(instance, PhotoData::new));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, PhotoData> STREAM_CODEC = StreamCodec.composite(
-        UUIDUtil.STREAM_CODEC, PhotoData::photo,
-        PhotoSubject.STREAM_CODEC, PhotoData::subject,
-        ByteBufCodecs.STRING_UTF8, PhotoData::name,
-        ByteBufCodecs.VAR_LONG, PhotoData::day,
-        ByteBufCodecs.STRING_UTF8, PhotoData::photographer,
-        PhotoData::new);
+    public static PhotoData read(FriendlyByteBuf buffer) {
+        return new PhotoData(buffer.readUUID(), buffer.readEnum(PhotoSubject.class), buffer.readUtf(),
+            buffer.readVarLong(), buffer.readUtf());
+    }
+
+    public void write(FriendlyByteBuf buffer) {
+        buffer.writeUUID(photo);
+        buffer.writeEnum(subject);
+        buffer.writeUtf(name);
+        buffer.writeVarLong(day);
+        buffer.writeUtf(photographer);
+    }
 
     /** A photo taken in this level now. */
     public static PhotoData taken(UUID photo, PhotoSubject subject, String name, Level level, String photographer) {

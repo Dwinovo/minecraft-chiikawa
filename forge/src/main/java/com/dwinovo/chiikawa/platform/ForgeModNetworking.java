@@ -6,6 +6,8 @@ import com.dwinovo.chiikawa.client.exam.ClientExamDeskPacketHandler;
 import com.dwinovo.chiikawa.client.manual.ClientManualPacketHandler;
 import com.dwinovo.chiikawa.client.music.ClientMusicPacketHandler;
 import com.dwinovo.chiikawa.client.pet.ClientPetPacketHandler;
+import com.dwinovo.chiikawa.client.photo.ClientPhotoPacketHandler;
+import com.dwinovo.chiikawa.client.settings.ClientSettingsPacketHandler;
 import com.dwinovo.chiikawa.client.shop.ClientShopPacketHandler;
 import com.dwinovo.chiikawa.client.voice.ClientVoicePacketHandler;
 import com.dwinovo.chiikawa.network.BoardPayloads;
@@ -15,6 +17,10 @@ import com.dwinovo.chiikawa.network.ExamDeskServerPacketHandler;
 import com.dwinovo.chiikawa.network.ManualPayloads;
 import com.dwinovo.chiikawa.network.PetPayloads;
 import com.dwinovo.chiikawa.network.PetServerPacketHandler;
+import com.dwinovo.chiikawa.network.PhotoPayloads;
+import com.dwinovo.chiikawa.network.PhotoServerPacketHandler;
+import com.dwinovo.chiikawa.network.SettingsPayloads;
+import com.dwinovo.chiikawa.network.SettingsServerPacketHandler;
 import com.dwinovo.chiikawa.network.ShopPayloads;
 import com.dwinovo.chiikawa.network.ShopServerPacketHandler;
 import com.dwinovo.chiikawa.network.MusicPayloads;
@@ -112,6 +118,35 @@ public final class ForgeModNetworking {
             (payload, context) -> ClientVoicePacketHandler.handleSpeech(payload));
         clientbound(PetPayloads.PetGesturePayload.class, PetPayloads.PetGesturePayload::read,
             (payload, context) -> ClientPetPacketHandler.handleGesture(payload));
+        clientbound(SettingsPayloads.WorldSettingsPayload.class, SettingsPayloads.WorldSettingsPayload::read,
+            (payload, context) -> ClientSettingsPacketHandler.handleWorld(payload));
+        serverbound(SettingsPayloads.ChangeWorldSettingsPayload.class, SettingsPayloads.ChangeWorldSettingsPayload::read,
+            (payload, context) -> {
+                ServerPlayer player = context.getSender();
+                if (player != null) {
+                    SettingsServerPacketHandler.handleChange(payload, player);
+                }
+            });
+        clientbound(PhotoPayloads.TakePhotoPayload.class, PhotoPayloads.TakePhotoPayload::read,
+            (payload, context) -> ClientPhotoPacketHandler.handleTake(payload));
+        serverbound(PhotoPayloads.UploadPhotoPayload.class, PhotoPayloads.UploadPhotoPayload::read,
+            (payload, context) -> {
+                ServerPlayer player = context.getSender();
+                if (player != null) {
+                    PhotoServerPacketHandler.handleUpload(payload, player);
+                }
+            });
+        serverbound(PhotoPayloads.RequestPhotoPayload.class, PhotoPayloads.RequestPhotoPayload::read,
+            (payload, context) -> {
+                ServerPlayer player = context.getSender();
+                if (player != null) {
+                    PhotoServerPacketHandler.handleRequest(payload, player);
+                }
+            });
+        clientbound(PhotoPayloads.DownloadPhotoPayload.class, PhotoPayloads.DownloadPhotoPayload::read,
+            (payload, context) -> ClientPhotoPacketHandler.handleDownload(payload));
+        clientbound(PhotoPayloads.OpenAlbumPayload.class, PhotoPayloads.OpenAlbumPayload::read,
+            (payload, context) -> ClientPhotoPacketHandler.handleOpen(payload));
     }
 
     public static void sendToClient(ServerPlayer player, MusicPayloads.Payload payload) {

@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.mixin.CameraAccessor;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import net.minecraft.client.Camera;
@@ -101,7 +102,7 @@ public final class PhotoCapture {
 
             minecraft.levelRenderer.graphicsChanged();
             target.bindWrite(false);
-            renderer.renderLevel(minecraft.getTimer());
+            renderer.renderLevel(minecraft.getFrameTime(), 0L, new PoseStack());
 
             NativeImage image = Screenshot.takeScreenshot(target);
             try {

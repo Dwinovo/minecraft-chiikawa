@@ -30,46 +30,46 @@ class CameraSettingsTest {
 
     @Test
     void settingsParseFromTheGeneratedShape() {
-        CameraSettings settings = CameraSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(GOOD)).getOrThrow();
+        CameraSettings settings = CameraSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(GOOD)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
-        assertEquals(new CameraSettings(ResourceLocation.fromNamespaceAndPath("chiikawa", "film"), 64.0, 12000, 600,
+        assertEquals(new CameraSettings(new ResourceLocation("chiikawa", "film"), 64.0, 12000, 600,
             320, 240, 70, new CameraSettings.Subjects(3, 5, 1), 40, 12, 0.25F), settings);
     }
 
     @Test
     void aFileWithoutAPosedChanceIsPosedHalfTheTimeAndTheChanceIsWrittenAnyway() {
         CameraSettings settings = CameraSettings.CODEC.parse(JsonOps.INSTANCE,
-            JsonParser.parseString(GOOD.replace("posed_chance", "something_else"))).getOrThrow();
+            JsonParser.parseString(GOOD.replace("posed_chance", "something_else"))).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
         assertEquals(0.5F, settings.posedChance());
-        assertEquals(0.5F, CameraSettings.CODEC.encodeStart(JsonOps.INSTANCE, settings).getOrThrow()
+        assertEquals(0.5F, CameraSettings.CODEC.encodeStart(JsonOps.INSTANCE, settings).getOrThrow(false, org.junit.jupiter.api.Assertions::fail)
             .getAsJsonObject().get("posed_chance").getAsFloat(), "the chance is not in the file to be changed");
     }
 
     @Test
     void aFileWithoutExposuresHoldsEightAndWritesThemAnyway() {
         CameraSettings settings = CameraSettings.CODEC.parse(JsonOps.INSTANCE,
-            JsonParser.parseString(GOOD.replace("exposures", "something_else"))).getOrThrow();
+            JsonParser.parseString(GOOD.replace("exposures", "something_else"))).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
         assertEquals(8, settings.exposures());
-        assertEquals(8, CameraSettings.CODEC.encodeStart(JsonOps.INSTANCE, settings).getOrThrow()
+        assertEquals(8, CameraSettings.CODEC.encodeStart(JsonOps.INSTANCE, settings).getOrThrow(false, org.junit.jupiter.api.Assertions::fail)
             .getAsJsonObject().get("exposures").getAsInt());
     }
 
     @Test
     void aRollOfNoShotsOrTooManyIsRejected() {
         assertTrue(CameraSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            GOOD.replace("\"exposures\": 12", "\"exposures\": 0"))).isError());
+            GOOD.replace("\"exposures\": 12", "\"exposures\": 0"))).result().isEmpty());
         assertTrue(CameraSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            GOOD.replace("\"exposures\": 12", "\"exposures\": 1000"))).isError());
+            GOOD.replace("\"exposures\": 12", "\"exposures\": 1000"))).result().isEmpty());
     }
 
     @Test
     void aPosedChanceOutsideZeroAndOneIsRejected() {
         assertTrue(CameraSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            GOOD.replace("0.25", "1.5"))).isError());
+            GOOD.replace("0.25", "1.5"))).result().isEmpty());
         assertTrue(CameraSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            GOOD.replace("0.25", "-0.1"))).isError());
+            GOOD.replace("0.25", "-0.1"))).result().isEmpty());
     }
 
     @Test
@@ -89,17 +89,17 @@ class CameraSettingsTest {
     }
 
     private static CameraSettings withPosedChance(float chance) {
-        CameraSettings settings = CameraSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(GOOD)).getOrThrow();
+        CameraSettings settings = CameraSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(GOOD)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
         return new CameraSettings(settings.film(), settings.ownerRange(), settings.cooldownTicks(), settings.retryTicks(),
             settings.width(), settings.height(), settings.fov(), settings.subjects(), settings.aimTicks(), settings.exposures(), chance);
     }
 
     @Test
     void settingsEncodeToWhatTheyParseFrom() {
-        CameraSettings settings = CameraSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(GOOD)).getOrThrow();
+        CameraSettings settings = CameraSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(GOOD)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
         assertEquals(settings, CameraSettings.CODEC.parse(JsonOps.INSTANCE,
-            CameraSettings.CODEC.encodeStart(JsonOps.INSTANCE, settings).getOrThrow()).getOrThrow());
+            CameraSettings.CODEC.encodeStart(JsonOps.INSTANCE, settings).getOrThrow(false, org.junit.jupiter.api.Assertions::fail)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail));
     }
 
     @Test
@@ -114,21 +114,21 @@ class CameraSettingsTest {
     @Test
     void settingsThatCannotBeRightAreRejected() {
         assertTrue(CameraSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            GOOD.replace("\"film\": \"chiikawa:film\", ", ""))).isError(), "no film");
+            GOOD.replace("\"film\": \"chiikawa:film\", ", ""))).result().isEmpty(), "no film");
         assertTrue(CameraSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            GOOD.replace("\"aim_ticks\": 40", "\"aim_ticks\": 0"))).isError(), "no time to aim");
+            GOOD.replace("\"aim_ticks\": 40", "\"aim_ticks\": 0"))).result().isEmpty(), "no time to aim");
         assertTrue(CameraSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            GOOD.replace("\"width\": 320", "\"width\": 100000"))).isError(), "a photo too big to keep");
+            GOOD.replace("\"width\": 320", "\"width\": 100000"))).result().isEmpty(), "a photo too big to keep");
         assertTrue(CameraSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            GOOD.replace("\"fov\": 70", "\"fov\": 170"))).isError(), "a lens too wide to draw");
+            GOOD.replace("\"fov\": 70", "\"fov\": 170"))).result().isEmpty(), "a lens too wide to draw");
         assertTrue(CameraSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            GOOD.replace("\"friend\": 5", "\"friend\": -5"))).isError(), "a negative liking");
+            GOOD.replace("\"friend\": 5", "\"friend\": -5"))).result().isEmpty(), "a negative liking");
     }
 
     @Test
     void aBrokenFileIsSkippedRatherThanTakingTheRestWithIt() {
-        ResourceLocation good = ResourceLocation.fromNamespaceAndPath("chiikawa", "camera");
-        ResourceLocation broken = ResourceLocation.fromNamespaceAndPath("chiikawa", "broken");
+        ResourceLocation good = new ResourceLocation("chiikawa", "camera");
+        ResourceLocation broken = new ResourceLocation("chiikawa", "broken");
 
         CameraSettingsLoader.Loaded loaded = CameraSettingsLoader.load(Map.of(
             good, JsonParser.parseString(GOOD),

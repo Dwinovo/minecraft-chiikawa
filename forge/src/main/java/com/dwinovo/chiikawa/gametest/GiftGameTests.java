@@ -357,16 +357,16 @@ public final class GiftGameTests {
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         for (int slot = 0; slot < pet.getBackpack().getContainerSize(); slot++) {
-            pet.getBackpack().setItem(slot, new ItemStack(Items.DIRT, Items.DIRT.getDefaultMaxStackSize()));
+            pet.getBackpack().setItem(slot, new ItemStack(Items.DIRT, Items.DIRT.getMaxStackSize()));
         }
-        pet.getBackpack().setItem(4, new ItemStack(Items.EMERALD, Items.EMERALD.getDefaultMaxStackSize() - ROOM));
+        pet.getBackpack().setItem(4, new ItemStack(Items.EMERALD, Items.EMERALD.getMaxStackSize() - ROOM));
         owner.setShiftKeyDown(false);
         owner.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.EMERALD, TEN));
 
         pet.mobInteract(owner, InteractionHand.MAIN_HAND);
 
         int held = owner.getItemInHand(InteractionHand.MAIN_HAND).getCount();
-        helper.assertTrue(Wallet.count(pet.getBackpack()) == Items.EMERALD.getDefaultMaxStackSize(),
+        helper.assertTrue(Wallet.count(pet.getBackpack()) == Items.EMERALD.getMaxStackSize(),
             "the pet has " + Wallet.count(pet.getBackpack()) + " emeralds");
         helper.assertTrue(held == TEN - ROOM, "the owner is left with " + held + " emeralds, not " + (TEN - ROOM));
         helper.succeed();

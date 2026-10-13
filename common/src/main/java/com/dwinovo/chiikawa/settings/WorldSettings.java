@@ -1,8 +1,6 @@
 package com.dwinovo.chiikawa.settings;
 
-import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Mth;
 
 /**
@@ -25,10 +23,14 @@ public record WorldSettings(float wildSpawn, float chatter) {
     /** How a world is until somebody changes it: nothing scaled. */
     public static final WorldSettings DEFAULT = new WorldSettings(1.0F, 1.0F);
 
-    public static final StreamCodec<ByteBuf, WorldSettings> STREAM_CODEC = StreamCodec.composite(
-        ByteBufCodecs.FLOAT, WorldSettings::wildSpawn,
-        ByteBufCodecs.FLOAT, WorldSettings::chatter,
-        WorldSettings::new);
+    public static WorldSettings read(FriendlyByteBuf buffer) {
+        return new WorldSettings(buffer.readFloat(), buffer.readFloat());
+    }
+
+    public void write(FriendlyByteBuf buffer) {
+        buffer.writeFloat(wildSpawn);
+        buffer.writeFloat(chatter);
+    }
 
     public WorldSettings {
         wildSpawn = within(wildSpawn, 1.0F, 1.0F);

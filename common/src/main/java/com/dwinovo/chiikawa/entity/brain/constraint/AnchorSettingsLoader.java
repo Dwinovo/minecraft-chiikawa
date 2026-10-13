@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.constraint;
 import com.dwinovo.chiikawa.Constants;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import java.util.Map;
 import java.util.Optional;
@@ -19,9 +20,9 @@ import net.minecraft.util.profiling.ProfilerFiller;
 public final class AnchorSettingsLoader extends SimpleJsonResourceReloadListener {
     public static final String DIRECTORY = "pet_anchor";
     /** Id for loaders that register reload listeners by id. */
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
+    public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, DIRECTORY);
     /** The one file the settings are in. */
-    public static final ResourceLocation FILE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "anchor");
+    public static final ResourceLocation FILE = new ResourceLocation(Constants.MOD_ID, "anchor");
 
     private static final String LOG_PREFIX = "[chiikawa-anchor] ";
 
@@ -49,8 +50,9 @@ public final class AnchorSettingsLoader extends SimpleJsonResourceReloadListener
         if (json == null) {
             return Optional.empty();
         }
-        return AnchorSettings.CODEC.parse(JsonOps.INSTANCE, json)
-            .ifError(error -> Constants.LOG.error(LOG_PREFIX + FILE + " is skipped, failed to parse: " + error.message()))
-            .result();
+        DataResult<AnchorSettings> parsed = AnchorSettings.CODEC.parse(JsonOps.INSTANCE, json);
+        parsed.error().ifPresent(error ->
+            Constants.LOG.error(LOG_PREFIX + FILE + " is skipped, failed to parse: " + error.message()));
+        return parsed.result();
     }
 }

@@ -4,9 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ExtraCodecs;
 
 /**
@@ -31,11 +28,6 @@ public record FilmRoll(int exposures, List<PhotoData> shots) {
         ExtraCodecs.intRange(1, MOST_EXPOSURES).fieldOf("exposures").forGetter(FilmRoll::exposures),
         PhotoData.CODEC.listOf().fieldOf("shots").forGetter(FilmRoll::shots)
     ).apply(instance, FilmRoll::new));
-
-    public static final StreamCodec<RegistryFriendlyByteBuf, FilmRoll> STREAM_CODEC = StreamCodec.composite(
-        ByteBufCodecs.VAR_INT, FilmRoll::exposures,
-        PhotoData.STREAM_CODEC.apply(ByteBufCodecs.list(MOST_EXPOSURES)), FilmRoll::shots,
-        FilmRoll::new);
 
     public FilmRoll {
         shots = List.copyOf(shots);

@@ -87,7 +87,7 @@ public final class ClientPhotoCache {
                 DynamicTexture texture = new DynamicTexture(image);
                 // Smoothed, because a photo is shown at whatever size the window has room for.
                 texture.setFilter(true, false);
-                ResourceLocation location = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,
+                ResourceLocation location = new ResourceLocation(Constants.MOD_ID,
                     "photo/" + chunk.photo());
                 Minecraft.getInstance().getTextureManager().register(location, texture);
                 entry.picture = new Picture(location, width, height);

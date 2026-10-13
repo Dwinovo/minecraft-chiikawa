@@ -127,7 +127,7 @@ public class GoShoppingBehavior extends Behavior<AbstractPet> {
      * is a pet that has misunderstood what money is for.
      */
     private static void keep(AbstractPet pet, ItemStack goods) {
-        if (pet.getHealth() < pet.getMaxHealth() && goods.has(DataComponents.FOOD)) {
+        if (pet.getHealth() < pet.getMaxHealth() && goods.isEdible()) {
             pet.heal(PetInteractHandler.FEED_HEAL);
             return;
         }

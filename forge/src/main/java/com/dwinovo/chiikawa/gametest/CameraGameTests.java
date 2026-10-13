@@ -17,6 +17,7 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
+import com.dwinovo.chiikawa.gametest.mixin.GameTestHelperAccessor;
 import com.dwinovo.chiikawa.init.InitActivity;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitEntity;
@@ -57,8 +58,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Hachiware's camera: it takes a photo only with a camera and film in its bag, an owner
@@ -606,7 +607,7 @@ public final class CameraGameTests {
      * never get to.
      */
     private static void clearNeighbours(GameTestHelper helper) {
-        helper.getLevel().getEntitiesOfClass(AbstractPet.class, helper.getBounds().inflate(NEIGHBOURHOOD))
+        helper.getLevel().getEntitiesOfClass(AbstractPet.class, ((GameTestHelperAccessor) helper).chiikawa$getBounds().inflate(NEIGHBOURHOOD))
             .forEach(Entity::discard);
     }
 
