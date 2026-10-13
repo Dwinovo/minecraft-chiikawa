@@ -58,7 +58,7 @@ public final class PhotoDelivery implements PhotoUploads.Listener {
             // The shot is put on a roll only now that it is kept; if the bag was emptied of film in
             // the meantime there is no roll to put it on, and it is a photo nobody has.
             if (!FilmRolls.record(pet.getBackpack(), PhotoScout.filmOf(camera), camera.exposures(), shot,
-                    pet::spawnAtLocation)) {
+                    left -> pet.spawnAtLocation(level, left))) {
                 failed(photo);
                 return;
             }

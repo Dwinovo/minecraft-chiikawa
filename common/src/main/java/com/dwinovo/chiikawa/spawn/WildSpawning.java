@@ -3,8 +3,8 @@ package com.dwinovo.chiikawa.spawn;
 import com.dwinovo.chiikawa.settings.WorldSettingsStore;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.ServerLevelAccessor;
 
@@ -23,7 +23,7 @@ public final class WildSpawning {
 
     /** The spawn predicate both loaders register for every pet, in place of the animals' own. */
     public static <T extends Animal> boolean canSpawn(EntityType<T> type, ServerLevelAccessor level,
-            MobSpawnType reason, BlockPos pos, RandomSource random) {
+            EntitySpawnReason reason, BlockPos pos, RandomSource random) {
         return Animal.checkAnimalSpawnRules(type, level, reason, pos, random)
             && allows(WorldSettingsStore.of(level.getLevel()).get().wildSpawn(), reason, random);
     }
@@ -35,8 +35,8 @@ public final class WildSpawning {
      *
      * @param wildSpawn the setting, from 0 to 1
      */
-    public static boolean allows(float wildSpawn, MobSpawnType reason, RandomSource random) {
-        if (reason != MobSpawnType.NATURAL && reason != MobSpawnType.CHUNK_GENERATION) {
+    public static boolean allows(float wildSpawn, EntitySpawnReason reason, RandomSource random) {
+        if (reason != EntitySpawnReason.NATURAL && reason != EntitySpawnReason.CHUNK_GENERATION) {
             return true;
         }
         if (wildSpawn >= 1.0F) {
