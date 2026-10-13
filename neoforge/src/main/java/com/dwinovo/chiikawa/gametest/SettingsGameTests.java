@@ -23,7 +23,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.ServerOpListEntry;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.gametest.GameTestHolder;
@@ -83,17 +83,17 @@ public final class SettingsGameTests {
         WorldSettings before = store.get();
         try {
             store.set(new WorldSettings(1.0F, before.chatter()));
-            helper.assertTrue(WildSpawning.canSpawn(type, level, MobSpawnType.NATURAL, at, level.getRandom()),
+            helper.assertTrue(WildSpawning.canSpawn(type, level, EntitySpawnReason.NATURAL, at, level.getRandom()),
                 "the spot is not one an animal may spawn on, so this case proves nothing");
 
             store.set(new WorldSettings(0.0F, before.chatter()));
-            helper.assertFalse(WildSpawning.canSpawn(type, level, MobSpawnType.NATURAL, at, level.getRandom()),
+            helper.assertFalse(WildSpawning.canSpawn(type, level, EntitySpawnReason.NATURAL, at, level.getRandom()),
                 "a natural spawn went through with wild spawning at nothing");
-            helper.assertFalse(WildSpawning.canSpawn(type, level, MobSpawnType.CHUNK_GENERATION, at, level.getRandom()),
+            helper.assertFalse(WildSpawning.canSpawn(type, level, EntitySpawnReason.CHUNK_GENERATION, at, level.getRandom()),
                 "a spawn while the chunk was made went through with wild spawning at nothing");
-            helper.assertTrue(WildSpawning.canSpawn(type, level, MobSpawnType.SPAWN_EGG, at, level.getRandom()),
+            helper.assertTrue(WildSpawning.canSpawn(type, level, EntitySpawnReason.SPAWN_ITEM_USE, at, level.getRandom()),
                 "a spawn egg was refused");
-            Animal born = type.spawn(level, at.above(), MobSpawnType.SPAWN_EGG);
+            Animal born = type.spawn(level, at.above(), EntitySpawnReason.SPAWN_ITEM_USE);
             helper.assertTrue(born != null, "a spawn egg spawned nothing");
             born.discard();
         } finally {
