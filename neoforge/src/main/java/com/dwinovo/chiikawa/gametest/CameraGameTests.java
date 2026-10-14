@@ -167,6 +167,9 @@ public final class CameraGameTests {
      * that tries another camera does not leave it for the next.
      */
     private static void settle(ServerLevel level) {
+        // A photo asked for in another batch, a gift case's included, would still be waiting for a
+        // minute, and a case that counts the photos asked for would count it.
+        PhotoSystem.stopServer(level.getServer());
         settleWorld(level, Difficulty.NORMAL, NOON);
         if (dataPackCameras == null) {
             dataPackCameras = CameraSettings.all();
