@@ -222,13 +222,22 @@ public final class PhotoScout {
     }
 
     /**
-     * Which way to face with nobody to turn to: the sun when it is low, east in the morning
-     * and west in the evening, or the way the pet is looking.
+     * The way along the horizon the sun is in, east at sunrise and west at sunset. The sky turns the
+     * sun's disc about the east-west axis, a quarter turn from where it stands overhead, which puts
+     * it at {@code -sin(angle)} along the world's x axis: positive, east, before noon.
+     *
+     * @param sunAngle the sun's angle in the sky, as the level gives it
+     */
+    static Vec3 towardsSun(float sunAngle) {
+        return new Vec3(-Math.sin(sunAngle) >= 0.0 ? 1.0 : -1.0, 0.0, 0.0);
+    }
+
+    /**
+     * Which way to face with nobody to turn to: the sun when it is low, or the way the pet is looking.
      */
     private static Vec3 facing(AbstractPet pet) {
         if (sunIsLow(pet)) {
-            // The sun's path runs east to west across the sky, and it is east of the world before noon.
-            return new Vec3(Math.cos(pet.level().getSunAngle(1.0F)) >= 0.0 ? 1.0 : -1.0, 0.0, 0.0);
+            return towardsSun(pet.level().getSunAngle(1.0F));
         }
         Vec3 looking = pet.getViewVector(1.0F);
         Vec3 level = new Vec3(looking.x, 0.0, looking.z);
