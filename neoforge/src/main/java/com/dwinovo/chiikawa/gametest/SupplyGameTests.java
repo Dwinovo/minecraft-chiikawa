@@ -267,7 +267,7 @@ public final class SupplyGameTests {
         pet.tame(owner);
 
         int withPet = new PetBackpackMenu(1, owner.getInventory(), pet).slots.size();
-        int withoutPet = new PetBackpackMenu(2, owner.getInventory()).slots.size();
+        int withoutPet = new PetBackpackMenu(2, owner.getInventory(), PetBackpackMenu.NO_PET).slots.size();
 
         helper.assertTrue(withPet == withoutPet,
             "the server lays out " + withPet + " slots and the client " + withoutPet);
