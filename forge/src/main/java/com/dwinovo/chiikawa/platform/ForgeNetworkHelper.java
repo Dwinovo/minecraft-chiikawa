@@ -6,7 +6,6 @@ import com.dwinovo.chiikawa.network.MusicPayloads;
 import com.dwinovo.chiikawa.platform.services.INetworkHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkHooks;
 
 public final class ForgeNetworkHelper implements INetworkHelper {
     @Override
@@ -21,7 +20,7 @@ public final class ForgeNetworkHelper implements INetworkHelper {
 
     @Override
     public void openPetMenu(ServerPlayer player, AbstractPet pet) {
-        NetworkHooks.openScreen(player, PetBackpackMenu.providerFor(pet), buf -> PetBackpackMenu.writeOpeningData(buf, pet.getId()));
+        player.openMenu(PetBackpackMenu.providerFor(pet), buf -> PetBackpackMenu.writeOpeningData(buf, pet.getId()));
     }
 
     @Override
