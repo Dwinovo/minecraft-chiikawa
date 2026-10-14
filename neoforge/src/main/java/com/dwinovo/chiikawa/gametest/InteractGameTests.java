@@ -10,6 +10,7 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.network.PetServerPacketHandler;
+import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
@@ -22,7 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.network.payload.AdvancedOpenScreenPayload;
-import net.neoforged.neoforge.network.registration.ChannelAttributes;
+import net.neoforged.neoforge.network.registration.NetworkRegistry;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
@@ -137,7 +138,7 @@ public final class InteractGameTests {
         owner.setShiftKeyDown(false);
         owner.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         // The stand-in has no game on the other end, so it is made one that declares it takes the opening.
-        ChannelAttributes.getOrCreateAdHocChannels(owner.connection.getConnection()).add(AdvancedOpenScreenPayload.TYPE.id());
+        NetworkRegistry.onMinecraftRegister(owner.connection.getConnection(), Set.of(AdvancedOpenScreenPayload.TYPE.id()));
 
         pet.mobInteract(owner, InteractionHand.MAIN_HAND);
 
