@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
@@ -42,10 +43,10 @@ public final class ShopPayloads {
         public static final StreamCodec<RegistryFriendlyByteBuf, ShopPricesPayload> STREAM_CODEC = StreamCodec.of(
             (buffer, value) -> {
                 buffer.writeBlockPos(value.shop);
-                buffer.writeCollection(value.prices, (buf, price) -> PriceView.STREAM_CODEC.encode(buf, price));
+                PriceView.STREAM_CODEC.apply(ByteBufCodecs.list()).encode(buffer, value.prices);
             },
             buffer -> new ShopPricesPayload(buffer.readBlockPos(),
-                buffer.readList(buf -> PriceView.STREAM_CODEC.decode(buf)))
+                PriceView.STREAM_CODEC.apply(ByteBufCodecs.list()).decode(buffer))
         );
 
         @Override

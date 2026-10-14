@@ -8,7 +8,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.LightCoordsUtil;
@@ -69,15 +68,13 @@ public final class WorldSurface implements DrawSurface {
 
     @Override
     public void fillRect(int x, int y, int width, int height, int argb) {
-        int color = faded(argb);
-        float z = nextLayer();
-        collector.submitCustomGeometry(pose, RenderTypes.textBackground(), (at, consumer) -> {
-            // Wound as the game winds its own name-tag backdrop, which this render type culls by.
-            consumer.addVertex(at, x, y + height, z).setColor(color).setLight(FULL_BRIGHT);
-            consumer.addVertex(at, x + width, y + height, z).setColor(color).setLight(FULL_BRIGHT);
-            consumer.addVertex(at, x + width, y, z).setColor(color).setLight(FULL_BRIGHT);
-            consumer.addVertex(at, x, y, z).setColor(color).setLight(FULL_BRIGHT);
-        });
+        // The game's own backdrop for text, which a name tag and a text display use; like the text,
+        // it takes no z, so the layer goes through the matrix.
+        pose.pushPose();
+        pose.translate(0.0F, 0.0F, nextLayer());
+        collector.submitTextBackground(pose, x, y, x + width, y + height, faded(argb), Font.DisplayMode.NORMAL,
+            FULL_BRIGHT);
+        pose.popPose();
     }
 
     @Override

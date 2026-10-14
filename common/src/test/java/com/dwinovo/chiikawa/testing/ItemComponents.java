@@ -14,7 +14,7 @@ public final class ItemComponents {
     }
 
     public static void bind() {
-        BuiltInRegistries.DATA_COMPONENT_INITIALIZERS.build(VanillaRegistries.createLookup())
+        BuiltInRegistries.DATA_COMPONENT_INITIALIZERS.build(VanillaRegistries.createReloadableLookup(VanillaRegistries.createWorldLookup()))
             .forEach(DataComponentInitializers.PendingComponents::apply);
     }
 }

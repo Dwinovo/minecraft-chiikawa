@@ -18,10 +18,10 @@ import com.dwinovo.chiikawa.ui.UiTheme;
 import com.dwinovo.chiikawa.ui.widget.Arrow;
 import com.dwinovo.chiikawa.ui.widget.Badge;
 import com.dwinovo.chiikawa.ui.widget.TitledPanel;
+import com.mojang.blaze3d.Blaze3D;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -180,7 +180,7 @@ public class MusicBoxScreen extends Screen {
         try {
             Path folder = Minecraft.getInstance().gameDirectory.toPath().resolve("config/chiikawa/music");
             Files.createDirectories(folder);
-            Util.getPlatform().openPath(folder);
+            Blaze3D.openPath(folder);
         } catch (Exception ex) {
             Constants.LOG.warn("[chiikawa-music] Failed to open music folder", ex);
         }

@@ -2,7 +2,6 @@ package com.dwinovo.chiikawa.block;
 
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.network.ExamDeskServerPacketHandler;
-import com.mojang.serialization.MapCodec;
 import java.util.EnumMap;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
@@ -46,7 +45,6 @@ import org.jetbrains.annotations.Nullable;
  * {@link com.dwinovo.chiikawa.qualification.ExamEnrollment}'s business.
  */
 public class ExamDeskBlock extends BaseEntityBlock implements PropAtRest {
-    public static final MapCodec<ExamDeskBlock> CODEC = simpleCodec(ExamDeskBlock::new);
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<DeskPart> PART = EnumProperty.create("part", DeskPart.class);
     /** How high the chair's seat is, in pixels; its model is built to it. */
@@ -75,11 +73,6 @@ public class ExamDeskBlock extends BaseEntityBlock implements PropAtRest {
     public ExamDeskBlock(Properties properties) {
         super(properties);
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(PART, DeskPart.DESK));
-    }
-
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
     }
 
     /** The chair of a desk at {@code desk} facing {@code facing}: the block behind it. */

@@ -39,7 +39,7 @@ class PetSpawnTest {
         assertTrue(spawn.covers(FOREST, IS_FOREST::equals), "named by tag");
         assertFalse(spawn.covers(biome("desert"), tag -> false));
         assertEquals(EntityTypes.PIG, spawn.spawners().get(0).value().type());
-        assertEquals(2, spawn.spawners().get(0).value().maxCount());
+        assertEquals(2, spawn.spawners().get(0).value().count().maxInclusive());
     }
 
     @Test

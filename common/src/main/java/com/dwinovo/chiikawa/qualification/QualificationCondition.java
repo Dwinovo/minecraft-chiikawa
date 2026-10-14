@@ -31,7 +31,7 @@ public record QualificationCondition(LicenceRequirement requirement) implements 
 
     @Override
     public boolean test(LootContext context) {
-        Entity entity = context.getOptionalParameter(LootContextParams.THIS_ENTITY);
+        Entity entity = context.getOptional(LootContextParams.THIS_ENTITY);
         return entity instanceof AbstractPet pet && requirement.metBy(pet.licences());
     }
 }

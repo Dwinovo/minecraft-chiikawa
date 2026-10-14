@@ -21,6 +21,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.attribute.EnvironmentAttributeMap;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.player.Player;
@@ -31,6 +33,7 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 
@@ -159,7 +162,8 @@ public final class LifeGameTests {
     }
 
     private static boolean spawns(Biome biome, EntityType<?> type) {
-        return biome.getMobSettings().getMobs(type.getCategory()).unwrap().stream()
+        EnvironmentAttributeMap.Entry<MobSpawnSettings, ?> natural = biome.getAttributes().get(EnvironmentAttributes.NATURAL_MOB_SPAWNS);
+        return natural != null && ((MobSpawnSettings) natural.argument()).getMobsToSpawn(type.getCategory()).unwrap().stream()
             .anyMatch(spawner -> spawner.value().type() == type);
     }
 

@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.spawn;
 import com.dwinovo.chiikawa.Constants;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.level.biome.Biome;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.world.BiomeModifier;
@@ -36,13 +37,13 @@ public final class PetSpawnsBiomeModifier implements BiomeModifier {
     }
 
     @Override
-    public void modify(Holder<Biome> biome, Phase phase, ModifiableBiomeInfo.BiomeInfo.Builder builder) {
+    public void modify(RegistryAccess registries, Holder<Biome> biome, Phase phase, ModifiableBiomeInfo.BiomeInfo.Builder builder) {
         if (phase != Phase.ADD) {
             return;
         }
         biome.unwrapKey().ifPresent(key -> PetSpawns.in(key, biome::is)
             .forEach(spawner -> builder.getMobSpawnSettings()
-                .addSpawn(spawner.value().type().getCategory(), spawner.weight(), spawner.value())));
+                .addSpawn(spawner.value().type(), spawner.weight(), spawner.value().count())));
     }
 
     @Override

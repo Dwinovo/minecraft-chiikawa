@@ -120,9 +120,9 @@ public final class PropRenderer {
      */
     static void intoSprite(BakedModel model, float lean, PoseStack pose) {
         // A sprite shows its south face; a prop's face is on its north.
-        pose.mulPose(Axis.YP.rotationDegrees(180.0F));
+        pose.rotate(Axis.YP.rotationDegrees(180.0F));
         // Anticlockwise about the model's Z, which the viewer, on its other side, sees as clockwise.
-        pose.mulPose(Axis.ZP.rotationDegrees(lean));
+        pose.rotate(Axis.ZP.rotationDegrees(lean));
         fitToSprite(model, lean, pose);
     }
 

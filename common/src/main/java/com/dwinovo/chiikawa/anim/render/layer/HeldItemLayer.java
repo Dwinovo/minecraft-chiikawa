@@ -129,9 +129,9 @@ public final class HeldItemLayer implements RenderLayer {
      * and a half turn about Z followed by theirs comes to the single quarter turn here.
      */
     static void intoFist(PoseStack pose) {
-        pose.mulPose(Axis.XP.rotationDegrees(-90.0F));
+        pose.rotate(Axis.XP.rotationDegrees(-90.0F));
         pose.translate(0.0F, 0.125F, -0.0625F);
-        pose.mulPose(Axis.XP.rotation(HOLDING_LIFT));
+        pose.rotate(Axis.XP.rotation(HOLDING_LIFT));
         pose.scale(HAND_SCALE, HAND_SCALE, HAND_SCALE);
     }
 }

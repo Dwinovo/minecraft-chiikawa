@@ -54,7 +54,7 @@ public class PropBlockRenderer<T extends BlockEntity> implements BlockEntityRend
     public void submit(State state, PoseStack pose, SubmitNodeCollector collector, CameraRenderState camera) {
         pose.pushPose();
         pose.translate(0.5F, 0.0F, 0.5F);
-        pose.mulPose(Axis.YP.rotationDegrees(180.0F - state.facing.toYRot()));
+        pose.rotate(Axis.YP.rotationDegrees(180.0F - state.facing.toYRot()));
         pose.scale(PIXEL, PIXEL, PIXEL);
         PropRenderer.draw(state.model, pose, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, state.shown,
             state.breakProgress);

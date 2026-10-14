@@ -53,7 +53,7 @@ public final class MeleeAttackWithAnim {
                         }
                         lookTarget.set(new EntityTracker(target, true));
                         pet.triggerAction(PetAction.SLASH);
-                        pet.swing(InteractionHand.MAIN_HAND);
+                        pet.swingForAttack(InteractionHand.MAIN_HAND);
                         pet.doHurtTarget(level, target);
                         pet.playAttackSound();
                         cooldown.setWithExpiry(true, (long) PetCombat.swingCooldown(attackSpeedOf(pet)));

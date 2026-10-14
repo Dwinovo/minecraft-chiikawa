@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.music.MusicTrackView;
 import com.dwinovo.chiikawa.music.PlaybackMode;
 import java.util.List;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
@@ -19,12 +20,12 @@ public final class MusicPayloads {
         public static final StreamCodec<RegistryFriendlyByteBuf, MusicCatalogPayload> STREAM_CODEC = StreamCodec.of(
             (buffer, value) -> {
                 buffer.writeVarInt(value.handIndex);
-                buffer.writeCollection(value.tracks, (buf, track) -> MusicTrackView.STREAM_CODEC.encode(buf, track));
+                MusicTrackView.STREAM_CODEC.apply(ByteBufCodecs.list()).encode(buffer, value.tracks);
                 buffer.writeBoolean(value.openScreen);
             },
             buffer -> new MusicCatalogPayload(
                 buffer.readVarInt(),
-                buffer.readList(buf -> MusicTrackView.STREAM_CODEC.decode(buf)),
+                MusicTrackView.STREAM_CODEC.apply(ByteBufCodecs.list()).decode(buffer),
                 buffer.readBoolean()
             )
         );
@@ -138,12 +139,12 @@ public final class MusicPayloads {
             (buffer, value) -> {
                 buffer.writeVarInt(value.sessionId);
                 buffer.writeVarInt(value.frameStart);
-                buffer.writeCollection(value.frames, (buf, frame) -> buf.writeByteArray(frame));
+                ByteBufCodecs.byteArray(4096).apply(ByteBufCodecs.list()).encode(buffer, value.frames);
             },
             buffer -> new MusicStreamChunkPayload(
                 buffer.readVarInt(),
                 buffer.readVarInt(),
-                buffer.readList(buf -> buf.readByteArray(4096))
+                ByteBufCodecs.byteArray(4096).apply(ByteBufCodecs.list()).decode(buffer)
             )
         );
 

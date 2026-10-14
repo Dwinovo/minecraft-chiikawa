@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
@@ -79,7 +80,7 @@ public class GiveGiftBehavior extends Behavior<AbstractPet> {
     private void hand(ServerLevel level, AbstractPet pet, Player player) {
         ItemStack gift = pet.getPendingGift();
         if (!player.getInventory().add(gift.copy())) {
-            player.drop(gift.copy(), false);
+            player.drop(gift.copy(), false, Prediction.SERVER_ONLY);
         }
         pet.setPendingGift(ItemStack.EMPTY);
         given = true;

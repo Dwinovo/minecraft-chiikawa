@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
@@ -84,10 +85,10 @@ public final class ExamDeskPayloads {
                 buffer.writeIdentifier(value.qualification);
                 buffer.writeIdentifier(value.feeItem);
                 buffer.writeVarInt(value.feeCount);
-                buffer.writeCollection(value.candidates, (buf, candidate) -> CandidateView.STREAM_CODEC.encode(buf, candidate));
+                CandidateView.STREAM_CODEC.apply(ByteBufCodecs.list()).encode(buffer, value.candidates);
             },
             buffer -> new OfferView(buffer.readIdentifier(), buffer.readIdentifier(), buffer.readVarInt(),
-                buffer.readList(buf -> CandidateView.STREAM_CODEC.decode(buf)))
+                CandidateView.STREAM_CODEC.apply(ByteBufCodecs.list()).decode(buffer))
         );
     }
 
@@ -108,12 +109,12 @@ public final class ExamDeskPayloads {
                 buffer.writeBlockPos(value.desk);
                 buffer.writeOptional(value.closed, (buf, refusal) -> buf.writeEnum(refusal));
                 buffer.writeOptional(value.booking, (buf, booking) -> BookingView.STREAM_CODEC.encode(buf, booking));
-                buffer.writeCollection(value.offers, (buf, offer) -> OfferView.STREAM_CODEC.encode(buf, offer));
+                OfferView.STREAM_CODEC.apply(ByteBufCodecs.list()).encode(buffer, value.offers);
             },
             buffer -> new DeskViewPayload(buffer.readBlockPos(),
                 buffer.readOptional(buf -> buf.readEnum(ExamEnrollment.Refusal.class)),
                 buffer.readOptional(buf -> BookingView.STREAM_CODEC.decode(buf)),
-                buffer.readList(buf -> OfferView.STREAM_CODEC.decode(buf)))
+                OfferView.STREAM_CODEC.apply(ByteBufCodecs.list()).decode(buffer))
         );
 
         @Override

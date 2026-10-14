@@ -3,31 +3,51 @@ package com.dwinovo.chiikawa.data;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
-import java.util.concurrent.CompletableFuture;
+import java.util.Set;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.MultiRegistryBootstrap;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
-import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.ItemLike;
 
 public final class ModRecipeProvider extends RecipeProvider {
-    public ModRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
-        super(registries, output);
+    private final HolderGetter<Item> items;
+
+    public ModRecipeProvider(BootstrapContext<Recipe<?>> recipes, BootstrapContext<Advancement> advancements) {
+        super(recipes, advancements);
+        this.items = recipes.lookup(Registries.ITEM);
+    }
+
+    /** Runs this over the recipes and the advancements they unlock, as the game runs its own; both loaders' data generators register it. */
+    public static MultiRegistryBootstrap bootstrap() {
+        return new MultiRegistryBootstrap() {
+            @Override
+            public Set<ResourceKey<? extends Registry<?>>> requestedRegistries() {
+                return Set.of(Registries.RECIPE, Registries.ADVANCEMENT);
+            }
+
+            @Override
+            public void run(MultiRegistryBootstrap.BootstrapGetter registries) {
+                new ModRecipeProvider(registries.get(Registries.RECIPE), registries.get(Registries.ADVANCEMENT)).buildRecipes();
+            }
+        };
     }
 
     @Override
     public void buildRecipes() {
-        HolderGetter<Item> itemLookup = this.registries.lookupOrThrow(Registries.ITEM);
+        HolderGetter<Item> itemLookup = this.items;
         ShapedRecipeBuilder.shaped(itemLookup, RecipeCategory.COMBAT, InitItems.USAGI_WEAPON.get())
             .define('Y', Items.WOOL.yellow())
             .define('F', Items.FLINT)
@@ -155,22 +175,5 @@ public final class ModRecipeProvider extends RecipeProvider {
             .pattern("WWW")
             .unlockedBy(getHasName(wool), has(wool))
             .save(this.output);
-    }
-
-    /** The data provider that runs {@link ModRecipeProvider}; both loaders' datagen entry points register it. */
-    public static final class Runner extends RecipeProvider.Runner {
-        public Runner(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-            super(output, registries);
-        }
-
-        @Override
-        protected RecipeProvider createRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
-            return new ModRecipeProvider(registries, output);
-        }
-
-        @Override
-        public String getName() {
-            return "Chiikawa Recipes";
-        }
     }
 }

@@ -1,14 +1,18 @@
 package com.dwinovo.chiikawa.spawn;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.function.Predicate;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.random.Weighted;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 
@@ -25,9 +29,22 @@ import net.minecraft.world.level.biome.MobSpawnSettings;
  * @param spawners who spawns there; each goes in its own mob category
  */
 public record PetSpawn(List<ExtraCodecs.TagOrElementLocation> biomes, List<Weighted<MobSpawnSettings.SpawnerData>> spawners) {
+    /**
+     * A spawner as vanilla wrote it up to 26.2, {@code type}, {@code minCount} and {@code maxCount}: 26.3 writes
+     * the count as a number provider, but a pack's files read the same on every version.
+     */
+    private static final MapCodec<MobSpawnSettings.SpawnerData> SPAWNER = RecordCodecBuilder.<MobSpawnSettings.SpawnerData>mapCodec(instance -> instance.group(
+        BuiltInRegistries.ENTITY_TYPE.byNameCodec().fieldOf("type").forGetter(MobSpawnSettings.SpawnerData::type),
+        ExtraCodecs.POSITIVE_INT.fieldOf("minCount").forGetter(data -> data.count().minInclusive()),
+        ExtraCodecs.POSITIVE_INT.fieldOf("maxCount").forGetter(data -> data.count().maxInclusive())
+    ).apply(instance, (type, min, max) -> new MobSpawnSettings.SpawnerData(type, UniformInt.of(min, max))))
+        .validate(data -> data.count().minInclusive() > data.count().maxInclusive()
+            ? DataResult.error(() -> "minCount needs to be smaller or equal to maxCount")
+            : DataResult.success(data));
+
     public static final Codec<PetSpawn> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         ExtraCodecs.TAG_OR_ELEMENT_ID.listOf().fieldOf("biomes").forGetter(PetSpawn::biomes),
-        Weighted.codec(MobSpawnSettings.SpawnerData.CODEC).listOf().fieldOf("spawners").forGetter(PetSpawn::spawners)
+        Weighted.codec(SPAWNER).listOf().fieldOf("spawners").forGetter(PetSpawn::spawners)
     ).apply(instance, PetSpawn::new));
 
     public PetSpawn {

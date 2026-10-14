@@ -50,7 +50,7 @@ public final class GuiPropRenderer extends PictureInPictureRenderer<GuiPropRende
     protected void renderToTexture(State state, PoseStack pose, SubmitNodeCollector collector) {
         Minecraft.getInstance().gameRenderer.lighting().setupFor(Lighting.Entry.ENTITY_IN_UI);
         pose.translate(state.translation().x, state.translation().y, state.translation().z);
-        pose.mulPose(state.rotation());
+        pose.rotate(state.rotation());
         // A prop's model is in model pixels.
         pose.scale(PIXEL, PIXEL, PIXEL);
         PropRenderer.draw(state.prop(), pose, collector, LightCoordsUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);

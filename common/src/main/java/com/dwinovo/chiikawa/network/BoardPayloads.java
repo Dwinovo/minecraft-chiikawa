@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
@@ -59,10 +60,10 @@ public final class BoardPayloads {
             (buffer, value) -> {
                 buffer.writeVarInt(value.price);
                 buffer.writeVarInt(value.daily);
-                buffer.writeCollection(value.unlocks, FriendlyByteBuf::writeIdentifier);
+                Identifier.STREAM_CODEC.apply(ByteBufCodecs.list()).encode(buffer, value.unlocks);
             },
             buffer -> new NextLevel(buffer.readVarInt(), buffer.readVarInt(),
-                buffer.readList(FriendlyByteBuf::readIdentifier))
+                Identifier.STREAM_CODEC.apply(ByteBufCodecs.list()).decode(buffer))
         );
     }
 
@@ -85,10 +86,10 @@ public final class BoardPayloads {
                 buffer.writeVarInt(value.level);
                 buffer.writeVarInt(value.daily);
                 NextLevel.STREAM_CODEC.encode(buffer, value.next);
-                buffer.writeCollection(value.slips, (buf, slip) -> SlipView.STREAM_CODEC.encode(buf, slip));
+                SlipView.STREAM_CODEC.apply(ByteBufCodecs.list()).encode(buffer, value.slips);
             },
             buffer -> new BoardSlipsPayload(buffer.readBlockPos(), buffer.readVarInt(), buffer.readVarInt(),
-                NextLevel.STREAM_CODEC.decode(buffer), buffer.readList(buf -> SlipView.STREAM_CODEC.decode(buf)))
+                NextLevel.STREAM_CODEC.decode(buffer), SlipView.STREAM_CODEC.apply(ByteBufCodecs.list()).decode(buffer))
         );
 
         @Override

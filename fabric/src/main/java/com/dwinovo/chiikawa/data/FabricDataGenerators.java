@@ -16,7 +16,6 @@ public class FabricDataGenerators implements DataGeneratorEntrypoint {
         pack.addProvider(FabricModItemTagsProvider::new);
         pack.addProvider(FabricModEntityTagsProvider::new);
         pack.addProvider((net.minecraft.data.DataProvider.Factory<FabricModSoundsProvider>) FabricModSoundsProvider::new);
-        pack.addProvider(ModRecipeProvider.Runner::new);
         pack.addProvider((net.minecraft.data.DataProvider.Factory<PetPersonalityProvider>) PetPersonalityProvider::new);
         pack.addProvider((net.minecraft.data.DataProvider.Factory<PetVoiceProvider>) PetVoiceProvider::new);
         pack.addProvider((net.minecraft.data.DataProvider.Factory<PetTaskTypeProvider>) PetTaskTypeProvider::new);
@@ -28,7 +27,7 @@ public class FabricDataGenerators implements DataGeneratorEntrypoint {
         pack.addProvider((net.minecraft.data.DataProvider.Factory<PetInteractionProvider>) PetInteractionProvider::new);
         pack.addProvider((net.minecraft.data.DataProvider.Factory<QualificationProvider>) QualificationProvider::new);
         pack.addProvider((net.minecraft.data.DataProvider.Factory<ManualProvider>) ManualProvider::new);
-        pack.addProvider((output, registries) -> new ModAdvancementProvider(output, registries));
-        pack.addProvider((output, registries) -> new ModLootTableProvider(output, registries));
+        pack.addProvider((output, registries) ->
+            FabricModReloadableRegistries.create(output, fabricDataGenerator.getWorldRegistries(), registries));
     }
 }

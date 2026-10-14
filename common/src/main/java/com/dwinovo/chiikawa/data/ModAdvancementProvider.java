@@ -1,15 +1,12 @@
 package com.dwinovo.chiikawa.data;
 
 import com.dwinovo.chiikawa.Constants;
-import java.util.concurrent.CompletableFuture;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.triggers.PlayerTrigger;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataProvider;
-import net.minecraft.data.PackOutput;
+import net.minecraft.data.advancements.AdvancementSubProvider;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.Identifier;
 
 /**
@@ -18,33 +15,21 @@ import net.minecraft.resources.Identifier;
  * newcomer something. A pack that would rather not replaces it. Shared by both loaders'
  * data generators.
  */
-public final class ModAdvancementProvider implements DataProvider {
+public final class ModAdvancementProvider extends AdvancementSubProvider {
     public static final Identifier HANDBOOK = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "handbook");
 
-    private final PackOutput.PathProvider pathProvider;
-    private final CompletableFuture<HolderLookup.Provider> registries;
-
-    public ModAdvancementProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        this.pathProvider = output.createRegistryElementsPathProvider(Registries.ADVANCEMENT);
-        this.registries = registries;
+    public ModAdvancementProvider(BootstrapContext<Advancement> output) {
+        super(output);
     }
 
     @Override
-    public CompletableFuture<?> run(CachedOutput cache) {
-        return registries.thenCompose(lookup -> {
-            // Vanilla's plain builder, named for recipes: the other one reports every
-            // advancement earned to Mojang's telemetry, which a hidden gift has no business in.
-            Advancement handbook = Advancement.Builder.recipeAdvancement()
-                .addCriterion("arrived", PlayerTrigger.TriggerInstance.tick())
-                .rewards(AdvancementRewards.Builder.loot(ModLootTableProvider.HANDBOOK_GIFT))
-                .build(HANDBOOK)
-                .value();
-            return DataProvider.saveStable(cache, lookup, Advancement.CODEC, handbook, pathProvider.json(HANDBOOK));
-        });
-    }
-
-    @Override
-    public String getName() {
-        return "Chiikawa Advancements";
+    public void generate() {
+        // Vanilla's plain builder, named for recipes: the other one reports every
+        // advancement earned to Mojang's telemetry, which a hidden gift has no business in.
+        Advancement.Builder.recipeAdvancement()
+            .addCriterion("arrived", PlayerTrigger.TriggerInstance.tick())
+            .rewards(AdvancementRewards.Builder.loot(output.lookup(Registries.LOOT_TABLE).getOrThrow(ModLootTableProvider.HANDBOOK_GIFT)))
+            .build(HANDBOOK)
+            .register(output);
     }
 }

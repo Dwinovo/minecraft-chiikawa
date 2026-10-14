@@ -58,7 +58,7 @@ public final class SpeechBubbleRenderer {
         }
         poseStack.pushPose();
         poseStack.translate(speech.nameTag().x, speech.nameTag().y + 0.5 + ABOVE_NAME, speech.nameTag().z);
-        poseStack.mulPose(camera.orientation);
+        poseStack.rotate(camera.orientation);
         poseStack.scale(SCALE, -SCALE, SCALE);
         WorldSurface surface = new WorldSurface(poseStack, collector, font, speech.alpha());
         Bubble bubble = new Bubble(Component.translatable(speech.line()).getString());

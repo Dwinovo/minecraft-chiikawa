@@ -11,11 +11,9 @@ import com.dwinovo.chiikawa.qualification.Qualification;
 import com.dwinovo.chiikawa.qualification.QualificationCondition;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.LootTableProvider;
 import net.minecraft.data.loot.LootTableSubProvider;
 import net.minecraft.resources.ResourceKey;
@@ -31,11 +29,10 @@ import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.advancements.predicates.StatePropertiesPredicate;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
-import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
-import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
+import net.minecraft.world.level.storage.loot.predicates.MatchBlock;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
 
 /**
  * Block drops and slip rewards. Built without the loaders' block loot helpers, which
@@ -46,48 +43,60 @@ public final class ModLootTableProvider extends LootTableProvider {
     public static final ResourceKey<LootTable> HANDBOOK_GIFT = ResourceKey.create(Registries.LOOT_TABLE,
         Identifier.fromNamespaceAndPath(Constants.MOD_ID, "gifts/handbook"));
 
-    public ModLootTableProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        super(output, Set.of(), List.of(
-            new SubProviderEntry(lookup -> new BlockDrops(), LootContextParamSets.BLOCK),
-            new SubProviderEntry(lookup -> new SlipRewards(), LootContextParamSets.GIFT),
-            new SubProviderEntry(lookup -> new Gifts(), LootContextParamSets.ADVANCEMENT_REWARD)
-        ), registries);
+    public ModLootTableProvider() {
+        super(Set.of(), List.of(
+            new SubProviderEntry(BlockDrops::new, LootContextParamSets.BLOCK),
+            new SubProviderEntry(SlipRewards::new, LootContextParamSets.GIFT),
+            new SubProviderEntry(Gifts::new, LootContextParamSets.ADVANCEMENT_REWARD)
+        ));
     }
 
     /** What advancements hand out. */
     private static final class Gifts implements LootTableSubProvider {
+        private final Context output;
+
+        Gifts(Context output) {
+            this.output = output;
+        }
+
         @Override
-        public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
+        public void run() {
             output.accept(HANDBOOK_GIFT, LootTable.lootTable().withPool(LootPool.lootPool()
-                .setRolls(ConstantValue.exactly(1))
+                .setRolls(ContextIntProviders.exactly(1))
                 .add(LootItem.lootTableItem(InitItems.HANDBOOK.get()))));
         }
     }
 
     private static final class BlockDrops implements LootTableSubProvider {
-        @Override
-        public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
-            dropSelf(output, InitBlocks.LABOR_BOARD.get());
-            dropSelf(output, InitBlocks.SHOP.get());
-            // Only the desk half drops it, as only the head of a bed drops the bed.
-            dropSelf(output, InitBlocks.EXAM_DESK.get(), LootItemBlockStatePropertyCondition
-                .hasBlockStateProperties(InitBlocks.EXAM_DESK.get())
-                .setProperties(StatePropertiesPredicate.Builder.properties().hasProperty(ExamDeskBlock.PART, DeskPart.DESK)));
+        private final Context output;
+        private final HolderGetter<Block> blocks;
+
+        BlockDrops(Context output) {
+            this.output = output;
+            this.blocks = output.lookup(Registries.BLOCK);
         }
 
-        private static void dropSelf(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output, Block block) {
+        @Override
+        public void run() {
+            dropSelf(InitBlocks.LABOR_BOARD.get());
+            dropSelf(InitBlocks.SHOP.get());
+            // Only the desk half drops it, as only the head of a bed drops the bed.
+            dropSelf(InitBlocks.EXAM_DESK.get(), MatchBlock.blockMatches(blocks, InitBlocks.EXAM_DESK.get(),
+                StatePropertiesPredicate.Builder.properties().hasProperty(ExamDeskBlock.PART, DeskPart.DESK)));
+        }
+
+        private void dropSelf(Block block) {
             output.accept(block.getLootTable().orElseThrow(), LootTable.lootTable().withPool(selfPool(block)));
         }
 
         /** Drops itself only when {@code when} holds of the block broken. */
-        private static void dropSelf(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output, Block block,
-                                     LootItemCondition.Builder when) {
+        private void dropSelf(Block block, LootItemCondition.Builder when) {
             output.accept(block.getLootTable().orElseThrow(), LootTable.lootTable().withPool(selfPool(block).when(when)));
         }
 
         private static LootPool.Builder selfPool(Block block) {
             return LootPool.lootPool()
-                .setRolls(ConstantValue.exactly(1))
+                .setRolls(ContextIntProviders.exactly(1))
                 .add(LootItem.lootTableItem(block))
                 .when(ExplosionCondition.survivesExplosion());
         }
@@ -101,18 +110,25 @@ public final class ModLootTableProvider extends LootTableProvider {
     private static final class SlipRewards implements LootTableSubProvider {
         private static final float EXTRA_CHANCE = 0.3F;
 
-        @Override
-        public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
-            reward(output, PetTaskTypeData.WEEDING, 1, 2, Items.BREAD, 1, 1, QualificationData.WEEDING);
-            reward(output, PetTaskTypeData.ADVANCED_WEEDING, 3, 5, Items.BREAD, 2, 3, QualificationData.WEEDING);
-            reward(output, PetTaskTypeData.STREET_PERFORMANCE, 2, 4, Items.COOKIE, 2, 4);
-            // Hunting pays most: it is the only work a pet can fail by falling.
-            reward(output, PetTaskTypeData.MELEE_HUNTING, 4, 7, Items.COOKED_BEEF, 1, 2);
-            reward(output, PetTaskTypeData.RANGED_HUNTING, 4, 7, Items.ARROW, 4, 8);
+        private final Context output;
+        private final HolderSet<Item> currency;
+
+        SlipRewards(Context output) {
+            this.output = output;
+            this.currency = output.lookup(Registries.ITEM).getOrThrow(InitTag.CURRENCY);
         }
 
-        private static void reward(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output, Identifier type,
-                int minPay, int maxPay, Item extra, int minExtra, int maxExtra) {
+        @Override
+        public void run() {
+            reward(PetTaskTypeData.WEEDING, 1, 2, Items.BREAD, 1, 1, QualificationData.WEEDING);
+            reward(PetTaskTypeData.ADVANCED_WEEDING, 3, 5, Items.BREAD, 2, 3, QualificationData.WEEDING);
+            reward(PetTaskTypeData.STREET_PERFORMANCE, 2, 4, Items.COOKIE, 2, 4);
+            // Hunting pays most: it is the only work a pet can fail by falling.
+            reward(PetTaskTypeData.MELEE_HUNTING, 4, 7, Items.COOKED_BEEF, 1, 2);
+            reward(PetTaskTypeData.RANGED_HUNTING, 4, 7, Items.ARROW, 4, 8);
+        }
+
+        private void reward(Identifier type, int minPay, int maxPay, Item extra, int minExtra, int maxExtra) {
             output.accept(PetTaskTypeData.reward(type), slipReward(minPay, maxPay, extra, minExtra, maxExtra));
         }
 
@@ -121,31 +137,31 @@ public final class ModLootTableProvider extends LootTableProvider {
          * holds, each coin a pool of its own asked for with {@code chiikawa:qualification},
          * so a pack sees plainly what each grade is worth and can change it.
          */
-        private static void reward(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output, Identifier type,
-                int minPay, int maxPay, Item extra, int minExtra, int maxExtra, Identifier licence) {
+        private void reward(Identifier type, int minPay, int maxPay, Item extra, int minExtra, int maxExtra,
+                Identifier licence) {
             LootTable.Builder table = slipReward(minPay, maxPay, extra, minExtra, maxExtra);
             Qualification qualification = QualificationData.all().get(licence);
             for (int held = 1; held <= qualification.grades(); held++) {
                 LicenceRequirement grade = new LicenceRequirement(licence, qualification.rank(held));
                 table.withPool(LootPool.lootPool()
-                    .setRolls(ConstantValue.exactly(1))
+                    .setRolls(ContextIntProviders.exactly(1))
                     .when(() -> new QualificationCondition(grade))
-                    .add(TagEntry.expandTag(InitTag.CURRENCY)));
+                    .add(TagEntry.expandTag(currency)));
             }
             output.accept(PetTaskTypeData.reward(type), table);
         }
 
-        private static LootTable.Builder slipReward(int minPay, int maxPay, Item extra, int minExtra, int maxExtra) {
+        private LootTable.Builder slipReward(int minPay, int maxPay, Item extra, int minExtra, int maxExtra) {
             return LootTable.lootTable()
                 .withPool(LootPool.lootPool()
-                    .setRolls(ConstantValue.exactly(1))
-                    .add(TagEntry.expandTag(InitTag.CURRENCY)
-                        .apply(SetItemCountFunction.setCount(UniformGenerator.between(minPay, maxPay)))))
+                    .setRolls(ContextIntProviders.exactly(1))
+                    .add(TagEntry.expandTag(currency)
+                        .apply(SetItemCountFunction.setCount(ContextIntProviders.between(minPay, maxPay)))))
                 .withPool(LootPool.lootPool()
-                    .setRolls(ConstantValue.exactly(1))
+                    .setRolls(ContextIntProviders.exactly(1))
                     .when(LootItemRandomChanceCondition.randomChance(EXTRA_CHANCE))
                     .add(LootItem.lootTableItem(extra)
-                        .apply(SetItemCountFunction.setCount(UniformGenerator.between(minExtra, maxExtra)))));
+                        .apply(SetItemCountFunction.setCount(ContextIntProviders.between(minExtra, maxExtra)))));
         }
     }
 }

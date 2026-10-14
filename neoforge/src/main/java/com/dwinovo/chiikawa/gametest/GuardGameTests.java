@@ -210,13 +210,13 @@ public final class GuardGameTests {
         first.setNoAi(true);
         // Neither of them can be killed: this case is about which one the pet chooses, and
         // a zombie that falls over mid-case would answer that question for it.
-        first.setInvulnerable(true);
+        first.setPermanentlyInvulnerable(true);
 
         helper.runAtTickTime(40, () -> {
             helper.assertTrue(fighting(pet, first), "the pet never took an interest in the first zombie");
             Zombie nearer = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(5, STAND, 4));
             nearer.setNoAi(true);
-            nearer.setInvulnerable(true);
+            nearer.setPermanentlyInvulnerable(true);
             helper.runAtTickTime(100, () -> {
                 helper.assertTrue(fighting(pet, first),
                     "the pet dropped what it was fighting for whatever wandered closer");
