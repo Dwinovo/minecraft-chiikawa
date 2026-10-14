@@ -99,10 +99,16 @@ public final class ClientPhotoCache {
         }
     }
 
-    /** Lets go of every photo, on leaving the world. */
+    /**
+     * Lets go of every photo, on leaving the world. That is announced from the network thread on
+     * some loaders, and a texture is released on the render thread, where the cache is kept too.
+     */
     public static void clear() {
-        ENTRIES.values().stream().map(entry -> entry.picture).filter(Objects::nonNull)
-            .forEach(picture -> Minecraft.getInstance().getTextureManager().release(picture.texture()));
-        ENTRIES.clear();
+        Minecraft minecraft = Minecraft.getInstance();
+        minecraft.execute(() -> {
+            ENTRIES.values().stream().map(entry -> entry.picture).filter(Objects::nonNull)
+                .forEach(picture -> minecraft.getTextureManager().release(picture.texture()));
+            ENTRIES.clear();
+        });
     }
 }
