@@ -89,7 +89,7 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
 
     private static final DeferredHolder<MenuType<?>, MenuType<PetBackpackMenu>> PET_BACKPACK =
         MENUS.register("pet_backpack", () -> IMenuTypeExtension.create((containerId, inventory, buf) ->
-            new PetBackpackMenu(containerId, inventory)
+            new PetBackpackMenu(containerId, inventory, PetBackpackMenu.OPENING_DATA.decode(buf))
         ));
 
     public static void register(IEventBus modEventBus) {
