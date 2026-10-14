@@ -226,13 +226,13 @@ public final class CameraGameTests {
                     send(photos, owner, asked, validPicture());
                 }
             }
-            helper.assertFalse(answered.isEmpty(), "Hachiware never asked for a photo");
-            helper.assertTrue(storedWhileHolding[0], "the picture was not stored while the camera was up");
-            helper.assertFalse(shotRolls(pet).isEmpty(), "the picture was not kept");
-            helper.assertFalse(pet.getBrain().isActive(InitActivity.TAKE_PHOTO.get()), "Hachiware was still taking the photo");
+            helper.assertFalse(answered.isEmpty(), Component.literal("Hachiware never asked for a photo"));
+            helper.assertTrue(storedWhileHolding[0], Component.literal("the picture was not stored while the camera was up"));
+            helper.assertFalse(shotRolls(pet).isEmpty(), Component.literal("the picture was not kept"));
+            helper.assertFalse(pet.getBrain().isActive(InitActivity.TAKE_PHOTO.get()), Component.literal("Hachiware was still taking the photo"));
             long rest = pet.getBrain().getTimeUntilExpiry(InitMemory.PHOTO_COOLDOWN.get());
             helper.assertTrue(rest > camera().cooldownTicks() - SETTLED_TICKS && rest <= camera().cooldownTicks(),
-                "Hachiware rests " + rest + " ticks from photos after it, not the camera's " + camera().cooldownTicks());
+                Component.literal("Hachiware rests " + rest + " ticks from photos after it, not the camera's " + camera().cooldownTicks()));
         });
     }
 
