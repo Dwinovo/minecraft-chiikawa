@@ -15,7 +15,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.phys.Vec3;
 import org.junit.jupiter.api.BeforeAll;
@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 
 /** When a pet may take a photo, as the intent asks it. */
 class PhotoOutlookTest {
-    private static final CameraSettings CAMERA = new CameraSettings(ResourceLocation.fromNamespaceAndPath("chiikawa", "film"),
+    private static final CameraSettings CAMERA = new CameraSettings(Identifier.fromNamespaceAndPath("chiikawa", "film"),
         64.0, 12000, 600, 320, 240, 70, new CameraSettings.Subjects(3, 5, 1), 40, 8, 0.5F);
     /** Ready to go: a camera, film, an owner near and calm, and an owner to take a photo of. */
     private static final PhotoOutlook READY = new PhotoOutlook(true, Optional.of(CAMERA), true, true, true, false,
@@ -101,8 +101,8 @@ class PhotoOutlookTest {
     @Test
     void theIntentAsksTheOutlook() {
         TakePhotoIntent intent = new TakePhotoIntent();
-        GlobalPos at = GlobalPos.of(ResourceKey.create(ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
-            ResourceLocation.withDefaultNamespace("overworld")), BlockPos.ZERO);
+        GlobalPos at = GlobalPos.of(ResourceKey.create(ResourceKey.createRegistryKey(Identifier.withDefaultNamespace("dimension")),
+            Identifier.withDefaultNamespace("overworld")), BlockPos.ZERO);
         TestContext pet = TestContext.at(at, new PetAnchor(at, 0.0, PetAnchor.UNLEASHED, false, true));
 
         assertTrue(intent.canRun(pet.photo(READY).build()).ok());

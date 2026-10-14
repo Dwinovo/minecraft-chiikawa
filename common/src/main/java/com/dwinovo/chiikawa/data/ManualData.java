@@ -37,7 +37,7 @@ public final class ManualData {
     }
 
     /** @return chapters by id, in the order the handbook lists them: {@link ManualPage#order} */
-    public static Map<ResourceLocation, ManualPage> all() {
+    public static Map<Identifier, ManualPage> all() {
         return Map.of(
             id("meet"), meet(),
             id("work"), work(),

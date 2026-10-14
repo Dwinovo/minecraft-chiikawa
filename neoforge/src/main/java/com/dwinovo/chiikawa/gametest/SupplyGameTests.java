@@ -104,14 +104,14 @@ public final class SupplyGameTests {
      */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void the_handbook_has_its_six_chapters_in_order(GameTestHelper helper) {
-        List<Map.Entry<ResourceLocation, ManualPage>> chapters = ManualData.all().entrySet().stream()
+        List<Map.Entry<Identifier, ManualPage>> chapters = ManualData.all().entrySet().stream()
             .sorted(Comparator.comparingInt(entry -> entry.getValue().order())).toList();
         helper.assertTrue(chapters.stream().map(entry -> entry.getKey().getPath()).toList()
             .equals(List.of("meet", "work", "shop", "care", "camera", "licence")),
-            "the chapters are " + chapters.stream().map(entry -> entry.getKey().getPath()).toList());
+            Component.literal("the chapters are " + chapters.stream().map(entry -> entry.getKey().getPath()).toList()));
         helper.assertTrue(chapters.stream().map(entry -> entry.getValue().link()).toList().equals(List.of(
             "play/taming", "play/work", "play/shop", "play/care", "play/camera", "play/licence")),
-            "the links are " + chapters.stream().map(entry -> entry.getValue().link()).toList());
+            Component.literal("the links are " + chapters.stream().map(entry -> entry.getValue().link()).toList()));
         helper.succeed();
     }
 
@@ -124,12 +124,12 @@ public final class SupplyGameTests {
         for (String locale : LanguageData.LOCALES) {
             Set<String> written = new HashSet<>();
             LanguageData.addTranslations(locale, (key, value) -> written.add(key));
-            helper.assertTrue(written.contains("manual.chiikawa.more"), locale + " has no link line");
+            helper.assertTrue(written.contains("manual.chiikawa.more"), Component.literal(locale + " has no link line"));
             ManualData.all().forEach((id, page) -> {
-                helper.assertTrue(written.contains(page.title()), locale + " has no " + page.title());
-                helper.assertTrue(written.contains(page.text()), locale + " has no " + page.text());
+                helper.assertTrue(written.contains(page.title()), Component.literal(locale + " has no " + page.title()));
+                helper.assertTrue(written.contains(page.text()), Component.literal(locale + " has no " + page.text()));
                 page.scene().actors().forEach(actor -> actor.motion().say().ifPresent(say ->
-                    helper.assertTrue(written.contains(say), locale + " has no " + say)));
+                    helper.assertTrue(written.contains(say), Component.literal(locale + " has no " + say))));
             });
         }
         helper.succeed();
@@ -146,7 +146,7 @@ public final class SupplyGameTests {
                 Set<String> own = new HashSet<>();
                 PetVoices.of(BuiltInRegistries.ENTITY_TYPE.getValue(pet)).lines().values()
                     .forEach(lines -> lines.forEach(line -> own.add(line.text())));
-                helper.assertTrue(own.contains(say), pet + " says " + say + " on " + id + ", not a line of its own");
+                helper.assertTrue(own.contains(say), Component.literal(pet + " says " + say + " on " + id + ", not a line of its own"));
             }))));
         helper.succeed();
     }

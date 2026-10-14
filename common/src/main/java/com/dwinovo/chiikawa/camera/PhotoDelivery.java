@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Unit;
 import net.minecraft.world.entity.Entity;
@@ -32,7 +32,7 @@ public final class PhotoDelivery implements PhotoUploads.Listener {
     private final CameraSettings camera;
     private final PhotoSubject kind;
     private final String name;
-    private final Optional<ResourceLocation> biome;
+    private final Optional<Identifier> biome;
 
     /**
      * @param pet who took it
@@ -42,7 +42,7 @@ public final class PhotoDelivery implements PhotoUploads.Listener {
      * @param biome where it was taken
      */
     public PhotoDelivery(AbstractPet pet, CameraSettings camera, PhotoSubject kind, String name,
-            Optional<ResourceLocation> biome) {
+            Optional<Identifier> biome) {
         this.level = (ServerLevel) pet.level();
         this.pet = pet.getUUID();
         this.camera = camera;
@@ -58,13 +58,13 @@ public final class PhotoDelivery implements PhotoUploads.Listener {
             // The shot is put on a roll only now that it is kept; if the bag was emptied of film in
             // the meantime there is no roll to put it on, and it is a photo nobody has.
             if (!FilmRolls.record(pet.getBackpack(), PhotoScout.filmOf(camera), camera.exposures(), shot,
-                    pet::spawnAtLocation)) {
+                    left -> pet.spawnAtLocation(level, left))) {
                 failed(photo);
                 return;
             }
             pet.getBrain().setMemoryWithExpiry(InitMemory.PHOTO_COOLDOWN.get(), Unit.INSTANCE, camera.cooldownTicks());
             biome.ifPresent(place -> {
-                List<ResourceLocation> places = new ArrayList<>(PhotoScout.photographed(pet));
+                List<Identifier> places = new ArrayList<>(PhotoScout.photographed(pet));
                 if (!places.contains(place)) {
                     places.add(place);
                     pet.getBrain().setMemory(InitMemory.PHOTOGRAPHED_BIOMES.get(), places);

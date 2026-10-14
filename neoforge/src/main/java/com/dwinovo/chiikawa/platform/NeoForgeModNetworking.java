@@ -92,16 +92,14 @@ public final class NeoForgeModNetworking {
             (payload, context) -> ClientVoicePacketHandler.handleSpeech(payload));
         registrar.playToClient(PetPayloads.PetGesturePayload.TYPE, PetPayloads.PetGesturePayload.STREAM_CODEC,
             (payload, context) -> ClientPetPacketHandler.handleGesture(payload));
-        registrar.playToClient(SettingsPayloads.WorldSettingsPayload.TYPE, SettingsPayloads.WorldSettingsPayload.STREAM_CODEC,
-            (payload, context) -> ClientSettingsPacketHandler.handleWorld(payload));
+        registrar.playToClient(SettingsPayloads.WorldSettingsPayload.TYPE, SettingsPayloads.WorldSettingsPayload.STREAM_CODEC);
         registrar.playToServer(SettingsPayloads.ChangeWorldSettingsPayload.TYPE, SettingsPayloads.ChangeWorldSettingsPayload.STREAM_CODEC,
             (payload, context) -> {
                 if (context.player() instanceof ServerPlayer player) {
                     SettingsServerPacketHandler.handleChange(payload, player);
                 }
             });
-        registrar.playToClient(PhotoPayloads.TakePhotoPayload.TYPE, PhotoPayloads.TakePhotoPayload.STREAM_CODEC,
-            (payload, context) -> ClientPhotoPacketHandler.handleTake(payload));
+        registrar.playToClient(PhotoPayloads.TakePhotoPayload.TYPE, PhotoPayloads.TakePhotoPayload.STREAM_CODEC);
         registrar.playToServer(PhotoPayloads.UploadPhotoPayload.TYPE, PhotoPayloads.UploadPhotoPayload.STREAM_CODEC,
             (payload, context) -> {
                 if (context.player() instanceof ServerPlayer player) {
@@ -114,10 +112,8 @@ public final class NeoForgeModNetworking {
                     PhotoServerPacketHandler.handleRequest(payload, player);
                 }
             });
-        registrar.playToClient(PhotoPayloads.DownloadPhotoPayload.TYPE, PhotoPayloads.DownloadPhotoPayload.STREAM_CODEC,
-            (payload, context) -> ClientPhotoPacketHandler.handleDownload(payload));
-        registrar.playToClient(PhotoPayloads.OpenAlbumPayload.TYPE, PhotoPayloads.OpenAlbumPayload.STREAM_CODEC,
-            (payload, context) -> ClientPhotoPacketHandler.handleOpen(payload));
+        registrar.playToClient(PhotoPayloads.DownloadPhotoPayload.TYPE, PhotoPayloads.DownloadPhotoPayload.STREAM_CODEC);
+        registrar.playToClient(PhotoPayloads.OpenAlbumPayload.TYPE, PhotoPayloads.OpenAlbumPayload.STREAM_CODEC);
     }
 
     public static void registerClientPayloads(RegisterClientPayloadHandlersEvent event) {
@@ -128,5 +124,9 @@ public final class NeoForgeModNetworking {
         event.register(MusicPayloads.MusicStreamStartPayload.TYPE, (payload, context) -> ClientMusicPacketHandler.handleStreamStart(payload));
         event.register(MusicPayloads.MusicStreamChunkPayload.TYPE, (payload, context) -> ClientMusicPacketHandler.handleStreamChunk(payload));
         event.register(MusicPayloads.MusicStreamStopPayload.TYPE, (payload, context) -> ClientMusicPacketHandler.handleStreamStop(payload));
+        event.register(SettingsPayloads.WorldSettingsPayload.TYPE, (payload, context) -> ClientSettingsPacketHandler.handleWorld(payload));
+        event.register(PhotoPayloads.TakePhotoPayload.TYPE, (payload, context) -> ClientPhotoPacketHandler.handleTake(payload));
+        event.register(PhotoPayloads.DownloadPhotoPayload.TYPE, (payload, context) -> ClientPhotoPacketHandler.handleDownload(payload));
+        event.register(PhotoPayloads.OpenAlbumPayload.TYPE, (payload, context) -> ClientPhotoPacketHandler.handleOpen(payload));
     }
 }

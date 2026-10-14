@@ -111,22 +111,22 @@ public final class FarmGameTests {
         helper.setBlock(bed, Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE));
         ItemStack seeds = new ItemStack(Items.WHEAT_SEEDS, 3);
 
-        helper.assertTrue(Utils.plantSeed(helper.getLevel(), pet, helper.absolutePos(bed), seeds), "the seed was not planted");
+        helper.assertTrue(Utils.plantSeed(helper.getLevel(), pet, helper.absolutePos(bed), seeds), Component.literal("the seed was not planted"));
         helper.assertBlockPresent(Blocks.WHEAT, bed.above());
-        helper.assertTrue(seeds.getCount() == 2, "the seeds left are " + seeds.getCount());
+        helper.assertTrue(seeds.getCount() == 2, Component.literal("the seeds left are " + seeds.getCount()));
 
-        helper.assertFalse(Utils.plantSeed(helper.getLevel(), pet, helper.absolutePos(bed), seeds), "planted where a crop already stands");
-        helper.assertTrue(seeds.getCount() == 2, "a seed was used up for nothing");
+        helper.assertFalse(Utils.plantSeed(helper.getLevel(), pet, helper.absolutePos(bed), seeds), Component.literal("planted where a crop already stands"));
+        helper.assertTrue(seeds.getCount() == 2, Component.literal("a seed was used up for nothing"));
 
         helper.setBlock(bed.above(), Blocks.STONE);
-        helper.assertFalse(Utils.plantSeed(helper.getLevel(), pet, helper.absolutePos(bed), seeds), "planted in solid stone");
+        helper.assertFalse(Utils.plantSeed(helper.getLevel(), pet, helper.absolutePos(bed), seeds), Component.literal("planted in solid stone"));
         helper.setBlock(bed.above(), Blocks.AIR);
-        helper.assertTrue(Utils.plantSeed(helper.getLevel(), pet, helper.absolutePos(bed), seeds), "the space was free again");
+        helper.assertTrue(Utils.plantSeed(helper.getLevel(), pet, helper.absolutePos(bed), seeds), Component.literal("the space was free again"));
 
         // The soil gone, as when it is broken just before the pet comes to plant: nothing to plant in.
         helper.setBlock(bed.above(), Blocks.AIR);
         helper.setBlock(bed, Blocks.AIR);
-        helper.assertFalse(Utils.plantSeed(helper.getLevel(), pet, helper.absolutePos(bed), seeds), "planted in the air");
+        helper.assertFalse(Utils.plantSeed(helper.getLevel(), pet, helper.absolutePos(bed), seeds), Component.literal("planted in the air"));
         helper.succeed();
     }
 

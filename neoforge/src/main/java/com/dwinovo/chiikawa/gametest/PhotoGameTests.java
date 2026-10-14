@@ -15,12 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The photo library as the server runs it: a photo is asked for, and kept only when the player
@@ -34,7 +32,7 @@ public final class PhotoGameTests {
     private static final int WIDTH = 32;
     private static final int HEIGHT = 24;
     private static final CameraSettings CAMERA = new CameraSettings(
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "film"), 64.0, 12000, 600, WIDTH, HEIGHT, 70,
+        Identifier.fromNamespaceAndPath(Constants.MOD_ID, "film"), 64.0, 12000, 600, WIDTH, HEIGHT, 70,
         new CameraSettings.Subjects(3, 5, 1), 40, 8, 0.5F);
 
     /** What a request was told, in order. */
@@ -73,11 +71,11 @@ public final class PhotoGameTests {
         Heard heard = new Heard();
 
         UUID photo = photos.request(owner, pet, CAMERA, heard);
-        helper.assertFalse(photos.library().has(photo), "the photo was there before it was sent");
+        helper.assertFalse(photos.library().has(photo), Component.literal("the photo was there before it was sent"));
         send(photos, owner, photo, png(WIDTH, HEIGHT));
 
-        helper.assertTrue(photos.library().has(photo), "a photo sent back whole was not kept");
-        helper.assertTrue(heard.told.equals(List.of("stored")), "the request was told " + heard.told);
+        helper.assertTrue(photos.library().has(photo), Component.literal("a photo sent back whole was not kept"));
+        helper.assertTrue(heard.told.equals(List.of("stored")), Component.literal("the request was told " + heard.told));
         helper.succeed();
     }
 
@@ -93,11 +91,11 @@ public final class PhotoGameTests {
         UUID photo = photos.request(owner, pet, CAMERA, heard);
         send(photos, stranger, photo, png(WIDTH, HEIGHT));
 
-        helper.assertFalse(photos.library().has(photo), "a stranger's photo was kept");
-        helper.assertTrue(heard.told.isEmpty(), "a stranger's piece changed the request: " + heard.told);
+        helper.assertFalse(photos.library().has(photo), Component.literal("a stranger's photo was kept"));
+        helper.assertTrue(heard.told.isEmpty(), Component.literal("a stranger's piece changed the request: " + heard.told));
         send(photos, owner, photo, png(WIDTH, HEIGHT));
-        helper.assertTrue(photos.library().has(photo), "the owner's photo was refused after a stranger tried");
-        helper.assertTrue(heard.told.equals(List.of("stored")), "the request was told " + heard.told);
+        helper.assertTrue(photos.library().has(photo), Component.literal("the owner's photo was refused after a stranger tried"));
+        helper.assertTrue(heard.told.equals(List.of("stored")), Component.literal("the request was told " + heard.told));
         helper.succeed();
     }
 
@@ -113,8 +111,8 @@ public final class PhotoGameTests {
         // As many full pieces as a photo is allowed to be cut into, and so more than it may weigh.
         send(photos, owner, photo, new byte[(PhotoChunk.MAX_PHOTO_BYTES / PhotoChunk.MAX_BYTES + 1) * PhotoChunk.MAX_BYTES]);
 
-        helper.assertFalse(photos.library().has(photo), "a photo that was too big was kept");
-        helper.assertTrue(heard.told.equals(List.of("failed")), "the request was told " + heard.told);
+        helper.assertFalse(photos.library().has(photo), Component.literal("a photo that was too big was kept"));
+        helper.assertTrue(heard.told.equals(List.of("failed")), Component.literal("the request was told " + heard.told));
         helper.succeed();
     }
 
@@ -129,8 +127,8 @@ public final class PhotoGameTests {
         UUID photo = photos.request(owner, pet, CAMERA, heard);
         send(photos, owner, photo, png(WIDTH + 1, HEIGHT));
 
-        helper.assertFalse(photos.library().has(photo), "a photo of the wrong size was kept");
-        helper.assertTrue(heard.told.equals(List.of("failed")), "the request was told " + heard.told);
+        helper.assertFalse(photos.library().has(photo), Component.literal("a photo of the wrong size was kept"));
+        helper.assertTrue(heard.told.equals(List.of("failed")), Component.literal("the request was told " + heard.told));
         helper.succeed();
     }
 
@@ -143,7 +141,7 @@ public final class PhotoGameTests {
 
         send(photos, sender, photo, png(WIDTH, HEIGHT));
 
-        helper.assertFalse(photos.library().has(photo), "a photo nobody asked for was kept");
+        helper.assertFalse(photos.library().has(photo), Component.literal("a photo nobody asked for was kept"));
         helper.succeed();
     }
 
@@ -158,12 +156,12 @@ public final class PhotoGameTests {
         UUID photo = photos.request(owner, pet, CAMERA, heard);
 
         helper.runAfterDelay(PhotoUploads.WAIT_TICKS / 2, () -> {
-            helper.assertTrue(heard.told.isEmpty(), "the request was given up on after half a minute");
+            helper.assertTrue(heard.told.isEmpty(), Component.literal("the request was given up on after half a minute"));
         });
         helper.runAfterDelay(PhotoUploads.WAIT_TICKS + 20, () -> {
-            helper.assertTrue(heard.told.equals(List.of("failed")), "the request was told " + heard.told);
+            helper.assertTrue(heard.told.equals(List.of("failed")), Component.literal("the request was told " + heard.told));
             send(photos, owner, photo, png(WIDTH, HEIGHT));
-            helper.assertFalse(photos.library().has(photo), "a photo that came after the minute was kept");
+            helper.assertFalse(photos.library().has(photo), Component.literal("a photo that came after the minute was kept"));
             helper.succeed();
         });
     }

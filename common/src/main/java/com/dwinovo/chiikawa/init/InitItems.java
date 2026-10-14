@@ -77,10 +77,10 @@ public final class InitItems {
 
     /** Hachiware's camera: kept in its backpack with film, it takes photos of its own accord. */
     public static final Supplier<Item> CAMERA =
-        registerItem("camera", () -> new DescribedItem(new Item.Properties().stacksTo(1)));
+        registerItem("camera", properties -> new DescribedItem(properties.stacksTo(1)));
     /** What photos are taken on, and once a roll has some on it, the album of them: use it to look. */
     public static final Supplier<Item> FILM =
-        registerItem("film", () -> new FilmItem(new Item.Properties()));
+        registerItem("film", FilmItem::new);
 
     public static final Supplier<Item> BACKPACK =
         registerItem("backpack", properties -> new BagItem(properties, BagItem.Wear.ON_BACK));

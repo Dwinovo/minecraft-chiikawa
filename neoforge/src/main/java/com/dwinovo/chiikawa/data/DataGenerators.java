@@ -35,26 +35,27 @@ public final class DataGenerators {
         event.getGenerator().addProvider(true,
                 new DatapackBuiltinEntriesProvider(output, lookupProvider, ModDatapackRegistries.BUILDER,
                         Set.of(Chiikawa.MODID)));
-        ModBlockTagsProvider blockTagsProvider = new ModBlockTagsProvider(output, lookupProvider, existingFileHelper);
-        event.getGenerator().addProvider(server, blockTagsProvider);
-        event.getGenerator().addProvider(server,
-                new ModItemTagsProvider(output, lookupProvider, existingFileHelper));
-        event.getGenerator().addProvider(server, new ModRecipeProvider(output, lookupProvider));
-        event.getGenerator().addProvider(server, new PetPersonalityProvider(output));
-        event.getGenerator().addProvider(server, new PetVoiceProvider(output));
-        event.getGenerator().addProvider(server, new PetTaskTypeProvider(output));
-        event.getGenerator().addProvider(server, new GameTestStructureProvider(output));
-        event.getGenerator().addProvider(server, new ShopCatalogProvider(output));
-        event.getGenerator().addProvider(server, new LaborBoardLevelProvider(output));
-        event.getGenerator().addProvider(server, new WhistleSettingsProvider(output));
-        event.getGenerator().addProvider(server, new CameraSettingsProvider(output));
-        event.getGenerator().addProvider(server, new GiftingSettingsProvider(output));
-        event.getGenerator().addProvider(server, new AnchorSettingsProvider(output));
-        event.getGenerator().addProvider(server, new PetSpawnProvider(output));
-        event.getGenerator().addProvider(server, new PetInteractionProvider(output));
-        event.getGenerator().addProvider(server, new QualificationProvider(output));
-        event.getGenerator().addProvider(server, new ModAdvancementProvider(output, lookupProvider));
-        event.getGenerator().addProvider(server, new ModLootTableProvider(output, lookupProvider));
+        ModBlockTagsProvider blockTagsProvider = new ModBlockTagsProvider(output, lookupProvider);
+        event.getGenerator().addProvider(true, blockTagsProvider);
+        event.getGenerator().addProvider(true,
+                new ModItemTagsProvider(output, lookupProvider));
+        event.getGenerator().addProvider(true,
+                new ModRecipeProvider.Runner(output, lookupProvider));
+        event.getGenerator().addProvider(true, new PetPersonalityProvider(output));
+        event.getGenerator().addProvider(true, new PetVoiceProvider(output));
+        event.getGenerator().addProvider(true, new PetTaskTypeProvider(output));
+        event.getGenerator().addProvider(true, new GameTestStructureProvider(output));
+        event.getGenerator().addProvider(true, new ShopCatalogProvider(output));
+        event.getGenerator().addProvider(true, new LaborBoardLevelProvider(output));
+        event.getGenerator().addProvider(true, new WhistleSettingsProvider(output));
+        event.getGenerator().addProvider(true, new CameraSettingsProvider(output));
+        event.getGenerator().addProvider(true, new GiftingSettingsProvider(output));
+        event.getGenerator().addProvider(true, new AnchorSettingsProvider(output));
+        event.getGenerator().addProvider(true, new PetSpawnProvider(output));
+        event.getGenerator().addProvider(true, new PetInteractionProvider(output));
+        event.getGenerator().addProvider(true, new QualificationProvider(output));
+        event.getGenerator().addProvider(true, new ModAdvancementProvider(output, lookupProvider));
+        event.getGenerator().addProvider(true, new ModLootTableProvider(output, lookupProvider));
         // Entity tags.
         event.getGenerator().addProvider(true, 
             new ModEntityTagsProvider(

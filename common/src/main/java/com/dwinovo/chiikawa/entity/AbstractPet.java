@@ -10,6 +10,7 @@ import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.anim.state.PetAnimContext;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
+import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import com.dwinovo.chiikawa.entity.brain.handler.ArcherJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.FarmerJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.FencerJobHandler;
@@ -1068,18 +1069,12 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         input.child("Backpack").ifPresent(backpackInput -> {
             ContainerHelper.loadAllItems(backpackInput, backpack.getItems());
             clearBagSlotOfOldStorage();
-        }
-        if (tag.contains("PetJob", Tag.TAG_INT)) {
-            setPetJobId(tag.getInt("PetJob"));
-        }
-        if (tag.contains("PetMode", Tag.TAG_BYTE)) {
-            this.entityData.set(PET_MODE, tag.getByte("PetMode"));
-        }
-        this.entityData.set(TASK, tag.contains("Task", Tag.TAG_COMPOUND) ? tag.getCompound("Task") : new CompoundTag());
-        setPendingGift(tag.contains("Gift", Tag.TAG_COMPOUND)
-            ? ItemStack.parse(level().registryAccess(), tag.getCompound("Gift")).orElse(ItemStack.EMPTY)
-            : ItemStack.EMPTY);
-        this.entityData.set(EAGER_UNTIL, tag.getLong("EagerUntil"));
+        });
+        input.getInt("PetJob").ifPresent(this::setPetJobId);
+        this.entityData.set(PET_MODE, input.getByteOr("PetMode", this.entityData.get(PET_MODE)));
+        this.entityData.set(TASK, input.read("Task", CompoundTag.CODEC).orElseGet(CompoundTag::new));
+        setPendingGift(input.read("Gift", ItemStack.CODEC).orElse(ItemStack.EMPTY));
+        this.entityData.set(EAGER_UNTIL, input.getLongOr("EagerUntil", 0L));
         applyEagerness();
         refreshJobFromMainhand();
         licences.load(input);

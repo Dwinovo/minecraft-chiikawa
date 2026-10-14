@@ -4,7 +4,7 @@ import com.dwinovo.chiikawa.camera.CameraSettings;
 import com.dwinovo.chiikawa.init.InitItems;
 import java.util.Map;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * The generated camera settings, by the id of the camera item. A pet takes a photo only
@@ -19,7 +19,7 @@ public final class CameraSettingsData {
     }
 
     /** @return settings by item id */
-    public static Map<ResourceLocation, CameraSettings> all() {
+    public static Map<Identifier, CameraSettings> all() {
         return Map.of(BuiltInRegistries.ITEM.getKey(InitItems.CAMERA.get()),
             new CameraSettings(BuiltInRegistries.ITEM.getKey(InitItems.FILM.get()), 64.0, 12000, 600, 320, 240, 70,
                 new CameraSettings.Subjects(3, 5, 1), 40, 8, 0.5F));
