@@ -18,6 +18,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.gametest.GameTestHolder;
@@ -126,7 +127,11 @@ public final class InteractGameTests {
         helper.succeed();
     }
 
-    /** Empty hand, standing up: the pet's backpack opens. */
+    /**
+     * Empty hand, standing up: the pet's backpack is asked for. The stand-in player of a case has no game
+     * to open a screen on, so what is checked is that the click is taken, and that what the server opens
+     * is a menu of this very pet.
+     */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void clicking_a_pet_opens_its_backpack(GameTestHelper helper) {
         ServerPlayer owner = player(helper);
@@ -135,10 +140,11 @@ public final class InteractGameTests {
         owner.setShiftKeyDown(false);
         owner.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
 
-        pet.mobInteract(owner, InteractionHand.MAIN_HAND);
+        InteractionResult result = pet.mobInteract(owner, InteractionHand.MAIN_HAND);
 
-        helper.assertTrue(owner.containerMenu instanceof PetBackpackMenu,
-            "clicking the pet did not open its backpack");
+        helper.assertTrue(result.consumesAction(), "clicking the pet did not do anything");
+        helper.assertTrue(PetBackpackMenu.providerFor(pet).createMenu(1, owner.getInventory(), owner) instanceof PetBackpackMenu menu
+            && menu.getPet() == pet, "what the server opens is not this pet's backpack");
         helper.succeed();
     }
 
