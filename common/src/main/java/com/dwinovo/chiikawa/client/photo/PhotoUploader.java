@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.Util;
 
 /**
  * Turns a frame into a photo and sends it to the server. Cutting, shrinking and compressing

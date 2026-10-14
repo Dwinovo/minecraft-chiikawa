@@ -16,7 +16,7 @@ import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.junit.jupiter.api.Test;
@@ -27,8 +27,8 @@ import org.junit.jupiter.api.Test;
  */
 class IntentAdmissionTest {
     private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
-        ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
-        ResourceLocation.withDefaultNamespace("overworld"));
+        ResourceKey.createRegistryKey(Identifier.withDefaultNamespace("dimension")),
+        Identifier.withDefaultNamespace("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     /** Reach 13, leash 20, round its home. */
     private static final PetAnchor FREE =
@@ -140,7 +140,7 @@ class IntentAdmissionTest {
 
     private static TestContext photoOf(Optional<GlobalPos> where) {
         PhotoOutlook outlook = new PhotoOutlook(true, Optional.of(new CameraSettings(
-            ResourceLocation.fromNamespaceAndPath("chiikawa", "film"), 64.0, 12000, 600, 320, 240, 70,
+            Identifier.fromNamespaceAndPath("chiikawa", "film"), 64.0, 12000, 600, 320, 240, 70,
             new CameraSettings.Subjects(1, 1, 1), 40, 8, 0.5F)), true, true, true, false,
             Optional.of(new PhotoPlan(PhotoSubject.FRIEND, Optional.empty(), "", Vec3.ZERO, where)));
         return TestContext.at(HOME, FREE).photo(outlook);

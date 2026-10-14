@@ -210,7 +210,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<Unit>> PHOTO_COOLDOWN =
         Services.REGISTRY.<MemoryModuleType<Unit>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "photo_cooldown"),
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "photo_cooldown"),
             () -> new MemoryModuleType<>(Optional.of(Unit.CODEC))
         );
 
@@ -221,7 +221,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<Unit>> GIFT_COOLDOWN =
         Services.REGISTRY.<MemoryModuleType<Unit>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "gift_cooldown"),
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "gift_cooldown"),
             () -> new MemoryModuleType<>(Optional.of(Unit.CODEC))
         );
 
@@ -232,16 +232,16 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<PhotoPlan>> PHOTO_PLAN =
         Services.REGISTRY.<MemoryModuleType<PhotoPlan>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "photo_plan"),
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "photo_plan"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
     /** The biomes the pet has taken a photo in, so a new one is worth a photo of its own. */
-    public static final Supplier<MemoryModuleType<List<ResourceLocation>>> PHOTOGRAPHED_BIOMES =
-        Services.REGISTRY.<MemoryModuleType<List<ResourceLocation>>>register(
+    public static final Supplier<MemoryModuleType<List<Identifier>>> PHOTOGRAPHED_BIOMES =
+        Services.REGISTRY.<MemoryModuleType<List<Identifier>>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "photographed_biomes"),
-            () -> new MemoryModuleType<>(Optional.of(ResourceLocation.CODEC.listOf()))
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "photographed_biomes"),
+            () -> new MemoryModuleType<>(Optional.of(Identifier.CODEC.listOf()))
         );
 
     private InitMemory() {

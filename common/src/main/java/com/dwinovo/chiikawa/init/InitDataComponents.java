@@ -52,7 +52,7 @@ public final class InitDataComponents {
     public static final Supplier<DataComponentType<FilmRoll>> FILM_ROLL =
         Services.REGISTRY.register(
             BuiltInRegistries.DATA_COMPONENT_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "film_roll"),
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "film_roll"),
             () -> DataComponentType.<FilmRoll>builder()
                 .persistent(FilmRoll.CODEC)
                 .networkSynchronized(FilmRoll.STREAM_CODEC)

@@ -43,11 +43,10 @@ import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestAssertException;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
@@ -57,8 +56,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Hachiware's camera: it takes a photo only with a camera and film in its bag, an owner
@@ -90,7 +87,7 @@ public final class CameraGameTests {
     /** How far round a yard another yard's pets might be seen from it. */
     private static final double NEIGHBOURHOOD = 40.0;
     /** The cameras as the data pack has them, kept before any case changes them. */
-    private static Map<ResourceLocation, CameraSettings> dataPackCameras;
+    private static Map<Identifier, CameraSettings> dataPackCameras;
 
     @BeforeBatch(batch = "chiikawa_camera_takes")
     public static void settleTakes(ServerLevel level) {
@@ -164,10 +161,13 @@ public final class CameraGameTests {
 
     /**
      * The world as every case here wants it, and the camera as the data pack has it: a case
-     * that tries another camera does not leave it for the next.
+     * that tries another camera does not leave it for the next. And no photo still asked for
+     * by a pet of some case before, which holds the request for a minute and which cases here
+     * that count what is asked for would find.
      */
     private static void settle(ServerLevel level) {
         settleWorld(level, Difficulty.NORMAL, NOON);
+        PhotoSystem.stopServer(level.getServer());
         if (dataPackCameras == null) {
             dataPackCameras = CameraSettings.all();
         }
@@ -224,7 +224,7 @@ public final class CameraGameTests {
                 }
             }
             helper.assertFalse(answered.isEmpty(), "Hachiware never asked for a photo");
-            PhotoData photo = photoOf(pet);
+            PhotoData photo = photoOf(helper, pet);
             helper.assertTrue(photo.subject() == PhotoSubject.OWNER, "the photo was of " + photo.subject());
             helper.assertTrue(photo.name().equals(owner.getName().getString()), "the photo was of " + photo.name());
             helper.assertTrue(photo.photographer().equals(pet.getDisplayName().getString()),
@@ -259,7 +259,7 @@ public final class CameraGameTests {
                 }
             }
             helper.assertFalse(answered.isEmpty(), "Hachiware never asked for a photo");
-            PhotoData photo = photoOf(pet);
+            PhotoData photo = photoOf(helper, pet);
             helper.assertTrue(photo.subject() == PhotoSubject.FRIEND, "the photo was of " + photo.subject());
             helper.assertTrue(photo.name().equals(friend.getDisplayName().getString()), "the photo was of " + photo.name());
             GameTestKit.assertSaid(helper, friend, VoiceMoment.PHOTOGRAPHED);
@@ -586,10 +586,10 @@ public final class CameraGameTests {
     }
 
     /** The first shot on the pet's roll. */
-    private static PhotoData photoOf(AbstractPet pet) {
+    private static PhotoData photoOf(GameTestHelper helper, AbstractPet pet) {
         List<ItemStack> rolls = shotRolls(pet);
         if (rolls.isEmpty()) {
-            throw new GameTestAssertException("there is no photo on any roll");
+            throw new GameTestAssertException(Component.literal("there is no photo on any roll"), (int) helper.getTick());
         }
         return FilmItem.rollOf(rolls.get(0)).shots().get(0);
     }

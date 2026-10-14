@@ -261,7 +261,7 @@ class IntentSelectorTest {
 
     /** Wander, harvest, plant and deliver, as a free farmer sees them. */
     private static List<Candidate> farmCandidates(Personality personality, DayPhase phase, PerceivedTargets targets,
-            ResourceLocation running) {
+            Identifier running) {
         IntentContext ctx = TestContext.at(PET, TestAnchors.free(PET))
             .phase(phase)
             .personality(personality)

@@ -13,12 +13,12 @@ import com.dwinovo.chiikawa.ui.Ui;
 import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.UiTheme;
 import com.dwinovo.chiikawa.ui.widget.TitledPanel;
-import com.mojang.blaze3d.platform.InputConstants;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.ConfirmLinkScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
@@ -174,7 +174,7 @@ public class HandbookScreen extends Screen {
 
         // The screen is handed the time since the last frame, not how far into the tick
         // this frame is; the pets move by the tick, so they ask the game's own clock.
-        float sceneTick = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
+        float sceneTick = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true);
         Rect picture = sceneArea();
         drawFrame(surface, picture);
         scene.draw(graphics, surface, picture, sceneTick);
@@ -189,7 +189,7 @@ public class HandbookScreen extends Screen {
     }
 
     /** The chapter's text, cut to its box and moved by the wheel, with a bar beside it when there is more. */
-    private void drawText(GuiGraphics graphics, DrawSurface surface) {
+    private void drawText(GuiGraphicsExtractor graphics, DrawSurface surface) {
         Rect area = textArea();
         graphics.enableScissor(area.x(), area.y(), area.right(), area.bottom());
         for (int i = 0; i < lines.size(); i++) {
@@ -219,12 +219,12 @@ public class HandbookScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (!chapters.isEmpty() && (keyCode == InputConstants.KEY_UP || keyCode == InputConstants.KEY_DOWN)) {
-            show(chapter + (keyCode == InputConstants.KEY_DOWN ? 1 : -1));
+    public boolean keyPressed(KeyEvent event) {
+        if (!chapters.isEmpty() && (event.isUp() || event.isDown())) {
+            show(chapter + (event.isDown() ? 1 : -1));
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     @Override

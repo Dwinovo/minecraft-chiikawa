@@ -8,12 +8,12 @@ import com.dwinovo.chiikawa.testing.TestContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.junit.jupiter.api.Test;
 
 class GiftOwnerIntentTest {
     private static final GlobalPos AT = GlobalPos.of(ResourceKey.create(ResourceKey.createRegistryKey(
-        ResourceLocation.withDefaultNamespace("dimension")), ResourceLocation.withDefaultNamespace("overworld")), BlockPos.ZERO);
+        Identifier.withDefaultNamespace("dimension")), Identifier.withDefaultNamespace("overworld")), BlockPos.ZERO);
     private final GiftOwnerIntent intent = new GiftOwnerIntent();
 
     private static TestContext pet() {
