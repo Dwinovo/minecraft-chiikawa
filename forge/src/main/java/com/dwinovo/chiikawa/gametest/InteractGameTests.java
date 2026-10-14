@@ -14,6 +14,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.Connection;
+import net.minecraft.network.ConnectionProtocol;
+import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
@@ -134,6 +137,9 @@ public final class InteractGameTests {
         pet.tame(owner);
         owner.setShiftKeyDown(false);
         owner.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        // The stand-in has no game on the other end, so its connection is put in the play protocol the opening is sent in.
+        owner.connection.getConnection().channel().attr(Connection.ATTRIBUTE_CLIENTBOUND_PROTOCOL)
+            .set(ConnectionProtocol.PLAY.codec(PacketFlow.CLIENTBOUND));
 
         pet.mobInteract(owner, InteractionHand.MAIN_HAND);
 
