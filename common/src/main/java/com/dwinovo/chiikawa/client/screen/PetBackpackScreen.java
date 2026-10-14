@@ -144,6 +144,8 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
             this.imageHeight = statusHeight();
         }
         notes.clear();
+        // As 1.20.1's own container screens do: the dark layer first, then the container.
+        this.renderBackground(graphics);
         super.render(graphics, mouseX, mouseY, partialTick);
         renderNotes(graphics, mouseX, mouseY);
         this.renderTooltip(graphics, mouseX, mouseY);
