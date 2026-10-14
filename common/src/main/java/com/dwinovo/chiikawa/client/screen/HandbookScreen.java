@@ -114,7 +114,8 @@ public class HandbookScreen extends Screen {
 
     private void openWebsite() {
         String url = ManualLinks.url(this.minecraft.getLanguageManager().getSelected(), current().link());
-        this.minecraft.gui.setScreen(new ConfirmLinkScreen(open -> this.minecraft.gui.setScreen(this), URI.create(url), true));
+        // Vanilla's own way: asked first, the browser opened on yes, and back to this screen either way.
+        ConfirmLinkScreen.confirmLinkNow(this, URI.create(url));
     }
 
     private int contentLeft() {
