@@ -16,10 +16,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.network.payload.AdvancedOpenScreenPayload;
+import net.neoforged.neoforge.network.registration.ChannelAttributes;
 
 /**
  * What a right click does. Every instruction an owner can give a pet goes through one
@@ -124,11 +125,7 @@ public final class InteractGameTests {
         helper.succeed();
     }
 
-    /**
-     * Empty hand, standing up: the pet's backpack is asked for. The stand-in player of a case has no game
-     * to open a screen on, so what is checked is that the click is taken, and that what the server opens
-     * is a menu of this very pet.
-     */
+    /** Empty hand, standing up: the pet's backpack opens. */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void clicking_a_pet_opens_its_backpack(GameTestHelper helper) {
         ServerPlayer owner = player(helper);
@@ -136,12 +133,13 @@ public final class InteractGameTests {
         pet.tame(owner);
         owner.setShiftKeyDown(false);
         owner.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        // The stand-in has no game on the other end, so it is made one that declares it takes the opening.
+        ChannelAttributes.getOrCreateAdHocChannels(owner.connection.getConnection()).add(AdvancedOpenScreenPayload.TYPE.id());
 
-        InteractionResult result = pet.mobInteract(owner, InteractionHand.MAIN_HAND);
+        pet.mobInteract(owner, InteractionHand.MAIN_HAND);
 
-        helper.assertTrue(result.consumesAction(), "clicking the pet did not do anything");
-        helper.assertTrue(PetBackpackMenu.providerFor(pet).createMenu(1, owner.getInventory(), owner) instanceof PetBackpackMenu menu
-            && menu.getPet() == pet, "what the server opens is not this pet's backpack");
+        helper.assertTrue(owner.containerMenu instanceof PetBackpackMenu menu && menu.getPet() == pet,
+            "clicking the pet did not open its backpack");
         helper.succeed();
     }
 
