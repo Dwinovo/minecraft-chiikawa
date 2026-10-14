@@ -94,6 +94,11 @@ public final class CameraGameTests {
         settle(level);
     }
 
+    @BeforeBatch(batch = "chiikawa_camera_rest")
+    public static void settleRest(ServerLevel level) {
+        settle(level);
+    }
+
     @BeforeBatch(batch = "chiikawa_camera_owner")
     public static void settleOwner(ServerLevel level) {
         settle(level);
@@ -202,6 +207,35 @@ public final class CameraGameTests {
             helper.assertTrue(pet.getBrain().hasMemoryValue(InitMemory.PHOTO_COOLDOWN.get()),
                 "Hachiware took a photo and was ready to take another");
             helper.assertTrue(answered.size() == 1, "Hachiware asked for " + answered.size() + " photos");
+        });
+    }
+
+    /**
+     * The picture is back while the pet still holds the camera up, before the behaviour ends: the
+     * rest it has once it is over is the camera's cooldown, not the short one for waiting.
+     */
+    @GameTest(template = "floor16", batch = "chiikawa_camera_rest", timeoutTicks = SHOT_TICKS)
+    public static void a_photo_stored_while_the_camera_is_still_up_leaves_the_pets_whole_rest(GameTestHelper helper) {
+        ServerPlayer owner = ownerAt(helper, new BlockPos(10, STAND, 10));
+        AbstractPet pet = photographer(helper, InitEntity.HACHIWARE_PET.get(), owner, true, true);
+        PhotoSystem photos = PhotoSystem.of(helper.getLevel().getServer());
+        Set<UUID> answered = new HashSet<>();
+        boolean[] storedWhileHolding = {false};
+
+        helper.succeedWhen(() -> {
+            for (UUID asked : photos.waiting()) {
+                if (answered.add(asked)) {
+                    storedWhileHolding[0] = pet.getActivity() == PetActivity.PHOTO;
+                    send(photos, owner, asked, validPicture());
+                }
+            }
+            helper.assertFalse(answered.isEmpty(), "Hachiware never asked for a photo");
+            helper.assertTrue(storedWhileHolding[0], "the picture was not stored while the camera was up");
+            helper.assertFalse(shotRolls(pet).isEmpty(), "the picture was not kept");
+            helper.assertFalse(pet.getBrain().isActive(InitActivity.TAKE_PHOTO.get()), "Hachiware was still taking the photo");
+            long rest = pet.getBrain().getTimeUntilExpiry(InitMemory.PHOTO_COOLDOWN.get());
+            helper.assertTrue(rest > camera().cooldownTicks() - SETTLED_TICKS && rest <= camera().cooldownTicks(),
+                "Hachiware rests " + rest + " ticks from photos after it, not the camera's " + camera().cooldownTicks());
         });
     }
 
