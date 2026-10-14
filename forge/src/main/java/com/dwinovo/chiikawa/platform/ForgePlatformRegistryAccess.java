@@ -96,7 +96,7 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
     // Menu registrations
     private static final RegistryObject<MenuType<PetBackpackMenu>> PET_BACKPACK =
         MENUS.register("pet_backpack", () -> IForgeMenuType.create((containerId, inventory, buf) ->
-            new PetBackpackMenu(containerId, inventory)
+            new PetBackpackMenu(containerId, inventory, PetBackpackMenu.readOpeningData(buf))
         ));
 
     public static void register(IEventBus modEventBus) {
