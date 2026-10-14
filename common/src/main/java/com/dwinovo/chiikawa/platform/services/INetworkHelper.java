@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.platform.services;
 
+import com.dwinovo.chiikawa.entity.AbstractPet;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -9,6 +10,13 @@ public interface INetworkHelper {
     void sendToClient(ServerPlayer player, CustomPacketPayload payload);
 
     void sendToServer(CustomPacketPayload payload);
+
+    /**
+     * Opens the pet's screen on the player's game, with the pet's id as the menu's opening data: a whole
+     * int, as the horse screen's packet carries the horse's, which a menu data slot (a short) cannot.
+     * What a loader opens a menu with data with is its own.
+     */
+    void openPetMenu(ServerPlayer player, AbstractPet pet);
 
     /**
      * Whether this player's game takes the payload. A game without the mod does not, nor
