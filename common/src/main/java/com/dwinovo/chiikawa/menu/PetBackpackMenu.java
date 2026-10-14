@@ -4,11 +4,14 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitMenu;
 import com.dwinovo.chiikawa.item.BagItem;
 
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -47,18 +50,46 @@ public class PetBackpackMenu extends AbstractContainerMenu {
      * nothing it does with them depends on which page the owner happens to be looking at.
      */
     private boolean slotsShown = true;
-    private final DataSlot petId = DataSlot.standalone();
+    /** Which entity the pet is, fixed when the menu is opened; the client finds the pet in its level by it. */
+    private final int petId;
 
-    public PetBackpackMenu(int containerId, Inventory playerInventory) {
-        this(containerId, playerInventory, null);
+    /**
+     * How the pet's id travels when the menu is opened, as the horse screen's does: a whole int in the
+     * opening data. It cannot ride in a data slot, which the game sends as a short.
+     */
+    public static void writeOpeningData(FriendlyByteBuf buf, int petId) {
+        buf.writeInt(petId);
     }
 
+    /** @return the pet's id the server wrote with {@link #writeOpeningData} */
+    public static int readOpeningData(FriendlyByteBuf buf) {
+        return buf.readInt();
+    }
+
+    /** What the opening data holds when there is no pet. */
+    public static final int NO_PET = -1;
+
+    /** What the server opens for a pet; each loader opens it with the pet's id as the opening data. */
+    public static MenuProvider providerFor(AbstractPet pet) {
+        return new SimpleMenuProvider((containerId, inventory, player) -> new PetBackpackMenu(containerId, inventory, pet),
+            Component.translatable("menu.chiikawa.pet_backpack"));
+    }
+
+    /** The client's menu: the pet is the entity with the id the server opened it with. */
+    public PetBackpackMenu(int containerId, Inventory playerInventory, int petId) {
+        this(containerId, playerInventory, null, petId);
+    }
+
+    /** The server's menu, which has the pet in hand. */
     public PetBackpackMenu(int containerId, Inventory playerInventory, AbstractPet pet) {
+        this(containerId, playerInventory, pet, pet != null ? pet.getId() : NO_PET);
+    }
+
+    private PetBackpackMenu(int containerId, Inventory playerInventory, AbstractPet pet, int petId) {
         super(InitMenu.PET_BACKPACK.get(), containerId);
         this.pet = pet;
+        this.petId = petId;
         this.level = playerInventory.player.level();
-        this.petId.set(pet != null ? pet.getId() : -1);
-        this.addDataSlot(this.petId);
 
         SimpleContainer handler = pet != null ? pet.getBackpack() : new SimpleContainer(petSlots());
         this.petContainer = handler;
@@ -187,7 +218,7 @@ public class PetBackpackMenu extends AbstractContainerMenu {
         if (level == null) {
             return null;
         }
-        Entity entity = level.getEntity(petId.get());
+        Entity entity = level.getEntity(petId);
         return entity instanceof AbstractPet ? (AbstractPet) entity : null;
     }
 
