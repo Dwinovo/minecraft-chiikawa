@@ -34,7 +34,8 @@ public final class ShopBasket {
      */
     public static Optional<ShopCatalog.Entry> wants(Personality personality, ShopCatalog catalog,
                                                     int money, ToIntFunction<Item> carried, RandomSource random) {
-        return WeightedRandom.getRandomItem(random, worthBuying(personality, catalog, money, carried))
+        return WeightedRandom.getRandomItem(random, worthBuying(personality, catalog, money, carried),
+            Personality.WeightedItem::weight)
             .flatMap(liking -> catalog.sale(liking.item()));
     }
 

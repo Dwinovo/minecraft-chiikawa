@@ -10,7 +10,7 @@ import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.junit.jupiter.api.Test;
 
 class AnchorSettingsTest {
@@ -56,7 +56,7 @@ class AnchorSettingsTest {
 
     @Test
     void theLoaderTakesTheOneFileAndNothingElse() {
-        ResourceLocation other = ResourceLocation.fromNamespaceAndPath("chiikawa", "other");
+        Identifier other = Identifier.fromNamespaceAndPath("chiikawa", "other");
 
         assertTrue(AnchorSettingsLoader.load(Map.of(AnchorSettingsLoader.FILE, json(GOOD))).isPresent());
         assertEquals(Optional.empty(), AnchorSettingsLoader.load(Map.of(other, json(GOOD))), "a file of another name");

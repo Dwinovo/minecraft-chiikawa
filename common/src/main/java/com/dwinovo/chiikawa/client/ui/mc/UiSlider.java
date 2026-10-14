@@ -3,12 +3,12 @@ package com.dwinovo.chiikawa.client.ui.mc;
 import com.dwinovo.chiikawa.ui.DrawSurface;
 import com.dwinovo.chiikawa.ui.Rect;
 import com.dwinovo.chiikawa.ui.widget.Slider;
-import com.mojang.blaze3d.platform.InputConstants;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleFunction;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractSliderButton;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
@@ -50,10 +50,10 @@ public final class UiSlider extends AbstractSliderButton {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == InputConstants.KEY_LEFT || keyCode == InputConstants.KEY_RIGHT) {
+    public boolean keyPressed(KeyEvent event) {
+        if (event.isLeft() || event.isRight()) {
             // The game's own arrow step is a pixel's worth, which is not a step anyone can count.
-            double moved = Mth.clamp(value + (keyCode == InputConstants.KEY_LEFT ? -KEY_STEP : KEY_STEP), 0.0, 1.0);
+            double moved = Mth.clamp(value + (event.isLeft() ? -KEY_STEP : KEY_STEP), 0.0, 1.0);
             if (moved != value) {
                 value = moved;
                 applyValue();
@@ -61,11 +61,11 @@ public final class UiSlider extends AbstractSliderButton {
             }
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     @Override
-    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         DrawSurface surface = new GuiSurface(graphics, Minecraft.getInstance().font);
         Slider.draw(surface, new Rect(getX(), getY(), getWidth(), getHeight()), value, getMessage().getString(),
             isHoveredOrFocused(), active);

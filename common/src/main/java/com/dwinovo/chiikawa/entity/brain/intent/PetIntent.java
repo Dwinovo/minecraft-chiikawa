@@ -3,7 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.intent;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.schedule.Activity;
 

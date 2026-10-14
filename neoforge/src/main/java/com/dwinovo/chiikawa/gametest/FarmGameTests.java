@@ -67,19 +67,19 @@ public final class FarmGameTests {
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WORK_TICKS)
     public static void a_farmer_sows_beetroot_seeds(GameTestHelper helper) {
         sows(helper, Items.BEETROOT_SEEDS, Blocks.BEETROOTS, Blocks.FARMLAND.defaultBlockState()
-            .setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE));
+            .setValue(FarmlandBlock.MOISTURE, FarmlandBlock.MAX_MOISTURE));
     }
 
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WORK_TICKS)
     public static void a_farmer_plants_potatoes(GameTestHelper helper) {
         sows(helper, Items.POTATO, Blocks.POTATOES, Blocks.FARMLAND.defaultBlockState()
-            .setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE));
+            .setValue(FarmlandBlock.MOISTURE, FarmlandBlock.MAX_MOISTURE));
     }
 
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WORK_TICKS)
     public static void a_farmer_plants_carrots(GameTestHelper helper) {
         sows(helper, Items.CARROT, Blocks.CARROTS, Blocks.FARMLAND.defaultBlockState()
-            .setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE));
+            .setValue(FarmlandBlock.MOISTURE, FarmlandBlock.MAX_MOISTURE));
     }
 
     /** Nether wart goes on soul sand, not farmland. */
@@ -107,7 +107,7 @@ public final class FarmGameTests {
     public static void planting_needs_no_player_and_leaves_a_taken_space_alone(GameTestHelper helper) {
         AbstractPet pet = worker(helper, new BlockPos(4, STAND, 4));
         BlockPos bed = new BlockPos(7, STAND - 1, 4);
-        helper.setBlock(bed, Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE));
+        helper.setBlock(bed, Blocks.FARMLAND.defaultBlockState().setValue(FarmlandBlock.MOISTURE, FarmlandBlock.MAX_MOISTURE));
         ItemStack seeds = new ItemStack(Items.WHEAT_SEEDS, 3);
 
         helper.assertTrue(Utils.plantSeed(helper.getLevel(), pet, helper.absolutePos(bed), seeds), "the seed was not planted");

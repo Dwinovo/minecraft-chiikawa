@@ -118,7 +118,7 @@ public final class GiftGameTests {
 
         helper.runAfterDelay(NOTHING_TICKS, () -> {
             // The handbook is the advancement's, on the owner's joining.
-            List<ItemStack> given = owner.getInventory().items.stream()
+            List<ItemStack> given = owner.getInventory().getNonEquipmentItems().stream()
                 .filter(stack -> !stack.isEmpty() && !stack.is(InitItems.HANDBOOK.get())).toList();
             helper.assertTrue(given.isEmpty(), "the owner was given something: " + given);
             helper.assertTrue(pet.getPendingGift().isEmpty(), "the pet was carrying something over");
@@ -140,7 +140,7 @@ public final class GiftGameTests {
         pet.getBackpack().setItem(3, roll);
 
         helper.succeedWhen(() -> {
-            ItemStack given = owner.getInventory().items.stream().filter(stack -> stack.is(InitItems.FILM.get()))
+            ItemStack given = owner.getInventory().getNonEquipmentItems().stream().filter(stack -> stack.is(InitItems.FILM.get()))
                 .findFirst().orElse(ItemStack.EMPTY);
             helper.assertFalse(given.isEmpty(), "the owner never got the roll");
             helper.assertTrue(FilmItem.rollOf(given).full(), "the owner was given a roll that was not full");

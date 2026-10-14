@@ -15,12 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The photo library as the server runs it: a photo is asked for, and kept only when the player
@@ -34,7 +31,7 @@ public final class PhotoGameTests {
     private static final int WIDTH = 32;
     private static final int HEIGHT = 24;
     private static final CameraSettings CAMERA = new CameraSettings(
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "film"), 64.0, 12000, 600, WIDTH, HEIGHT, 70,
+        Identifier.fromNamespaceAndPath(Constants.MOD_ID, "film"), 64.0, 12000, 600, WIDTH, HEIGHT, 70,
         new CameraSettings.Subjects(3, 5, 1), 40, 8, 0.5F);
 
     /** What a request was told, in order. */

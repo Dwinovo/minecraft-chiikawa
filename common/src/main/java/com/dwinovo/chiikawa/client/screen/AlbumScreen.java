@@ -13,8 +13,9 @@ import com.dwinovo.chiikawa.ui.UiTheme;
 import com.dwinovo.chiikawa.ui.widget.Arrow;
 import com.dwinovo.chiikawa.ui.widget.TitledPanel;
 import java.util.List;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -94,8 +95,8 @@ public class AlbumScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
         DrawSurface surface = new GuiSurface(graphics, this.font);
         TitledPanel.draw(surface, leftPos, topPos, panelWidth, panelHeight, this.title.getString());
         if (shots.isEmpty()) {
@@ -126,12 +127,13 @@ public class AlbumScreen extends Screen {
     }
 
     /** The picture, as big as it can be inside the frame without being squeezed out of shape. */
-    private void drawPicture(GuiGraphics graphics, ClientPhotoCache.Picture picture) {
+    private void drawPicture(GuiGraphicsExtractor graphics, ClientPhotoCache.Picture picture) {
         double scale = Math.min((double) frame.width() / picture.width(), (double) frame.height() / picture.height());
         int width = Math.max(1, (int) (picture.width() * scale));
         int height = Math.max(1, (int) (picture.height() * scale));
-        graphics.blit(picture.texture(), frame.x() + (frame.width() - width) / 2, frame.y() + (frame.height() - height) / 2,
-            width, height, 0.0F, 0.0F, picture.width(), picture.height(), picture.width(), picture.height());
+        graphics.blit(RenderPipelines.GUI_TEXTURED, picture.texture(), frame.x() + (frame.width() - width) / 2,
+            frame.y() + (frame.height() - height) / 2, 0.0F, 0.0F, width, height, picture.width(), picture.height(),
+            picture.width(), picture.height());
     }
 
     @Override

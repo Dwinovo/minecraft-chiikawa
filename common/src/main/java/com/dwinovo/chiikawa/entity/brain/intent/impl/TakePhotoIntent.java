@@ -11,7 +11,7 @@ import com.dwinovo.chiikawa.init.InitActivity;
 import com.dwinovo.chiikawa.init.InitMemory;
 import java.util.Optional;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.schedule.Activity;
 
 /**
@@ -28,7 +28,7 @@ public final class TakePhotoIntent implements PetIntent {
     private static final float SCORE = 0.45F;
 
     @Override
-    public ResourceLocation id() {
+    public Identifier id() {
         return PetIntents.TAKE_PHOTO;
     }
 

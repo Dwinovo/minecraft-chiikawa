@@ -6,7 +6,7 @@ import com.dwinovo.chiikawa.init.InitItems;
 import com.mojang.datafixers.util.Either;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * The generated gifting settings: a pet thinks of a present for its owner at most once a quarter
@@ -18,7 +18,7 @@ public final class GiftingSettingsData {
     }
 
     /** @return the settings by file id: the one file there is */
-    public static Map<ResourceLocation, GiftingSettings> all() {
+    public static Map<Identifier, GiftingSettings> all() {
         return Map.of(GiftingSettingsLoader.FILE, new GiftingSettings(6000,
             List.of(new GiftingSettings.Weighted(Either.right(InitItems.FILM.get()), 5))));
     }

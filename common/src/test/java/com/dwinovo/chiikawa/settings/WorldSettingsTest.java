@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import org.junit.jupiter.api.Test;
 
 class WorldSettingsTest {
@@ -53,7 +54,8 @@ class WorldSettingsTest {
         WorldSettingsStore store = new WorldSettingsStore();
         store.set(new WorldSettings(0.4F, 0.0F));
 
-        WorldSettingsStore loaded = WorldSettingsStore.load(store.save(new CompoundTag(), null), null);
+        WorldSettingsStore loaded = WorldSettingsStore.CODEC
+            .parse(NbtOps.INSTANCE, WorldSettingsStore.CODEC.encodeStart(NbtOps.INSTANCE, store).getOrThrow()).getOrThrow();
 
         assertEquals(new WorldSettings(0.4F, 0.0F), loaded.get());
     }
@@ -63,7 +65,7 @@ class WorldSettingsTest {
         CompoundTag tag = new CompoundTag();
         tag.putFloat("Chatter", 0.5F);
 
-        WorldSettingsStore loaded = WorldSettingsStore.load(tag, null);
+        WorldSettingsStore loaded = WorldSettingsStore.CODEC.parse(NbtOps.INSTANCE, tag).getOrThrow();
 
         assertEquals(new WorldSettings(1.0F, 0.5F), loaded.get());
     }

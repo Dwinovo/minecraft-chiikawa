@@ -7,7 +7,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
 
@@ -34,7 +34,7 @@ import net.minecraft.util.RandomSource;
  *                    calls out and whoever is in it turns to the camera and poses; the rest are
  *                    candid, taken without a word and with everyone going about their business
  */
-public record CameraSettings(ResourceLocation film, double ownerRange, int cooldownTicks, int retryTicks, int width,
+public record CameraSettings(Identifier film, double ownerRange, int cooldownTicks, int retryTicks, int width,
                              int height, int fov, Subjects subjects, int aimTicks, int exposures, float posedChance) {
     /** How often a photo is posed, when the data does not say. */
     public static final float DEFAULT_POSED_CHANCE = 0.5F;
@@ -62,7 +62,7 @@ public record CameraSettings(ResourceLocation film, double ownerRange, int coold
     }
 
     public static final Codec<CameraSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        ResourceLocation.CODEC.fieldOf("film").forGetter(CameraSettings::film),
+        Identifier.CODEC.fieldOf("film").forGetter(CameraSettings::film),
         Codec.doubleRange(1.0, 256.0).fieldOf("owner_range").forGetter(CameraSettings::ownerRange),
         ExtraCodecs.NON_NEGATIVE_INT.fieldOf("cooldown_ticks").forGetter(CameraSettings::cooldownTicks),
         ExtraCodecs.NON_NEGATIVE_INT.fieldOf("retry_ticks").forGetter(CameraSettings::retryTicks),
@@ -88,24 +88,24 @@ public record CameraSettings(ResourceLocation film, double ownerRange, int coold
         return posedChance >= 1.0F || (posedChance > 0.0F && random.nextFloat() < posedChance);
     }
 
-    private static volatile Map<ResourceLocation, CameraSettings> byItem = Collections.emptyMap();
+    private static volatile Map<Identifier, CameraSettings> byItem = Collections.emptyMap();
 
     /**
      * @param item an item's id
      * @return how that item takes photos, or nothing when no data pack makes a camera of it:
      *         an item whose settings are gone takes none rather than guessing
      */
-    public static Optional<CameraSettings> of(ResourceLocation item) {
+    public static Optional<CameraSettings> of(Identifier item) {
         return Optional.ofNullable(byItem.get(item));
     }
 
     /** @return every camera that is loaded, by the id of its item */
-    public static Map<ResourceLocation, CameraSettings> all() {
+    public static Map<Identifier, CameraSettings> all() {
         return byItem;
     }
 
     /** Replaces them all, as a data pack reload does. Public so an in-game case can try another camera. */
-    public static void replaceAll(Map<ResourceLocation, CameraSettings> settings) {
+    public static void replaceAll(Map<Identifier, CameraSettings> settings) {
         byItem = Map.copyOf(settings);
     }
 }

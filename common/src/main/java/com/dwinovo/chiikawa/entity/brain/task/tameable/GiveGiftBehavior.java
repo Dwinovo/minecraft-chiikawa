@@ -101,7 +101,7 @@ public class GiveGiftBehavior extends Behavior<AbstractPet> {
     private static void putBack(AbstractPet pet) {
         ItemStack left = pet.getBackpack().addItem(pet.getPendingGift());
         if (!left.isEmpty()) {
-            pet.spawnAtLocation(left);
+            pet.spawnAtLocation((ServerLevel) pet.level(), left);
         }
         pet.setPendingGift(ItemStack.EMPTY);
     }

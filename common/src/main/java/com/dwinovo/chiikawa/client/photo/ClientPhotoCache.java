@@ -6,6 +6,8 @@ import com.dwinovo.chiikawa.photo.ChunkAssembler;
 import com.dwinovo.chiikawa.photo.PhotoChunk;
 import com.dwinovo.chiikawa.platform.Services;
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.FilterMode;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
@@ -15,7 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * The photos this game has looked at, as textures. Only in memory, and let go of on leaving
@@ -37,7 +39,7 @@ public final class ClientPhotoCache {
      *
      * @param texture where the game has it
      */
-    public record Picture(ResourceLocation texture, int width, int height) {
+    public record Picture(Identifier texture, int width, int height) {
     }
 
     private static final class Entry {
@@ -84,10 +86,13 @@ public final class ClientPhotoCache {
                 int width = image.getWidth();
                 int height = image.getHeight();
                 // The texture owns the image from here, and closes it when it is let go of.
-                DynamicTexture texture = new DynamicTexture(image);
-                // Smoothed, because a photo is shown at whatever size the window has room for.
-                texture.setFilter(true, false);
-                ResourceLocation location = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID,
+                DynamicTexture texture = new DynamicTexture(() -> "Chiikawa photo " + chunk.photo(), image) {
+                    {
+                        // Smoothed, because a photo is shown at whatever size the window has room for.
+                        this.sampler = RenderSystem.getSamplerCache().getRepeat(FilterMode.LINEAR);
+                    }
+                };
+                Identifier location = Identifier.fromNamespaceAndPath(Constants.MOD_ID,
                     "photo/" + chunk.photo());
                 Minecraft.getInstance().getTextureManager().register(location, texture);
                 entry.picture = new Picture(location, width, height);
@@ -99,10 +104,15 @@ public final class ClientPhotoCache {
         }
     }
 
-    /** Lets go of every photo, on leaving the world. */
+    /**
+     * Lets go of every photo, on leaving the world. The game only lets go of a texture on its
+     * own thread, and Fabric says the world has been left from the connection's.
+     */
     public static void clear() {
-        ENTRIES.values().stream().map(entry -> entry.picture).filter(Objects::nonNull)
-            .forEach(picture -> Minecraft.getInstance().getTextureManager().release(picture.texture()));
-        ENTRIES.clear();
+        Minecraft.getInstance().execute(() -> {
+            ENTRIES.values().stream().map(entry -> entry.picture).filter(Objects::nonNull)
+                .forEach(picture -> Minecraft.getInstance().getTextureManager().release(picture.texture()));
+            ENTRIES.clear();
+        });
     }
 }

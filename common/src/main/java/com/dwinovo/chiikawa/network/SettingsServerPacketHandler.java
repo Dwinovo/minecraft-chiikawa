@@ -7,6 +7,8 @@ import com.dwinovo.chiikawa.settings.WorldSettings;
 import com.dwinovo.chiikawa.settings.WorldSettingsStore;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.Permissions;
 
 /**
  * Keeps every player's game in step with the world's settings, and takes changes to them.
@@ -14,8 +16,8 @@ import net.minecraft.server.level.ServerPlayer;
  * settings, and a screen only shows what it was last told.
  */
 public final class SettingsServerPacketHandler {
-    /** The permission level of a game master: the lowest that may run most commands. */
-    private static final int OPERATOR_LEVEL = 2;
+    /** The permission of a game master: the lowest that may run most commands. */
+    private static final Permission OPERATOR = Permissions.COMMANDS_GAMEMASTER;
 
     private SettingsServerPacketHandler() {
     }
@@ -25,20 +27,20 @@ public final class SettingsServerPacketHandler {
      * their own world, who is their own game's master whether or not cheats are on.
      */
     public static boolean canChange(ServerPlayer player) {
-        return player.hasPermissions(OPERATOR_LEVEL)
-            || player.server.isSingleplayerOwner(player.getGameProfile());
+        return player.permissions().hasPermission(OPERATOR)
+            || player.level().getServer().isSingleplayerOwner(player.nameAndId());
     }
 
     /** Tells a player what the settings are, and whether they can change them. */
     public static void sync(ServerPlayer player) {
         if (Services.NETWORK.canReceive(player, WorldSettingsPayload.TYPE)) {
             Services.NETWORK.sendToClient(player, new WorldSettingsPayload(
-                WorldSettingsStore.of(player.server).get(), canChange(player)));
+                WorldSettingsStore.of(player.level().getServer()).get(), canChange(player)));
         }
     }
 
     public static void handleChange(ChangeWorldSettingsPayload payload, ServerPlayer player) {
-        MinecraftServer server = player.server;
+        MinecraftServer server = player.level().getServer();
         if (!canChange(player)) {
             // A screen that offered the change had it wrong; put it right.
             sync(player);
