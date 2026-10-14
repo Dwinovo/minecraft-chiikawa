@@ -68,6 +68,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
  * the one case would then be about two cases' pets.
  */
 @GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class CameraGameTests {
     private static final int STAND = 2;
     /** Long enough to cross a yard, aim and press the shutter. */

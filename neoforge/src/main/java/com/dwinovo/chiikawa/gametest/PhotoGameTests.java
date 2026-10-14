@@ -26,6 +26,7 @@ import net.minecraft.server.level.ServerPlayer;
  * game on the other end of these cases, so the pieces a game would send are sent from here.
  */
 @GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class PhotoGameTests {
     private static final int STAND = 2;
     private static final int WIDTH = 32;

@@ -38,6 +38,7 @@ import net.minecraft.world.level.block.Blocks;
  * handler calls it.
  */
 @GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class SettingsGameTests {
     private static final int STAND = 2;
     /** The permission level of a game master. */

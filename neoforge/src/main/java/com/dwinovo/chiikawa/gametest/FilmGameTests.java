@@ -21,6 +21,7 @@ import net.minecraft.world.item.ItemStack;
  * rather than unit tests.
  */
 @GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class FilmGameTests {
     private static final int EXPOSURES = 3;
 
