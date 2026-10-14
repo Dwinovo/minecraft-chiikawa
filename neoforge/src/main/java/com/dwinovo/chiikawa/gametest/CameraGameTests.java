@@ -161,13 +161,13 @@ public final class CameraGameTests {
 
     /**
      * The world as every case here wants it, and the camera as the data pack has it: a case
-     * that tries another camera does not leave it for the next. And no photo still asked for
-     * by a pet of some case before, which holds the request for a minute and which cases here
-     * that count what is asked for would find.
+     * that tries another camera does not leave it for the next.
      */
     private static void settle(ServerLevel level) {
-        settleWorld(level, Difficulty.NORMAL, NOON);
+        // A photo asked for in another batch, a gift case's included, would still be waiting for a
+        // minute, and a case that counts the photos asked for would count it.
         PhotoSystem.stopServer(level.getServer());
+        settleWorld(level, Difficulty.NORMAL, NOON);
         if (dataPackCameras == null) {
             dataPackCameras = CameraSettings.all();
         }
