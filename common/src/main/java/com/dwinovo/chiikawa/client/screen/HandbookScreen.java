@@ -113,7 +113,7 @@ public class HandbookScreen extends Screen {
 
     private void openWebsite() {
         String url = ManualLinks.url(this.minecraft.getLanguageManager().getSelected(), current().link());
-        this.minecraft.setScreen(new ConfirmLinkScreen(open -> this.minecraft.setScreen(this), url, true));
+        this.minecraft.gui.setScreen(new ConfirmLinkScreen(open -> this.minecraft.gui.setScreen(this), url, true));
     }
 
     private int contentLeft() {

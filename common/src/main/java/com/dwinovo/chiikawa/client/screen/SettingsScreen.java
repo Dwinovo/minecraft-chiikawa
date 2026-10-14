@@ -214,7 +214,7 @@ public class SettingsScreen extends Screen {
         // Escape in the middle of a drag: the change was made, so it is not lost.
         send();
         if (this.minecraft != null) {
-            this.minecraft.setScreen(parent);
+            this.minecraft.gui.setScreen(parent);
         }
     }
 }
