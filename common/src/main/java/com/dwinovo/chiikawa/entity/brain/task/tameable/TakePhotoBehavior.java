@@ -154,12 +154,7 @@ public class TakePhotoBehavior extends Behavior<AbstractPet> {
 
     @Override
     protected void stop(ServerLevel level, AbstractPet pet, long gameTime) {
-        if (requested) {
-            // Rests from photos until the picture is back, so it does not take a second while it
-            // waits for the first. What the picture then costs, and how long the rest is after,
-            // is PhotoDelivery's to say.
-            pet.getBrain().setMemoryWithExpiry(InitMemory.PHOTO_COOLDOWN.get(), Unit.INSTANCE, PhotoUploads.WAIT_TICKS);
-        } else if (gaveUp) {
+        if (!requested && gaveUp) {
             // Somebody it could not get to, or lost, is somebody it would try again for, tick after
             // tick, were it not to rest.
             pet.getBrain().setMemoryWithExpiry(InitMemory.PHOTO_COOLDOWN.get(), Unit.INSTANCE, camera.retryTicks());
@@ -217,6 +212,11 @@ public class TakePhotoBehavior extends Behavior<AbstractPet> {
         PhotoSystem.of(level.getServer()).request(owner, pet, camera,
             new PhotoDelivery(pet, camera, shot.kind(), shot.name(), PhotoScout.biomeOf(pet)));
         requested = true;
+        // Rests from photos until the picture is back, so it does not take a second while it
+        // waits for the first. Set here, as it is asked for, so that what PhotoDelivery says when
+        // the picture is back, however soon, has the last word: what the picture then costs, and
+        // how long the rest is after.
+        pet.getBrain().setMemoryWithExpiry(InitMemory.PHOTO_COOLDOWN.get(), Unit.INSTANCE, PhotoUploads.WAIT_TICKS);
     }
 
     /** The friend being photographed looks at the camera, strikes its pose and says something. */
