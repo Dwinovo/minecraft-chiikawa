@@ -8,7 +8,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -47,7 +46,7 @@ public class PetBackpackMenu extends AbstractContainerMenu {
      * nothing it does with them depends on which page the owner happens to be looking at.
      */
     private boolean slotsShown = true;
-    private final DataSlot petId = DataSlot.standalone();
+    private final EntityIdSlots petId = new EntityIdSlots();
 
     public PetBackpackMenu(int containerId, Inventory playerInventory) {
         this(containerId, playerInventory, null);
@@ -58,7 +57,7 @@ public class PetBackpackMenu extends AbstractContainerMenu {
         this.pet = pet;
         this.level = playerInventory.player.level();
         this.petId.set(pet != null ? pet.getId() : -1);
-        this.addDataSlot(this.petId);
+        this.petId.addTo(this::addDataSlot);
 
         SimpleContainer handler = pet != null ? pet.getBackpack() : new SimpleContainer(petSlots());
         this.petContainer = handler;
