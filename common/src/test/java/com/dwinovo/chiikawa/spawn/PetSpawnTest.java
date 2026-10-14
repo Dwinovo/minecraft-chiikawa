@@ -50,8 +50,8 @@ class PetSpawnTest {
         assertEquals(java.util.List.of("#c:is_plains", "#c:is_savanna", "#c:is_desert", "#c:is_swamp", "#c:is_snowy_plains"),
             wild.biomes().stream().map(entry -> (entry.tag() ? "#" : "") + entry.id()).toList());
         // A biome from a mod that is in the plains tag is a plains, and a forest is not.
-        ResourceKey<Biome> moddedPlains = ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("examplemod", "meadow_flats"));
-        TagKey<Biome> isPlains = TagKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("c", "is_plains"));
+        ResourceKey<Biome> moddedPlains = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("examplemod", "meadow_flats"));
+        TagKey<Biome> isPlains = TagKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("c", "is_plains"));
         assertTrue(wild.covers(moddedPlains, isPlains::equals), "a modded plains does not count");
         assertFalse(wild.covers(FOREST, tag -> tag.location().getNamespace().equals("c") && tag.location().getPath().equals("is_forest")),
             "a forest counts");

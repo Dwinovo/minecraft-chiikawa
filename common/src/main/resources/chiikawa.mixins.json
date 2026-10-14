@@ -10,7 +10,7 @@
   ],
   "client": [
     "CameraAccessor",
-    "GameRendererMixin",
+    "CameraMixin",
     "MinecraftMixin"
   ],
   "server": [],

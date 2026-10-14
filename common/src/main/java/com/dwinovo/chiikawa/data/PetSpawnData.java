@@ -19,7 +19,7 @@ import net.minecraft.world.level.biome.MobSpawnSettings;
  * conventional biome tags rather than biomes by name, so a modded biome of the same kind counts.
  */
 public final class PetSpawnData {
-    public static final ResourceLocation WILD_PETS = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "wild_pets");
+    public static final Identifier WILD_PETS = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "wild_pets");
     /** Every vanilla biome the list used to name is in one of these, on both loaders. */
     private static final List<String> BIOME_TAGS = List.of(
         "is_plains", "is_savanna", "is_desert", "is_swamp", "is_snowy_plains");
@@ -31,13 +31,13 @@ public final class PetSpawnData {
     /** @return where wild pets spawn: the conventional tags of the kinds of biome they live in */
     public static List<ExtraCodecs.TagOrElementLocation> biomes() {
         return BIOME_TAGS.stream()
-            .map(path -> new ExtraCodecs.TagOrElementLocation(ResourceLocation.fromNamespaceAndPath("c", path), true))
+            .map(path -> new ExtraCodecs.TagOrElementLocation(Identifier.fromNamespaceAndPath("c", path), true))
             .toList();
     }
 
     /** @return spawn lists by id */
-    public static Map<ResourceLocation, PetSpawn> all() {
-        List<MobSpawnSettings.SpawnerData> spawners = Stream.<Supplier<? extends EntityType<?>>>of(
+    public static Map<Identifier, PetSpawn> all() {
+        List<Weighted<MobSpawnSettings.SpawnerData>> spawners = Stream.<Supplier<? extends EntityType<?>>>of(
                 InitEntity.USAGI_PET, InitEntity.HACHIWARE_PET, InitEntity.CHIIKAWA_PET, InitEntity.SHISA_PET,
                 InitEntity.MOMONGA_PET, InitEntity.KURIMANJU_PET, InitEntity.RAKKO_PET, InitEntity.FURUHONYA_PET)
             .map(type -> new Weighted<>(new MobSpawnSettings.SpawnerData(type.get(), 1, 1), WEIGHT))

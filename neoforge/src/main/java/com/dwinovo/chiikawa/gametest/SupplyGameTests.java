@@ -103,7 +103,7 @@ public final class SupplyGameTests {
      */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void the_handbook_has_its_six_chapters_in_order(GameTestHelper helper) {
-        List<Map.Entry<ResourceLocation, ManualPage>> chapters = ManualData.all().entrySet().stream()
+        List<Map.Entry<Identifier, ManualPage>> chapters = ManualData.all().entrySet().stream()
             .sorted(Comparator.comparingInt(entry -> entry.getValue().order())).toList();
         helper.assertTrue(chapters.stream().map(entry -> entry.getKey().getPath()).toList()
             .equals(List.of("meet", "work", "shop", "care", "camera", "licence")),

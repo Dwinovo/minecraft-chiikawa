@@ -9,13 +9,10 @@ import com.dwinovo.chiikawa.photo.PhotoSubject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Rolls of film: where a shot goes in a bag, when a roll is full, and what stacks. These are

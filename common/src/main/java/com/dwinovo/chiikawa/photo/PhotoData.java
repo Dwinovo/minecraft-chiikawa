@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.photo;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.UUID;
+import net.minecraft.SharedConstants;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -40,7 +41,7 @@ public record PhotoData(UUID photo, PhotoSubject subject, String name, long day,
 
     /** A photo taken in this level now. */
     public static PhotoData taken(UUID photo, PhotoSubject subject, String name, Level level, String photographer) {
-        return new PhotoData(photo, subject, name, level.getDayTime() / Level.TICKS_PER_DAY + 1, photographer);
+        return new PhotoData(photo, subject, name, level.getOverworldClockTime() / SharedConstants.TICKS_PER_GAME_DAY + 1, photographer);
     }
 
     /** "Taken by Hachiware · Day 12 · Chiikawa", the line under a photo in the album. */

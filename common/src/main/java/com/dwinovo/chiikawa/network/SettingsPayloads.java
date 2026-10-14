@@ -6,7 +6,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /** What the world's settings say, and a request to change them. */
 public final class SettingsPayloads {
@@ -22,7 +22,7 @@ public final class SettingsPayloads {
      */
     public record WorldSettingsPayload(WorldSettings settings, boolean canChange) implements CustomPacketPayload {
         public static final Type<WorldSettingsPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "world_settings"));
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "world_settings"));
         public static final StreamCodec<RegistryFriendlyByteBuf, WorldSettingsPayload> STREAM_CODEC =
             StreamCodec.composite(
                 WorldSettings.STREAM_CODEC, WorldSettingsPayload::settings,
@@ -41,7 +41,7 @@ public final class SettingsPayloads {
      */
     public record ChangeWorldSettingsPayload(WorldSettings settings) implements CustomPacketPayload {
         public static final Type<ChangeWorldSettingsPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "change_world_settings"));
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "change_world_settings"));
         public static final StreamCodec<RegistryFriendlyByteBuf, ChangeWorldSettingsPayload> STREAM_CODEC =
             StreamCodec.composite(
                 WorldSettings.STREAM_CODEC, ChangeWorldSettingsPayload::settings,

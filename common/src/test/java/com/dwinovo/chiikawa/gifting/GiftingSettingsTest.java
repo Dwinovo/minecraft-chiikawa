@@ -9,7 +9,7 @@ import com.mojang.serialization.JsonOps;
 import java.util.Map;
 import java.util.Optional;
 import net.minecraft.SharedConstants;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ class GiftingSettingsTest {
         assertEquals(2, settings.weights().size());
         assertTrue(settings.weights().get(0).match().right().isPresent());
         assertTrue(settings.weights().get(1).match().left().isPresent());
-        assertEquals(ResourceLocation.fromNamespaceAndPath("chiikawa", "currency"),
+        assertEquals(Identifier.fromNamespaceAndPath("chiikawa", "currency"),
             settings.weights().get(1).match().left().orElseThrow().location());
     }
 
@@ -62,7 +62,7 @@ class GiftingSettingsTest {
 
     @Test
     void theLoaderTakesTheOneFileAndNothingElse() {
-        ResourceLocation other = ResourceLocation.fromNamespaceAndPath("chiikawa", "other");
+        Identifier other = Identifier.fromNamespaceAndPath("chiikawa", "other");
         JsonElement good = JsonParser.parseString(GOOD);
 
         assertTrue(GiftingSettingsLoader.load(Map.of(GiftingSettingsLoader.FILE, good)).isPresent());

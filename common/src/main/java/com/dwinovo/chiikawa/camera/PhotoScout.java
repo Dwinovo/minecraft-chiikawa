@@ -17,15 +17,17 @@ import java.util.Set;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -143,8 +145,8 @@ public final class PhotoScout {
     }
 
     /** The biome the pet stands in. */
-    public static Optional<ResourceLocation> biomeOf(AbstractPet pet) {
-        return pet.level().getBiome(pet.blockPosition()).unwrapKey().map(ResourceKey::location);
+    public static Optional<Identifier> biomeOf(AbstractPet pet) {
+        return pet.level().getBiome(pet.blockPosition()).unwrapKey().map(ResourceKey::identifier);
     }
 
     /** Hurt just now, riding, or flying, in any of the ways the owner's own game has enough to do already. */
@@ -212,13 +214,18 @@ public final class PhotoScout {
 
     private static boolean sunIsLow(AbstractPet pet) {
         Level level = pet.level();
-        DayPhase phase = DayPhase.of(level.dimensionType().fixedTime().orElse(level.getDayTime()));
+        DayPhase phase = DayPhase.of(level.getDefaultClockTime());
         return (phase == DayPhase.MORNING || phase == DayPhase.EVENING) && level.canSeeSky(pet.blockPosition());
     }
 
     /** The biomes the pet has taken a photo in. */
-    public static List<ResourceLocation> photographed(AbstractPet pet) {
+    public static List<Identifier> photographed(AbstractPet pet) {
         return pet.getBrain().getMemory(InitMemory.PHOTOGRAPHED_BIOMES.get()).orElse(List.of());
+    }
+
+    /** Where the sun is in its path, in radians, as the game draws it. */
+    private static float sunAngle(AbstractPet pet) {
+        return pet.level().environmentAttributes().getValue(EnvironmentAttributes.SUN_ANGLE, pet.position()) * Mth.DEG_TO_RAD;
     }
 
     /**
@@ -228,7 +235,7 @@ public final class PhotoScout {
     private static Vec3 facing(AbstractPet pet) {
         if (sunIsLow(pet)) {
             // The sun's path runs east to west across the sky, and it is east of the world before noon.
-            return new Vec3(Math.cos(pet.level().getSunAngle(1.0F)) >= 0.0 ? 1.0 : -1.0, 0.0, 0.0);
+            return new Vec3(Math.cos(sunAngle(pet)) >= 0.0 ? 1.0 : -1.0, 0.0, 0.0);
         }
         Vec3 looking = pet.getViewVector(1.0F);
         Vec3 level = new Vec3(looking.x, 0.0, looking.z);
