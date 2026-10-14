@@ -2,10 +2,10 @@ package com.dwinovo.chiikawa.client.photo;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.mixin.CameraAccessor;
-import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.renderpearl.api.GpuFormat;
 import java.util.OptionalDouble;
 import java.util.function.Consumer;
 import net.minecraft.client.Camera;
@@ -86,7 +86,7 @@ public final class PhotoCapture {
         HitResult hit = minecraft.hitResult;
         Entity pointedAt = minecraft.crosshairPickEntity;
 
-        RenderTarget target = new TextureTarget("Chiikawa photo", width, height, true, GpuFormat.RGBA8_UNORM);
+        RenderTarget target = new TextureTarget("Chiikawa photo", width, height, GpuFormat.RGBA8_UNORM, GpuFormat.D32_FLOAT);
         boolean read = false;
         try {
             RenderSystem.getDevice().createCommandEncoder()
@@ -108,7 +108,7 @@ public final class PhotoCapture {
             // the level in it, as the panorama screenshot does.
             renderer.update(minecraft.getDeltaTracker());
             renderer.extract(minecraft.getDeltaTracker(), true);
-            renderer.renderLevel(minecraft.getDeltaTracker());
+            renderer.renderLevel();
 
             // The game hands the pixels over once the graphics card has finished with them, a few frames on.
             Screenshot.takeScreenshot(target, image -> {

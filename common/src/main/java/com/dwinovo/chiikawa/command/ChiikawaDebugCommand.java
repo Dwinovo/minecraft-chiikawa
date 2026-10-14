@@ -29,6 +29,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.Item;
@@ -101,7 +102,8 @@ public final class ChiikawaDebugCommand {
                     if (FilmRolls.isOpen(player.getMainHandItem(), film)) {
                         FilmRolls.add(player.getMainHandItem(), shot);
                     } else {
-                        player.getInventory().placeItemBackInInventory(FilmRolls.begin(film, camera.exposures(), shot));
+                        player.getInventory().placeItemBackInInventory(FilmRolls.begin(film, camera.exposures(), shot),
+                            Prediction.SERVER_ONLY);
                     }
                     player.sendSystemMessage(Component.literal("[chiikawa-photo] Photo " + photo + " is in the library"));
                 }

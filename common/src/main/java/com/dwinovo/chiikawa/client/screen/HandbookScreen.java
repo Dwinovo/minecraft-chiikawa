@@ -13,6 +13,7 @@ import com.dwinovo.chiikawa.ui.Ui;
 import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.UiTheme;
 import com.dwinovo.chiikawa.ui.widget.TitledPanel;
+import java.net.URI;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -113,7 +114,7 @@ public class HandbookScreen extends Screen {
 
     private void openWebsite() {
         String url = ManualLinks.url(this.minecraft.getLanguageManager().getSelected(), current().link());
-        this.minecraft.gui.setScreen(new ConfirmLinkScreen(open -> this.minecraft.gui.setScreen(this), url, true));
+        this.minecraft.gui.setScreen(new ConfirmLinkScreen(open -> this.minecraft.gui.setScreen(this), URI.create(url), true));
     }
 
     private int contentLeft() {
