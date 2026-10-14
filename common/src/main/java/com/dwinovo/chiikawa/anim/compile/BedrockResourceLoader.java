@@ -57,7 +57,7 @@ public final class BedrockResourceLoader implements ResourceManagerReloadListene
     private static Map<ResourceLocation, BakedModel> loadModels(ResourceManager manager, long stamp) {
         Map<ResourceLocation, BakedModel> baked = new HashMap<>();
         Map<ResourceLocation, Resource> resources = manager.listResources(MODEL_PATH_PREFIX,
-                id -> id.getPath().endsWith(JSON_EXTENSION));
+                BedrockResourceLoader::isOurs);
         for (Map.Entry<ResourceLocation, Resource> e : resources.entrySet()) {
             ResourceLocation rid = e.getKey();
             ResourceLocation modelKey = toModelKey(rid);
@@ -76,7 +76,7 @@ public final class BedrockResourceLoader implements ResourceManagerReloadListene
                                                                         Map<ResourceLocation, BakedModel> models) {
         Map<ResourceLocation, BakedAnimation> baked = new HashMap<>();
         Map<ResourceLocation, Resource> resources = manager.listResources(ANIMATION_PATH_PREFIX,
-                id -> id.getPath().endsWith(JSON_EXTENSION));
+                BedrockResourceLoader::isOurs);
         for (Map.Entry<ResourceLocation, Resource> e : resources.entrySet()) {
             ResourceLocation rid = e.getKey();
             ResourceLocation modelKey = toAnimationFileKey(rid);
@@ -99,6 +99,15 @@ public final class BedrockResourceLoader implements ResourceManagerReloadListene
             }
         }
         return baked;
+    }
+
+    /**
+     * Whether a listed resource is one of this mod's geo or animation files. The listing walks every
+     * pack in every namespace, and other mods keep models under {@code models/entity} that are not
+     * Bedrock geo at all: only the {@code chiikawa} namespace is read.
+     */
+    static boolean isOurs(ResourceLocation id) {
+        return Constants.MOD_ID.equals(id.getNamespace()) && id.getPath().endsWith(JSON_EXTENSION);
     }
 
     /** Strips {@value #MODEL_PATH_PREFIX}/ prefix and .json suffix. */
