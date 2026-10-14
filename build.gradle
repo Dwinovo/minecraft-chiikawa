@@ -2,7 +2,7 @@ plugins {
     // see https://fabricmc.net/develop/ for new versions
     id 'net.fabricmc.fabric-loom' version '1.16.1' apply false
     // see https://projects.neoforged.net/neoforged/moddevgradle for new versions
-    id 'net.neoforged.moddev' version '2.0.141' apply false
+    id 'net.neoforged.moddev' version '2.0.148' apply false
 }
 
 // 本分支的第二个 loader:1.20.6+ 是 neoforge,1.20.1–1.20.4 是 forge。由 settings.gradle 决定,这里只是读出来。

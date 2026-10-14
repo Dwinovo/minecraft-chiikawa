@@ -8,9 +8,9 @@ name: Build
 # 只挂本分支:每条 MC 版本分支各有一份,各守各的。
 on:
   push:
-    branches: ["26.2"]
+    branches: ["26.3"]
   pull_request:
-    branches: ["26.2"]
+    branches: ["26.3"]
   workflow_dispatch:
 
 # 连着推几次时只留最后一次。
