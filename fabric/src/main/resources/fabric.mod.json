@@ -13,7 +13,7 @@
         "issues": "https://github.com/Dwinovo/minecraft-chiikawa/issues"
     },
     "license": "${license}",
-    "icon": "${mod_id}.png",
+    "icon": "logo.png",
     "environment": "*",
     "entrypoints": {
         "main": [
