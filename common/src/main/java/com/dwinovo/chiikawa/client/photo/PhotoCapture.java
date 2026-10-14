@@ -101,6 +101,8 @@ public final class PhotoCapture {
             eyes.chiikawa$setEyeHeightOld(viewpoint.getEyeHeight());
             camera.reset();
 
+            // The game sets its camera up for a frame apart from drawing the level in it, as the panorama does.
+            renderer.updateCamera(minecraft.getDeltaTracker());
             renderer.renderLevel(minecraft.getDeltaTracker());
 
             // The game hands the pixels over once the graphics card has finished with them, a few frames on.
