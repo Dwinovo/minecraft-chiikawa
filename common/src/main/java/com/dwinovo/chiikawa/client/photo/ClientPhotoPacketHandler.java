@@ -34,6 +34,6 @@ public final class ClientPhotoPacketHandler {
     }
 
     public static void handleOpen(OpenAlbumPayload payload) {
-        Minecraft.getInstance().setScreen(new AlbumScreen(payload.shots()));
+        Minecraft.getInstance().setScreenAndShow(new AlbumScreen(payload.shots()));
     }
 }

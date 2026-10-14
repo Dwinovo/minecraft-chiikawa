@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.client.photo;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.mixin.CameraAccessor;
+import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -16,6 +17,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector4f;
 
 /**
  * Draws the world once from an entity's eyes, without the player seeing any of it: into a
@@ -71,27 +73,29 @@ public final class PhotoCapture {
             return;
         }
         GameRenderer renderer = minecraft.gameRenderer;
-        Camera camera = renderer.getMainCamera();
+        Camera camera = renderer.mainCamera();
         CameraAccessor eyes = (CameraAccessor) camera;
         Options options = minecraft.options;
 
         Entity cameraEntity = minecraft.getCameraEntity();
         float eyeHeight = eyes.chiikawa$getEyeHeight();
         float eyeHeightOld = eyes.chiikawa$getEyeHeightOld();
-        boolean hideGui = options.hideGui;
+        boolean hudHidden = minecraft.gui.hud.isHidden();
         CameraType cameraType = options.getCameraType();
         // Drawing the level looks at whatever the cursor is on, from wherever it is drawn from.
         HitResult hit = minecraft.hitResult;
         Entity pointedAt = minecraft.crosshairPickEntity;
 
-        RenderTarget target = new TextureTarget("Chiikawa photo", width, height, true);
+        RenderTarget target = new TextureTarget("Chiikawa photo", width, height, true, GpuFormat.RGBA8_UNORM);
         boolean read = false;
         try {
             RenderSystem.getDevice().createCommandEncoder()
-                .clearColorAndDepthTextures(target.getColorTexture(), 0, target.getDepthTexture(), 1.0);
+                .clearColorAndDepthTextures(target.getColorTexture(), new Vector4f(), target.getDepthTexture(), 0.0);
             inUse = target;
 
-            options.hideGui = true;
+            if (!hudHidden) {
+                minecraft.gui.hud.toggle();
+            }
             options.setCameraType(CameraType.FIRST_PERSON);
             lens = fov;
             renderer.setRenderBlockOutline(false);
@@ -102,7 +106,7 @@ public final class PhotoCapture {
 
             // The game sets its camera up and takes the level's state down for a frame apart from drawing
             // the level in it, as the panorama screenshot does.
-            renderer.update(minecraft.getDeltaTracker(), true);
+            renderer.update(minecraft.getDeltaTracker());
             renderer.extract(minecraft.getDeltaTracker(), true);
             renderer.renderLevel(minecraft.getDeltaTracker());
 
@@ -125,7 +129,9 @@ public final class PhotoCapture {
             camera.setEntity(cameraEntity);
             eyes.chiikawa$setEyeHeight(eyeHeight);
             eyes.chiikawa$setEyeHeightOld(eyeHeightOld);
-            options.hideGui = hideGui;
+            if (minecraft.gui.hud.isHidden() != hudHidden) {
+                minecraft.gui.hud.toggle();
+            }
             options.setCameraType(cameraType);
             lens = Double.NaN;
             renderer.setRenderBlockOutline(true);
