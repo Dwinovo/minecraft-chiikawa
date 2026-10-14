@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 /** Only this mod's own geo and animation files are read, whatever else the packs hold. */
 class BedrockResourceLoaderTest {
     private static ResourceLocation id(String namespace, String path) {
-        return ResourceLocation.fromNamespaceAndPath(namespace, path);
+        return new ResourceLocation(namespace, path);
     }
 
     @Test
