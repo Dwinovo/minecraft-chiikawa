@@ -137,7 +137,7 @@ public final class InteractGameTests {
 
         pet.mobInteract(owner, InteractionHand.MAIN_HAND);
 
-        helper.assertTrue(owner.containerMenu instanceof PetBackpackMenu,
+        helper.assertTrue(owner.containerMenu instanceof PetBackpackMenu menu && menu.getPet() == pet,
             "clicking the pet did not open its backpack");
         helper.succeed();
     }
