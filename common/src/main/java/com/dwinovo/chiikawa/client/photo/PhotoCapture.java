@@ -49,6 +49,11 @@ public final class PhotoCapture {
         return inUse;
     }
 
+    /** @return whether a photo is being drawn now */
+    public static boolean isDrawing() {
+        return inUse != null;
+    }
+
     /**
      * @return the field of view the game is to draw with now, from top to bottom of the picture,
      *         or nothing when no photo is being taken and the player's own is used
