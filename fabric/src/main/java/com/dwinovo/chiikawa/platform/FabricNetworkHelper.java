@@ -4,8 +4,8 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.platform.services.INetworkHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,7 +28,7 @@ public final class FabricNetworkHelper implements INetworkHelper {
     @Override
     public void openPetMenu(ServerPlayer player, AbstractPet pet) {
         MenuProvider menu = PetBackpackMenu.providerFor(pet);
-        player.openMenu(new ExtendedScreenHandlerFactory<Integer>() {
+        player.openMenu(new ExtendedMenuProvider<Integer>() {
             @Override
             public Integer getScreenOpeningData(ServerPlayer opening) {
                 return pet.getId();
