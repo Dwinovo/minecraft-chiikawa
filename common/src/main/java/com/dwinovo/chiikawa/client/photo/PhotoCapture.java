@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.client.photo;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.mixin.CameraAccessor;
+import com.dwinovo.chiikawa.mixin.GameRendererAccessor;
 import com.mojang.blaze3d.GpuFormat;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
@@ -13,7 +14,9 @@ import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.Screenshot;
+import net.minecraft.client.TextureFilteringMethod;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.state.GameRenderState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
@@ -113,6 +116,7 @@ public final class PhotoCapture {
             // the level in it, as the panorama screenshot does.
             renderer.update(minecraft.getDeltaTracker());
             renderer.extract(minecraft.getDeltaTracker(), true);
+            placeTerrain(minecraft);
             renderer.renderLevel(minecraft.getDeltaTracker());
 
             // The game hands the pixels over once the graphics card has finished with them, a few frames on.
@@ -143,5 +147,23 @@ public final class PhotoCapture {
             minecraft.hitResult = hit;
             minecraft.crosshairPickEntity = pointedAt;
         }
+    }
+
+    /**
+     * Tells the shaders where the camera is, from the state just taken down for this frame, with
+     * the arguments the game gives them at the start of every frame it draws: the terrain is
+     * placed relative to that position and not to the camera the level is drawn with. Left at
+     * the player's eyes, the terrain of a photo is shifted against the entities by as much as
+     * the pet's eyes are from the player's, and a wall behind the owner is drawn in front of
+     * their body. The game writes it again for the player's own frame.
+     */
+    private static void placeTerrain(Minecraft minecraft) {
+        GameRenderer renderer = minecraft.gameRenderer;
+        GameRenderState state = renderer.gameRenderState();
+        ((GameRendererAccessor) renderer).chiikawa$getGlobalSettingsUniform().update(
+            state.windowRenderState.width, state.windowRenderState.height,
+            state.optionsRenderState.glintStrength, minecraft.level.getGameTime(), minecraft.getDeltaTracker(),
+            state.optionsRenderState.menuBackgroundBlurriness, state.levelRenderState.cameraRenderState.pos,
+            state.optionsRenderState.textureFiltering == TextureFilteringMethod.RGSS);
     }
 }

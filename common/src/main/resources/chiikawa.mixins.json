@@ -11,6 +11,7 @@
   "client": [
     "CameraAccessor",
     "CameraMixin",
+    "GameRendererAccessor",
     "GameRendererMixin"
   ],
   "server": [],
