@@ -13,6 +13,7 @@ import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.Screenshot;
+import net.minecraft.client.TextureFilteringMethod;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.HitResult;
@@ -26,9 +27,10 @@ import org.jetbrains.annotations.Nullable;
  *
  * <p>Everything about the player's game that the frame has to differ in is changed, and put
  * back before this returns, whatever happens in between: whose eyes it is, how the camera
- * sits there, that the lens is the camera's own, and that the interface, the hand and the block outline are not
- * drawn. The game's own way of switching whose eyes it looks through is not used, because it
- * also resets the screen effect the player has on.
+ * sits there and where the shaders place the terrain from, that the lens is the camera's own,
+ * and that the interface, the hand and the block outline are not drawn. The game's own way of
+ * switching whose eyes it looks through is not used, because it also resets the screen effect
+ * the player has on.
  */
 public final class PhotoCapture {
     /** The target the frame is being drawn into, while it is. */
@@ -138,6 +140,12 @@ public final class PhotoCapture {
      * frame, as the panorama does, then ticked, which is what has the camera read the sky and
      * fog from where it now is. Without the tick it has no surroundings to read them from and
      * the sky is drawn black, in the photo and on the player's screen after it.
+     *
+     * <p>The shaders are told where the camera is, as the game does once at the start of every
+     * frame: the terrain is placed relative to that position and not to the camera the level is
+     * drawn with. Left at the player's eyes, the terrain of a photo is shifted against the
+     * entities by as much as the pet's eyes are from the player's, and a wall behind the owner is
+     * drawn in front of their body.
      */
     private static void seat(Minecraft minecraft, float eyeHeight, float eyeHeightOld) {
         Camera camera = minecraft.gameRenderer.getMainCamera();
@@ -150,5 +158,11 @@ public final class PhotoCapture {
         // The tick eases the eye height too, and these are not to move.
         eyes.chiikawa$setEyeHeight(eyeHeight);
         eyes.chiikawa$setEyeHeightOld(eyeHeightOld);
+        Options options = minecraft.options;
+        minecraft.gameRenderer.getGlobalSettingsUniform().update(
+            minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight(),
+            options.glintStrength().get(), minecraft.level.getGameTime(), minecraft.getDeltaTracker(),
+            options.getMenuBackgroundBlurriness(), camera,
+            options.textureFiltering().get() == TextureFilteringMethod.RGSS);
     }
 }
