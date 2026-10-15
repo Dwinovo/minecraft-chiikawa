@@ -20,6 +20,7 @@ class ManualLinksTest {
         assertEquals("en", ManualLinks.folder("fr_fr"));
         assertEquals("pt", ManualLinks.folder("pt_br"));
         assertEquals("pt", ManualLinks.folder("pt_pt"));
+        assertEquals("en", ManualLinks.folder("ko_kr"), "the site has no Korean");
         assertEquals("en", ManualLinks.folder(""));
     }
 
@@ -29,5 +30,6 @@ class ManualLinksTest {
         assertEquals("https://chiikawa.dwinovo.cn/ja/play/camera.html", ManualLinks.url("ja_jp", "play/camera"));
         assertEquals("https://chiikawa.dwinovo.cn/en/play/taming.html", ManualLinks.url("en_us", "play/taming"));
         assertEquals("https://chiikawa.dwinovo.cn/pt/play/shop.html", ManualLinks.url("pt_br", "play/shop"));
+        assertEquals("https://chiikawa.dwinovo.cn/en/play/shop.html", ManualLinks.url("ko_kr", "play/shop"));
     }
 }
