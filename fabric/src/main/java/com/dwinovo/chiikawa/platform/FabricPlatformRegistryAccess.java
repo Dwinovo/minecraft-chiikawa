@@ -17,7 +17,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.schedule.Activity;
-import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
+import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
 import net.minecraft.world.inventory.MenuType;
 
 public final class FabricPlatformRegistryAccess implements IPlatformRegistryAccess {
@@ -80,7 +80,7 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
         answerWhistleActivity = registerActivity("answer_whistle");
         takePhotoActivity = registerActivity("take_photo");
 
-        petBackpackMenu = registerMenu("pet_backpack", new ExtendedScreenHandlerType<>(PetBackpackMenu::new, PetBackpackMenu.OPENING_DATA));
+        petBackpackMenu = registerMenu("pet_backpack", new ExtendedMenuType<>(PetBackpackMenu::new, PetBackpackMenu.OPENING_DATA));
     }
 
     private static <T extends SensorType<?>> Supplier<T> registerSensor(String path, T type) {
