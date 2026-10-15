@@ -34,7 +34,7 @@ class PetSpawnTest {
     void aPackNamesBiomesByIdOrByTagAndWritesSpawnersAsVanillaDoes() {
         PetSpawn spawn = parse("""
             { "biomes": [ "minecraft:plains", "#minecraft:is_forest" ],
-              "spawners": [ { "type": "minecraft:pig", "weight": 5, "minCount": 1, "maxCount": 2 } ] }""");
+              "spawners": [ { "type": "minecraft:pig", "weight": 5, "count": { "type": "minecraft:uniform", "min_inclusive": 1, "max_inclusive": 2 } } ] }""");
 
         assertTrue(spawn.covers(PLAINS, tag -> false), "named by id");
         assertTrue(spawn.covers(FOREST, IS_FOREST::equals), "named by tag");
@@ -63,10 +63,10 @@ class PetSpawnTest {
         PetSpawns.replaceAll(Map.of(
             id("a"), parse("""
                 { "biomes": [ "minecraft:plains" ],
-                  "spawners": [ { "type": "minecraft:pig", "weight": 5, "minCount": 1, "maxCount": 1 } ] }"""),
+                  "spawners": [ { "type": "minecraft:pig", "weight": 5, "count": 1 } ] }"""),
             id("b"), parse("""
                 { "biomes": [ "minecraft:plains", "minecraft:forest" ],
-                  "spawners": [ { "type": "minecraft:cow", "weight": 5, "minCount": 1, "maxCount": 1 } ] }""")));
+                  "spawners": [ { "type": "minecraft:cow", "weight": 5, "count": 1 } ] }""")));
 
         assertEquals(2, PetSpawns.in(PLAINS, tag -> false).size());
         assertEquals(1, PetSpawns.in(FOREST, tag -> false).size());
@@ -79,10 +79,10 @@ class PetSpawnTest {
         PetSpawnLoader.Loaded loaded = PetSpawnLoader.load(Map.of(
             id("good"), JsonParser.parseString("""
                 { "biomes": [ "minecraft:plains" ],
-                  "spawners": [ { "type": "minecraft:pig", "weight": 5, "minCount": 1, "maxCount": 1 } ] }"""),
+                  "spawners": [ { "type": "minecraft:pig", "weight": 5, "count": 1 } ] }"""),
             id("backwards"), JsonParser.parseString("""
                 { "biomes": [ "minecraft:plains" ],
-                  "spawners": [ { "type": "minecraft:pig", "weight": 5, "minCount": 3, "maxCount": 1 } ] }""")));
+                  "spawners": [ { "type": "minecraft:pig", "weight": 5, "count": { "type": "minecraft:uniform", "min_inclusive": 3, "max_inclusive": 1 } } ] }""")));
 
         assertEquals(1, loaded.spawns().size());
         assertEquals(1, loaded.errors().size());

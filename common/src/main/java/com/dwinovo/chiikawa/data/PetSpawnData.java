@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.random.Weighted;
-import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 
@@ -41,7 +41,7 @@ public final class PetSpawnData {
         List<Weighted<MobSpawnSettings.SpawnerData>> spawners = Stream.<Supplier<? extends EntityType<?>>>of(
                 InitEntity.USAGI_PET, InitEntity.HACHIWARE_PET, InitEntity.CHIIKAWA_PET, InitEntity.SHISA_PET,
                 InitEntity.MOMONGA_PET, InitEntity.KURIMANJU_PET, InitEntity.RAKKO_PET, InitEntity.FURUHONYA_PET)
-            .map(type -> new Weighted<>(new MobSpawnSettings.SpawnerData(type.get(), UniformInt.of(1, 1)), WEIGHT))
+            .map(type -> new Weighted<>(new MobSpawnSettings.SpawnerData(type.get(), ConstantInt.of(1)), WEIGHT))
             .toList();
         return Map.of(WILD_PETS, new PetSpawn(biomes(), spawners));
     }
