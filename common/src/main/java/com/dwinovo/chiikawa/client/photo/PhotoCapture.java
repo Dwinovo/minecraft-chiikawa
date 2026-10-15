@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.client.photo;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.mixin.CameraAccessor;
+import com.dwinovo.chiikawa.mixin.MinecraftAccessor;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -73,6 +74,7 @@ public final class PhotoCapture {
         GameRenderer renderer = minecraft.gameRenderer;
         Camera camera = renderer.getMainCamera();
         CameraAccessor eyes = (CameraAccessor) camera;
+        MinecraftAccessor view = (MinecraftAccessor) minecraft;
         Options options = minecraft.options;
 
         Entity cameraEntity = minecraft.getCameraEntity();
@@ -95,7 +97,7 @@ public final class PhotoCapture {
             options.setCameraType(CameraType.FIRST_PERSON);
             lens = fov;
             renderer.setRenderBlockOutline(false);
-            minecraft.setCameraEntity(viewpoint);
+            view.chiikawa$setCameraEntity(viewpoint);
             // At the new eyes' height at once, not eased to it over the next few ticks.
             eyes.chiikawa$setEyeHeight(viewpoint.getEyeHeight());
             eyes.chiikawa$setEyeHeightOld(viewpoint.getEyeHeight());
@@ -119,7 +121,7 @@ public final class PhotoCapture {
             if (!read) {
                 target.destroyBuffers();
             }
-            minecraft.setCameraEntity(cameraEntity);
+            view.chiikawa$setCameraEntity(cameraEntity);
             eyes.chiikawa$setEyeHeight(eyeHeight);
             eyes.chiikawa$setEyeHeightOld(eyeHeightOld);
             camera.reset();
