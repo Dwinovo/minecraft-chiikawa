@@ -653,53 +653,21 @@ public final class LanguageData {
         } else if ("ko_kr".equals(locale)) {
             addCommonTranslations(adder, "치이카와", "가방", "따라오기", "앉아", "자유 행동");
             addDollTooltipTranslations(adder, "인형을 케이크 위에 놓아 볼래?");
-            addHandbookTranslations(adder, "치이카와의 알바 수첩", "우클릭해서 열어. 펫을 어떻게 쓰는지 적혀 있어", "이 수첩은 아직 비어 있어",
-                "이전 페이지", "다음 페이지");
-            addHandbookPage(adder, "meet", "치이카와를 만나기",
-                "평원, 사바나, 사막, 늪, 눈 덮인 벌판에 야생 펫이 나와. 각자 도구를 들고 있어.",
-                "빵이나 쿠키 같은 음식을 들고 야생 펫을 우클릭해. 한 번에 길들여질 확률은 30%야.",
-                "웅크리고 우클릭하면 따라오기, 앉아, 자유 행동을 바꿔. 피리 사탕은 근처 펫에게 한 번에 지시해.",
-                "펫을 우클릭하면 가방, 상태, 지시를 볼 수 있어.");
-            addHandbookPage(adder, "work", "일하러 가기",
-                "알바 게시판을 놓으면 해 뜰 때마다 전표가 3장 붙어.",
-                "펫은 손에 든 도구에 맞는 전표를 받아. 괭이면 잡초 뽑기야.",
-                "전표를 받으면 적힌 양만큼 일을 해.",
-                "보상은 펫 가방으로 들어가. 화면을 열면 꺼낼 수 있어.");
-            addHandbookPage(adder, "shop", "상점",
-                "상점을 놓으면 자유 행동 중인 펫이 가방의 에메랄드로 물건을 사.",
-                "누구는 무엇을 사는지가 달라. 치이카와는 간식을 제일 자주 사.",
-                "계산대를 우클릭하면 가격표가 열려. 플레이어도 사고팔 수 있어.",
-                "에메랄드를 들고 자기 펫을 우클릭하면 용돈을 줘.");
-            addHandbookPage(adder, "presents", "선물",
-                "펫이 쇼핑할 때 가끔 주인을 위해 선물을 같이 사.",
-                "사면 선물을 들고 주인에게 걸어와.",
-                "선물은 인벤토리로 들어가. 가득 차면 발밑에 놓여.",
-                "살 때와 건넬 때 채팅으로 알려 줘.");
-            addHandbookPage(adder, "supplies", "가방과 간식",
-                "배낭을 입히면 가방이 10칸 늘어.",
-                "곰 가방, 고래 가방, 별 가방도 10칸이야. 어느 펫이나 멜 수 있어.",
-                "간단한 요리를 먹이면 5분 동안 더 빠르고 일도 더 하려 해.",
-                "이름표로 펫 이름을 지을 수 있어.");
-            addHandbookPage(adder, "upgrade", "게시판 강화",
-                "게시판 화면에서 에메랄드를 쓰면 레벨이 오르고, 하루에 전표가 한 장 더 붙어.",
-                "2레벨부터 토벌 전표가 나와.",
-                "검을 든 펫은 가까이서 토벌하고, 활을 든 펫은 멀리서 토벌해.",
-                "토벌 보상이 제일 크지만, 펫이 쓰러지면 그 전표는 실패야.");
-            addHandbookPage(adder, "safety", "쓰러짐과 불러오기",
-                "펫이 쓰러지면 인형이 되고, 가방 안 물건은 인형에 남아.",
-                "놓인 케이크를 인형으로 우클릭하면 물건을 가진 채 돌아와.",
-                "체력이 35% 아래로 내려가면 싸움에서 빠지고, 60%가 되면 다시 가.",
-                "펫 방울을 쓰면 다른 차원에 있어도 모든 펫이 네 옆으로 와.");
-            addHandbookPage(adder, "friends", "친구끼리",
-                "펫이 말하면 머리 위에 말풍선이 떠. 16칸 안의 플레이어가 봐.",
-                "둘 다 한가하면 가끔 원작 장면을 해. 모몽가가 치이카와에게 매달리는 식이야.",
-                "랏코는 치이카와와 하치와레에게 먹을 것을 주고, 쿠리만쥬는 잡초를 뽑은 펫에게 커피를 줘.",
-                "하치와레가 길에서 연주하면 근처의 한가한 펫이 앉아 듣고 박수를 쳐.");
-            addHandbookPage(adder, "licence", "잡초 뽑기 자격증",
-                "게시판의 잡초 뽑기 전표가 연습이야. 참고서를 들고 우클릭하면 펫이 읽어.",
-                "시험 책상을 놓고 우클릭해서 펫 한 마리를 접수해. 다이아몬드 1개가 필요해. 책상 하나에는 한 마리만.",
-                "낮에 책상 앞에 앉아 답안을 쓰고, 다음 날 아침에 결과가 나와. 책상을 부수면 시험은 취소야.",
-                "합격하면 한 등급 오르고 보수가 늘어. 3급부터 넓은 잡초 뽑기 전표를 받아.");
+            addHandbookTranslations(adder, "치이카와의 알바 수첩", "우클릭해서 열어. 펫을 어떻게 쓰는지 적혀 있어",
+                "이 수첩은 아직 비어 있어");
+            addHandbookChapter(adder, "meet", "치이카와를 만나기",
+                "평원, 사바나, 사막, 늪, 눈 덮인 벌판에는 야생 펫이 살아. 빵이나 쿠키 같은 음식을 들고 우클릭하면 길들일 수 있을지도 몰라. 웅크리고 우클릭하면 따라오기, 앉아, 자유 행동이 바뀌고, 그냥 우클릭하면 그 펫의 화면이 열려. 피리 사탕을 불면 근처 펫 모두에게 한꺼번에 지시할 수 있어.");
+            addHandbookChapter(adder, "work", "일하러 가기",
+                "알바 게시판을 놓으면 해가 뜰 때마다 전표가 몇 장 붙어. 펫은 손에 든 도구에 맞는 전표를 받아 가. 괭이를 들면 잡초 뽑기, 검이나 활을 들면 토벌, 오르골을 든 하치와레는 길거리 연주야. 보상은 곧바로 펫의 가방에 들어가. 게시판에 에메랄드를 쓰면 레벨이 올라서 하루에 붙는 전표가 늘고, 2레벨부터는 토벌 전표도 나와.");
+            addHandbookChapter(adder, "shop", "상점과 선물",
+                "상점을 놓으면 펫이 자기 가방에 든 에메랄드로 마음에 드는 물건을 사러 가. 에메랄드를 들고 우클릭하면 용돈을 줄 수 있어. 가끔은 가방에서 하나를 골라 선물로 가져다주기도 해. 상점에서는 너도 사고팔 수 있어.");
+            addHandbookChapter(adder, "care", "돌보기",
+                "배낭이나 가방을 메게 하면 가방이 10칸 늘어나고, 간단한 요리를 먹이면 일할 의욕이 올라. 쓰러진 펫은 인형이 돼. 인형을 들고 놓아 둔 케이크를 우클릭하면 돌아와. 펫이 길을 잃었다면 펫 방울을 울려 봐.");
+            addHandbookChapter(adder, "camera", "하치와레의 카메라",
+                "하치와레에게 카메라와 필름을 주면 알맞은 때에 너와 친구들, 풍경을 찍어 줘. 필름 한 롤에는 8장이 들어가고, 다 찍으면 선물로 건네줘. 필름을 우클릭하면 그 롤의 사진을 넘겨 볼 수 있어.");
+            addHandbookChapter(adder, "licence", "잡초 뽑기 자격증",
+                "시험 책상을 놓고 우클릭해서 다이아몬드 1개로 펫을 접수해. 낮에 책상에 앉아 답안을 쓰고, 결과는 다음 날 아침에 나와. 잡초 뽑기 전표를 해내거나 참고서를 읽으면 합격 확률이 올라가. 합격한 펫은 잡초 뽑기 보상이 늘고, 3급부터는 상급 잡초 뽑기 전표도 받을 수 있어.");
+            adder.add("manual.chiikawa.more", "더 자세한 내용은 웹사이트에서 →");
             addJobTranslations(adder, "직업", "없음", "농부", "검사", "궁수", "음악가", "알 수 없음");
             addEntityTranslations(adder, "우사기", "하치와레", "치이카와", "시사", "모몽가", "쿠리만쥬", "랏코", "후루혼야");
             addItemTagTranslations(adder, "농부 도구", "검사 도구", "궁수 도구", "음악가 도구", "길들이기 음식", "심을 작물", "배달 아이템", "주울 수 있는 아이템", "펫 간식");
@@ -722,8 +690,8 @@ public final class LanguageData {
                 "랏코 인형",
                 "후루혼야 인형",
                 "우사기의 토벌봉",
-                "하치와레의 사수마타",
-                "치이카와의 사수마타",
+                "하치와레의 사스마타",
+                "치이카와의 사스마타",
                 "랏코의 검"
             );
             addMusicBoxTranslations(adder, "오르골", "선택된 곡 없음", "곡: %s", "곡 고르기", "가져오는 중", "실패", "재생할 곡이 없어",
@@ -753,10 +721,7 @@ public final class LanguageData {
                 "이미 최고 등급이야", "일을 더 해야 해", "접수했거나 결과를 기다리는 중", "대기 중", "너무 멀어");
             addExamDeskOddsTranslations(adder, "기초 %s%%", "일한 양 +%s%%", "이전에 낙방 +%s%%", "참고서를 읽음 +%s%%",
                 "성격 ×%s", "합격 확률 %s (최대 %s%%)");
-            addPetNewsTranslations(adder, "%1$s(이)가 %4$s %2$s개로 %3$s을(를) 샀어",
-                    "%1$s(이)가 %4$s %2$s개로 %3$s을(를) 사서 그 자리에서 먹었어",
-                    "%1$s(이)가 %4$s %2$s개로 %3$s을(를) 샀어. 너에게 주는 거라며",
-                    "%1$s(이)가 %2$s을(를) 줬어");
+            addPetNewsTranslations(adder, "%1$s(이)가 너에게 %2$s을(를) 줬어");
             addRecallTranslations(adder, "%s마리가 달려왔어", "부를 펫이 없어",
                     "%s(은)는 대답이 없어. 마지막으로 본 곳에 없어");
             addShopScreenTranslations(adder, "상점", "%s 사기", "%s 팔기", "오늘은 파는 게 없어",
@@ -879,7 +844,23 @@ public final class LanguageData {
             addVoiceLines(adder, "rakko", VoiceMoment.WHISTLE, "...가자.");
             addVoiceLines(adder, "shisa", VoiceMoment.WHISTLE, "네에~!");
             addVoiceLines(adder, "furuhonya", VoiceMoment.WHISTLE, "갈게...");
+            addVoiceLines(adder, "hachiware", VoiceMoment.PHOTO, "찍을게~!");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.PHOTOGRAPHED, "응...");
+            addVoiceLines(adder, "usagi", VoiceMoment.PHOTOGRAPHED, "야하아!");
+            addVoiceLines(adder, "momonga", VoiceMoment.PHOTOGRAPHED, "귀엽게 찍어.");
+            addVoiceLines(adder, "rakko", VoiceMoment.PHOTOGRAPHED, "...찍어.");
+            addVoiceLines(adder, "shisa", VoiceMoment.PHOTOGRAPHED, "예쁘게 찍어 주세요~");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.PHOTOGRAPHED, "카니");
             addWhistleTranslations(adder, "피리 사탕", "피리 사탕 (%s)", "길게 눌러 불어. 근처 펫이 표시된 지시를 따라. 웅크리고 우클릭하면 지시를 바꿔.", "피리 사탕: %s", "펫 %d마리가 달려왔어", "펫 %d마리가 앉았어", "펫 %d마리가 자유롭게 돌아다녀", "야생 펫 %d마리가 구경하러 왔어", "호루라기를 들은 펫이 없어", "구경하러 가는 중", "호루라기가 안 들려");
+            addSettingsTranslations(adder, "치이카와 설정", "야생 펫 등장: %s", "수다 빈도: %s", "말풍선: %s", "켜짐", "꺼짐",
+                "등장과 수다는 월드 설정이야. 월드 안에서 바꿀 수 있어", "등장과 수다는 관리자만 바꿀 수 있어",
+                "펫 소리 크기는 기본 소리 설정의 \"친화적 몹\"에서 조절할 수 있어");
+            addAlbumTranslations(adder, "%1$s 촬영 · %2$s일째 · %3$s", "%1$s 촬영 · %2$s일째 · 풍경", "촬영 %1$s/%2$s",
+                "현상 중...", "이 사진을 찾을 수 없어", "이전 사진", "다음 사진");
+            addCameraTranslations(adder, "하치와레의 카메라", "필름과 함께 하치와레의 가방에 넣으면 사진 찍기 좋은 순간을 알아서 찾아", "필름",
+                "한 롤에 여러 장을 찍을 수 있고, 다 차면 하치와레가 롤을 건네줘. 우클릭하면 사진을 볼 수 있어. 카메라를 가진 하치와레의 가방에 넣어 줘");
+            addPhotoIntentTranslations(adder, "사진 찍기", "사진은 하치와레만 찍어", "가방에 카메라가 없어", "가방에 필름이 없어",
+                "주인이 너무 멀리 있어", "주인이 바빠 보여", "방금 찍어서 쉬는 중이야", "지금은 찍을 만한 게 없어");
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
