@@ -72,8 +72,7 @@ public final class PhotoCapture {
             return;
         }
         GameRenderer renderer = minecraft.gameRenderer;
-        Camera camera = renderer.getMainCamera();
-        CameraAccessor eyes = (CameraAccessor) camera;
+        CameraAccessor eyes = (CameraAccessor) renderer.getMainCamera();
         MinecraftAccessor view = (MinecraftAccessor) minecraft;
         Options options = minecraft.options;
 
@@ -99,12 +98,7 @@ public final class PhotoCapture {
             renderer.setRenderBlockOutline(false);
             view.chiikawa$setCameraEntity(viewpoint);
             // At the new eyes' height at once, not eased to it over the next few ticks.
-            eyes.chiikawa$setEyeHeight(viewpoint.getEyeHeight());
-            eyes.chiikawa$setEyeHeightOld(viewpoint.getEyeHeight());
-            camera.reset();
-
-            // The game sets its camera up for a frame apart from drawing the level in it, as the panorama does.
-            renderer.updateCamera(minecraft.getDeltaTracker());
+            seat(minecraft, viewpoint.getEyeHeight(), viewpoint.getEyeHeight());
             renderer.renderLevel(minecraft.getDeltaTracker());
 
             // The game hands the pixels over once the graphics card has finished with them, a few frames on.
@@ -124,9 +118,7 @@ public final class PhotoCapture {
                 target.destroyBuffers();
             }
             view.chiikawa$setCameraEntity(cameraEntity);
-            eyes.chiikawa$setEyeHeight(eyeHeight);
-            eyes.chiikawa$setEyeHeightOld(eyeHeightOld);
-            camera.reset();
+            seat(minecraft, eyeHeight, eyeHeightOld);
             options.hideGui = hideGui;
             options.setCameraType(cameraType);
             lens = Double.NaN;
@@ -134,5 +126,24 @@ public final class PhotoCapture {
             minecraft.hitResult = hit;
             minecraft.crosshairPickEntity = pointedAt;
         }
+    }
+
+    /**
+     * Sets the game's camera up on its camera entity afresh, as the game does it: set up for a
+     * frame, as the panorama does, then ticked, which is what has the camera read the sky and
+     * fog from where it now is. Without the tick it has no surroundings to read them from and
+     * the sky is drawn black, in the photo and on the player's screen after it.
+     */
+    private static void seat(Minecraft minecraft, float eyeHeight, float eyeHeightOld) {
+        Camera camera = minecraft.gameRenderer.getMainCamera();
+        CameraAccessor eyes = (CameraAccessor) camera;
+        eyes.chiikawa$setEyeHeight(eyeHeight);
+        eyes.chiikawa$setEyeHeightOld(eyeHeightOld);
+        camera.reset();
+        minecraft.gameRenderer.updateCamera(minecraft.getDeltaTracker());
+        camera.tick();
+        // The tick eases the eye height too, and these are not to move.
+        eyes.chiikawa$setEyeHeight(eyeHeight);
+        eyes.chiikawa$setEyeHeightOld(eyeHeightOld);
     }
 }
