@@ -16,6 +16,9 @@ import net.minecraft.world.entity.Entity;
  * photo, and how long the pet rests after it, is the pet's own mind's to say when it reads what it is told
  * (see {@link PhotoResults}). The pet is looked up afresh, since a minute is long enough for it to have
  * wandered off into a chunk nobody has loaded; a pet that is gone is a photo nobody records.
+ *
+ * <p>Told on the server thread, as the photo system's uploads are (the platforms hand the payloads over on it),
+ * which is where the pet's mind applies what a photo makes durable as it is told.
  */
 public final class PhotoDelivery implements PhotoUploads.Listener {
     private final ServerLevel level;
