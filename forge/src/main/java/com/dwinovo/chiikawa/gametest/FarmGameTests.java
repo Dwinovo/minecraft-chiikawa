@@ -50,6 +50,14 @@ public final class FarmGameTests {
     /** How long a pet is watched leaving something alone before we believe it means to. */
     private static final int LEAVE_IT_TICKS = 600;
 
+    /**
+     * The longest a pet takes, from setting off for a crop it has no way to, to reap one it has: it gives up in a tick or
+     * two, the sensor looks again and the pet decides on the next turn of its decisions, and the open crop is four blocks
+     * off. It takes about 50; the farm behaviors that gave up the same way took about 95, and a pet that waited out
+     * a hundred ticks of having no way takes more than a hundred.
+     */
+    private static final int GIVE_UP_AND_REAP_TICKS = 80;
+
     private static final int STAND = 2;
 
     @BeforeBatch(batch = BATCH)
@@ -225,6 +233,40 @@ public final class FarmGameTests {
             helper.assertTrue(helper.getBlockState(open).getValue(CropBlock.AGE) < CropBlock.MAX_AGE, "the open crop was not reaped");
             helper.assertTrue(helper.getBlockState(walled).getValue(CropBlock.AGE) == CropBlock.MAX_AGE, "the walled-in crop was reaped");
         });
+    }
+
+    /**
+     * A pet gives up on a crop it has no way to the moment the brain's mover says so, not a long while after, as a
+     * pet that had pathfound for it before setting off did: with a crop walled in nearer than one that is open, it is
+     * reaping the open one within the time the two walks and the scan between them take, from the time it first sets
+     * off. A field with several walled-in crops must not look like a pet that is stuck.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WORK_TICKS)
+    public static void a_pet_gives_up_on_a_crop_it_cannot_get_to_at_once(GameTestHelper helper) {
+        AbstractPet pet = holding(worker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
+        BlockPos walled = new BlockPos(7, STAND, 4);
+        ripeWheat(helper, walled);
+        for (int x = -1; x <= 1; x++) {
+            for (int z = -1; z <= 1; z++) {
+                for (int y = 0; y <= 1; y++) {
+                    if (x != 0 || z != 0) {
+                        helper.setBlock(walled.offset(x, y, z), Blocks.STONE);
+                    }
+                }
+            }
+        }
+        BlockPos open = new BlockPos(4, STAND, 8);
+        ripeWheat(helper, open);
+
+        long[] setOff = {-1L};
+        helper.onEachTick(() -> {
+            if (setOff[0] < 0L && pet.getIntent().filter(ErrandIds.HARVEST::equals).isPresent()) {
+                setOff[0] = helper.getTick();
+            }
+            helper.assertTrue(setOff[0] < 0L || helper.getTick() - setOff[0] <= GIVE_UP_AND_REAP_TICKS || carries(pet, Items.WHEAT),
+                "the pet had not reaped the open crop " + GIVE_UP_AND_REAP_TICKS + " ticks after it set off for one");
+        });
+        helper.succeedWhen(() -> helper.assertTrue(carries(pet, Items.WHEAT), "the pet never came away with the wheat that was open to it"));
     }
 
     private static void ripeWheat(GameTestHelper helper, BlockPos crop) {
