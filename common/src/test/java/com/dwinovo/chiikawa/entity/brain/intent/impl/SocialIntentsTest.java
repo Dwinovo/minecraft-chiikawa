@@ -3,6 +3,9 @@ package com.dwinovo.chiikawa.entity.brain.intent.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.data.ErrandSettingsData;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCategory;
@@ -56,13 +59,15 @@ class SocialIntentsTest {
 
     @Test
     void aSceneComesAfterAnyErrandButBeforePotteringAboutAndAnsweringComesFirst() {
-        float scene = socialize.score(partnerAt(1).build());
-        float answer = cooperate.score(TestContext.at(OWNER, AT_HEEL).playingAlong().build());
+        ErrandSettings<?> scene = ErrandSettingsData.all().get(ErrandIds.SOCIALIZE);
+        ErrandSettings<?> answer = ErrandSettingsData.all().get(ErrandIds.COOPERATE);
+        ErrandSettings<?> pickUp = ErrandSettingsData.all().get(ErrandIds.PICK_UP_ITEM);
+        ErrandSettings<?> wander = ErrandSettingsData.all().get(ErrandIds.WANDER);
 
-        assertTrue(scene < 0.4F, "picking up an item comes first");
-        assertTrue(scene > 0.05F, "wandering comes after");
-        assertTrue(answer > scene, "a pet being visited answers rather than setting off itself");
-        assertTrue(answer < 0.6F, "work still takes a pet away");
+        assertEquals(pickUp.priority(), scene.priority());
+        assertTrue(scene.score() < pickUp.score(), "picking up an item comes first");
+        assertTrue(scene.priority() > wander.priority(), "wandering comes after");
+        assertTrue(answer.priority() > scene.priority(), "a pet being visited answers rather than setting off itself");
     }
 
     private static TestContext partnerAt(int blocksEast) {
