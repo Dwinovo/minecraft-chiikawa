@@ -33,6 +33,11 @@ import net.minecraft.world.phys.AABB;
  * <p>Which of them to fight is {@link PetCombat#pick}: the nearest, but the one already
  * being fought is kept while it is worth keeping, so a pet in a crowd finishes something
  * instead of turning towards whatever drifted closest.
+ *
+ * <p>This is the only thing that writes the attack target, whatever the pet's job and what it is
+ * doing: one that is gone, or that the pet may not attack, is not on the list and so is dropped
+ * for the next, or for none. The fights read it and never write it, and a fight is about the foe
+ * it set off for, and over when the sensor names another.
  */
 public class PetAttackbleEntitySensor extends Sensor<AbstractPet> {
     /**
@@ -58,9 +63,10 @@ public class PetAttackbleEntitySensor extends Sensor<AbstractPet> {
     @Override
     protected void doTick(ServerLevel level, AbstractPet pet) {
         // Only fencers and archers ever act on attack targets, so skip the scan for
-        // other jobs. Whether a pet may fight right now is up to its intents.
+        // other jobs, and leave them none. Whether a pet may fight right now is up to its errands.
         int jobId = pet.getPetJobId();
         if (jobId != InitRegistry.FENCER_ID && jobId != InitRegistry.ARCHER_ID) {
+            pet.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
             return;
         }
 
