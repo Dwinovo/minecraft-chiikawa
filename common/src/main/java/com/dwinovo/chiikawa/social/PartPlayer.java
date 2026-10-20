@@ -4,10 +4,10 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 
 /**
  * One pet playing its part in a scene, from the moment the two meet until the scene is
- * over: it holds the part's pose throughout, plays the opening beat, the recurring beat
- * each time it comes round, and the closing beat as it lets go. Held by whichever
- * behavior the pet is in the scene through, the one that came over or the one visited,
- * so both play a part the same way.
+ * over: it plays the opening beat, the recurring beat each time it comes round, and the
+ * closing beat as it lets go. Held by the step the pet plays its part in, the one that
+ * came over or the one visited, so both play a part the same way. The part's pose is
+ * not its to hold: the step claims it, and the executor shows it.
  */
 public final class PartPlayer {
     private final PetInteraction.Side side;
@@ -20,13 +20,12 @@ public final class PartPlayer {
     }
 
     /**
-     * The part begins: the pet takes up its pose and plays the opening beat.
+     * The part begins: the pet plays the opening beat.
      *
      * @param gameTime the current game time
      * @return the part under way, to be ticked while it lasts and ended when it is over
      */
     public static PartPlayer begin(AbstractPet pet, PetInteraction.Side side, long gameTime) {
-        pet.setPerformance(side.pose().orElse(""));
         side.begin().ifPresent(beat -> beat.play(pet));
         return new PartPlayer(side, side.nowAndThen()
             .map(recurring -> gameTime + recurring.nextWait(pet.getRandom()))
@@ -41,9 +40,8 @@ public final class PartPlayer {
         });
     }
 
-    /** The part is over, however it ended: the closing beat, and the pose let go. */
+    /** The part is over, however it ended: the closing beat. */
     public void end(AbstractPet pet) {
         side.end().ifPresent(beat -> beat.play(pet));
-        pet.setPerformance("");
     }
 }

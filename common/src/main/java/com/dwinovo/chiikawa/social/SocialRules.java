@@ -5,12 +5,12 @@ import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandView;
 import com.dwinovo.chiikawa.init.InitMemory;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.UUID;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.SimpleContainer;
@@ -21,7 +21,7 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * Who may play which scene with whom. Asked by the sensor when a pet looks around, and
- * again by the pet as it sets off, since the partner may have got busy in between.
+ * again by the pet's view as it decides, since the partner may have got busy in between.
  */
 public final class SocialRules {
     private SocialRules() {
@@ -46,7 +46,7 @@ public final class SocialRules {
             Optional<Partner> partner = bestPartner(pet, entry.getKey(), interaction, gameTime);
             if (partner.isPresent()) {
                 return Optional.of(new InteractionPlan(entry.getKey(), interaction, self.get(), partner.get().pet(),
-                    interaction.partners().get(partner.get().rank()), false));
+                    interaction.partners().get(partner.get().rank())));
             }
         }
         return Optional.empty();
@@ -57,6 +57,8 @@ public final class SocialRules {
      * kind the scene is played with, not played by these two lately, and doing what the
      * scene asks of it. An idle partner must be free — permitted to play along by its own
      * owner, not already waited for by another pet, and doing nothing but pottering about.
+     * What it will say to being asked is its own to decide when it is, see {@code InvitationDesk}; this
+     * is what the pet that would ask can know beforehand.
      *
      * @return the partner's place among the scene's partners, empty if it would not
      */
@@ -74,9 +76,10 @@ public final class SocialRules {
                     .isPresent()) {
             return OptionalInt.empty();
         }
+        ErrandView errands = partner.getMind().errands();
         boolean doingIt = switch (interaction.partnerState()) {
-            case IDLE -> isFree(partner);
-            case PLAYING_MUSIC -> partner.getMind().errands().playingMusic();
+            case IDLE -> isFree(partner, errands, gameTime);
+            case PLAYING_MUSIC -> errands.playingMusic();
         };
         return doingIt ? rank : OptionalInt.empty();
     }
@@ -97,21 +100,6 @@ public final class SocialRules {
     public static ItemStack takeHandOver(AbstractPet pet, PetInteraction interaction) {
         OptionalInt slot = handOverSlot(pet, interaction);
         return slot.isPresent() ? pet.getBackpack().removeItem(slot.getAsInt(), 1) : ItemStack.EMPTY;
-    }
-
-    /**
-     * Notes on both pets that they have played this scene together, so neither starts it
-     * with the other again before the scene's cooldown is over.
-     */
-    public static void rememberPlayed(ResourceLocation id, PetInteraction interaction, AbstractPet one, AbstractPet other,
-            long gameTime) {
-        long end = gameTime + interaction.cooldownTicks();
-        note(one, id, other.getUUID(), end, gameTime);
-        note(other, id, one.getUUID(), end, gameTime);
-    }
-
-    private static void note(AbstractPet pet, ResourceLocation id, UUID other, long end, long gameTime) {
-        pet.getBrain().setMemory(InitMemory.SOCIAL_COOLDOWNS.get(), cooldowns(pet).with(id, other, end, gameTime));
     }
 
     private static SocialCooldowns cooldowns(AbstractPet pet) {
@@ -138,10 +126,10 @@ public final class SocialRules {
      * Free to be asked: its owner lets it play, nobody is on the way to it, and it is only
      * pottering about. A pet at work is never pulled off it for a scene.
      */
-    private static boolean isFree(AbstractPet partner) {
+    private static boolean isFree(AbstractPet partner, ErrandView errands, long gameTime) {
         return PetConstraints.allows(partner, PetOwnership.of(partner), ErrandCategory.SOCIAL)
-            && !partner.getBrain().hasMemoryValue(InitMemory.INTERACTION_RESERVATION.get())
-            && partner.getMind().errands().isOn(ErrandIds.WANDER);
+            && errands.engagedWith(gameTime).isEmpty()
+            && errands.isOn(ErrandIds.WANDER);
     }
 
     private static OptionalInt handOverSlot(AbstractPet pet, PetInteraction interaction) {
