@@ -25,10 +25,6 @@ public interface IPlatformRegistryAccess {
     /** Notices the other pets a pet could play a scene with. */
     Supplier<SensorType<PetSocialSensor>> petSocialSensor();
 
-    Supplier<Activity> socializeActivity();
-
-    Supplier<Activity> cooperateActivity();
-
     Supplier<Activity> answerWhistleActivity();
 
     Supplier<MenuType<PetBackpackMenu>> petBackpackMenu();
