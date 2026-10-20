@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.ExtraCodecs;
@@ -23,7 +23,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 public final class ErrandSettingsLoader extends SimpleJsonResourceReloadListener<JsonElement> {
     public static final String DIRECTORY = "pet_errand";
     /** Id for loaders that register reload listeners by id. */
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
 
     private static final String LOG_PREFIX = "[chiikawa-errand] ";
 
@@ -32,7 +32,7 @@ public final class ErrandSettingsLoader extends SimpleJsonResourceReloadListener
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
+    protected void apply(Map<Identifier, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
         Loaded loaded = load(files);
         loaded.errors().forEach(Constants.LOG::error);
         loaded.warnings().forEach(Constants.LOG::warn);
@@ -44,12 +44,12 @@ public final class ErrandSettingsLoader extends SimpleJsonResourceReloadListener
      * @param files parsed JSON by file id, which is the id of the errand
      * @return the settings that decoded and hold together, and what went wrong with the rest
      */
-    static Loaded load(Map<ResourceLocation, JsonElement> files) {
-        Map<ResourceLocation, ErrandSettings<?>> decoded = new HashMap<>();
+    static Loaded load(Map<Identifier, JsonElement> files) {
+        Map<Identifier, ErrandSettings<?>> decoded = new HashMap<>();
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
         files.forEach((id, json) -> {
-            if (!ErrandIds.ALL.contains(id)) {
+            if (Errands.get(id) == null) {
                 warnings.add(LOG_PREFIX + id + " is skipped, there is no such errand");
                 return;
             }
@@ -58,7 +58,7 @@ public final class ErrandSettingsLoader extends SimpleJsonResourceReloadListener
                 .ifError(error -> errors.add(LOG_PREFIX + id + " is switched off, failed to parse: " + error.message()));
         });
         // What one file says about the others can only be checked with all of them read.
-        Map<ResourceLocation, ErrandSettings<?>> settings = new HashMap<>();
+        Map<Identifier, ErrandSettings<?>> settings = new HashMap<>();
         decoded.forEach((id, parsed) -> parsed.problemAmong(id, decoded).ifPresentOrElse(
             problem -> errors.add(LOG_PREFIX + id + " is switched off, " + problem),
             () -> settings.put(id, parsed)));
@@ -70,6 +70,6 @@ public final class ErrandSettingsLoader extends SimpleJsonResourceReloadListener
      * @param errors one message per file that could not be used
      * @param warnings one message per file that is named for no errand
      */
-    record Loaded(Map<ResourceLocation, ErrandSettings<?>> settings, List<String> errors, List<String> warnings) {
+    record Loaded(Map<Identifier, ErrandSettings<?>> settings, List<String> errors, List<String> warnings) {
     }
 }

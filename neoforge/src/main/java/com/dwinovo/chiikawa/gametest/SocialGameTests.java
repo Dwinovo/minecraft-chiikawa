@@ -17,9 +17,8 @@ import com.dwinovo.chiikawa.data.PetInteractionData;
 import com.dwinovo.chiikawa.data.PetTaskTypeData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
-import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
-import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
-import com.dwinovo.chiikawa.entity.brain.intent.RunningIntent;
+import com.dwinovo.chiikawa.entity.brain.PetMind;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
@@ -113,8 +112,8 @@ public final class SocialGameTests {
             .thenIdle(SETTLE_TICKS)
             .thenExecute(() -> thinkOf(momonga, PetInteractionData.CLING, chiikawa))
             .thenWaitUntil(() -> {
-                helper.assertTrue(reservedBy(chiikawa, momonga), "Chiikawa was never asked");
-                helper.assertTrue(runs(chiikawa, PetIntents.COOPERATE), "Chiikawa did not stop to play along");
+                helper.assertTrue(reservedBy(chiikawa, momonga), Component.literal("Chiikawa was never asked"));
+                helper.assertTrue(runs(chiikawa, ErrandIds.COOPERATE), Component.literal("Chiikawa did not stop to play along"));
                 waitingAt.set(chiikawa.position());
             })
             .thenExecute(() -> helper.assertTrue(SocialRules.accepts(PetInteractionData.CLING, scene(PetInteractionData.CLING),
@@ -149,14 +148,14 @@ public final class SocialGameTests {
                 PetInteraction cling = scene(PetInteractionData.CLING);
                 chiikawa.getBrain().setMemoryWithExpiry(InitMemory.INTERACTION_RESERVATION.get(),
                     new InteractionReservation(momonga, cling.partners().get(0), false), SHORT_WAIT);
-                IntentSelector.requestReevaluate(chiikawa);
+                PetMind.nudge(chiikawa, "test");
             })
-            .thenWaitUntil(() -> helper.assertTrue(runs(chiikawa, PetIntents.COOPERATE),
-                "Chiikawa did not wait for the pet it was told was coming"))
+            .thenWaitUntil(() -> helper.assertTrue(runs(chiikawa, ErrandIds.COOPERATE),
+                Component.literal("Chiikawa did not wait for the pet it was told was coming")))
             .thenWaitUntil(() -> {
                 helper.assertFalse(chiikawa.getBrain().hasMemoryValue(InitMemory.INTERACTION_RESERVATION.get()),
-                    "the reservation never ran out");
-                helper.assertFalse(runs(chiikawa, PetIntents.COOPERATE), "Chiikawa is still waiting for nobody");
+                    Component.literal("the reservation never ran out"));
+                helper.assertFalse(runs(chiikawa, ErrandIds.COOPERATE), Component.literal("Chiikawa is still waiting for nobody"));
             })
             .thenSucceed();
     }
@@ -212,7 +211,7 @@ public final class SocialGameTests {
             .thenIdle(SETTLE_TICKS)
             .thenExecute(() -> thinkOf(momonga, PetInteractionData.CLING, chiikawa))
             .thenExecuteFor(LEAVE_IT_TICKS, () -> {
-                helper.assertTrue(runs(momonga, PetIntents.STAY), "a sitting pet got up");
+                helper.assertTrue(runs(momonga, ErrandIds.STAY), Component.literal("a sitting pet got up"));
                 helper.assertFalse(chiikawa.getBrain().hasMemoryValue(InitMemory.INTERACTION_RESERVATION.get()),
                     "a sitting pet asked another over");
             })
@@ -233,7 +232,7 @@ public final class SocialGameTests {
                 "a sitting pet was up for a scene"))
             .thenExecute(() -> thinkOf(momonga, PetInteractionData.CLING, chiikawa))
             .thenExecuteFor(LEAVE_IT_TICKS, () -> {
-                helper.assertTrue(runs(chiikawa, PetIntents.STAY), "a sitting pet was made to get up");
+                helper.assertTrue(runs(chiikawa, ErrandIds.STAY), Component.literal("a sitting pet was made to get up"));
                 helper.assertFalse(chiikawa.getBrain().hasMemoryValue(InitMemory.INTERACTION_RESERVATION.get()),
                     "a sitting pet was asked over");
                 helper.assertTrue(momonga.getPerformance().isEmpty(), "Momonga clung onto a sitting pet");
@@ -264,7 +263,7 @@ public final class SocialGameTests {
                     "Chiikawa does not remember having been clung to by Momonga");
             })
             .thenWaitUntil(() -> {
-                helper.assertTrue(runs(newcomer.get(), PetIntents.WANDER), "the newcomer never settled");
+                helper.assertTrue(runs(newcomer.get(), ErrandIds.WANDER), Component.literal("the newcomer never settled"));
                 long now = helper.getLevel().getGameTime();
                 PetInteraction cling = scene(PetInteractionData.CLING);
                 helper.assertTrue(SocialRules.accepts(PetInteractionData.CLING, cling, momonga, chiikawa, now).isEmpty(),
@@ -480,10 +479,7 @@ public final class SocialGameTests {
     }
 
     private static boolean runs(AbstractPet pet, Identifier intent) {
-        return pet.getBrain().getMemory(InitMemory.CURRENT_INTENT.get())
-            .map(RunningIntent::id)
-            .filter(intent::equals)
-            .isPresent();
+        return pet.getIntent().filter(intent::equals).isPresent();
     }
 
     private static boolean coolingDown(AbstractPet pet, Identifier id, AbstractPet other, GameTestHelper helper) {

@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 
 /**
@@ -34,8 +34,8 @@ import net.minecraft.util.ExtraCodecs;
  * @param tuning the errand's own numbers, of a shape of the errand's own
  * @param <T> the shape of the tuning
  */
-public record ErrandSettings<T>(int priority, float score, int maxTicks, Rests rests, List<ResourceLocation> yieldsTo,
-                                List<ResourceLocation> overlays, Optional<VoiceMoment> startVoice, T tuning) {
+public record ErrandSettings<T>(int priority, float score, int maxTicks, Rests rests, List<Identifier> yieldsTo,
+                                List<Identifier> overlays, Optional<VoiceMoment> startVoice, T tuning) {
     private static final String LOG_PREFIX = "[chiikawa-errand] ";
 
     /**
@@ -73,9 +73,9 @@ public record ErrandSettings<T>(int priority, float score, int maxTicks, Rests r
             ExtraCodecs.POSITIVE_INT.fieldOf("max_ticks").forGetter(ErrandSettings::maxTicks),
             Rests.CODEC.fieldOf("rests").forGetter(ErrandSettings::rests),
             // Always written, though a file without them reads as none: they are lists to change.
-            ResourceLocation.CODEC.listOf().optionalFieldOf("yields_to")
+            Identifier.CODEC.listOf().optionalFieldOf("yields_to")
                 .forGetter(settings -> Optional.of(settings.yieldsTo())),
-            ResourceLocation.CODEC.listOf().optionalFieldOf("overlays")
+            Identifier.CODEC.listOf().optionalFieldOf("overlays")
                 .forGetter(settings -> Optional.of(settings.overlays())),
             VoiceMoment.CODEC.optionalFieldOf("start_voice").forGetter(ErrandSettings::startVoice),
             tuning.fieldOf("tuning").forGetter(ErrandSettings::tuning)
@@ -87,14 +87,19 @@ public record ErrandSettings<T>(int priority, float score, int maxTicks, Rests r
     /**
      * @param errand an errand's id
      * @return the codec of that errand's file, with the tuning of its own shape
+     * @throws IllegalArgumentException for an id that is not an errand's
      */
     @SuppressWarnings("unchecked")
-    public static Codec<ErrandSettings<?>> codecOf(ResourceLocation errand) {
-        return (Codec<ErrandSettings<?>>) (Codec<?>) codec(ErrandTunings.codecOf(errand));
+    public static Codec<ErrandSettings<?>> codecOf(Identifier errand) {
+        ErrandType<?, ?> type = Errands.get(errand);
+        if (type == null) {
+            throw new IllegalArgumentException("No such errand " + errand);
+        }
+        return (Codec<ErrandSettings<?>>) (Codec<?>) codec(type.tuningCodec());
     }
 
     /** @return these settings with the errands that go first, as data names them */
-    public ErrandSettings<T> yieldingTo(ResourceLocation... errands) {
+    public ErrandSettings<T> yieldingTo(Identifier... errands) {
         return new ErrandSettings<>(priority, score, maxTicks, rests, List.of(errands), overlays, startVoice, tuning);
     }
 
@@ -111,8 +116,8 @@ public record ErrandSettings<T>(int priority, float score, int maxTicks, Rests r
      * @param all every errand that decoded, by id
      * @return what is wrong with it, or nothing
      */
-    public Optional<String> problemAmong(ResourceLocation errand, Map<ResourceLocation, ErrandSettings<?>> all) {
-        for (ResourceLocation other : yieldsTo) {
+    public Optional<String> problemAmong(Identifier errand, Map<Identifier, ErrandSettings<?>> all) {
+        for (Identifier other : yieldsTo) {
             ErrandSettings<?> theirs = all.get(other);
             if (other.equals(errand) || theirs == null || theirs.priority != priority) {
                 return Optional.of("yields_to " + other + " must name another errand of priority " + priority);
@@ -121,15 +126,15 @@ public record ErrandSettings<T>(int priority, float score, int maxTicks, Rests r
         return Optional.empty();
     }
 
-    private static volatile Map<ResourceLocation, ErrandSettings<?>> byErrand = Collections.emptyMap();
-    private static final Set<ResourceLocation> REPORTED = ConcurrentHashMap.newKeySet();
+    private static volatile Map<Identifier, ErrandSettings<?>> byErrand = Collections.emptyMap();
+    private static final Set<Identifier> REPORTED = ConcurrentHashMap.newKeySet();
 
     /**
      * @param errand an errand's id
      * @return how that errand goes, or nothing when no data pack gives it settings: an errand whose
      *         settings are gone is switched off rather than guessed at, and says so once
      */
-    public static Optional<ErrandSettings<?>> of(ResourceLocation errand) {
+    public static Optional<ErrandSettings<?>> of(Identifier errand) {
         ErrandSettings<?> settings = byErrand.get(errand);
         if (settings == null && REPORTED.add(errand)) {
             Constants.LOG.error(LOG_PREFIX + errand + " is switched off, it has no settings");
@@ -138,12 +143,12 @@ public record ErrandSettings<T>(int priority, float score, int maxTicks, Rests r
     }
 
     /** @return every errand that is loaded, by id */
-    public static Map<ResourceLocation, ErrandSettings<?>> all() {
+    public static Map<Identifier, ErrandSettings<?>> all() {
         return byErrand;
     }
 
     /** Replaces them all, as a data pack reload does. Public so an in-game case can try other settings. */
-    public static void replaceAll(Map<ResourceLocation, ErrandSettings<?>> settings) {
+    public static void replaceAll(Map<Identifier, ErrandSettings<?>> settings) {
         byErrand = Map.copyOf(settings);
         REPORTED.clear();
     }
