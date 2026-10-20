@@ -636,7 +636,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         BrainUtils.addStayTasks(brain);
         BrainUtils.addIdleTasks(brain);
         BrainUtils.addTakeTaskTasks(brain);
-        BrainUtils.addShopTasks(brain);
         BrainUtils.addSocialTasks(brain);
         BrainUtils.addExamTasks(brain);
         BrainUtils.addWhistleTasks(brain);
