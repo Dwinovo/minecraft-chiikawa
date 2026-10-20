@@ -9,8 +9,11 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
+import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
+import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.utils.Utils;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
@@ -50,13 +53,13 @@ public final class FarmGameTests {
     /** How long a pet is watched leaving something alone before we believe it means to. */
     private static final int LEAVE_IT_TICKS = 600;
 
+    /** The longest the farm behaviors took to find that they had no way to a crop: the walk to it lasted fifteen ticks. */
+    private static final int GIVE_UP_TICKS = 15;
     /**
-     * The longest a pet takes, from setting off for a crop it has no way to, to reap one it has: it gives up in a tick or
-     * two, the sensor looks again and the pet decides on the next turn of its decisions, and the open crop is four blocks
-     * off. It takes about 50; the farm behaviors that gave up the same way took about 95, and a pet that waited out
-     * a hundred ticks of having no way takes more than a hundred.
+     * The longest a pet takes to reap a crop a few blocks off from the decision to go for it: it takes about twenty when
+     * the crop is three blocks away, and a walk of the longest the sensor lets it set off on takes about forty.
      */
-    private static final int GIVE_UP_AND_REAP_TICKS = 80;
+    private static final int REAP_TICKS = 60;
 
     private static final int STAND = 2;
 
@@ -236,10 +239,10 @@ public final class FarmGameTests {
     }
 
     /**
-     * A pet gives up on a crop it has no way to the moment the brain's mover says so, not a long while after, as a
-     * pet that had pathfound for it before setting off did: with a crop walled in nearer than one that is open, it is
-     * reaping the open one within the time the two walks and the scan between them take, from the time it first sets
-     * off. A field with several walled-in crops must not look like a pet that is stuck.
+     * A pet gives up on a crop it has no way to the moment the brain's mover says so, not a long while after: the farm
+     * behaviors that pathfound for it before they set off took up to fifteen ticks, and a pet that waited out a hundred
+     * ticks of having no way would make a field with several walled-in crops look like a pet that is stuck. Then, with a
+     * crop it can get to in range, it is reaping that within the time a short walk takes from the decision to go for it.
      */
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WORK_TICKS)
     public static void a_pet_gives_up_on_a_crop_it_cannot_get_to_at_once(GameTestHelper helper) {
@@ -255,18 +258,39 @@ public final class FarmGameTests {
                 }
             }
         }
-        BlockPos open = new BlockPos(4, STAND, 8);
-        ripeWheat(helper, open);
-
+        BlockPos open = new BlockPos(4, STAND, 7);
+        boolean[] gaveUp = {false};
         long[] setOff = {-1L};
+
         helper.onEachTick(() -> {
+            if (!gaveUp[0]) {
+                Optional<DecisionLog.Ended> ended = harvestEnded(pet);
+                if (ended.isEmpty()) {
+                    return;
+                }
+                helper.assertTrue(ended.get().outcome() instanceof Outcome.GaveUp,
+                    "the pet ended its walk to the walled-in crop " + ended.get().outcome());
+                helper.assertTrue(ended.get().ranTicks() <= GIVE_UP_TICKS,
+                    "the pet took " + ended.get().ranTicks() + " ticks to give up on a crop it had no way to");
+                gaveUp[0] = true;
+                ripeWheat(helper, open);
+                return;
+            }
             if (setOff[0] < 0L && pet.getIntent().filter(ErrandIds.HARVEST::equals).isPresent()) {
                 setOff[0] = helper.getTick();
             }
-            helper.assertTrue(setOff[0] < 0L || helper.getTick() - setOff[0] <= GIVE_UP_AND_REAP_TICKS || carries(pet, Items.WHEAT),
-                "the pet had not reaped the open crop " + GIVE_UP_AND_REAP_TICKS + " ticks after it set off for one");
+            if (carries(pet, Items.WHEAT)) {
+                helper.succeed();
+            }
+            helper.assertTrue(setOff[0] < 0L || helper.getTick() - setOff[0] <= REAP_TICKS,
+                "the pet had not reaped the open crop " + REAP_TICKS + " ticks after it set off for it");
         });
-        helper.succeedWhen(() -> helper.assertTrue(carries(pet, Items.WHEAT), "the pet never came away with the wheat that was open to it"));
+    }
+
+    private static Optional<DecisionLog.Ended> harvestEnded(AbstractPet pet) {
+        return pet.getMind().log().entries().stream()
+            .filter(entry -> entry instanceof DecisionLog.Ended ended && ended.errand().equals(ErrandIds.HARVEST))
+            .map(DecisionLog.Ended.class::cast).findFirst();
     }
 
     private static void ripeWheat(GameTestHelper helper, BlockPos crop) {
