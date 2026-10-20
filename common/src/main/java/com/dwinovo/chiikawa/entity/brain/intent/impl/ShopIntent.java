@@ -24,8 +24,6 @@ import net.minecraft.world.entity.schedule.Activity;
  * keep to the garden does not find it in town.
  */
 public final class ShopIntent implements PetIntent {
-    private static final float SCORE = 0.65F;
-
     @Override
     public ResourceLocation id() {
         return PetIntents.SHOP;
@@ -52,10 +50,5 @@ public final class ShopIntent implements PetIntent {
     @Override
     public Optional<GlobalPos> destination(IntentContext ctx) {
         return ctx.shopWorthVisiting();
-    }
-
-    @Override
-    public float score(IntentContext ctx) {
-        return SCORE;
     }
 }

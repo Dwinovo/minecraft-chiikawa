@@ -9,20 +9,18 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.schedule.Activity;
 
 /**
- * An intent that can always run at a fixed score, such as staying put or wandering;
- * whether it applies is left entirely to the permission table.
+ * An intent that can always run, such as staying put or wandering; whether it applies is left
+ * entirely to the permission table.
  */
 public final class ConstantIntent implements PetIntent {
     private final ResourceLocation id;
     private final IntentCategory category;
     private final Supplier<Activity> activity;
-    private final float score;
 
-    public ConstantIntent(ResourceLocation id, IntentCategory category, Supplier<Activity> activity, float score) {
+    public ConstantIntent(ResourceLocation id, IntentCategory category, Supplier<Activity> activity) {
         this.id = id;
         this.category = category;
         this.activity = activity;
-        this.score = score;
     }
 
     @Override
@@ -43,10 +41,5 @@ public final class ConstantIntent implements PetIntent {
     @Override
     public IntentCheck canRun(IntentContext ctx) {
         return IntentCheck.OK;
-    }
-
-    @Override
-    public float score(IntentContext ctx) {
-        return score;
     }
 }
