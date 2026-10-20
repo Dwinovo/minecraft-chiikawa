@@ -86,6 +86,11 @@ public final class LiveHandle implements Handle {
     }
 
     @Override
+    public void walkTo(Vec3 target, float speed, int closeEnough) {
+        brain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(target, speed, closeEnough));
+    }
+
+    @Override
     public void walkTo(Entity target, float speed, int closeEnough) {
         brain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityTracker(target, false), speed, closeEnough));
     }
