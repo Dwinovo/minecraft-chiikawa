@@ -15,7 +15,6 @@ import com.dwinovo.chiikawa.entity.brain.task.tameable.FloatBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.FollowOwnerBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.RandomWalkTask;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.SitBehavior;
-import com.dwinovo.chiikawa.entity.brain.task.tameable.TakeTaskBehavior;
 import com.dwinovo.chiikawa.init.InitActivity;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
@@ -77,12 +76,6 @@ public final class BrainUtils {
         Pair<Integer, BehaviorControl<? super AbstractPet>> chatter = Pair.of(99, BehaviorBuilder.create(instance ->
             instance.point((level, pet, gameTime) -> PetSpeech.say(pet, VoiceMoment.IDLE).isPresent())));
         PetActivities.register(brain, Activity.IDLE, ImmutableList.of(randomTask, chatter), Set.of());
-    }
-
-    /** {@code take_task}: walk to the nearest labor board and take a slip. */
-    public static void addTakeTaskTasks(Brain<AbstractPet> brain) {
-        PetActivities.register(brain, InitActivity.TAKE_TASK.get(),
-            ImmutableList.of(Pair.of(2, new TakeTaskBehavior())), Set.of());
     }
 
     /** {@code answer_whistle}: a wild pet goes over to see who whistled. */
