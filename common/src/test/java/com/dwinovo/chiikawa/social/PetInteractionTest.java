@@ -149,9 +149,34 @@ class PetInteractionTest {
     }
 
     @Test
+    void aPartnerThatIsPlayingMusicIsNotHandedAnythingNorMadeKeen() {
+        String audience = """
+            { "initiators": [ { "pets": [ "minecraft:fox" ] } ],
+              "partners": [ { "pets": [ "minecraft:cow" ] } ], "partner_state": "playing_music",
+              "notice_distance": 8, "approach_distance": 1, "reservation_ticks": 300, "duration_ticks": 80,
+              "cooldown_ticks": 12000, "chance": 0.5 %s }""";
+
+        assertTrue(PetInteraction.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(audience.formatted(""))).result().isPresent());
+        assertTrue(PetInteraction.CODEC.parse(JsonOps.INSTANCE,
+            JsonParser.parseString(audience.formatted(", \"partner_eager_ticks\": 100"))).result().isEmpty());
+        assertTrue(PetInteraction.CODEC.parse(JsonOps.INSTANCE,
+            JsonParser.parseString(audience.formatted(", \"hands_over\": \"minecraft:cookie\""))).result().isEmpty());
+    }
+
+    @Test
+    void aRestThatIsLetGoOfIsForgotten() {
+        UUID other = UUID.randomUUID();
+        String subject = SocialCooldowns.subject(CLING, other);
+        SocialCooldowns cooldowns = SocialCooldowns.NONE.with(subject, 1200, 100);
+
+        assertEquals(1100, cooldowns.remaining(subject, 200));
+        assertEquals(0, cooldowns.with(subject, 0, 200).remaining(subject, 200));
+    }
+
+    @Test
     void thePairThatPlayedASceneLeavesThatSceneAloneUntilItsCooldownIsOver() {
         UUID other = UUID.randomUUID();
-        SocialCooldowns cooldowns = SocialCooldowns.NONE.with(CLING, other, 1200, 0);
+        SocialCooldowns cooldowns = SocialCooldowns.NONE.with(SocialCooldowns.subject(CLING, other), 1200, 0);
 
         assertTrue(cooldowns.coolingDown(CLING, other, 1199));
         assertFalse(cooldowns.coolingDown(CLING, other, 1200), "over");
@@ -163,7 +188,8 @@ class PetInteractionTest {
     void cooldownsThatAreOverAreForgotten() {
         UUID first = UUID.randomUUID();
         UUID second = UUID.randomUUID();
-        SocialCooldowns cooldowns = SocialCooldowns.NONE.with(CLING, first, 100, 0).with(CLING, second, 2000, 500);
+        SocialCooldowns cooldowns = SocialCooldowns.NONE.with(SocialCooldowns.subject(CLING, first), 100, 0)
+            .with(SocialCooldowns.subject(CLING, second), 1500, 500);
 
         assertEquals(1, cooldowns.until().size());
         assertTrue(cooldowns.coolingDown(CLING, second, 1999));
