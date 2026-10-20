@@ -2,9 +2,12 @@ package com.dwinovo.chiikawa.entity.brain.sensor;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
+import com.dwinovo.chiikawa.entity.brain.errand.rest.SubjectRests;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.utils.Deliveries;
 import com.dwinovo.chiikawa.utils.Utils;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -18,6 +21,9 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
  * The kinds of block the farmer sensor finds for the farmer's errands: what makes a block one, where the sensor
  * remembers it, and which errand works it. The one place that says so, for the sensor that finds them and for the view
  * that shows them to the errands.
+ *
+ * <p>The sensor remembers more than one block of a kind: the one it chose, in the kind's own memory, and the others it
+ * found nearby, in {@link FarmSights}. What the view shows is the first of them that still is one of the kind.
  */
 public enum FarmTarget {
     /** A crop that is ripe. */
@@ -56,7 +62,7 @@ public enum FarmTarget {
         return errand;
     }
 
-    /** @return the memory the sensor keeps the block it found in, which only the sensor writes */
+    /** @return the memory the sensor keeps the block it chose in, which only the sensor writes */
     public MemoryModuleType<BlockPos> memory() {
         return memory.get();
     }
@@ -71,10 +77,30 @@ public enum FarmTarget {
         return worthFinding.test(pet);
     }
 
-    /** @return the block the sensor remembers, if it still is one of this kind, where it is now */
+    /** @return whether the errand that works this kind is resting from the block, which the ledger writes and this only reads */
+    public boolean resting(AbstractPet pet, BlockPos pos, long now) {
+        return pet.getBrain().getMemory(InitMemory.SUBJECT_RESTS.get())
+            .filter(rests -> rests.remaining(errand, SubjectRests.subject(pos), now) > 0).isPresent();
+    }
+
+    /** @return the blocks the sensor remembers for this kind, the one it chose and then those it found after it */
+    public List<BlockPos> remembered(AbstractPet pet) {
+        List<BlockPos> blocks = new ArrayList<>();
+        pet.getBrain().getMemory(memory()).ifPresent(blocks::add);
+        pet.getBrain().getMemory(InitMemory.FARM_SIGHTS.get()).ifPresent(sights -> blocks.addAll(sights.after(this)));
+        return blocks;
+    }
+
+    /**
+     * @return the first block the sensor remembers that still is one of this kind, where it is now, and that the errand
+     *         is not resting from: a pet that has just reaped a crop is shown the next one at once
+     */
     public Optional<GlobalPos> seenBy(AbstractPet pet) {
-        return pet.level() instanceof ServerLevel level
-            ? pet.getBrain().getMemory(memory()).filter(pos -> holds(level, pet, pos)).map(pos -> GlobalPos.of(level.dimension(), pos))
-            : Optional.empty();
+        if (!(pet.level() instanceof ServerLevel level)) {
+            return Optional.empty();
+        }
+        long now = level.getGameTime();
+        return remembered(pet).stream().filter(pos -> holds(level, pet, pos) && !resting(pet, pos, now)).findFirst()
+            .map(pos -> GlobalPos.of(level.dimension(), pos));
     }
 }
