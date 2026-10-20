@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.entity.brain;
 import com.dwinovo.chiikawa.camera.PhotoResults;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
+import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandType;
@@ -32,6 +33,9 @@ import com.dwinovo.chiikawa.entity.brain.errand.view.LivePetView;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.qualification.ExamStage;
 import com.dwinovo.chiikawa.qualification.PetExams;
+import com.dwinovo.chiikawa.social.PetInteraction;
+import com.dwinovo.chiikawa.social.PetInteractions;
+import com.dwinovo.chiikawa.social.SocialCooldowns;
 import com.dwinovo.chiikawa.task.SlipWages;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import java.util.ArrayList;
@@ -67,6 +71,10 @@ import org.jetbrains.annotations.Nullable;
  * pet take is part of that half. The second half is {@link #handle}, run when the pet reads its inbox at its
  * next tick: what concerns deciding and the errand under way, a step's ending, a nudge. A message with a
  * first half is a {@link Message.Durable} one, and is queued for the second as {@link Message.Settled}.
+ *
+ * <p>Another pet's invitation to play a scene is answered by the mind and not by an errand, since only the mind knows what the
+ * pet is doing, and its priority, at the moment it is asked: see {@link InvitationDesk}. Having said yes, the pet decides again
+ * at once and plays along as the errand {@code cooperate}, and when that ends, however it does, it is no longer waited for.
  */
 public final class PetMind {
     public static final int DECISION_INTERVAL = 10;
@@ -93,6 +101,8 @@ public final class PetMind {
     private final ErrandView errands;
     /** Set when the pet has been told something that may change its mind, until it next decides. */
     private boolean decideNow;
+    /** Whether the pet has been on cooperate since it last said yes to an invitation: it is let go of when that ends. */
+    private boolean hosting;
 
     /** @param pet the pet, which shows what the mind derives: see {@code AbstractPet#intent} */
     public PetMind(AbstractPet pet) {
@@ -159,6 +169,7 @@ public final class PetMind {
     public void remove() {
         inbox.clear();
         desk.clear();
+        hosting = false;
     }
 
     public void tick(ServerLevel level) {
@@ -174,6 +185,11 @@ public final class PetMind {
             decide(now, trigger);
         }
         executor.tick(now);
+        if (hosting && !errands.isOn(ErrandIds.COOPERATE)) {
+            // Whatever ended it, the pet is no longer waited for, nor waiting.
+            hosting = false;
+            desk.clear();
+        }
         if (executor.running().isEmpty() && endedDoneIn(now)) {
             // An errand that did what it set out to hands over to the next in the tick it ends, so that a pet that goes
             // from one short errand to the next, such as one habit to another, is never on none for a tick: the player
@@ -221,10 +237,36 @@ public final class PetMind {
                 executor.requestEnd(Outcome.interrupted("moved"));
                 decideNow = true;
             }
+            case Message.Invitation invitation -> answer(invitation, now);
+            case Message.Withdrawn withdrawn -> {
+                desk.withdrawn(withdrawn.from());
+                executor.deliver(withdrawn, now);
+            }
+            case Message.SceneStart start -> {
+                desk.arrived();
+                executor.deliver(start, now);
+            }
             case Message.Settled settled -> settled(settled, now);
             case Message.Durable durable -> throw new IllegalStateException(durable + " was queued without being kept");
             default -> executor.deliver(message, now);
         }
+    }
+
+    /**
+     * Answers another pet that asks it to play a scene: says yes if the scene is one the pet's owner lets it play, it is not
+     * resting from it with that pet, and the errand that asks matters more than the one it is on, and then
+     * decides what to do about having said it.
+     */
+    private void answer(Message.Invitation invitation, long now) {
+        PetInteraction scene = PetInteractions.all().get(invitation.scene());
+        boolean accepted = scene != null && invitation.partnerRank() < scene.partners().size()
+            && desk.consider(invitation, PetConstraints.allows(pet, PetOwnership.of(pet), ErrandCategory.SOCIAL),
+                rests.resting(ErrandIds.COOPERATE, SocialCooldowns.subject(invitation.scene(), invitation.initiator()), now),
+                errands.priority(), now);
+        if (pet.level() instanceof ServerLevel level && level.getEntity(invitation.initiator()) instanceof AbstractPet asker) {
+            handle.post(asker, new Message.InvitationReply(pet.getUUID(), accepted));
+        }
+        decideNow |= accepted;
     }
 
     /**
@@ -337,6 +379,7 @@ public final class PetMind {
     }
 
     private void start(Decision.Started started, @Nullable ErrandType<?, ?> previous, long now) {
+        hosting |= started.type().id().equals(ErrandIds.COOPERATE);
         executor.start(started.type().id(), started.offer().plan(), started.settings(), started.routine(), now);
         // Setting off to fight, rather than turning from one way of fighting to another, is when a pet
         // shouts its battle cry.
