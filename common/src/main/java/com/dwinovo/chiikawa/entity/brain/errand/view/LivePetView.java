@@ -101,9 +101,7 @@ public final class LivePetView implements PetView {
         this.resultsDesk = new Lazy<>(() -> PetExams.resultsDesk(pet)
             .filter(desk -> ExamDeskBlockEntity.at(level, desk).isPresent()));
         this.seatedAtExam = new Lazy<>(() -> PetExams.seatedAtExam(pet));
-        this.whistleHeard = new Lazy<>(() -> pet.getBrain().getMemory(InitMemory.WHISTLE_HEARD.get())
-            .filter(heard -> heard.from() <= level.getGameTime())
-            .map(WhistleHeard::where));
+        this.whistleHeard = new Lazy<>(() -> WhistleHeard.by(pet));
         this.photo = new Lazy<>(() -> PhotoScout.outlook(pet));
     }
 

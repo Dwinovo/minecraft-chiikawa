@@ -1,6 +1,5 @@
 package com.dwinovo.chiikawa.platform;
 
-import com.dwinovo.chiikawa.entity.brain.PetActivities;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPlacesSensor;
@@ -13,7 +12,6 @@ import com.dwinovo.chiikawa.qualification.QualificationCondition;
 import java.util.function.Supplier;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.ai.sensing.SensorType;
-import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -27,9 +25,6 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
     // Sensor Types
     private static final DeferredRegister<SensorType<?>> SENSOR_TYPES =
         DeferredRegister.create(ForgeRegistries.SENSOR_TYPES, Constants.MOD_ID);
-    // Activities
-    private static final DeferredRegister<Activity> ACTIVITIES =
-        DeferredRegister.create(ForgeRegistries.ACTIVITIES, Constants.MOD_ID);
     // Menus
     private static final DeferredRegister<MenuType<?>> MENUS =
         DeferredRegister.create(ForgeRegistries.MENU_TYPES, Constants.MOD_ID);
@@ -51,9 +46,6 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
     private static final RegistryObject<SensorType<PetSocialSensor>> PET_SOCIAL_SENSOR =
         SENSOR_TYPES.register("pet_social_sensor", () -> new SensorType<>(PetSocialSensor::new));
 
-    private static final RegistryObject<Activity> ANSWER_WHISTLE =
-        ACTIVITIES.register("answer_whistle", () -> new Activity(PetActivities.name("answer_whistle")));
-
     // Menu registrations
     private static final RegistryObject<MenuType<PetBackpackMenu>> PET_BACKPACK =
         MENUS.register("pet_backpack", () -> IForgeMenuType.create((containerId, inventory, buf) ->
@@ -66,7 +58,6 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
         
         // Register all DeferredRegisters
         SENSOR_TYPES.register(modEventBus);
-        ACTIVITIES.register(modEventBus);
         MENUS.register(modEventBus);
         LOOT_CONDITIONS.register(modEventBus);
     }
@@ -104,11 +95,6 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
     @Override
     public Supplier<LootItemConditionType> qualificationCondition() {
         return QUALIFICATION_CONDITION;
-    }
-
-    @Override
-    public Supplier<Activity> answerWhistleActivity() {
-        return ANSWER_WHISTLE;
     }
 
     @Override
