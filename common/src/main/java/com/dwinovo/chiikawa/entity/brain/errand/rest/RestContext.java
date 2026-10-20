@@ -1,20 +1,27 @@
 package com.dwinovo.chiikawa.entity.brain.errand.rest;
 
+import com.dwinovo.chiikawa.entity.brain.errand.Plan;
 import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * What a rest is about, for a source that depends on it: the camera item a photo is taken with,
- * or the scene two pets play.
+ * What a rest is about, for a source that depends on it and for a rest that is on one thing and not on the errand:
+ * the camera item a photo is taken with, or the scene two pets play and the pet it is played with.
  *
  * @param key the id of that item or scene, when the rest is about one
+ * @param subject what the rest is on when its spec says it is on one thing, see {@link Plan#subject}
  */
-public record RestContext(Optional<ResourceLocation> key) {
+public record RestContext(Optional<ResourceLocation> key, Optional<String> subject) {
     /** A rest about nothing in particular. */
-    public static final RestContext NONE = new RestContext(Optional.empty());
+    public static final RestContext NONE = new RestContext(Optional.empty(), Optional.empty());
 
     /** @return the context of a rest about this item or scene */
     public static RestContext of(ResourceLocation key) {
-        return new RestContext(Optional.of(key));
+        return new RestContext(Optional.of(key), Optional.empty());
+    }
+
+    /** @return the context of a rest about what this plan is about */
+    public static RestContext of(Plan plan) {
+        return new RestContext(plan.restKey(), plan.subject());
     }
 }
