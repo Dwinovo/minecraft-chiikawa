@@ -28,6 +28,7 @@ import com.dwinovo.chiikawa.task.BoardLevelsLoader;
 import com.dwinovo.chiikawa.whistle.WhistleSettingsLoader;
 import com.dwinovo.chiikawa.camera.CameraSettingsLoader;
 import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettingsLoader;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettingsLoader;
 import com.dwinovo.chiikawa.gifting.GiftingSettingsLoader;
 import com.dwinovo.chiikawa.photo.PhotoSystem;
 import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
@@ -105,6 +106,7 @@ public class ChiikawaForge {
             event.addListener(new PetSpawnLoader());
             event.addListener(new PetVoiceLoader());
             event.addListener(new PetInteractionLoader());
+            event.addListener(new ErrandSettingsLoader());
             event.addListener(new QualificationLoader(task -> PetTaskTypes.all().containsKey(task)));
         });
 
