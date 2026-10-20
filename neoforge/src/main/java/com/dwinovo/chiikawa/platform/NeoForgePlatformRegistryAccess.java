@@ -69,8 +69,6 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
         ACTIVITIES.register("take_task", () -> new Activity(PetActivities.name("take_task")));
     private static final DeferredHolder<Activity, Activity> SHOP =
         ACTIVITIES.register("shop", () -> new Activity(PetActivities.name("shop")));
-    private static final DeferredHolder<Activity, Activity> GIFT_OWNER =
-        ACTIVITIES.register("gift_owner", () -> new Activity(PetActivities.name("gift_owner")));
     private static final DeferredHolder<Activity, Activity> SOCIALIZE =
         ACTIVITIES.register("socialize", () -> new Activity(PetActivities.name("socialize")));
     private static final DeferredHolder<Activity, Activity> COOPERATE =
@@ -177,11 +175,6 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
     @Override
     public Supplier<Activity> shopActivity() {
         return SHOP;
-    }
-
-    @Override
-    public Supplier<Activity> giftOwnerActivity() {
-        return GIFT_OWNER;
     }
 
     @Override
