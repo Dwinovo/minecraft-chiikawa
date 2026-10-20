@@ -36,7 +36,6 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     private final Supplier<Activity> musicianPlayActivity;
     private final Supplier<Activity> followOwnerActivity;
     private final Supplier<Activity> stayActivity;
-    private final Supplier<Activity> takeTaskActivity;
     private final Supplier<Activity> socializeActivity;
     private final Supplier<Activity> cooperateActivity;
     private final Supplier<Activity> answerWhistleActivity;
@@ -63,7 +62,6 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
         musicianPlayActivity = registerActivity("musician_play");
         followOwnerActivity = registerActivity("follow_owner");
         stayActivity = registerActivity("stay");
-        takeTaskActivity = registerActivity("take_task");
         socializeActivity = registerActivity("socialize");
         cooperateActivity = registerActivity("cooperate");
         answerWhistleActivity = registerActivity("answer_whistle");
@@ -163,11 +161,6 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     @Override
     public Supplier<Activity> stayActivity() {
         return stayActivity;
-    }
-
-    @Override
-    public Supplier<Activity> takeTaskActivity() {
-        return takeTaskActivity;
     }
 
     @Override

@@ -71,15 +71,17 @@ public final class ErrandContractGameTests {
     private static final int INTERRUPT_TICKS = 2;
     /** How long into a step the pet is cut short for the middle of a routine. */
     private static final int MIDDLE_TICKS = 10;
-    /** Long enough for the longest errand to be cut short for the third time: a paper written in full before the last cut. */
-    private static final int INTERRUPT_CASE_TICKS = 1200;
+    /**
+     * Long enough for the longest errand to be cut short for the third time: a paper written in full before the last cut,
+     * or the half minute an errand cut short rests from the board after each of the first two.
+     */
+    private static final int INTERRUPT_CASE_TICKS = 2400;
     private static final int PURITY_CASE_TICKS = 200;
 
     /** The errands still carried out by an old activity, which have no cases here yet. */
     private static final Set<ResourceLocation> LEGACY = Set.of(ErrandIds.FOLLOW_OWNER, ErrandIds.STAY, ErrandIds.WANDER,
         ErrandIds.HARVEST, ErrandIds.PLANT, ErrandIds.DELIVER, ErrandIds.WEED, ErrandIds.PICK_MUSHROOM, ErrandIds.MELEE,
-        ErrandIds.RANGED, ErrandIds.PLAY_MUSIC, ErrandIds.TAKE_TASK, ErrandIds.SOCIALIZE, ErrandIds.COOPERATE,
-        ErrandIds.ANSWER_WHISTLE);
+        ErrandIds.RANGED, ErrandIds.PLAY_MUSIC, ErrandIds.SOCIALIZE, ErrandIds.COOPERATE, ErrandIds.ANSWER_WHISTLE);
 
     /**
      * Where in an errand's routine a pet is cut short. The first is as soon as the pet is seen on the errand at all,

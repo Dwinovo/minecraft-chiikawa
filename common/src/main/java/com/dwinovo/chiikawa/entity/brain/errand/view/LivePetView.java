@@ -53,7 +53,6 @@ public final class LivePetView implements PetView {
     private final Lazy<Boolean> eager;
     private final Lazy<Optional<GlobalPos>> offeringBoard;
     private final Lazy<Optional<GlobalPos>> shopWorthVisiting;
-    private final Lazy<Boolean> takeTaskCoolingDown;
     private final Lazy<Optional<GlobalPos>> socialPartner;
     private final Lazy<Boolean> playingAlong;
     private final Lazy<Boolean> carryingGift;
@@ -85,7 +84,6 @@ public final class LivePetView implements PetView {
         this.eager = new Lazy<>(pet::isEager);
         this.offeringBoard = new Lazy<>(this::findOfferingBoard);
         this.shopWorthVisiting = new Lazy<>(this::findShopWorthVisiting);
-        this.takeTaskCoolingDown = new Lazy<>(() -> pet.getBrain().hasMemoryValue(InitMemory.TAKE_TASK_COOLDOWN.get()));
         this.socialPartner = new Lazy<>(() -> pet.getBrain().getMemory(InitMemory.INTERACTION_PLAN.get())
             .map(InteractionPlan::partner)
             .filter(AbstractPet::isAlive)
@@ -171,11 +169,6 @@ public final class LivePetView implements PetView {
     @Override
     public Optional<GlobalPos> shopWorthVisiting() {
         return shopWorthVisiting.get();
-    }
-
-    @Override
-    public boolean takeTaskCoolingDown() {
-        return takeTaskCoolingDown.get();
     }
 
     @Override

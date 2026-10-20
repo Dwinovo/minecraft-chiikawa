@@ -10,18 +10,23 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.data.PetTaskTypeData;
+import com.dwinovo.chiikawa.data.QualificationData;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.item.PetDollData;
 import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
+import com.dwinovo.chiikawa.task.TaskTracker;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -42,6 +47,8 @@ public final class SlipGameTests {
     private static final int DEATH_TICKS = 200;
 
     private static final int STAND = 2;
+    /** What a weeding slip asks, see {@link #weeding}. */
+    private static final int WEEDS = 8;
 
     @BeforeBatch(batch = DAY_BATCH)
     public static void settleDay(ServerLevel level) {
@@ -109,10 +116,36 @@ public final class SlipGameTests {
         });
     }
 
+    /**
+     * The last of the work on a slip is reported in the very tick the pet is unloaded, before it has read anything it was
+     * told: the wages are in its bag, and the slip is marked as practice for its licence, as it is told, so they are in the
+     * pet that is loaded again from the save a chunk makes as it unloads it, once each, and the slip is gone.
+     */
+    @GameTest(template = "floor8", batch = DAY_BATCH, timeoutTicks = 40)
+    public static void wages_for_a_slip_finished_as_the_pet_is_unloaded_are_in_its_save(GameTestHelper helper) {
+        AbstractPet pet = holding(worker(helper, new BlockPos(3, STAND, 3)), Items.WOODEN_HOE);
+        pet.setTask(weeding());
+        int practice = pet.licences().get(QualificationData.WEEDING).practice();
+
+        TaskTracker.advance(pet, PetWorkCounters.WEED, WEEDS);
+        // A chunk saves its entities as it unloads them, and removing a living entity clears its memories.
+        CompoundTag saved = new CompoundTag();
+        helper.assertTrue(pet.save(saved), "the unloaded pet was not saved");
+        pet.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
+
+        AbstractPet loaded = (AbstractPet) EntityType.create(saved, helper.getLevel()).orElseThrow();
+        helper.assertTrue(loaded.getTask().isEmpty(), "the pet loaded again still has the slip");
+        int emeralds = GameTestKit.count(loaded, Items.EMERALD);
+        helper.assertTrue(emeralds >= 1 && emeralds <= 2, "the pet loaded again has " + emeralds + " emeralds, not the one or two a weeding slip pays");
+        int practised = loaded.licences().get(QualificationData.WEEDING).practice();
+        helper.assertTrue(practised == practice + 1, "the pet loaded again has practised " + practised + " slips, not " + (practice + 1));
+        helper.succeed();
+    }
+
     /** A weeding slip as a board would hand one out. */
     private static PetTask weeding() {
         ResourceLocation farmer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FARMER.get());
-        return new PetTask(PetTaskTypeData.WEEDING, farmer, PetWorkCounters.WEED, PetTask.NO_ICON, 8,
+        return new PetTask(PetTaskTypeData.WEEDING, farmer, PetWorkCounters.WEED, PetTask.NO_ICON, WEEDS,
             PetTaskTypeData.reward(PetTaskTypeData.WEEDING), 0);
     }
 }

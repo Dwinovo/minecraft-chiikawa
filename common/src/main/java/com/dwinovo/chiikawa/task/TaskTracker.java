@@ -1,28 +1,17 @@
 package com.dwinovo.chiikawa.task;
 
-import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
-import com.dwinovo.chiikawa.init.InitMemory;
-import com.dwinovo.chiikawa.voice.PetSpeech;
-import com.dwinovo.chiikawa.voice.VoiceMoment;
-import net.minecraft.core.particles.ParticleTypes;
+import com.dwinovo.chiikawa.entity.brain.errand.inbox.Cue;
+import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.storage.loot.LootParams;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 /**
- * Counts the work a pet reports against the slip it carries, and pays the slip out the
- * moment it is finished: wherever the pet is, the reward goes straight into its
- * backpack with a sparkle.
+ * Counts the work a pet reports against the slip it carries, and has the slip paid out the
+ * moment it is finished: wherever the pet is, the reward goes straight into its backpack
+ * with a sparkle. The pet is told it is paid and does the rest itself, see {@link SlipWages}.
  */
 public final class TaskTracker {
-    private static final int REWARD_PARTICLES = 12;
-
     private TaskTracker() {
     }
 
@@ -43,27 +32,13 @@ public final class TaskTracker {
         });
     }
 
+    /**
+     * The slip is let go of at once, so work reported in the same tick is not counted against it twice. Glad of
+     * its pay at once, whatever its mind is up to, a pet that cannot decide for itself included.
+     */
     private static void complete(AbstractPet pet, PetTask task) {
-        ServerLevel level = (ServerLevel) pet.level();
         pet.setTask(null);
-        pet.getBrain().setMemory(InitMemory.LAST_FINISHED_SLIP.get(), new FinishedSlip(task.type(), level.getGameTime()));
-        pet.licences().practised(task.type());
-        LootTable reward = level.getServer().reloadableRegistries().getLootTable(task.reward());
-        LootParams params = new LootParams.Builder(level)
-            .withParameter(LootContextParams.ORIGIN, pet.position())
-            .withParameter(LootContextParams.THIS_ENTITY, pet)
-            .create(LootContextParamSets.GIFT);
-        for (ItemStack stack : reward.getRandomItems(params)) {
-            ItemStack remainder = pet.getBackpack().addItem(stack);
-            if (!remainder.isEmpty()) {
-                pet.spawnAtLocation(remainder);
-            }
-        }
-        level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pet.getX(), pet.getY() + pet.getBbHeight() * 0.8, pet.getZ(),
-            REWARD_PARTICLES, 0.35, 0.3, 0.35, 0.0);
-        pet.triggerReaction(PetReaction.HAPPY);
-        pet.playTameSound();
-        PetSpeech.say(pet, VoiceMoment.PAID);
-        PetMind.nudge(pet, "slip_done");
+        PetMind.post(pet, new Message.SlipCompleted(task));
+        PetMind.cue(pet, new Cue.Paid());
     }
 }
