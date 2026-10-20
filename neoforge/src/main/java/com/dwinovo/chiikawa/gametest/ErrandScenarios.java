@@ -19,6 +19,7 @@ import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
+import com.dwinovo.chiikawa.entity.brain.errand.step.Meeting;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.init.InitEntity;
@@ -605,7 +606,7 @@ final class ErrandScenarios {
                 : Optional.of(kept + " cookies are in Rakko's bag and " + eaten + " were eaten, of the " + COOKIES + " it had");
         }
 
-        /** The pair leave the scene alone for a day, whichever way it ended. */
+        /** The pair leave the scene alone for a day once it has begun, whichever way it ended. */
         private void forgetTheRest() {
             rakko.getBrain().eraseMemory(InitMemory.SOCIAL_COOLDOWNS.get());
             chiikawa.getBrain().eraseMemory(InitMemory.SOCIAL_COOLDOWNS.get());
@@ -615,13 +616,20 @@ final class ErrandScenarios {
     /** The pet that goes over, the first step being to ask the other to play along and the last to play its part. */
     private static Scenario socialize(GameTestHelper helper) {
         Treat treat = new Treat(helper, true);
-        return new Scenario(treat.rakko, SOCIALIZE_STEPS, ran -> Optional.empty(), ran -> treat.untidy(), treat::forgetTheRest);
+        return new Scenario(treat.rakko, SOCIALIZE_STEPS, ran -> played(ran, SOCIALIZE_STEPS - 1), ran -> treat.untidy(),
+            treat::forgetTheRest);
     }
 
     /** The pet that is asked, the first step being to wait for the one coming over and the last to play its part. */
     private static Scenario cooperate(GameTestHelper helper) {
         Treat treat = new Treat(helper, false);
-        return new Scenario(treat.chiikawa, COOPERATE_STEPS, ran -> Optional.empty(), ran -> treat.untidy(), treat::forgetTheRest);
+        return new Scenario(treat.chiikawa, COOPERATE_STEPS, ran -> played(ran, COOPERATE_STEPS - 1), ran -> treat.untidy(),
+            treat::forgetTheRest);
+    }
+
+    /** The scene begins with the step that plays it, the last of both, and the pet reports it as that step does. */
+    private static Optional<String> played(Running ran, int playStep) {
+        return ran.stepIndex() >= playStep ? Optional.of(Meeting.PLAYED) : Optional.empty();
     }
 
     /** A zombie that stands still and has one hit left in it. */
