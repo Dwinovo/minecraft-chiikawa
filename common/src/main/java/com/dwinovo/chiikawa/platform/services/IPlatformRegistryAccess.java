@@ -25,16 +25,6 @@ public interface IPlatformRegistryAccess {
     /** Notices the other pets a pet could play a scene with. */
     Supplier<SensorType<PetSocialSensor>> petSocialSensor();
 
-    Supplier<Activity> farmerHarvestActivity();
-
-    Supplier<Activity> farmerPlantActivity();
-
-    Supplier<Activity> deleverActivity();
-
-    Supplier<Activity> weedActivity();
-
-    Supplier<Activity> pickMushroomActivity();
-
     /**
      * Brain {@link Activity} owning the fencer job's combat behaviors
      * (walk-to-target + melee swing). Replaces fencer's earlier reuse of
