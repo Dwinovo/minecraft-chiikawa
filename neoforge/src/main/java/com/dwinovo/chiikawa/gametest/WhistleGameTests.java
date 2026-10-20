@@ -6,7 +6,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.anim.state.PetActivity;
+import com.dwinovo.chiikawa.block.ExamDeskBlockEntity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.init.InitDataComponents;
@@ -50,6 +50,8 @@ public final class WhistleGameTests {
     private static final int ANSWER_TICKS = 40;
     /** Long enough to walk over to see who whistled, which a pet in no hurry does at a few blocks a second. */
     private static final int COME_OVER_TICKS = 400;
+    /** Long enough to walk over to a desk and sit down at it. */
+    private static final int SEATING_TICKS = 300;
     private static final ResourceLocation FLUTE = ResourceLocation.withDefaultNamespace("block.note_block.flute");
     /** Short enough that the far side of a sixteen block yard is out of earshot. */
     private static final WhistleSettings YARD = new WhistleSettings(14.0, 10, 40, 10, 200, FLUTE, 2.0F);
@@ -159,21 +161,33 @@ public final class WhistleGameTests {
         helper.succeed();
     }
 
-    /** A pet at its desk, writing, is not got up by a whistle. */
-    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = ANSWER_TICKS + 20)
+    /**
+     * A pet at its exam desk, writing, is not got up by a whistle.
+     *
+     * <p>(A) It used to seat the pet by setting its pose to the exam's, which made the animation the logic; a pet is
+     * seated when its errand says it is, so the pet is signed up at a desk and the whistle is blown once it has
+     * really sat down to its paper.
+     */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = SEATING_TICKS + ANSWER_TICKS + 20)
     public static void a_pet_at_its_exam_desk_keeps_writing(GameTestHelper helper) {
         ServerPlayer owner = ownerAt(helper, new BlockPos(2, STAND, 2));
-        AbstractPet pet = owned(helper, owner, new BlockPos(4, STAND, 4), PetDirective.STAY);
-        pet.setActivity(PetActivity.EXAM);
+        ExamDeskBlockEntity desk = ExamGameTests.placeDesk(helper);
+        AbstractPet pet = ExamGameTests.signedUp(helper, owner, desk, new BlockPos(4, STAND, 6));
 
-        PetWhistle.Heard heard = PetWhistle.blow(owner, PetDirective.FOLLOW, SHORT);
+        helper.startSequence()
+            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().seated(), "the pet never sat down to its paper"))
+            .thenExecute(() -> {
+                PetWhistle.Heard heard = PetWhistle.blow(owner, PetDirective.FOLLOW, SHORT);
 
-        helper.assertTrue(heard.nobody(), "heard by " + heard);
-        helper.assertFalse(pet.getBrain().hasMemoryValue(InitMemory.WHISTLE_CALL.get()), "an order was left for it");
-        helper.runAfterDelay(ANSWER_TICKS, () -> {
-            helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, "the pet at its desk was called away");
-            helper.succeed();
-        });
+                helper.assertTrue(heard.nobody(), "heard by " + heard);
+                helper.assertFalse(pet.getBrain().hasMemoryValue(InitMemory.WHISTLE_CALL.get()), "an order was left for it");
+            })
+            .thenIdle(ANSWER_TICKS)
+            .thenExecute(() -> {
+                helper.assertTrue(pet.getPetDirective() == PetDirective.FREE, "the pet at its desk was called away");
+                helper.assertTrue(pet.getMind().errands().seated(), "the pet at its desk was got up");
+            })
+            .thenSucceed();
     }
 
     /** A player, in survival, standing at {@code rel}. */
