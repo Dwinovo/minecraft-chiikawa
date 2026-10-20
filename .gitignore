@@ -19,7 +19,9 @@ build
 
 # other
 eclipse
-run
+# The game's working folders, not the packages named run
+/run
+/*/run
 runs
 run-data
 common/logs/
