@@ -4,7 +4,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.impl.AnswerWhistleErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.BlockWorkErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.CheckResultsErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.CombatErrand;
-import com.dwinovo.chiikawa.entity.brain.errand.impl.ConstantErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.CooperateErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.DeliverErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.FollowOwnerErrand;
@@ -13,17 +12,17 @@ import com.dwinovo.chiikawa.entity.brain.errand.impl.PickUpItemErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.PlayMusicErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.ShopErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.SocializeErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.StayErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.TakeExamErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.TakePhotoErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.TakeTaskErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.WanderErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
-import com.dwinovo.chiikawa.init.InitActivity;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.schedule.Activity;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -43,10 +42,8 @@ public final class Errands {
     /** Errands every pet considers, whatever its capability. */
     private static final List<ErrandType<?, ?>> GENERIC = List.of(
         register(new FollowOwnerErrand()),
-        register(new ConstantErrand<>(ErrandIds.STAY, ErrandCategory.STAY, ErrandTunings.Untuned.CODEC,
-            () -> InitActivity.STAY.get())),
-        register(new ConstantErrand<>(ErrandIds.WANDER, ErrandCategory.WANDER, ErrandTunings.Wander.CODEC,
-            () -> Activity.IDLE)),
+        register(new StayErrand()),
+        register(new WanderErrand()),
         register(new PickUpItemErrand()),
         register(new TakeTaskErrand()),
         register(new ShopErrand()),
