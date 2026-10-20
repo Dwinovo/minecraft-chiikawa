@@ -201,7 +201,8 @@ public final class ErrandContractGameTests {
      * its data says for the way it ended.
      */
     private static void endsInTime(GameTestHelper helper, ResourceLocation id) {
-        AbstractPet pet = ErrandScenarios.setUp(id, helper).pet();
+        ErrandScenarios.Scenario scenario = ErrandScenarios.setUp(id, helper);
+        AbstractPet pet = scenario.pet();
         Watch watch = new Watch();
         boolean[] done = {false};
         helper.runAtTickTime(SETTLING, () -> helper.assertTrue(watch.seen != null || done[0], "the pet never set off on " + id));
@@ -219,7 +220,7 @@ public final class ErrandContractGameTests {
             helper.assertTrue(ran != null, id + " ended without having been seen to run");
             helper.assertTrue(ended.get().ranTicks() <= ran.settings().maxTicks() + GRACE,
                 id + " ran " + ended.get().ranTicks() + " ticks, past its limit of " + ran.settings().maxTicks());
-            assertRested(helper, pet, ran, ended.get());
+            assertRested(helper, pet, scenario, ran, ended.get());
             helper.succeed();
         });
     }
@@ -258,7 +259,7 @@ public final class ErrandContractGameTests {
             }
             String at = " (cut short at " + points[next[0]] + ")";
             helper.assertTrue(ended.get().outcome() instanceof Outcome.Interrupted, id + " ended " + ended.get().outcome() + at);
-            assertRested(helper, pet, watch.seen, ended.get());
+            assertRested(helper, pet, scenario, watch.seen, ended.get());
             Residue.none(helper, pet, scenario, watch.seen);
             told[0] = -1;
             if (++next[0] == points.length) {
@@ -267,8 +268,13 @@ public final class ErrandContractGameTests {
         });
     }
 
-    /** That the pet rests from the errand for exactly what its data says for the way it ended. */
-    private static void assertRested(GameTestHelper helper, AbstractPet pet, Running ran, DecisionLog.Ended ended) {
+    /**
+     * That the pet rests from the errand for exactly what its data says for the way it ended, and for what its steps
+     * reported on the way if that is more: a rest begun in the middle of the errand has run down by the time it ends,
+     * by no more than the errand ran.
+     */
+    private static void assertRested(GameTestHelper helper, AbstractPet pet, ErrandScenarios.Scenario scenario, Running ran,
+            DecisionLog.Ended ended) {
         ResourceLocation id = ran.errand();
         ErrandSettings.Rests rests = ran.settings().rests();
         RestSpec spec = switch (ended.outcome()) {
@@ -276,17 +282,29 @@ public final class ErrandContractGameTests {
             case Outcome.GaveUp gaveUp -> rests.gaveUp();
             case Outcome.Interrupted interrupted -> rests.interrupted();
         };
-        long ticks = spec.amount().map(fixed -> (long) fixed,
-            source -> RestSources.resolver(source).map(resolver -> resolver.ticks(new RestContext(ran.plan().restKey()))).orElse(0L));
+        long ticks = ticksOf(spec, ran);
         helper.assertTrue(ticks > 0 || !(ended.outcome() instanceof Outcome.GaveUp), id + " gives no rest after giving up");
+        long reported = scenario.reported().apply(ran).map(report -> ticksOf(rests.reports().get(report), ran)).orElse(0L);
 
         long now = helper.getLevel().getGameTime();
         RestLedger ledger = new RestLedger(errand -> Errands.get(errand).restStore().of(pet.getBrain(), errand), ErrandSettings::of);
         long left = ran.plan().subject().map(subject -> ledger.remaining(id, subject, now)).orElseGet(() -> ledger.remaining(id, now));
-        long expected = Math.max(0L, ticks - (now - ended.gameTime()));
         // A rest kept in a memory has run down by one in the tick it was written in, since the brain ticks after the mind.
+        if (reported > ticks) {
+            long latest = reported - (now - ended.gameTime());
+            helper.assertTrue(left <= latest && left >= latest - ended.ranTicks() - 1,
+                id + " " + ended.outcome() + " leaves " + left + " ticks of rest, not the " + reported + " it reported less up to "
+                    + ended.ranTicks() + " ticks");
+            return;
+        }
+        long expected = Math.max(0L, ticks - (now - ended.gameTime()));
         helper.assertTrue(left == expected || left == expected - 1,
             id + " " + ended.outcome() + " leaves " + left + " ticks of rest, not " + expected);
+    }
+
+    private static long ticksOf(RestSpec spec, Running ran) {
+        return spec.amount().map(fixed -> (long) fixed,
+            source -> RestSources.resolver(source).map(resolver -> resolver.ticks(new RestContext(ran.plan().restKey()))).orElse(0L));
     }
 
     private static Optional<Running> runningOn(AbstractPet pet, ResourceLocation id) {

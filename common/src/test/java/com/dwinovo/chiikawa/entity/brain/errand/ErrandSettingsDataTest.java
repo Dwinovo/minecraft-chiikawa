@@ -155,7 +155,7 @@ class ErrandSettingsDataTest {
         assertEquals(20, ticks(all, ErrandIds.MELEE));
         assertEquals(600, ticks(all, ErrandIds.TAKE_TASK));
         assertEquals(600, all.get(ErrandIds.TAKE_TASK).rests().interrupted().amount().left().orElseThrow());
-        assertEquals(Set.of("stored", "failed"), all.get(ErrandIds.TAKE_PHOTO).rests().reports().keySet());
+        assertEquals(Set.of("taken", "stored", "failed"), all.get(ErrandIds.TAKE_PHOTO).rests().reports().keySet());
     }
 
     private static int ticks(Map<ResourceLocation, ErrandSettings<?>> all, ResourceLocation errand) {
