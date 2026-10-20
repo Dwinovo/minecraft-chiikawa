@@ -238,6 +238,13 @@ public final class LivePetView implements PetView {
     }
 
     @Override
+    public Optional<UUID> nearestVisible(Onlooker kind, float range) {
+        return pet.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES)
+            .flatMap(seen -> seen.findClosest(entity -> kind.matches(entity) && pet.distanceToSqr(entity) <= range * range))
+            .map(LivingEntity::getUUID);
+    }
+
+    @Override
     public Optional<GlobalPos> whereIs(UUID creature) {
         return pet.level() instanceof ServerLevel level && level.getEntity(creature) instanceof LivingEntity found && found.isAlive()
             ? Optional.of(GlobalPos.of(found.level().dimension(), found.blockPosition())) : Optional.empty();

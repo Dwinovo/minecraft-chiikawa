@@ -103,6 +103,13 @@ public interface PetView {
     Optional<PickableItem> pickable(UUID item);
 
     /**
+     * @param kind whom
+     * @param range how near, in blocks
+     * @return the id of the nearest of them the pet can see within that range
+     */
+    Optional<UUID> nearestVisible(Onlooker kind, float range);
+
+    /**
      * @param creature the id of a creature, such as the one a pet means to photograph
      * @return where it is now, while it is alive in the pet's level; asked afresh of the world each time, since it moves
      */
