@@ -88,8 +88,6 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
         ACTIVITIES.register("check_results", () -> new Activity(PetActivities.name("check_results")));
     private static final RegistryObject<Activity> ANSWER_WHISTLE =
         ACTIVITIES.register("answer_whistle", () -> new Activity(PetActivities.name("answer_whistle")));
-    private static final RegistryObject<Activity> TAKE_PHOTO =
-        ACTIVITIES.register("take_photo", () -> new Activity(PetActivities.name("take_photo")));
 
     // Menu registrations
     private static final RegistryObject<MenuType<PetBackpackMenu>> PET_BACKPACK =
@@ -231,11 +229,6 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
     @Override
     public Supplier<Activity> answerWhistleActivity() {
         return ANSWER_WHISTLE;
-    }
-
-    @Override
-    public Supplier<Activity> takePhotoActivity() {
-        return TAKE_PHOTO;
     }
 
     @Override
