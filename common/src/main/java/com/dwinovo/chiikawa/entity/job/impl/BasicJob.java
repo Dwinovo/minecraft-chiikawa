@@ -10,19 +10,19 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * Standard pet job: holding an item with {@code toolTag} lets the pet assume it,
- * which offers the job's intents.
+ * which offers the job's errands.
  */
 public class BasicJob implements PetCapability {
     private final int id;
     private final int priority;
     private final TagKey<Item> toolTag;
-    private final List<Identifier> intents;
+    private final List<Identifier> errands;
 
-    public BasicJob(int id, int priority, TagKey<Item> toolTag, List<Identifier> intents) {
+    public BasicJob(int id, int priority, TagKey<Item> toolTag, List<Identifier> errands) {
         this.id = id;
         this.priority = priority;
         this.toolTag = toolTag;
-        this.intents = List.copyOf(intents);
+        this.errands = List.copyOf(errands);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class BasicJob implements PetCapability {
     }
 
     @Override
-    public List<Identifier> intents() {
-        return intents;
+    public List<Identifier> errands() {
+        return errands;
     }
 }
