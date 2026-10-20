@@ -7,7 +7,7 @@ import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import com.dwinovo.chiikawa.init.InitMemory;
-import com.dwinovo.chiikawa.init.InitTag;
+import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
 import com.dwinovo.chiikawa.utils.Utils;
 import net.minecraft.world.phys.AABB;
 import java.util.Comparator;
@@ -43,8 +43,7 @@ public class PetPickableItemSensor extends Sensor<AbstractPet>{
         // Nearest reachable item. Sorting before the reachability check means the
         // pathfind usually runs for the nearest candidate only.
         ItemEntity target = level.getEntitiesOfClass(ItemEntity.class, aabb, ItemEntity::isAlive).stream()
-                .filter(e -> !e.hasPickUpDelay())
-                .filter(e -> e.getItem().is(InitTag.ENTITY_PICKABLE_ITEMS))
+                .filter(e -> PickableItem.of(e).isPresent())
                 .sorted(Comparator.comparingDouble(entity::distanceToSqr))
                 .filter(e -> Utils.canReach(entity, e.blockPosition()))
                 .findFirst()

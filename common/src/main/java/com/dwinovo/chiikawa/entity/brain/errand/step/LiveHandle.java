@@ -10,9 +10,12 @@ import com.dwinovo.chiikawa.entity.brain.errand.run.Handle;
 import com.dwinovo.chiikawa.task.TaskTracker;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
+import java.util.Optional;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.Brain;
@@ -41,6 +44,17 @@ public final class LiveHandle implements Handle {
         return pet;
     }
 
+    /** @return the handle a step was given, which in the library's steps is always a live one */
+    static LiveHandle of(Handle handle) {
+        return (LiveHandle) handle;
+    }
+
+    /** @return the creature or item with this id, while it is in the pet's world and has not gone */
+    Optional<Entity> creature(UUID id) {
+        return pet.level() instanceof ServerLevel level ? Optional.ofNullable(level.getEntity(id)).filter(Entity::isAlive)
+            : Optional.empty();
+    }
+
     private Brain<AbstractPet> brain() {
         return pet.getBrain();
     }
@@ -59,6 +73,7 @@ public final class LiveHandle implements Handle {
     public void stopWalking() {
         brain().eraseMemory(MemoryModuleType.WALK_TARGET);
         brain().eraseMemory(MemoryModuleType.PATH);
+        brain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
     }
 
     @Override
