@@ -37,7 +37,7 @@ class ErrandSettingsTest {
     private static final String PLANT = """
         { "priority": 50, "score": 0.6, "max_ticks": 600, "yields_to": ["chiikawa:harvest"], "overlays": [],
           "rests": { "done": 0, "gave_up": { "ticks": 200, "per": "subject" }, "interrupted": 0 },
-          "tuning": { "speed": 0.8, "reach_sqr": 3.0 } }""";
+          "tuning": { "speed": 0.8, "reach_sqr": 3.0, "no_way_ticks": 100 } }""";
 
     private static final String TAKE_TASK = """
         { "priority": 50, "score": 0.7, "max_ticks": 1200, "yields_to": [], "overlays": [],
@@ -167,7 +167,7 @@ class ErrandSettingsTest {
     void aTuningOfTheWrongShapeIsRejected() {
         assertTrue(parse(ErrandIds.PLANT, PLANT.replace("\"reach_sqr\": 3.0", "\"stand_back\": 3")).isError());
         assertTrue(parse(ErrandIds.TAKE_PHOTO, PHOTO.replace("\"no_way_ticks\": 100", "\"no_way_ticks\": 0")).isError());
-        assertTrue(parse(ErrandIds.STAY, PLANT.replace("\"tuning\": { \"speed\": 0.8, \"reach_sqr\": 3.0 }", "\"tuning\": {}")).isSuccess());
+        assertTrue(parse(ErrandIds.STAY, PLANT.replace("\"tuning\": { \"speed\": 0.8, \"reach_sqr\": 3.0, \"no_way_ticks\": 100 }", "\"tuning\": {}")).isSuccess());
     }
 
     @Test

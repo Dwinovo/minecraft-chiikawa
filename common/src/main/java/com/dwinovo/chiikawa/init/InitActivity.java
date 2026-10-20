@@ -5,21 +5,6 @@ import java.util.function.Supplier;
 import net.minecraft.world.entity.schedule.Activity;
 
 public final class InitActivity {
-    // Farmer harvest activity.
-    public static final Supplier<Activity> FARMER_HARVEST =
-        Services.PLATFORM_REGISTRY.farmerHarvestActivity();
-    // Farmer plant activity.
-    public static final Supplier<Activity> FARMER_PLANT =
-        Services.PLATFORM_REGISTRY.farmerPlantActivity();
-    // Deliver activity.
-    public static final Supplier<Activity> DELEVER =
-        Services.PLATFORM_REGISTRY.deleverActivity();
-    // Pulling up weeds.
-    public static final Supplier<Activity> WEED =
-        Services.PLATFORM_REGISTRY.weedActivity();
-    // Picking mushrooms.
-    public static final Supplier<Activity> PICK_MUSHROOM =
-        Services.PLATFORM_REGISTRY.pickMushroomActivity();
     // Fencer combat activity.
     public static final Supplier<Activity> FENCER_FIGHT =
         Services.PLATFORM_REGISTRY.fencerFightActivity();

@@ -33,13 +33,20 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.FarmBlock;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * For each native errand, a setup in which it is the best thing its pet can do and a way to tell whether
@@ -61,6 +68,14 @@ final class ErrandScenarios {
     private static final int BOARD_AWAY = 7;
     /** The step of a photo at which the shutter goes: after the walk and the aim. */
     private static final int SHUTTER_STEP = 2;
+    /**
+     * Where a farmer's work is, across the yard from the farmer: a walk of many ticks, and as far as the farmer sensor looks,
+     * which is five blocks each way.
+     */
+    private static final BlockPos WORK = new BlockPos(9, STAND, 9);
+    private static final BlockPos FARMER = new BlockPos(4, STAND, 4);
+    private static final int SEEDS = 8;
+    private static final int CROP = 2;
 
     /**
      * A pet set up to be on one errand.
@@ -82,14 +97,19 @@ final class ErrandScenarios {
         }
     }
 
-    private static final Map<ResourceLocation, Function<GameTestHelper, Scenario>> BY_ERRAND = Map.of(
-        ErrandIds.PICK_UP_ITEM, ErrandScenarios::pickUpItem,
-        ErrandIds.TAKE_PHOTO, ErrandScenarios::takePhoto,
-        ErrandIds.GIFT_OWNER, ErrandScenarios::giftOwner,
-        ErrandIds.SHOP, ErrandScenarios::shop,
-        ErrandIds.TAKE_TASK, ErrandScenarios::takeTask,
-        ErrandIds.TAKE_EXAM, ErrandScenarios::takeExam,
-        ErrandIds.CHECK_RESULTS, ErrandScenarios::checkResults);
+    private static final Map<ResourceLocation, Function<GameTestHelper, Scenario>> BY_ERRAND = Map.ofEntries(
+        Map.entry(ErrandIds.PICK_UP_ITEM, ErrandScenarios::pickUpItem),
+        Map.entry(ErrandIds.TAKE_PHOTO, ErrandScenarios::takePhoto),
+        Map.entry(ErrandIds.GIFT_OWNER, ErrandScenarios::giftOwner),
+        Map.entry(ErrandIds.SHOP, ErrandScenarios::shop),
+        Map.entry(ErrandIds.TAKE_TASK, ErrandScenarios::takeTask),
+        Map.entry(ErrandIds.TAKE_EXAM, ErrandScenarios::takeExam),
+        Map.entry(ErrandIds.CHECK_RESULTS, ErrandScenarios::checkResults),
+        Map.entry(ErrandIds.HARVEST, ErrandScenarios::harvest),
+        Map.entry(ErrandIds.PLANT, ErrandScenarios::plant),
+        Map.entry(ErrandIds.DELIVER, ErrandScenarios::deliver),
+        Map.entry(ErrandIds.WEED, ErrandScenarios::weed),
+        Map.entry(ErrandIds.PICK_MUSHROOM, ErrandScenarios::pickMushroom));
 
     private ErrandScenarios() {
     }
@@ -276,5 +296,133 @@ final class ErrandScenarios {
             }
             return Optional.empty();
         });
+    }
+
+    /**
+     * A ripe wheat crop across the yard and a farmer with a hoe. A crop is reaped whole or not at all: it stands ripe and the
+     * pet has no wheat, or it has been replanted young and the pet has the wheat.
+     */
+    private static Scenario harvest(GameTestHelper helper) {
+        helper.setBlock(WORK.below(), moistFarmland());
+        helper.setBlock(WORK, Blocks.WHEAT.defaultBlockState().setValue(CropBlock.AGE, CropBlock.MAX_AGE));
+        AbstractPet pet = GameTestKit.holding(GameTestKit.worker(helper, FARMER), Items.WOODEN_HOE);
+        return new Scenario(pet, 2, ran -> {
+            BlockState crop = helper.getBlockState(WORK);
+            boolean ripe = crop.is(Blocks.WHEAT) && crop.getValue(CropBlock.AGE) == CropBlock.MAX_AGE;
+            boolean reaped = carries(pet, Items.WHEAT);
+            if (ripe && reaped) {
+                return Optional.of("the pet has the wheat, though the crop is still standing ripe");
+            }
+            if (!ripe && !reaped) {
+                return Optional.of("the crop was reaped, though the pet has no wheat");
+            }
+            return Optional.empty();
+        });
+    }
+
+    /**
+     * Bare watered farmland across the yard and a farmer with seeds. A seed is planted or it is not: the crop stands and
+     * one seed is gone from the bag, or neither.
+     */
+    private static Scenario plant(GameTestHelper helper) {
+        helper.setBlock(WORK.below(), moistFarmland());
+        AbstractPet pet = GameTestKit.holding(GameTestKit.worker(helper, FARMER), Items.WOODEN_HOE);
+        pet.getBackpack().addItem(new ItemStack(Items.WHEAT_SEEDS, SEEDS));
+        return new Scenario(pet, 2, ran -> {
+            boolean planted = helper.getBlockState(WORK).is(Blocks.WHEAT);
+            int used = SEEDS - GameTestKit.count(pet, Items.WHEAT_SEEDS);
+            if (planted && used != 1) {
+                return Optional.of("a crop is planted, though " + used + " seeds are gone from the bag");
+            }
+            if (!planted && used != 0) {
+                return Optional.of(used + " seeds are gone from the bag, though no crop is planted");
+            }
+            return Optional.empty();
+        });
+    }
+
+    /**
+     * A farmer with some wheat to put away and a chest across the yard. Whatever is cut short, no wheat is lost or made:
+     * what is not in the chest is in the bag, and the chest's lid is down.
+     */
+    private static Scenario deliver(GameTestHelper helper) {
+        helper.setBlock(WORK, Blocks.CHEST);
+        AbstractPet pet = GameTestKit.holding(GameTestKit.worker(helper, FARMER), Items.WOODEN_HOE);
+        pet.getBackpack().addItem(new ItemStack(Items.WHEAT, CROP));
+        return new Scenario(pet, 3 + CROP, ran -> {
+            ChestBlockEntity chest = (ChestBlockEntity) helper.getBlockEntity(WORK);
+            int stored = 0;
+            for (int slot = 0; slot < ((Container) chest).getContainerSize(); slot++) {
+                ItemStack there = ((Container) chest).getItem(slot);
+                stored += there.is(Items.WHEAT) ? there.getCount() : 0;
+            }
+            int total = stored + GameTestKit.count(pet, Items.WHEAT);
+            if (total != CROP) {
+                return Optional.of("the wheat in the chest and in the bag is " + total + ", not the " + CROP + " the pet set off with");
+            }
+            if (lidIsUp(helper.getLevel(), chest)) {
+                return Optional.of("the chest was left open");
+            }
+            return Optional.empty();
+        });
+    }
+
+    /** Grass across the yard, and a farmer with a hoe and no owner to pay it, which is who pulls weeds unasked. */
+    private static Scenario weed(GameTestHelper helper) {
+        helper.setBlock(WORK.below(), Blocks.GRASS_BLOCK);
+        helper.setBlock(WORK, Blocks.SHORT_GRASS);
+        AbstractPet pet = GameTestKit.holding(GameTestKit.wildWorker(helper, FARMER), Items.WOODEN_HOE);
+        return new Scenario(pet, 2, ran -> {
+            BlockState there = helper.getBlockState(WORK);
+            return there.is(Blocks.SHORT_GRASS) || there.isAir() ? Optional.empty()
+                : Optional.of("the weed was left as " + there.getBlock() + ", neither standing nor pulled");
+        });
+    }
+
+    /**
+     * A mushroom across the yard on a night, and a farmer with a hoe and no owner to pay it. A mushroom is picked whole
+     * or not at all: it stands and the pet has none, or it is gone and the pet has it.
+     */
+    private static Scenario pickMushroom(GameTestHelper helper) {
+        settleWorld(helper.getLevel(), Difficulty.NORMAL, GameTestKit.MIDNIGHT);
+        helper.setBlock(WORK, Blocks.RED_MUSHROOM);
+        AbstractPet pet = GameTestKit.holding(GameTestKit.wildWorker(helper, FARMER), Items.WOODEN_HOE);
+        return new Scenario(pet, 2, ran -> {
+            boolean standing = helper.getBlockState(WORK).is(Blocks.RED_MUSHROOM);
+            boolean picked = carries(pet, Items.RED_MUSHROOM);
+            if (standing && picked) {
+                return Optional.of("the pet has the mushroom, though it is still standing");
+            }
+            if (!standing && !picked) {
+                return Optional.of("the mushroom is gone, though the pet does not have it");
+            }
+            return Optional.empty();
+        });
+    }
+
+    /** Watered, or the farmland dries out and turns back to dirt mid-case. */
+    private static BlockState moistFarmland() {
+        return Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE);
+    }
+
+    /**
+     * Whether the chest's lid is being held up. The lid is moved by block events, which the level runs at the end of its
+     * tick, so what is waiting is run first; the game keeps whether it is up in a field of the chest's lid controller that
+     * nothing outside it reads, since on the server the lid never swings.
+     */
+    private static boolean lidIsUp(ServerLevel level, ChestBlockEntity chest) {
+        try {
+            java.lang.reflect.Method runBlockEvents = ServerLevel.class.getDeclaredMethod("runBlockEvents");
+            runBlockEvents.setAccessible(true);
+            runBlockEvents.invoke(level);
+            java.lang.reflect.Field controller = ChestBlockEntity.class.getDeclaredField("chestLidController");
+            controller.setAccessible(true);
+            Object lid = controller.get(chest);
+            java.lang.reflect.Field shouldBeOpen = lid.getClass().getDeclaredField("shouldBeOpen");
+            shouldBeOpen.setAccessible(true);
+            return shouldBeOpen.getBoolean(lid);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("The chest's lid can no longer be read, the case has to be taught where it is now", e);
+        }
     }
 }

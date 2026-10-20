@@ -22,7 +22,9 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.FarmBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
@@ -195,5 +197,39 @@ public final class FarmGameTests {
             helper.assertTrue(wheat.isAlive(), "the wheat was taken");
             helper.succeed();
         });
+    }
+
+    /**
+     * A crop walled in on every side is one the pet cannot get to. It gives up on it, and leaves it alone for a while
+     * instead of standing at the wall for good: the next crop, farther off and open, is reaped.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WORK_TICKS)
+    public static void a_crop_the_pet_cannot_get_to_does_not_hold_it_back_from_one_it_can(GameTestHelper helper) {
+        AbstractPet pet = holding(worker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
+        BlockPos walled = new BlockPos(7, STAND, 4);
+        ripeWheat(helper, walled);
+        for (int x = -1; x <= 1; x++) {
+            for (int z = -1; z <= 1; z++) {
+                for (int y = 0; y <= 1; y++) {
+                    if (x != 0 || z != 0) {
+                        helper.setBlock(walled.offset(x, y, z), Blocks.STONE);
+                    }
+                }
+            }
+        }
+        BlockPos open = new BlockPos(4, STAND, 8);
+        ripeWheat(helper, open);
+
+        helper.succeedWhen(() -> {
+            helper.assertTrue(carries(pet, Items.WHEAT), "the pet never came away with the wheat that was open to it");
+            helper.assertTrue(helper.getBlockState(open).getValue(CropBlock.AGE) < CropBlock.MAX_AGE, "the open crop was not reaped");
+            helper.assertTrue(helper.getBlockState(walled).getValue(CropBlock.AGE) == CropBlock.MAX_AGE, "the walled-in crop was reaped");
+        });
+    }
+
+    private static void ripeWheat(GameTestHelper helper, BlockPos crop) {
+        helper.setBlock(crop.below(), Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE));
+        BlockState ripe = Blocks.WHEAT.defaultBlockState().setValue(CropBlock.AGE, CropBlock.MAX_AGE);
+        helper.setBlock(crop, ripe);
     }
 }

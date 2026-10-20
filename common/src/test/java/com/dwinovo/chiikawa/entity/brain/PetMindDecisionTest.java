@@ -17,6 +17,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.decide.Decision;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionTrace;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.Permits;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.Scored;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.BlockWorkErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestStore;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
@@ -213,7 +214,7 @@ class PetMindDecisionTest {
     void endsTheRunningErrandWhenItsConditionFails() {
         TestView cropGone = view();
 
-        assertEquals(Optional.of(Outcome.gaveUp("no_crop")), ending(ErrandIds.HARVEST, new Plan() { }, cropGone));
+        assertEquals(Optional.of(Outcome.gaveUp("no_crop")), ending(ErrandIds.HARVEST, new BlockWorkErrand.Work(east(1)), cropGone));
     }
 
     @Test

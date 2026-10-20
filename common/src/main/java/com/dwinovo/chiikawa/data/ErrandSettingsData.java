@@ -39,7 +39,7 @@ public final class ErrandSettingsData {
     public static Map<ResourceLocation, ErrandSettings<?>> all() {
         // A crop or a chest a pet could not get to is left alone for ten seconds.
         Rests blockWork = Rests.of(NONE, RestSpec.ticksPerSubject(200), NONE);
-        ErrandTunings.BlockWork blockWorkTuning = new ErrandTunings.BlockWork(0.8F, 3.0);
+        ErrandTunings.BlockWork blockWorkTuning = new ErrandTunings.BlockWork(0.8F, 3.0, 100);
         ErrandTunings.Footwork footwork = new ErrandTunings.Footwork(1.0F, 1.2F, 10.0, 3.0, 2);
         // However it ends, the same two leave the scene alone afterwards.
         Rests scene = Rests.of(RestSpec.fromPerSubject(RestSources.SCENE_COOLDOWN),
@@ -55,7 +55,7 @@ public final class ErrandSettingsData {
             // The farmer's strict order: harvest, then plant, then deliver.
             entry(ErrandIds.PLANT, errand(50, 0.6F, HALF_A_MINUTE, blockWork, blockWorkTuning)
                 .yieldingTo(ErrandIds.HARVEST)),
-            entry(ErrandIds.DELIVER, errand(50, 0.6F, 3000, blockWork, new ErrandTunings.Deliver(0.8F, 2, 3.0))
+            entry(ErrandIds.DELIVER, errand(50, 0.6F, 3000, blockWork, new ErrandTunings.Deliver(0.8F, 2, 3.0, 100))
                 .yieldingTo(ErrandIds.HARVEST, ErrandIds.PLANT)),
             entry(ErrandIds.WEED, errand(50, 0.5F, HALF_A_MINUTE, blockWork, blockWorkTuning)),
             entry(ErrandIds.PICK_MUSHROOM, errand(50, 0.5F, HALF_A_MINUTE, blockWork, blockWorkTuning)),

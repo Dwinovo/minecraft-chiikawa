@@ -79,7 +79,7 @@ class ForageOfferTest {
             assertEquals("intent.chiikawa.fail.not_night",
                 TestErrands.whyNoOffer(ErrandIds.PICK_MUSHROOM, view(PetOwnership.WILD, phase, 1)).reasonKey());
         }
-        assertTrue(TestErrands.stillWanted(ErrandIds.PICK_MUSHROOM, Heading.NOWHERE, view(PetOwnership.WILD, DayPhase.NIGHT, 1)).ok());
+        assertTrue(TestErrands.stillWanted(ErrandIds.PICK_MUSHROOM, workAt(1), view(PetOwnership.WILD, DayPhase.NIGHT, 1)).ok());
     }
 
     /** Both a weed and a mushroom {@code blocksEast} of home. */
@@ -88,6 +88,10 @@ class ForageOfferTest {
         PerceivedTargets targets = new PerceivedTargets(Optional.empty(), Optional.empty(), Optional.empty(),
             Optional.empty(), target, target, Optional.empty());
         return TestView.at(HOME, WILD_ANCHOR).ownership(ownership).phase(phase).targets(targets);
+    }
+
+    private static BlockWorkErrand.Work workAt(int blocksEast) {
+        return new BlockWorkErrand.Work(GlobalPos.of(OVERWORLD, HOME.pos().east(blocksEast)));
     }
 
     private static PetTask slip(ResourceLocation counter) {

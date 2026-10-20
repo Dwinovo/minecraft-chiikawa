@@ -34,6 +34,7 @@ class StateOwnershipTest {
     private static final String HANDLE = STEPS + "LiveHandle.java";
     private static final String RESTS = "entity/brain/errand/rest/RestStore.java";
     private static final String BEHAVIORS = "entity/brain/task/";
+    private static final String SENSORS = "entity/brain/sensor/";
 
     /**
      * One kind of write, and who does it.
@@ -62,8 +63,7 @@ class StateOwnershipTest {
             Pattern.compile(WRITE + "MemoryModuleType\\.(?:WALK_TARGET|LOOK_TARGET|PATH)\\b"
                 + "|\\bsetWalkAndLookTargetMemories\\(|\\blookAt(?:Entity|EachOther|Entities)\\("),
             Set.of(HANDLE),
-            Set.of(PET, BEHAVIORS + "combat/CombatMoveBehavior.java", BEHAVIORS + "farmer/WalkToBlockTargetBehavior.java",
-                BEHAVIORS + "farmer/WalkToContainerBehavior.java", BEHAVIORS + "farmer/WalkToPlantCropBehavior.java",
+            Set.of(PET, BEHAVIORS + "combat/CombatMoveBehavior.java",
                 BEHAVIORS + "idle/GlanceBehavior.java", BEHAVIORS + "musician/PlayMusicBehavior.java",
                 BEHAVIORS + "social/CooperateBehavior.java", BEHAVIORS + "social/SocializeBehavior.java",
                 BEHAVIORS + "tameable/AnchorLeashBehavior.java", BEHAVIORS + "tameable/AnswerWhistleBehavior.java",
@@ -74,6 +74,10 @@ class StateOwnershipTest {
                 + "|MUSICIAN_RESTING|SOCIAL_COOLDOWNS|ERRAND_RESTS|SUBJECT_RESTS)\\b"),
             Set.of(RESTS),
             Set.of(BEHAVIORS + "musician/PlayMusicBehavior.java", "social/SocialRules.java")),
+        new Rule("the blocks of work the farmer sees",
+            Pattern.compile(WRITE + "(?:InitMemory\\.(?:HARVEST_POS|PLANT_POS|CONTAINER_POS|WEED_POS|MUSHROOM_POS)\\b|\\S*?\\.memory\\(\\))"),
+            Set.of(SENSORS + "PetFarmerWorkSensor.java"),
+            Set.of()),
         new Rule("the present in the paws", Pattern.compile("\\bsetPendingGift\\("),
             Set.of(PET, STEPS + "TakePresent.java", STEPS + "HandOver.java"),
             Set.of()));
