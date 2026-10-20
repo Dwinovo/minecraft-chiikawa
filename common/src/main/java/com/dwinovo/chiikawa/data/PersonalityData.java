@@ -1,8 +1,8 @@
 package com.dwinovo.chiikawa.data;
 
 import com.dwinovo.chiikawa.anim.state.PetReaction;
-import com.dwinovo.chiikawa.entity.brain.intent.DayPhase;
-import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
+import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.personality.IdleHabits;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.init.InitEntity;
@@ -27,9 +27,9 @@ import net.minecraft.world.level.ItemLike;
  * items, so a wandering pet still reacts to those whatever its randomness.
  */
 public final class PersonalityData {
-    private static final List<ResourceLocation> FARMING = List.of(PetIntents.HARVEST, PetIntents.PLANT, PetIntents.DELIVER,
-        PetIntents.WEED, PetIntents.PICK_MUSHROOM);
-    private static final List<ResourceLocation> FIGHTING = List.of(PetIntents.MELEE, PetIntents.RANGED);
+    private static final List<ResourceLocation> FARMING = List.of(ErrandIds.HARVEST, ErrandIds.PLANT, ErrandIds.DELIVER,
+        ErrandIds.WEED, ErrandIds.PICK_MUSHROOM);
+    private static final List<ResourceLocation> FIGHTING = List.of(ErrandIds.MELEE, ErrandIds.RANGED);
 
     private PersonalityData() {
     }
@@ -40,7 +40,7 @@ public final class PersonalityData {
         // Diligent.
         all.put(id(InitEntity.CHIIKAWA_PET.get()), personality()
             .weigh(1.2F, FARMING)
-            .weigh(0.8F, PetIntents.WANDER)
+            .weigh(0.8F, ErrandIds.WANDER)
             .at(DayPhase.MORNING, 1.1F, FARMING)
             .randomness(0.05F)
             .wildTool(Items.WOODEN_HOE, 6)
@@ -59,8 +59,8 @@ public final class PersonalityData {
             .build());
         // Cheerful, often playing music.
         all.put(id(InitEntity.HACHIWARE_PET.get()), personality()
-            .weigh(1.3F, PetIntents.PLAY_MUSIC)
-            .at(DayPhase.EVENING, 1.2F, PetIntents.PLAY_MUSIC)
+            .weigh(1.3F, ErrandIds.PLAY_MUSIC)
+            .at(DayPhase.EVENING, 1.2F, ErrandIds.PLAY_MUSIC)
             .randomness(0.08F)
             .wildTool(Items.WOODEN_HOE, 3)
             .wildTool(Items.STONE_HOE, 1)
@@ -84,8 +84,8 @@ public final class PersonalityData {
             .build());
         // Very whimsical.
         all.put(id(InitEntity.USAGI_PET.get()), personality()
-            .weigh(2.0F, PetIntents.WANDER)
-            .at(DayPhase.NIGHT, 1.5F, PetIntents.WANDER)
+            .weigh(2.0F, ErrandIds.WANDER)
+            .at(DayPhase.NIGHT, 1.5F, ErrandIds.WANDER)
             .randomness(0.15F)
             .wildTool(InitItems.USAGI_WEAPON.get(), 6)
             .wildTool(Items.WOODEN_HOE, 1)
@@ -107,8 +107,8 @@ public final class PersonalityData {
         // Hard-working.
         all.put(id(InitEntity.SHISA_PET.get()), personality()
             .weigh(1.3F, FARMING)
-            .weigh(1.2F, PetIntents.PICK_UP_ITEM)
-            .weigh(0.6F, PetIntents.WANDER)
+            .weigh(1.2F, ErrandIds.PICK_UP_ITEM)
+            .weigh(0.6F, ErrandIds.WANDER)
             .at(DayPhase.MORNING, 1.2F, FARMING)
             .randomness(0.05F)
             .wildTool(Items.WOODEN_HOE, 5)
@@ -127,8 +127,8 @@ public final class PersonalityData {
         // Would rather not work.
         all.put(id(InitEntity.MOMONGA_PET.get()), personality()
             .weigh(0.7F, FARMING)
-            .weigh(2.0F, PetIntents.WANDER)
-            .at(DayPhase.DAY, 1.5F, PetIntents.WANDER)
+            .weigh(2.0F, ErrandIds.WANDER)
+            .at(DayPhase.DAY, 1.5F, ErrandIds.WANDER)
             .randomness(0.12F)
             .wildTool(Items.AIR, 6)
             .wildTool(Items.WOODEN_HOE, 1)
@@ -147,8 +147,8 @@ public final class PersonalityData {
         // Laid-back.
         all.put(id(InitEntity.KURIMANJU_PET.get()), personality()
             .weigh(0.85F, FARMING)
-            .weigh(3.0F, PetIntents.WANDER)
-            .at(DayPhase.EVENING, 1.5F, PetIntents.WANDER)
+            .weigh(3.0F, ErrandIds.WANDER)
+            .at(DayPhase.EVENING, 1.5F, ErrandIds.WANDER)
             .randomness(0.08F)
             .wildTool(Items.WOODEN_HOE, 3)
             .wildTool(Items.AIR, 2)
@@ -185,7 +185,7 @@ public final class PersonalityData {
         // Quiet.
         all.put(id(InitEntity.FURUHONYA_PET.get()), personality()
             .weigh(0.7F, FIGHTING)
-            .weigh(0.5F, PetIntents.WANDER)
+            .weigh(0.5F, ErrandIds.WANDER)
             .randomness(0.02F)
             // Books, of course.
             .likes(Items.BOOK, 3)

@@ -3,8 +3,6 @@ package com.dwinovo.chiikawa.init;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.camera.PhotoPlan;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.SubjectRests;
-import com.dwinovo.chiikawa.entity.brain.intent.IntentSwitchLog;
-import com.dwinovo.chiikawa.entity.brain.intent.RunningIntent;
 import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.social.InteractionPlan;
 import com.dwinovo.chiikawa.social.InteractionReservation;
@@ -158,30 +156,6 @@ public final class InitMemory {
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
-    /** The intent the selector last chose. */
-    public static final Supplier<MemoryModuleType<RunningIntent>> CURRENT_INTENT =
-        Services.REGISTRY.<MemoryModuleType<RunningIntent>>register(
-            BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "current_intent"),
-            () -> new MemoryModuleType<>(Optional.empty())
-        );
-
-    /** Present when the selector should evaluate on the next tick instead of waiting for its interval. */
-    public static final Supplier<MemoryModuleType<Unit>> INTENT_REEVALUATE =
-        Services.REGISTRY.<MemoryModuleType<Unit>>register(
-            BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "intent_reevaluate"),
-            () -> new MemoryModuleType<>(Optional.empty())
-        );
-
-    /** Recent intent switches; present only while logging is turned on by the debug command. */
-    public static final Supplier<MemoryModuleType<IntentSwitchLog>> INTENT_SWITCH_LOG =
-        Services.REGISTRY.<MemoryModuleType<IntentSwitchLog>>register(
-            BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "intent_switch_log"),
-            () -> new MemoryModuleType<>(Optional.empty())
-        );
-
     /** What the pet last said out loud and when; see {@link PetSpeech}. */
     public static final Supplier<MemoryModuleType<PetSpeech.Said>> LAST_SAID =
         Services.REGISTRY.<MemoryModuleType<PetSpeech.Said>>register(
@@ -229,8 +203,8 @@ public final class InitMemory {
         );
 
     /**
-     * The photo the pet has set off to take, kept from the moment the selector chooses the errand until
-     * it ends, so the behavior carries out what the selector admitted.
+     * The photo the pet has set off to take, kept from the moment the mind chooses the errand until
+     * it ends, so the behavior carries out what the mind admitted.
      */
     public static final Supplier<MemoryModuleType<PhotoPlan>> PHOTO_PLAN =
         Services.REGISTRY.<MemoryModuleType<PhotoPlan>>register(

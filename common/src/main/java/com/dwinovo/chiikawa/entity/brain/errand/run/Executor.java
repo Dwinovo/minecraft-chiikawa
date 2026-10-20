@@ -39,6 +39,9 @@ public final class Executor {
     @Nullable
     private Outcome pending;
     private int stepsBegun;
+    /** The pose and the scene last published, so that only a change is: see {@link #project}. */
+    private PetActivity projectedActivity = PetActivity.NONE;
+    private String projectedPerformance = "";
 
     /**
      * @param handle the pet
@@ -180,9 +183,23 @@ public final class Executor {
         pending = null;
     }
 
+    /**
+     * Publishes what the pet is doing. The errand is published as it is; the pose and the scene only when
+     * what the step claims of them changes. So a step that claims nothing, as one that is still carried out
+     * by an old behavior, leaves alone what that behavior sets, and the pose and the scene of a step that
+     * does claim them are still cleared the tick it ends.
+     */
     private void project() {
         projection.intent(running == null ? null : running.errand());
-        projection.activity(step == null ? PetActivity.NONE : step.pose());
-        projection.performance(step == null ? "" : step.performance());
+        PetActivity pose = step == null ? PetActivity.NONE : step.pose();
+        if (pose != projectedActivity) {
+            projectedActivity = pose;
+            projection.activity(pose);
+        }
+        String performance = step == null ? "" : step.performance();
+        if (!performance.equals(projectedPerformance)) {
+            projectedPerformance = performance;
+            projection.performance(performance);
+        }
     }
 }
