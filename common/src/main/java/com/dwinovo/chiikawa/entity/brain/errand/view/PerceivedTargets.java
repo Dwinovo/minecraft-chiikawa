@@ -20,7 +20,7 @@ public record PerceivedTargets(
     Optional<GlobalPos> container,
     Optional<GlobalPos> weed,
     Optional<GlobalPos> mushroom,
-    Optional<GlobalPos> pickableItem
+    Optional<PickableItem> pickableItem
 ) {
     public static final PerceivedTargets NONE = new PerceivedTargets(Optional.empty(), Optional.empty(),
         Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
@@ -36,7 +36,7 @@ public record PerceivedTargets(
             brain.getMemory(InitMemory.CONTAINER_POS.get()).map(pos -> GlobalPos.of(dimension, pos)),
             brain.getMemory(InitMemory.WEED_POS.get()).map(pos -> GlobalPos.of(dimension, pos)),
             brain.getMemory(InitMemory.MUSHROOM_POS.get()).map(pos -> GlobalPos.of(dimension, pos)),
-            brain.getMemory(InitMemory.PICKABLE_ITEM.get()).map(item -> GlobalPos.of(dimension, item.blockPosition()))
+            brain.getMemory(InitMemory.PICKABLE_ITEM.get()).flatMap(PickableItem::of)
         );
     }
 }
