@@ -10,6 +10,8 @@ import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.task.PetTask;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.GlobalPos;
@@ -47,6 +49,7 @@ public final class TestView implements PetView {
     private boolean presentToGive;
     private boolean seatedAtExam;
     private Optional<GlobalPos> ownerPos = Optional.empty();
+    private final Map<UUID, GlobalPos> creatures = new HashMap<>();
 
     private TestView(GlobalPos pos, PetAnchor anchor) {
         this.pos = pos;
@@ -184,6 +187,12 @@ public final class TestView implements PetView {
         return this;
     }
 
+    /** A creature that is somewhere in the pet's world, such as a friend it means to photograph. */
+    public TestView creature(UUID id, GlobalPos where) {
+        this.creatures.put(id, where);
+        return this;
+    }
+
     /** Where the pet's owner is. */
     public TestView ownerPos(GlobalPos owner) {
         this.ownerPos = Optional.of(owner);
@@ -229,6 +238,11 @@ public final class TestView implements PetView {
     @Override
     public Optional<PickableItem> pickable(UUID item) {
         return targets.pickableItem().filter(perceived -> perceived.id().equals(item));
+    }
+
+    @Override
+    public Optional<GlobalPos> whereIs(UUID creature) {
+        return Optional.ofNullable(creatures.get(creature));
     }
 
     @Override
