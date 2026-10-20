@@ -67,6 +67,14 @@ public interface Handle {
     /** Holds off the pet's next attack for this long. */
     void cooldownAttack(int ticks);
 
+    /**
+     * Tells how the errand is faring, as its settings name the report: the pet rests the errand as they say
+     * for it, instead of what it was resting, whether that is more or less. For a step that does something
+     * the errand must keep its distance from afterwards even if it is cut short, such as pressing a shutter.
+     * A report the settings do not name changes nothing.
+     */
+    void report(String report);
+
     /** Counts work done towards the slip the pet carries. */
     void reportWork(ResourceLocation counter, int amount);
 
