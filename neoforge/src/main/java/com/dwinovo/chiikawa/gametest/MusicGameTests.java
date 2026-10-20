@@ -10,6 +10,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
+import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.init.InitEntity;
@@ -19,11 +20,14 @@ import com.dwinovo.chiikawa.music.MusicBoxSelection;
 import com.dwinovo.chiikawa.music.PlaybackMode;
 import com.dwinovo.chiikawa.music.ServerMusicLibrary;
 import com.dwinovo.chiikawa.music.ServerMusicSystem;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -36,6 +40,8 @@ import net.minecraft.world.item.ItemStack;
 public final class MusicGameTests {
     private static final String BATCH = "chiikawa_music";
     private static final String FULL_BATCH = "chiikawa_music_full";
+    /** Apart from the others, which fill the streams the server allows between them. */
+    private static final String LEASH_BATCH = "chiikawa_music_leash";
     /**
      * A song ends by the wall clock while a test server ticks as fast as it can, so a song of
      * a second or two takes thousands of ticks to end; and importing runs off the server
@@ -111,14 +117,14 @@ public final class MusicGameTests {
         AtomicReference<AbstractPet> hachiware = new AtomicReference<>();
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(readySong(library, FIRST).isPresent(), "the song was never imported"))
+            .thenWaitUntil(() -> helper.assertTrue(readySong(library, FIRST).isPresent(), Component.literal("the song was never imported")))
             .thenExecute(() -> hachiware.set(busker(helper, library, PlaybackMode.ONCE)))
-            .thenWaitUntil(() -> helper.assertTrue(streaming(helper, hachiware.get(), library), "Hachiware never started the song"))
+            .thenWaitUntil(() -> helper.assertTrue(streaming(helper, hachiware.get(), library), Component.literal("Hachiware never started the song")))
             .thenExecute(() -> PetMind.post(hachiware.get(), new Message.Moved("test")))
             .thenIdle(INTERRUPT_TICKS)
             .thenExecute(() -> {
-                helper.assertTrue(!streaming(helper, hachiware.get(), library), "the song was still being streamed for the pet");
-                helper.assertTrue(hachiware.get().getActivity() == PetActivity.NONE, "the pet was still posed as a busker");
+                helper.assertTrue(!streaming(helper, hachiware.get(), library), Component.literal("the song was still being streamed for the pet"));
+                helper.assertTrue(hachiware.get().getActivity() == PetActivity.NONE, Component.literal("the pet was still posed as a busker"));
             })
             .thenSucceed();
     }
@@ -135,15 +141,15 @@ public final class MusicGameTests {
         AtomicReference<AbstractPet> hachiware = new AtomicReference<>();
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(readySong(library, FIRST).isPresent(), "the song was never imported"))
+            .thenWaitUntil(() -> helper.assertTrue(readySong(library, FIRST).isPresent(), Component.literal("the song was never imported")))
             .thenExecute(() -> hachiware.set(busker(helper, library, PlaybackMode.ONCE)))
-            .thenWaitUntil(() -> helper.assertTrue(streaming(helper, hachiware.get(), library), "Hachiware never started the song"))
+            .thenWaitUntil(() -> helper.assertTrue(streaming(helper, hachiware.get(), library), Component.literal("Hachiware never started the song")))
             .thenExecute(() -> hachiware.get().setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY))
             .thenWaitUntil(() -> {
-                helper.assertTrue(!streaming(helper, hachiware.get(), library), "the music went on without the box");
+                helper.assertTrue(!streaming(helper, hachiware.get(), library), Component.literal("the music went on without the box"));
                 helper.assertTrue(!hachiware.get().getBrain().hasMemoryValue(InitMemory.MUSICIAN_NOW_PLAYING.get())
                         && !hachiware.get().getBrain().hasMemoryValue(InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get()),
-                    "the pet still remembered what it played");
+                    Component.literal("the pet still remembered what it played"));
             })
             .thenSucceed();
     }
@@ -162,22 +168,60 @@ public final class MusicGameTests {
         int retry = library.config().retryTicks();
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(readySong(library, FIRST).isPresent(), "the song was never imported"))
+            .thenWaitUntil(() -> helper.assertTrue(readySong(library, FIRST).isPresent(), Component.literal("the song was never imported")))
             .thenExecute(() -> {
                 for (int taken = 0; taken < library.config().maxConcurrentSessions(); taken++) {
                     AbstractPet other = GameTestKit.wild(helper, InitEntity.CHIIKAWA_PET.get(), new BlockPos(2 + taken, STAND, 2));
                     helper.assertTrue(ServerMusicSystem.streams(helper.getLevel().getServer())
-                        .start(other, readySong(library, FIRST).orElseThrow().trackId()).isPresent(), "a stream was not free to take");
+                        .start(other, readySong(library, FIRST).orElseThrow().trackId()).isPresent(), Component.literal("a stream was not free to take"));
                 }
                 hachiware.set(busker(helper, library, PlaybackMode.ONCE));
             })
             .thenWaitUntil(() -> helper.assertTrue(hachiware.get().getBrain().hasMemoryValue(InitMemory.MUSICIAN_RESTING.get()),
-                "Hachiware never gave up the song"))
+                Component.literal("Hachiware never gave up the song")))
             .thenExecute(() -> {
                 long left = hachiware.get().getBrain().getTimeUntilExpiry(InitMemory.MUSICIAN_RESTING.get());
-                helper.assertTrue(left > 0 && left <= retry, "Hachiware rests for " + left + " ticks, not up to the " + retry);
-                helper.assertTrue(hachiware.get().getActivity() == PetActivity.NONE, "the pet was posed as a busker");
-                helper.assertTrue(!streaming(helper, hachiware.get(), library), "a stream was started with none free");
+                helper.assertTrue(left > 0 && left <= retry, Component.literal("Hachiware rests for " + left + " ticks, not up to the " + retry));
+                helper.assertTrue(hachiware.get().getActivity() == PetActivity.NONE, Component.literal("the pet was posed as a busker"));
+                helper.assertTrue(!streaming(helper, hachiware.get(), library), Component.literal("a stream was started with none free"));
+            })
+            .thenSucceed();
+    }
+
+    /**
+     * A busker stands where it plays, so the leash cannot be held to a place it heads for. When the middle of its area is
+     * moved away from it, it is beyond the leash, stops playing at its next decision and walks back to the area, as a pet on
+     * any other errand would.
+     */
+    @GameTest(template = "floor32", batch = LEASH_BATCH, timeoutTicks = CASE_TICKS)
+    public static void a_busker_whose_area_moves_away_stops_and_walks_back_to_it(GameTestHelper helper) {
+        quietYard(helper, NOON);
+        ServerMusicLibrary library = ServerMusicSystem.library(helper.getLevel().getServer());
+        addSong(library, FIRST, SONG_SECONDS);
+        AtomicReference<AbstractPet> hachiware = new AtomicReference<>();
+        AtomicLong movedAt = new AtomicLong();
+        BlockPos newHome = helper.absolutePos(new BlockPos(30, STAND, 30));
+
+        helper.startSequence()
+            .thenWaitUntil(() -> helper.assertTrue(readySong(library, FIRST).isPresent(), Component.literal("the song was never imported")))
+            .thenExecute(() -> hachiware.set(busker(helper, library, PlaybackMode.ONCE)))
+            .thenWaitUntil(() -> helper.assertTrue(streaming(helper, hachiware.get(), library), Component.literal("Hachiware never started the song")))
+            .thenExecute(() -> {
+                hachiware.get().getBrain().setMemory(MemoryModuleType.HOME, GlobalPos.of(helper.getLevel().dimension(), newHome));
+                movedAt.set(helper.getLevel().getGameTime());
+            })
+            .thenWaitUntil(() -> helper.assertTrue(!streaming(helper, hachiware.get(), library),
+                Component.literal("Hachiware went on playing beyond the leash of its area")))
+            .thenExecute(() -> {
+                long waited = helper.getLevel().getGameTime() - movedAt.get();
+                helper.assertTrue(waited <= PetMind.DECISION_INTERVAL + INTERRUPT_TICKS,
+                    Component.literal("Hachiware went on playing for " + waited + " ticks beyond the leash"));
+                helper.assertTrue(hachiware.get().getActivity() == PetActivity.NONE, Component.literal("the pet was still posed as a busker"));
+            })
+            .thenWaitUntil(() -> {
+                double reach = AnchorSettings.current().orElseThrow().free().reach();
+                helper.assertTrue(hachiware.get().blockPosition().distSqr(newHome) < reach * reach,
+                    Component.literal("Hachiware never walked back to the middle of its area"));
             })
             .thenSucceed();
     }

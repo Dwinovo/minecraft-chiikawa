@@ -7,12 +7,14 @@ import com.dwinovo.chiikawa.entity.brain.errand.Plan;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import java.util.Optional;
+import net.minecraft.core.GlobalPos;
 
 /**
  * Whether the errand a pet is on goes on. The mirror of what lets an errand start, and as little
  * asked as it: the pet's capability must still offer the errand and its directive still permit it,
- * the errand itself must still want to go on, and where it goes must still be within the leash. A
- * pet is not taken off an errand because another of the same priority could start; that is for a higher one.
+ * the errand itself must still want to go on, and it must still be within the leash: where it goes, for an
+ * errand that goes somewhere, and the pet itself, for one that stays where it is. A pet is not taken off an
+ * errand because another of the same priority could start; that is for a higher one.
  */
 public final class Continuation {
     private Continuation() {
@@ -26,7 +28,7 @@ public final class Continuation {
      * @param permits what the pet is allowed to do
      * @return how the errand ends now, or nothing if it goes on: interrupted when the pet was taken off
      *         it by a change of capability or directive, and gave up when the errand no longer wants to
-     *         go on, or what it was heading for is out of the pet's area
+     *         go on, or what it was heading for, or the pet itself when the errand heads nowhere, is out of the pet's area
      */
     public static Optional<Outcome> endOf(Running running, ErrandType<?, ?> type, boolean offered, PetView view,
             Permits permits) {
@@ -40,9 +42,13 @@ public final class Continuation {
         if (!wanted.ok()) {
             return Optional.of(Outcome.gaveUp(wanted.reason()));
         }
-        return running.plan().destination(view)
-            .filter(destination -> !view.anchor().admits(destination, false))
-            .map(destination -> Outcome.gaveUp("out_of_leash"));
+        Optional<GlobalPos> destination = running.plan().destination(view);
+        if (destination.isPresent()) {
+            return view.anchor().admits(destination.get(), false) ? Optional.empty() : Optional.of(Outcome.gaveUp("out_of_leash"));
+        }
+        // An errand that goes nowhere, playing music where it stands, is not held to a place but to the pet: one carried
+        // past the leash, as when its area moves away, leaves it, and wandering walks the pet back.
+        return view.anchor().admits(view.pos(), false) ? Optional.empty() : Optional.of(Outcome.gaveUp("left_area"));
     }
 
     @SuppressWarnings("unchecked")
