@@ -47,6 +47,11 @@ public record ChiikawaMusicConfig(
         return Math.max(framesPerChunk, leadSeconds * 50);
     }
 
+    /** How long a musician waits after a song that would not start, in ticks. */
+    public int retryTicks() {
+        return retrySeconds * 20;
+    }
+
     public int sampleRate() {
         return 48000;
     }

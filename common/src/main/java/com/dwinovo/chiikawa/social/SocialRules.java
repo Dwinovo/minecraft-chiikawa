@@ -1,6 +1,5 @@
 package com.dwinovo.chiikawa.social;
 
-import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
@@ -77,7 +76,7 @@ public final class SocialRules {
         }
         boolean doingIt = switch (interaction.partnerState()) {
             case IDLE -> isFree(partner);
-            case PLAYING_MUSIC -> partner.getActivity() == PetActivity.PLAY_GUITAR;
+            case PLAYING_MUSIC -> partner.getMind().errands().playingMusic();
         };
         return doingIt ? rank : OptionalInt.empty();
     }
