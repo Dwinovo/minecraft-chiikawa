@@ -492,7 +492,9 @@ public final class CameraGameTests {
         owner.teleportTo(far.getX() + 0.5, far.getY(), far.getZ() + 0.5);
         AbstractPet pet = photographer(helper, InitEntity.HACHIWARE_PET.get(), owner, true, true);
         seenEveryView(pet);
-        AbstractPet friend = pet(helper, InitEntity.CHIIKAWA_PET.get(), new BlockPos(11, STAND, 4), false);
+        // Far enough that a stroll or two before the pet makes up its mind does not bring it within the six blocks the case
+        // waits for it to be farther than.
+        AbstractPet friend = pet(helper, InitEntity.CHIIKAWA_PET.get(), new BlockPos(13, STAND, 4), false);
         friend.setNoAi(true);
         PhotoSystem photos = PhotoSystem.of(helper.getLevel().getServer());
         long[] lostAt = {-1};
