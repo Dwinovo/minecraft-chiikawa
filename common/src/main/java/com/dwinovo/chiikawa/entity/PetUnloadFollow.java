@@ -35,7 +35,7 @@ public final class PetUnloadFollow {
             if (entity instanceof AbstractPet pet && pet.level() instanceof ServerLevel level) {
                 LivingEntity owner = findFollowedOwner(pet);
                 if (owner != null) {
-                    pet.teleportToOwner(level, owner);
+                    pet.teleportToOwner(level, owner, "chunk_unload");
                 }
                 // Whether or not it followed, this is the last anyone will see of it until
                 // somebody loads the chunk again, which is exactly what a bell is rung for.

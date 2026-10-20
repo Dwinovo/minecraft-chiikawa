@@ -2,9 +2,7 @@ package com.dwinovo.chiikawa.utils;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.PetActivities;
-import com.dwinovo.chiikawa.entity.brain.task.tameable.AnswerWhistleBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.FloatBehavior;
-import com.dwinovo.chiikawa.init.InitActivity;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import java.util.Set;
@@ -29,11 +27,4 @@ public final class BrainUtils {
         Pair<Integer, BehaviorControl<? super AbstractPet>> walkToTarget = Pair.of(1, new MoveToTargetSink());
         PetActivities.register(brain, Activity.CORE, ImmutableList.of(floatInWater, look, walkToTarget), Set.of());
     }
-
-    /** {@code answer_whistle}: a wild pet goes over to see who whistled. */
-    public static void addWhistleTasks(Brain<AbstractPet> brain) {
-        PetActivities.register(brain, InitActivity.ANSWER_WHISTLE.get(),
-            ImmutableList.of(Pair.of(2, new AnswerWhistleBehavior())), Set.of());
-    }
-
 }
