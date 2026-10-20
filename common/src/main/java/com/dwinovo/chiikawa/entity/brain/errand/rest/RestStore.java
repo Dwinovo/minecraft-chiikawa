@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Where one errand of one pet keeps how long it is resting. Only the {@link RestLedger} writes it.
  *
- * <p>Three kinds of storage hold the rests, see {@link Kind}; the ledger does not care which.
+ * <p>Four kinds of storage hold the rests, see {@link Kind}; the ledger does not care which.
  */
 public interface RestStore {
     /**
@@ -62,6 +62,25 @@ public interface RestStore {
                 } else {
                     brain.eraseMemory(memory.get());
                 }
+            }
+        };
+    }
+
+    /**
+     * Scaffolding, deleted with {@code LegacyActivityStep} in T17: the errand's own behavior still keeps
+     * its rest, in the memory or the sensor it has always used, and its start condition still reads it. So
+     * the ledger has nothing to say about it: it never rests the errand and writes nothing, and there is
+     * no second writer. An errand leaves this for one of the other kinds when it goes native.
+     */
+    static Kind legacy() {
+        return (brain, errand) -> new RestStore() {
+            @Override
+            public long remaining(@Nullable String subject, long now) {
+                return 0L;
+            }
+
+            @Override
+            public void restFor(@Nullable String subject, long ticks, long now) {
             }
         };
     }
