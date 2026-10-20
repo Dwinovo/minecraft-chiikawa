@@ -24,8 +24,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
+import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.player.Player;
@@ -95,11 +97,25 @@ public final class LiveHandle implements Handle {
         brain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(new EntityTracker(target, false), speed, closeEnough));
     }
 
+    /**
+     * Besides the memories, the mover is stopped if it is under way. It keeps the path it planned and the place it
+     * planned it for as long as it runs, and goes on along that path when it is given another walk to a place within
+     * two blocks of the old one, never planning the new one: the next errand would walk on to where the last was going,
+     * and not be told it has no way until the mover has let that go.
+     */
     @Override
     public void stopWalking() {
         brain().eraseMemory(MemoryModuleType.WALK_TARGET);
         brain().eraseMemory(MemoryModuleType.PATH);
         brain().eraseMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE);
+        if (pet.level() instanceof ServerLevel level) {
+            for (BehaviorControl<? super AbstractPet> behavior : brain().getRunningBehaviors()) {
+                if (behavior instanceof MoveToTargetSink) {
+                    behavior.doStop(level, pet, level.getGameTime());
+                }
+            }
+        }
+        pet.getNavigation().stop();
     }
 
     @Override
