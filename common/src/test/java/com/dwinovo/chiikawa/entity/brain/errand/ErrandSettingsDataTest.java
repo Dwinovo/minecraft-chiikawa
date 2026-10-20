@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.data.ErrandSettingsData;
+import com.dwinovo.chiikawa.entity.brain.errand.overlay.Overlays;
+import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSpec;
+import com.dwinovo.chiikawa.entity.brain.personality.IdleHabits;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.mojang.serialization.JsonOps;
 import java.util.HashMap;
@@ -144,6 +147,29 @@ class ErrandSettingsDataTest {
     }
 
     @Test
+    void onlyWanderingChatsOnTheSide() {
+        Map<ResourceLocation, List<ResourceLocation>> overlays = new HashMap<>();
+        ErrandSettingsData.all().forEach((errand, settings) -> {
+            if (!settings.overlays().isEmpty()) {
+                overlays.put(errand, settings.overlays());
+            }
+        });
+
+        assertEquals(Map.of(ErrandIds.WANDER, List.of(Overlays.IDLE_CHATTER)), overlays);
+    }
+
+    @Test
+    void aHabitOfAPetWithNothingToDoIsBoundOnlyByTheLongestHabitThereCanBe() {
+        Map<ResourceLocation, ErrandSettings<?>> all = ErrandSettingsData.all();
+
+        for (ResourceLocation errand : List.of(ErrandIds.WANDER, ErrandIds.STAY)) {
+            int limit = all.get(errand).maxTicks();
+            assertTrue(limit > IdleHabits.LONGEST_TICKS, errand + " would cut the longest habit short");
+            assertTrue(limit <= IdleHabits.LONGEST_TICKS + 600, errand + " is no longer a safety bound on one habit");
+        }
+    }
+
+    @Test
     void theRestsAreWhatEachErrandHasAlwaysDone() {
         Map<ResourceLocation, ErrandSettings<?>> all = ErrandSettingsData.all();
 
@@ -154,6 +180,11 @@ class ErrandSettingsDataTest {
         assertEquals(200, ticks(all, ErrandIds.HARVEST));
         assertEquals(40, ticks(all, ErrandIds.PICK_UP_ITEM));
         assertEquals(20, ticks(all, ErrandIds.MELEE));
+        for (ResourceLocation errand : List.of(ErrandIds.FOLLOW_OWNER, ErrandIds.STAY, ErrandIds.WANDER)) {
+            assertEquals(20, ticks(all, errand), errand.toString());
+            assertEquals(RestSpec.NONE, all.get(errand).rests().done(), errand.toString());
+            assertEquals(RestSpec.NONE, all.get(errand).rests().interrupted(), errand.toString());
+        }
         assertEquals(600, ticks(all, ErrandIds.TAKE_TASK));
         assertEquals(600, all.get(ErrandIds.TAKE_TASK).rests().interrupted().amount().left().orElseThrow());
         assertEquals(Set.of("taken", "stored", "failed"), all.get(ErrandIds.TAKE_PHOTO).rests().reports().keySet());
