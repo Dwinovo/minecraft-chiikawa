@@ -10,7 +10,6 @@ import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.anim.state.PetAnimContext;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
-import com.dwinovo.chiikawa.entity.brain.handler.MusicianJobHandler;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Projection;
@@ -582,10 +581,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * from Mojang's static-registration convention (Villager registers
      * profession-aware behaviors once and lets activity selection do the
      * filtering).
-     *
-     * <p>Future jobs just append a new
-     * {@code <Job>JobHandler.registerActivities(brain)} call here and list
-     * their intents on the capability — no plumbing elsewhere needs to touch.
      */
     @Override
     protected Brain<?> makeBrain(Dynamic<?> dynamic) {
@@ -598,10 +593,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         BrainUtils.addIdleTasks(brain);
         BrainUtils.addSocialTasks(brain);
         BrainUtils.addWhistleTasks(brain);
-
-        // Each job's activities — registered once, dormant until the intent
-        // selector picks one of that job's intents.
-        MusicianJobHandler.registerActivities(brain);
 
         brain.setCoreActivities(java.util.Set.of(Activity.CORE));
         brain.setDefaultActivity(BrainUtils.HELD);
