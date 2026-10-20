@@ -48,7 +48,7 @@ public final class PetFollowKeeper {
                 PetFollowKeeper::leftBehind)) {
             LivingEntity owner = pet.getOwner();
             if (owner != null) {
-                pet.teleportToOwner(level, owner);
+                pet.teleportToOwner(level, owner, "left_behind");
             }
         }
     }

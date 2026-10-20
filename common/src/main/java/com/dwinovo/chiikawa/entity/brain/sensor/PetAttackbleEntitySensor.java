@@ -137,12 +137,21 @@ public class PetAttackbleEntitySensor extends Sensor<AbstractPet> {
 
     /** @return whether the candidate was worth adding */
     private static boolean offer(AbstractPet pet, Set<LivingEntity> found, LivingEntity candidate) {
-        if (!candidate.isAlive() || candidate.distanceTo(pet) > SEARCH_RANGE
-                || !PetTargeting.canTarget(pet, candidate)) {
+        if (!fightable(pet, candidate)) {
             return false;
         }
         found.add(candidate);
         return true;
+    }
+
+    /**
+     * @return whether the pet may fight it, and it is there to be fought: alive, within the search range and not on the
+     *         pet's own side. What the sensor lists and what the pet's view shows of what it remembers is the same
+     *         question, so a foe the pet has been taken away from is no longer shown, though the sensor looks again
+     *         only every half second
+     */
+    public static boolean fightable(AbstractPet pet, LivingEntity foe) {
+        return foe.isAlive() && foe.distanceTo(pet) <= SEARCH_RANGE && PetTargeting.canTarget(pet, foe);
     }
 
     /** The id of what the pet is fighting, so the choice can stay with it. */

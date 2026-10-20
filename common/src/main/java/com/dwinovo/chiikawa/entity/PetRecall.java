@@ -1,5 +1,8 @@
 package com.dwinovo.chiikawa.entity;
 
+import com.dwinovo.chiikawa.entity.brain.PetMind;
+import com.dwinovo.chiikawa.entity.brain.PetTargeting;
+import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -19,7 +22,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
-import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 
 /**
  * Calling every pet you own back to you, wherever it got to. Pets somebody has loaded are
@@ -35,6 +37,8 @@ import com.dwinovo.chiikawa.entity.brain.PetTargeting;
  * called is the owner speaking, and the answer to "stay there" is not "so stay there".
  */
 public final class PetRecall {
+    /** What a pet that is brought is told took it, see {@link Message.Moved}. */
+    private static final String CAUSE = "recall";
     /** How long a ring keeps looking for a pet whose chunk it woke. */
     private static final int WAIT_TICKS = 60;
     /**
@@ -201,8 +205,9 @@ public final class PetRecall {
         }
         // A spot beside the owner if there is one; otherwise right where the owner stands,
         // because a bell that sometimes does nothing is worse than a pet underfoot.
-        if (!arrived.teleportToOwner(home, owner)) {
+        if (!arrived.teleportToOwner(home, owner, CAUSE)) {
             arrived.teleportTo(owner.getX(), owner.getY(), owner.getZ());
+            PetMind.post(arrived, new Message.Moved(CAUSE));
         }
         PetRoster.of(home).note(arrived);
         return true;
