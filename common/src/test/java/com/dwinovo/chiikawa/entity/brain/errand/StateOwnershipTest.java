@@ -51,8 +51,7 @@ class StateOwnershipTest {
     private static final List<Rule> RULES = List.of(
         new Rule("the pose", Pattern.compile("\\bsetActivity\\("),
             Set.of(PET),
-            Set.of(BEHAVIORS + "exam/CheckResultsBehavior.java", BEHAVIORS + "exam/TakeExamBehavior.java",
-                BEHAVIORS + "musician/PlayMusicBehavior.java", "music/ServerMusicStreamManager.java")),
+            Set.of(BEHAVIORS + "musician/PlayMusicBehavior.java", "music/ServerMusicStreamManager.java")),
         new Rule("the scene", Pattern.compile("\\bsetPerformance\\("),
             Set.of(PET),
             Set.of("social/PartPlayer.java")),
@@ -63,8 +62,7 @@ class StateOwnershipTest {
             Pattern.compile(WRITE + "MemoryModuleType\\.(?:WALK_TARGET|LOOK_TARGET|PATH)\\b"
                 + "|\\bsetWalkAndLookTargetMemories\\(|\\blookAt(?:Entity|EachOther|Entities)\\("),
             Set.of(HANDLE),
-            Set.of(PET, BEHAVIORS + "combat/CombatMoveBehavior.java", BEHAVIORS + "exam/CheckResultsBehavior.java",
-                BEHAVIORS + "exam/TakeExamBehavior.java", BEHAVIORS + "farmer/WalkToBlockTargetBehavior.java",
+            Set.of(PET, BEHAVIORS + "combat/CombatMoveBehavior.java", BEHAVIORS + "farmer/WalkToBlockTargetBehavior.java",
                 BEHAVIORS + "farmer/WalkToContainerBehavior.java", BEHAVIORS + "farmer/WalkToPlantCropBehavior.java",
                 BEHAVIORS + "idle/GlanceBehavior.java", BEHAVIORS + "musician/PlayMusicBehavior.java",
                 BEHAVIORS + "social/CooperateBehavior.java", BEHAVIORS + "social/SocializeBehavior.java",
