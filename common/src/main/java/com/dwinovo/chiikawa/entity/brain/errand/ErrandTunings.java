@@ -75,11 +75,13 @@ public final class ErrandTunings {
     /**
      * @param speed how fast it walks to the block
      * @param reachSqr how near to the block's middle it has to be to work it, squared
+     * @param noWayTicks how long it has to be unable to find a way before it gives up on one
      */
-    public record BlockWork(float speed, double reachSqr) {
+    public record BlockWork(float speed, double reachSqr, int noWayTicks) {
         public static final Codec<BlockWork> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Fields.SPEED.fieldOf("speed").forGetter(BlockWork::speed),
-            Codec.doubleRange(0.0, 65536.0).fieldOf("reach_sqr").forGetter(BlockWork::reachSqr)
+            Codec.doubleRange(0.0, 65536.0).fieldOf("reach_sqr").forGetter(BlockWork::reachSqr),
+            Fields.TICKS.fieldOf("no_way_ticks").forGetter(BlockWork::noWayTicks)
         ).apply(instance, BlockWork::new));
     }
 
@@ -87,12 +89,14 @@ public final class ErrandTunings {
      * @param speed how fast it walks to the container
      * @param arriveDistance how near the walk gets, counted in blocks along each axis
      * @param reach how near it has to be to the container to put things in it
+     * @param noWayTicks how long it has to be unable to find a way before it gives up on one
      */
-    public record Deliver(float speed, int arriveDistance, double reach) {
+    public record Deliver(float speed, int arriveDistance, double reach, int noWayTicks) {
         public static final Codec<Deliver> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Fields.SPEED.fieldOf("speed").forGetter(Deliver::speed),
             Fields.BLOCKS.fieldOf("arrive_distance").forGetter(Deliver::arriveDistance),
-            Fields.DISTANCE.fieldOf("reach").forGetter(Deliver::reach)
+            Fields.DISTANCE.fieldOf("reach").forGetter(Deliver::reach),
+            Fields.TICKS.fieldOf("no_way_ticks").forGetter(Deliver::noWayTicks)
         ).apply(instance, Deliver::new));
     }
 
