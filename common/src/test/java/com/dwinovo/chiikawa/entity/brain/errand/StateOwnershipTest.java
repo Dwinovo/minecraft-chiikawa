@@ -51,8 +51,7 @@ class StateOwnershipTest {
         new Rule("the pose", Pattern.compile("\\bsetActivity\\("),
             Set.of(PET),
             Set.of(BEHAVIORS + "exam/CheckResultsBehavior.java", BEHAVIORS + "exam/TakeExamBehavior.java",
-                BEHAVIORS + "musician/PlayMusicBehavior.java", BEHAVIORS + "tameable/TakePhotoBehavior.java",
-                "music/ServerMusicStreamManager.java")),
+                BEHAVIORS + "musician/PlayMusicBehavior.java", "music/ServerMusicStreamManager.java")),
         new Rule("the scene", Pattern.compile("\\bsetPerformance\\("),
             Set.of(PET),
             Set.of("social/PartPlayer.java")),
@@ -71,15 +70,13 @@ class StateOwnershipTest {
                 BEHAVIORS + "tameable/AnchorLeashBehavior.java", BEHAVIORS + "tameable/AnswerWhistleBehavior.java",
                 BEHAVIORS + "tameable/FollowOwnerBehavior.java", BEHAVIORS + "tameable/GiveGiftBehavior.java",
                 BEHAVIORS + "tameable/GoShoppingBehavior.java", BEHAVIORS + "tameable/RandomWalkTask.java",
-                BEHAVIORS + "tameable/SitBehavior.java", BEHAVIORS + "tameable/TakePhotoBehavior.java",
-                BEHAVIORS + "tameable/TakeTaskBehavior.java")),
+                BEHAVIORS + "tameable/SitBehavior.java", BEHAVIORS + "tameable/TakeTaskBehavior.java")),
         new Rule("a rest",
             Pattern.compile(WRITE + "InitMemory\\.(?:PHOTO_COOLDOWN|GIFT_COOLDOWN|SHOP_COOLDOWN|TAKE_TASK_COOLDOWN"
                 + "|MUSICIAN_RESTING|SOCIAL_COOLDOWNS|ERRAND_RESTS|SUBJECT_RESTS)\\b"),
             Set.of(RESTS),
-            Set.of("camera/PhotoDelivery.java", BEHAVIORS + "musician/PlayMusicBehavior.java",
-                BEHAVIORS + "tameable/GiveGiftBehavior.java", BEHAVIORS + "tameable/GoShoppingBehavior.java",
-                BEHAVIORS + "tameable/TakePhotoBehavior.java", BEHAVIORS + "tameable/TakeTaskBehavior.java",
+            Set.of(BEHAVIORS + "musician/PlayMusicBehavior.java", BEHAVIORS + "tameable/GiveGiftBehavior.java",
+                BEHAVIORS + "tameable/GoShoppingBehavior.java", BEHAVIORS + "tameable/TakeTaskBehavior.java",
                 "social/SocialRules.java")),
         new Rule("the present in the paws", Pattern.compile("\\bsetPendingGift\\("),
             Set.of(PET),
@@ -90,7 +87,7 @@ class StateOwnershipTest {
     private static final String ERRANDS = "entity/brain/errand/impl/";
     /** The errands still carried out by an old activity, which reach into the pet as the behaviors did. */
     private static final Set<String> LEGACY_ERRANDS = Set.of(ERRANDS + "AnswerWhistleErrand.java",
-        ERRANDS + "PlayMusicErrand.java", ERRANDS + "TakePhotoErrand.java");
+        ERRANDS + "PlayMusicErrand.java");
 
     @Test
     void eachPieceOfStateIsWrittenByItsOwnerAndTheLegacyWritersOnly() {
