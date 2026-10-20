@@ -37,8 +37,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -77,6 +79,12 @@ final class ErrandScenarios {
     private static final BlockPos FARMER = new BlockPos(4, STAND, 4);
     private static final int SEEDS = 8;
     private static final int CROP = 2;
+    /** Where a fighter stands, and the foe east of it: a walk of many ticks for a sword, and within a bow's range. */
+    private static final BlockPos FIGHTER = new BlockPos(4, STAND, 4);
+    private static final BlockPos FOE = new BlockPos(12, STAND, 4);
+    private static final BlockPos ARCHER = new BlockPos(3, STAND, 4);
+    private static final BlockPos TARGET = new BlockPos(13, STAND, 4);
+    private static final int ARROWS = 16;
 
     /**
      * A pet set up to be on one errand.
@@ -110,7 +118,9 @@ final class ErrandScenarios {
         Map.entry(ErrandIds.PLANT, ErrandScenarios::plant),
         Map.entry(ErrandIds.DELIVER, ErrandScenarios::deliver),
         Map.entry(ErrandIds.WEED, ErrandScenarios::weed),
-        Map.entry(ErrandIds.PICK_MUSHROOM, ErrandScenarios::pickMushroom));
+        Map.entry(ErrandIds.PICK_MUSHROOM, ErrandScenarios::pickMushroom),
+        Map.entry(ErrandIds.MELEE, ErrandScenarios::melee),
+        Map.entry(ErrandIds.RANGED, ErrandScenarios::ranged));
 
     private ErrandScenarios() {
     }
@@ -399,6 +409,41 @@ final class ErrandScenarios {
             }
             return Optional.empty();
         });
+    }
+
+    /**
+     * A pet with a sword and a zombie across the yard, standing where it is and with one hit left in it. It is night, since
+     * a zombie that burns in the sun is put down by the sun and not by the pet. A fight leaves nothing in the world to put
+     * right but what any errand does: the pet is not using anything, and has nowhere left to walk to.
+     */
+    private static Scenario melee(GameTestHelper helper) {
+        settleWorld(helper.getLevel(), Difficulty.NORMAL, GameTestKit.MIDNIGHT);
+        AbstractPet pet = GameTestKit.holding(ownedPet(helper, FIGHTER), Items.IRON_SWORD);
+        foe(helper, FOE);
+        return new Scenario(pet, 2, ran -> Optional.empty());
+    }
+
+    /**
+     * A pet with a bow and a quiver and a zombie across the yard, in range and standing where it is. However it is cut
+     * short, even with the bow at its full draw, no arrow flies: the quiver is as it was and the bow is down.
+     */
+    private static Scenario ranged(GameTestHelper helper) {
+        settleWorld(helper.getLevel(), Difficulty.NORMAL, GameTestKit.MIDNIGHT);
+        AbstractPet pet = GameTestKit.holding(ownedPet(helper, ARCHER), Items.BOW);
+        pet.getBackpack().addItem(new ItemStack(Items.ARROW, ARROWS));
+        foe(helper, TARGET);
+        return new Scenario(pet, 3, ran -> {
+            int left = GameTestKit.count(pet, Items.ARROW);
+            return left == ARROWS ? Optional.empty()
+                : Optional.of((ARROWS - left) + " arrows are gone from the quiver, though the pet was cut short before it loosed one");
+        });
+    }
+
+    /** A zombie that stands still and has one hit left in it. */
+    private static void foe(GameTestHelper helper, BlockPos at) {
+        Zombie zombie = helper.spawn(EntityType.ZOMBIE, at);
+        zombie.setNoAi(true);
+        zombie.setHealth(1.0F);
     }
 
     /** Watered, or the farmland dries out and turns back to dirt mid-case. */
