@@ -10,7 +10,6 @@ import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.anim.state.PetAnimContext;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
-import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
@@ -560,14 +559,11 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
         // Universal activities present in every brain.
         BrainUtils.addCoreTasks(brain);
-        BrainUtils.addFollowOwnerTasks(brain);
-        BrainUtils.addStayTasks(brain);
-        BrainUtils.addIdleTasks(brain);
         BrainUtils.addSocialTasks(brain);
         BrainUtils.addWhistleTasks(brain);
 
         brain.setCoreActivities(java.util.Set.of(Activity.CORE));
-        brain.setDefaultActivity(BrainUtils.HELD);
+        brain.setDefaultActivity(Activity.IDLE);
         // A brain starts with no activity active, not even its core: the pet would stand still until a legacy
         // errand switched one on, whatever the executor asked of it.
         brain.useDefaultActivity();
