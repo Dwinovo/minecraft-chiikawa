@@ -9,8 +9,8 @@ import net.minecraft.world.item.Item;
 
 /** Musician job: only Hachiware can play the music box. */
 public final class MusicianJob extends BasicJob {
-    public MusicianJob(int id, int priority, TagKey<Item> toolTag, List<ResourceLocation> intents) {
-        super(id, priority, toolTag, intents);
+    public MusicianJob(int id, int priority, TagKey<Item> toolTag, List<ResourceLocation> errands) {
+        super(id, priority, toolTag, errands);
     }
 
     @Override
