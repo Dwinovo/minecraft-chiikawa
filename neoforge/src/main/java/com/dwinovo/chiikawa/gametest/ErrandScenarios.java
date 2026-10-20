@@ -12,9 +12,11 @@ import com.dwinovo.chiikawa.block.ExamDeskBlockEntity;
 import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
 import com.dwinovo.chiikawa.camera.PhotoResults;
 import com.dwinovo.chiikawa.camera.PhotoScout;
+import com.dwinovo.chiikawa.data.PetInteractionData;
 import com.dwinovo.chiikawa.data.QualificationData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
+import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.init.InitBlocks;
@@ -31,6 +33,9 @@ import com.dwinovo.chiikawa.photo.PhotoSystem;
 import com.dwinovo.chiikawa.qualification.ExamStage;
 import com.dwinovo.chiikawa.qualification.Licence;
 import com.dwinovo.chiikawa.shop.Wallet;
+import com.dwinovo.chiikawa.social.InteractionPlan;
+import com.dwinovo.chiikawa.social.PetInteraction;
+import com.dwinovo.chiikawa.social.PetInteractions;
 import com.dwinovo.chiikawa.task.BoardSlot;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +52,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Zombie;
@@ -98,6 +104,9 @@ final class ErrandScenarios {
     /** A song of silence, short enough to be played to its end in a case that waits for one. */
     private static final String SONG = "chiikawa_gametest_contract";
     private static final int SONG_SECONDS = 1;
+    /** Ask, wait for the answer, walk over, hand over, play: and for the other, wait for the guest, play. */
+    private static final int SOCIALIZE_STEPS = 5;
+    private static final int COOPERATE_STEPS = 2;
 
     /**
      * A pet set up to be on one errand.
@@ -110,9 +119,19 @@ final class ErrandScenarios {
      * @param untidy what the errand may not leave behind that is its own to the world and not to the pet, such as an item
      *               half taken: the problem, or nothing if all is as it should be; told the errand as it was last seen
      *               running, since what is left behind may be fair where the errand had got to
+     * @param again what makes the errand startable again once it was cut short and checked, for an errand that rests for
+     *              longer than the case lasts after every way it ends, such as one that two pets leave alone for a day:
+     *              forgets the rest, which the case has seen is as the errand's data says
      */
     record Scenario(AbstractPet pet, int steps, Function<Running, Optional<String>> reported,
-                    Function<Running, Optional<String>> untidy) {
+                    Function<Running, Optional<String>> untidy, Runnable again) {
+        /** A scenario of an errand that is startable again as soon as its rest is over. */
+        Scenario(AbstractPet pet, int steps, Function<Running, Optional<String>> reported,
+                 Function<Running, Optional<String>> untidy) {
+            this(pet, steps, reported, untidy, () -> {
+            });
+        }
+
         /** A scenario of an errand whose steps report nothing. */
         Scenario(AbstractPet pet, int steps, Function<Running, Optional<String>> untidy) {
             this(pet, steps, ran -> Optional.empty(), untidy);
@@ -137,7 +156,9 @@ final class ErrandScenarios {
         Map.entry(ErrandIds.PLAY_MUSIC, ErrandScenarios::playMusic),
         Map.entry(ErrandIds.FOLLOW_OWNER, ErrandScenarios::followOwner),
         Map.entry(ErrandIds.WANDER, ErrandScenarios::wander),
-        Map.entry(ErrandIds.STAY, ErrandScenarios::stay));
+        Map.entry(ErrandIds.STAY, ErrandScenarios::stay),
+        Map.entry(ErrandIds.SOCIALIZE, ErrandScenarios::socialize),
+        Map.entry(ErrandIds.COOPERATE, ErrandScenarios::cooperate));
 
     private ErrandScenarios() {
     }
@@ -516,6 +537,91 @@ final class ErrandScenarios {
         return new Scenario(pet, 1, ran -> readySong(library, SONG).map(MusicTrackView::trackId)
             .filter(track -> ServerMusicSystem.streams(helper.getLevel().getServer()).isPlaying(pet, track))
             .map(track -> "the song is still being streamed for the pet"));
+    }
+
+    /**
+     * Rakko, who goes over to Chiikawa with a snack from its own bag, and Chiikawa, who is asked and plays along: the pair
+     * of the treat scene, both wild and pottering about, Rakko with the idea of going over to Chiikawa for as long as it is
+     * not on the way. Chiikawa's health goes up by one snack's worth for every cookie it eats, so the cookies can be told:
+     * each is in Rakko's bag or eaten, never lost and never both. Whichever of the two is cut short, neither is left
+     * engaged, posed or waiting for the other.
+     *
+     * <p>The pet the scenario is for is made first, so that it ticks first and its partner hears in the same tick that it
+     * is not coming after all.
+     */
+    private static final class Treat {
+        private static final BlockPos RAKKO = new BlockPos(4, STAND, 8);
+        private static final BlockPos CHIIKAWA = new BlockPos(8, STAND, 8);
+        private static final float HEALTHY = 20.0F;
+        private static final double HEARTY = 100.0;
+
+        private final AbstractPet rakko;
+        private final AbstractPet chiikawa;
+
+        private Treat(GameTestHelper helper, boolean rakkoFirst) {
+            AbstractPet first = rakkoFirst ? makeRakko(helper) : makeChiikawa(helper);
+            AbstractPet second = rakkoFirst ? makeChiikawa(helper) : makeRakko(helper);
+            this.rakko = rakkoFirst ? first : second;
+            this.chiikawa = rakkoFirst ? second : first;
+            helper.onEachTick(this::thinkOfGoingOver);
+        }
+
+        private static AbstractPet makeRakko(GameTestHelper helper) {
+            AbstractPet rakko = GameTestKit.wild(helper, InitEntity.RAKKO_PET.get(), RAKKO);
+            rakko.getBackpack().setItem(AbstractPet.BAG_SLOT + 1, new ItemStack(Items.COOKIE, COOKIES));
+            return rakko;
+        }
+
+        private static AbstractPet makeChiikawa(GameTestHelper helper) {
+            AbstractPet chiikawa = GameTestKit.wild(helper, InitEntity.CHIIKAWA_PET.get(), CHIIKAWA);
+            chiikawa.getAttribute(Attributes.MAX_HEALTH).setBaseValue(HEARTY);
+            chiikawa.setHealth(HEALTHY);
+            return chiikawa;
+        }
+
+        /** Gives Rakko the idea its sensor would have had, whenever it has none and is not acting on one. */
+        private void thinkOfGoingOver() {
+            if (rakko.getMind().errands().isOn(ErrandIds.SOCIALIZE) || rakko.getBrain().hasMemoryValue(InitMemory.INTERACTION_PLAN.get())) {
+                return;
+            }
+            ResourceLocation id = PetInteractionData.TREAT;
+            PetInteraction scene = PetInteractions.all().get(id);
+            rakko.getBrain().setMemory(InitMemory.INTERACTION_PLAN.get(), new InteractionPlan(id, scene,
+                scene.initiatorSide(rakko.getType().builtInRegistryHolder()).orElseThrow(), chiikawa,
+                scene.partners().get(scene.partnerRank(chiikawa.getType().builtInRegistryHolder()).getAsInt())));
+        }
+
+        private Optional<String> untidy() {
+            long now = rakko.level().getGameTime();
+            if (chiikawa.getMind().errands().engagedWith(now).isPresent()) {
+                return Optional.of("Chiikawa is still said to be waiting for a visitor");
+            }
+            if (!rakko.getPerformance().isEmpty() || !chiikawa.getPerformance().isEmpty()) {
+                return Optional.of("a scene is still being played: " + rakko.getPerformance() + " and " + chiikawa.getPerformance());
+            }
+            long eaten = Math.round((chiikawa.getHealth() - HEALTHY) / PetInteractHandler.FEED_HEAL);
+            int kept = GameTestKit.count(rakko, Items.COOKIE);
+            return kept + eaten == COOKIES ? Optional.empty()
+                : Optional.of(kept + " cookies are in Rakko's bag and " + eaten + " were eaten, of the " + COOKIES + " it had");
+        }
+
+        /** The pair leave the scene alone for a day, whichever way it ended. */
+        private void forgetTheRest() {
+            rakko.getBrain().eraseMemory(InitMemory.SOCIAL_COOLDOWNS.get());
+            chiikawa.getBrain().eraseMemory(InitMemory.SOCIAL_COOLDOWNS.get());
+        }
+    }
+
+    /** The pet that goes over, the first step being to ask the other to play along and the last to play its part. */
+    private static Scenario socialize(GameTestHelper helper) {
+        Treat treat = new Treat(helper, true);
+        return new Scenario(treat.rakko, SOCIALIZE_STEPS, ran -> Optional.empty(), ran -> treat.untidy(), treat::forgetTheRest);
+    }
+
+    /** The pet that is asked, the first step being to wait for the one coming over and the last to play its part. */
+    private static Scenario cooperate(GameTestHelper helper) {
+        Treat treat = new Treat(helper, false);
+        return new Scenario(treat.chiikawa, COOPERATE_STEPS, ran -> Optional.empty(), ran -> treat.untidy(), treat::forgetTheRest);
     }
 
     /** A zombie that stands still and has one hit left in it. */

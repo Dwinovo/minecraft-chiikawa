@@ -78,7 +78,7 @@ public final class ErrandContractGameTests {
     private static final int PURITY_CASE_TICKS = 200;
 
     /** The errands still carried out by an old activity, which have no cases here yet. */
-    private static final Set<ResourceLocation> LEGACY = Set.of(ErrandIds.SOCIALIZE, ErrandIds.COOPERATE, ErrandIds.ANSWER_WHISTLE);
+    private static final Set<ResourceLocation> LEGACY = Set.of(ErrandIds.ANSWER_WHISTLE);
 
     /**
      * Where in an errand's routine a pet is cut short. The first is as soon as the pet is seen on the errand at all,
@@ -271,6 +271,7 @@ public final class ErrandContractGameTests {
             helper.assertTrue(ended.get().outcome() instanceof Outcome.Interrupted, id + " ended " + ended.get().outcome() + at);
             assertRested(helper, pet, scenario, watch.seen, ended.get());
             Residue.none(helper, pet, scenario, watch.seen);
+            scenario.again().run();
             told[0] = -1;
             if (++next[0] == points.length) {
                 helper.succeed();

@@ -93,6 +93,26 @@ class InvitationDeskTest {
     }
 
     @Test
+    void whenTheAskerHasArrivedTheEngagementLastsUntilTheSceneIsOver() {
+        desk.consider(invitation(ASKER, ASK_PRIORITY, 160), true, false, OptionalInt.empty(), NOW);
+
+        desk.arrived();
+
+        assertEquals(ASKER, desk.engagement(100_000L).orElseThrow().initiator());
+        assertFalse(desk.consider(invitation(OTHER, ASK_PRIORITY, 100_500L), true, false, OptionalInt.empty(), 100_000L),
+            "nobody else can have a pet that is playing");
+        assertTrue(desk.withdrawn(ASKER));
+        assertEquals(Optional.empty(), desk.engagement(100_000L));
+    }
+
+    @Test
+    void arrivingWhenNobodyAskedChangesNothing() {
+        desk.arrived();
+
+        assertEquals(Optional.empty(), desk.engagement(NOW));
+    }
+
+    @Test
     void clearForgetsTheEngagement() {
         desk.consider(invitation(ASKER, ASK_PRIORITY, 160), true, false, OptionalInt.empty(), NOW);
 
