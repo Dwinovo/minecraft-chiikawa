@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.errand.rest;
 
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -16,6 +17,15 @@ public record SubjectRests(Map<Key, Long> until) {
 
     public SubjectRests {
         until = Map.copyOf(until);
+    }
+
+    /**
+     * @param pos a block an errand works on
+     * @return the subject that block is: the one name by which the errand's plan rests on it and the sensor that finds
+     *         it asks whether it is resting
+     */
+    public static String subject(BlockPos pos) {
+        return pos.getX() + "," + pos.getY() + "," + pos.getZ();
     }
 
     /**
