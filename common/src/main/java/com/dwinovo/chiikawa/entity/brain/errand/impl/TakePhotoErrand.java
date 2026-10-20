@@ -52,7 +52,9 @@ import net.minecraft.resources.ResourceLocation;
  *
  * <p>How long it rests is the camera's: a pack's camera says how long after a photo that was kept and how
  * long after one that was not, and the wait for the picture is a minute. These are the named numbers this
- * errand works out for the rests in its settings.
+ * errand works out for the rests in its settings. The wait for the picture is rested from the shutter, which
+ * reports it (see {@link Shutter}), so that no way of ending after it leaves the pet free to set off on
+ * another while the first is on its way; the errand being done adds nothing of its own to that.
  */
 public final class TakePhotoErrand implements ErrandType<TakePhotoErrand.Shot, ErrandTunings.TakePhoto> {
     /**

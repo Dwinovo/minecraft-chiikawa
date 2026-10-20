@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
@@ -51,6 +52,14 @@ import org.jetbrains.annotations.Nullable;
  *
  * <p>Runs before the brain ticks, so that the walk and the gaze it sets are carried out by the sinks
  * in the same tick.
+ *
+ * <p>What a pet is told is handled in two halves, because the inbox is lost with the pet when it is
+ * removed from the world, a chunk unloading included. The first half is {@link #keep}, run as the pet is
+ * told, on the server thread: whatever the message makes durable, what is saved with the pet or the world,
+ * is written there and then, and only there. The second half is {@link #handle}, run when the pet reads its
+ * inbox at its next tick: what concerns deciding and the errand under way, the rests, a step's ending,
+ * a nudge. A message with a first half is a {@link Message.Durable} one, and is queued for the second as
+ * {@link Message.Settled}.
  */
 public final class PetMind {
     public static final int DECISION_INTERVAL = 10;
@@ -90,14 +99,19 @@ public final class PetMind {
     }
 
     /**
-     * Tells a pet something. The only way in from outside: what is told is read at the pet's next tick.
-     * A no-op on a client, and on a pet whose mind is off it waits in the inbox, which holds the latest
-     * few.
+     * Tells a pet something. The only way in from outside: what the message makes durable is applied now,
+     * which is why this is for the server thread, and the rest is read at the pet's next tick. A no-op on
+     * a client, and on a pet whose mind is off it waits in the inbox, which holds the latest few.
+     *
+     * @throws IllegalStateException for a message with something to keep, told from another thread
      */
     public static void post(AbstractPet pet, Message message) {
-        if (!pet.level().isClientSide()) {
-            pet.getMind().inbox.post(message, pet.level().getGameTime());
+        if (pet.level().isClientSide()) {
+            return;
         }
+        PetMind mind = pet.getMind();
+        Message queued = message instanceof Message.Durable durable ? mind.keep(durable) : message;
+        mind.inbox.post(queued, pet.level().getGameTime());
     }
 
     /**
@@ -108,6 +122,15 @@ public final class PetMind {
         if (!pet.level().isClientSide()) {
             pet.getMind().apply(cue);
         }
+    }
+
+    /**
+     * A step of the errand the pet is on reports how it is faring: the pet rests the errand as its settings say
+     * for the report, at once. For the executor's steps alone, through their handle.
+     */
+    public void report(String report) {
+        executor.running().ifPresent(running -> rests.afterReport(running.errand(), report,
+            new RestContext(running.plan().restKey()), pet.level().getGameTime()));
     }
 
     /** Has the pet decide again at its next tick instead of waiting for its turn. */
@@ -177,12 +200,36 @@ public final class PetMind {
                 executor.requestEnd(Outcome.interrupted("moved"));
                 decideNow = true;
             }
+            case Message.Settled settled -> settled(settled, now);
+            case Message.Durable durable -> throw new IllegalStateException(durable + " was queued without being kept");
+            default -> executor.deliver(message, now);
+        }
+    }
+
+    /**
+     * The first half of what a pet is told that has something to keep: applies what it makes durable, on the
+     * server thread, and says what is left of it to do at the pet's next tick.
+     */
+    private Message.Settled keep(Message.Durable message) {
+        MinecraftServer server = pet.level().getServer();
+        if (server != null && !server.isSameThread()) {
+            throw new IllegalStateException("Told " + message + " from another thread; hop onto the server's with execute first");
+        }
+        Optional<String> report = switch (message) {
+            case Message.PhotoResult result -> Optional.of(PhotoResults.received(pet, result));
+        };
+        return new Message.Settled(message, report);
+    }
+
+    /** The second half of what a pet is told that has something to keep. */
+    private void settled(Message.Settled settled, long now) {
+        switch (settled.message()) {
             case Message.PhotoResult result -> {
-                rests.afterReport(ErrandIds.TAKE_PHOTO, PhotoResults.received(pet, result), RestContext.of(result.camera()), now);
+                settled.report().ifPresent(report ->
+                    rests.afterReport(ErrandIds.TAKE_PHOTO, report, RestContext.of(result.camera()), now));
                 // The photo errand may be holding the pose for it, and puts the camera away.
                 executor.deliver(result, now);
             }
-            default -> executor.deliver(message, now);
         }
     }
 
