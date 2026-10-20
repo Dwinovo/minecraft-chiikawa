@@ -51,17 +51,6 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
     private static final RegistryObject<SensorType<PetSocialSensor>> PET_SOCIAL_SENSOR =
         SENSOR_TYPES.register("pet_social_sensor", () -> new SensorType<>(PetSocialSensor::new));
 
-    // Activity registrations
-    private static final RegistryObject<Activity> FARMER_HARVEST =
-        ACTIVITIES.register("farmer_harvest", () -> new Activity(PetActivities.name("farmer_harvest")));
-    private static final RegistryObject<Activity> FARMER_PLANT =
-        ACTIVITIES.register("farmer_plant", () -> new Activity(PetActivities.name("farmer_plant")));
-    private static final RegistryObject<Activity> DELEVER =
-        ACTIVITIES.register("delever", () -> new Activity(PetActivities.name("delever")));
-    private static final RegistryObject<Activity> WEED =
-        ACTIVITIES.register("weed", () -> new Activity(PetActivities.name("weed")));
-    private static final RegistryObject<Activity> PICK_MUSHROOM =
-        ACTIVITIES.register("pick_mushroom", () -> new Activity(PetActivities.name("pick_mushroom")));
     private static final RegistryObject<Activity> FENCER_FIGHT =
         ACTIVITIES.register("fencer_fight", () -> new Activity(PetActivities.name("fencer_fight")));
     private static final RegistryObject<Activity> ARCHER_SHOOT =
@@ -124,31 +113,6 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
     @Override
     public Supplier<SensorType<PetSocialSensor>> petSocialSensor() {
         return PET_SOCIAL_SENSOR;
-    }
-
-    @Override
-    public Supplier<Activity> farmerHarvestActivity() {
-        return FARMER_HARVEST;
-    }
-
-    @Override
-    public Supplier<Activity> farmerPlantActivity() {
-        return FARMER_PLANT;
-    }
-
-    @Override
-    public Supplier<Activity> deleverActivity() {
-        return DELEVER;
-    }
-
-    @Override
-    public Supplier<Activity> weedActivity() {
-        return WEED;
-    }
-
-    @Override
-    public Supplier<Activity> pickMushroomActivity() {
-        return PICK_MUSHROOM;
     }
 
     @Override
