@@ -95,6 +95,11 @@ public interface RestStore {
         return memory(InitMemory.GIFT_COOLDOWN);
     }
 
+    /** The play_music errand's rest, in the memory it has always been in; not saved. */
+    static Kind musicRetry() {
+        return memory(InitMemory.MUSICIAN_RESTING);
+    }
+
     /** The shop errand's rest, in the memory it has always been in. */
     static Kind shopCooldown() {
         return memory(InitMemory.SHOP_COOLDOWN);
