@@ -69,10 +69,11 @@ final class ErrandScenarios {
     /** The step of a photo at which the shutter goes: after the walk and the aim. */
     private static final int SHUTTER_STEP = 2;
     /**
-     * Where a farmer's work is, across the yard from the farmer: a walk of many ticks, and as far as the farmer sensor looks,
-     * which is five blocks each way.
+     * Where a farmer's work is, across the yard from the farmer: a walk of a few seconds, and well inside what the farmer
+     * sensor sees, which is five blocks each way from where the pet stands. A pet strolls about while it makes up its mind,
+     * and work at the very edge of that is work out of sight as soon as it has strolled the wrong way.
      */
-    private static final BlockPos WORK = new BlockPos(9, STAND, 9);
+    private static final BlockPos WORK = new BlockPos(7, STAND, 7);
     private static final BlockPos FARMER = new BlockPos(4, STAND, 4);
     private static final int SEEDS = 8;
     private static final int CROP = 2;
