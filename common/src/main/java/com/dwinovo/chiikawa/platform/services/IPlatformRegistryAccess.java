@@ -57,8 +57,6 @@ public interface IPlatformRegistryAccess {
 
     Supplier<Activity> stayActivity();
 
-    Supplier<Activity> pickUpActivity();
-
     Supplier<Activity> takeTaskActivity();
 
     Supplier<Activity> shopActivity();

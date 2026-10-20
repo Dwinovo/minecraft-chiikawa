@@ -15,7 +15,6 @@ import com.dwinovo.chiikawa.entity.brain.task.social.SocializeBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.AnchorLeashBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.FloatBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.FollowOwnerBehavior;
-import com.dwinovo.chiikawa.entity.brain.task.tameable.PickUpItemTask;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.RandomWalkTask;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.SitBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.GiveGiftBehavior;
@@ -40,6 +39,14 @@ import net.minecraft.world.entity.schedule.Activity;
 
 /** Activities shared by every pet, whatever its job. */
 public final class BrainUtils {
+    /**
+     * Scaffolding, deleted with the idle behaviors when wander goes native: the activity the pet's brain is in
+     * whenever no legacy errand has it, so while it is on an errand that is carried out by steps. It has
+     * no behavior, so only the core runs and nothing walks or looks on its own beside the
+     * executor; the idle habits belong to the wander errand, which enters {@link Activity#IDLE} for them.
+     */
+    public static final Activity HELD = Activity.REST;
+
     private BrainUtils() {
     }
 
@@ -75,12 +82,6 @@ public final class BrainUtils {
         Pair<Integer, BehaviorControl<? super AbstractPet>> chatter = Pair.of(99, BehaviorBuilder.create(instance ->
             instance.point((level, pet, gameTime) -> PetSpeech.say(pet, VoiceMoment.IDLE).isPresent())));
         PetActivities.register(brain, Activity.IDLE, ImmutableList.of(randomTask, chatter), Set.of());
-    }
-
-    /** {@code pick_up_item}: walk to the remembered item and take it. */
-    public static void addPickUpTasks(Brain<AbstractPet> brain) {
-        PetActivities.register(brain, InitActivity.PICK_UP.get(),
-            ImmutableList.of(Pair.of(3, new PickUpItemTask(0.7f))), Set.of());
     }
 
     /** {@code gift_owner}: carry what the pet bought for its owner over to them. */
