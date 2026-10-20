@@ -17,7 +17,6 @@ import com.dwinovo.chiikawa.entity.brain.task.tameable.FloatBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.FollowOwnerBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.RandomWalkTask;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.SitBehavior;
-import com.dwinovo.chiikawa.entity.brain.task.tameable.GiveGiftBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.GoShoppingBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.TakeTaskBehavior;
 import com.dwinovo.chiikawa.init.InitActivity;
@@ -81,12 +80,6 @@ public final class BrainUtils {
         Pair<Integer, BehaviorControl<? super AbstractPet>> chatter = Pair.of(99, BehaviorBuilder.create(instance ->
             instance.point((level, pet, gameTime) -> PetSpeech.say(pet, VoiceMoment.IDLE).isPresent())));
         PetActivities.register(brain, Activity.IDLE, ImmutableList.of(randomTask, chatter), Set.of());
-    }
-
-    /** {@code gift_owner}: carry what the pet bought for its owner over to them. */
-    public static void addGiftTasks(Brain<AbstractPet> brain) {
-        PetActivities.register(brain, InitActivity.GIFT_OWNER.get(),
-            ImmutableList.of(Pair.of(2, new GiveGiftBehavior())), Set.of());
     }
 
     /** {@code shop}: walk to the nearest shop and buy something the pet likes. */

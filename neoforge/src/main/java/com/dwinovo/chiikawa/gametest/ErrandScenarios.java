@@ -42,6 +42,7 @@ final class ErrandScenarios {
     /** How far off the owner is, east, along the row of yards. */
     private static final int OWNER_AWAY = 40;
     private static final int FILM = 3;
+    private static final int COOKIES = 3;
     /** The step of a photo at which the shutter goes: after the walk and the aim. */
     private static final int SHUTTER_STEP = 2;
 
@@ -67,7 +68,8 @@ final class ErrandScenarios {
 
     private static final Map<ResourceLocation, Function<GameTestHelper, Scenario>> BY_ERRAND = Map.of(
         ErrandIds.PICK_UP_ITEM, ErrandScenarios::pickUpItem,
-        ErrandIds.TAKE_PHOTO, ErrandScenarios::takePhoto);
+        ErrandIds.TAKE_PHOTO, ErrandScenarios::takePhoto,
+        ErrandIds.GIFT_OWNER, ErrandScenarios::giftOwner);
 
     private ErrandScenarios() {
     }
@@ -100,6 +102,30 @@ final class ErrandScenarios {
             }
             if (!wheat.isAlive() || wheat.getItem().getCount() != count) {
                 return Optional.of("the wheat on the floor was touched, though the pet does not have it");
+            }
+            return Optional.empty();
+        });
+    }
+
+    /**
+     * A pet with three cookies in its bag and its owner across the yard, which is a present in mind and a walk of many
+     * ticks to the owner. Whatever is cut short, the cookies are all back in the bag and the owner has none, unless the
+     * present was handed over.
+     */
+    private static Scenario giftOwner(GameTestHelper helper) {
+        ServerPlayer owner = player(helper);
+        BlockPos across = helper.absolutePos(new BlockPos(10, STAND, 10));
+        owner.teleportTo(across.getX() + 0.5, across.getY(), across.getZ() + 0.5);
+        AbstractPet pet = GameTestKit.wild(helper, InitEntity.USAGI_PET.get(), new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        pet.setPetDirective(PetDirective.FREE);
+        pet.getBackpack().setItem(AbstractPet.BAG_SLOT + 1, new ItemStack(Items.COOKIE, COOKIES));
+        return new Scenario(pet, 3, ran -> {
+            if (GameTestKit.count(pet, Items.COOKIE) != COOKIES) {
+                return Optional.of("the bag has " + GameTestKit.count(pet, Items.COOKIE) + " cookies, not the " + COOKIES + " it had");
+            }
+            if (owner.getInventory().countItem(Items.COOKIE) > 0) {
+                return Optional.of("the owner was given a cookie, though the present was not handed over");
             }
             return Optional.empty();
         });

@@ -77,10 +77,13 @@ public final class ErrandContractGameTests {
     /** The errands still carried out by an old activity, which have no cases here yet. */
     private static final Set<ResourceLocation> LEGACY = Set.of(ErrandIds.FOLLOW_OWNER, ErrandIds.STAY, ErrandIds.WANDER,
         ErrandIds.HARVEST, ErrandIds.PLANT, ErrandIds.DELIVER, ErrandIds.WEED, ErrandIds.PICK_MUSHROOM, ErrandIds.MELEE,
-        ErrandIds.RANGED, ErrandIds.PLAY_MUSIC, ErrandIds.TAKE_TASK, ErrandIds.SHOP, ErrandIds.GIFT_OWNER,
+        ErrandIds.RANGED, ErrandIds.PLAY_MUSIC, ErrandIds.TAKE_TASK, ErrandIds.SHOP,
         ErrandIds.SOCIALIZE, ErrandIds.COOPERATE, ErrandIds.TAKE_EXAM, ErrandIds.CHECK_RESULTS, ErrandIds.ANSWER_WHISTLE);
 
-    /** Where in an errand's routine a pet is cut short. */
+    /**
+     * Where in an errand's routine a pet is cut short. The first is as soon as the pet is seen on the errand at all,
+     * which for an errand whose first step is an action of one tick is already past it.
+     */
     private enum Point {
         FIRST,
         MIDDLE,
@@ -88,7 +91,7 @@ public final class ErrandContractGameTests {
 
         boolean reached(Running running, long now, int steps) {
             return switch (this) {
-                case FIRST -> running.stepIndex() == 0;
+                case FIRST -> true;
                 case MIDDLE -> running.stepIndex() == (steps - 1) / 2 && now - running.startedAt() >= MIDDLE_TICKS;
                 case LAST -> running.stepIndex() == steps - 1;
             };

@@ -637,7 +637,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         BrainUtils.addIdleTasks(brain);
         BrainUtils.addTakeTaskTasks(brain);
         BrainUtils.addShopTasks(brain);
-        BrainUtils.addGiftTasks(brain);
         BrainUtils.addSocialTasks(brain);
         BrainUtils.addExamTasks(brain);
         BrainUtils.addWhistleTasks(brain);
@@ -651,6 +650,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
         brain.setCoreActivities(java.util.Set.of(Activity.CORE));
         brain.setDefaultActivity(BrainUtils.HELD);
+        // A brain starts with no activity active, not even its core: the pet would stand still until a legacy
+        // errand switched one on, whatever the executor asked of it.
+        brain.useDefaultActivity();
         return brain;
     }
 

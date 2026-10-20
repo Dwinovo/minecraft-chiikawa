@@ -44,6 +44,17 @@ class RoutineTest {
     }
 
     @Test
+    void aRoutineLetsGoOfWhatItHoldsWhenAskedAndANewOneHoldsNothing() {
+        int[] released = {0};
+        Routine routine = Routine.of(Routine.step(ScriptedStep::running)).releasing(h -> released[0]++);
+
+        routine.release(handle);
+        Routine.of(Routine.step(ScriptedStep::running)).release(handle);
+
+        assertEquals(1, released[0]);
+    }
+
+    @Test
     void aRoundIsGoneRoundForAsLongAsTheConditionHoldsAndAskedBeforeTheFirst() {
         int[] rounds = {2};
         List<String> made = new ArrayList<>();

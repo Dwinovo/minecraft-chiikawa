@@ -60,8 +60,6 @@ public interface IPlatformRegistryAccess {
 
     Supplier<Activity> shopActivity();
 
-    Supplier<Activity> giftOwnerActivity();
-
     Supplier<Activity> socializeActivity();
 
     Supplier<Activity> cooperateActivity();

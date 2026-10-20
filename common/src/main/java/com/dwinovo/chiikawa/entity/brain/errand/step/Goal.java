@@ -73,6 +73,33 @@ public sealed interface Goal {
     }
 
     /**
+     * The pet's owner, wherever they are: looked for each time like a creature, and gone while they are not in the
+     * pet's world.
+     */
+    record Owner() implements Goal {
+        @Override
+        public Optional<Vec3> where(LiveHandle live) {
+            return live.owner().map(Entity::position);
+        }
+
+        @Override
+        public boolean walkTo(LiveHandle live, float speed, int closeEnough) {
+            return live.owner().map(owner -> {
+                live.walkTo(owner, speed, closeEnough);
+                return true;
+            }).orElse(false);
+        }
+
+        @Override
+        public boolean lookAt(LiveHandle live) {
+            return live.owner().map(owner -> {
+                live.lookAt(owner);
+                return true;
+            }).orElse(false);
+        }
+    }
+
+    /**
      * @param id the creature's, or item's, entity id
      */
     record Creature(UUID id) implements Goal {

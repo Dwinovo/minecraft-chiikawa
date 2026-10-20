@@ -40,8 +40,8 @@ class GiftOwnerOfferTest {
 
     @Test
     void theErrandGoesOnOnlyWhileThePetCarriesThePresent() {
-        assertTrue(TestErrands.stillWanted(ErrandIds.GIFT_OWNER, Heading.NOWHERE, pet().holdingGift()).ok());
+        assertTrue(TestErrands.stillWanted(ErrandIds.GIFT_OWNER, new GiftOwnerErrand.Delivery(), pet().holdingGift()).ok());
         // A present in mind is not one in its paws: once it is handed over, or put back, the errand is done.
-        assertFalse(TestErrands.stillWanted(ErrandIds.GIFT_OWNER, Heading.NOWHERE, pet().withPresent()).ok());
+        assertFalse(TestErrands.stillWanted(ErrandIds.GIFT_OWNER, new GiftOwnerErrand.Delivery(), pet().withPresent()).ok());
     }
 }

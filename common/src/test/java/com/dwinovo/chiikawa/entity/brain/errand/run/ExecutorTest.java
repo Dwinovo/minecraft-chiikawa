@@ -16,6 +16,8 @@ import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
 import com.dwinovo.chiikawa.testing.FakeHandle;
 import com.dwinovo.chiikawa.testing.TestRests;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
@@ -181,6 +183,26 @@ class ExecutorTest {
             assertEquals(1, step.released, "released once for " + ending.outcome());
             assertEquals(1, fresh.writes(), "rested once for " + ending.outcome());
             assertEquals(ending.rest(), fresh.remaining(null, 1), "the rest for " + ending.outcome());
+        }
+    }
+
+    @Test
+    void whatTheErrandHoldsAcrossItsStepsIsLetGoOfOnceHoweverItEndsAndAfterTheStep() {
+        for (Outcome outcome : new Outcome[] {Outcome.done(), Outcome.gaveUp("no"), Outcome.interrupted("moved")}) {
+            List<Integer> stepsReleased = new ArrayList<>();
+            ScriptedStep step = ScriptedStep.running();
+            Executor each = executorOver(new TestRests.Store(), new DecisionLog());
+            each.start(ERRAND, PLAN, settings, Routine.single(step).releasing(h -> stepsReleased.add(step.released)), 0);
+
+            switch (outcome) {
+                case Outcome.Done done -> step.then(StepStatus.DONE);
+                case Outcome.GaveUp gaveUp -> step.then(StepStatus.gaveUp(gaveUp.reason()));
+                case Outcome.Interrupted interrupted -> each.requestEnd(interrupted);
+            }
+            each.tick(1);
+            each.tick(2);
+
+            assertEquals(List.of(1), stepsReleased, "once, after the step, for " + outcome);
         }
     }
 
