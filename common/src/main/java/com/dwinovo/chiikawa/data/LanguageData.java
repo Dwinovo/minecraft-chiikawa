@@ -67,7 +67,7 @@ public final class LanguageData {
                 "没有攻击目标", "攻击冷却中", "没有箭", "没有新的曲子可演奏", "曲子演奏完了", "先做更要紧的活",
                 "附近没有野草", "附近没有蘑菇", "要领到对应的工作牌才会做", "只在夜里做",
                 "已经带着一张工作牌", "刚才没领到牌，歇一会儿", "附近的公告板没有合适的工作牌",
-                "刚买过东西", "商店里没有它想要又买得起的", "手上没有要送的东西");
+                "商店里没有它想要又买得起的", "手上没有要送的东西");
             addBlockTranslations(adder, "劳动公告板", "商店");
             addSupplyTranslations(adder, "双肩包", "小熊挎包", "鲸鱼挎包", "星星挎包", "给宠物背上，背包多 10 格",
                     "简单料理", "喂给宠物，一阵子干活更起劲",
@@ -277,7 +277,7 @@ public final class LanguageData {
                 "もっと大事なことが先", "近くに雑草がない", "近くにキノコがない",
                 "合うお仕事カードを取ったときだけやる", "夜だけやる",
                 "もうお仕事カードを持っている", "カードを取りそこねたので、ひと休み", "近くの掲示板に合うカードがない",
-                "さっき買い物したばかり", "お店に欲しくて買えるものがない", "渡すものを持っていない");
+                "お店に欲しくて買えるものがない", "渡すものを持っていない");
             addBlockTranslations(adder, "労働掲示板", "お店");
             addSupplyTranslations(adder, "リュック", "くまのポーチ", "くじらのポーチ", "星のポーチ", "ペットに背負わせると、持ち物が10マス増える",
                     "かんたんごはん", "ペットに食べさせると、しばらくお仕事にやる気が出る",
@@ -487,7 +487,7 @@ public final class LanguageData {
                 "Algo mais urgente vem primeiro", "Sem ervas daninhas por perto", "Sem cogumelos por perto",
                 "Só com uma ficha compatível", "Só se faz à noite",
                 "Já está com uma ficha", "Descansando depois de perder uma ficha", "Nenhuma ficha adequada em um quadro por perto",
-                "Acabou de comprar algo", "Nada aqui que queira e possa pagar", "Nada para dar");
+                "Nada aqui que queira e possa pagar", "Nada para dar");
             addBlockTranslations(adder, "Quadro de Trabalho", "Loja");
             addSupplyTranslations(adder, "Mochila de Costas", "Bolsa do Urso", "Bolsa da Baleia", "Bolsa da Estrela", "Usada por um pet: mais dez espaços",
                     "Prato Simples", "Dado a um pet: com mais vontade de trabalhar por um tempo",
@@ -702,7 +702,7 @@ public final class LanguageData {
                 "공격할 대상이 없어", "공격 대기 중이야", "화살이 없어", "새로 연주할 곡이 없어", "곡이 끝났어", "더 급한 일이 먼저야",
                 "근처에 잡초가 없어", "근처에 버섯이 없어", "맞는 전표를 받아야 해", "밤에만 해",
                 "이미 전표를 들고 있어", "전표를 못 받아서 잠시 쉬는 중이야", "근처 게시판에 맞는 전표가 없어",
-                "방금 물건을 샀어", "사고 싶고 살 수 있는 물건이 없어", "건넬 것이 없어");
+                "사고 싶고 살 수 있는 물건이 없어", "건넬 것이 없어");
             addBlockTranslations(adder, "알바 게시판", "상점");
             addSupplyTranslations(adder, "배낭", "곰 가방", "고래 가방", "별 가방", "펫에게 입히면 가방이 10칸 늘어",
                     "간단한 요리", "펫에게 먹이면 한동안 일을 더 하려 해",
@@ -914,7 +914,7 @@ public final class LanguageData {
                 "Something more urgent comes first", "No weeds nearby", "No mushrooms nearby",
                 "Only with a matching slip", "Only done at night",
                 "Already carries a slip", "Resting after missing a slip", "No slip for it on a nearby board",
-                "Just bought something", "Nothing here it wants and can afford", "Nothing to give");
+                "Nothing here it wants and can afford", "Nothing to give");
             addBlockTranslations(adder, "Labor Board", "Shop");
             addSupplyTranslations(adder, "Rucksack", "Bear Pouch", "Whale Pouch", "Star Pouch", "Worn by a pet: ten more slots",
                     "Simple Dish", "Fed to a pet: keener on work for a while",
@@ -1184,7 +1184,6 @@ public final class LanguageData {
         String hasSlip,
         String boardResting,
         String noSlip,
-        String shopResting,
         String nothingToBuy,
         String noGift
     ) {
@@ -1210,7 +1209,6 @@ public final class LanguageData {
         adder.add("intent.chiikawa.fail.has_slip", hasSlip);
         adder.add("intent.chiikawa.fail.board_resting", boardResting);
         adder.add("intent.chiikawa.fail.no_slip", noSlip);
-        adder.add("intent.chiikawa.fail.shop_resting", shopResting);
         adder.add("intent.chiikawa.fail.nothing_to_buy", nothingToBuy);
         adder.add("intent.chiikawa.fail.no_gift", noGift);
     }

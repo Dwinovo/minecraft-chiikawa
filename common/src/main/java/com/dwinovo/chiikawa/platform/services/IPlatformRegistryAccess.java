@@ -58,8 +58,6 @@ public interface IPlatformRegistryAccess {
 
     Supplier<Activity> takeTaskActivity();
 
-    Supplier<Activity> shopActivity();
-
     Supplier<Activity> socializeActivity();
 
     Supplier<Activity> cooperateActivity();

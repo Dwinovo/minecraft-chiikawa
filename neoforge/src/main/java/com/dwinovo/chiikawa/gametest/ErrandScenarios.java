@@ -10,10 +10,12 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
+import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.photo.PhotoSystem;
+import com.dwinovo.chiikawa.shop.Wallet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -43,6 +45,8 @@ final class ErrandScenarios {
     private static final int OWNER_AWAY = 40;
     private static final int FILM = 3;
     private static final int COOKIES = 3;
+    /** Enough for anything on the list, so what the pet does at the counter is about wanting rather than affording. */
+    private static final int WAGES = 8;
     /** The step of a photo at which the shutter goes: after the walk and the aim. */
     private static final int SHUTTER_STEP = 2;
 
@@ -69,7 +73,8 @@ final class ErrandScenarios {
     private static final Map<ResourceLocation, Function<GameTestHelper, Scenario>> BY_ERRAND = Map.of(
         ErrandIds.PICK_UP_ITEM, ErrandScenarios::pickUpItem,
         ErrandIds.TAKE_PHOTO, ErrandScenarios::takePhoto,
-        ErrandIds.GIFT_OWNER, ErrandScenarios::giftOwner);
+        ErrandIds.GIFT_OWNER, ErrandScenarios::giftOwner,
+        ErrandIds.SHOP, ErrandScenarios::shop);
 
     private ErrandScenarios() {
     }
@@ -126,6 +131,32 @@ final class ErrandScenarios {
             }
             if (owner.getInventory().countItem(Items.COOKIE) > 0) {
                 return Optional.of("the owner was given a cookie, though the present was not handed over");
+            }
+            return Optional.empty();
+        });
+    }
+
+    /**
+     * A pet with a purse of emeralds and nothing to do but spend them, and a shop across the yard: a walk of many ticks to
+     * the counter. A purchase is money paid for goods in the bag, both or neither, so what is left is never one without the
+     * other.
+     */
+    private static Scenario shop(GameTestHelper helper) {
+        helper.setBlock(new BlockPos(13, STAND, 4), InitBlocks.SHOP.get());
+        AbstractPet pet = GameTestKit.worker(helper, new BlockPos(3, STAND, 4));
+        pet.getBackpack().addItem(new ItemStack(Items.EMERALD, WAGES));
+        return new Scenario(pet, 2, ran -> {
+            boolean paid = Wallet.count(pet.getBackpack()) < WAGES;
+            boolean goods = false;
+            for (int slot = 0; slot < pet.getBackpack().getContainerSize(); slot++) {
+                ItemStack stack = pet.getBackpack().getItem(slot);
+                goods |= !stack.isEmpty() && !Wallet.isMoney(stack);
+            }
+            if (paid && !goods) {
+                return Optional.of("money was paid, though the pet came away with nothing for it");
+            }
+            if (goods && !paid) {
+                return Optional.of("the pet has goods it did not pay for");
             }
             return Optional.empty();
         });
