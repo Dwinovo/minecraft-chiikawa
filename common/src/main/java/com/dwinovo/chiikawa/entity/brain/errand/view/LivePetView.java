@@ -12,7 +12,7 @@ import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
 import com.dwinovo.chiikawa.entity.brain.task.musician.PlayMusicBehavior;
-import com.dwinovo.chiikawa.gifting.GiftErrand;
+import com.dwinovo.chiikawa.gifting.GiftPool;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.qualification.PetExams;
@@ -93,8 +93,8 @@ public final class LivePetView implements PetView {
             .filter(AbstractPet::isAlive)
             .map(partner -> GlobalPos.of(partner.level().dimension(), partner.blockPosition())));
         this.playingAlong = new Lazy<>(() -> pet.getBrain().hasMemoryValue(InitMemory.INTERACTION_RESERVATION.get()));
-        this.carryingGift = new Lazy<>(() -> !pet.getPendingGift().isEmpty());
-        this.presentToGive = new Lazy<>(() -> GiftErrand.thinksOfAnother(pet));
+        this.carryingGift = new Lazy<>(() -> pet.getOwner() instanceof Player && !pet.getPendingGift().isEmpty());
+        this.presentToGive = new Lazy<>(() -> pet.getOwner() instanceof Player && !GiftPool.of(pet).isEmpty());
         this.attackCoolingDown = new Lazy<>(() -> pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_COOLING_DOWN));
         this.hasArrows = new Lazy<>(() -> !Utils.getArrow(pet).isEmpty());
         this.hasPlayableSelection = new Lazy<>(() -> PlayMusicBehavior.playableSelection(pet).isPresent());
