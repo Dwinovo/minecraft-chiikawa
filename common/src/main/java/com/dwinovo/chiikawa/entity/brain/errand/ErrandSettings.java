@@ -1,9 +1,11 @@
 package com.dwinovo.chiikawa.entity.brain.errand;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.entity.brain.errand.overlay.Overlays;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSpec;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Collections;
 import java.util.List;
@@ -37,6 +39,9 @@ import net.minecraft.util.ExtraCodecs;
 public record ErrandSettings<T>(int priority, float score, int maxTicks, Rests rests, List<ResourceLocation> yieldsTo,
                                 List<ResourceLocation> overlays, Optional<VoiceMoment> startVoice, T tuning) {
     private static final String LOG_PREFIX = "[chiikawa-errand] ";
+    /** An id that names an overlay: one that does not turns the errand off. */
+    private static final Codec<ResourceLocation> OVERLAY = ResourceLocation.CODEC.validate(id ->
+        Overlays.get(id).isPresent() ? DataResult.success(id) : DataResult.error(() -> id + " is no overlay"));
 
     /**
      * How long an errand is left alone once it has ended, by how it ended.
@@ -75,7 +80,7 @@ public record ErrandSettings<T>(int priority, float score, int maxTicks, Rests r
             // Always written, though a file without them reads as none: they are lists to change.
             ResourceLocation.CODEC.listOf().optionalFieldOf("yields_to")
                 .forGetter(settings -> Optional.of(settings.yieldsTo())),
-            ResourceLocation.CODEC.listOf().optionalFieldOf("overlays")
+            OVERLAY.listOf().optionalFieldOf("overlays")
                 .forGetter(settings -> Optional.of(settings.overlays())),
             VoiceMoment.CODEC.optionalFieldOf("start_voice").forGetter(ErrandSettings::startVoice),
             tuning.fieldOf("tuning").forGetter(ErrandSettings::tuning)
@@ -101,6 +106,11 @@ public record ErrandSettings<T>(int priority, float score, int maxTicks, Rests r
     /** @return these settings with the errands that go first, as data names them */
     public ErrandSettings<T> yieldingTo(ResourceLocation... errands) {
         return new ErrandSettings<>(priority, score, maxTicks, rests, List.of(errands), overlays, startVoice, tuning);
+    }
+
+    /** @return these settings with the pet doing these on the side, see {@link com.dwinovo.chiikawa.entity.brain.errand.run.Overlay} */
+    public ErrandSettings<T> withOverlays(ResourceLocation... overlays) {
+        return new ErrandSettings<>(priority, score, maxTicks, rests, yieldsTo, List.of(overlays), startVoice, tuning);
     }
 
     /** @return these settings with the pet saying this on setting off */

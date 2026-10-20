@@ -5,12 +5,6 @@ import java.util.function.Supplier;
 import net.minecraft.world.entity.schedule.Activity;
 
 public final class InitActivity {
-    // Walking back to the owner.
-    public static final Supplier<Activity> FOLLOW_OWNER =
-        Services.PLATFORM_REGISTRY.followOwnerActivity();
-    // Sitting still.
-    public static final Supplier<Activity> STAY =
-        Services.PLATFORM_REGISTRY.stayActivity();
     // Going over to another pet to play a scene with it.
     public static final Supplier<Activity> SOCIALIZE =
         Services.PLATFORM_REGISTRY.socializeActivity();
