@@ -18,9 +18,9 @@ import net.minecraft.resources.ResourceLocation;
  *
  * <p>Two ways of writing, because two things happen. An errand that ends is told by the executor and
  * only ever lengthens a rest: a photo stored while the camera is still up has already rested the
- * pet for the camera's cooldown, and the wait for the upload that follows must not cut that short. A
- * report, told to the errand later by whatever was waiting on, replaces: a photo that did not come
- * back shortens the wait to the retry.
+ * pet for the camera's cooldown, and an errand that gives up after it must not cut that short. A
+ * report, told by a step as it does something or later by whatever was waited on, replaces: the shutter
+ * rests the pet for the upload, and a photo that did not come back shortens that to the retry.
  */
 public final class RestLedger {
     private static final String LOG_PREFIX = "[chiikawa-errand] ";
@@ -102,10 +102,10 @@ public final class RestLedger {
     }
 
     /**
-     * Something the errand was waiting on has come back. Rests as the errand's settings say for that
-     * report, instead of what it was resting, whether that is more or less. A report the settings do
-     * not name changes nothing. A report rests the errand as a whole, whatever its other rests are on.
-     * For the inbox alone.
+     * A step has done something the errand rests for, or something the errand was waiting on has come
+     * back. Rests as the errand's settings say for that report, instead of what it was resting, whether
+     * that is more or less. A report the settings do not name changes nothing. A report rests the errand
+     * as a whole, whatever its other rests are on. For the mind alone.
      *
      * @param errand the errand
      * @param report what came back, as the settings name it
