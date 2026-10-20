@@ -253,7 +253,7 @@ public final class LivePetView implements PetView {
     @Override
     public Optional<PickableItem> pickable(UUID item) {
         return pet.level() instanceof ServerLevel level && level.getEntity(item) instanceof ItemEntity found
-            ? PickableItem.of(found) : Optional.empty();
+            ? PickableItem.of(pet, found) : Optional.empty();
     }
 
     private Optional<GlobalPos> findOfferingBoard() {

@@ -8,6 +8,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.utils.Utils;
 import net.minecraft.core.BlockPos;
@@ -17,6 +18,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -173,5 +175,25 @@ public final class FarmGameTests {
 
         helper.succeedWhen(() -> helper.assertTrue(carries(pet, Items.WHEAT),
             "the wheat is still on the floor"));
+    }
+
+    /**
+     * A bag with no room for the wheat is no reason to walk to it: the pet is not offered what it cannot take, so it
+     * does not set off for it and stand at it, or give up and set off again.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = LEAVE_IT_TICKS + 100)
+    public static void a_pet_with_a_full_bag_is_not_sent_for_what_is_lying_about(GameTestHelper helper) {
+        AbstractPet pet = holding(worker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
+        for (int slot = 0; slot < pet.getBackpack().getContainerSize(); slot++) {
+            pet.getBackpack().setItem(slot, new ItemStack(Items.COBBLESTONE, Items.COBBLESTONE.getDefaultMaxStackSize()));
+        }
+        ItemEntity wheat = helper.spawnItem(Items.WHEAT, new BlockPos(7, STAND, 4));
+
+        helper.onEachTick(() -> helper.assertFalse(pet.getIntent().filter(ErrandIds.PICK_UP_ITEM::equals).isPresent(),
+            "the pet set off for the wheat with no room for it"));
+        helper.runAtTickTime(LEAVE_IT_TICKS, () -> {
+            helper.assertTrue(wheat.isAlive(), "the wheat was taken");
+            helper.succeed();
+        });
     }
 }
