@@ -1,13 +1,15 @@
 package com.dwinovo.chiikawa.music;
 
-import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.PetMind;
+import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.network.MusicPayloads.MusicStreamChunkPayload;
 import com.dwinovo.chiikawa.network.MusicPayloads.MusicStreamStartPayload;
 import com.dwinovo.chiikawa.network.MusicPayloads.MusicStreamStopPayload;
 import com.dwinovo.chiikawa.platform.Services;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import net.minecraft.server.level.ServerLevel;
@@ -76,9 +78,8 @@ public final class ServerMusicStreamManager {
         // elapsed, so the client has time to drain frames we already buffered ahead.
         if (currentFrame >= frameCount) {
             stopSession(session, MusicStopReason.FINISHED);
-            if (source.getActivity() == PetActivity.PLAY_GUITAR) {
-                source.setActivity(PetActivity.NONE);
-            }
+            // Only a song that ran its course is told to the pet: the stops that are the pet's own doing it knows of.
+            PetMind.post(source, new Message.MusicStopped(MusicStopReason.FINISHED.name().toLowerCase(Locale.ROOT)));
             return;
         }
 
@@ -171,9 +172,6 @@ public final class ServerMusicStreamManager {
     private void stopSession(MusicStreamSession session, MusicStopReason reason) {
         sessionsById.remove(session.sessionId());
         sessionsByEntity.remove(session.source().getId());
-        if (session.source().getActivity() == PetActivity.PLAY_GUITAR) {
-            session.source().setActivity(PetActivity.NONE);
-        }
         MusicStreamStopPayload payload = new MusicStreamStopPayload(session.sessionId(), reason);
         for (ServerPlayer listener : List.copyOf(session.listeners())) {
             Services.NETWORK.sendToClient(listener, payload);
