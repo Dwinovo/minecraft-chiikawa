@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandType;
 import com.dwinovo.chiikawa.entity.brain.errand.Errands;
 import com.dwinovo.chiikawa.entity.brain.errand.Offer;
+import com.dwinovo.chiikawa.entity.brain.errand.Offers;
 import com.dwinovo.chiikawa.entity.brain.errand.Plan;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import java.util.List;
@@ -38,9 +39,14 @@ public final class TestErrands {
         return errand;
     }
 
+    /** @return what the errand answers when asked what it offers the pet: the offers, or why none */
+    public static Offers<?> answer(ResourceLocation id, PetView view) {
+        return answerOf(errand(id), view);
+    }
+
     /** @return what the errand offers the pet */
     public static List<? extends Offer<?>> offers(ResourceLocation id, PetView view) {
-        return offersOf(errand(id), view);
+        return answer(id, view).list();
     }
 
     /** @return the plan of the errand's only offer, which it must have */
@@ -54,7 +60,7 @@ public final class TestErrands {
 
     /** @return why the errand offers nothing */
     public static Check whyNoOffer(ResourceLocation id, PetView view) {
-        return whyNoOfferOf(errand(id), view);
+        return answer(id, view).check();
     }
 
     /** @return whether the errand goes on for a pet that set out with this plan */
@@ -68,13 +74,8 @@ public final class TestErrands {
     }
 
     @SuppressWarnings("unchecked")
-    private static <P extends Plan, T> List<Offer<P>> offersOf(ErrandType<P, T> type, PetView view) {
+    private static <P extends Plan, T> Offers<P> answerOf(ErrandType<P, T> type, PetView view) {
         return type.offers(view, (T) settings(type).tuning());
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <P extends Plan, T> Check whyNoOfferOf(ErrandType<P, T> type, PetView view) {
-        return type.whyNoOffer(view, (T) settings(type).tuning());
     }
 
     @SuppressWarnings("unchecked")
