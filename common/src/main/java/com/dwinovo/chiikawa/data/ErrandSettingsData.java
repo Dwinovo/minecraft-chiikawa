@@ -94,7 +94,7 @@ public final class ErrandSettingsData {
                 Rests.of(NONE, RestSpec.ticks(200), NONE), new ErrandTunings.TakeExam(0.7F, 0.8, 20))),
             entry(ErrandIds.CHECK_RESULTS, errand(80, 0.72F, 1200,
                 Rests.of(NONE, RestSpec.ticks(1200), NONE), new ErrandTunings.CheckResults(0.7F, 1.2, 60))),
-            entry(ErrandIds.ANSWER_WHISTLE, errand(50, 0.55F, 12000, giveUp(200), new ErrandTunings.AnswerWhistle(0.7F, 3, 8.0))),
+            entry(ErrandIds.ANSWER_WHISTLE, errand(50, 0.55F, 12000, giveUp(200), new ErrandTunings.AnswerWhistle(0.7F, 3, 3.5, 8.0))),
             // The shutter itself reports the wait for the picture, so that every way the errand ends after it
             // already rests for it, and none before it does; when the pet is told the picture was stored the
             // rest is the camera's, and when it was lost only as long as it takes to try again.
