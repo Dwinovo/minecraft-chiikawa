@@ -3,9 +3,13 @@ package com.dwinovo.chiikawa.gametest;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.carries;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.ownedPet;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 
+import com.dwinovo.chiikawa.block.DeskBooking;
+import com.dwinovo.chiikawa.block.ExamDeskBlockEntity;
 import com.dwinovo.chiikawa.camera.PhotoResults;
 import com.dwinovo.chiikawa.camera.PhotoScout;
+import com.dwinovo.chiikawa.data.QualificationData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
@@ -15,6 +19,8 @@ import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.photo.PhotoSystem;
+import com.dwinovo.chiikawa.qualification.ExamStage;
+import com.dwinovo.chiikawa.qualification.Licence;
 import com.dwinovo.chiikawa.shop.Wallet;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +32,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 
 /**
  * For each native errand, a setup in which it is the best thing its pet can do and a way to tell whether
@@ -74,7 +82,9 @@ final class ErrandScenarios {
         ErrandIds.PICK_UP_ITEM, ErrandScenarios::pickUpItem,
         ErrandIds.TAKE_PHOTO, ErrandScenarios::takePhoto,
         ErrandIds.GIFT_OWNER, ErrandScenarios::giftOwner,
-        ErrandIds.SHOP, ErrandScenarios::shop);
+        ErrandIds.SHOP, ErrandScenarios::shop,
+        ErrandIds.TAKE_EXAM, ErrandScenarios::takeExam,
+        ErrandIds.CHECK_RESULTS, ErrandScenarios::checkResults);
 
     private ErrandScenarios() {
     }
@@ -157,6 +167,50 @@ final class ErrandScenarios {
             }
             if (goods && !paid) {
                 return Optional.of("the pet has goods it did not pay for");
+            }
+            return Optional.empty();
+        });
+    }
+
+    /**
+     * A pet signed up for an exam at a desk across the yard, on the day it is held. The paper is handed in whole or not
+     * at all, the licence and the desk together, and the desk stays booked for the pet whatever becomes of its errand:
+     * a pet called away before it hands in can come back to it while the exam is on.
+     */
+    private static Scenario takeExam(GameTestHelper helper) {
+        ExamDeskBlockEntity desk = ExamGameTests.placeDesk(helper);
+        AbstractPet pet = ExamGameTests.signedUp(helper, desk, new BlockPos(4, STAND, 8));
+        return new Scenario(pet, 5, ran -> {
+            boolean paperIn = pet.licences().get(QualificationData.WEEDING).paper().isPresent();
+            boolean resultOnDesk = desk.booking().flatMap(DeskBooking::passed).isPresent();
+            if (paperIn != resultOnDesk) {
+                return Optional.of(paperIn ? "the pet's licence has a paper in, though the desk has none of it"
+                    : "the desk has the paper, though the pet's licence has not handed it in");
+            }
+            if (desk.booking().filter(booking -> booking.pet().equals(pet.getUUID())).isEmpty()) {
+                return Optional.of("the desk is no longer booked for the pet that was sitting at it");
+            }
+            return Optional.empty();
+        });
+    }
+
+    /**
+     * A pet that sat an exam yesterday and passed, on the morning the results are up, a few blocks from the desk. The results
+     * are heard whole or not at all: the licence has gone up a grade and the paper is gone, or neither has happened.
+     */
+    private static Scenario checkResults(GameTestHelper helper) {
+        settleWorld(helper.getLevel(), Difficulty.NORMAL, (ExamGameTests.EXAM_DAY_NUMBER + 1) * Level.TICKS_PER_DAY + ExamGameTests.MORNING);
+        ExamDeskBlockEntity desk = ExamGameTests.placeDesk(helper);
+        AbstractPet pet = GameTestKit.worker(helper, new BlockPos(4, STAND, 8));
+        pet.licences().set(QualificationData.WEEDING, new Licence(0, 0, 0, false,
+            new ExamStage.Sat(ExamGameTests.at(helper, ExamGameTests.DESK), ExamGameTests.EXAM_DAY_NUMBER, true)));
+        desk.book(new DeskBooking(pet.getUUID(), "Shisa", QualificationData.WEEDING, 5, ExamGameTests.EXAM_DAY_NUMBER,
+            Optional.of(true)));
+        return new Scenario(pet, 3, ran -> {
+            Licence licence = pet.licences().get(QualificationData.WEEDING);
+            if (licence.paper().isPresent() == (licence.held() == 1)) {
+                return Optional.of(licence.held() == 1 ? "the pet has the grade, and the paper it was granted for"
+                    : "the pet has no grade, and the paper it should have been granted for is gone");
             }
             return Optional.empty();
         });
