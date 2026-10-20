@@ -296,10 +296,12 @@ public final class SocialGameTests {
      * pet only for a few seconds, so that it is not asking again in the very next breath, and not for the day that a
      * scene played rests the pair.
      */
-    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = SETTLE_TICKS + SCENE_TICKS + TURNED_DOWN_REST_TICKS)
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = SETTLE_TICKS + 2 * SCENE_TICKS + TURNED_DOWN_REST_TICKS)
     public static void a_pet_turned_down_may_ask_again_in_a_few_seconds_and_not_a_day(GameTestHelper helper) {
-        AbstractPet momonga = wild(helper, InitEntity.MOMONGA_PET.get(), new BlockPos(4, STAND, 8));
-        AbstractPet chiikawa = wild(helper, InitEntity.CHIIKAWA_PET.get(), new BlockPos(8, STAND, 8));
+        BlockPos start = new BlockPos(4, STAND, 8);
+        BlockPos partnerAt = new BlockPos(8, STAND, 8);
+        AbstractPet momonga = wild(helper, InitEntity.MOMONGA_PET.get(), start);
+        AbstractPet chiikawa = wild(helper, InitEntity.CHIIKAWA_PET.get(), partnerAt);
         PetInteraction cling = scene(PetInteractionData.CLING);
 
         helper.startSequence()
@@ -312,8 +314,7 @@ public final class SocialGameTests {
                     helper.getLevel().getGameTime()));
                 thinkOf(momonga, PetInteractionData.CLING, chiikawa);
             })
-            .thenWaitUntil(() -> helper.assertTrue(endedWith(momonga, ErrandIds.SOCIALIZE, "declined"),
-                "Momonga was never turned down"))
+            .thenWaitUntil(() -> helper.assertTrue(timesTurnedDown(momonga) == 1, "Momonga was never turned down"))
             .thenExecute(() -> {
                 long left = restLeft(momonga, PetInteractionData.CLING, chiikawa, helper);
                 helper.assertTrue(left > 0 && left <= TURNED_DOWN_REST_TICKS,
@@ -322,10 +323,20 @@ public final class SocialGameTests {
                     "a day is not very different from a few seconds in this data pack");
             })
             .thenIdle(TURNED_DOWN_REST_TICKS)
-            .thenExecute(() -> helper.assertTrue(SocialRules.accepts(PetInteractionData.CLING, cling, momonga, chiikawa,
-                    helper.getLevel().getGameTime()).isPresent(),
-                "Momonga is still held back from asking Chiikawa, " + restLeft(momonga, PetInteractionData.CLING, chiikawa, helper)
-                    + " ticks later"))
+            .thenExecute(() -> {
+                // Where the two have strolled to in the meantime is not the question; back where they were, with the idea
+                // again, it asks, and is turned down a second time, which a pet held back for the day would not be.
+                Vec3 back = helper.absoluteVec(Vec3.atBottomCenterOf(start));
+                momonga.teleportTo(back.x, back.y, back.z);
+                Vec3 there = helper.absoluteVec(Vec3.atBottomCenterOf(partnerAt));
+                chiikawa.teleportTo(there.x, there.y, there.z);
+                thinkOf(momonga, PetInteractionData.CLING, chiikawa);
+            })
+            .thenWaitUntil(() -> helper.assertTrue(timesTurnedDown(momonga) == 2,
+                "Momonga did not ask Chiikawa again, " + restLeft(momonga, PetInteractionData.CLING, chiikawa, helper)
+                    + " ticks of rest left, " + momonga.distanceTo(chiikawa) + " blocks from it, which is "
+                    + (SocialRules.accepts(PetInteractionData.CLING, cling, momonga, chiikawa, helper.getLevel().getGameTime())
+                        .isPresent() ? "" : "not ") + "a partner for it, doing " + doing(momonga) + " and " + doing(chiikawa)))
             .thenSucceed();
     }
 
@@ -571,10 +582,16 @@ public final class SocialGameTests {
             .remaining(SocialCooldowns.subject(id, other.getUUID()), helper.getLevel().getGameTime());
     }
 
-    /** @return whether the errand has ended with the pet giving up for this reason */
-    private static boolean endedWith(AbstractPet pet, ResourceLocation errand, String reason) {
-        return pet.getMind().log().entries().stream().anyMatch(entry -> entry instanceof DecisionLog.Ended ended
-            && ended.errand().equals(errand) && ended.outcome() instanceof Outcome.GaveUp gaveUp && gaveUp.reason().equals(reason));
+    /** @return what the pet is on, for a case to say what it found */
+    private static String doing(AbstractPet pet) {
+        return pet.getIntent().map(ResourceLocation::getPath).orElse("nothing");
+    }
+
+    /** @return how many times the pet has gone over to ask another to play and been told no */
+    private static long timesTurnedDown(AbstractPet pet) {
+        return pet.getMind().log().entries().stream().filter(entry -> entry instanceof DecisionLog.Ended ended
+            && ended.errand().equals(ErrandIds.SOCIALIZE) && ended.outcome() instanceof Outcome.GaveUp gaveUp
+            && gaveUp.reason().equals("declined")).count();
     }
 
     private static boolean coolingDown(AbstractPet pet, ResourceLocation id, AbstractPet other, GameTestHelper helper) {
