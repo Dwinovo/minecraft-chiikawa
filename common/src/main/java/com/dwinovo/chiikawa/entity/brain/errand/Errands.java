@@ -1,30 +1,27 @@
 package com.dwinovo.chiikawa.entity.brain.errand;
 
 import com.dwinovo.chiikawa.entity.brain.errand.impl.AnswerWhistleErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.BlockWorkErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.CheckResultsErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.CombatErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.ConstantErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.CooperateErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.DeliverErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.FollowOwnerErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.GiftOwnerErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.PickUpItemErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.PlayMusicErrand;
-import com.dwinovo.chiikawa.entity.brain.errand.impl.Requirement;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.ShopErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.SocializeErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.TakeExamErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.TakePhotoErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.TakeTaskErrand;
-import com.dwinovo.chiikawa.entity.brain.errand.impl.TargetErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
-import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.init.InitActivity;
-import com.dwinovo.chiikawa.task.PetWorkCounters;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.schedule.Activity;
 import org.jetbrains.annotations.Nullable;
@@ -63,19 +60,11 @@ public final class Errands {
     );
 
     static {
-        register(new TargetErrand<>(ErrandIds.HARVEST, ErrandCategory.WORK, ErrandTunings.BlockWork.CODEC,
-            () -> InitActivity.FARMER_HARVEST.get(), PerceivedTargets::harvest, "no_crop", List.of(), Optional.empty()));
-        register(new TargetErrand<>(ErrandIds.PLANT, ErrandCategory.WORK, ErrandTunings.BlockWork.CODEC,
-            () -> InitActivity.FARMER_PLANT.get(), PerceivedTargets::plant, "no_farmland", List.of(), Optional.empty()));
-        register(new TargetErrand<>(ErrandIds.DELIVER, ErrandCategory.WORK, ErrandTunings.Deliver.CODEC,
-            () -> InitActivity.DELEVER.get(), PerceivedTargets::container, "no_container", List.of(), Optional.empty()));
-        register(new TargetErrand<>(ErrandIds.WEED, ErrandCategory.FORAGE, ErrandTunings.BlockWork.CODEC,
-            () -> InitActivity.WEED.get(), PerceivedTargets::weed, "no_weed",
-            List.of(Requirement.wildOrCarrying(PetWorkCounters.WEED)), Optional.of(PetWorkCounters.WEED)));
-        register(new TargetErrand<>(ErrandIds.PICK_MUSHROOM, ErrandCategory.FORAGE, ErrandTunings.BlockWork.CODEC,
-            () -> InitActivity.PICK_MUSHROOM.get(), PerceivedTargets::mushroom, "no_mushroom",
-            List.of(Requirement.wildOrCarrying(PetWorkCounters.PICK_MUSHROOM), Requirement.AT_NIGHT),
-            Optional.of(PetWorkCounters.PICK_MUSHROOM)));
+        register(BlockWorkErrand.harvesting());
+        register(BlockWorkErrand.planting());
+        register(new DeliverErrand());
+        register(BlockWorkErrand.weeding());
+        register(BlockWorkErrand.pickingMushrooms());
         register(new CombatErrand<>(ErrandIds.MELEE, ErrandTunings.Footwork.CODEC, () -> InitActivity.FENCER_FIGHT.get(), false));
         register(new CombatErrand<>(ErrandIds.RANGED, ErrandTunings.Ranged.CODEC, () -> InitActivity.ARCHER_SHOOT.get(), true));
         register(new PlayMusicErrand());
