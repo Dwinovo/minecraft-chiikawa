@@ -62,7 +62,7 @@ public final class LivePetView implements PetView {
     private final Lazy<Boolean> hasArrows;
     private final Lazy<Boolean> hasPlayableSelection;
     private final Lazy<Boolean> playingMusic;
-    private final Lazy<Optional<GlobalPos>> examDesk;
+    private final Lazy<Optional<PetExams.Summons>> examToSit;
     private final Lazy<Optional<GlobalPos>> resultsDesk;
     private final Lazy<Boolean> seatedAtExam;
     private final Lazy<Optional<GlobalPos>> whistleHeard;
@@ -97,9 +97,8 @@ public final class LivePetView implements PetView {
         this.hasArrows = new Lazy<>(() -> !Utils.getArrow(pet).isEmpty());
         this.hasPlayableSelection = new Lazy<>(() -> PlayMusicBehavior.playableSelection(pet).isPresent());
         this.playingMusic = new Lazy<>(() -> pet.getActivity() == PetActivity.PLAY_GUITAR);
-        this.examDesk = new Lazy<>(() -> PetExams.toSit(pet)
-            .map(PetExams.Summons::desk)
-            .filter(desk -> ExamDeskBlockEntity.at(level, desk).isPresent()));
+        this.examToSit = new Lazy<>(() -> PetExams.toSit(pet)
+            .filter(summons -> ExamDeskBlockEntity.at(level, summons.desk()).isPresent()));
         this.resultsDesk = new Lazy<>(() -> PetExams.resultsDesk(pet)
             .filter(desk -> ExamDeskBlockEntity.at(level, desk).isPresent()));
         this.seatedAtExam = new Lazy<>(() -> PetExams.seatedAtExam(pet));
@@ -220,8 +219,8 @@ public final class LivePetView implements PetView {
     }
 
     @Override
-    public Optional<GlobalPos> examDesk() {
-        return examDesk.get();
+    public Optional<PetExams.Summons> examToSit() {
+        return examToSit.get();
     }
 
     @Override
