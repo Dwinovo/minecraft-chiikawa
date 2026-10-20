@@ -126,6 +126,15 @@ public record ErrandSettings<T>(int priority, float score, int maxTicks, Rests r
         return Optional.empty();
     }
 
+    /**
+     * @param type the errand these are the settings of
+     * @return what is wrong with them that only the errand can tell, or nothing
+     */
+    @SuppressWarnings("unchecked")
+    public Optional<String> problemFor(ErrandType<?, ?> type) {
+        return ((ErrandType<?, T>) type).problem(this);
+    }
+
     private static volatile Map<ResourceLocation, ErrandSettings<?>> byErrand = Collections.emptyMap();
     private static final Set<ResourceLocation> REPORTED = ConcurrentHashMap.newKeySet();
 

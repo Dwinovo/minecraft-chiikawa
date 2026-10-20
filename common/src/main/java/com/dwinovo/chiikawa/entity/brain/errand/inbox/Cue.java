@@ -19,4 +19,8 @@ public sealed interface Cue {
      */
     record Pose(UUID photographer, int lookTicks, String gesture, VoiceMoment line) implements Cue {
     }
+
+    /** The pet has just been paid for a slip: it sparkles, looks pleased and says something. */
+    record Paid() implements Cue {
+    }
 }
