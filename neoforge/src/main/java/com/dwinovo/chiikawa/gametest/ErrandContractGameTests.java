@@ -7,7 +7,6 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.data.ErrandSettingsData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
-import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandType;
 import com.dwinovo.chiikawa.entity.brain.errand.Errands;
@@ -77,8 +76,8 @@ public final class ErrandContractGameTests {
     private static final int INTERRUPT_CASE_TICKS = 2400;
     private static final int PURITY_CASE_TICKS = 200;
 
-    /** The errands still carried out by an old activity, which have no cases here yet. */
-    private static final Set<ResourceLocation> LEGACY = Set.of(ErrandIds.ANSWER_WHISTLE);
+    /** The errands still carried out by an old activity, which have no cases here yet: none, and the check stays until the scaffolding goes. */
+    private static final Set<ResourceLocation> LEGACY = Set.of();
 
     /**
      * Where in an errand's routine a pet is cut short. The first is as soon as the pet is seen on the errand at all,

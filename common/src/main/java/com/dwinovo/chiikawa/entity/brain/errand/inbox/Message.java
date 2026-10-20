@@ -67,7 +67,8 @@ public sealed interface Message {
     }
 
     /**
-     * The pet was taken somewhere without walking there.
+     * The pet was taken somewhere without walking there: where it was heading, what it was looking at and what it was
+     * doing are no longer so, and it decides again from where it is.
      *
      * @param cause what took it, as a short key for the log
      */
@@ -75,16 +76,19 @@ public sealed interface Message {
     }
 
     /**
-     * The owner's whistle, to a pet of theirs.
+     * The owner's whistle, to a pet of theirs. The pet picks a wait of its own up to the longest, so that a yard does not
+     * move as one, and takes the order when that is over: it is then told to do it as the owner could tell it. The
+     * order is saved state only once it is taken, so it is not a {@link Durable} message: a pet that is unloaded within its
+     * wait never hears it, as the whistle was never kept for a pet that was not there.
      *
      * @param order what the pet is told to do
-     * @param maxDelay the longest the pet waits before it answers, in ticks; it picks its own
+     * @param maxDelay the longest the pet waits before it answers, in ticks
      */
     record WhistleOrder(PetDirective order, int maxDelay) implements Message {
     }
 
     /**
-     * A whistle a wild pet heard.
+     * A whistle a wild pet heard. What it makes of it is not saved: it is curious for a while and then it is not.
      *
      * @param where the blower, as they stood when they blew
      * @param from the game time the pet sets off for it
