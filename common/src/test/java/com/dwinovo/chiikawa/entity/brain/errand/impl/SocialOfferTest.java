@@ -9,6 +9,9 @@ import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
+import com.dwinovo.chiikawa.entity.brain.errand.Plan;
+import com.dwinovo.chiikawa.social.SocialCooldowns;
+import com.dwinovo.chiikawa.testing.TestScenes;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.testing.TestErrands;
 import com.dwinovo.chiikawa.testing.TestView;
@@ -67,6 +70,30 @@ class SocialOfferTest {
         assertFalse(TestErrands.offers(ErrandIds.COOPERATE, TestView.at(OWNER, AT_HEEL).askedToPlay()).isEmpty());
         assertEquals("intent.chiikawa.fail.not_asked",
             TestErrands.whyNoOffer(ErrandIds.COOPERATE, TestView.at(OWNER, AT_HEEL)).reasonKey());
+    }
+
+    @Test
+    void aPetPlaysAlongOnlyWhileItIsStillWaitedFor() {
+        TestView asked = TestView.at(OWNER, AT_HEEL).askedToPlay();
+        Plan plan = TestErrands.planOf(ErrandIds.COOPERATE, asked);
+
+        assertTrue(TestErrands.stillWanted(ErrandIds.COOPERATE, plan, asked).ok());
+        assertEquals("intent.chiikawa.fail.not_asked",
+            TestErrands.stillWanted(ErrandIds.COOPERATE, plan, TestView.at(OWNER, AT_HEEL)).reasonKey(),
+            "the pet that asked has stopped waiting");
+    }
+
+    @Test
+    void eachSideRestsOnTheSceneWithTheOtherPet() {
+        TestView idea = partnerAt(10);
+        TestView asked = TestView.at(OWNER, AT_HEEL).askedToPlay();
+
+        assertEquals(Optional.of(SocialCooldowns.subject(TestScenes.SCENE, TestScenes.PARTNER)),
+            TestErrands.planOf(ErrandIds.SOCIALIZE, idea).subject());
+        assertEquals(Optional.of(SocialCooldowns.subject(TestScenes.SCENE, TestScenes.PARTNER)),
+            TestErrands.planOf(ErrandIds.COOPERATE, asked).subject());
+        assertEquals(Optional.of(TestScenes.SCENE), TestErrands.planOf(ErrandIds.SOCIALIZE, idea).restKey());
+        assertEquals(Optional.of(TestScenes.SCENE), TestErrands.planOf(ErrandIds.COOPERATE, asked).restKey());
     }
 
     @Test
