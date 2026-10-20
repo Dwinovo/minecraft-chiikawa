@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.camera;
 
 import com.dwinovo.chiikawa.entity.brain.errand.Check;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -8,21 +9,24 @@ import java.util.Optional;
  * reads is: who it is, what it carries, how its owner is, and what there is to take a photo
  * of. Made by {@link PhotoScout}, read by the errand, and tried without a world.
  *
+ * <p>Whether the pet is resting from photos is not here: that is the rest ledger's to say.
+ *
  * @param photographer whether this kind of pet takes photos at all
  * @param camera the settings of the camera it carries, if it carries one
  * @param hasFilm whether it has film for that camera
  * @param ownerInRange whether its owner is in its world and near enough for their game to draw what it sees
  * @param ownerCalm whether its owner is in no state for it: not hurt just now, riding, or flying, where the
  *                  game that has to draw the picture is working hard enough already
- * @param coolingDown whether it took a photo, or tried to, a moment ago
- * @param plan what it has chosen to take a photo of: a plan it already has, or one drawn from the
- *             moments there are by what it fancies
+ * @param moments the photos there is a good moment for now, one of each kind, whatever the pet fancies
  */
 public record PhotoOutlook(boolean photographer, Optional<CameraSettings> camera, boolean hasFilm,
-                           boolean ownerInRange, boolean ownerCalm, boolean coolingDown, Optional<PhotoPlan> plan) {
+                           boolean ownerInRange, boolean ownerCalm, List<PhotoPlan> moments) {
     /** What a pet that takes no photos has. */
-    public static final PhotoOutlook NONE = new PhotoOutlook(false, Optional.empty(), false, false, false, false,
-        Optional.empty());
+    public static final PhotoOutlook NONE = new PhotoOutlook(false, Optional.empty(), false, false, false, List.of());
+
+    public PhotoOutlook {
+        moments = List.copyOf(moments);
+    }
 
     /** Whether it may set about taking a photo. */
     public Check canStart() {
@@ -30,13 +34,12 @@ public record PhotoOutlook(boolean photographer, Optional<CameraSettings> camera
         if (!able.ok()) {
             return able;
         }
-        return plan.isEmpty() ? Check.fail("nothing_to_shoot") : Check.OK;
+        return fancied().isEmpty() ? Check.fail("nothing_to_shoot") : Check.OK;
     }
 
     /**
      * Whether it may carry on with one. The moment may pass while it aims, which is no reason
-     * to put the camera away mid-shot; the rest it takes once the shutter has gone is what
-     * ends it, so a pet is not left holding up a camera with nothing to do.
+     * to put the camera away mid-shot.
      */
     public Check canContinue() {
         if (!photographer) {
@@ -51,9 +54,12 @@ public record PhotoOutlook(boolean photographer, Optional<CameraSettings> camera
         if (!ownerInRange) {
             return Check.fail("owner_far");
         }
-        if (!ownerCalm) {
-            return Check.fail("owner_busy");
-        }
-        return coolingDown ? Check.fail("photo_resting") : Check.OK;
+        return ownerCalm ? Check.OK : Check.fail("owner_busy");
+    }
+
+    /** @return the moments of a kind the pet fancies taking at all, which are the ones it may choose among */
+    public List<PhotoPlan> fancied() {
+        return camera.map(settings -> moments.stream().filter(moment -> settings.subjects().weight(moment.kind()) > 0).toList())
+            .orElse(List.of());
     }
 }

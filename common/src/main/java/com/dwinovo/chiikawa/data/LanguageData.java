@@ -223,7 +223,7 @@ public final class LanguageData {
             addCameraTranslations(adder, "小八的相机", "放进小八的背包，有胶卷的时候它会自己找时机拍照", "胶卷",
                 "一卷拍几张照片，拍满了小八会送给你；右键看拍了什么。放进带着相机的小八的背包");
             addPhotoIntentTranslations(adder, "拍照", "只有小八会拍照", "背包里没有相机", "背包里没有胶卷", "主人离得太远",
-                "主人现在顾不上", "刚拍过，歇一会儿", "现在没有想拍的");
+                "主人现在顾不上", "现在没有想拍的");
         } else if ("ja_jp".equals(locale)) {
             addCommonTranslations(adder, "ちいかわ", "持ち物", "ついてくる", "おすわり", "自由行動");
             addDollTooltipTranslations(adder, "ぬいぐるみをケーキに置いてみる？");
@@ -433,7 +433,7 @@ public final class LanguageData {
             addCameraTranslations(adder, "ハチワレのカメラ", "ハチワレのリュックに入れると、フィルムがあれば自分でシャッターチャンスを探します", "フィルム",
                 "1本で何枚か撮れて、いっぱいになるとハチワレが渡してくれます。右クリックで写真を見られます。カメラを持ったハチワレのリュックに入れてください");
             addPhotoIntentTranslations(adder, "写真を撮る", "写真を撮るのはハチワレだけ", "リュックにカメラがない", "リュックにフィルムがない",
-                "飼い主が遠すぎる", "飼い主が忙しそう", "さっき撮ったばかり", "撮りたいものがない");
+                "飼い主が遠すぎる", "飼い主が忙しそう", "撮りたいものがない");
         } else if ("pt_br".equals(locale)) {
             addCommonTranslations(adder, "Chiikawa", "Mochila do Pet", "Seguir", "Sentar", "Livre");
             addDollTooltipTranslations(adder, "Que tal colocar a pelúcia em cima de um bolo?");
@@ -648,7 +648,7 @@ public final class LanguageData {
             addCameraTranslations(adder, "A Câmera do Hachiware", "Coloque na mochila do Hachiware com um pouco de filme para que procure bons momentos para tirar fotos", "Filme",
                 "Um rolo tem várias fotos, e o Hachiware entrega o rolo a você quando ele estiver cheio; clique com o botão direito para ver as fotos. Coloque na mochila de um Hachiware que tenha uma câmera");
             addPhotoIntentTranslations(adder, "Tirar uma foto", "Só o Hachiware tira fotos", "Sem câmera na mochila",
-                "Sem filme na mochila", "O dono está longe demais", "O dono está ocupado", "Acabou de tirar uma, descansando",
+                "Sem filme na mochila", "O dono está longe demais", "O dono está ocupado",
                 "Nada que valha uma foto agora");
         } else if ("ko_kr".equals(locale)) {
             addCommonTranslations(adder, "치이카와", "가방", "따라오기", "앉아", "자유 행동");
@@ -860,7 +860,7 @@ public final class LanguageData {
             addCameraTranslations(adder, "하치와레의 카메라", "필름과 함께 하치와레의 가방에 넣으면 사진 찍기 좋은 순간을 알아서 찾아", "필름",
                 "한 롤에 여러 장을 찍을 수 있고, 다 차면 하치와레가 롤을 건네줘. 우클릭하면 사진을 볼 수 있어. 카메라를 가진 하치와레의 가방에 넣어 줘");
             addPhotoIntentTranslations(adder, "사진 찍기", "사진은 하치와레만 찍어", "가방에 카메라가 없어", "가방에 필름이 없어",
-                "주인이 너무 멀리 있어", "주인이 바빠 보여", "방금 찍어서 쉬는 중이야", "지금은 찍을 만한 게 없어");
+                "주인이 너무 멀리 있어", "주인이 바빠 보여", "지금은 찍을 만한 게 없어");
         } else {
             addCommonTranslations(adder, "Chiikawa", "Pet Backpack", "Follow", "Sit", "Free Roam");
             addDollTooltipTranslations(adder, "Try placing the doll on a cake?");
@@ -1075,7 +1075,7 @@ public final class LanguageData {
             addCameraTranslations(adder, "Hachiware's Camera", "Put it in Hachiware's backpack with some film, and it will look for good moments to take photos", "Film",
                 "A roll holds several shots, and Hachiware gives you the roll once it is full; right-click to look through it. Put it in the backpack of a Hachiware that has a camera");
             addPhotoIntentTranslations(adder, "Take a photo", "Only Hachiware takes photos", "No camera in its backpack",
-                "No film in its backpack", "Its owner is too far away", "Its owner is busy", "Just took one, resting",
+                "No film in its backpack", "Its owner is too far away", "Its owner is busy",
                 "Nothing worth a photo right now");
         }
     }
@@ -1120,14 +1120,13 @@ public final class LanguageData {
 
     /** Taking photos as an intent: its name, and why a pet is not taking one, for the debug command. */
     private static void addPhotoIntentTranslations(Adder adder, String name, String notPhotographer, String noCamera,
-            String noFilm, String ownerFar, String ownerBusy, String resting, String nothingToShoot) {
+            String noFilm, String ownerFar, String ownerBusy, String nothingToShoot) {
         adder.add("intent.chiikawa.take_photo", name);
         adder.add("intent.chiikawa.fail.not_photographer", notPhotographer);
         adder.add("intent.chiikawa.fail.no_camera", noCamera);
         adder.add("intent.chiikawa.fail.no_film", noFilm);
         adder.add("intent.chiikawa.fail.owner_far", ownerFar);
         adder.add("intent.chiikawa.fail.owner_busy", ownerBusy);
-        adder.add("intent.chiikawa.fail.photo_resting", resting);
         adder.add("intent.chiikawa.fail.nothing_to_shoot", nothingToShoot);
     }
 
