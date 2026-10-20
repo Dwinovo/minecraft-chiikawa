@@ -7,6 +7,7 @@ import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.task.PetTask;
 import java.util.Optional;
+import java.util.UUID;
 import net.minecraft.core.GlobalPos;
 
 /**
@@ -100,4 +101,11 @@ public interface PetView {
 
     /** @return whether the pet could take a photo now, and of what */
     PhotoOutlook photo();
+
+    /**
+     * @param item the id of an item the pet means to pick up
+     * @return that item, while it is still there and still one the pets pick up; asked afresh of the world each time, not
+     *         taken from what the sensor remembers, which may be a few ticks behind
+     */
+    Optional<PickableItem> pickable(UUID item);
 }

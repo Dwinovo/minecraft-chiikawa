@@ -10,7 +10,7 @@ import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * The generated errand settings, by the id of the errand: how much each matters, how a pet goes about
@@ -36,7 +36,7 @@ public final class ErrandSettingsData {
     }
 
     /** @return settings by errand id */
-    public static Map<ResourceLocation, ErrandSettings<?>> all() {
+    public static Map<Identifier, ErrandSettings<?>> all() {
         // A crop or a chest a pet could not get to is left alone for ten seconds.
         Rests blockWork = Rests.of(NONE, RestSpec.ticksPerSubject(200), NONE);
         ErrandTunings.BlockWork blockWorkTuning = new ErrandTunings.BlockWork(0.8F, 3.0);
@@ -50,7 +50,7 @@ public final class ErrandSettingsData {
             entry(ErrandIds.STAY, errand(10, 1.0F, A_DAY, giveUp(20), ErrandTunings.Untuned.NONE)),
             entry(ErrandIds.WANDER, errand(10, 0.05F, A_DAY, giveUp(20), new ErrandTunings.Wander(0.6F, 4, 10, 100, 0.6F))),
             entry(ErrandIds.PICK_UP_ITEM, errand(30, 0.4F, HALF_A_MINUTE,
-                Rests.of(NONE, RestSpec.ticksPerSubject(40), NONE), new ErrandTunings.PickUp(0.7F, 1.5))),
+                Rests.of(NONE, RestSpec.ticksPerSubject(40), NONE), new ErrandTunings.PickUp(0.7F, 1.5, 400, 100))),
             entry(ErrandIds.HARVEST, errand(50, 0.6F, HALF_A_MINUTE, blockWork, blockWorkTuning)),
             // The farmer's strict order: harvest, then plant, then deliver.
             entry(ErrandIds.PLANT, errand(50, 0.6F, HALF_A_MINUTE, blockWork, blockWorkTuning)
@@ -98,7 +98,7 @@ public final class ErrandSettingsData {
         return Rests.of(NONE, RestSpec.ticks(ticks), NONE);
     }
 
-    private static Map.Entry<ResourceLocation, ErrandSettings<?>> entry(ResourceLocation id, ErrandSettings<?> settings) {
+    private static Map.Entry<Identifier, ErrandSettings<?>> entry(Identifier id, ErrandSettings<?> settings) {
         return Map.entry(id, settings);
     }
 }
