@@ -15,6 +15,8 @@ import com.dwinovo.chiikawa.entity.brain.errand.decide.Decision;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionTrace;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.Permits;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.CheckResultsErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.TakeExamErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Cue;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Inbox;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.InvitationDesk;
@@ -28,10 +30,13 @@ import com.dwinovo.chiikawa.entity.brain.errand.step.LiveHandle;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.errand.view.LivePetView;
 import com.dwinovo.chiikawa.init.InitRegistry;
+import com.dwinovo.chiikawa.qualification.ExamStage;
+import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -208,8 +213,8 @@ public final class PetMind {
 
     /**
      * The first half of what a pet is told that has something to keep: applies what it makes durable, the rests
-     * it makes the pet take included, on the server thread, and leaves what is left of it to do at the pet's
-     * next tick.
+     * it makes the pet take and the changes to its licences included, on the server thread, and leaves what is
+     * left of it to do at the pet's next tick.
      */
     private Message.Settled keep(Message.Durable message) {
         MinecraftServer server = pet.level().getServer();
@@ -217,11 +222,20 @@ public final class PetMind {
             throw new IllegalStateException("Told " + message + " from another thread; hop onto the server's with execute first");
         }
         long now = pet.level().getGameTime();
-        switch (message) {
-            case Message.PhotoResult result -> rests.afterReport(ErrandIds.TAKE_PHOTO,
-                PhotoResults.received(pet, result), RestContext.of(result.camera()), now);
-        }
-        return new Message.Settled(message);
+        Message.Durable kept = switch (message) {
+            case Message.PhotoResult result -> {
+                rests.afterReport(ErrandIds.TAKE_PHOTO, PhotoResults.received(pet, result), RestContext.of(result.camera()), now);
+                yield result;
+            }
+            case Message.ExamCalledOff calledOff -> {
+                PetExams.excuse(pet, calledOff.id());
+                yield calledOff;
+            }
+            // A pet on its way to hear them at the desk hears them there, once it has read what is on it.
+            case Message.ResultsDue due -> new Message.ResultsDue(due.id(),
+                visitingResultsOf(due.id()) ? Optional.empty() : PetExams.grant(pet, due.id()));
+        };
+        return new Message.Settled(kept);
     }
 
     /** The second half of what a pet is told that has something to keep. */
@@ -229,7 +243,27 @@ public final class PetMind {
         switch (settled.message()) {
             // The photo errand may be holding the pose for it, and puts the camera away.
             case Message.PhotoResult result -> executor.deliver(result, now);
+            case Message.ExamCalledOff calledOff -> {
+                PetExams.tellCalledOff(pet, calledOff.id(), calledOff.reason());
+                // A pet at the paper of an exam that is off gets up from it.
+                errands.running().map(Running::plan)
+                    .filter(plan -> plan instanceof TakeExamErrand.Sitting sitting && sitting.qualification().equals(calledOff.id()))
+                    .ifPresent(plan -> executor.requestEnd(Outcome.interrupted("called_off")));
+                decideNow = true;
+            }
+            case Message.ResultsDue due -> {
+                due.heard().ifPresent(result -> PetExams.show(pet, due.id(), result));
+                decideNow = true;
+            }
         }
+    }
+
+    /** @return whether the pet is on its way to the desk the results of that exam are up at */
+    private boolean visitingResultsOf(ResourceLocation exam) {
+        Optional<GlobalPos> desk = pet.licences().get(exam).paper().map(ExamStage.Sat::desk);
+        return errands.running().map(Running::plan)
+            .filter(plan -> plan instanceof CheckResultsErrand.Visit visit && Optional.of(visit.desk()).equals(desk))
+            .isPresent();
     }
 
     private void decide(long now, String trigger) {
