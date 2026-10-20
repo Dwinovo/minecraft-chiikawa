@@ -56,6 +56,7 @@ public final class DataGenerators {
         event.getGenerator().addProvider(server, new AnchorSettingsProvider(output));
         event.getGenerator().addProvider(server, new PetSpawnProvider(output));
         event.getGenerator().addProvider(server, new PetInteractionProvider(output));
+        event.getGenerator().addProvider(server, new ErrandSettingsProvider(output));
         event.getGenerator().addProvider(server, new QualificationProvider(output));
         event.getGenerator().addProvider(server, new ModAdvancementProvider(output, lookupProvider));
         event.getGenerator().addProvider(server, new ModLootTableProvider(output, lookupProvider));
