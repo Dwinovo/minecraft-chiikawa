@@ -35,6 +35,12 @@ public interface Handle {
     OptionalInt blockedTicks();
 
     /**
+     * @return whether the pet is still on the walk it was sent on: the brain's mover lets go of it when the pet has
+     *         arrived, when it finds no way, and when it has gone as far along a path as the path goes
+     */
+    boolean walking();
+
+    /**
      * @return whether the brain's mover can look for a way just now, which it cannot from the air: a pet in a hop or a
      *         fall finds no path to anywhere, and says so
      */

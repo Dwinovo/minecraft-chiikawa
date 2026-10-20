@@ -54,6 +54,11 @@ public final class FakeHandle implements Handle {
     }
 
     @Override
+    public boolean walking() {
+        return true;
+    }
+
+    @Override
     public boolean canFindWay() {
         return true;
     }
