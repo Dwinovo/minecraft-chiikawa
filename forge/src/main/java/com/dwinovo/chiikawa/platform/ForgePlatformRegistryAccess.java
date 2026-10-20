@@ -51,10 +51,6 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
     private static final RegistryObject<SensorType<PetSocialSensor>> PET_SOCIAL_SENSOR =
         SENSOR_TYPES.register("pet_social_sensor", () -> new SensorType<>(PetSocialSensor::new));
 
-    private static final RegistryObject<Activity> SOCIALIZE =
-        ACTIVITIES.register("socialize", () -> new Activity(PetActivities.name("socialize")));
-    private static final RegistryObject<Activity> COOPERATE =
-        ACTIVITIES.register("cooperate", () -> new Activity(PetActivities.name("cooperate")));
     private static final RegistryObject<Activity> ANSWER_WHISTLE =
         ACTIVITIES.register("answer_whistle", () -> new Activity(PetActivities.name("answer_whistle")));
 
@@ -103,16 +99,6 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
     @Override
     public Supplier<SensorType<PetSocialSensor>> petSocialSensor() {
         return PET_SOCIAL_SENSOR;
-    }
-
-    @Override
-    public Supplier<Activity> socializeActivity() {
-        return SOCIALIZE;
-    }
-
-    @Override
-    public Supplier<Activity> cooperateActivity() {
-        return COOPERATE;
     }
 
     @Override
