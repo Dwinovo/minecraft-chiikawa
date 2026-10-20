@@ -13,11 +13,12 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
  * whatever the directive; errands decide whether to act on them.
  *
  * <p>The blocks of work the farmer sensor remembers are shown only while they still are what they were
- * remembered as, as an item is only while it is lying there: the sensor looks again every second, and a pet
- * that has just reaped a crop is not to set off for it once more in the meantime.
+ * remembered as, as an item is only while it is lying there and a foe only while it is alive and the pet's to fight:
+ * the sensors look again every second or less, and a pet that has just reaped a crop is not to set off for it once
+ * more in the meantime.
  */
 public record PerceivedTargets(
-    Optional<GlobalPos> attackTarget,
+    Optional<AttackTarget> attackTarget,
     Optional<GlobalPos> harvest,
     Optional<GlobalPos> plant,
     Optional<GlobalPos> container,
@@ -31,8 +32,7 @@ public record PerceivedTargets(
     public static PerceivedTargets capture(AbstractPet pet) {
         Brain<AbstractPet> brain = pet.getBrain();
         return new PerceivedTargets(
-            brain.getMemory(MemoryModuleType.ATTACK_TARGET)
-                .map(target -> GlobalPos.of(target.level().dimension(), target.blockPosition())),
+            brain.getMemory(MemoryModuleType.ATTACK_TARGET).flatMap(foe -> AttackTarget.of(pet, foe)),
             FarmTarget.HARVEST.seenBy(pet),
             FarmTarget.PLANT.seenBy(pet),
             FarmTarget.DELIVER.seenBy(pet),
