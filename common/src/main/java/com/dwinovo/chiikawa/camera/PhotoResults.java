@@ -20,6 +20,8 @@ import net.minecraft.resources.ResourceLocation;
  * the pet's own idea of when to give one is what sees to it.
  */
 public final class PhotoResults {
+    /** The report of a shutter that has gone, as the errand's settings name it: the picture is now being waited for. */
+    public static final String TAKEN = "taken";
     /** The report of a photo that was kept, as the errand's settings name it. */
     public static final String STORED = "stored";
     /** The report of a photo that was not, likewise. */
