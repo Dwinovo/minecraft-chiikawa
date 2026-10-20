@@ -44,12 +44,6 @@ public final class InitActivity {
     // Playing along while another pet comes over.
     public static final Supplier<Activity> COOPERATE =
         Services.PLATFORM_REGISTRY.cooperateActivity();
-    // Sitting a licence exam at a labor board.
-    public static final Supplier<Activity> TAKE_EXAM =
-        Services.PLATFORM_REGISTRY.takeExamActivity();
-    // Going to a labor board to see the exam results.
-    public static final Supplier<Activity> CHECK_RESULTS =
-        Services.PLATFORM_REGISTRY.checkResultsActivity();
 
     // A wild pet going over to see who whistled.
     public static final Supplier<Activity> ANSWER_WHISTLE =
