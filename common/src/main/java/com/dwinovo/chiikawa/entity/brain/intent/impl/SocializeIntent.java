@@ -21,8 +21,6 @@ import net.minecraft.world.entity.schedule.Activity;
  * the leash: a pet at heel only plays with pets around its owner's feet.
  */
 public final class SocializeIntent implements PetIntent {
-    private static final float SCORE = 0.35F;
-
     @Override
     public ResourceLocation id() {
         return PetIntents.SOCIALIZE;
@@ -46,10 +44,5 @@ public final class SocializeIntent implements PetIntent {
     @Override
     public Optional<GlobalPos> destination(IntentContext ctx) {
         return ctx.socialPartner();
-    }
-
-    @Override
-    public float score(IntentContext ctx) {
-        return SCORE;
     }
 }
