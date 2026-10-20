@@ -51,8 +51,8 @@ import org.jetbrains.annotations.Nullable;
  * <p>Every {@link #DECISION_INTERVAL} ticks (staggered by entity id), right after the pet is told
  * something that may change its mind, or whenever it is on no errand, it ends the errand it is on if
  * its capability no longer offers it, its directive no longer permits it, it no longer wants to go on
- * or what it heads for is out of the leash, then looks at the generic errands plus those of its
- * capability. A pet goes on with what it is doing unless an errand of a strictly higher priority can
+ * or what it heads for is out of the leash (the pet itself, for an errand that heads nowhere), then looks
+ * at the generic errands plus those of its capability. A pet goes on with what it is doing unless an errand of a strictly higher priority can
  * start; otherwise it starts the best of the highest priority there is. How much each matters is
  * data, see {@link ErrandSettings}.
  *

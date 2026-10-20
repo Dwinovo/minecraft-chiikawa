@@ -63,7 +63,7 @@ public final class LanguageData {
                 "把 MP3 / WAV 文件放入文件夹后点击刷新", "部分歌曲导入失败", "请使用 MP3 格式的音频", "打开文件夹", "刷新", "上一页", "下一页");
             addMusicBoxModeTranslations(adder, "播放模式：%s", "单次播放", "列表循环", "随机播放", "单曲循环");
             addIntentFailureTranslations(adder, "无法跟随主人", "主人就在附近", "没什么可做的", "目标不在范围内",
-                "目标离开了活动范围", "附近没有可拾取的物品", "没有可收割的作物", "没有可种植的耕地", "没有可存放的容器",
+                "目标离开了活动范围", "已离开活动范围", "附近没有可拾取的物品", "没有可收割的作物", "没有可种植的耕地", "没有可存放的容器",
                 "没有攻击目标", "攻击冷却中", "没有箭", "没有新的曲子可演奏", "先做更要紧的活",
                 "附近没有野草", "附近没有蘑菇", "要领到对应的工作牌才会做", "只在夜里做",
                 "已经带着一张工作牌", "附近的公告板没有合适的工作牌",
@@ -272,7 +272,7 @@ public final class LanguageData {
                 "MP3・WAVファイルをフォルダに入れて、更新を押してください", "一部の曲を読み込めませんでした", "MP3形式の音声を使ってください", "フォルダを開く", "更新", "前のページ", "次のページ");
             addMusicBoxModeTranslations(adder, "再生モード：%s", "1回だけ再生", "全曲リピート", "シャッフル再生", "1曲リピート");
             addIntentFailureTranslations(adder, "飼い主についていけない", "飼い主がすぐ近くにいる", "することがない", "目標が届かないところにいる",
-                "目標が行動範囲の外に出た", "近くに拾えるアイテムがない", "収穫できる作物がない", "種をまける耕地がない", "しまえる入れ物がない",
+                "目標が行動範囲の外に出た", "行動範囲の外に出た", "近くに拾えるアイテムがない", "収穫できる作物がない", "種をまける耕地がない", "しまえる入れ物がない",
                 "攻撃する相手がいない", "攻撃のクールダウン中", "矢がない", "新しく演奏できる曲がない",
                 "もっと大事なことが先", "近くに雑草がない", "近くにキノコがない",
                 "合うお仕事カードを取ったときだけやる", "夜だけやる",
@@ -482,7 +482,7 @@ public final class LanguageData {
                 "Coloque arquivos MP3 / WAV na pasta e depois recarregue", "Algumas músicas não puderam ser importadas", "Use arquivos de áudio MP3", "Abrir Pasta", "Recarregar", "Página anterior", "Próxima página");
             addMusicBoxModeTranslations(adder, "Reprodução: %s", "Tocar uma vez", "Repetir tudo", "Aleatório", "Repetir uma");
             addIntentFailureTranslations(adder, "Não consegue seguir o dono", "O dono está por perto", "Nada para fazer", "O alvo está fora de alcance",
-                "O alvo saiu da área permitida", "Nenhum item para pegar", "Nenhuma plantação para colher", "Nenhuma terra arada para plantar", "Nenhum recipiente para entregar",
+                "O alvo saiu da área permitida", "Saiu da área permitida", "Nenhum item para pegar", "Nenhuma plantação para colher", "Nenhuma terra arada para plantar", "Nenhum recipiente para entregar",
                 "Nenhum alvo para atacar", "O ataque está recarregando", "Sem flechas", "Nenhuma música nova para tocar",
                 "Algo mais urgente vem primeiro", "Sem ervas daninhas por perto", "Sem cogumelos por perto",
                 "Só com uma ficha compatível", "Só se faz à noite",
@@ -698,7 +698,7 @@ public final class LanguageData {
                 "폴더에 MP3 / WAV를 넣고 새로고침해", "일부 곡을 가져오지 못했어", "MP3 파일을 써 줘", "폴더 열기", "새로고침", "이전 페이지", "다음 페이지");
             addMusicBoxModeTranslations(adder, "재생: %s", "한 번 재생", "목록 반복", "무작위", "한 곡 반복");
             addIntentFailureTranslations(adder, "주인을 따라갈 수 없어", "주인이 바로 옆에 있어", "할 일이 없어", "목표가 범위 밖이야",
-                "목표가 활동 범위를 벗어났어", "주울 물건이 없어", "수확할 작물이 없어", "심을 밭이 없어", "넣을 상자가 없어",
+                "목표가 활동 범위를 벗어났어", "활동 범위를 벗어났어", "주울 물건이 없어", "수확할 작물이 없어", "심을 밭이 없어", "넣을 상자가 없어",
                 "공격할 대상이 없어", "공격 대기 중이야", "화살이 없어", "새로 연주할 곡이 없어", "더 급한 일이 먼저야",
                 "근처에 잡초가 없어", "근처에 버섯이 없어", "맞는 전표를 받아야 해", "밤에만 해",
                 "이미 전표를 들고 있어", "근처 게시판에 맞는 전표가 없어",
@@ -909,7 +909,7 @@ public final class LanguageData {
                 "Put MP3 / WAV files in the folder, then reload", "Some songs failed to import", "Please use MP3 audio files", "Open Folder", "Reload", "Previous page", "Next page");
             addMusicBoxModeTranslations(adder, "Playback: %s", "Play once", "Repeat all", "Shuffle", "Repeat one");
             addIntentFailureTranslations(adder, "Can't follow the owner", "Owner is close by", "Nothing to do", "Target is out of range",
-                "Target left the allowed area", "No item to pick up", "No crop to harvest", "No farmland to plant", "No container to deliver to",
+                "Target left the allowed area", "Left the allowed area", "No item to pick up", "No crop to harvest", "No farmland to plant", "No container to deliver to",
                 "No target to attack", "Attack is cooling down", "No arrows", "No new song to play",
                 "Something more urgent comes first", "No weeds nearby", "No mushrooms nearby",
                 "Only with a matching slip", "Only done at night",
@@ -1167,6 +1167,7 @@ public final class LanguageData {
         String nothingToDo,
         String outOfReach,
         String outOfLeash,
+        String leftArea,
         String noItem,
         String noCrop,
         String noFarmland,
@@ -1190,6 +1191,7 @@ public final class LanguageData {
         adder.add("intent.chiikawa.fail.nothing_to_do", nothingToDo);
         adder.add("intent.chiikawa.fail.out_of_reach", outOfReach);
         adder.add("intent.chiikawa.fail.out_of_leash", outOfLeash);
+        adder.add("intent.chiikawa.fail.left_area", leftArea);
         adder.add("intent.chiikawa.fail.no_item", noItem);
         adder.add("intent.chiikawa.fail.no_crop", noCrop);
         adder.add("intent.chiikawa.fail.no_farmland", noFarmland);
