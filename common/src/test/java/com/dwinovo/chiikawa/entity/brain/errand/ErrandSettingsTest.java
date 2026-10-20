@@ -26,9 +26,10 @@ import org.junit.jupiter.api.Test;
 class ErrandSettingsTest {
     private static final String PHOTO = """
         { "priority": 40, "score": 0.45, "max_ticks": 1200, "yields_to": [], "overlays": [],
-          "rests": { "done": { "from": "chiikawa:photo_upload_wait" }, "gave_up": { "from": "chiikawa:camera_retry" },
+          "rests": { "done": 0, "gave_up": { "from": "chiikawa:camera_retry" },
                      "interrupted": 0,
-                     "reports": { "stored": { "from": "chiikawa:camera_cooldown" }, "failed": { "from": "chiikawa:camera_retry" } } },
+                     "reports": { "taken": { "from": "chiikawa:photo_upload_wait" }, "stored": { "from": "chiikawa:camera_cooldown" },
+                                  "failed": { "from": "chiikawa:camera_retry" } } },
           "tuning": { "speed": 0.7, "stand_back": 4, "hold_ticks": 20, "look_back_ticks": 60, "view_distance": 16.0,
                       "max_walk_ticks": 400, "no_way_ticks": 100 } }""";
 
@@ -52,11 +53,11 @@ class ErrandSettingsTest {
         assertEquals(40, settings.priority());
         assertEquals(0.45F, settings.score());
         assertEquals(1200, settings.maxTicks());
-        assertEquals(RestSpec.from(RestSources.PHOTO_UPLOAD_WAIT), settings.rests().done());
+        assertEquals(RestSpec.NONE, settings.rests().done());
         assertEquals(RestSpec.from(RestSources.CAMERA_RETRY), settings.rests().gaveUp());
         assertEquals(RestSpec.NONE, settings.rests().interrupted());
-        assertEquals(Map.of("stored", RestSpec.from(RestSources.CAMERA_COOLDOWN), "failed", RestSpec.from(RestSources.CAMERA_RETRY)),
-            settings.rests().reports());
+        assertEquals(Map.of("taken", RestSpec.from(RestSources.PHOTO_UPLOAD_WAIT), "stored", RestSpec.from(RestSources.CAMERA_COOLDOWN),
+            "failed", RestSpec.from(RestSources.CAMERA_RETRY)), settings.rests().reports());
         assertEquals(new ErrandTunings.TakePhoto(0.7F, 4, 20, 60, 16.0, 400, 100), settings.tuning());
     }
 

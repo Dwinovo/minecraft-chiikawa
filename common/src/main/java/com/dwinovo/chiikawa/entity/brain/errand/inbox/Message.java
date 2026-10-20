@@ -14,8 +14,33 @@ import net.minecraft.world.item.ItemStack;
  * something, a photo came back. Each is a plain record of ids, numbers and positions, never of an
  * entity, so a message waiting in an inbox cannot keep a pet that has since gone from the world
  * alive; whoever handles it finds the pet again by its id, and finds it gone.
+ *
+ * <p>A message is read at the pet's next tick, and one that waits when the pet is removed from the world
+ * is lost with the inbox. So what a message makes durable, anything saved with the pet or the world such as a
+ * shot on its film roll, is not left to the tick: a {@link Durable} message is applied as it is told, and
+ * only what concerns deciding and the errand under way, a rest, a step's ending, a nudge, waits in the inbox
+ * as a {@link Settled} one. See {@code PetMind}.
  */
 public sealed interface Message {
+    /**
+     * A message with something to keep: it has effects that must outlive the inbox, which the pet's mind
+     * applies the moment it is told, on the server thread, and then queues what is left of it as {@link Settled}.
+     * Each kind is applied in one place, the mind's {@code keep}, which is the only writer of what it makes
+     * durable.
+     */
+    sealed interface Durable extends Message permits PhotoResult {
+    }
+
+    /**
+     * A {@link Durable} message after its durable effects were applied, which is the form the inbox holds:
+     * what is left for the next tick is to decide and to tell the errand under way.
+     *
+     * @param message what was told
+     * @param report what the durable part found, for the rest ledger to rest by, if it has something to say
+     */
+    record Settled(Durable message, Optional<String> report) implements Message {
+    }
+
     /**
      * Something may have changed that the pet should decide again about, such as being fed or paid.
      *
@@ -92,8 +117,11 @@ public sealed interface Message {
     record SlipCompleted(PetTask task) implements Message {
     }
 
-    /** What came back of a photo the pet asked its owner's game for. */
-    sealed interface PhotoResult extends Message {
+    /**
+     * What came back of a photo the pet asked its owner's game for. Its durable part is the shot on the
+     * film roll and the biome among those the pet has photographed, see {@code PhotoResults}.
+     */
+    sealed interface PhotoResult extends Durable {
         /** @return the camera item the photo was taken with, which the rest after it depends on */
         ResourceLocation camera();
 

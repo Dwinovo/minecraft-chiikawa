@@ -15,7 +15,9 @@ import com.dwinovo.chiikawa.camera.PhotoScout;
 import com.dwinovo.chiikawa.data.ShopCatalogData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
+import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
+import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitEntity;
@@ -27,6 +29,7 @@ import com.dwinovo.chiikawa.photo.PhotoChunk;
 import com.dwinovo.chiikawa.photo.PhotoData;
 import com.dwinovo.chiikawa.photo.PhotoRaster;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
+import com.dwinovo.chiikawa.photo.PhotoUploads;
 import com.dwinovo.chiikawa.photo.PhotoSystem;
 import com.dwinovo.chiikawa.shop.ShopBasket;
 import com.dwinovo.chiikawa.shop.Wallet;
@@ -46,6 +49,7 @@ import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestAssertException;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -166,6 +170,16 @@ public final class CameraGameTests {
         settle(level);
     }
 
+    @BeforeBatch(batch = "chiikawa_camera_cut_short")
+    public static void settleCutShort(ServerLevel level) {
+        settle(level);
+    }
+
+    @BeforeBatch(batch = "chiikawa_camera_unloaded")
+    public static void settleUnloaded(ServerLevel level) {
+        settle(level);
+    }
+
     /**
      * The world as every case here wants it, and the camera as the data pack has it: a case
      * that tries another camera does not leave it for the next.
@@ -236,6 +250,75 @@ public final class CameraGameTests {
             long rest = pet.getBrain().getTimeUntilExpiry(InitMemory.PHOTO_COOLDOWN.get());
             helper.assertTrue(rest > camera().cooldownTicks() - SETTLED_TICKS && rest <= camera().cooldownTicks(),
                 "Hachiware rests " + rest + " ticks from photos after it, not the camera's " + camera().cooldownTicks());
+        });
+    }
+
+    /**
+     * Cut short in the tick after the shutter, while the picture is still on its way, Hachiware rests for the
+     * wait for it all the same: it does not set off on another photo before the first is back.
+     */
+    @GameTest(template = "floor16", batch = "chiikawa_camera_cut_short", timeoutTicks = SHOT_TICKS + WAIT_TICKS)
+    public static void a_pet_cut_short_after_the_shutter_waits_for_the_picture_before_another(GameTestHelper helper) {
+        ServerPlayer owner = ownerAt(helper, new BlockPos(10, STAND, 10));
+        AbstractPet pet = photographer(helper, InitEntity.HACHIWARE_PET.get(), owner, true, true);
+        seenEveryView(pet);
+        PhotoSystem photos = PhotoSystem.of(helper.getLevel().getServer());
+        Set<UUID> asked = new HashSet<>();
+        long[] cutAt = {-1};
+
+        helper.onEachTick(() -> {
+            long now = helper.getLevel().getGameTime();
+            asked.addAll(photos.waiting());
+            if (cutAt[0] < 0 && !asked.isEmpty()) {
+                PetMind.post(pet, new Message.Moved("test"));
+                cutAt[0] = now;
+            }
+            if (cutAt[0] >= 0 && now - cutAt[0] >= RESTING_AFTER) {
+                // Rested for the wait from the shutter, which has run down by the ticks since.
+                long rest = pet.getBrain().getTimeUntilExpiry(InitMemory.PHOTO_COOLDOWN.get());
+                helper.assertTrue(rest > PhotoUploads.WAIT_TICKS - (now - cutAt[0]) - RESTING_AFTER,
+                    "Hachiware rests " + rest + " ticks from photos " + (now - cutAt[0]) + " ticks after the shutter");
+                helper.assertFalse(pet.getIntent().filter(ErrandIds.TAKE_PHOTO::equals).isPresent(),
+                    "Hachiware set off on another photo with the first still on its way");
+            }
+        });
+        helper.succeedWhen(() -> {
+            helper.assertTrue(cutAt[0] >= 0, "Hachiware never pressed the shutter");
+            helper.assertTrue(helper.getLevel().getGameTime() - cutAt[0] >= WAIT_TICKS, "still too soon to say");
+            helper.assertTrue(asked.size() == 1, "Hachiware asked for " + asked.size() + " photos");
+        });
+    }
+
+    /**
+     * The picture comes back in the very tick the pet is unloaded, before it has read anything it was told: the
+     * shot is on the roll in its bag as it is told, so it is on the roll of the pet that is loaded again.
+     */
+    @GameTest(template = "floor16", batch = "chiikawa_camera_unloaded", timeoutTicks = SHOT_TICKS)
+    public static void a_photo_that_comes_back_as_the_pet_is_unloaded_is_on_its_roll_when_it_is_loaded_again(
+            GameTestHelper helper) {
+        ServerPlayer owner = ownerAt(helper, new BlockPos(10, STAND, 10));
+        AbstractPet pet = photographer(helper, InitEntity.HACHIWARE_PET.get(), owner, true, true);
+        seenEveryView(pet);
+        PhotoSystem photos = PhotoSystem.of(helper.getLevel().getServer());
+        boolean[] unloaded = {false};
+
+        helper.onEachTick(() -> {
+            if (unloaded[0] || photos.waiting().isEmpty()) {
+                return;
+            }
+            unloaded[0] = true;
+            send(photos, owner, photos.waiting().iterator().next(), validPicture());
+            helper.assertTrue(shotRolls(pet).size() == 1, "the shot was not on the roll as the pet was told of it");
+            pet.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
+
+            CompoundTag saved = new CompoundTag();
+            helper.assertTrue(pet.save(saved), "the unloaded pet was not saved");
+            AbstractPet loaded = (AbstractPet) EntityType.create(saved, helper.getLevel()).orElseThrow();
+            List<ItemStack> rolls = shotRolls(loaded);
+            helper.assertTrue(rolls.size() == 1 && FilmItem.rollOf(rolls.get(0)).shots().size() == 1,
+                "the pet loaded again has " + rolls.size() + " rolls with shots on");
+            helper.assertTrue(count(loaded, InitItems.FILM.get()) == ROLLS, "the roll was not made of one of the fresh ones");
+            helper.succeed();
         });
     }
 

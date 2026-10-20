@@ -4,6 +4,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.carries;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.ownedPet;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
 
+import com.dwinovo.chiikawa.camera.PhotoResults;
 import com.dwinovo.chiikawa.camera.PhotoScout;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
@@ -49,11 +50,19 @@ final class ErrandScenarios {
      *
      * @param pet the pet, which sets off on its own
      * @param steps how many steps the errand's routine has, which the cases cut it between
+     * @param reported the report the errand's steps have made, by the name its settings give it, by the time the errand was
+     *                 last seen at this step: a rest the errand begins when something happens in the middle of it, and
+     *                 which however it ends it still keeps
      * @param untidy what the errand may not leave behind that is its own to the world and not to the pet, such as an item
      *               half taken: the problem, or nothing if all is as it should be; told the errand as it was last seen
      *               running, since what is left behind may be fair where the errand had got to
      */
-    record Scenario(AbstractPet pet, int steps, Function<Running, Optional<String>> untidy) {
+    record Scenario(AbstractPet pet, int steps, Function<Running, Optional<String>> reported,
+                    Function<Running, Optional<String>> untidy) {
+        /** A scenario of an errand whose steps report nothing. */
+        Scenario(AbstractPet pet, int steps, Function<Running, Optional<String>> untidy) {
+            this(pet, steps, ran -> Optional.empty(), untidy);
+        }
     }
 
     private static final Map<ResourceLocation, Function<GameTestHelper, Scenario>> BY_ERRAND = Map.of(
@@ -116,7 +125,7 @@ final class ErrandScenarios {
         friend.setNoAi(true);
         PhotoSystem photos = PhotoSystem.of(helper.getLevel().getServer());
         Set<UUID> asked = photos.waiting();
-        return new Scenario(pet, 4, ran -> {
+        return new Scenario(pet, 4, ran -> ran.stepIndex() > SHUTTER_STEP ? Optional.of(PhotoResults.TAKEN) : Optional.empty(), ran -> {
             boolean shutterPressed = ran.stepIndex() >= SHUTTER_STEP;
             if (!shutterPressed && !asked.containsAll(photos.waiting())) {
                 return Optional.of("a photo was asked for before the shutter");

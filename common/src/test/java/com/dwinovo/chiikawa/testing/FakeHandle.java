@@ -22,6 +22,7 @@ public final class FakeHandle implements Handle {
     public int glances;
     public long now;
     public final List<VoiceMoment> said = new ArrayList<>();
+    public final List<String> reported = new ArrayList<>();
 
     @Override
     public void stopWalking() {
@@ -111,6 +112,11 @@ public final class FakeHandle implements Handle {
 
     @Override
     public void cooldownAttack(int ticks) {
+    }
+
+    @Override
+    public void report(String report) {
+        reported.add(report);
     }
 
     @Override

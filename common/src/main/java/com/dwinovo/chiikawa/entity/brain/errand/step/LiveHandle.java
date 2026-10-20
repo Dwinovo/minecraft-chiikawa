@@ -167,6 +167,11 @@ public final class LiveHandle implements Handle {
     }
 
     @Override
+    public void report(String report) {
+        pet.getMind().report(report);
+    }
+
+    @Override
     public void reportWork(ResourceLocation counter, int amount) {
         TaskTracker.advance(pet, counter, amount);
     }
