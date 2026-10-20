@@ -1,9 +1,11 @@
 package com.dwinovo.chiikawa.entity.brain.errand;
 
+import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestStore;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Routine;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.mojang.serialization.Codec;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
@@ -76,4 +78,12 @@ public interface ErrandType<P extends Plan, T> {
 
     /** @return where this errand's rests are kept, see {@link RestStore.Kind}; a declaration, bound to a pet by the ledger */
     RestStore.Kind restStore();
+
+    /**
+     * The named numbers this errand's rests point at that only it can work out, registered when the errand
+     * is, see {@link RestSources}.
+     */
+    default Map<ResourceLocation, RestSources.Resolver> restSources() {
+        return Map.of();
+    }
 }

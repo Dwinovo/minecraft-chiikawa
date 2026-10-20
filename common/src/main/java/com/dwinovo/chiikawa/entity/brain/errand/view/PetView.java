@@ -108,4 +108,10 @@ public interface PetView {
      *         taken from what the sensor remembers, which may be a few ticks behind
      */
     Optional<PickableItem> pickable(UUID item);
+
+    /**
+     * @param creature the id of a creature, such as the one a pet means to photograph
+     * @return where it is now, while it is alive in the pet's level; asked afresh of the world each time, since it moves
+     */
+    Optional<GlobalPos> whereIs(UUID creature);
 }

@@ -234,7 +234,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitMemory.WHISTLE_CALL.get(),
         InitMemory.WHISTLE_HEARD.get(),
         InitMemory.PHOTO_COOLDOWN.get(),
-        InitMemory.PHOTO_PLAN.get(),
         InitMemory.GIFT_COOLDOWN.get(),
         InitMemory.PHOTOGRAPHED_BIOMES.get(),
         InitMemory.ERRAND_RESTS.get(),
@@ -642,7 +641,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         BrainUtils.addSocialTasks(brain);
         BrainUtils.addExamTasks(brain);
         BrainUtils.addWhistleTasks(brain);
-        BrainUtils.addPhotoTasks(brain);
 
         // Each job's activities — registered once, dormant until the intent
         // selector picks one of that job's intents.
