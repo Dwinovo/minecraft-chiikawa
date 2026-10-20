@@ -56,10 +56,10 @@ import org.jetbrains.annotations.Nullable;
  * <p>What a pet is told is handled in two halves, because the inbox is lost with the pet when it is
  * removed from the world, a chunk unloading included. The first half is {@link #keep}, run as the pet is
  * told, on the server thread: whatever the message makes durable, what is saved with the pet or the world,
- * is written there and then, and only there. The second half is {@link #handle}, run when the pet reads its
- * inbox at its next tick: what concerns deciding and the errand under way, the rests, a step's ending,
- * a nudge. A message with a first half is a {@link Message.Durable} one, and is queued for the second as
- * {@link Message.Settled}.
+ * is written there and then, and only there. A rest is saved with the pet, so the rest a message makes the
+ * pet take is part of that half. The second half is {@link #handle}, run when the pet reads its inbox at its
+ * next tick: what concerns deciding and the errand under way, a step's ending, a nudge. A message with a
+ * first half is a {@link Message.Durable} one, and is queued for the second as {@link Message.Settled}.
  */
 public final class PetMind {
     public static final int DECISION_INTERVAL = 10;
@@ -207,29 +207,28 @@ public final class PetMind {
     }
 
     /**
-     * The first half of what a pet is told that has something to keep: applies what it makes durable, on the
-     * server thread, and says what is left of it to do at the pet's next tick.
+     * The first half of what a pet is told that has something to keep: applies what it makes durable, the rests
+     * it makes the pet take included, on the server thread, and leaves what is left of it to do at the pet's
+     * next tick.
      */
     private Message.Settled keep(Message.Durable message) {
         MinecraftServer server = pet.level().getServer();
         if (server != null && !server.isSameThread()) {
             throw new IllegalStateException("Told " + message + " from another thread; hop onto the server's with execute first");
         }
-        Optional<String> report = switch (message) {
-            case Message.PhotoResult result -> Optional.of(PhotoResults.received(pet, result));
-        };
-        return new Message.Settled(message, report);
+        long now = pet.level().getGameTime();
+        switch (message) {
+            case Message.PhotoResult result -> rests.afterReport(ErrandIds.TAKE_PHOTO,
+                PhotoResults.received(pet, result), RestContext.of(result.camera()), now);
+        }
+        return new Message.Settled(message);
     }
 
     /** The second half of what a pet is told that has something to keep. */
     private void settled(Message.Settled settled, long now) {
         switch (settled.message()) {
-            case Message.PhotoResult result -> {
-                settled.report().ifPresent(report ->
-                    rests.afterReport(ErrandIds.TAKE_PHOTO, report, RestContext.of(result.camera()), now));
-                // The photo errand may be holding the pose for it, and puts the camera away.
-                executor.deliver(result, now);
-            }
+            // The photo errand may be holding the pose for it, and puts the camera away.
+            case Message.PhotoResult result -> executor.deliver(result, now);
         }
     }
 
