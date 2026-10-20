@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.camera.PhotoOutlook;
 import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
+import com.dwinovo.chiikawa.entity.brain.errand.inbox.InvitationDesk;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.music.Playable;
 import com.dwinovo.chiikawa.qualification.PetExams;
@@ -59,11 +60,11 @@ public interface PetView {
     /** @return the nearest shop, while it sells something the pet likes and can afford */
     Optional<GlobalPos> shopWorthVisiting();
 
-    /** @return the pet this one has thought of playing a scene with */
-    Optional<GlobalPos> socialPartner();
+    /** @return the scene this pet has thought of playing with another pet, while that pet would play it now */
+    Optional<SocialIdea> socialIdea();
 
-    /** @return whether another pet is on its way to play a scene with this one */
-    boolean playingAlong();
+    /** @return the invitation to a scene this pet has said yes to, until the asking pet stops waiting for it */
+    Optional<InvitationDesk.Engagement> engagement();
 
     /** @return whether the pet has something for its owner that it has not handed over */
     boolean carryingGift();
