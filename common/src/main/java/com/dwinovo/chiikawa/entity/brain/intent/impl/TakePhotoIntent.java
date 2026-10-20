@@ -25,8 +25,6 @@ import net.minecraft.world.entity.schedule.Activity;
  * the thing to do, and nothing a pet works at is worth missing it for.
  */
 public final class TakePhotoIntent implements PetIntent {
-    private static final float SCORE = 0.45F;
-
     @Override
     public ResourceLocation id() {
         return PetIntents.TAKE_PHOTO;
@@ -67,10 +65,5 @@ public final class TakePhotoIntent implements PetIntent {
     @Override
     public void onStop(IntentRuntime runtime) {
         runtime.brain().eraseMemory(InitMemory.PHOTO_PLAN.get());
-    }
-
-    @Override
-    public float score(IntentContext ctx) {
-        return SCORE;
     }
 }

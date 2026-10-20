@@ -25,8 +25,6 @@ import net.minecraft.world.entity.schedule.Activity;
  * in the bag, the errand is done.
  */
 public final class GiftOwnerIntent implements PetIntent {
-    private static final float SCORE = 0.85F;
-
     @Override
     public ResourceLocation id() {
         return PetIntents.GIFT_OWNER;
@@ -55,10 +53,5 @@ public final class GiftOwnerIntent implements PetIntent {
     @Override
     public Optional<GlobalPos> destination(IntentContext ctx) {
         return ctx.ownerPos();
-    }
-
-    @Override
-    public float score(IntentContext ctx) {
-        return SCORE;
     }
 }

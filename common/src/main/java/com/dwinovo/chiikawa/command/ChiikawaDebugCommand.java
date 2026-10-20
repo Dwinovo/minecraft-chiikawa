@@ -131,6 +131,7 @@ public final class ChiikawaDebugCommand {
         source.sendSuccess(() -> header, false);
         for (IntentSelector.CandidateView view : snapshot.candidates()) {
             MutableComponent line = Component.literal(" " + view.intent().id() + " ")
+                .append(Component.literal("p" + view.priority() + " "))
                 .append(flag("allowed", view.allowed()))
                 .append(" ")
                 .append(flag("check", view.check().ok()));
@@ -155,7 +156,7 @@ public final class ChiikawaDebugCommand {
             .append(" last " + entries.size() + " switches:"), false);
         for (IntentSwitchLog.Entry entry : entries) {
             String top = entry.top().stream()
-                .map(scored -> String.format(Locale.ROOT, "%s %.2f", scored.id(), scored.score()))
+                .map(scored -> String.format(Locale.ROOT, "%s p%d %.2f", scored.errand(), scored.priority(), scored.score()))
                 .collect(Collectors.joining(", "));
             source.sendSuccess(() -> Component.literal(" " + entry.gameTime() + ": " + name(entry.from()) + " -> "
                 + name(entry.to()) + " [" + entry.cause() + "] " + top), false);

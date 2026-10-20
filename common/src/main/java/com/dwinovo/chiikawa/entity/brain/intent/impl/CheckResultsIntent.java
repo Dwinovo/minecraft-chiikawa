@@ -18,8 +18,6 @@ import net.minecraft.world.entity.schedule.Activity;
  */
 public final class CheckResultsIntent implements PetIntent {
     /** As keen as sitting the exam was: nothing else is on its mind that morning. */
-    private static final float SCORE = 0.72F;
-
     @Override
     public ResourceLocation id() {
         return PetIntents.CHECK_RESULTS;
@@ -43,10 +41,5 @@ public final class CheckResultsIntent implements PetIntent {
     @Override
     public Optional<GlobalPos> destination(IntentContext ctx) {
         return ctx.resultsDesk();
-    }
-
-    @Override
-    public float score(IntentContext ctx) {
-        return SCORE;
     }
 }

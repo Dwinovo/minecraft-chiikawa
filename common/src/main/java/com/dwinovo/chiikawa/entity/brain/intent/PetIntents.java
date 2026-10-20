@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.intent;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.AnswerWhistleIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.CheckResultsIntent;
 import com.dwinovo.chiikawa.entity.brain.intent.impl.CombatIntent;
@@ -30,17 +31,11 @@ import org.jetbrains.annotations.Nullable;
  * Registry of every pet intent. Generic intents are open to every pet; the others
  * are offered by capabilities through {@code PetCapability#intents()}.
  *
- * <p>Preferences are base scores: fights (0.8) over taking a slip (0.7) over work (0.6)
- * over foraging (0.5) over picking up items (0.4) over playing a scene with another pet
- * (0.35), everything over wandering (0.05); a wild pet curious about a whistle (0.55) goes over
- * before it forages; a pet another one is coming over to plays
- * along (0.5); and a photo (0.45), taken only with a camera and a good moment, goes over picking
- * things up and playing a scene.
- * Work the pet's slip counts is raised by {@link IntentSelector#TASK_BONUS}, and a pet's
- * personality weighs them all. The farmer's strict order that 0.0.9 hard-coded as an if-chain, harvest before
- * plant before deliver, is not a preference, so it is expressed by
- * {@link IntentRequirement#yieldsTo} instead of score gaps that a personality could
- * close.
+ * <p>How much each matters is not decided here but by the intent's {@link ErrandSettings}: its priority,
+ * which a pet gives way to only for a higher one, its score among the intents of its priority, and the
+ * intents that must have nothing to do before it is started, such as the farmer's strict order of
+ * harvest before plant before deliver. Work the pet's slip counts is raised by
+ * {@link IntentSelector#TASK_BONUS}, and a pet's personality weighs them all.
  */
 public final class PetIntents {
     public static final ResourceLocation FOLLOW_OWNER = id("follow_owner");
@@ -70,10 +65,10 @@ public final class PetIntents {
     /** Intents every pet considers, whatever its capability. */
     public static final List<PetIntent> GENERIC = List.of(
         register(new FollowOwnerIntent()),
-        register(new ConstantIntent(STAY, IntentCategory.STAY, () -> InitActivity.STAY.get(), 1.0F)),
-        register(new ConstantIntent(WANDER, IntentCategory.WANDER, () -> Activity.IDLE, 0.05F)),
+        register(new ConstantIntent(STAY, IntentCategory.STAY, () -> InitActivity.STAY.get())),
+        register(new ConstantIntent(WANDER, IntentCategory.WANDER, () -> Activity.IDLE)),
         register(new TargetIntent(PICK_UP_ITEM, IntentCategory.PICK_UP, () -> InitActivity.PICK_UP.get(),
-            PerceivedTargets::pickableItem, 0.4F, "no_item", List.of(), Optional.empty())),
+            PerceivedTargets::pickableItem, "no_item", List.of(), Optional.empty())),
         register(new TakeTaskIntent()),
         register(new ShopIntent()),
         register(new GiftOwnerIntent()),
@@ -86,18 +81,17 @@ public final class PetIntents {
     );
 
     static {
-        PetIntent harvest = register(new TargetIntent(HARVEST, IntentCategory.WORK, () -> InitActivity.FARMER_HARVEST.get(),
-            PerceivedTargets::harvest, 0.6F, "no_crop", List.of(), Optional.empty()));
-        PetIntent plant = register(new TargetIntent(PLANT, IntentCategory.WORK, () -> InitActivity.FARMER_PLANT.get(),
-            PerceivedTargets::plant, 0.6F, "no_farmland", List.of(IntentRequirement.yieldsTo(harvest)), Optional.empty()));
+        register(new TargetIntent(HARVEST, IntentCategory.WORK, () -> InitActivity.FARMER_HARVEST.get(),
+            PerceivedTargets::harvest, "no_crop", List.of(), Optional.empty()));
+        register(new TargetIntent(PLANT, IntentCategory.WORK, () -> InitActivity.FARMER_PLANT.get(),
+            PerceivedTargets::plant, "no_farmland", List.of(), Optional.empty()));
         register(new TargetIntent(DELIVER, IntentCategory.WORK, () -> InitActivity.DELEVER.get(),
-            PerceivedTargets::container, 0.6F, "no_container",
-            List.of(IntentRequirement.yieldsTo(harvest), IntentRequirement.yieldsTo(plant)), Optional.empty()));
+            PerceivedTargets::container, "no_container", List.of(), Optional.empty()));
         register(new TargetIntent(WEED, IntentCategory.FORAGE, () -> InitActivity.WEED.get(),
-            PerceivedTargets::weed, 0.5F, "no_weed", List.of(IntentRequirement.wildOrCarrying(PetWorkCounters.WEED)),
+            PerceivedTargets::weed, "no_weed", List.of(IntentRequirement.wildOrCarrying(PetWorkCounters.WEED)),
             Optional.of(PetWorkCounters.WEED)));
         register(new TargetIntent(PICK_MUSHROOM, IntentCategory.FORAGE, () -> InitActivity.PICK_MUSHROOM.get(),
-            PerceivedTargets::mushroom, 0.5F, "no_mushroom",
+            PerceivedTargets::mushroom, "no_mushroom",
             List.of(IntentRequirement.wildOrCarrying(PetWorkCounters.PICK_MUSHROOM), IntentRequirement.AT_NIGHT),
             Optional.of(PetWorkCounters.PICK_MUSHROOM)));
         register(new CombatIntent(MELEE, () -> InitActivity.FENCER_FIGHT.get(), false));

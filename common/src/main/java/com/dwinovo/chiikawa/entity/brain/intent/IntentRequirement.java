@@ -28,19 +28,4 @@ public interface IntentRequirement {
     IntentRequirement AT_NIGHT = ctx -> ctx.phase() == DayPhase.NIGHT ? IntentCheck.OK : IntentCheck.fail("not_night");
 
     IntentCheck check(IntentContext ctx);
-
-    /**
-     * Makes an intent strictly lower in priority than {@code other}: it can only start
-     * or continue while {@code other} cannot start. The two never compete on score, so
-     * no personality multiplier or randomness can reorder them.
-     *
-     * <p>{@code other} must be offered and permitted whenever the yielding intent is,
-     * i.e. come from the same capability and category.
-     *
-     * @param other the intent that goes first
-     * @return the requirement
-     */
-    static IntentRequirement yieldsTo(PetIntent other) {
-        return ctx -> other.canRun(ctx).ok() ? IntentCheck.fail("higher_priority") : IntentCheck.OK;
-    }
 }

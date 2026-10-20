@@ -20,8 +20,6 @@ import net.minecraft.world.entity.schedule.Activity;
  * A pet that could not get its slip rests from the board for a while, see {@code TAKE_TASK_COOLDOWN}.
  */
 public final class TakeTaskIntent implements PetIntent {
-    private static final float SCORE = 0.7F;
-
     @Override
     public ResourceLocation id() {
         return PetIntents.TAKE_TASK;
@@ -51,10 +49,5 @@ public final class TakeTaskIntent implements PetIntent {
     @Override
     public Optional<GlobalPos> destination(IntentContext ctx) {
         return ctx.offeringBoard();
-    }
-
-    @Override
-    public float score(IntentContext ctx) {
-        return SCORE;
     }
 }

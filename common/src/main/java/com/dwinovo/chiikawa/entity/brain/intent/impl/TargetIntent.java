@@ -24,7 +24,6 @@ public final class TargetIntent implements PetIntent {
     private final IntentCategory category;
     private final Supplier<Activity> activity;
     private final Function<PerceivedTargets, Optional<GlobalPos>> target;
-    private final float score;
     private final String missingReason;
     private final List<IntentRequirement> requirements;
     private final Optional<ResourceLocation> workCounter;
@@ -36,13 +35,12 @@ public final class TargetIntent implements PetIntent {
      * @param workCounter the work counter its behaviors report, see {@link PetIntent#workCounter}
      */
     public TargetIntent(ResourceLocation id, IntentCategory category, Supplier<Activity> activity,
-            Function<PerceivedTargets, Optional<GlobalPos>> target, float score, String missingReason,
+            Function<PerceivedTargets, Optional<GlobalPos>> target, String missingReason,
             List<IntentRequirement> requirements, Optional<ResourceLocation> workCounter) {
         this.id = id;
         this.category = category;
         this.activity = activity;
         this.target = target;
-        this.score = score;
         this.missingReason = missingReason;
         this.requirements = List.copyOf(requirements);
         this.workCounter = workCounter;
@@ -77,11 +75,6 @@ public final class TargetIntent implements PetIntent {
     @Override
     public Optional<GlobalPos> destination(IntentContext ctx) {
         return target.apply(ctx.targets());
-    }
-
-    @Override
-    public float score(IntentContext ctx) {
-        return score;
     }
 
     @Override

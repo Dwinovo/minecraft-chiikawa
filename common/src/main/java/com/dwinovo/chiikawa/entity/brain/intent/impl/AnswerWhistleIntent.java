@@ -23,8 +23,6 @@ import net.minecraft.world.entity.schedule.Activity;
  * not so curious that it lets a fight or a job go.
  */
 public final class AnswerWhistleIntent implements PetIntent {
-    private static final float SCORE = 0.55F;
-
     @Override
     public ResourceLocation id() {
         return PetIntents.ANSWER_WHISTLE;
@@ -48,11 +46,6 @@ public final class AnswerWhistleIntent implements PetIntent {
     @Override
     public Optional<GlobalPos> destination(IntentContext ctx) {
         return ctx.whistleHeard();
-    }
-
-    @Override
-    public float score(IntentContext ctx) {
-        return SCORE;
     }
 
     @Override

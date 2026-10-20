@@ -11,6 +11,7 @@ import com.dwinovo.chiikawa.camera.PhotoPlan;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector.Candidate;
 import com.dwinovo.chiikawa.testing.TestContext;
+import com.dwinovo.chiikawa.testing.TestErrands;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
@@ -19,6 +20,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -33,6 +35,11 @@ class IntentAdmissionTest {
     /** Reach 13, leash 20, round its home. */
     private static final PetAnchor FREE =
         TestAnchors.free(HOME);
+
+    @BeforeAll
+    static void shippedSettings() {
+        TestErrands.load();
+    }
 
     private static GlobalPos east(int blocks) {
         return GlobalPos.of(OVERWORLD, HOME.pos().east(blocks));

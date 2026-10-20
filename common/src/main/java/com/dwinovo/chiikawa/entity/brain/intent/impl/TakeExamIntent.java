@@ -19,8 +19,6 @@ import net.minecraft.world.entity.schedule.Activity;
  */
 public final class TakeExamIntent implements PetIntent {
     /** Ahead of taking a slip or getting on with work: the owner paid for this. */
-    private static final float SCORE = 0.72F;
-
     @Override
     public ResourceLocation id() {
         return PetIntents.TAKE_EXAM;
@@ -50,10 +48,5 @@ public final class TakeExamIntent implements PetIntent {
     @Override
     public Optional<GlobalPos> destination(IntentContext ctx) {
         return ctx.seatedAtExam() ? Optional.empty() : ctx.examDesk();
-    }
-
-    @Override
-    public float score(IntentContext ctx) {
-        return SCORE;
     }
 }

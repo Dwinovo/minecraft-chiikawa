@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain.intent;
 
+import com.dwinovo.chiikawa.entity.brain.errand.decide.Scored;
 import java.util.ArrayDeque;
 import java.util.List;
 import net.minecraft.resources.ResourceLocation;
@@ -18,16 +19,16 @@ public final class IntentSwitchLog {
      * @param from the intent switched away from, {@code null} if there was none
      * @param to the intent switched to, {@code null} if nothing could run
      * @param cause why the pet evaluated or why the previous intent ended
-     * @param top the best scores of the evaluation, highest first
+     * @param top the best of the priority the evaluation chose from, highest score first
      */
     public record Entry(long gameTime, @Nullable ResourceLocation from, @Nullable ResourceLocation to,
-            String cause, List<IntentSelector.Scored> top) {
+            String cause, List<Scored> top) {
     }
 
     private final ArrayDeque<Entry> entries = new ArrayDeque<>(CAPACITY);
 
     void record(long gameTime, @Nullable ResourceLocation from, @Nullable ResourceLocation to, String cause,
-            List<IntentSelector.Scored> ranking) {
+            List<Scored> ranking) {
         if (entries.size() == CAPACITY) {
             entries.removeFirst();
         }
