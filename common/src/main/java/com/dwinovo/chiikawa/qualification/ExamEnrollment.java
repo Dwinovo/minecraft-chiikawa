@@ -5,7 +5,7 @@ import com.dwinovo.chiikawa.block.ExamDeskBlockEntity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
-import com.dwinovo.chiikawa.entity.brain.intent.IntentCategory;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
 import java.util.List;
 import java.util.Optional;
@@ -143,7 +143,7 @@ public final class ExamEnrollment {
     /** Whether the pet would go to the desk from where it is: one told to stay stays, and the rest go within their reach. */
     private static Optional<Ineligible> whereItIs(AbstractPet pet, ExamDeskBlockEntity desk) {
         PetOwnership ownership = PetOwnership.of(pet);
-        if (!PetConstraints.allows(pet, ownership, IntentCategory.EXAM)) {
+        if (!PetConstraints.allows(pet, ownership, ErrandCategory.EXAM)) {
             return Optional.of(Ineligible.STAYING);
         }
         GlobalPos chair = GlobalPos.of(desk.getLevel().dimension(), desk.chair());

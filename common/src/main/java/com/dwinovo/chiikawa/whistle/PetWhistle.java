@@ -4,7 +4,7 @@ import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
-import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
+import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.voice.PetSpeech;
@@ -60,7 +60,7 @@ public final class PetWhistle {
                     // The expiry counts from now, so the wait is part of how long it is interested.
                     pet.getBrain().setMemoryWithExpiry(InitMemory.WHISTLE_HEARD.get(), new WhistleHeard(where, at),
                         at - now + settings.curiousTicks());
-                    IntentSelector.requestReevaluate(pet);
+                    PetMind.nudge(pet, "whistle");
                     wild++;
                 }
                 case DEAF -> {

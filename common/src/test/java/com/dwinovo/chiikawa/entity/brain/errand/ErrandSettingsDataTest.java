@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.data.ErrandSettingsData;
-import com.dwinovo.chiikawa.entity.brain.intent.PetIntent;
-import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.mojang.serialization.JsonOps;
 import java.util.HashMap;
@@ -15,7 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.SharedConstants;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -23,7 +21,7 @@ import org.junit.jupiter.api.Test;
 /** What the generated errand settings say: that every errand has them, and that they are the order the pets keep. */
 class ErrandSettingsDataTest {
     /** 0.1.4 implementation plan, "Default priorities". */
-    private static final Map<ResourceLocation, Integer> PRIORITIES = Map.ofEntries(
+    private static final Map<Identifier, Integer> PRIORITIES = Map.ofEntries(
         Map.entry(ErrandIds.GIFT_OWNER, 80),
         Map.entry(ErrandIds.MELEE, 80),
         Map.entry(ErrandIds.RANGED, 80),
@@ -47,7 +45,7 @@ class ErrandSettingsDataTest {
         Map.entry(ErrandIds.STAY, 10));
 
     /** The scores the intents have today, which the scores here must not move. */
-    private static final Map<ResourceLocation, Float> SCORES = Map.ofEntries(
+    private static final Map<Identifier, Float> SCORES = Map.ofEntries(
         Map.entry(ErrandIds.GIFT_OWNER, 0.85F),
         Map.entry(ErrandIds.MELEE, 0.8F),
         Map.entry(ErrandIds.RANGED, 0.8F),
@@ -78,23 +76,20 @@ class ErrandSettingsDataTest {
 
     @Test
     void everyErrandHasSettingsAndNothingElseDoes() {
-        assertEquals(new HashSet<>(ErrandIds.ALL), ErrandSettingsData.all().keySet());
-        assertEquals(21, ErrandIds.ALL.size());
-        assertEquals(21, new HashSet<>(ErrandIds.ALL).size(), "each id once");
-    }
+        Set<Identifier> errands = new HashSet<>();
+        Errands.all().stream().map(ErrandType::id).forEach(errands::add);
 
-    @Test
-    void theErrandsAreTheIntentsTheyReplace() {
-        Set<ResourceLocation> intents = new HashSet<>();
-        PetIntents.all().stream().map(PetIntent::id).forEach(intents::add);
-
-        assertEquals(intents, new HashSet<>(ErrandIds.ALL));
+        assertEquals(errands, ErrandSettingsData.all().keySet());
+        assertEquals(21, errands.size());
     }
 
     @Test
     void theTableOfPrioritiesIsComplete() {
-        assertEquals(new HashSet<>(ErrandIds.ALL), PRIORITIES.keySet());
-        assertEquals(new HashSet<>(ErrandIds.ALL), SCORES.keySet());
+        Set<Identifier> errands = new HashSet<>();
+        Errands.all().stream().map(ErrandType::id).forEach(errands::add);
+
+        assertEquals(errands, PRIORITIES.keySet());
+        assertEquals(errands, SCORES.keySet());
     }
 
     @Test
@@ -123,7 +118,7 @@ class ErrandSettingsDataTest {
 
     @Test
     void theFarmersOrderIsDataAndNothingElseYields() {
-        Map<ResourceLocation, List<ResourceLocation>> yields = new HashMap<>();
+        Map<Identifier, List<Identifier>> yields = new HashMap<>();
         ErrandSettingsData.all().forEach((errand, settings) -> {
             if (!settings.yieldsTo().isEmpty()) {
                 yields.put(errand, settings.yieldsTo());
@@ -137,7 +132,7 @@ class ErrandSettingsDataTest {
 
     @Test
     void onlyTheFightsShoutOnSettingOff() {
-        Map<ResourceLocation, Optional<VoiceMoment>> voices = new HashMap<>();
+        Map<Identifier, Optional<VoiceMoment>> voices = new HashMap<>();
         ErrandSettingsData.all().forEach((errand, settings) -> {
             if (settings.startVoice().isPresent()) {
                 voices.put(errand, settings.startVoice());
@@ -149,7 +144,7 @@ class ErrandSettingsDataTest {
 
     @Test
     void theRestsAreWhatEachErrandHasAlwaysDone() {
-        Map<ResourceLocation, ErrandSettings<?>> all = ErrandSettingsData.all();
+        Map<Identifier, ErrandSettings<?>> all = ErrandSettingsData.all();
 
         assertEquals(600, ticks(all, ErrandIds.GIFT_OWNER));
         assertEquals(600, ticks(all, ErrandIds.SHOP));
@@ -163,7 +158,7 @@ class ErrandSettingsDataTest {
         assertEquals(Set.of("stored", "failed"), all.get(ErrandIds.TAKE_PHOTO).rests().reports().keySet());
     }
 
-    private static int ticks(Map<ResourceLocation, ErrandSettings<?>> all, ResourceLocation errand) {
+    private static int ticks(Map<Identifier, ErrandSettings<?>> all, Identifier errand) {
         return all.get(errand).rests().gaveUp().amount().left().orElseThrow();
     }
 }

@@ -2,8 +2,6 @@ package com.dwinovo.chiikawa.data;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.dwinovo.chiikawa.entity.brain.intent.PetIntent;
-import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,17 +64,6 @@ class LanguageDataUiTranslationTest {
     static void bootstrap() {
         SharedConstants.tryDetectVersion();
         Bootstrap.bootStrap();
-    }
-
-    @Test
-    void everyIntentHasAName() {
-        for (String locale : LanguageData.LOCALES) {
-            Map<String, String> translations = collect(locale);
-            for (PetIntent intent : PetIntents.all()) {
-                String key = "intent." + intent.id().getNamespace() + "." + intent.id().getPath();
-                assertTrue(translations.containsKey(key), () -> locale + " is missing " + key);
-            }
-        }
     }
 
     @Test
