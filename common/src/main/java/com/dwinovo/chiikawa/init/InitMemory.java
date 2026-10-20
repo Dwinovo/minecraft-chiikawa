@@ -6,7 +6,6 @@ import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.social.InteractionPlan;
 import com.dwinovo.chiikawa.social.SocialCooldowns;
 import com.dwinovo.chiikawa.task.FinishedSlip;
-import com.dwinovo.chiikawa.whistle.WhistleCall;
 import com.dwinovo.chiikawa.whistle.WhistleHeard;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.mojang.serialization.Codec;
@@ -151,14 +150,6 @@ public final class InitMemory {
         Services.REGISTRY.<MemoryModuleType<PetSpeech.Said>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
             ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "last_said"),
-            () -> new MemoryModuleType<>(Optional.empty())
-        );
-
-    /** An order the owner whistled that the pet has not taken yet, see {@link WhistleCall}. */
-    public static final Supplier<MemoryModuleType<WhistleCall>> WHISTLE_CALL =
-        Services.REGISTRY.<MemoryModuleType<WhistleCall>>register(
-            BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "whistle_call"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 

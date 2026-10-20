@@ -1,12 +1,14 @@
 package com.dwinovo.chiikawa.entity.brain.errand.step;
 
 import com.dwinovo.chiikawa.utils.Deliveries;
+import com.dwinovo.chiikawa.whistle.WhistleHeard;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -162,6 +164,41 @@ public sealed interface Goal {
         public boolean lookAt(LiveHandle live) {
             return live.owner().map(owner -> {
                 live.lookAt(owner);
+                return true;
+            }).orElse(false);
+        }
+    }
+
+    /**
+     * Where a whistle was blown that the pet has set off for, and whoever is standing there: the walk is to the spot, and
+     * the gaze is on the player nearest to it if one is near enough and on the spot if none is. Looked for in the pet's
+     * memory each time, since it lasts only as long as the pet's curiosity does, and is gone with it.
+     *
+     * @param lookRange how far from the spot a player may have wandered and still be the one looked at
+     */
+    record Whistler(double lookRange) implements Goal {
+        @Override
+        public Optional<Vec3> where(LiveHandle live) {
+            return WhistleHeard.by(live.pet()).map(spot -> Vec3.atCenterOf(spot.pos()));
+        }
+
+        @Override
+        public boolean walkTo(LiveHandle live, float speed, int closeEnough) {
+            return WhistleHeard.by(live.pet()).map(spot -> {
+                live.walkTo(spot.pos(), speed, closeEnough);
+                return true;
+            }).orElse(false);
+        }
+
+        @Override
+        public boolean lookAt(LiveHandle live) {
+            return where(live).map(centre -> {
+                Player blower = live.pet().level().getNearestPlayer(centre.x, centre.y, centre.z, lookRange, false);
+                if (blower != null) {
+                    live.lookAt(blower);
+                } else {
+                    live.lookAt(centre.add(0.0, 1.0, 0.0));
+                }
                 return true;
             }).orElse(false);
         }

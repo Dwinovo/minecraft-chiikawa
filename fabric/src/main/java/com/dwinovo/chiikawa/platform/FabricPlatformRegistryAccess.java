@@ -1,6 +1,5 @@
 package com.dwinovo.chiikawa.platform;
 
-import com.dwinovo.chiikawa.entity.brain.PetActivities;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPlacesSensor;
@@ -15,7 +14,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.sensing.SensorType;
-import net.minecraft.world.entity.schedule.Activity;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
@@ -26,7 +24,6 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     private final Supplier<SensorType<PetPickableItemSensor>> petItemEntitySensor;
     private final Supplier<SensorType<PetPlacesSensor>> petPlacesSensor;
     private final Supplier<SensorType<PetSocialSensor>> petSocialSensor;
-    private final Supplier<Activity> answerWhistleActivity;
     private final Supplier<MenuType<PetBackpackMenu>> petBackpackMenu;
     private final Supplier<LootItemConditionType> qualificationCondition;
 
@@ -40,19 +37,12 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
         petPlacesSensor = registerSensor("pet_places_sensor", new SensorType<>(PetPlacesSensor::new));
         petSocialSensor = registerSensor("pet_social_sensor", new SensorType<>(PetSocialSensor::new));
 
-        answerWhistleActivity = registerActivity("answer_whistle");
-
         petBackpackMenu = registerMenu("pet_backpack", new ExtendedScreenHandlerType<>(PetBackpackMenu::new, PetBackpackMenu.OPENING_DATA));
     }
 
     private static <T extends SensorType<?>> Supplier<T> registerSensor(String path, T type) {
         Registry.register(BuiltInRegistries.SENSOR_TYPE, id(path), type);
         return () -> type;
-    }
-
-    private static Supplier<Activity> registerActivity(String path) {
-        Activity activity = Registry.register(BuiltInRegistries.ACTIVITY, id(path), new Activity(PetActivities.name(path)));
-        return () -> activity;
     }
 
     private static Supplier<MenuType<PetBackpackMenu>> registerMenu(String path, MenuType<PetBackpackMenu> menuType) {
@@ -92,11 +82,6 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     @Override
     public Supplier<LootItemConditionType> qualificationCondition() {
         return qualificationCondition;
-    }
-
-    @Override
-    public Supplier<Activity> answerWhistleActivity() {
-        return answerWhistleActivity;
     }
 
     @Override

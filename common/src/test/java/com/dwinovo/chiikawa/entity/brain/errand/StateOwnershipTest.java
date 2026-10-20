@@ -29,11 +29,11 @@ class StateOwnershipTest {
     private static final String ROOT = "com/dwinovo/chiikawa/";
 
     private static final String PET = "entity/AbstractPet.java";
+    private static final String MIND = "entity/brain/PetMind.java";
     private static final String EXECUTOR = "entity/brain/errand/run/Executor.java";
     private static final String STEPS = "entity/brain/errand/step/";
     private static final String HANDLE = STEPS + "LiveHandle.java";
     private static final String RESTS = "entity/brain/errand/rest/RestStore.java";
-    private static final String BEHAVIORS = "entity/brain/task/";
     private static final String SENSORS = "entity/brain/sensor/";
 
     /**
@@ -63,7 +63,7 @@ class StateOwnershipTest {
             Pattern.compile(WRITE + "MemoryModuleType\\.(?:WALK_TARGET|LOOK_TARGET|PATH)\\b"
                 + "|\\bsetWalkAndLookTargetMemories\\(|\\blookAt(?:Entity|EachOther|Entities)\\("),
             Set.of(HANDLE),
-            Set.of(PET, BEHAVIORS + "tameable/AnswerWhistleBehavior.java")),
+            Set.of()),
         new Rule("a rest",
             Pattern.compile(WRITE + "InitMemory\\.(?:PHOTO_COOLDOWN|GIFT_COOLDOWN|SHOP_COOLDOWN|TAKE_TASK_COOLDOWN"
                 + "|MUSICIAN_RESTING|SOCIAL_COOLDOWNS|ERRAND_RESTS|SUBJECT_RESTS)\\b"),
@@ -91,7 +91,18 @@ class StateOwnershipTest {
             Set.of()),
         new Rule("the foe the sensor names", Pattern.compile(WRITE + "MemoryModuleType\\.ATTACK_TARGET\\b"),
             Set.of(SENSORS + "PetAttackbleEntitySensor.java"),
-            Set.of(PET)),
+            Set.of()),
+        new Rule("the whistle a wild pet has heard",
+            Pattern.compile(WRITE + "(?:InitMemory\\.WHISTLE_HEARD|WhistleHeard\\.type\\(\\))"),
+            Set.of(MIND),
+            Set.of()),
+        new Rule("what the pet is told to do in general: follow, stay or be free",
+            Pattern.compile("\\bsetPetDirective\\(|entityData\\.set\\(PET_MODE\\b"),
+            // The owner's own hand (the screen, the crouch, the payload, the handbook's demonstration) and the order they
+            // whistled, which the pet's mind takes once the pet's wait is over.
+            Set.of(PET, MIND, "entity/interact/PetInteractHandler.java", "network/PetServerPacketHandler.java",
+                "client/manual/ManualScene.java"),
+            Set.of()),
         new Rule("the blocks of work the farmer sees",
             Pattern.compile(WRITE + "(?:InitMemory\\.(?:HARVEST_POS|PLANT_POS|CONTAINER_POS|WEED_POS|MUSHROOM_POS)\\b|\\S*?\\.memory\\(\\))"),
             Set.of(SENSORS + "PetFarmerWorkSensor.java"),
@@ -104,7 +115,7 @@ class StateOwnershipTest {
     private static final Pattern NOT_FOR_ERRANDS = Pattern.compile("\\bgetBrain\\(\\)|\\bgetRandom\\(\\)|\\bInitMemory\\b|\\bsetMemory\\b");
     private static final String ERRANDS = "entity/brain/errand/impl/";
     /** The errands still carried out by an old activity, which reach into the pet as the behaviors did. */
-    private static final Set<String> LEGACY_ERRANDS = Set.of(ERRANDS + "AnswerWhistleErrand.java");
+    private static final Set<String> LEGACY_ERRANDS = Set.of();
 
     @Test
     void eachPieceOfStateIsWrittenByItsOwnerAndTheLegacyWritersOnly() {

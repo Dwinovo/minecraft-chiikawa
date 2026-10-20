@@ -1,7 +1,9 @@
 package com.dwinovo.chiikawa.entity.brain;
 
+import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.camera.PhotoResults;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
@@ -38,6 +40,8 @@ import com.dwinovo.chiikawa.social.PetInteractions;
 import com.dwinovo.chiikawa.social.SocialCooldowns;
 import com.dwinovo.chiikawa.task.SlipWages;
 import com.dwinovo.chiikawa.voice.PetSpeech;
+import com.dwinovo.chiikawa.voice.VoiceMoment;
+import com.dwinovo.chiikawa.whistle.WhistleHeard;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -71,6 +75,10 @@ import org.jetbrains.annotations.Nullable;
  * pet take is part of that half. The second half is {@link #handle}, run when the pet reads its inbox at its
  * next tick: what concerns deciding and the errand under way, a step's ending, a nudge. A message with a
  * first half is a {@link Message.Durable} one, and is queued for the second as {@link Message.Settled}.
+ *
+ * <p>The owner's whistled order is waited for by the inbox, which delivers it when the pet's wait of its own is over, and
+ * taken by the mind as an owner's order; the whistle a wild pet hears is the mind's to note, as the one thing that writes
+ * it. Being taken somewhere without walking there ends what the pet was doing and clears where it was heading.
  *
  * <p>Another pet's invitation to play a scene is answered by the mind and not by an errand, since only the mind knows what the
  * pet is doing, and its priority, at the moment it is asked: see {@link InvitationDesk}. Having said yes, the pet decides again
@@ -127,8 +135,17 @@ public final class PetMind {
             return;
         }
         PetMind mind = pet.getMind();
+        long now = pet.level().getGameTime();
         Message queued = message instanceof Message.Durable durable ? mind.keep(durable) : message;
-        mind.inbox.post(queued, pet.level().getGameTime());
+        mind.inbox.post(queued, mind.dueAt(queued, now));
+    }
+
+    /**
+     * @return when the pet reads what it is told: at once, but for the owner's whistled order, which waits for a part of the
+     *         longest wait that is the pet's own, so that a yard of pets does not move as one
+     */
+    private long dueAt(Message message, long now) {
+        return message instanceof Message.WhistleOrder whistled ? now + pet.getRandom().nextInt(whistled.maxDelay() + 1) : now;
     }
 
     /**
@@ -234,9 +251,14 @@ public final class PetMind {
             case Message.CapabilityChanged changed -> decideNow = true;
             case Message.Hurt hurt -> decideNow = true;
             case Message.Moved moved -> {
+                // Where it was heading and what it was looking at are not where it is now, whatever it was doing.
+                handle.stopWalking();
+                handle.clearLook();
                 executor.requestEnd(Outcome.interrupted("moved"));
                 decideNow = true;
             }
+            case Message.WhistleOrder whistled -> obey(whistled.order());
+            case Message.WhistleHeard heard -> listen(heard, now);
             case Message.Invitation invitation -> answer(invitation, now);
             case Message.Withdrawn withdrawn -> {
                 desk.withdrawn(withdrawn.from());
@@ -249,6 +271,32 @@ public final class PetMind {
             case Message.Settled settled -> settled(settled, now);
             case Message.Durable durable -> throw new IllegalStateException(durable + " was queued without being kept");
             default -> executor.deliver(message, now);
+        }
+    }
+
+    /**
+     * Takes the order the owner whistled, now that the pet's wait is over, as the owner could have told it, and shows it is
+     * glad to be called to heel. A pet that has been let go of since the blow has no order left to take.
+     */
+    private void obey(PetDirective order) {
+        if (!(PetOwnership.of(pet) instanceof PetOwnership.Owned)) {
+            return;
+        }
+        pet.setPetDirective(order);
+        if (order == PetDirective.FOLLOW) {
+            handle.reaction(PetReaction.HAPPY);
+            handle.say(VoiceMoment.WHISTLE);
+        }
+        // As it is when the owner tells it, only without waiting for the notice of it to be read a tick later.
+        decideNow = true;
+    }
+
+    /** Takes note of a whistle that has caught the pet's curiosity, if it is still going to be curious by the time it is read. */
+    private void listen(Message.WhistleHeard heard, long now) {
+        if (heard.until() > now) {
+            pet.getBrain().setMemoryWithExpiry(WhistleHeard.type(), new WhistleHeard(heard.where(), heard.from()),
+                heard.until() - now);
+            decideNow = true;
         }
     }
 

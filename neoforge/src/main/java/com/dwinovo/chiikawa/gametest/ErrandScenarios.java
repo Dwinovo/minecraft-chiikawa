@@ -17,7 +17,9 @@ import com.dwinovo.chiikawa.data.QualificationData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
+import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
+import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.entity.brain.errand.step.Meeting;
 import com.dwinovo.chiikawa.init.InitBlocks;
@@ -38,6 +40,7 @@ import com.dwinovo.chiikawa.social.InteractionPlan;
 import com.dwinovo.chiikawa.social.PetInteraction;
 import com.dwinovo.chiikawa.social.PetInteractions;
 import com.dwinovo.chiikawa.task.BoardSlot;
+import com.dwinovo.chiikawa.whistle.WhistleHeard;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -45,6 +48,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -105,6 +109,10 @@ final class ErrandScenarios {
     /** A song of silence, short enough to be played to its end in a case that waits for one. */
     private static final String SONG = "chiikawa_gametest_contract";
     private static final int SONG_SECONDS = 1;
+    /** How long a whistle holds a pet's interest, longer than the cases take to cut the errand short at each of its steps. */
+    private static final int WHISTLE_INTEREST_TICKS = 600;
+    /** Long enough for a whistle the pet has just been told of to have reached its memory. */
+    private static final int WHISTLE_ECHO_TICKS = 5;
     /** Ask, wait for the answer, walk over, hand over, play: and for the other, wait for the guest, play. */
     private static final int SOCIALIZE_STEPS = 5;
     private static final int COOPERATE_STEPS = 2;
@@ -159,7 +167,8 @@ final class ErrandScenarios {
         Map.entry(ErrandIds.WANDER, ErrandScenarios::wander),
         Map.entry(ErrandIds.STAY, ErrandScenarios::stay),
         Map.entry(ErrandIds.SOCIALIZE, ErrandScenarios::socialize),
-        Map.entry(ErrandIds.COOPERATE, ErrandScenarios::cooperate));
+        Map.entry(ErrandIds.COOPERATE, ErrandScenarios::cooperate),
+        Map.entry(ErrandIds.ANSWER_WHISTLE, ErrandScenarios::answerWhistle));
 
     private ErrandScenarios() {
     }
@@ -190,6 +199,25 @@ final class ErrandScenarios {
         pet.tame(owner);
         pet.setPetDirective(PetDirective.FOLLOW);
         return new Scenario(pet, 1, ran -> Optional.empty());
+    }
+
+    /**
+     * A wild pet in an empty yard and a whistle blown across it, which the pet is told of as the blow would tell it, and
+     * again whenever its curiosity has run out, so that the errand is under way for as long as the case cuts it short. It
+     * walks over and looks at the spot. Whatever step it is cut short at, the walk and the gaze are gone with it.
+     */
+    private static Scenario answerWhistle(GameTestHelper helper) {
+        AbstractPet pet = GameTestKit.wildPet(helper, new BlockPos(4, STAND, 8));
+        GlobalPos blown = GlobalPos.of(helper.getLevel().dimension(), helper.absolutePos(new BlockPos(11, STAND, 8)));
+        long[] told = {-WHISTLE_ECHO_TICKS};
+        helper.onEachTick(() -> {
+            long now = helper.getLevel().getGameTime();
+            if (!pet.getBrain().hasMemoryValue(WhistleHeard.type()) && now - told[0] > WHISTLE_ECHO_TICKS) {
+                told[0] = now;
+                PetMind.post(pet, new Message.WhistleHeard(blown, now, now + WHISTLE_INTEREST_TICKS));
+            }
+        });
+        return new Scenario(pet, 2, ran -> Optional.empty());
     }
 
     /**

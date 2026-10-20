@@ -231,13 +231,17 @@ public final class ErrandTunings {
 
     /**
      * @param speed how fast it walks to the spot
-     * @param closeEnough how near the spot it comes: near enough to look, not so near as to crowd
+     * @param closeEnough how near the spot it comes, by blocks: near enough to look, not so near as to crowd; the brain's
+     *                    mover stops the pet when it is this many blocks away from the spot's block
+     * @param arriveDistance how near the spot, as the crow flies, the pet counts as there: a little over the blocks it
+     *                       comes to, since the middle of the block it stops in can be up to half a block further
      * @param lookRange how far from the spot the blower may have wandered and still be the one looked at
      */
-    public record AnswerWhistle(float speed, int closeEnough, double lookRange) {
+    public record AnswerWhistle(float speed, int closeEnough, double arriveDistance, double lookRange) {
         public static final Codec<AnswerWhistle> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Fields.SPEED.fieldOf("speed").forGetter(AnswerWhistle::speed),
             Fields.BLOCKS.fieldOf("close_enough").forGetter(AnswerWhistle::closeEnough),
+            Fields.DISTANCE.fieldOf("arrive_distance").forGetter(AnswerWhistle::arriveDistance),
             Fields.DISTANCE.fieldOf("look_range").forGetter(AnswerWhistle::lookRange)
         ).apply(instance, AnswerWhistle::new));
     }

@@ -1,6 +1,5 @@
 package com.dwinovo.chiikawa.platform;
 
-import com.dwinovo.chiikawa.entity.brain.PetActivities;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPlacesSensor;
@@ -13,7 +12,6 @@ import com.dwinovo.chiikawa.qualification.QualificationCondition;
 import java.util.function.Supplier;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.ai.sensing.SensorType;
-import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.neoforged.bus.api.IEventBus;
@@ -24,8 +22,6 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAccess {
     private static final DeferredRegister<SensorType<?>> SENSOR_TYPES =
         DeferredRegister.create(Registries.SENSOR_TYPE, Constants.MOD_ID);
-    private static final DeferredRegister<Activity> ACTIVITIES =
-        DeferredRegister.create(Registries.ACTIVITY, Constants.MOD_ID);
     private static final DeferredRegister<MenuType<?>> MENUS =
         DeferredRegister.create(Registries.MENU, Constants.MOD_ID);
     private static final DeferredRegister<LootItemConditionType> LOOT_CONDITIONS =
@@ -45,9 +41,6 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
     private static final DeferredHolder<SensorType<?>, SensorType<PetSocialSensor>> PET_SOCIAL_SENSOR =
         SENSOR_TYPES.register("pet_social_sensor", () -> new SensorType<>(PetSocialSensor::new));
 
-    private static final DeferredHolder<Activity, Activity> ANSWER_WHISTLE =
-        ACTIVITIES.register("answer_whistle", () -> new Activity(PetActivities.name("answer_whistle")));
-
     private static final DeferredHolder<MenuType<?>, MenuType<PetBackpackMenu>> PET_BACKPACK =
         MENUS.register("pet_backpack", () -> IMenuTypeExtension.create((containerId, inventory, buf) ->
             new PetBackpackMenu(containerId, inventory, PetBackpackMenu.OPENING_DATA.decode(buf))
@@ -55,7 +48,6 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
 
     public static void register(IEventBus modEventBus) {
         SENSOR_TYPES.register(modEventBus);
-        ACTIVITIES.register(modEventBus);
         MENUS.register(modEventBus);
         LOOT_CONDITIONS.register(modEventBus);
     }
@@ -88,11 +80,6 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
     @Override
     public Supplier<LootItemConditionType> qualificationCondition() {
         return QUALIFICATION_CONDITION;
-    }
-
-    @Override
-    public Supplier<Activity> answerWhistleActivity() {
-        return ANSWER_WHISTLE;
     }
 
     @Override

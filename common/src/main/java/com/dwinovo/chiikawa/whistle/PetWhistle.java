@@ -1,27 +1,23 @@
 package com.dwinovo.chiikawa.whistle;
 
-import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
-import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
-import com.dwinovo.chiikawa.init.InitMemory;
+import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
+import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.qualification.PetExams;
-import com.dwinovo.chiikawa.voice.PetSpeech;
-import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.dwinovo.chiikawa.whistle.WhistleHearing.Hearing;
-import java.util.Optional;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * Blowing a whistle for the pets near the blower, and the pets answering. Knows nothing
- * about the item that was blown: the order and how a whistle behaves are handed in.
+ * Blowing a whistle for the pets near the blower. Knows nothing about the item that was blown: the order
+ * and how a whistle behaves are handed in, and who hears it is {@link WhistleHearing}'s to say.
  *
- * <p>The blower's own pets each take the order after a wait of their own, held as a
- * {@link WhistleCall} until {@link #hear} finds it due. Wild pets that hear a call come
- * over to look for a while, held as a {@link WhistleHeard} that an intent answers; they
+ * <p>What a pet makes of the whistle is its own to do: this only tells it. The blower's own pets are told
+ * the order, and each takes it after a wait of its own, see {@link Message.WhistleOrder}. Wild pets that hear a
+ * call are told where it was blown from and for how long it interests them, see {@link Message.WhistleHeard}; they
  * are never tamed by it and their order is never touched.
  */
 public final class PetWhistle {
@@ -38,7 +34,7 @@ public final class PetWhistle {
         }
     }
 
-    /** Gives every pet within earshot of {@code owner} the order, or its curiosity. */
+    /** Tells every pet within earshot of {@code owner} the order, or what has caught its curiosity. */
     public static Heard blow(ServerPlayer owner, PetDirective order, WhistleSettings settings) {
         ServerLevel level = owner.serverLevel();
         long now = level.getGameTime();
@@ -50,17 +46,15 @@ public final class PetWhistle {
             Hearing hearing = WhistleHearing.of(owner.getUUID(), order, PetOwnership.of(pet),
                 pet.level() == level, pet.distanceToSqr(owner), settings.range(),
                 PetExams.seatedAtExam(pet));
-            long at = now + pet.getRandom().nextInt(settings.reactDelayTicks() + 1);
             switch (hearing) {
                 case OWNED -> {
-                    pet.getBrain().setMemory(InitMemory.WHISTLE_CALL.get(), new WhistleCall(order, at));
+                    PetMind.post(pet, new Message.WhistleOrder(order, settings.reactDelayTicks()));
                     owned++;
                 }
                 case WILD -> {
-                    // The expiry counts from now, so the wait is part of how long it is interested.
-                    pet.getBrain().setMemoryWithExpiry(InitMemory.WHISTLE_HEARD.get(), new WhistleHeard(where, at),
-                        at - now + settings.curiousTicks());
-                    PetMind.nudge(pet, "whistle");
+                    // The wait counts from now, so it is part of how long the pet is interested.
+                    long from = now + pet.getRandom().nextInt(settings.reactDelayTicks() + 1);
+                    PetMind.post(pet, new Message.WhistleHeard(where, from, from + settings.curiousTicks()));
                     wild++;
                 }
                 case DEAF -> {
@@ -68,26 +62,5 @@ public final class PetWhistle {
             }
         }
         return new Heard(owned, wild);
-    }
-
-    /**
-     * Takes the order the pet was whistled, once its wait is over. Called every tick from
-     * the pet's own server step, so it only reads a memory until there is something to do.
-     */
-    public static void hear(AbstractPet pet) {
-        Optional<WhistleCall> call = pet.getBrain().getMemory(InitMemory.WHISTLE_CALL.get());
-        if (call.isEmpty() || pet.level().getGameTime() < call.get().at()) {
-            return;
-        }
-        pet.getBrain().eraseMemory(InitMemory.WHISTLE_CALL.get());
-        // A pet let go of since the blow has no order left to take.
-        if (!(PetOwnership.of(pet) instanceof PetOwnership.Owned)) {
-            return;
-        }
-        pet.setPetDirective(call.get().order());
-        if (call.get().order() == PetDirective.FOLLOW) {
-            pet.triggerReaction(PetReaction.HAPPY);
-            PetSpeech.say(pet, VoiceMoment.WHISTLE);
-        }
     }
 }

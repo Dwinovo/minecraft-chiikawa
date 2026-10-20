@@ -21,7 +21,6 @@ import com.dwinovo.chiikawa.utils.BrainUtils;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
 import com.dwinovo.chiikawa.entity.job.api.PetCapability;
 import com.dwinovo.chiikawa.init.InitMemory;
-import com.dwinovo.chiikawa.whistle.PetWhistle;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.init.InitSensor;
 import com.dwinovo.chiikawa.item.BagItem;
@@ -226,7 +225,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitMemory.INTERACTION_PLAN.get(),
         InitMemory.SOCIAL_COOLDOWNS.get(),
         InitMemory.LAST_SAID.get(),
-        InitMemory.WHISTLE_CALL.get(),
         InitMemory.WHISTLE_HEARD.get(),
         InitMemory.PHOTO_COOLDOWN.get(),
         InitMemory.GIFT_COOLDOWN.get(),
@@ -323,26 +321,28 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * <p>A spot is only used when its block column is loaded, it stands on solid
      * ground that isn't harmful, the pet's box there has no collision, no liquid
      * and no harmful blocks, and it isn't right on top of the owner. When no spot
-     * qualifies the pet stays where it is.
+     * qualifies the pet stays where it is. A pet that is moved is told so, see
+     * {@link Message.Moved}, and is left to put right what it was doing.
      *
      * @param level the pet's (and owner's) server level
      * @param owner the entity to teleport next to
+     * @param cause what is moving it, as a short key for the pet's log
      * @return whether the pet was moved
      */
-    public boolean teleportToOwner(ServerLevel level, LivingEntity owner) {
+    public boolean teleportToOwner(ServerLevel level, LivingEntity owner, String cause) {
         BlockPos base = owner.blockPosition();
         for (int i = 0; i < TELEPORT_ATTEMPTS; i++) {
             int dx = Mth.nextInt(getRandom(), -3, 3);
             int dy = Mth.nextInt(getRandom(), -1, 1);
             int dz = Mth.nextInt(getRandom(), -3, 3);
-            if (tryTeleportNear(level, owner, base.offset(dx, dy, dz))) {
+            if (tryTeleportNear(level, owner, base.offset(dx, dy, dz), cause)) {
                 return true;
             }
         }
         return false;
     }
 
-    private boolean tryTeleportNear(ServerLevel level, LivingEntity owner, BlockPos start) {
+    private boolean tryTeleportNear(ServerLevel level, LivingEntity owner, BlockPos start, String cause) {
         double x = start.getX() + 0.5;
         double z = start.getZ() + 0.5;
         // Don't land on the owner's head/feet.
@@ -379,12 +379,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         teleportTo(x, y, z);
         resetFallDistance();
         getNavigation().stop();
-        // Forget where we were heading so the pet doesn't try to walk back.
-        Brain<AbstractPet> brain = getBrain();
-        brain.eraseMemory(MemoryModuleType.WALK_TARGET);
-        brain.eraseMemory(MemoryModuleType.LOOK_TARGET);
-        brain.eraseMemory(MemoryModuleType.ATTACK_TARGET);
-        brain.eraseMemory(MemoryModuleType.PATH);
+        // What it was heading for, looking at and doing is for its mind to put right, so that the pet doesn't try to walk back.
+        PetMind.post(this, new Message.Moved(cause));
         return true;
     }
 
@@ -587,7 +583,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
         // Universal activities present in every brain.
         BrainUtils.addCoreTasks(brain);
-        BrainUtils.addWhistleTasks(brain);
 
         brain.setCoreActivities(java.util.Set.of(Activity.CORE));
         brain.setDefaultActivity(Activity.IDLE);
@@ -633,7 +628,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
             applyEagerness();
         }
         PetExams.upkeep(this);
-        PetWhistle.hear(this);
         mind.tick(serverLevel);
         getBrain().tick(serverLevel, this);
         super.customServerAiStep();
