@@ -10,6 +10,10 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.PetFollowKeeper;
 import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
+import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
+import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
+import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
@@ -34,6 +38,8 @@ public final class FollowGameTests {
     private static final BlockPos HERE = new BlockPos(4, STAND, 4);
     /** Well past the distance a following pet is allowed to fall behind. */
     private static final BlockPos LEFT_BEHIND = new BlockPos(30, STAND, 30);
+    /** Far enough from its owner for a pet to set off after it, and within what it acts in. */
+    private static final int CATCHING_UP = 10;
 
     @BeforeBatch(batch = BATCH)
     public static void settle(ServerLevel level) {
@@ -98,6 +104,41 @@ public final class FollowGameTests {
 
         helper.assertFalse(caughtUp(pet, owner), "a wild pet was fetched to somebody it does not belong to");
         helper.succeed();
+    }
+
+    /**
+     * Arriving at the owner's side is the end of following, not giving up on it: the pet rests from nothing, and follows on
+     * the moment the owner moves off again.
+     */
+    @GameTest(template = "floor32", batch = BATCH, timeoutTicks = 400)
+    public static void a_pet_that_has_arrived_follows_on_as_soon_as_its_owner_moves_off(GameTestHelper helper) {
+        ServerPlayer owner = owner(helper);
+        AbstractPet pet = following(helper, owner);
+        long[] movedOff = {Long.MAX_VALUE};
+        BlockPos ahead = helper.absolutePos(new BlockPos(HERE.getX() + CATCHING_UP, STAND, HERE.getZ()));
+        pet.teleportTo(ahead.getX() + 0.5, ahead.getY(), ahead.getZ() + 0.5);
+
+        helper.startSequence()
+            .thenWaitUntil(() -> helper.assertTrue(arrivals(pet).anyMatch(ended -> ended.outcome() instanceof Outcome.Done),
+                "the pet never arrived at its owner's side"))
+            .thenExecute(() -> {
+                helper.assertTrue(arrivals(pet).noneMatch(ended -> !(ended.outcome() instanceof Outcome.Done)),
+                    "the pet gave up on following when it arrived");
+                BlockPos off = helper.absolutePos(new BlockPos(HERE.getX() + CATCHING_UP, STAND, HERE.getZ()));
+                owner.teleportTo(off.getX() + 0.5, off.getY(), off.getZ() + 0.5);
+                movedOff[0] = helper.getLevel().getGameTime();
+            })
+            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().log().entries().stream().anyMatch(entry ->
+                    entry instanceof DecisionLog.Switched switched && ErrandIds.FOLLOW_OWNER.equals(switched.to())
+                        && switched.gameTime() > movedOff[0]),
+                "the pet did not follow on"))
+            .thenSucceed();
+    }
+
+    private static Stream<DecisionLog.Ended> arrivals(AbstractPet pet) {
+        return pet.getMind().log().entries().stream()
+            .filter(entry -> entry instanceof DecisionLog.Ended ended && ended.errand().equals(ErrandIds.FOLLOW_OWNER))
+            .map(DecisionLog.Ended.class::cast);
     }
 
     /** Somebody standing in the test area for a pet to belong to and fall behind. */
