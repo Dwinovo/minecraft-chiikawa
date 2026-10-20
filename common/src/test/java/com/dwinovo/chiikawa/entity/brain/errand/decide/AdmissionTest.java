@@ -95,7 +95,8 @@ class AdmissionTest {
 
     @Test
     void anErrandsOwnConditionsComeFirst() {
-        assertEquals("intent.chiikawa.fail.shop_resting", verdict(ErrandIds.SHOP, shopAt(40).shopResting()));
+        assertEquals("intent.chiikawa.fail.board_resting",
+            verdict(ErrandIds.TAKE_TASK, TestView.at(HOME, FREE).offeringBoard(east(40)).takeTaskResting()));
     }
 
     @Test
