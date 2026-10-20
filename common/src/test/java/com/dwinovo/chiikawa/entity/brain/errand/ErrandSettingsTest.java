@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettingsLoader.Loaded;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSpec;
+import com.dwinovo.chiikawa.task.BoardSlips;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -37,6 +38,11 @@ class ErrandSettingsTest {
         { "priority": 50, "score": 0.6, "max_ticks": 600, "yields_to": ["chiikawa:harvest"], "overlays": [],
           "rests": { "done": 0, "gave_up": { "ticks": 200, "per": "subject" }, "interrupted": 0 },
           "tuning": { "speed": 0.8, "reach_sqr": 3.0 } }""";
+
+    private static final String TAKE_TASK = """
+        { "priority": 50, "score": 0.7, "max_ticks": 1200, "yields_to": [], "overlays": [],
+          "rests": { "done": 0, "gave_up": 600, "interrupted": 600 },
+          "tuning": { "speed": 0.7, "arrive_distance": 2, "take_distance": 3.0, "no_way_ticks": 100 } }""";
 
     private static final String HARVEST = PLANT.replace("\"yields_to\": [\"chiikawa:harvest\"]", "\"yields_to\": []");
 
@@ -207,6 +213,20 @@ class ErrandSettingsTest {
         assertEquals(Set.of(ErrandIds.HARVEST), loaded.settings().keySet(), "harvest itself is fine");
         assertEquals(1, loaded.errors().size());
         assertTrue(loaded.errors().get(0).contains("yields_to"), loaded.errors().get(0));
+    }
+
+    @Test
+    void theLoaderSwitchesOffAnErrandWhoseSettingsItsOwnRulesRefuse() {
+        Loaded loaded = ErrandSettingsLoader.load(files(Map.of(
+            ErrandIds.HARVEST, HARVEST,
+            ErrandIds.TAKE_TASK, TAKE_TASK.replace("\"max_ticks\": 1200", "\"max_ticks\": " + (BoardSlips.RESERVATION_TICKS + 1)))));
+
+        assertEquals(Set.of(ErrandIds.HARVEST), loaded.settings().keySet());
+        assertEquals(1, loaded.errors().size());
+        assertTrue(loaded.errors().get(0).contains("chiikawa:take_task") && loaded.errors().get(0).contains("max_ticks"),
+            loaded.errors().get(0));
+        assertEquals(Set.of(ErrandIds.HARVEST, ErrandIds.TAKE_TASK), ErrandSettingsLoader.load(files(Map.of(
+            ErrandIds.HARVEST, HARVEST, ErrandIds.TAKE_TASK, TAKE_TASK))).settings().keySet());
     }
 
     @Test

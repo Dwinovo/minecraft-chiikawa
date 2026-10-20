@@ -35,9 +35,6 @@ public final class InitActivity {
     // Sitting still.
     public static final Supplier<Activity> STAY =
         Services.PLATFORM_REGISTRY.stayActivity();
-    // Walking to a labor board to take a slip.
-    public static final Supplier<Activity> TAKE_TASK =
-        Services.PLATFORM_REGISTRY.takeTaskActivity();
     // Going over to another pet to play a scene with it.
     public static final Supplier<Activity> SOCIALIZE =
         Services.PLATFORM_REGISTRY.socializeActivity();
