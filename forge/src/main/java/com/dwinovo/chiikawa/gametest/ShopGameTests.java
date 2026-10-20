@@ -10,7 +10,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.network.ShopPayloads.ShopTradePayload;
@@ -178,7 +178,7 @@ public final class ShopGameTests {
         AbstractPet pet = holding(worker(helper, new BlockPos(3, STAND, 3)), Items.WOODEN_HOE);
         pet.getBackpack().addItem(new ItemStack(Items.EMERALD, WAGES));
 
-        helper.onEachTick(() -> helper.assertFalse(pet.getIntent().filter(PetIntents.SHOP::equals).isPresent(),
+        helper.onEachTick(() -> helper.assertFalse(pet.getIntent().filter(ErrandIds.SHOP::equals).isPresent(),
             "the pet set off for a shop outside its area"));
         helper.runAtTickTime(LEAVE_IT_TICKS, () -> {
             helper.assertTrue(Wallet.count(pet.getBackpack()) == WAGES, "the pet went to a shop outside its area");

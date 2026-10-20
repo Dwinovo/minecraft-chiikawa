@@ -2,8 +2,8 @@ package com.dwinovo.chiikawa.camera;
 
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.brain.intent.DayPhase;
-import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
+import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.impl.HachiwarePet;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
@@ -199,7 +199,7 @@ public final class PhotoScout {
 
     /** With nothing to do: sitting where it was told to, or wandering about. */
     private static boolean idle(AbstractPet pet) {
-        return pet.getIntent().map(intent -> intent.equals(PetIntents.WANDER) || intent.equals(PetIntents.STAY)).orElse(true);
+        return pet.getIntent().map(intent -> intent.equals(ErrandIds.WANDER) || intent.equals(ErrandIds.STAY)).orElse(true);
     }
 
     /**
