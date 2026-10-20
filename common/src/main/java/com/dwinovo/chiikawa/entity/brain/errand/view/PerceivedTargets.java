@@ -15,7 +15,8 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
  * <p>The blocks of work the farmer sensor remembers are shown only while they still are what they were
  * remembered as, as an item is only while it is lying there and a foe only while it is alive and the pet's to fight:
  * the sensors look again every second or less, and a pet that has just reaped a crop is not to set off for it once
- * more in the meantime.
+ * more in the meantime. Of the blocks it remembers of a kind the first that still holds is shown, so the next crop of
+ * the field is known the moment the last is reaped and the errands that yield to harvesting are not let through in the gap.
  */
 public record PerceivedTargets(
     Optional<AttackTarget> attackTarget,

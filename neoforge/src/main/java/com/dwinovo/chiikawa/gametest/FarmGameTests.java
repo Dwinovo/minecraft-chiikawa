@@ -13,6 +13,8 @@ import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.utils.Utils;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
@@ -162,6 +164,40 @@ public final class FarmGameTests {
                 + pet.getIntent().map(Object::toString).orElse("doing nothing")
                 + " and had been told about a container at "
                 + pet.getBrain().getMemory(InitMemory.CONTAINER_POS.get()).map(Object::toString).orElse("nowhere"));
+        });
+    }
+
+    /**
+     * The harvest is carried to the chest once the field is reaped, not after every crop: a farmer beside a field of ripe
+     * wheat knows the next crop the moment it has reaped one, so it is never between two crops with nothing to harvest
+     * and a chest to run to. The case reaps nine crops, and the pet may set off for the chest only when none is left ripe.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WORK_TICKS)
+    public static void a_farmer_reaps_the_field_before_it_carries_the_harvest_away(GameTestHelper helper) {
+        AbstractPet pet = holding(worker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
+        List<BlockPos> field = new ArrayList<>();
+        for (int x = 6; x <= 8; x++) {
+            for (int z = 3; z <= 5; z++) {
+                field.add(new BlockPos(x, STAND, z));
+                ripeWheat(helper, field.get(field.size() - 1));
+            }
+        }
+        BlockPos chest = new BlockPos(4, STAND, 8);
+        helper.setBlock(chest, Blocks.CHEST);
+        boolean[] setOffForTheChest = {false};
+
+        helper.onEachTick(() -> {
+            if (!setOffForTheChest[0] && pet.getIntent().filter(ErrandIds.DELIVER::equals).isPresent()) {
+                setOffForTheChest[0] = true;
+                long ripe = field.stream().filter(crop -> helper.getBlockState(crop).getBlock() == Blocks.WHEAT
+                    && helper.getBlockState(crop).getValue(CropBlock.AGE) == CropBlock.MAX_AGE).count();
+                helper.assertTrue(ripe == 0, "the pet set off for the chest with " + ripe + " ripe crops still in the field");
+            }
+        });
+        helper.succeedWhen(() -> {
+            helper.assertTrue(setOffForTheChest[0], "the pet never set off for the chest");
+            Container container = (Container) helper.getBlockEntity(chest);
+            helper.assertTrue(container.hasAnyMatching(stack -> stack.is(Items.WHEAT)), "the chest has no wheat in it");
         });
     }
 
