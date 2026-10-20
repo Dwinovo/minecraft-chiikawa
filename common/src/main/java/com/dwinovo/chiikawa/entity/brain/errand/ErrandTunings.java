@@ -20,6 +20,8 @@ public final class ErrandTunings {
         private static final Codec<Double> DISTANCE = Codec.doubleRange(0.0, 256.0);
         private static final Codec<Integer> BLOCKS = ExtraCodecs.NON_NEGATIVE_INT;
         private static final Codec<Integer> TICKS = ExtraCodecs.POSITIVE_INT;
+        /** A time that may be none at all: a pet that is not to wait. */
+        private static final Codec<Integer> PATIENCE = ExtraCodecs.NON_NEGATIVE_INT;
     }
 
     /** An errand with no numbers of its own: what it does is the same for every pet, or all in other files. */
@@ -61,27 +63,29 @@ public final class ErrandTunings {
      * @param speed how fast it walks to the item
      * @param pickupDistance how near it has to be to pick it up
      * @param maxWalkTicks the longest it walks to an item before it decides the item is not worth the walk
-     * @param noWayTicks how long it has to be unable to find a way before it gives up on one
+     * @param noWayTicks how long the mover may have no way to the item before the pet gives up on one: none gives
+     *                   up the first time it says so
      */
     public record PickUp(float speed, double pickupDistance, int maxWalkTicks, int noWayTicks) {
         public static final Codec<PickUp> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Fields.SPEED.fieldOf("speed").forGetter(PickUp::speed),
             Fields.DISTANCE.fieldOf("pickup_distance").forGetter(PickUp::pickupDistance),
             Fields.TICKS.fieldOf("max_walk_ticks").forGetter(PickUp::maxWalkTicks),
-            Fields.TICKS.fieldOf("no_way_ticks").forGetter(PickUp::noWayTicks)
+            Fields.PATIENCE.fieldOf("no_way_ticks").forGetter(PickUp::noWayTicks)
         ).apply(instance, PickUp::new));
     }
 
     /**
      * @param speed how fast it walks to the block
      * @param reachSqr how near to the block's middle it has to be to work it, squared
-     * @param noWayTicks how long it has to be unable to find a way before it gives up on one
+     * @param noWayTicks how long the mover may have no way to the block before the pet gives up on one: none gives
+     *                   up the first time it says so
      */
     public record BlockWork(float speed, double reachSqr, int noWayTicks) {
         public static final Codec<BlockWork> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Fields.SPEED.fieldOf("speed").forGetter(BlockWork::speed),
             Codec.doubleRange(0.0, 65536.0).fieldOf("reach_sqr").forGetter(BlockWork::reachSqr),
-            Fields.TICKS.fieldOf("no_way_ticks").forGetter(BlockWork::noWayTicks)
+            Fields.PATIENCE.fieldOf("no_way_ticks").forGetter(BlockWork::noWayTicks)
         ).apply(instance, BlockWork::new));
     }
 
@@ -89,14 +93,15 @@ public final class ErrandTunings {
      * @param speed how fast it walks to the container
      * @param arriveDistance how near the walk gets, counted in blocks along each axis
      * @param reach how near it has to be to the container to put things in it
-     * @param noWayTicks how long it has to be unable to find a way before it gives up on one
+     * @param noWayTicks how long the mover may have no way to the container before the pet gives up on one: none gives
+     *                   up the first time it says so
      */
     public record Deliver(float speed, int arriveDistance, double reach, int noWayTicks) {
         public static final Codec<Deliver> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Fields.SPEED.fieldOf("speed").forGetter(Deliver::speed),
             Fields.BLOCKS.fieldOf("arrive_distance").forGetter(Deliver::arriveDistance),
             Fields.DISTANCE.fieldOf("reach").forGetter(Deliver::reach),
-            Fields.TICKS.fieldOf("no_way_ticks").forGetter(Deliver::noWayTicks)
+            Fields.PATIENCE.fieldOf("no_way_ticks").forGetter(Deliver::noWayTicks)
         ).apply(instance, Deliver::new));
     }
 
@@ -147,14 +152,15 @@ public final class ErrandTunings {
      * @param speed how fast it walks to the board
      * @param arriveDistance how near the walk gets, counted in blocks along each axis; the board is solid
      * @param takeDistance how near it has to be to take a slip
-     * @param noWayTicks how long it has to be unable to find a way to the board before it gives up on one
+     * @param noWayTicks how long the mover may have no way to the board before the pet gives up on one: none gives
+     *                   up the first time it says so
      */
     public record TakeTask(float speed, int arriveDistance, double takeDistance, int noWayTicks) {
         public static final Codec<TakeTask> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Fields.SPEED.fieldOf("speed").forGetter(TakeTask::speed),
             Fields.BLOCKS.fieldOf("arrive_distance").forGetter(TakeTask::arriveDistance),
             Fields.DISTANCE.fieldOf("take_distance").forGetter(TakeTask::takeDistance),
-            Fields.TICKS.fieldOf("no_way_ticks").forGetter(TakeTask::noWayTicks)
+            Fields.PATIENCE.fieldOf("no_way_ticks").forGetter(TakeTask::noWayTicks)
         ).apply(instance, TakeTask::new));
     }
 
@@ -199,14 +205,15 @@ public final class ErrandTunings {
     /**
      * @param speed how fast it walks to the chair
      * @param arriveDistance how near the chair it has to be to sit down on it
-     * @param noWayTicks how long it has to be unable to find a way to the chair before it gives up on one
+     * @param noWayTicks how long the mover may have no way to the chair before the pet gives up on one: none gives
+     *                   up the first time it says so
      * @param handInTicks how long it stays in its chair handing the paper in: the {@code hand_in} animation's second
      */
     public record TakeExam(float speed, double arriveDistance, int noWayTicks, int handInTicks) {
         public static final Codec<TakeExam> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Fields.SPEED.fieldOf("speed").forGetter(TakeExam::speed),
             Fields.DISTANCE.fieldOf("arrive_distance").forGetter(TakeExam::arriveDistance),
-            Fields.TICKS.fieldOf("no_way_ticks").forGetter(TakeExam::noWayTicks),
+            Fields.PATIENCE.fieldOf("no_way_ticks").forGetter(TakeExam::noWayTicks),
             Fields.TICKS.fieldOf("hand_in_ticks").forGetter(TakeExam::handInTicks)
         ).apply(instance, TakeExam::new));
     }
@@ -214,14 +221,15 @@ public final class ErrandTunings {
     /**
      * @param speed how fast it walks to the chair
      * @param readingDistance how near the chair it has to be to read what is on the desk
-     * @param noWayTicks how long it has to be unable to find a way to the chair before it gives up on one
+     * @param noWayTicks how long the mover may have no way to the chair before the pet gives up on one: none gives
+     *                   up the first time it says so
      * @param readingTicks how long it stands reading the results before it takes them in
      */
     public record CheckResults(float speed, double readingDistance, int noWayTicks, int readingTicks) {
         public static final Codec<CheckResults> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Fields.SPEED.fieldOf("speed").forGetter(CheckResults::speed),
             Fields.DISTANCE.fieldOf("reading_distance").forGetter(CheckResults::readingDistance),
-            Fields.TICKS.fieldOf("no_way_ticks").forGetter(CheckResults::noWayTicks),
+            Fields.PATIENCE.fieldOf("no_way_ticks").forGetter(CheckResults::noWayTicks),
             Fields.TICKS.fieldOf("reading_ticks").forGetter(CheckResults::readingTicks)
         ).apply(instance, CheckResults::new));
     }
@@ -246,7 +254,8 @@ public final class ErrandTunings {
      * @param lookBackTicks how long whoever is photographed keeps looking at the camera
      * @param viewDistance how far a view is looked at, for the pet to turn its head towards
      * @param maxWalkTicks the longest it walks to somebody before it decides they are not worth the walk
-     * @param noWayTicks how long it has to be unable to find a way before it gives up on one
+     * @param noWayTicks how long the mover may have no way to who it photographs before the pet gives up on one: none gives
+     *                   up the first time it says so
      */
     public record TakePhoto(float speed, int standBack, int holdTicks, int lookBackTicks, double viewDistance,
                             int maxWalkTicks, int noWayTicks) {
@@ -257,7 +266,7 @@ public final class ErrandTunings {
             Fields.TICKS.fieldOf("look_back_ticks").forGetter(TakePhoto::lookBackTicks),
             Fields.DISTANCE.fieldOf("view_distance").forGetter(TakePhoto::viewDistance),
             Fields.TICKS.fieldOf("max_walk_ticks").forGetter(TakePhoto::maxWalkTicks),
-            Fields.TICKS.fieldOf("no_way_ticks").forGetter(TakePhoto::noWayTicks)
+            Fields.PATIENCE.fieldOf("no_way_ticks").forGetter(TakePhoto::noWayTicks)
         ).apply(instance, TakePhoto::new));
     }
 }
