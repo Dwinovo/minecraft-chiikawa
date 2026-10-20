@@ -25,6 +25,7 @@ import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.testing.TestErrands;
 import com.dwinovo.chiikawa.testing.TestPhotos;
 import com.dwinovo.chiikawa.testing.TestView;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -143,8 +144,10 @@ class AdmissionTest {
     void errandsThatGoNowhereSayNothing() {
         TestView view = TestView.at(HOME, FREE).askedToPlay().withSong();
 
-        assertEquals(Optional.empty(), destination(ErrandIds.WANDER, view));
-        assertEquals(Optional.empty(), destination(ErrandIds.STAY, view));
+        // Pottering about has several ways to go about it, and none of them has anywhere to go.
+        for (ResourceLocation habitual : List.of(ErrandIds.WANDER, ErrandIds.STAY)) {
+            TestErrands.offers(habitual, view).forEach(offer -> assertEquals(Optional.empty(), offer.plan().destination(view)));
+        }
         assertEquals(Optional.empty(), destination(ErrandIds.COOPERATE, view));
         assertEquals(Optional.empty(), destination(ErrandIds.PLAY_MUSIC, view));
     }

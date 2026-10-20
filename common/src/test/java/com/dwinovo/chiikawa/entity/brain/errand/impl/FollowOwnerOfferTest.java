@@ -27,6 +27,8 @@ class FollowOwnerOfferTest {
     private static final GlobalPos OWNER = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     private static final PetAnchor FOLLOWING = TestAnchors.following(OWNER);
 
+    private static final FollowOwnerErrand.Heel HEEL = new FollowOwnerErrand.Heel();
+
     private final ErrandSettings<?> settings = ErrandSettingsData.all().get(ErrandIds.FOLLOW_OWNER);
 
     @BeforeAll
@@ -60,12 +62,13 @@ class FollowOwnerOfferTest {
     }
 
     @Test
-    void startsAtFollowStartAndContinuesUntilArrived() {
+    void startsAtFollowStartAndGoesOnForAsLongAsItFollowsTheOwner() {
         assertTrue(TestErrands.offers(ErrandIds.FOLLOW_OWNER, petAt(6, FOLLOWING)).isEmpty());
         assertEquals(1, TestErrands.offers(ErrandIds.FOLLOW_OWNER, petAt(7, FOLLOWING)).size());
 
-        assertTrue(TestErrands.stillWanted(ErrandIds.FOLLOW_OWNER, Heading.NOWHERE, petAt(3, FOLLOWING)).ok());
-        assertFalse(TestErrands.stillWanted(ErrandIds.FOLLOW_OWNER, Heading.NOWHERE,
+        // Arriving is the end of the step, not a reason to give up on the errand.
+        assertTrue(TestErrands.stillWanted(ErrandIds.FOLLOW_OWNER, HEEL, petAt(3, FOLLOWING)).ok());
+        assertTrue(TestErrands.stillWanted(ErrandIds.FOLLOW_OWNER, HEEL,
             petAt(TestAnchors.SETTINGS.follow().arrive(), FOLLOWING)).ok());
     }
 
@@ -77,7 +80,7 @@ class FollowOwnerOfferTest {
 
         assertTrue(TestErrands.offers(ErrandIds.FOLLOW_OWNER, view).isEmpty());
         assertEquals("intent.chiikawa.fail.owner_unavailable", TestErrands.whyNoOffer(ErrandIds.FOLLOW_OWNER, view).reasonKey());
-        assertFalse(TestErrands.stillWanted(ErrandIds.FOLLOW_OWNER, Heading.NOWHERE, view).ok());
+        assertFalse(TestErrands.stillWanted(ErrandIds.FOLLOW_OWNER, HEEL, view).ok());
     }
 
     @Test

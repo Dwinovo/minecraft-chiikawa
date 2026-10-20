@@ -57,7 +57,8 @@ import org.jetbrains.annotations.Nullable;
  * data, see {@link ErrandSettings}.
  *
  * <p>Runs before the brain ticks, so that the walk and the gaze it sets are carried out by the sinks
- * in the same tick.
+ * in the same tick. An errand that ends done is followed by the next in the same tick; one that is cut short or
+ * gives up is followed at the pet's next.
  *
  * <p>What a pet is told is handled in two halves, because the inbox is lost with the pet when it is
  * removed from the world, a chunk unloading included. The first half is {@link #keep}, run as the pet is
@@ -173,6 +174,16 @@ public final class PetMind {
             decide(now, trigger);
         }
         executor.tick(now);
+        if (executor.running().isEmpty() && endedDoneIn(now)) {
+            // An errand that did what it set out to hands over to the next in the tick it ends, so that a pet that goes
+            // from one short errand to the next, such as one habit to another, is never on none for a tick: the player
+            // is told what it is doing, and the checks that ask are answered, in every tick.
+            decide(now, "done");
+        }
+    }
+
+    private boolean endedDoneIn(long now) {
+        return log.lastEnded().filter(ended -> ended.gameTime() == now && ended.outcome() instanceof Outcome.Done).isPresent();
     }
 
     /** @return how each errand would fare now, without changing anything */

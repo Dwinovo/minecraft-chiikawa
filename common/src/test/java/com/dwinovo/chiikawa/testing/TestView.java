@@ -7,6 +7,7 @@ import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
+import com.dwinovo.chiikawa.entity.brain.errand.view.Onlooker;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
@@ -53,6 +54,7 @@ public final class TestView implements PetView {
     private boolean seatedAtExam;
     private Optional<GlobalPos> ownerPos = Optional.empty();
     private final Map<UUID, GlobalPos> creatures = new HashMap<>();
+    private final Map<Onlooker, UUID> onlookers = new HashMap<>();
 
     private TestView(GlobalPos pos, PetAnchor anchor) {
         this.pos = pos;
@@ -181,6 +183,12 @@ public final class TestView implements PetView {
         return this;
     }
 
+    /** Someone of this kind the pet can see, near enough for any habit of looking at them. */
+    public TestView onlooker(Onlooker kind, UUID who) {
+        this.onlookers.put(kind, who);
+        return this;
+    }
+
     /** Where the pet's owner is. */
     public TestView ownerPos(GlobalPos owner) {
         this.ownerPos = Optional.of(owner);
@@ -233,6 +241,12 @@ public final class TestView implements PetView {
     public Optional<GlobalPos> whereIs(UUID creature) {
         return Optional.ofNullable(creatures.get(creature))
             .or(() -> targets.attackTarget().filter(foe -> foe.id().equals(creature)).map(AttackTarget::where));
+    }
+
+    /** Whoever {@link #onlooker} told of, at any range. */
+    @Override
+    public Optional<UUID> nearestVisible(Onlooker kind, float range) {
+        return Optional.ofNullable(onlookers.get(kind));
     }
 
     @Override

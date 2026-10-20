@@ -5,8 +5,8 @@ import net.minecraft.core.GlobalPos;
 /**
  * The area a pet is allowed to act in, derived by {@link PetConstraints#anchorOf}.
  *
- * <p>Intents only start on targets within {@code reach}; while acting the pet may
- * go as far as {@code leash}, past which the anchor leash walks it back. The gap
+ * <p>Errands only start on targets within {@code reach}; while acting the pet may
+ * go as far as {@code leash}, past which it does nothing but walk back (see the wander errand). The gap
  * between the two is the pursuit margin that keeps a pet from flip-flopping
  * between chasing and being pulled back. Distances are measured between block
  * positions.

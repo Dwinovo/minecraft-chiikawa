@@ -14,7 +14,7 @@ import net.minecraft.core.GlobalPos;
  * @param where where the errand takes the pet, if anywhere in particular
  */
 public record Heading(Function<PetView, Optional<GlobalPos>> where) implements Plan {
-    /** For an errand that goes nowhere in particular: staying, wandering, playing where it stands. */
+    /** For an errand that goes nowhere in particular: playing where it stands. */
     public static final Heading NOWHERE = new Heading(view -> Optional.empty());
 
     @Override

@@ -4,8 +4,10 @@ import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings.Rests;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandTunings;
+import com.dwinovo.chiikawa.entity.brain.errand.overlay.Overlays;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSpec;
+import com.dwinovo.chiikawa.entity.brain.personality.IdleHabits;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.List;
 import java.util.Map;
@@ -21,12 +23,18 @@ import net.minecraft.resources.ResourceLocation;
  * about and staying put 10. Within a priority the score keeps the order the pet has always had.
  *
  * <p>The numbers in each tuning are the ones the behaviors have always had. An errand with no limit of
- * its own today (following, staying, wandering and fighting end when they stop being wanted) is given
- * a day; one that walks to something and does one thing to it, half a minute.
+ * its own today (following and fighting end when they stop being wanted) is given a day; one that walks to
+ * something and does one thing to it, half a minute; one that is a habit at a time, a little over the longest habit.
  */
 public final class ErrandSettingsData {
     /** A day: for an errand that ends when it stops being wanted, long enough that this never decides. */
     private static final int A_DAY = 24000;
+    /**
+     * The longest a habit of a pet with nothing to do can last, which is what a personality's habits are held to, and
+     * fifteen seconds over: sitting or wandering is a habit at a time, and the way back to the area it keeps to is walked
+     * in less.
+     */
+    private static final int LONGEST_HABIT = IdleHabits.LONGEST_TICKS + 300;
     /** Half a minute: to walk to something and do one thing to it. */
     private static final int HALF_A_MINUTE = 600;
 
@@ -48,8 +56,10 @@ public final class ErrandSettingsData {
         return Map.ofEntries(
             // Following is worth more the further the owner is, up to max_score; the score here is the least.
             entry(ErrandIds.FOLLOW_OWNER, errand(50, 0.5F, A_DAY, giveUp(20), new ErrandTunings.FollowOwner(1.0F, 1.0F))),
-            entry(ErrandIds.STAY, errand(10, 1.0F, A_DAY, giveUp(20), ErrandTunings.Untuned.NONE)),
-            entry(ErrandIds.WANDER, errand(10, 0.05F, A_DAY, giveUp(20), new ErrandTunings.Wander(0.6F, 4, 10, 100, 0.6F))),
+            // A habit of a pet with nothing to do is one short step, so the pet picks again between habits.
+            entry(ErrandIds.STAY, errand(10, 1.0F, LONGEST_HABIT, giveUp(20), ErrandTunings.Untuned.NONE)),
+            entry(ErrandIds.WANDER, errand(10, 0.05F, LONGEST_HABIT, giveUp(20), new ErrandTunings.Wander(0.6F, 4, 10, 100, 0.6F))
+                .withOverlays(Overlays.IDLE_CHATTER)),
             entry(ErrandIds.PICK_UP_ITEM, errand(30, 0.4F, HALF_A_MINUTE,
                 Rests.of(NONE, RestSpec.ticksPerSubject(40), NONE), new ErrandTunings.PickUp(0.7F, 1.5, 400, 0))),
             entry(ErrandIds.HARVEST, errand(50, 0.6F, HALF_A_MINUTE, blockWork, blockWorkTuning)),

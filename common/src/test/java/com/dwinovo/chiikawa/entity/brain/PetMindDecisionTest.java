@@ -47,6 +47,7 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.InclusiveRange;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import org.junit.jupiter.api.BeforeAll;
@@ -70,6 +71,9 @@ class PetMindDecisionTest {
     private static final int LOW = 10;
     private static final int MIDDLE = 50;
     private static final int HIGH = 80;
+    /** Pottering about is one way and nothing else, so that deciding to wander draws nothing among habits. */
+    private static final IdleHabits PAUSE_ONLY = new IdleHabits(new IdleHabits.Glance(0, 5.0F, new InclusiveRange<>(45)),
+        new IdleHabits.Glance(0, 5.0F, new InclusiveRange<>(45)), 0, new IdleHabits.Pause(1, new InclusiveRange<>(30, 60)));
 
     @BeforeAll
     static void shippedSettings() {
@@ -91,7 +95,7 @@ class PetMindDecisionTest {
     void aHigherPriorityWinsWhateverItsScore() {
         // A farmer who thinks the world of harvesting still drops it for a fight.
         Personality keen = new Personality(Map.of(ErrandIds.HARVEST, 100.0F), Map.of(), 0.0F, List.of(), List.of(),
-            IdleHabits.DEFAULT, Map.of());
+            PAUSE_ONLY, Map.of());
         TestView view = view().personality(keen).targets(fightAndCrop());
 
         assertEquals(ErrandIds.MELEE, decide(List.of(ErrandIds.HARVEST, ErrandIds.MELEE), view, NONE, FixedRandom.floats())
@@ -131,7 +135,7 @@ class PetMindDecisionTest {
     void noiseNeverLiftsALowerPriorityOverAHigherOne() {
         // The most noise a pet can have, all of it in favour of wandering, which it also fancies.
         Personality restless = new Personality(Map.of(ErrandIds.WANDER, 100.0F), Map.of(), 1.0F, List.of(), List.of(),
-            IdleHabits.DEFAULT, Map.of());
+            PAUSE_ONLY, Map.of());
         TestView view = view().personality(restless).targets(farm(true, false, false));
         List<ResourceLocation> offered = List.of(ErrandIds.WANDER, ErrandIds.HARVEST);
 
@@ -253,7 +257,7 @@ class PetMindDecisionTest {
     @Test
     void anErrandCarriesThePriorityAndWeighedScoreOfItsSettings() {
         Personality personality = new Personality(Map.of(ErrandIds.WANDER, 2.0F),
-            Map.of(DayPhase.NIGHT, Map.of(ErrandIds.WANDER, 3.0F)), 0.0F, List.of(), List.of(), IdleHabits.DEFAULT, Map.of());
+            Map.of(DayPhase.NIGHT, Map.of(ErrandIds.WANDER, 3.0F)), 0.0F, List.of(), List.of(), PAUSE_ONLY, Map.of());
         List<ResourceLocation> offered = List.of(ErrandIds.WANDER, ErrandIds.HARVEST);
         TestView day = view().personality(personality).phase(DayPhase.DAY);
         TestView night = view().personality(personality).phase(DayPhase.NIGHT);
@@ -270,7 +274,7 @@ class PetMindDecisionTest {
     void aPersonalityCannotMakeALowerPriorityOutrankAnExam() {
         // Wandering, scored as high as a personality may, against an exam.
         Personality restless = new Personality(Map.of(ErrandIds.WANDER, 100.0F), Map.of(), 1.0F,
-            List.of(), List.of(), IdleHabits.DEFAULT, Map.of());
+            List.of(), List.of(), PAUSE_ONLY, Map.of());
         TestView view = view().personality(restless).examDesk(GlobalPos.of(OVERWORLD, PET.pos().east(2)));
         List<ResourceLocation> offered = List.of(ErrandIds.WANDER, ErrandIds.TAKE_EXAM);
 
@@ -304,7 +308,7 @@ class PetMindDecisionTest {
         // personality may have.
         Personality inverted = new Personality(
             Map.of(ErrandIds.HARVEST, 0.1F, ErrandIds.PLANT, 5.0F, ErrandIds.DELIVER, 10.0F),
-            Map.of(DayPhase.DAY, Map.of(ErrandIds.PLANT, 2.0F)), 1.0F, List.of(), List.of(), IdleHabits.DEFAULT, Map.of());
+            Map.of(DayPhase.DAY, Map.of(ErrandIds.PLANT, 2.0F)), 1.0F, List.of(), List.of(), PAUSE_ONLY, Map.of());
         TestView everything = view().personality(inverted).targets(farm(true, true, true));
 
         for (float noise = 0.0F; noise <= 1.0F; noise += 0.125F) {
@@ -423,7 +427,7 @@ class PetMindDecisionTest {
     }
 
     private static TestView view() {
-        return TestView.at(PET, TestAnchors.free(PET));
+        return TestView.at(PET, TestAnchors.free(PET)).personality(noisy(0.0F));
     }
 
     /** A free pet with an item to pick up and a pet to call on. */
@@ -452,7 +456,7 @@ class PetMindDecisionTest {
     }
 
     private static Personality noisy(float randomness) {
-        return new Personality(Map.of(), Map.of(), randomness, List.of(), List.of(), IdleHabits.DEFAULT, Map.of());
+        return new Personality(Map.of(), Map.of(), randomness, List.of(), List.of(), PAUSE_ONLY, Map.of());
     }
 
     private static List<ResourceLocation> farm() {

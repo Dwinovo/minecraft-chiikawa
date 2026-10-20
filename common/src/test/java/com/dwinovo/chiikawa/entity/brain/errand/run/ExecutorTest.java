@@ -13,9 +13,11 @@ import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
 import com.dwinovo.chiikawa.entity.brain.errand.Plan;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
+import com.dwinovo.chiikawa.entity.brain.errand.overlay.Overlays;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
 import com.dwinovo.chiikawa.testing.FakeHandle;
 import com.dwinovo.chiikawa.testing.TestRests;
+import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -329,6 +331,35 @@ class ExecutorTest {
         assertEquals(ERRAND, ended.errand());
         assertEquals(12L, ended.gameTime());
         assertEquals(2L, ended.ranTicks());
+    }
+
+    @Test
+    void anOverlayOfTheSettingsRunsBesideTheStepForAsLongAsTheErrandDoes() {
+        ErrandSettings<String> chatting = new ErrandSettings<>(settings.priority(), settings.score(), MAX_TICKS, settings.rests(),
+            List.of(), List.of(Overlays.IDLE_CHATTER), Optional.empty(), "");
+        ScriptedStep step = ScriptedStep.running().then(StepStatus.RUNNING).then(StepStatus.RUNNING).then(StepStatus.DONE);
+        executor.start(ERRAND, PLAN, chatting, Routine.single(step), 0);
+
+        executor.tick(1);
+        executor.tick(2);
+        executor.tick(3);
+
+        assertEquals(List.of(VoiceMoment.IDLE, VoiceMoment.IDLE), handle.said, "once for each tick the errand goes on, not the one it ends in");
+        assertFalse(executor.running().isPresent());
+
+        executor.tick(4);
+
+        assertEquals(2, handle.said.size(), "a pet on no errand has no overlay");
+    }
+
+    @Test
+    void anErrandWithNoOverlaysSaysNothingOnTheSide() {
+        start(Routine.single(ScriptedStep.running()), 0);
+
+        executor.tick(1);
+        executor.tick(2);
+
+        assertEquals(List.of(), handle.said);
     }
 
     private Executor executorOver(TestRests.Store rests, DecisionLog decisions) {

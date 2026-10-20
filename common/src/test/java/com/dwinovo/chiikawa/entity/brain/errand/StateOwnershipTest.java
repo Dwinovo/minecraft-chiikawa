@@ -63,10 +63,8 @@ class StateOwnershipTest {
             Pattern.compile(WRITE + "MemoryModuleType\\.(?:WALK_TARGET|LOOK_TARGET|PATH)\\b"
                 + "|\\bsetWalkAndLookTargetMemories\\(|\\blookAt(?:Entity|EachOther|Entities)\\("),
             Set.of(HANDLE),
-            Set.of(PET, BEHAVIORS + "idle/GlanceBehavior.java", BEHAVIORS + "social/CooperateBehavior.java",
-                BEHAVIORS + "social/SocializeBehavior.java", BEHAVIORS + "tameable/AnchorLeashBehavior.java",
-                BEHAVIORS + "tameable/AnswerWhistleBehavior.java", BEHAVIORS + "tameable/FollowOwnerBehavior.java",
-                BEHAVIORS + "tameable/RandomWalkTask.java", BEHAVIORS + "tameable/SitBehavior.java")),
+            Set.of(PET, BEHAVIORS + "social/CooperateBehavior.java", BEHAVIORS + "social/SocializeBehavior.java",
+                BEHAVIORS + "tameable/AnswerWhistleBehavior.java")),
         new Rule("a rest",
             Pattern.compile(WRITE + "InitMemory\\.(?:PHOTO_COOLDOWN|GIFT_COOLDOWN|SHOP_COOLDOWN|TAKE_TASK_COOLDOWN"
                 + "|MUSICIAN_RESTING|SOCIAL_COOLDOWNS|ERRAND_RESTS|SUBJECT_RESTS)\\b"),

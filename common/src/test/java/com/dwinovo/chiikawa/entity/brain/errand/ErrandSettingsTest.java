@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettingsLoader.Loaded;
+import com.dwinovo.chiikawa.entity.brain.errand.overlay.Overlays;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSpec;
 import com.dwinovo.chiikawa.task.BoardSlips;
@@ -14,6 +15,7 @@ import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -92,6 +94,14 @@ class ErrandSettingsTest {
         ErrandSettings<?> settings = parse(ErrandIds.PLANT, PLANT.replace("\"overlays\": [],", "\"overlays\": [], \"start_voice\": \"hunt\",")).getOrThrow();
 
         assertEquals(Optional.of(VoiceMoment.HUNT), settings.startVoice());
+    }
+
+    @Test
+    void anOverlayIsOneOfTheOnesTheModHasAndAnyOtherSwitchesTheErrandOff() {
+        ErrandSettings<?> chatting = parse(ErrandIds.PLANT, PLANT.replace("\"overlays\": []", "\"overlays\": [\"chiikawa:idle_chatter\"]")).getOrThrow();
+
+        assertEquals(List.of(Overlays.IDLE_CHATTER), chatting.overlays());
+        assertTrue(parse(ErrandIds.PLANT, PLANT.replace("\"overlays\": []", "\"overlays\": [\"chiikawa:idle_chater\"]")).isError());
     }
 
     @Test
