@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.task.tameable;
 
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
+import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.gifting.GiftErrand;
 import com.dwinovo.chiikawa.gifting.GiftPool;
 import com.dwinovo.chiikawa.gifting.GiftingSettings;
@@ -93,7 +93,7 @@ public class GiveGiftBehavior extends Behavior<AbstractPet> {
         }
         // Over, handed across or put back: the pet picks what to do next now, not at its next
         // turn, which would find the errand still its activity and set off on it again.
-        IntentSelector.requestReevaluate(pet);
+        PetMind.nudge(pet, "gift_over");
     }
 
     /** The errand is off: what was being carried goes back in the bag, or on the ground if the bag is full. */

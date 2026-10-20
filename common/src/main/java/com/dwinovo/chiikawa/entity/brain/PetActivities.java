@@ -19,8 +19,8 @@ import net.minecraft.world.entity.schedule.Activity;
  * The single entry point for adding activities to a pet brain.
  *
  * <p>Activities get no memory requirements: whether an activity may run is decided
- * entirely by its intent, so the selector can always enter the activity of the
- * intent it picked. Only the selector switches activities.
+ * entirely by its errand, so the pet's mind can always enter the activity of the
+ * errand it picked. Only a legacy step switches activities.
  */
 public final class PetActivities {
     private PetActivities() {

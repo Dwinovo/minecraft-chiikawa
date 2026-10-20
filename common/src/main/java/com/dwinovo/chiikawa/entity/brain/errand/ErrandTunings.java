@@ -2,8 +2,6 @@ package com.dwinovo.chiikawa.entity.brain.errand;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Map;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 
 /**
@@ -13,29 +11,6 @@ import net.minecraft.util.ExtraCodecs;
  * squared is named {@code _sqr} and given squared.
  */
 public final class ErrandTunings {
-    private static final Map<ResourceLocation, Codec<?>> CODECS = Map.ofEntries(
-        Map.entry(ErrandIds.FOLLOW_OWNER, FollowOwner.CODEC),
-        Map.entry(ErrandIds.STAY, Untuned.CODEC),
-        Map.entry(ErrandIds.WANDER, Wander.CODEC),
-        Map.entry(ErrandIds.PICK_UP_ITEM, PickUp.CODEC),
-        Map.entry(ErrandIds.HARVEST, BlockWork.CODEC),
-        Map.entry(ErrandIds.PLANT, BlockWork.CODEC),
-        Map.entry(ErrandIds.DELIVER, Deliver.CODEC),
-        Map.entry(ErrandIds.WEED, BlockWork.CODEC),
-        Map.entry(ErrandIds.PICK_MUSHROOM, BlockWork.CODEC),
-        Map.entry(ErrandIds.MELEE, Footwork.CODEC),
-        Map.entry(ErrandIds.RANGED, Ranged.CODEC),
-        Map.entry(ErrandIds.PLAY_MUSIC, PlayMusic.CODEC),
-        Map.entry(ErrandIds.TAKE_TASK, TakeTask.CODEC),
-        Map.entry(ErrandIds.SHOP, Shop.CODEC),
-        Map.entry(ErrandIds.GIFT_OWNER, GiftOwner.CODEC),
-        Map.entry(ErrandIds.SOCIALIZE, Socialize.CODEC),
-        Map.entry(ErrandIds.COOPERATE, Untuned.CODEC),
-        Map.entry(ErrandIds.TAKE_EXAM, TakeExam.CODEC),
-        Map.entry(ErrandIds.CHECK_RESULTS, CheckResults.CODEC),
-        Map.entry(ErrandIds.ANSWER_WHISTLE, AnswerWhistle.CODEC),
-        Map.entry(ErrandIds.TAKE_PHOTO, TakePhoto.CODEC));
-
     private ErrandTunings() {
     }
 
@@ -45,19 +20,6 @@ public final class ErrandTunings {
         private static final Codec<Double> DISTANCE = Codec.doubleRange(0.0, 256.0);
         private static final Codec<Integer> BLOCKS = ExtraCodecs.NON_NEGATIVE_INT;
         private static final Codec<Integer> TICKS = ExtraCodecs.POSITIVE_INT;
-    }
-
-    /**
-     * @param errand an errand's id
-     * @return the codec of that errand's {@code tuning}
-     * @throws IllegalArgumentException for an id that is not an errand's
-     */
-    public static Codec<?> codecOf(ResourceLocation errand) {
-        Codec<?> codec = CODECS.get(errand);
-        if (codec == null) {
-            throw new IllegalArgumentException("No tuning for errand " + errand);
-        }
-        return codec;
     }
 
     /** An errand with no numbers of its own: what it does is the same for every pet, or all in other files. */
