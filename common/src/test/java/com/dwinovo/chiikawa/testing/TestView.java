@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.testing;
 
 import com.dwinovo.chiikawa.camera.PhotoOutlook;
+import com.dwinovo.chiikawa.data.QualificationData;
 import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
@@ -9,6 +10,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
+import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.task.PetTask;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +43,7 @@ public final class TestView implements PetView {
     private boolean hasArrows;
     private boolean hasPlayableSelection;
     private boolean playingMusic;
-    private Optional<GlobalPos> examDesk = Optional.empty();
+    private Optional<PetExams.Summons> examToSit = Optional.empty();
     private Optional<GlobalPos> resultsDesk = Optional.empty();
     private Optional<GlobalPos> whistleHeard = Optional.empty();
     private PhotoOutlook photo = PhotoOutlook.NONE;
@@ -147,7 +149,7 @@ public final class TestView implements PetView {
 
     /** A desk the pet could sit its exam at now. */
     public TestView examDesk(GlobalPos board) {
-        this.examDesk = Optional.of(board);
+        this.examToSit = Optional.of(new PetExams.Summons(QualificationData.WEEDING, board));
         return this;
     }
 
@@ -310,8 +312,8 @@ public final class TestView implements PetView {
     }
 
     @Override
-    public Optional<GlobalPos> examDesk() {
-        return examDesk;
+    public Optional<PetExams.Summons> examToSit() {
+        return examToSit;
     }
 
     @Override
