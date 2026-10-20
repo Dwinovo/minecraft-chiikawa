@@ -24,9 +24,10 @@ import org.junit.jupiter.api.Test;
 
 /**
  * How long Hachiware rests from photos, with the numbers the shipped settings and the camera give: the
- * ordering of the rest an errand that ends writes and the rest a report that comes back writes, which is what
- * keeps a photo stored while the camera is still up from being cut short by the wait for the upload, and
- * has one that did not come back wait only for the retry.
+ * ordering of the rest an errand that ends writes and the rest a report writes. The shutter reports the
+ * wait for the upload, so that however the errand ends after it, it has rested for it, and one that ends
+ * before it has not; a photo stored while the camera is still up is not cut short by what follows, and one
+ * that did not come back waits only for the retry.
  */
 class TakePhotoRestsTest {
     private static final ResourceLocation PHOTO = ErrandIds.TAKE_PHOTO;
@@ -59,20 +60,42 @@ class TakePhotoRestsTest {
     }
 
     @Test
-    void thePetWaitsForThePictureWhenItIsDoneAndOnlyTheRetryWhenItGaveUp() {
-        ledger.afterOutcome(photo, Outcome.done(), NOW);
-        assertEquals(PhotoUploads.WAIT_TICKS, ledger.remaining(PHOTO, NOW));
+    void theShutterRestsThePetForThePictureFromThenOn() {
+        report(PhotoResults.TAKEN, NOW);
 
-        TestRests.Store other = new TestRests.Store();
-        new RestLedger(errand -> other, ErrandSettings::of).afterOutcome(photo, Outcome.gaveUp("gone"), NOW);
-        assertEquals(CAMERA.retryTicks(), other.remaining(null, NOW));
+        assertEquals(PhotoUploads.WAIT_TICKS, ledger.remaining(PHOTO, NOW));
+        assertEquals(PhotoUploads.WAIT_TICKS - 15, ledger.remaining(PHOTO, NOW + 15));
     }
 
     @Test
-    void aPhotoCutShortLeavesNoRest() {
-        ledger.afterOutcome(photo, Outcome.interrupted("higher"), NOW);
+    void aPetCutShortAfterTheShutterStillWaitsForThePictureAndOneCutShortBeforeItRestsNotAtAll() {
+        report(PhotoResults.TAKEN, NOW);
+        ledger.afterOutcome(photo, Outcome.interrupted("moved"), NOW + 1);
+        assertEquals(PhotoUploads.WAIT_TICKS - 1, ledger.remaining(PHOTO, NOW + 1));
 
-        assertEquals(0, ledger.remaining(PHOTO, NOW));
+        TestRests.Store before = new TestRests.Store();
+        new RestLedger(errand -> before, ErrandSettings::of).afterOutcome(photo, Outcome.interrupted("higher"), NOW);
+        assertEquals(0, before.remaining(null, NOW));
+    }
+
+    @Test
+    void anErrandThatEndsAfterTheShutterDoesNotCutTheWaitShortAndDoneAddsNothingOfItsOwn() {
+        report(PhotoResults.TAKEN, NOW);
+        ledger.afterOutcome(photo, Outcome.done(), NOW + 20);
+        assertEquals(PhotoUploads.WAIT_TICKS - 20, ledger.remaining(PHOTO, NOW + 20));
+        ledger.afterOutcome(photo, Outcome.gaveUp("not_coming"), NOW + 20);
+        assertEquals(PhotoUploads.WAIT_TICKS - 20, ledger.remaining(PHOTO, NOW + 20));
+
+        TestRests.Store never = new TestRests.Store();
+        new RestLedger(errand -> never, ErrandSettings::of).afterOutcome(photo, Outcome.done(), NOW);
+        assertEquals(0, never.remaining(null, NOW), "done is the shutter's, it rests for nothing of its own");
+    }
+
+    @Test
+    void aPetThatGaveUpBeforeTheShutterWaitsOnlyForTheRetry() {
+        ledger.afterOutcome(photo, Outcome.gaveUp("unreachable"), NOW);
+
+        assertEquals(CAMERA.retryTicks(), ledger.remaining(PHOTO, NOW));
     }
 
     @Test
@@ -87,7 +110,8 @@ class TakePhotoRestsTest {
 
     @Test
     void aPhotoStoredAfterTheErrandIsDoneReplacesTheWaitWithTheCamerasRest() {
-        ledger.afterOutcome(photo, Outcome.done(), NOW);
+        report(PhotoResults.TAKEN, NOW);
+        ledger.afterOutcome(photo, Outcome.done(), NOW + 20);
         report(PhotoResults.STORED, NOW + 100);
 
         assertEquals(CAMERA.cooldownTicks(), ledger.remaining(PHOTO, NOW + 100));
@@ -95,7 +119,8 @@ class TakePhotoRestsTest {
 
     @Test
     void aPhotoThatDoesNotComeBackShortensTheWaitToTheRetry() {
-        ledger.afterOutcome(photo, Outcome.done(), NOW);
+        report(PhotoResults.TAKEN, NOW);
+        ledger.afterOutcome(photo, Outcome.done(), NOW + 20);
         report(PhotoResults.FAILED, NOW + 100);
 
         assertEquals(CAMERA.retryTicks(), ledger.remaining(PHOTO, NOW + 100));
