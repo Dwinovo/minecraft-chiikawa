@@ -16,6 +16,8 @@ import com.dwinovo.chiikawa.data.PetTaskTypeData;
 import com.dwinovo.chiikawa.data.QualificationData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
+import com.dwinovo.chiikawa.entity.brain.PetMind;
+import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
@@ -23,6 +25,7 @@ import com.dwinovo.chiikawa.qualification.ExamEnrollment;
 import com.dwinovo.chiikawa.qualification.ExamStage;
 import com.dwinovo.chiikawa.qualification.Ineligible;
 import com.dwinovo.chiikawa.qualification.Licence;
+import com.dwinovo.chiikawa.qualification.PetExams;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -63,8 +66,8 @@ public final class ExamGameTests {
     private static final String RESULTS_MORNING = "chiikawa_exam_results";
     private static final String RESULTS_AFTERNOON = "chiikawa_exam_afternoon";
     /** Any day will do: an exam is sat the day its pet is signed up. */
-    private static final long EXAM_DAY_NUMBER = 3L;
-    private static final long MORNING = 2000L;
+    static final long EXAM_DAY_NUMBER = 3L;
+    static final long MORNING = 2000L;
     private static final long AFTERNOON = 8000L;
     /** Long enough to walk to the desk and write a paper, about 26 seconds. */
     private static final int EXAM_TICKS = 1200;
@@ -72,7 +75,7 @@ public final class ExamGameTests {
 
     private static final int STAND = 2;
     /** The desk faces north, so its pet sits on the block south of it. */
-    private static final BlockPos DESK = new BlockPos(4, STAND, 2);
+    static final BlockPos DESK = new BlockPos(4, STAND, 2);
 
     @BeforeBatch(batch = EXAM_DAY)
     public static void examDay(ServerLevel level) {
@@ -181,6 +184,33 @@ public final class ExamGameTests {
             .thenSucceed();
     }
 
+    /** Told its desk is gone as it sits at the paper, the pet gets up from the chair. */
+    @GameTest(template = "floor8", batch = EXAM_DAY, timeoutTicks = EXAM_TICKS)
+    public static void a_pet_that_loses_its_desk_gets_up_from_the_chair(GameTestHelper helper) {
+        ExamDeskBlockEntity desk = placeDesk(helper);
+        AbstractPet pet = signedUp(helper, desk, new BlockPos(4, STAND, 6));
+
+        helper.startSequence()
+            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().seated(), "the pet never sat down to the paper"))
+            .thenExecute(() -> helper.destroyBlock(DESK))
+            .thenWaitUntil(() -> helper.assertTrue(!pet.getMind().errands().seated() && pet.getActivity() == PetActivity.NONE,
+                "the pet is still in its chair at a desk that is gone"))
+            .thenSucceed();
+    }
+
+    /** A call-off is kept the moment the pet is told, not when it next reads what it has been told. */
+    @GameTest(template = "floor8", batch = EXAM_DAY, timeoutTicks = 100)
+    public static void a_call_off_is_kept_as_the_pet_is_told(GameTestHelper helper) {
+        ExamDeskBlockEntity desk = placeDesk(helper);
+        AbstractPet pet = signedUp(helper, desk, new BlockPos(4, STAND, 6));
+
+        PetMind.post(pet, new Message.ExamCalledOff(QualificationData.WEEDING, PetExams.MISSED));
+
+        helper.assertTrue(pet.licences().get(QualificationData.WEEDING).exam() instanceof ExamStage.None,
+            "the pet is still signed up for an exam it was told is off");
+        helper.succeed();
+    }
+
     /** Breaking the chair takes the desk with it, as breaking either half of a bed takes the other. */
     @GameTest(template = "floor8", batch = EXAM_DAY, timeoutTicks = 100)
     public static void breaking_the_chair_takes_the_desk_with_it(GameTestHelper helper) {
@@ -250,6 +280,43 @@ public final class ExamGameTests {
         });
     }
 
+    /** Told its results are due as it reads them at the desk, the pet hears them when it has read them, and not before. */
+    @GameTest(template = "floor8", batch = RESULTS_MORNING, timeoutTicks = RESULTS_TICKS)
+    public static void a_pet_reading_its_results_is_not_told_them_before_it_has_read_them(GameTestHelper helper) {
+        ExamDeskBlockEntity desk = placeDesk(helper);
+        AbstractPet pet = worker(helper, new BlockPos(4, STAND, 6));
+        pet.licences().set(QualificationData.WEEDING, new Licence(0, 0, 0, false,
+            new ExamStage.Sat(at(helper, DESK), EXAM_DAY_NUMBER, true)));
+        desk.book(new DeskBooking(pet.getUUID(), "Shisa", QualificationData.WEEDING, 5, EXAM_DAY_NUMBER, Optional.of(true)));
+
+        helper.startSequence()
+            .thenWaitUntil(() -> helper.assertTrue(pet.getActivity() == PetActivity.READ_RESULTS, "the pet never began to read"))
+            .thenExecute(() -> {
+                PetMind.post(pet, new Message.ResultsDue(QualificationData.WEEDING));
+
+                helper.assertTrue(pet.licences().get(QualificationData.WEEDING).held() == 0,
+                    "the results were given to a pet that was still reading them");
+            })
+            .thenWaitUntil(() -> helper.assertTrue(pet.licences().get(QualificationData.WEEDING).held() == 1,
+                "the pet has not heard it passed after reading"))
+            .thenSucceed();
+    }
+
+    /** A pet not on its way to the desk has its results the moment it is told they are due. */
+    @GameTest(template = "floor8", batch = RESULTS_AFTERNOON, timeoutTicks = 100)
+    public static void a_result_is_kept_as_the_pet_is_told(GameTestHelper helper) {
+        AbstractPet pet = worker(helper, new BlockPos(3, STAND, 5));
+        pet.setPetDirective(PetDirective.STAY);
+        pet.licences().set(QualificationData.WEEDING, new Licence(0, 0, 0, false,
+            new ExamStage.Sat(at(helper, DESK), EXAM_DAY_NUMBER, true)));
+
+        PetMind.post(pet, new Message.ResultsDue(QualificationData.WEEDING));
+
+        helper.assertTrue(pet.licences().get(QualificationData.WEEDING).held() == 1,
+            "the pet was told its results were due and has not been granted the grade");
+        helper.succeed();
+    }
+
     /** Read before the exam: the book is spent. A pet that has read one and not sat since takes no other. */
     @GameTest(template = "floor8", batch = EXAM_DAY, timeoutTicks = 100)
     public static void a_pet_reads_the_book_once_before_each_exam(GameTestHelper helper) {
@@ -287,7 +354,7 @@ public final class ExamGameTests {
     }
 
     /** A desk at {@link #DESK} facing north, and its chair behind it, as placing one puts them. */
-    private static ExamDeskBlockEntity placeDesk(GameTestHelper helper) {
+    static ExamDeskBlockEntity placeDesk(GameTestHelper helper) {
         BlockState desk = InitBlocks.EXAM_DESK.get().defaultBlockState().setValue(ExamDeskBlock.FACING, Direction.NORTH);
         helper.setBlock(DESK, desk);
         helper.setBlock(ExamDeskBlock.chair(DESK, Direction.NORTH), desk.setValue(ExamDeskBlock.PART, DeskPart.CHAIR));
@@ -295,8 +362,12 @@ public final class ExamGameTests {
     }
 
     /** A practised pet of a fresh owner's, signed up at the desk. */
-    private static AbstractPet signedUp(GameTestHelper helper, ExamDeskBlockEntity desk, BlockPos rel) {
-        ServerPlayer owner = player(helper);
+    static AbstractPet signedUp(GameTestHelper helper, ExamDeskBlockEntity desk, BlockPos rel) {
+        return signedUp(helper, player(helper), desk, rel);
+    }
+
+    /** A practised pet of {@code owner}'s, signed up at the desk for a diamond. */
+    static AbstractPet signedUp(GameTestHelper helper, ServerPlayer owner, ExamDeskBlockEntity desk, BlockPos rel) {
         owner.getInventory().add(new ItemStack(Items.DIAMOND, 1));
         AbstractPet pet = ownersPet(helper, owner, rel, true);
         Optional<ExamEnrollment.Refusal> refusal = ExamEnrollment.signUp(owner, desk, QualificationData.WEEDING, pet.getUUID());
@@ -305,7 +376,7 @@ public final class ExamGameTests {
     }
 
     /** A pet of {@code owner}'s left to itself, that has done a weeding slip or not. */
-    private static AbstractPet ownersPet(GameTestHelper helper, ServerPlayer owner, BlockPos rel, boolean practised) {
+    static AbstractPet ownersPet(GameTestHelper helper, ServerPlayer owner, BlockPos rel, boolean practised) {
         AbstractPet pet = wildPet(helper, rel);
         pet.tame(owner);
         pet.setPetDirective(PetDirective.FREE);
@@ -336,7 +407,7 @@ public final class ExamGameTests {
             .sum();
     }
 
-    private static GlobalPos at(GameTestHelper helper, BlockPos rel) {
+    static GlobalPos at(GameTestHelper helper, BlockPos rel) {
         return GlobalPos.of(helper.getLevel().dimension(), helper.absolutePos(rel));
     }
 }
