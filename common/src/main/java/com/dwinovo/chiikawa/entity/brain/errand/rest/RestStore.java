@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.errand.rest;
 
 import com.dwinovo.chiikawa.init.InitMemory;
+import com.dwinovo.chiikawa.social.SocialCooldowns;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -13,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Where one errand of one pet keeps how long it is resting. Only the {@link RestLedger} writes it.
  *
- * <p>Four kinds of storage hold the rests, see {@link Kind}; the ledger does not care which.
+ * <p>Several kinds of storage hold the rests, see {@link Kind}; the ledger does not care which.
  */
 public interface RestStore {
     /**
@@ -108,6 +109,31 @@ public interface RestStore {
     /** The take_task errand's rest, in the memory it has always been in; not saved. */
     static Kind takeTaskCooldown() {
         return memory(InitMemory.TAKE_TASK_COOLDOWN);
+    }
+
+    /**
+     * A rest for each scene with each other pet, in the memory the scenes have always been remembered in; not saved. Both
+     * errands of a scene, the pet that goes over and the pet that is visited, keep it there and read it from there, so
+     * whichever of the two is asked again is held back.
+     */
+    static Kind sceneCooldowns() {
+        return (brain, errand) -> new RestStore() {
+            @Override
+            public long remaining(@Nullable String subject, long now) {
+                return subject == null ? 0L : cooldowns().remaining(subject, now);
+            }
+
+            @Override
+            public void restFor(@Nullable String subject, long ticks, long now) {
+                if (subject != null) {
+                    brain.setMemory(InitMemory.SOCIAL_COOLDOWNS.get(), cooldowns().with(subject, ticks, now));
+                }
+            }
+
+            private SocialCooldowns cooldowns() {
+                return brain.getMemory(InitMemory.SOCIAL_COOLDOWNS.get()).orElse(SocialCooldowns.NONE);
+            }
+        };
     }
 
     /** A rest for each thing the errand was about, in the one memory all such errands share; not saved. */
