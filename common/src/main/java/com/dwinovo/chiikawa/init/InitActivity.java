@@ -5,9 +5,6 @@ import java.util.function.Supplier;
 import net.minecraft.world.entity.schedule.Activity;
 
 public final class InitActivity {
-    // Musician performance activity.
-    public static final Supplier<Activity> MUSICIAN_PLAY =
-        Services.PLATFORM_REGISTRY.musicianPlayActivity();
     // Walking back to the owner.
     public static final Supplier<Activity> FOLLOW_OWNER =
         Services.PLATFORM_REGISTRY.followOwnerActivity();
