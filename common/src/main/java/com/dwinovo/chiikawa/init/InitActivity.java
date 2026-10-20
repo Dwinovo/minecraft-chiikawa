@@ -35,9 +35,6 @@ public final class InitActivity {
     // Sitting still.
     public static final Supplier<Activity> STAY =
         Services.PLATFORM_REGISTRY.stayActivity();
-    // Picking up a nearby item.
-    public static final Supplier<Activity> PICK_UP =
-        Services.PLATFORM_REGISTRY.pickUpActivity();
     // Walking to a labor board to take a slip.
     public static final Supplier<Activity> TAKE_TASK =
         Services.PLATFORM_REGISTRY.takeTaskActivity();

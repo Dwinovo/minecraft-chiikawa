@@ -142,6 +142,10 @@ public final class PetMind {
             case Message.DirectiveChanged changed -> decideNow = true;
             case Message.CapabilityChanged changed -> decideNow = true;
             case Message.Hurt hurt -> decideNow = true;
+            case Message.Moved moved -> {
+                executor.requestEnd(Outcome.interrupted("moved"));
+                decideNow = true;
+            }
             default -> executor.deliver(message, now);
         }
     }
