@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.social;
 
 import com.dwinovo.chiikawa.task.FinishedSlip;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +32,8 @@ import net.minecraft.world.item.ItemStack;
  * @param initiators who starts it, and how each plays its part
  * @param partners who it is played with, in order of preference: a pet goes for a partner
  *                 of the earliest entry it can find, the nearest one of those
- * @param partnerState what the partner has to be doing
+ * @param partnerState what the partner has to be doing; a partner that is playing music is not asked, and is
+ *                     handed nothing and made keen by nothing
  * @param partnerFinished a slip the partner must have just finished, if any
  * @param handsOver what the initiator takes out of its backpack and hands over, for the
  *                  partner to eat there and then; without one of these on it, it does not
@@ -61,7 +63,7 @@ public record PetInteraction(
     int cooldownTicks,
     float chance
 ) {
-    public static final Codec<PetInteraction> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<PetInteraction> CODEC = RecordCodecBuilder.<PetInteraction>create(instance -> instance.group(
         ExtraCodecs.nonEmptyList(Side.CODEC.listOf()).fieldOf("initiators").forGetter(PetInteraction::initiators),
         ExtraCodecs.nonEmptyList(Side.CODEC.listOf()).fieldOf("partners").forGetter(PetInteraction::partners),
         PartnerState.CODEC.optionalFieldOf("partner_state", PartnerState.IDLE).forGetter(PetInteraction::partnerState),
@@ -74,11 +76,18 @@ public record PetInteraction(
         ExtraCodecs.POSITIVE_INT.fieldOf("duration_ticks").forGetter(PetInteraction::durationTicks),
         ExtraCodecs.NON_NEGATIVE_INT.fieldOf("cooldown_ticks").forGetter(PetInteraction::cooldownTicks),
         Codec.floatRange(0.0F, 1.0F).fieldOf("chance").forGetter(PetInteraction::chance)
-    ).apply(instance, PetInteraction::new));
+    ).apply(instance, PetInteraction::new)).validate(PetInteraction::checked);
 
     public PetInteraction {
         initiators = List.copyOf(initiators);
         partners = List.copyOf(partners);
+    }
+
+    /** A partner that goes on playing music is not asked, so there is no way to hand it anything or make it keen. */
+    private static DataResult<PetInteraction> checked(PetInteraction scene) {
+        return scene.partnerState == PartnerState.PLAYING_MUSIC && (scene.handsOver.isPresent() || scene.partnerEagerTicks > 0)
+            ? DataResult.error(() -> "a partner that is playing music is not asked, so it is handed nothing and made keen by nothing")
+            : DataResult.success(scene);
     }
 
     /**

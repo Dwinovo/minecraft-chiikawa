@@ -84,7 +84,7 @@ public final class ErrandSettingsData {
             entry(ErrandIds.GIFT_OWNER, errand(80, 0.85F, 2400,
                 Rests.of(RestSpec.from(RestSources.GIFTING_COOLDOWN), RestSpec.ticks(600), NONE),
                 new ErrandTunings.GiftOwner(1.0F, 1, 2.0))),
-            entry(ErrandIds.SOCIALIZE, errand(30, 0.35F, 1200, scene, new ErrandTunings.Socialize(0.6F, 1))),
+            entry(ErrandIds.SOCIALIZE, errand(30, 0.35F, 1200, scene, new ErrandTunings.Socialize(0.6F, 1, 5))),
             entry(ErrandIds.COOPERATE, errand(80, 0.5F, 1200, scene, ErrandTunings.Untuned.NONE)),
             entry(ErrandIds.TAKE_EXAM, errand(80, 0.72F, 2400,
                 Rests.of(NONE, RestSpec.ticks(200), NONE), new ErrandTunings.TakeExam(0.7F, 0.8, 20))),

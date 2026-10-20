@@ -8,6 +8,7 @@ import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
+import com.dwinovo.chiikawa.entity.brain.errand.inbox.InvitationDesk;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
 import com.dwinovo.chiikawa.gifting.GiftPool;
@@ -19,12 +20,14 @@ import com.dwinovo.chiikawa.music.ServerMusicSystem;
 import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.shop.ShopBasket;
 import com.dwinovo.chiikawa.shop.Wallet;
-import com.dwinovo.chiikawa.social.InteractionPlan;
+import com.dwinovo.chiikawa.social.PetInteractions;
+import com.dwinovo.chiikawa.social.SocialRules;
 import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.dwinovo.chiikawa.utils.Utils;
 import com.dwinovo.chiikawa.whistle.WhistleHeard;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.UUID;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -55,8 +58,8 @@ public final class LivePetView implements PetView {
     private final Lazy<Boolean> eager;
     private final Lazy<Optional<GlobalPos>> offeringBoard;
     private final Lazy<Optional<GlobalPos>> shopWorthVisiting;
-    private final Lazy<Optional<GlobalPos>> socialPartner;
-    private final Lazy<Boolean> playingAlong;
+    private final Lazy<Optional<SocialIdea>> socialIdea;
+    private final Lazy<Optional<InvitationDesk.Engagement>> engagement;
     private final Lazy<Boolean> carryingGift;
     private final Lazy<Boolean> presentToGive;
     private final Lazy<Boolean> attackCoolingDown;
@@ -85,11 +88,9 @@ public final class LivePetView implements PetView {
         this.eager = new Lazy<>(pet::isEager);
         this.offeringBoard = new Lazy<>(this::findOfferingBoard);
         this.shopWorthVisiting = new Lazy<>(this::findShopWorthVisiting);
-        this.socialPartner = new Lazy<>(() -> pet.getBrain().getMemory(InitMemory.INTERACTION_PLAN.get())
-            .map(InteractionPlan::partner)
-            .filter(AbstractPet::isAlive)
-            .map(partner -> GlobalPos.of(partner.level().dimension(), partner.blockPosition())));
-        this.playingAlong = new Lazy<>(() -> pet.getBrain().hasMemoryValue(InitMemory.INTERACTION_RESERVATION.get()));
+        this.socialIdea = new Lazy<>(this::findSocialIdea);
+        this.engagement = new Lazy<>(() -> pet.getMind().errands().engagement(level.getGameTime())
+            .filter(asked -> PetInteractions.all().containsKey(asked.scene())));
         this.carryingGift = new Lazy<>(() -> pet.getOwner() instanceof Player && !pet.getPendingGift().isEmpty());
         this.presentToGive = new Lazy<>(() -> pet.getOwner() instanceof Player && !GiftPool.of(pet).isEmpty());
         this.attackCoolingDown = new Lazy<>(() -> pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_COOLING_DOWN));
@@ -172,13 +173,13 @@ public final class LivePetView implements PetView {
     }
 
     @Override
-    public Optional<GlobalPos> socialPartner() {
-        return socialPartner.get();
+    public Optional<SocialIdea> socialIdea() {
+        return socialIdea.get();
     }
 
     @Override
-    public boolean playingAlong() {
-        return playingAlong.get();
+    public Optional<InvitationDesk.Engagement> engagement() {
+        return engagement.get();
     }
 
     @Override
@@ -272,6 +273,22 @@ public final class LivePetView implements PetView {
             .filter(shop -> ShopBasket.wantsAnything(personality(), shop.catalog(),
                 Wallet.count(pet.getBackpack()), ShopBasket.carriedIn(pet.getBackpack())))
             .map(shop -> GlobalPos.of(level.dimension(), shop.getBlockPos()));
+    }
+
+    /**
+     * The scene the sensor thought of, while it is still one to play: the pet it means to visit would play along now and
+     * the pet has what the scene takes. The sensor thought of it a moment ago, and either may have changed since.
+     */
+    private Optional<SocialIdea> findSocialIdea() {
+        long now = pet.level().getGameTime();
+        return pet.getBrain().getMemory(InitMemory.INTERACTION_PLAN.get())
+            .filter(idea -> SocialRules.hasToHandOver(pet, idea.interaction()))
+            .flatMap(idea -> {
+                OptionalInt rank = SocialRules.accepts(idea.id(), idea.interaction(), pet, idea.partner(), now);
+                return rank.isEmpty() ? Optional.empty() : Optional.of(new SocialIdea(idea.id(), idea.interaction(), idea.self(),
+                    rank.getAsInt(), idea.partner().getUUID(),
+                    GlobalPos.of(idea.partner().level().dimension(), idea.partner().blockPosition())));
+            });
     }
 
     /**

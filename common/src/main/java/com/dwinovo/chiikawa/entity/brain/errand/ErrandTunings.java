@@ -192,11 +192,14 @@ public final class ErrandTunings {
      * @param speed how fast it walks to the partner
      * @param arriveMargin how much further than the scene's approach distance the two may stand and
      *                     still begin: a partner shifting its feet should not undo the arrival
+     * @param replyTicks how long it waits for the partner to say yes or no to being asked, before it gives up on a
+     *                   partner that is not listening
      */
-    public record Socialize(float speed, int arriveMargin) {
+    public record Socialize(float speed, int arriveMargin, int replyTicks) {
         public static final Codec<Socialize> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Fields.SPEED.fieldOf("speed").forGetter(Socialize::speed),
-            Fields.BLOCKS.fieldOf("arrive_margin").forGetter(Socialize::arriveMargin)
+            Fields.BLOCKS.fieldOf("arrive_margin").forGetter(Socialize::arriveMargin),
+            Fields.TICKS.fieldOf("reply_ticks").forGetter(Socialize::replyTicks)
         ).apply(instance, Socialize::new));
     }
 

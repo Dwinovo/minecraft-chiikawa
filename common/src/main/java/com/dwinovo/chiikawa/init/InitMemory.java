@@ -4,7 +4,6 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.SubjectRests;
 import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.social.InteractionPlan;
-import com.dwinovo.chiikawa.social.InteractionReservation;
 import com.dwinovo.chiikawa.social.SocialCooldowns;
 import com.dwinovo.chiikawa.task.FinishedSlip;
 import com.dwinovo.chiikawa.whistle.WhistleCall;
@@ -136,14 +135,6 @@ public final class InitMemory {
         Services.REGISTRY.<MemoryModuleType<InteractionPlan>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
             ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "interaction_plan"),
-            () -> new MemoryModuleType<>(Optional.empty())
-        );
-
-    /** Present, with an expiry, while another pet is on its way to play a scene with this one. */
-    public static final Supplier<MemoryModuleType<InteractionReservation>> INTERACTION_RESERVATION =
-        Services.REGISTRY.<MemoryModuleType<InteractionReservation>>register(
-            BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "interaction_reservation"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 

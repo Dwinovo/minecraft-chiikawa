@@ -20,10 +20,19 @@ public interface ErrandView {
 
     /**
      * @param now the current game time
+     * @return the invitation to play a scene that the pet has said yes to, until the scene is over or the invitation
+     *         runs out
+     */
+    Optional<InvitationDesk.Engagement> engagement(long now);
+
+    /**
+     * @param now the current game time
      * @return the pet that has asked this one to play a scene and been answered yes, until the scene
      *         is over or the invitation runs out
      */
-    Optional<UUID> engagedWith(long now);
+    default Optional<UUID> engagedWith(long now) {
+        return engagement(now).map(InvitationDesk.Engagement::initiator);
+    }
 
     /** @return the id of the errand the pet is on */
     default Optional<ResourceLocation> errand() {
@@ -55,6 +64,16 @@ public interface ErrandView {
         return has(StepTag.PLAYING_MUSIC);
     }
 
+    /**
+     * @param now the current game time
+     * @return whether the pet is on a scene with another pet, going over to play it or playing along, or has said yes to
+     *         one and is about to
+     */
+    default boolean social(long now) {
+        return engagedWith(now).isPresent()
+            || errand().map(Errands::get).filter(type -> type.category() == ErrandCategory.SOCIAL).isPresent();
+    }
+
     private boolean has(StepTag tag) {
         return running().filter(running -> running.tags().contains(tag)).isPresent();
     }
@@ -68,8 +87,8 @@ public interface ErrandView {
             }
 
             @Override
-            public Optional<UUID> engagedWith(long now) {
-                return desk.engagement(now).map(InvitationDesk.Engagement::initiator);
+            public Optional<InvitationDesk.Engagement> engagement(long now) {
+                return desk.engagement(now);
             }
         };
     }

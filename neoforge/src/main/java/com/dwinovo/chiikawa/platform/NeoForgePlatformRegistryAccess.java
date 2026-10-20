@@ -45,10 +45,6 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
     private static final DeferredHolder<SensorType<?>, SensorType<PetSocialSensor>> PET_SOCIAL_SENSOR =
         SENSOR_TYPES.register("pet_social_sensor", () -> new SensorType<>(PetSocialSensor::new));
 
-    private static final DeferredHolder<Activity, Activity> SOCIALIZE =
-        ACTIVITIES.register("socialize", () -> new Activity(PetActivities.name("socialize")));
-    private static final DeferredHolder<Activity, Activity> COOPERATE =
-        ACTIVITIES.register("cooperate", () -> new Activity(PetActivities.name("cooperate")));
     private static final DeferredHolder<Activity, Activity> ANSWER_WHISTLE =
         ACTIVITIES.register("answer_whistle", () -> new Activity(PetActivities.name("answer_whistle")));
 
@@ -87,16 +83,6 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
     @Override
     public Supplier<SensorType<PetSocialSensor>> petSocialSensor() {
         return PET_SOCIAL_SENSOR;
-    }
-
-    @Override
-    public Supplier<Activity> socializeActivity() {
-        return SOCIALIZE;
-    }
-
-    @Override
-    public Supplier<Activity> cooperateActivity() {
-        return COOPERATE;
     }
 
     @Override

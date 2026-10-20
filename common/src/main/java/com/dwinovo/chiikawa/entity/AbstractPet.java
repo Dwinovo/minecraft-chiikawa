@@ -224,7 +224,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitMemory.SHOP_COOLDOWN.get(),
         InitMemory.LAST_FINISHED_SLIP.get(),
         InitMemory.INTERACTION_PLAN.get(),
-        InitMemory.INTERACTION_RESERVATION.get(),
         InitMemory.SOCIAL_COOLDOWNS.get(),
         InitMemory.LAST_SAID.get(),
         InitMemory.WHISTLE_CALL.get(),
@@ -588,7 +587,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
         // Universal activities present in every brain.
         BrainUtils.addCoreTasks(brain);
-        BrainUtils.addSocialTasks(brain);
         BrainUtils.addWhistleTasks(brain);
 
         brain.setCoreActivities(java.util.Set.of(Activity.CORE));

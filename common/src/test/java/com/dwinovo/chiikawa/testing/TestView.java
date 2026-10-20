@@ -5,12 +5,14 @@ import com.dwinovo.chiikawa.data.QualificationData;
 import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
+import com.dwinovo.chiikawa.entity.brain.errand.inbox.InvitationDesk;
 import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.errand.view.Onlooker;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
+import com.dwinovo.chiikawa.entity.brain.errand.view.SocialIdea;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.music.MusicBoxSelection;
 import com.dwinovo.chiikawa.music.Playable;
@@ -40,8 +42,8 @@ public final class TestView implements PetView {
     private Optional<GlobalPos> offeringBoard = Optional.empty();
     private Optional<GlobalPos> shopWorthVisiting = Optional.empty();
     private boolean carryingGift;
-    private Optional<GlobalPos> socialPartner = Optional.empty();
-    private boolean playingAlong;
+    private Optional<SocialIdea> socialIdea = Optional.empty();
+    private Optional<InvitationDesk.Engagement> engagement = Optional.empty();
     private boolean eager;
     private boolean attackCoolingDown;
     private boolean hasArrows;
@@ -109,13 +111,14 @@ public final class TestView implements PetView {
 
     /** The pet has thought of playing a scene with a pet standing here. */
     public TestView socialPartner(GlobalPos partner) {
-        this.socialPartner = Optional.of(partner);
+        this.socialIdea = Optional.of(TestScenes.idea(partner));
+        this.creatures.put(TestScenes.PARTNER, partner);
         return this;
     }
 
-    /** Another pet is on its way over to play a scene with this one. */
+    /** Another pet has asked this one to play a scene, and been told yes. */
     public TestView askedToPlay() {
-        this.playingAlong = true;
+        this.engagement = Optional.of(TestScenes.asked());
         return this;
     }
 
@@ -275,13 +278,13 @@ public final class TestView implements PetView {
     }
 
     @Override
-    public Optional<GlobalPos> socialPartner() {
-        return socialPartner;
+    public Optional<SocialIdea> socialIdea() {
+        return socialIdea;
     }
 
     @Override
-    public boolean playingAlong() {
-        return playingAlong;
+    public Optional<InvitationDesk.Engagement> engagement() {
+        return engagement;
     }
 
     @Override
