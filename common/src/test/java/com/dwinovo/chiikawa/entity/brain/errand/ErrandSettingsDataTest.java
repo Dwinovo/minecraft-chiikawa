@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.data.ErrandSettingsData;
-import com.dwinovo.chiikawa.entity.brain.intent.PetIntent;
-import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.mojang.serialization.JsonOps;
 import java.util.HashMap;
@@ -78,23 +76,20 @@ class ErrandSettingsDataTest {
 
     @Test
     void everyErrandHasSettingsAndNothingElseDoes() {
-        assertEquals(new HashSet<>(ErrandIds.ALL), ErrandSettingsData.all().keySet());
-        assertEquals(21, ErrandIds.ALL.size());
-        assertEquals(21, new HashSet<>(ErrandIds.ALL).size(), "each id once");
-    }
+        Set<ResourceLocation> errands = new HashSet<>();
+        Errands.all().stream().map(ErrandType::id).forEach(errands::add);
 
-    @Test
-    void theErrandsAreTheIntentsTheyReplace() {
-        Set<ResourceLocation> intents = new HashSet<>();
-        PetIntents.all().stream().map(PetIntent::id).forEach(intents::add);
-
-        assertEquals(intents, new HashSet<>(ErrandIds.ALL));
+        assertEquals(errands, ErrandSettingsData.all().keySet());
+        assertEquals(21, errands.size());
     }
 
     @Test
     void theTableOfPrioritiesIsComplete() {
-        assertEquals(new HashSet<>(ErrandIds.ALL), PRIORITIES.keySet());
-        assertEquals(new HashSet<>(ErrandIds.ALL), SCORES.keySet());
+        Set<ResourceLocation> errands = new HashSet<>();
+        Errands.all().stream().map(ErrandType::id).forEach(errands::add);
+
+        assertEquals(errands, PRIORITIES.keySet());
+        assertEquals(errands, SCORES.keySet());
     }
 
     @Test
