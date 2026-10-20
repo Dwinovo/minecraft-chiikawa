@@ -1118,7 +1118,7 @@ public final class LanguageData {
         adder.add("tooltip.chiikawa.film", filmTip);
     }
 
-    /** Taking photos as an intent: its name, and why a pet is not taking one, for the debug command. */
+    /** Taking photos as an errand: its name, and why a pet is not taking one, for the debug command. */
     private static void addPhotoIntentTranslations(Adder adder, String name, String notPhotographer, String noCamera,
             String noFilm, String ownerFar, String ownerBusy, String nothingToShoot) {
         adder.add("intent.chiikawa.take_photo", name);
@@ -1348,7 +1348,7 @@ public final class LanguageData {
         adder.add("block.chiikawa.shop", shop);
     }
 
-    /** Names of what a pet may be doing, shown in its backpack; one per intent. */
+    /** Names of what a pet may be doing, shown in its backpack; one per errand. */
     private static void addIntentNameTranslations(
         Adder adder,
         String followOwner,
@@ -1453,7 +1453,7 @@ public final class LanguageData {
 
     /**
      * What a pet is at. Only the idle case needs words of its own: a pet that is doing
-     * something is named by the intent it is running, and a slip by its own type, both of
+     * something is named by the errand it is running, and a slip by its own type, both of
      * which already have names. How far along it is comes out as a bar and a count, which
      * read the same in every language.
      */
