@@ -33,7 +33,6 @@ public final class TestView implements PetView {
     private Optional<GlobalPos> offeringBoard = Optional.empty();
     private Optional<GlobalPos> shopWorthVisiting = Optional.empty();
     private boolean takeTaskCoolingDown;
-    private boolean shopCoolingDown;
     private boolean carryingGift;
     private Optional<GlobalPos> socialPartner = Optional.empty();
     private boolean playingAlong;
@@ -98,11 +97,6 @@ public final class TestView implements PetView {
     /** A shop the pet knows about and has both a reason and the money to visit. */
     public TestView shopWorthVisiting(GlobalPos shop) {
         this.shopWorthVisiting = Optional.of(shop);
-        return this;
-    }
-
-    public TestView shopResting() {
-        this.shopCoolingDown = true;
         return this;
     }
 
@@ -273,11 +267,6 @@ public final class TestView implements PetView {
     @Override
     public boolean takeTaskCoolingDown() {
         return takeTaskCoolingDown;
-    }
-
-    @Override
-    public boolean shopCoolingDown() {
-        return shopCoolingDown;
     }
 
     @Override
