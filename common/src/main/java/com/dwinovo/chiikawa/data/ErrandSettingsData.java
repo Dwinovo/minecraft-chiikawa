@@ -7,6 +7,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.ErrandTunings;
 import com.dwinovo.chiikawa.entity.brain.errand.overlay.Overlays;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSpec;
+import com.dwinovo.chiikawa.entity.brain.errand.step.Meeting;
 import com.dwinovo.chiikawa.entity.brain.personality.IdleHabits;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.List;
@@ -50,9 +51,12 @@ public final class ErrandSettingsData {
         Rests blockWork = Rests.of(NONE, RestSpec.ticksPerSubject(200), NONE);
         ErrandTunings.BlockWork blockWorkTuning = new ErrandTunings.BlockWork(0.8F, 3.0, 0);
         ErrandTunings.Footwork footwork = new ErrandTunings.Footwork(1.0F, 1.2F, 10.0, 3.0, 2);
-        // However it ends, the same two leave the scene alone afterwards.
-        Rests scene = Rests.of(RestSpec.fromPerSubject(RestSources.SCENE_COOLDOWN),
-            RestSpec.fromPerSubject(RestSources.SCENE_COOLDOWN), RestSpec.fromPerSubject(RestSources.SCENE_COOLDOWN));
+        // The scene beginning is a report, and the pair rest the scene's cooldown from then on however it ends, so that
+        // finishing and being cut short need rest nothing of their own. An invitation that is declined or not answered, or
+        // a walk that never gets there, never began it: those rest the pair only a few seconds, so that they are not asked
+        // again in the very next breath.
+        Rests scene = new Rests(NONE, RestSpec.ticksPerSubject(100), NONE,
+            Map.of(Meeting.PLAYED, RestSpec.fromPerSubject(RestSources.SCENE_COOLDOWN)));
         return Map.ofEntries(
             // Following is worth more the further the owner is, up to max_score; the score here is the least.
             entry(ErrandIds.FOLLOW_OWNER, errand(50, 0.5F, A_DAY, giveUp(20), new ErrandTunings.FollowOwner(1.0F, 1.0F))),
