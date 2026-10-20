@@ -147,7 +147,7 @@ public final class PetMind {
      */
     public void report(String report) {
         executor.running().ifPresent(running -> rests.afterReport(running.errand(), report,
-            new RestContext(running.plan().restKey()), pet.level().getGameTime()));
+            RestContext.of(running.plan()), pet.level().getGameTime()));
     }
 
     /** Has the pet decide again at its next tick instead of waiting for its turn. */

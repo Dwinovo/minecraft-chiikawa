@@ -27,6 +27,8 @@ class RestLedgerTest {
     private static final int UPLOAD_WAIT = 600;
     private static final int CAMERA_COOLDOWN = 12000;
     private static final int RETRY = 300;
+    private static final int SCENE_COOLDOWN = 24000;
+    private static final int SCENE_GUARD = 100;
 
     private final TestRests.Store store = new TestRests.Store();
     private final List<String> errors = new ArrayList<>();
@@ -148,6 +150,50 @@ class RestLedgerTest {
     }
 
     @Test
+    void aReportOnASubjectRestsThatSubjectAndNotTheErrand() {
+        ErrandSettings<String> scene = scene();
+        RestLedger scenes = ledger(scene);
+
+        scenes.afterReport(PHOTO, "played", RestContext.of(subject("pal-1")), NOW);
+
+        assertEquals(SCENE_COOLDOWN, scenes.remaining(PHOTO, "pal-1", NOW));
+        assertFalse(scenes.resting(PHOTO, "pal-2", NOW), "another pet is not rested");
+        assertFalse(scenes.resting(PHOTO, NOW), "nor is the errand as a whole");
+    }
+
+    @Test
+    void aReportOnASubjectOfAContextWithNoneRestsTheErrand() {
+        RestLedger scenes = ledger(scene());
+
+        scenes.afterReport(PHOTO, "played", RestContext.NONE, NOW);
+
+        assertTrue(scenes.resting(PHOTO, NOW));
+    }
+
+    @Test
+    void aSceneCutShortAfterItBeganKeepsTheRestItsBeginningMade() {
+        ErrandSettings<String> scene = scene();
+        RestLedger scenes = ledger(scene);
+        scenes.afterReport(PHOTO, "played", RestContext.of(subject("pal-1")), NOW);
+
+        scenes.afterOutcome(running(PHOTO, scene, subject("pal-1")), Outcome.gaveUp("withdrawn"), NOW + 50);
+        scenes.afterOutcome(running(PHOTO, scene, subject("pal-1")), Outcome.interrupted("moved"), NOW + 60);
+
+        assertEquals(SCENE_COOLDOWN - 60, scenes.remaining(PHOTO, "pal-1", NOW + 60), "giving up cut the rest short");
+    }
+
+    @Test
+    void aSceneThatNeverBeganRestsOnlyTheGuardAgainstAskingAgain() {
+        ErrandSettings<String> scene = scene();
+        RestLedger scenes = ledger(scene);
+
+        scenes.afterOutcome(running(PHOTO, scene, subject("pal-1")), Outcome.gaveUp("declined"), NOW);
+
+        assertEquals(SCENE_GUARD, scenes.remaining(PHOTO, "pal-1", NOW));
+        assertFalse(scenes.resting(PHOTO, "pal-1", NOW + SCENE_GUARD));
+    }
+
+    @Test
     void aNamedNumberIsAskedOfItsSourceWithWhatTheRestIsAbout() {
         RestSources.register(RestSources.CAMERA_RETRY, context -> context.key().map(key -> key.equals(CAMERA) ? 77L : 5L).orElse(-1L));
         ErrandSettings<String> fromSource = TestRests.settings(1200, new ErrandSettings.Rests(RestSpec.ticks(0),
@@ -205,6 +251,12 @@ class RestLedgerTest {
         assertEquals(0, sourced.remaining(PHOTO, NOW));
         assertEquals(1, errors.size(), "once, not for every pet and every time");
         assertTrue(errors.get(0).contains(RestSources.MUSIC_RETRY.toString()), errors.get(0));
+    }
+
+    /** The rests of a scene: its cooldown from the report that it began, a few seconds if it never did. */
+    private static ErrandSettings<String> scene() {
+        return TestRests.settings(1200, new ErrandSettings.Rests(RestSpec.ticks(0), RestSpec.ticksPerSubject(SCENE_GUARD),
+            RestSpec.ticks(0), Map.of("played", RestSpec.ticksPerSubject(SCENE_COOLDOWN))));
     }
 
     private RestLedger ledger(ErrandSettings<?> settings) {
