@@ -21,8 +21,9 @@ import org.jetbrains.annotations.Nullable;
  * <p>An errand is ended between steps and never in the middle of one that cannot be cut:
  * {@link #requestEnd} and the time limit wait for a step that is {@link Step#interruptible}, so a
  * half-done action is finished and the longest an end waits is one tick. However an errand ends it
- * ends once, in this order: the step lets go of what it holds, the walk, gaze and path are cleared, the
- * rest is written, the end is logged, and what the player is told is cleared with it.
+ * ends once, in this order: the step lets go of what it holds, the routine lets go of what the errand holds
+ * across its steps, the walk, gaze and path are cleared, the rest is written, the end is logged, and what the
+ * player is told is cleared with it.
  */
 public final class Executor {
     private final Handle handle;
@@ -185,6 +186,7 @@ public final class Executor {
     private void finish(Outcome outcome, long now) {
         Running ended = running;
         releaseStep();
+        routine.release(handle);
         handle.stopWalking();
         handle.clearLook();
         rests.afterOutcome(ended, outcome, now);
