@@ -18,18 +18,18 @@ import net.minecraft.world.item.ItemStack;
  *
  * <p>A message is read at the pet's next tick, and one that waits when the pet is removed from the world
  * is lost with the inbox. So what a message makes durable, anything saved with the pet or the world such as a
- * shot on its film roll, the rest the pet takes after it or a change to its licence, is not left to the tick: a
- * {@link Durable} message is applied as it is told, and only what concerns deciding and the errand under way, a
- * step's ending, a nudge, waits in the inbox as a {@link Settled} one. See {@code PetMind}.
+ * shot on its film roll, the wages of a slip, the rest the pet takes after it or a change to its licence, is not
+ * left to the tick: a {@link Durable} message is applied as it is told, and only what concerns deciding and the
+ * errand under way, a step's ending, a nudge, waits in the inbox as a {@link Settled} one. See {@code PetMind}.
  */
 public sealed interface Message {
     /**
      * A message with something to keep: it has effects that must outlive the inbox, the rests it makes the pet
-     * take and the changes to its licences among them, which the pet's mind applies the moment it is told, on
-     * the server thread, and then queues what is left of it as {@link Settled}. Each kind is applied in one
-     * place, the mind's {@code keep}, which is the only writer of what it makes durable.
+     * take, the changes to its licences and the wages of a slip among them, which the pet's mind applies the
+     * moment it is told, on the server thread, and then queues what is left of it as {@link Settled}. Each kind is
+     * applied in one place, the mind's {@code keep}, which is the only writer of what it makes durable.
      */
-    sealed interface Durable extends Message permits PhotoResult, ExamCalledOff, ResultsDue {
+    sealed interface Durable extends Message permits PhotoResult, ExamCalledOff, ResultsDue, SlipCompleted {
     }
 
     /**
@@ -120,11 +120,12 @@ public sealed interface Message {
     }
 
     /**
-     * The pet finished the work on its slip.
+     * The pet finished the work on its slip. Its durable part is the wages, see {@code SlipWages}; the pet looks
+     * glad of them at once, see {@link Cue.Paid}, and decides again at its next tick, since it can go for another slip.
      *
      * @param task the slip, as it was when it was finished
      */
-    record SlipCompleted(PetTask task) implements Message {
+    record SlipCompleted(PetTask task) implements Durable {
     }
 
     /**

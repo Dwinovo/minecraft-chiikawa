@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.UnaryOperator;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -59,6 +60,13 @@ public class LaborBoardBlockEntity extends BlockEntity {
 
     public LaborBoardBlockEntity(BlockPos pos, BlockState state) {
         super(InitBlockEntities.LABOR_BOARD.get(), pos, state);
+    }
+
+    /** @return the board at {@code pos}, while it is in {@code level} and loaded */
+    public static Optional<LaborBoardBlockEntity> at(Level level, GlobalPos pos) {
+        return Optional.of(pos)
+            .filter(at -> at.dimension().equals(level.dimension()) && level.isLoaded(at.pos()))
+            .flatMap(at -> level.getBlockEntity(at.pos(), InitBlockEntities.LABOR_BOARD.get()));
     }
 
     /** @return whether the board has a slip {@code pet} would take right now */

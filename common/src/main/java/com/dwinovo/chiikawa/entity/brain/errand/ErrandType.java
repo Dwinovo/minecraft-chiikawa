@@ -60,6 +60,17 @@ public interface ErrandType<P extends Plan, T> {
     Routine routine(P plan, ErrandSettings<T> settings);
 
     /**
+     * What is wrong with these settings that only this errand can tell, such as a time limit that outlasts
+     * something the errand holds the world to: checked when they are loaded, and an errand with settings that
+     * fail it is switched off.
+     *
+     * @return what is wrong with them, or nothing
+     */
+    default Optional<String> problem(ErrandSettings<T> settings) {
+        return Optional.empty();
+    }
+
+    /**
      * The work counter this errand's work reports, see {@link com.dwinovo.chiikawa.task.PetWorkCounters}.
      * A pet carrying a slip that counts it prefers this errand.
      */

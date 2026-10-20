@@ -100,6 +100,11 @@ public interface RestStore {
         return memory(InitMemory.SHOP_COOLDOWN);
     }
 
+    /** The take_task errand's rest, in the memory it has always been in; not saved. */
+    static Kind takeTaskCooldown() {
+        return memory(InitMemory.TAKE_TASK_COOLDOWN);
+    }
+
     /** A rest for each thing the errand was about, in the one memory all such errands share; not saved. */
     static Kind subjects() {
         return (brain, errand) -> new RestStore() {

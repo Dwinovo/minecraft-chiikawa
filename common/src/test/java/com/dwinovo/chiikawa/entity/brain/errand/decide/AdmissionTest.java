@@ -18,6 +18,8 @@ import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
+import com.dwinovo.chiikawa.task.PetTask;
+import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.testing.TestErrands;
 import com.dwinovo.chiikawa.testing.TestPhotos;
@@ -27,6 +29,7 @@ import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -45,6 +48,9 @@ class AdmissionTest {
     /** Reach 13, leash 20, round its home. */
     private static final PetAnchor FREE =
         TestAnchors.free(HOME);
+    private static final PetTask SLIP = new PetTask(ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding"),
+        ResourceLocation.fromNamespaceAndPath("chiikawa", "farmer"), PetWorkCounters.WEED, PetTask.NO_ICON, 8,
+        ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath("chiikawa", "pet_task/weeding")), 0);
     private static final RestLedger NO_RESTS = new RestLedger(errand -> RestStore.legacy().of(null, errand), errand -> Optional.empty());
 
     @BeforeAll
@@ -95,8 +101,8 @@ class AdmissionTest {
 
     @Test
     void anErrandsOwnConditionsComeFirst() {
-        assertEquals("intent.chiikawa.fail.board_resting",
-            verdict(ErrandIds.TAKE_TASK, TestView.at(HOME, FREE).offeringBoard(east(40)).takeTaskResting()));
+        assertEquals("intent.chiikawa.fail.has_slip",
+            verdict(ErrandIds.TAKE_TASK, TestView.at(HOME, FREE).offeringBoard(east(40)).slip(SLIP)));
     }
 
     @Test

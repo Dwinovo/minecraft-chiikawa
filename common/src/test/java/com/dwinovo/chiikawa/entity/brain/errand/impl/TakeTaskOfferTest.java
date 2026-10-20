@@ -6,6 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandTunings;
+import com.dwinovo.chiikawa.task.BoardSlips;
 import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.dwinovo.chiikawa.testing.TestAnchors;
@@ -52,15 +55,40 @@ class TakeTaskOfferTest {
         assertEquals("intent.chiikawa.fail.has_slip", TestErrands.whyNoOffer(ErrandIds.TAKE_TASK, boardAt(1).slip(slip)).reasonKey());
         // Having taken it ends the walk to the board.
         assertEquals("intent.chiikawa.fail.has_slip",
-            TestErrands.stillWanted(ErrandIds.TAKE_TASK, Heading.NOWHERE, boardAt(1).slip(slip)).reasonKey());
+            TestErrands.stillWanted(ErrandIds.TAKE_TASK, trip(1), boardAt(1).slip(slip)).reasonKey());
     }
 
     @Test
-    void restsAfterMissingASlipAndNeedsABoardOfferingOne() {
-        assertTrue(TestErrands.offers(ErrandIds.TAKE_TASK, boardAt(1).takeTaskResting()).isEmpty());
-        assertEquals("intent.chiikawa.fail.board_resting",
-            TestErrands.whyNoOffer(ErrandIds.TAKE_TASK, boardAt(1).takeTaskResting()).reasonKey());
+    void needsABoardOfferingOneAndGoesOnOnlyWhileThereIsOne() {
+        assertTrue(TestErrands.offers(ErrandIds.TAKE_TASK, TestView.at(HOME, FREE)).isEmpty());
         assertEquals("intent.chiikawa.fail.no_slip", TestErrands.whyNoOffer(ErrandIds.TAKE_TASK, TestView.at(HOME, FREE)).reasonKey());
+        assertTrue(TestErrands.stillWanted(ErrandIds.TAKE_TASK, trip(1), boardAt(1)).ok());
+        assertEquals("intent.chiikawa.fail.no_slip",
+            TestErrands.stillWanted(ErrandIds.TAKE_TASK, trip(1), TestView.at(HOME, FREE)).reasonKey());
+    }
+
+    @Test
+    void theHoldOnASlipOutlastsTheErrandThatMadeIt() {
+        ErrandSettings<ErrandTunings.TakeTask> shipped = settings();
+        TakeTaskErrand errand = new TakeTaskErrand();
+
+        assertEquals(Optional.empty(), errand.problem(shipped));
+        assertEquals(Optional.empty(), errand.problem(withLimit(shipped, BoardSlips.RESERVATION_TICKS)));
+        assertTrue(errand.problem(withLimit(shipped, BoardSlips.RESERVATION_TICKS + 1)).isPresent());
+    }
+
+    private static TakeTaskErrand.Trip trip(int blocksEast) {
+        return new TakeTaskErrand.Trip(GlobalPos.of(OVERWORLD, HOME.pos().east(blocksEast)));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static ErrandSettings<ErrandTunings.TakeTask> settings() {
+        return (ErrandSettings<ErrandTunings.TakeTask>) ErrandSettings.of(ErrandIds.TAKE_TASK).orElseThrow();
+    }
+
+    private static ErrandSettings<ErrandTunings.TakeTask> withLimit(ErrandSettings<ErrandTunings.TakeTask> settings, int maxTicks) {
+        return new ErrandSettings<>(settings.priority(), settings.score(), maxTicks, settings.rests(), settings.yieldsTo(),
+            settings.overlays(), settings.startVoice(), settings.tuning());
     }
 
     private static TestView boardAt(int blocksEast) {

@@ -231,7 +231,7 @@ public final class BoardGameTests {
      * mind. A board that offers that first leaves the pet holding a slip it cannot finish
      * at noon, and the case waits out its clock for nothing.
      */
-    private static BlockPos weedingBoard(GameTestHelper helper) {
+    static BlockPos weedingBoard(GameTestHelper helper) {
         return boardWhere(helper, farmerSlips -> !farmerSlips.isEmpty()
             && farmerSlips.get(0).slip().type().equals(PetTaskTypeData.WEEDING),
             "offers a farmer weeding first");

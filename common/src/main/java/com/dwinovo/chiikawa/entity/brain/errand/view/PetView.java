@@ -58,9 +58,6 @@ public interface PetView {
     /** @return the nearest shop, while it sells something the pet likes and can afford */
     Optional<GlobalPos> shopWorthVisiting();
 
-    /** @return whether the pet recently failed to take a slip; goes when take_task keeps its rest in the ledger */
-    boolean takeTaskCoolingDown();
-
     /** @return the pet this one has thought of playing a scene with */
     Optional<GlobalPos> socialPartner();
 
