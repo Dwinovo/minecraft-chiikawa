@@ -52,6 +52,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
@@ -133,7 +134,10 @@ final class ErrandScenarios {
         Map.entry(ErrandIds.PICK_MUSHROOM, ErrandScenarios::pickMushroom),
         Map.entry(ErrandIds.MELEE, ErrandScenarios::melee),
         Map.entry(ErrandIds.RANGED, ErrandScenarios::ranged),
-        Map.entry(ErrandIds.PLAY_MUSIC, ErrandScenarios::playMusic));
+        Map.entry(ErrandIds.PLAY_MUSIC, ErrandScenarios::playMusic),
+        Map.entry(ErrandIds.FOLLOW_OWNER, ErrandScenarios::followOwner),
+        Map.entry(ErrandIds.WANDER, ErrandScenarios::wander),
+        Map.entry(ErrandIds.STAY, ErrandScenarios::stay));
 
     private ErrandScenarios() {
     }
@@ -150,6 +154,46 @@ final class ErrandScenarios {
             throw new IllegalArgumentException(errand + " has no scenario");
         }
         return setUp.apply(helper);
+    }
+
+    /**
+     * A pet at heel and its owner across the yard, just short of the reach of the area it acts in and so a walk of a few seconds.
+     * Nothing of the errand is left in the world.
+     */
+    private static Scenario followOwner(GameTestHelper helper) {
+        ServerPlayer owner = player(helper);
+        BlockPos across = helper.absolutePos(new BlockPos(14, STAND, 8));
+        owner.teleportTo(across.getX() + 0.5, across.getY(), across.getZ() + 0.5);
+        AbstractPet pet = GameTestKit.wild(helper, InitEntity.USAGI_PET.get(), new BlockPos(3, STAND, 8));
+        pet.tame(owner);
+        pet.setPetDirective(PetDirective.FOLLOW);
+        return new Scenario(pet, 1, ran -> Optional.empty());
+    }
+
+    /**
+     * A pet left to itself in an empty yard, which potters about: every habit is one step. Whatever habit it is cut short in,
+     * the walk and the gaze it set are gone with it and the pet has not been told anything it does not hold to.
+     */
+    private static Scenario wander(GameTestHelper helper) {
+        AbstractPet pet = GameTestKit.owned(helper, InitEntity.USAGI_PET.get(), new BlockPos(8, STAND, 8));
+        pet.setPetDirective(PetDirective.FREE);
+        return new Scenario(pet, 1, ran -> Optional.empty());
+    }
+
+    /**
+     * A pet told to sit, which looks around where it sits. Whatever habit it is cut short in, it has not moved from its seat
+     * and is still sitting: the sitting is the directive's, and an errand ending is not a reason to stand up.
+     */
+    private static Scenario stay(GameTestHelper helper) {
+        AbstractPet pet = GameTestKit.owned(helper, InitEntity.USAGI_PET.get(), new BlockPos(8, STAND, 8));
+        pet.setPetDirective(PetDirective.STAY);
+        Vec3 seat = pet.position();
+        return new Scenario(pet, 1, ran -> {
+            if (pet.getPetDirective() != PetDirective.STAY) {
+                return Optional.of("the pet is no longer told to sit");
+            }
+            return pet.position().distanceToSqr(seat) > 1.0E-6 ? Optional.of("the pet moved from its seat") : Optional.empty();
+        });
     }
 
     /**
