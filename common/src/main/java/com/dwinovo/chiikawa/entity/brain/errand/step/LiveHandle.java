@@ -14,6 +14,7 @@ import com.dwinovo.chiikawa.task.TaskTracker;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -97,9 +98,15 @@ public final class LiveHandle implements Handle {
     }
 
     @Override
-    public int blockedTicks() {
-        return (int) brain().getMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE)
-            .map(since -> now() - since).orElse(0L).longValue();
+    public OptionalInt blockedTicks() {
+        return brain().getMemory(MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE)
+            .map(since -> OptionalInt.of((int) (now() - since))).orElse(OptionalInt.empty());
+    }
+
+    /** The same conditions as the ground navigation of the pet: it plans no path in the air. */
+    @Override
+    public boolean canFindWay() {
+        return pet.onGround() || pet.isInLiquid() || pet.isPassenger();
     }
 
     @Override

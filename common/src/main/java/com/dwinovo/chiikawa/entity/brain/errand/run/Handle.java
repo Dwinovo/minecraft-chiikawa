@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Cue;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
+import java.util.OptionalInt;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -27,8 +28,17 @@ public interface Handle {
     /** Stops walking: forgets where it was going, the path to it, and that it could not find one. */
     void stopWalking();
 
-    /** @return for how many ticks the pet has wanted to walk and been unable to */
-    int blockedTicks();
+    /**
+     * @return for how many ticks the brain's own mover has said it has no way to where the pet walks to, which is a
+     *         path it cannot find or one that stops short; empty while it has one
+     */
+    OptionalInt blockedTicks();
+
+    /**
+     * @return whether the brain's mover can look for a way just now, which it cannot from the air: a pet in a hop or a
+     *         fall finds no path to anywhere, and says so
+     */
+    boolean canFindWay();
 
     void lookAt(Entity target);
 
