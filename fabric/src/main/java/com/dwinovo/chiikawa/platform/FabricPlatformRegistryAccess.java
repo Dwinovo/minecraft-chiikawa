@@ -26,11 +26,6 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     private final Supplier<SensorType<PetPickableItemSensor>> petItemEntitySensor;
     private final Supplier<SensorType<PetPlacesSensor>> petPlacesSensor;
     private final Supplier<SensorType<PetSocialSensor>> petSocialSensor;
-    private final Supplier<Activity> farmerHarvestActivity;
-    private final Supplier<Activity> farmerPlantActivity;
-    private final Supplier<Activity> deleverActivity;
-    private final Supplier<Activity> weedActivity;
-    private final Supplier<Activity> pickMushroomActivity;
     private final Supplier<Activity> fencerFightActivity;
     private final Supplier<Activity> archerShootActivity;
     private final Supplier<Activity> musicianPlayActivity;
@@ -52,11 +47,6 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
         petPlacesSensor = registerSensor("pet_places_sensor", new SensorType<>(PetPlacesSensor::new));
         petSocialSensor = registerSensor("pet_social_sensor", new SensorType<>(PetSocialSensor::new));
 
-        farmerHarvestActivity = registerActivity("farmer_harvest");
-        farmerPlantActivity = registerActivity("farmer_plant");
-        deleverActivity = registerActivity("delever");
-        weedActivity = registerActivity("weed");
-        pickMushroomActivity = registerActivity("pick_mushroom");
         fencerFightActivity = registerActivity("fencer_fight");
         archerShootActivity = registerActivity("archer_shoot");
         musicianPlayActivity = registerActivity("musician_play");
@@ -111,31 +101,6 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     @Override
     public Supplier<SensorType<PetSocialSensor>> petSocialSensor() {
         return petSocialSensor;
-    }
-
-    @Override
-    public Supplier<Activity> farmerHarvestActivity() {
-        return farmerHarvestActivity;
-    }
-
-    @Override
-    public Supplier<Activity> farmerPlantActivity() {
-        return farmerPlantActivity;
-    }
-
-    @Override
-    public Supplier<Activity> deleverActivity() {
-        return deleverActivity;
-    }
-
-    @Override
-    public Supplier<Activity> weedActivity() {
-        return weedActivity;
-    }
-
-    @Override
-    public Supplier<Activity> pickMushroomActivity() {
-        return pickMushroomActivity;
     }
 
     @Override
