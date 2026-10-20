@@ -50,7 +50,7 @@ public final class ErrandSettingsData {
             entry(ErrandIds.STAY, errand(10, 1.0F, A_DAY, giveUp(20), ErrandTunings.Untuned.NONE)),
             entry(ErrandIds.WANDER, errand(10, 0.05F, A_DAY, giveUp(20), new ErrandTunings.Wander(0.6F, 4, 10, 100, 0.6F))),
             entry(ErrandIds.PICK_UP_ITEM, errand(30, 0.4F, HALF_A_MINUTE,
-                Rests.of(NONE, RestSpec.ticksPerSubject(40), NONE), new ErrandTunings.PickUp(0.7F, 1.5))),
+                Rests.of(NONE, RestSpec.ticksPerSubject(40), NONE), new ErrandTunings.PickUp(0.7F, 1.5, 400, 100))),
             entry(ErrandIds.HARVEST, errand(50, 0.6F, HALF_A_MINUTE, blockWork, blockWorkTuning)),
             // The farmer's strict order: harvest, then plant, then deliver.
             entry(ErrandIds.PLANT, errand(50, 0.6F, HALF_A_MINUTE, blockWork, blockWorkTuning)
