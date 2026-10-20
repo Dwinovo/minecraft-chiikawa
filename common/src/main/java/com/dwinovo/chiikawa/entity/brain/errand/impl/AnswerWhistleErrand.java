@@ -32,7 +32,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
  * curious, but not so curious that it lets a job go. The whistle is the pet's memory of it, noted by the
  * mind that was told of it, and the walk and the gaze go by that memory each time, so a pet that is whistled to
  * again goes to the new spot, and one that has lost interest on the way stops where it is. The walk has no
- * limit of its own and none for a pet that cannot find a way, as before: the curiosity running out is what ends it.
+ * limit of its own and none for a pet that cannot find a way: the curiosity running out is what ends it.
  */
 public final class AnswerWhistleErrand implements ErrandType<AnswerWhistleErrand.Curious, ErrandTunings.AnswerWhistle> {
     /** The whistle the pet has set off for, wherever it was blown: asked of the pet's view each time. */
