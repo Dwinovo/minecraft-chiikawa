@@ -15,7 +15,8 @@ public interface Plan {
      * @return where the plan takes the pet, worked out afresh each time since the owner, a friend or a
      *         partner moves; nothing for a plan that goes nowhere in particular: wandering, sitting,
      *         playing where it stands. It is all the area a pet acts in asks about an errand: an errand
-     *         starts only on a destination within the anchor's reach and goes on only within its leash
+     *         starts only on a destination within the anchor's reach and goes on only within its leash; one
+     *         with no destination goes on only while the pet itself is within the leash
      */
     default Optional<GlobalPos> destination(PetView view) {
         return Optional.empty();
