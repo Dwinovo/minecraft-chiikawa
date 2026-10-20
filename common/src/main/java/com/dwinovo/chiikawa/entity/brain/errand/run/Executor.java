@@ -222,9 +222,7 @@ public final class Executor {
 
     /**
      * Publishes what the pet is doing. The errand is published as it is; the pose and the scene only when
-     * what the step claims of them changes. So a step that claims nothing, as one that is still carried out
-     * by an old behavior, leaves alone what that behavior sets, and the pose and the scene of a step that
-     * does claim them are still cleared the tick it ends.
+     * what the step claims of them changes, and they are cleared the tick the step that claimed them ends.
      */
     private void project() {
         projection.intent(running == null ? null : running.errand());
