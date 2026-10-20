@@ -224,22 +224,22 @@ public final class PersonalityData {
         private IdleHabits idle = IdleHabits.DEFAULT;
         private final Map<ResourceLocation, Personality.Leaning> licences = new HashMap<>();
 
-        Builder weigh(float factor, ResourceLocation intent) {
-            return weigh(factor, List.of(intent));
+        Builder weigh(float factor, ResourceLocation errand) {
+            return weigh(factor, List.of(errand));
         }
 
-        Builder weigh(float factor, List<ResourceLocation> intents) {
-            intents.forEach(intent -> multipliers.put(intent, factor));
+        Builder weigh(float factor, List<ResourceLocation> errands) {
+            errands.forEach(errand -> multipliers.put(errand, factor));
             return this;
         }
 
-        Builder at(DayPhase phase, float factor, ResourceLocation intent) {
-            return at(phase, factor, List.of(intent));
+        Builder at(DayPhase phase, float factor, ResourceLocation errand) {
+            return at(phase, factor, List.of(errand));
         }
 
-        Builder at(DayPhase phase, float factor, List<ResourceLocation> intents) {
+        Builder at(DayPhase phase, float factor, List<ResourceLocation> errands) {
             Map<ResourceLocation, Float> multipliersAt = routine.computeIfAbsent(phase, ignored -> new HashMap<>());
-            intents.forEach(intent -> multipliersAt.put(intent, factor));
+            errands.forEach(errand -> multipliersAt.put(errand, factor));
             return this;
         }
 

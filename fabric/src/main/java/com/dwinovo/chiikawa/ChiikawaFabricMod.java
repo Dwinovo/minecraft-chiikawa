@@ -7,7 +7,6 @@ import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.init.InitSensor;
 import com.dwinovo.chiikawa.init.InitTag;
-import com.dwinovo.chiikawa.init.InitActivity;
 import com.dwinovo.chiikawa.init.InitSounds;
 import com.dwinovo.chiikawa.init.InitMenu;
 import com.dwinovo.chiikawa.init.InitDataComponents;
@@ -60,7 +59,6 @@ public class ChiikawaFabricMod implements ModInitializer {
         InitMemory.init();
         InitSensor.init();
         InitTag.init();
-        InitActivity.init();
         InitLootConditions.init();
         InitSounds.init();
         InitMenu.init();
