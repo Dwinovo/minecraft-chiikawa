@@ -90,6 +90,11 @@ public interface RestStore {
         return memory(InitMemory.PHOTO_COOLDOWN);
     }
 
+    /** The gift errand's rest, in the saved memory it has always been in. */
+    static Kind giftCooldown() {
+        return memory(InitMemory.GIFT_COOLDOWN);
+    }
+
     /** A rest for each thing the errand was about, in the one memory all such errands share; not saved. */
     static Kind subjects() {
         return (brain, errand) -> new RestStore() {

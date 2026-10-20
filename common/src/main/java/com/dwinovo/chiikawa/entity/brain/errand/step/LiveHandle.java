@@ -24,6 +24,7 @@ import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -54,6 +55,11 @@ public final class LiveHandle implements Handle {
     Optional<Entity> creature(UUID id) {
         return pet.level() instanceof ServerLevel level ? Optional.ofNullable(level.getEntity(id)).filter(Entity::isAlive)
             : Optional.empty();
+    }
+
+    /** @return the pet's owner, while they are a player in the pet's world */
+    Optional<Player> owner() {
+        return pet.getOwner() instanceof Player owner && owner.isAlive() ? Optional.of(owner) : Optional.empty();
     }
 
     private Brain<AbstractPet> brain() {
