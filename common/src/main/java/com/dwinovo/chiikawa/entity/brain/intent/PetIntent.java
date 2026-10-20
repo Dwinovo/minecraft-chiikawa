@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain.intent;
 
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.core.GlobalPos;
@@ -9,7 +10,8 @@ import net.minecraft.world.entity.schedule.Activity;
 
 /**
  * One thing a pet may decide to do. Intents are stateless: conditions and score
- * read only the {@link IntentContext}; per-pet progress lives in brain memories.
+ * read only the {@link IntentContext}; per-pet progress lives in brain memories. How much
+ * it matters, and what it is worth to the pet, is data: {@link ErrandSettings}.
  *
  * <p>An intent says whether and how much a pet wants to do something; the behaviors
  * of its {@link #activity()} say how. The selector filters intents by the
@@ -41,8 +43,14 @@ public interface PetIntent {
         return Optional.empty();
     }
 
-    /** Base score from 0 to 1. */
-    float score(IntentContext ctx);
+    /**
+     * How much the pet fancies this among the intents of its priority, from 0 to 1, before its
+     * personality weighs it: the score in the intent's settings, unless the intent is worth more
+     * or less as the pet's situation changes.
+     */
+    default float score(IntentContext ctx, ErrandSettings<?> settings) {
+        return settings.score();
+    }
 
     /**
      * The work counter this intent's work reports, see
