@@ -47,6 +47,23 @@ class ExecutorTest {
     }
 
     @Test
+    void aGlanceIsLeftOutWhileTheStepHoldsTheGazeAndMadeOtherwise() {
+        executor.glance(null, 60);
+        assertEquals(1, handle.glances, "a pet on no errand glances");
+
+        ScriptedStep aiming = ScriptedStep.running();
+        aiming.holdsGaze = true;
+        start(Routine.single(aiming), 0);
+        executor.glance(null, 60);
+        assertEquals(1, handle.glances, "a step that sets the gaze every tick would overwrite it");
+
+        executor.end(Outcome.interrupted("test"), 1);
+        start(Routine.single(ScriptedStep.running()), 2);
+        executor.glance(null, 60);
+        assertEquals(2, handle.glances);
+    }
+
+    @Test
     void anEndAskedForWaitsForAStepThatCanBeCut() {
         ScriptedStep action = ScriptedStep.running();
         action.interruptible = false;

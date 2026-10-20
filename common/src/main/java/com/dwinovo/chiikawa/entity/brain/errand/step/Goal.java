@@ -7,7 +7,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * What a step is about, as a place or as a creature: where a walk goes, what a gaze rests on. A creature is
+ * What a step is about, as a place, a creature or a view: where a walk goes, what a gaze rests on. A creature is
  * kept by its id and looked for each time, since it moves, may be gone, and a plan must not hold on to an
  * entity that is no longer in the world.
  */
@@ -43,6 +43,31 @@ public sealed interface Goal {
         @Override
         public boolean lookAt(LiveHandle live) {
             live.lookAt(pos);
+            return true;
+        }
+    }
+
+    /**
+     * A view: nothing to walk to, a heading to look along from where the pet stands.
+     *
+     * @param facing which way, level
+     * @param distance how far along it the pet looks
+     */
+    record Horizon(Vec3 facing, double distance) implements Goal {
+        @Override
+        public Optional<Vec3> where(LiveHandle live) {
+            return Optional.of(live.pet().getEyePosition().add(facing.scale(distance)));
+        }
+
+        /** Already as near as it gets: there is nowhere to walk to. */
+        @Override
+        public boolean walkTo(LiveHandle live, float speed, int closeEnough) {
+            return true;
+        }
+
+        @Override
+        public boolean lookAt(LiveHandle live) {
+            live.lookAt(live.pet().getEyePosition().add(facing.scale(distance)));
             return true;
         }
     }

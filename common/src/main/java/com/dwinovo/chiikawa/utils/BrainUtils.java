@@ -19,7 +19,6 @@ import com.dwinovo.chiikawa.entity.brain.task.tameable.RandomWalkTask;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.SitBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.GiveGiftBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.GoShoppingBehavior;
-import com.dwinovo.chiikawa.entity.brain.task.tameable.TakePhotoBehavior;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.TakeTaskBehavior;
 import com.dwinovo.chiikawa.init.InitActivity;
 import com.dwinovo.chiikawa.voice.PetSpeech;
@@ -117,12 +116,6 @@ public final class BrainUtils {
     public static void addWhistleTasks(Brain<AbstractPet> brain) {
         PetActivities.register(brain, InitActivity.ANSWER_WHISTLE.get(),
             ImmutableList.of(Pair.of(2, new AnswerWhistleBehavior())), Set.of());
-    }
-
-    /** {@code take_photo}: go to a few blocks from who it is of, aim the camera and press the shutter. */
-    public static void addPhotoTasks(Brain<AbstractPet> brain) {
-        PetActivities.register(brain, InitActivity.TAKE_PHOTO.get(),
-            ImmutableList.of(Pair.of(2, new TakePhotoBehavior())), Set.of());
     }
 
     /**
