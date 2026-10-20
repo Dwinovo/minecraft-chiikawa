@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * How long a pet leaves each errand alone after it has ended, and the only thing that writes it.
@@ -92,11 +93,12 @@ public final class RestLedger {
             case Outcome.GaveUp gaveUp -> rests.gaveUp();
             case Outcome.Interrupted interrupted -> rests.interrupted();
         };
-        long ticks = ticks(running.errand(), spec, new RestContext(running.plan().restKey()));
+        RestContext context = RestContext.of(running.plan());
+        long ticks = ticks(running.errand(), spec, context);
         if (ticks <= 0) {
             return;
         }
-        String subject = spec.per() == RestSpec.Per.SUBJECT ? running.plan().subject().orElse(null) : null;
+        String subject = subject(spec, context);
         RestStore store = stores.apply(running.errand());
         store.restFor(subject, Math.max(ticks, store.remaining(subject, now)), now);
     }
@@ -105,7 +107,8 @@ public final class RestLedger {
      * A step has done something the errand rests for, or something the errand was waiting on has come
      * back. Rests as the errand's settings say for that report, instead of what it was resting, whether
      * that is more or less. A report the settings do not name changes nothing. A report rests the errand
-     * as a whole, whatever its other rests are on. For the mind alone.
+     * as a whole, whatever its other rests are on, unless its spec is on one subject: then it rests that
+     * subject of the context alone, instead of what that was resting. For the mind alone.
      *
      * @param errand the errand
      * @param report what came back, as the settings name it
@@ -115,8 +118,14 @@ public final class RestLedger {
     public void afterReport(ResourceLocation errand, String report, RestContext context, long now) {
         RestSpec spec = settings.apply(errand).map(found -> found.rests().reports().get(report)).orElse(null);
         if (spec != null) {
-            stores.apply(errand).restFor(null, ticks(errand, spec, context), now);
+            stores.apply(errand).restFor(subject(spec, context), ticks(errand, spec, context), now);
         }
+    }
+
+    /** @return what the rest is on: the subject of the context if the spec says one, which a context may have none of */
+    @Nullable
+    private static String subject(RestSpec spec, RestContext context) {
+        return spec.per() == RestSpec.Per.SUBJECT ? context.subject().orElse(null) : null;
     }
 
     private long ticks(ResourceLocation errand, RestSpec spec, RestContext context) {
