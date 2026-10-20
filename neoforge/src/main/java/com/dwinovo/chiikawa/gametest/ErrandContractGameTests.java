@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestGenerator;
@@ -69,8 +70,6 @@ public final class ErrandContractGameTests {
     private static final int GRACE = 20;
     /** How long an interrupt is allowed to take: the tick it is told, and the one after. */
     private static final int INTERRUPT_TICKS = 2;
-    /** How long into a step the pet is cut short for the middle of a routine. */
-    private static final int MIDDLE_TICKS = 10;
     /**
      * Long enough for the longest errand to be cut short for the third time: a paper written in full before the last cut,
      * or the half minute an errand cut short rests from the board after each of the first two.
@@ -85,17 +84,21 @@ public final class ErrandContractGameTests {
 
     /**
      * Where in an errand's routine a pet is cut short. The first is as soon as the pet is seen on the errand at all,
-     * which for an errand whose first step is an action of one tick is already past it.
+     * which for an errand whose first step is an action of one tick is already past it. The middle is as soon as it is
+     * seen at the middle step, not some time into it: a step can be over in a tick, when the pet is already where it was
+     * to walk to, and a pet that has wandered about for the rest it takes after being cut short once can be anywhere,
+     * the board it takes a slip from at its feet included. A cut that waited for the step to last would then never come,
+     * and the pet would finish the errand and the case would run out of time.
      */
     private enum Point {
         FIRST,
         MIDDLE,
         LAST;
 
-        boolean reached(Running running, long now, int steps) {
+        boolean reached(Running running, int steps) {
             return switch (this) {
                 case FIRST -> true;
-                case MIDDLE -> running.stepIndex() == (steps - 1) / 2 && now - running.startedAt() >= MIDDLE_TICKS;
+                case MIDDLE -> running.stepIndex() == (steps - 1) / 2;
                 case LAST -> running.stepIndex() == steps - 1;
             };
         }
@@ -211,7 +214,8 @@ public final class ErrandContractGameTests {
         AbstractPet pet = scenario.pet();
         Watch watch = new Watch();
         boolean[] done = {false};
-        helper.runAtTickTime(SETTLING, () -> helper.assertTrue(watch.seen != null || done[0], "the pet never set off on " + id));
+        helper.runAtTickTime(SETTLING, () -> helper.assertTrue(watch.seen != null || done[0],
+            "the pet never set off on " + id + ": " + whereItStands(pet, id)));
         helper.onEachTick(() -> {
             if (done[0]) {
                 return;
@@ -243,6 +247,8 @@ public final class ErrandContractGameTests {
         Watch watch = new Watch();
         int[] next = {0};
         long[] told = {-1};
+        helper.runAtTickTime(INTERRUPT_CASE_TICKS - 1, () -> helper.assertTrue(next[0] == points.length,
+            id + " was cut short only " + next[0] + " times: " + whereItStands(pet, id)));
         helper.onEachTick(() -> {
             if (next[0] == points.length) {
                 return;
@@ -251,7 +257,7 @@ public final class ErrandContractGameTests {
             Optional<Running> running = runningOn(pet, id);
             running.ifPresent(found -> watch.seen = found);
             if (told[0] < 0) {
-                if (running.isPresent() && points[next[0]].reached(running.get(), now, scenario.steps())) {
+                if (running.isPresent() && points[next[0]].reached(running.get(), scenario.steps())) {
                     PetMind.post(pet, new Message.Moved("test"));
                     told[0] = now;
                 }
@@ -311,6 +317,20 @@ public final class ErrandContractGameTests {
     private static long ticksOf(RestSpec spec, Running ran) {
         return spec.amount().map(fixed -> (long) fixed,
             source -> RestSources.resolver(source).map(resolver -> resolver.ticks(new RestContext(ran.plan().restKey()))).orElse(0L));
+    }
+
+    /** @return what a pet that is not getting on with the errand is doing, for the case to say so */
+    private static String whereItStands(AbstractPet pet, ResourceLocation id) {
+        long now = pet.level().getGameTime();
+        RestLedger ledger = new RestLedger(errand -> Errands.get(errand).restStore().of(pet.getBrain(), errand), ErrandSettings::of);
+        return "on " + pet.getMind().errands().running().map(Running::errand).orElse(null) + " at step "
+            + pet.getMind().errands().running().map(Running::stepIndex).orElse(-1) + ", resting from it for "
+            + ledger.remaining(id, now) + " ticks, at " + pet.position() + ", and its log ends "
+            + pet.getMind().log().entries().stream().skip(Math.max(0, pet.getMind().log().entries().size() - 6)).toList()
+            + ", and looked at now it is " + pet.getMind().look((ServerLevel) pet.level()).trace().lines().stream()
+                .filter(line -> line.errand().equals(id)).map(line -> line.verdict()).toList()
+            + ", remembering " + pet.getBrain().getMemories().keySet().stream()
+                .map(memory -> BuiltInRegistries.MEMORY_MODULE_TYPE.getKey(memory).getPath()).sorted().toList();
     }
 
     private static Optional<Running> runningOn(AbstractPet pet, ResourceLocation id) {
