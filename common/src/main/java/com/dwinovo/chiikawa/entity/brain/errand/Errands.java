@@ -26,7 +26,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Registry of every errand a pet can be on, by the id it has always had as an intent. Generic errands
+ * Registry of every errand a pet can be on, by its id. Generic errands
  * are open to every pet; the others are offered by capabilities through
  * {@code PetCapability#errands()}.
  *

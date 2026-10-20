@@ -51,10 +51,10 @@ public final class PetPersonalityLoader extends SimpleJsonResourceReloadListener
         files.forEach((entityId, json) -> Personality.CODEC.parse(JsonOps.INSTANCE, json)
             .ifSuccess(personality -> {
                 personalities.put(entityId, personality);
-                personality.intentIds().stream()
-                    .filter(intent -> Errands.get(intent) == null)
+                personality.errandIds().stream()
+                    .filter(errand -> Errands.get(errand) == null)
                     .sorted()
-                    .forEach(intent -> warnings.add(LOG_PREFIX + entityId + " weighs unknown intent " + intent));
+                    .forEach(errand -> warnings.add(LOG_PREFIX + entityId + " weighs unknown errand " + errand));
             })
             .ifError(error -> errors.add(LOG_PREFIX + entityId + " uses the default personality, failed to parse: "
                 + error.message())));
@@ -64,7 +64,7 @@ public final class PetPersonalityLoader extends SimpleJsonResourceReloadListener
     /**
      * @param personalities decoded personalities by entity type id
      * @param errors one message per file that could not be decoded
-     * @param warnings one message per unknown intent id
+     * @param warnings one message per unknown errand id
      */
     record Loaded(Map<ResourceLocation, Personality> personalities, List<String> errors, List<String> warnings) {
     }
