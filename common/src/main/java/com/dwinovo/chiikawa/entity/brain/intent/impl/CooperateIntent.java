@@ -19,8 +19,6 @@ import net.minecraft.world.entity.schedule.Activity;
  * the one coming over gives up.
  */
 public final class CooperateIntent implements PetIntent {
-    private static final float SCORE = 0.5F;
-
     @Override
     public ResourceLocation id() {
         return PetIntents.COOPERATE;
@@ -39,10 +37,5 @@ public final class CooperateIntent implements PetIntent {
     @Override
     public IntentCheck canRun(IntentContext ctx) {
         return ctx.playingAlong() ? IntentCheck.OK : IntentCheck.fail("not_asked");
-    }
-
-    @Override
-    public float score(IntentContext ctx) {
-        return SCORE;
     }
 }

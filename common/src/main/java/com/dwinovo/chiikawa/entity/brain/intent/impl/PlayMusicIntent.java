@@ -28,8 +28,6 @@ import net.minecraft.world.entity.schedule.Activity;
  * box), so coming back plays the song again, as in 0.0.9.
  */
 public final class PlayMusicIntent implements PetIntent {
-    private static final float SCORE = 0.6F;
-
     @Override
     public ResourceLocation id() {
         return PetIntents.PLAY_MUSIC;
@@ -53,11 +51,6 @@ public final class PlayMusicIntent implements PetIntent {
     @Override
     public IntentCheck canContinue(IntentContext ctx) {
         return ctx.playingMusic() || ctx.hasPlayableSelection() ? IntentCheck.OK : IntentCheck.fail("song_over");
-    }
-
-    @Override
-    public float score(IntentContext ctx) {
-        return SCORE;
     }
 
     @Override
