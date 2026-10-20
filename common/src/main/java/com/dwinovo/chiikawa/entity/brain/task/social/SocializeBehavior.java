@@ -1,6 +1,5 @@
 package com.dwinovo.chiikawa.entity.brain.task.social;
 
-import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
@@ -187,7 +186,7 @@ public class SocializeBehavior extends Behavior<AbstractPet> {
             case IDLE -> partner.getBrain().getMemory(InitMemory.INTERACTION_RESERVATION.get())
                 .filter(reservation -> reservation.heldBy(pet))
                 .isPresent();
-            case PLAYING_MUSIC -> partner.getActivity() == PetActivity.PLAY_GUITAR;
+            case PLAYING_MUSIC -> partner.getMind().errands().playingMusic();
         };
     }
 

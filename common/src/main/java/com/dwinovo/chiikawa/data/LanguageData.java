@@ -64,7 +64,7 @@ public final class LanguageData {
             addMusicBoxModeTranslations(adder, "播放模式：%s", "单次播放", "列表循环", "随机播放", "单曲循环");
             addIntentFailureTranslations(adder, "无法跟随主人", "主人就在附近", "已经回到主人身边", "目标不在范围内",
                 "目标离开了活动范围", "附近没有可拾取的物品", "没有可收割的作物", "没有可种植的耕地", "没有可存放的容器",
-                "没有攻击目标", "攻击冷却中", "没有箭", "没有新的曲子可演奏", "曲子演奏完了", "先做更要紧的活",
+                "没有攻击目标", "攻击冷却中", "没有箭", "没有新的曲子可演奏", "先做更要紧的活",
                 "附近没有野草", "附近没有蘑菇", "要领到对应的工作牌才会做", "只在夜里做",
                 "已经带着一张工作牌", "附近的公告板没有合适的工作牌",
                 "商店里没有它想要又买得起的", "手上没有要送的东西");
@@ -273,7 +273,7 @@ public final class LanguageData {
             addMusicBoxModeTranslations(adder, "再生モード：%s", "1回だけ再生", "全曲リピート", "シャッフル再生", "1曲リピート");
             addIntentFailureTranslations(adder, "飼い主についていけない", "飼い主がすぐ近くにいる", "飼い主のそばに戻った", "目標が届かないところにいる",
                 "目標が行動範囲の外に出た", "近くに拾えるアイテムがない", "収穫できる作物がない", "種をまける耕地がない", "しまえる入れ物がない",
-                "攻撃する相手がいない", "攻撃のクールダウン中", "矢がない", "新しく演奏できる曲がない", "演奏が終わった",
+                "攻撃する相手がいない", "攻撃のクールダウン中", "矢がない", "新しく演奏できる曲がない",
                 "もっと大事なことが先", "近くに雑草がない", "近くにキノコがない",
                 "合うお仕事カードを取ったときだけやる", "夜だけやる",
                 "もうお仕事カードを持っている", "近くの掲示板に合うカードがない",
@@ -483,7 +483,7 @@ public final class LanguageData {
             addMusicBoxModeTranslations(adder, "Reprodução: %s", "Tocar uma vez", "Repetir tudo", "Aleatório", "Repetir uma");
             addIntentFailureTranslations(adder, "Não consegue seguir o dono", "O dono está por perto", "De volta com o dono", "O alvo está fora de alcance",
                 "O alvo saiu da área permitida", "Nenhum item para pegar", "Nenhuma plantação para colher", "Nenhuma terra arada para plantar", "Nenhum recipiente para entregar",
-                "Nenhum alvo para atacar", "O ataque está recarregando", "Sem flechas", "Nenhuma música nova para tocar", "A música acabou",
+                "Nenhum alvo para atacar", "O ataque está recarregando", "Sem flechas", "Nenhuma música nova para tocar",
                 "Algo mais urgente vem primeiro", "Sem ervas daninhas por perto", "Sem cogumelos por perto",
                 "Só com uma ficha compatível", "Só se faz à noite",
                 "Já está com uma ficha", "Nenhuma ficha adequada em um quadro por perto",
@@ -699,7 +699,7 @@ public final class LanguageData {
             addMusicBoxModeTranslations(adder, "재생: %s", "한 번 재생", "목록 반복", "무작위", "한 곡 반복");
             addIntentFailureTranslations(adder, "주인을 따라갈 수 없어", "주인이 바로 옆에 있어", "이미 주인 곁이야", "목표가 범위 밖이야",
                 "목표가 활동 범위를 벗어났어", "주울 물건이 없어", "수확할 작물이 없어", "심을 밭이 없어", "넣을 상자가 없어",
-                "공격할 대상이 없어", "공격 대기 중이야", "화살이 없어", "새로 연주할 곡이 없어", "곡이 끝났어", "더 급한 일이 먼저야",
+                "공격할 대상이 없어", "공격 대기 중이야", "화살이 없어", "새로 연주할 곡이 없어", "더 급한 일이 먼저야",
                 "근처에 잡초가 없어", "근처에 버섯이 없어", "맞는 전표를 받아야 해", "밤에만 해",
                 "이미 전표를 들고 있어", "근처 게시판에 맞는 전표가 없어",
                 "사고 싶고 살 수 있는 물건이 없어", "건넬 것이 없어");
@@ -910,7 +910,7 @@ public final class LanguageData {
             addMusicBoxModeTranslations(adder, "Playback: %s", "Play once", "Repeat all", "Shuffle", "Repeat one");
             addIntentFailureTranslations(adder, "Can't follow the owner", "Owner is close by", "Back with the owner", "Target is out of range",
                 "Target left the allowed area", "No item to pick up", "No crop to harvest", "No farmland to plant", "No container to deliver to",
-                "No target to attack", "Attack is cooling down", "No arrows", "No new song to play", "The song is over",
+                "No target to attack", "Attack is cooling down", "No arrows", "No new song to play",
                 "Something more urgent comes first", "No weeds nearby", "No mushrooms nearby",
                 "Only with a matching slip", "Only done at night",
                 "Already carries a slip", "No slip for it on a nearby board",
@@ -1175,7 +1175,6 @@ public final class LanguageData {
         String attackCoolingDown,
         String noArrows,
         String noNewSong,
-        String songOver,
         String higherPriority,
         String noWeed,
         String noMushroom,
@@ -1199,7 +1198,6 @@ public final class LanguageData {
         adder.add("intent.chiikawa.fail.attack_cooling_down", attackCoolingDown);
         adder.add("intent.chiikawa.fail.no_arrows", noArrows);
         adder.add("intent.chiikawa.fail.no_new_song", noNewSong);
-        adder.add("intent.chiikawa.fail.song_over", songOver);
         adder.add("intent.chiikawa.fail.higher_priority", higherPriority);
         adder.add("intent.chiikawa.fail.no_weed", noWeed);
         adder.add("intent.chiikawa.fail.no_mushroom", noMushroom);
