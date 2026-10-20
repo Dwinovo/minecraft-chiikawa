@@ -10,10 +10,10 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
 /**
  * Turns the owner's {@link PetDirective} into what the AI may do: an anchor (where)
- * and a permission table (what kind of intent).
+ * and a permission table (what category of errand).
  *
- * <p>This is the only AI class that reads {@link PetDirective}. Every rule that used
- * to be a mode check inside a behavior or sensor lives in {@link #anchorOf} or
+ * <p>This is the only AI class that reads {@link PetDirective}. Every rule that is
+ * a mode check, whatever the errand or sensor, lives in {@link #anchorOf} or
  * {@link #allows}.
  */
 public final class PetConstraints {

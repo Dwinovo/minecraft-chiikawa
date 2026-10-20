@@ -21,11 +21,11 @@ import net.minecraft.resources.ResourceLocation;
  *
  * <p>Fights, the present in a pet's paws, the exam and the invitation of a friend are priority 80; the
  * slip, work and playing music 50; a photo 40; picking things up and calling on a friend 30; pottering
- * about and staying put 10. Within a priority the score keeps the order the pet has always had.
+ * about and staying put 10. Within a priority the score settles which comes first.
  *
- * <p>The numbers in each tuning are the ones the behaviors have always had. An errand with no limit of
- * its own today (following and fighting end when they stop being wanted) is given a day; one that walks to
- * something and does one thing to it, half a minute; one that is a habit at a time, a little over the longest habit.
+ * <p>An errand with no limit of its own (following and fighting end when they stop being wanted) is given a
+ * day; one that walks to something and does one thing to it, half a minute; one that is a habit at a time, a little
+ * over the longest habit.
  */
 public final class ErrandSettingsData {
     /** A day: for an errand that ends when it stops being wanted, long enough that this never decides. */
@@ -47,7 +47,7 @@ public final class ErrandSettingsData {
     /** @return settings by errand id */
     public static Map<ResourceLocation, ErrandSettings<?>> all() {
         // A crop or a chest a pet could not get to is left alone for ten seconds; it gives up on it as soon as the
-        // brain's mover says it has no full path to it, as the farm behaviors did when they pathfound before setting off.
+        // brain's mover says it has no full path to it.
         Rests blockWork = Rests.of(NONE, RestSpec.ticksPerSubject(200), NONE);
         ErrandTunings.BlockWork blockWorkTuning = new ErrandTunings.BlockWork(0.8F, 3.0, 0);
         ErrandTunings.Footwork footwork = new ErrandTunings.Footwork(1.0F, 1.2F, 10.0, 3.0, 2);

@@ -21,7 +21,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.decide.Scored;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.BlockWorkErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.CombatErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
-import com.dwinovo.chiikawa.entity.brain.errand.rest.RestStore;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
@@ -35,6 +34,7 @@ import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.dwinovo.chiikawa.testing.FixedRandom;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.testing.TestErrands;
+import com.dwinovo.chiikawa.testing.TestRests;
 import com.dwinovo.chiikawa.testing.TestView;
 import java.util.HashMap;
 import java.util.List;
@@ -64,7 +64,7 @@ class PetMindDecisionTest {
         ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
         ResourceLocation.withDefaultNamespace("overworld"));
     private static final GlobalPos PET = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
-    private static final RestLedger NO_RESTS = new RestLedger(errand -> RestStore.legacy().of(null, errand), errand -> Optional.empty());
+    private static final RestLedger NO_RESTS = TestRests.noRests();
     private static final Permits ALL = category -> true;
     private static final long NOW = 1000L;
     private static final int NONE = Integer.MIN_VALUE;

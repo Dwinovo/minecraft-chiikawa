@@ -40,7 +40,7 @@ public final class RestGameTests {
     private static final int CROP_REST = 200;
     private static final String CROP = "2,2,2";
 
-    /** Where each errand's rests live, as the errands that go native will say. */
+    /** Where the rests that live in a memory of their own are kept. */
     private static final Map<ResourceLocation, RestStore.Kind> KINDS = Map.of(
         ErrandIds.TAKE_PHOTO, RestStore.memory(InitMemory.PHOTO_COOLDOWN),
         ErrandIds.GIFT_OWNER, RestStore.memory(InitMemory.GIFT_COOLDOWN),
@@ -82,7 +82,7 @@ public final class RestGameTests {
 
     /** A rest written through the ledger is in the memory the rest of the mod reads. */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 20)
-    public static void a_rest_the_ledger_writes_to_a_legacy_memory_is_the_memory_the_mod_reads(GameTestHelper helper) {
+    public static void a_rest_the_ledger_writes_is_in_the_memory_the_mod_reads(GameTestHelper helper) {
         AbstractPet pet = ownedPet(helper, new BlockPos(3, STAND, 3));
         long now = helper.getLevel().getGameTime();
 

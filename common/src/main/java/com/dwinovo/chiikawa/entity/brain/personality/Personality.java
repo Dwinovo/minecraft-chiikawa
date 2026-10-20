@@ -22,17 +22,17 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * How one kind of pet leans: how much it wants to do each intent, how that shifts over
+ * How one kind of pet leans: how much it wants to do each errand, how that shifts over
  * the day, how random its choices are, and what it holds when it spawns in the wild.
  * Loaded per entity type from {@code data/<namespace>/pet_personality/<entity>.json}
  * by {@link PetPersonalityLoader}.
  *
- * <p>Multipliers only weigh intents the owner's directive already permits; a
+ * <p>Multipliers only weigh errands the owner's directive already permits; a
  * personality can never make a pet do what it was told not to.
  *
- * @param intentMultipliers score multiplier per intent id; unlisted intents keep 1
- * @param routine extra score multipliers per intent id for a part of the day
- * @param randomness how far the pet's choices stray from the best score among intents of the
+ * @param intentMultipliers score multiplier per errand id (the data's {@code intent_multipliers}); unlisted errands keep 1
+ * @param routine extra score multipliers per errand id for a part of the day
+ * @param randomness how far the pet's choices stray from the best score among errands of the
  *                   same priority, from 0 to 1; see {@code Decision#pickWithinTier}
  * @param wildTools the tools a wild pet of this kind may spawn holding, by weight;
  *                  {@code minecraft:air} weighs spawning empty-handed
@@ -103,17 +103,17 @@ public record Personality(
     }
 
     /**
-     * @param intent an intent id
+     * @param errand an errand id
      * @param phase the current part of the day
-     * @return the factor this pet's base score for {@code intent} is multiplied by
+     * @return the factor this pet's base score for {@code errand} is multiplied by
      */
-    public float multiplier(ResourceLocation intent, DayPhase phase) {
-        return intentMultipliers.getOrDefault(intent, 1.0F)
-            * routine.getOrDefault(phase, Map.of()).getOrDefault(intent, 1.0F);
+    public float multiplier(ResourceLocation errand, DayPhase phase) {
+        return intentMultipliers.getOrDefault(errand, 1.0F)
+            * routine.getOrDefault(phase, Map.of()).getOrDefault(errand, 1.0F);
     }
 
-    /** @return every intent id this personality weighs, for validation */
-    public Set<ResourceLocation> intentIds() {
+    /** @return every errand id this personality weighs, for validation */
+    public Set<ResourceLocation> errandIds() {
         Set<ResourceLocation> ids = new HashSet<>(intentMultipliers.keySet());
         routine.values().forEach(multipliers -> ids.addAll(multipliers.keySet()));
         return ids;

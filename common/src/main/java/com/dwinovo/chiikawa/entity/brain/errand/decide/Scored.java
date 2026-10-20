@@ -5,7 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 
 /**
  * An errand a pet could start now, as the decision sees it: the priority it has in data and the
- * score the pet gives it today, bonuses and personality already weighed in.
+ * score the pet gives it, bonuses and personality already weighed in.
  *
  * @param errand the errand's id
  * @param priority its priority

@@ -4,9 +4,8 @@ import com.dwinovo.chiikawa.Constants;
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * The id of every errand a pet can be on. They are the ids the pet's intents have always had, so
- * the synced {@code INTENT} string, the {@code intent.chiikawa.*} translations and the keys of a
- * personality's multipliers go on meaning the same.
+ * The id of every errand a pet can be on. It is also the value of the synced {@code INTENT} string, the end of the
+ * {@code intent.chiikawa.*} translation keys and the key of a personality's multipliers.
  */
 public final class ErrandIds {
     public static final ResourceLocation FOLLOW_OWNER = id("follow_owner");

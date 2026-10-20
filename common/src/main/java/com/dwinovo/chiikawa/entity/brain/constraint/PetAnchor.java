@@ -12,7 +12,7 @@ import net.minecraft.core.GlobalPos;
  * positions.
  *
  * @param center the anchor point
- * @param reach radius in which intents may pick targets
+ * @param reach radius in which errands may pick targets
  * @param leash radius past which the pet is walked back to {@code center};
  *              {@link Double#POSITIVE_INFINITY} when nothing pulls it back
  * @param followsOwner whether {@code center} is the owner the pet follows; only then

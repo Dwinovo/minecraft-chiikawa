@@ -13,11 +13,11 @@ import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Projection;
+import com.dwinovo.chiikawa.entity.brain.task.tameable.FloatBehavior;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
 import com.dwinovo.chiikawa.qualification.LicenceView;
 import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.qualification.PetLicences;
-import com.dwinovo.chiikawa.utils.BrainUtils;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
 import com.dwinovo.chiikawa.entity.job.api.PetCapability;
 import com.dwinovo.chiikawa.init.InitMemory;
@@ -32,6 +32,8 @@ import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.utils.Utils;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
+import com.google.common.collect.ImmutableList;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -64,6 +66,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
+import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.animal.Animal;
@@ -543,9 +547,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     /**
      * Pick the highest-priority capability whose tool the pet holds in its
      * mainhand, and write its id to {@link #PET_JOB}. The brain is <em>not</em>
-     * rebuilt — every job's activities live on a single static brain since
-     * {@link #makeBrain}, so a job change is just a synced value flip plus a
-     * tell to the pet's mind to decide again right away.
+     * rebuilt: it is the same for every job since {@link #makeBrain}, so a job
+     * change is just a synced value flip plus a tell to the pet's mind to decide
+     * again right away.
      */
     public void refreshJobFromMainhand() {
         if (level().isClientSide()) {
@@ -564,30 +568,23 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     }
 
     /**
-     * Build the entity's brain once, registering <em>all</em> activities up
-     * front. Activities don't run unless the pet's mind (see
-     * {@link #customServerAiStep}) chooses them, so the unused activities cost
-     * only their flat memory footprint.
-     *
-     * <p>This avoids the prior "rebuild on job change" pattern, which had
-     * three problems: (1) {@code brain.stopAll} interrupted in-flight
-     * behaviors mid-frame causing animation glitches, (2) {@code brain.pack}
-     * preserved memories but not behavior internal state, (3) it diverged
-     * from Mojang's static-registration convention (Villager registers
-     * profession-aware behaviors once and lets activity selection do the
-     * filtering).
+     * Builds the entity's brain once. It holds the memories and sensors the mind reads and a core that is always
+     * active: float, and carry out the walk and the gaze the mind sets. The default activity is vanilla's
+     * {@code IDLE} with no behavior at all, so a pet does nothing by itself; what it does is up to the errand its
+     * mind picked (see {@link #customServerAiStep}).
      */
     @Override
     protected Brain<?> makeBrain(Dynamic<?> dynamic) {
         Brain<AbstractPet> brain = (Brain<AbstractPet>) brainProvider().makeBrain(dynamic);
 
-        // Universal activities present in every brain.
-        BrainUtils.addCoreTasks(brain);
-
+        brain.addActivity(Activity.CORE, ImmutableList.of(
+            Pair.of(0, new FloatBehavior<>()),
+            Pair.of(0, new LookAtTargetSink(45, 45)),
+            Pair.of(1, new MoveToTargetSink())));
         brain.setCoreActivities(java.util.Set.of(Activity.CORE));
         brain.setDefaultActivity(Activity.IDLE);
-        // A brain starts with no activity active, not even its core: the pet would stand still until a legacy
-        // errand switched one on, whatever the executor asked of it.
+        // A brain starts with no activity active, not even its core: the pet would stand still, whatever the mind
+        // asked of it.
         brain.useDefaultActivity();
         return brain;
     }

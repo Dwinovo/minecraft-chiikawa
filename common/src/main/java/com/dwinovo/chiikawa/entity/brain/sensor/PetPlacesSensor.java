@@ -17,7 +17,7 @@ import net.minecraft.world.entity.ai.village.poi.PoiManager;
 /**
  * Remembers the places a pet's day is built around — the nearest labor board and the
  * nearest shop — found through the level's points of interest, like a villager finds its
- * workstation. Whether the pet may walk that far is up to its intents.
+ * workstation. Whether the pet may walk that far is up to its errands.
  *
  * <p>One sensor for both because they are looked up the same way and placed about as
  * rarely; two would scan the same points of interest twice a second for no reason.

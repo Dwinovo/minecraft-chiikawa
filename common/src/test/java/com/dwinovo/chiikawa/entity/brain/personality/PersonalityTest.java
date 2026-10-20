@@ -49,7 +49,7 @@ class PersonalityTest {
         assertEquals(1.5F, personality.multiplier(WANDER, DayPhase.NIGHT), 1.0E-6F);
         assertEquals(0.1F, personality.randomness(), 1.0E-6F);
         assertEquals(List.of(Items.WOODEN_HOE, Items.AIR), personality.wildTools().stream().map(Personality.WeightedItem::item).toList());
-        assertEquals(Set.of(HARVEST, WANDER), personality.intentIds());
+        assertEquals(Set.of(HARVEST, WANDER), personality.errandIds());
     }
 
     @Test

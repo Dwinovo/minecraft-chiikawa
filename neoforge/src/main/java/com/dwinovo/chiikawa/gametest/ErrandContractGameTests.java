@@ -14,7 +14,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.Offers;
 import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
 import com.dwinovo.chiikawa.entity.brain.errand.Plan;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
-import com.dwinovo.chiikawa.entity.brain.errand.impl.LegacyErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestContext;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
@@ -48,14 +47,12 @@ import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
- * What every native errand does, so that none can be made native without it: the same three cases for
+ * What every errand does, so that none can be added without it: the same three cases for
  * each, made from its scenario in {@link ErrandScenarios}. What it offers is asked without changing the pet or
  * drawing from its random; it ends within its time limit and rests as its data says; and cut short at the
  * start, in the middle and at the last step, it ends interrupted and leaves nothing of itself behind.
  *
- * <p>The cases are made when the game registers them, one set for each errand that has a scenario. The
- * errands that are not native yet are listed in {@link #LEGACY}, which shrinks with each one that goes
- * native and is empty when the last has.
+ * <p>The cases are made when the game registers them, one set for each errand that has a scenario.
  */
 @GameTestHolder(Constants.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -75,9 +72,6 @@ public final class ErrandContractGameTests {
      */
     private static final int INTERRUPT_CASE_TICKS = 2400;
     private static final int PURITY_CASE_TICKS = 200;
-
-    /** The errands still carried out by an old activity, which have no cases here yet: none, and the check stays until the scaffolding goes. */
-    private static final Set<ResourceLocation> LEGACY = Set.of();
 
     /**
      * Where in an errand's routine a pet is cut short. The first is as soon as the pet is seen on the errand at all,
@@ -141,22 +135,15 @@ public final class ErrandContractGameTests {
         return cases;
     }
 
-    /** The errands with a scenario are the native ones, and with the legacy ones they are all the errands there are. */
+    /** The errands with a scenario are all the errands there are: one that has none gets no cases, so it fails here. */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 20)
-    public static void every_errand_is_nativeswith_a_scenario_or_legacy_without(GameTestHelper helper) {
+    public static void every_errand_has_a_scenario(GameTestHelper helper) {
         Set<ResourceLocation> all = new TreeSet<>();
-        Set<ResourceLocation> natives = new TreeSet<>();
-        Set<ResourceLocation> legacy = new TreeSet<>();
         for (ErrandType<?, ?> errand : Errands.all()) {
             all.add(errand.id());
-            (errand instanceof LegacyErrand<?, ?> ? legacy : natives).add(errand.id());
         }
-        helper.assertTrue(natives.equals(new TreeSet<>(ErrandScenarios.ids())),
-            "the native errands are " + natives + " and the ones with a scenario " + ErrandScenarios.ids());
-        helper.assertTrue(legacy.equals(new TreeSet<>(LEGACY)), "the legacy errands are " + legacy + ", not " + LEGACY);
-        Set<ResourceLocation> together = new TreeSet<>(natives);
-        together.addAll(LEGACY);
-        helper.assertTrue(together.equals(all), "native and legacy together are " + together + ", not all of " + all);
+        helper.assertTrue(all.equals(new TreeSet<>(ErrandScenarios.ids())),
+            "the errands are " + all + " and the ones with a scenario " + ErrandScenarios.ids());
         helper.succeed();
     }
 
