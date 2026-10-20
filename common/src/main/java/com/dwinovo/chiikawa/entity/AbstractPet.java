@@ -10,8 +10,6 @@ import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.anim.state.PetAnimContext;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
-import com.dwinovo.chiikawa.entity.brain.handler.ArcherJobHandler;
-import com.dwinovo.chiikawa.entity.brain.handler.FencerJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.MusicianJobHandler;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
@@ -603,8 +601,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
         // Each job's activities — registered once, dormant until the intent
         // selector picks one of that job's intents.
-        FencerJobHandler.registerActivities(brain);
-        ArcherJobHandler.registerActivities(brain);
         MusicianJobHandler.registerActivities(brain);
 
         brain.setCoreActivities(java.util.Set.of(Activity.CORE));

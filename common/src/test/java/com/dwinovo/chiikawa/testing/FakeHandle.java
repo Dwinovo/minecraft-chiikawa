@@ -45,6 +45,10 @@ public final class FakeHandle implements Handle {
     }
 
     @Override
+    public void walkTo(Vec3 target, float speed, int closeEnough) {
+    }
+
+    @Override
     public void walkTo(Entity target, float speed, int closeEnough) {
     }
 
