@@ -28,7 +28,10 @@ public interface Handle {
     /** Sets off for a creature, following it as it moves. */
     void walkTo(Entity target, float speed, int closeEnough);
 
-    /** Stops walking: forgets where it was going, the path to it, and that it could not find one. */
+    /**
+     * Stops walking: forgets where it was going, the path to it, and that it could not find one, and has the brain's mover
+     * let go of the walk it was on, so that a walk set next is planned afresh.
+     */
     void stopWalking();
 
     /**
