@@ -5,14 +5,12 @@ import java.util.UUID;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.TamableAnimal;
-import net.minecraft.world.entity.ai.Brain;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * Single source of truth for which entities a pet may pick or keep as its
- * {@link MemoryModuleType#ATTACK_TARGET}.
+ * {@code ATTACK_TARGET}.
  *
  * <p>A pet never fights its own side: itself, its owner, any player, or any
  * ownable entity (other pets, wolves, cats, horses…) that belongs to the same
@@ -41,20 +39,6 @@ public final class PetTargeting {
             target.getUUID(),
             targetOwner
         );
-    }
-
-    /**
-     * Erases the brain's attack target if the pet is not allowed to attack it.
-     *
-     * @param pet the pet owning {@code brain}
-     * @param brain the pet's brain
-     */
-    public static void clearInvalidAttackTarget(TamableAnimal pet, Brain<?> brain) {
-        brain.getMemory(MemoryModuleType.ATTACK_TARGET).ifPresent(target -> {
-            if (!canTarget(pet, target)) {
-                brain.eraseMemory(MemoryModuleType.ATTACK_TARGET);
-            }
-        });
     }
 
     /**

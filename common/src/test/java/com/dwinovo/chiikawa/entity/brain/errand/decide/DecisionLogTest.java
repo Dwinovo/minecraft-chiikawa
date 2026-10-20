@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 
@@ -25,6 +26,18 @@ class DecisionLogTest {
         DecisionLog.Switched switched = (DecisionLog.Switched) log.entries().get(0);
         assertNull(switched.from());
         assertEquals(WORK, switched.to());
+    }
+
+    @Test
+    void theLastErrandToEndIsTheNewestEndingWhateverCameAfterIt() {
+        DecisionLog log = new DecisionLog();
+        assertEquals(Optional.empty(), log.lastEnded());
+
+        log.ended(20, PLAY, Outcome.done(), 5);
+        log.ended(40, WORK, Outcome.gaveUp("unreachable"), 30);
+        log.switched(41, null, PLAY, "NO_ERRAND", List.of(new Scored(PLAY, 10, 0.1F, List.of(1))));
+
+        assertEquals(Optional.of(new DecisionLog.Ended(40, WORK, Outcome.gaveUp("unreachable"), 30)), log.lastEnded());
     }
 
     @Test

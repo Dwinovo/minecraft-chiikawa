@@ -1,12 +1,17 @@
 package com.dwinovo.chiikawa.gametest;
 
 import static com.dwinovo.chiikawa.gametest.GameTestKit.MIDNIGHT;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.count;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.holding;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.ownedPet;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.PetDirective;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
+import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
+import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
@@ -38,6 +43,9 @@ public final class CombatGameTests {
      * moment, so a tight clock here measures patience rather than aim.
      */
     private static final int FIGHT_TICKS = 2400;
+    private static final int ARROWS = 16;
+    /** Longer than a draw and a shot, so that an arrow still to be loosed would have been. */
+    private static final int DRAW_WATCH_TICKS = 40;
     /** How long an archer with an empty quiver is watched before we believe it. */
     private static final int LEAVE_IT_TICKS = 400;
 
@@ -62,6 +70,31 @@ public final class CombatGameTests {
 
         helper.succeedWhen(() -> helper.assertTrue(zombie.isDeadOrDying() || zombie.getHealth() < zombie.getMaxHealth(),
             "the fencer never landed a hit"));
+    }
+
+    /**
+     * A fight is about the foe the pet set off for, and over when that one is down: the pet is done with it, rests from
+     * nothing, and sets off for the next the moment it is named, so a field of zombies is cleared one after another.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = FIGHT_TICKS)
+    public static void a_fencer_goes_on_to_the_next_foe_when_one_falls(GameTestHelper helper) {
+        AbstractPet pet = holding(ownedPet(helper, new BlockPos(4, STAND, 4)), Items.IRON_SWORD);
+        Zombie first = helper.spawn(EntityType.ZOMBIE, new BlockPos(8, STAND, 4));
+        Zombie second = helper.spawn(EntityType.ZOMBIE, new BlockPos(8, STAND, 8));
+        for (Zombie zombie : new Zombie[] {first, second}) {
+            zombie.setNoAi(true);
+            zombie.setHealth(1.0F);
+        }
+
+        helper.succeedWhen(() -> {
+            helper.assertTrue(!first.isAlive() && !second.isAlive(), "the fencer left a zombie standing");
+            helper.assertTrue(pet.getMind().log().entries().stream().anyMatch(entry -> entry instanceof DecisionLog.Ended ended
+                && ended.errand().equals(ErrandIds.MELEE) && ended.outcome() instanceof Outcome.Done),
+                "the fight with the first zombie did not end done");
+            helper.assertFalse(pet.getMind().log().entries().stream().anyMatch(entry -> entry instanceof DecisionLog.Ended ended
+                && ended.errand().equals(ErrandIds.MELEE) && ended.outcome() instanceof Outcome.GaveUp),
+                "the fencer gave up a fight on the way");
+        });
     }
 
     /**
@@ -93,6 +126,29 @@ public final class CombatGameTests {
 
         helper.succeedWhen(() -> helper.assertTrue(zombie.isDeadOrDying() || zombie.getHealth() < zombie.getMaxHealth(),
             "the archer never hit anything"));
+    }
+
+    /**
+     * Told to sit with the bow half drawn, an archer lowers it and does not shoot. The arrow that would have flown is
+     * still in the quiver and the zombie is untouched, however long it is watched.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = FIGHT_TICKS)
+    public static void an_archer_told_to_sit_mid_draw_does_not_shoot(GameTestHelper helper) {
+        AbstractPet pet = holding(ownedPet(helper, new BlockPos(3, STAND, 4)), Items.BOW);
+        pet.getBackpack().addItem(new ItemStack(Items.ARROW, ARROWS));
+        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(10, STAND, 4));
+        zombie.setNoAi(true);
+
+        helper.startSequence()
+            .thenWaitUntil(() -> helper.assertTrue(pet.isUsingItem(), "the archer never drew its bow"))
+            .thenExecute(() -> pet.setPetDirective(PetDirective.STAY))
+            .thenWaitUntil(() -> helper.assertFalse(pet.isUsingItem(), "the archer told to sit kept its bow raised"))
+            .thenExecuteFor(DRAW_WATCH_TICKS, () -> {
+                helper.assertFalse(pet.isUsingItem(), "the archer told to sit raised its bow again");
+                helper.assertTrue(count(pet, Items.ARROW) == ARROWS, "the archer told to sit loosed an arrow");
+                helper.assertTrue(zombie.getHealth() == zombie.getMaxHealth(), "the archer told to sit hit the zombie");
+            })
+            .thenSucceed();
     }
 
     /**

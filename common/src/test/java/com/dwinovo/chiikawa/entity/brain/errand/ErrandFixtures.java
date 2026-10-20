@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.errand;
 import com.dwinovo.chiikawa.camera.PhotoOutlook;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
+import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
@@ -29,6 +30,7 @@ public final class ErrandFixtures {
         ResourceLocation.withDefaultNamespace("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     private static final UUID ITEM = UUID.fromString("00000000-0000-0000-0000-0000000000a1");
+    private static final UUID FOE = UUID.fromString("00000000-0000-0000-0000-0000000000a3");
     private static final UUID FRIEND = UUID.fromString("00000000-0000-0000-0000-0000000000a2");
 
     private static final Map<ResourceLocation, TestView> BY_ERRAND = Map.ofEntries(
@@ -48,9 +50,9 @@ public final class ErrandFixtures {
         Map.entry(ErrandIds.PICK_MUSHROOM, free().ownership(PetOwnership.WILD).phase(DayPhase.NIGHT).targets(targets(
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(east(2)),
             Optional.empty()))),
-        Map.entry(ErrandIds.MELEE, free().targets(targets(Optional.of(east(2)), Optional.empty(), Optional.empty(),
+        Map.entry(ErrandIds.MELEE, free().targets(targets(Optional.of(new AttackTarget(FOE, east(2))), Optional.empty(), Optional.empty(),
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()))),
-        Map.entry(ErrandIds.RANGED, free().armedWithArrows().targets(targets(Optional.of(east(2)), Optional.empty(),
+        Map.entry(ErrandIds.RANGED, free().armedWithArrows().targets(targets(Optional.of(new AttackTarget(FOE, east(2))), Optional.empty(),
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()))),
         Map.entry(ErrandIds.PLAY_MUSIC, free().withSong()),
         Map.entry(ErrandIds.TAKE_TASK, free().offeringBoard(east(2))),
@@ -79,7 +81,7 @@ public final class ErrandFixtures {
         return TestView.at(HOME, TestAnchors.free(HOME));
     }
 
-    private static PerceivedTargets targets(Optional<GlobalPos> attack, Optional<GlobalPos> harvest, Optional<GlobalPos> plant,
+    private static PerceivedTargets targets(Optional<AttackTarget> attack, Optional<GlobalPos> harvest, Optional<GlobalPos> plant,
             Optional<GlobalPos> container, Optional<GlobalPos> weed, Optional<GlobalPos> mushroom, Optional<PickableItem> item) {
         return new PerceivedTargets(attack, harvest, plant, container, weed, mushroom, item);
     }

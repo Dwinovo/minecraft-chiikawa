@@ -278,14 +278,13 @@ public final class PetMind {
     }
 
     private void decide(long now, String trigger) {
-        PetTargeting.clearInvalidAttackTarget(pet, pet.getBrain());
         LivePetView view = LivePetView.of(pet);
         Permits permits = permits(view);
         List<ErrandType<?, ?>> offered = offered();
         forgetUnavailable(offered, permits);
 
         Optional<Running> was = executor.running();
-        ErrandType<?, ?> previous = was.map(running -> Errands.get(running.errand())).orElse(null);
+        ErrandType<?, ?> previous = justBefore(was, log, now);
         String cause = trigger;
         int floor = Integer.MIN_VALUE;
         if (was.isPresent()) {
@@ -313,6 +312,17 @@ public final class PetMind {
         } else if (was.isPresent() && executor.running().isEmpty()) {
             log.switched(now, was.get().errand(), null, cause, List.of());
         }
+    }
+
+    /**
+     * @return the errand the pet was on a moment ago: the one it is on, or the one that ended in the tick before, since an
+     *         errand that ends by itself, such as a fight that is over for a foe, leaves the pet on none when it decides
+     */
+    @Nullable
+    static ErrandType<?, ?> justBefore(Optional<Running> was, DecisionLog log, long now) {
+        return was.map(Running::errand)
+            .or(() -> log.lastEnded().filter(ended -> ended.gameTime() >= now - 1).map(DecisionLog.Ended::errand))
+            .map(Errands::get).orElse(null);
     }
 
     private void start(Decision.Started started, @Nullable ErrandType<?, ?> previous, long now) {

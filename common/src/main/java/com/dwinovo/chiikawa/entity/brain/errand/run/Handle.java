@@ -22,6 +22,9 @@ public interface Handle {
     /** Sets off for a place, to within {@code closeEnough} blocks of it. */
     void walkTo(BlockPos target, float speed, int closeEnough);
 
+    /** Sets off for a point in the open, wherever it falls in its block. */
+    void walkTo(Vec3 target, float speed, int closeEnough);
+
     /** Sets off for a creature, following it as it moves. */
     void walkTo(Entity target, float speed, int closeEnough);
 

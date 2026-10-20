@@ -129,7 +129,8 @@ public final class ErrandTunings {
     /**
      * @param footwork where it stands
      * @param range how far away it still shoots
-     * @param drawTicks how long it draws the bow before it looses
+     * @param drawTicks how long it draws the bow before the tick it looses in: the bow is loosed on the tick after the
+     *                  draw, so a draw of 15 is an arrow 16 ticks after the bow is raised
      * @param cooldownTicks how long it waits after a shot
      */
     public record Ranged(Footwork footwork, double range, int drawTicks, int cooldownTicks) {

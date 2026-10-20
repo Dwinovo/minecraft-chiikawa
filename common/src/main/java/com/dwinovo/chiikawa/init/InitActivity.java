@@ -5,12 +5,6 @@ import java.util.function.Supplier;
 import net.minecraft.world.entity.schedule.Activity;
 
 public final class InitActivity {
-    // Fencer combat activity.
-    public static final Supplier<Activity> FENCER_FIGHT =
-        Services.PLATFORM_REGISTRY.fencerFightActivity();
-    // Archer ranged-attack activity.
-    public static final Supplier<Activity> ARCHER_SHOOT =
-        Services.PLATFORM_REGISTRY.archerShootActivity();
     // Musician performance activity.
     public static final Supplier<Activity> MUSICIAN_PLAY =
         Services.PLATFORM_REGISTRY.musicianPlayActivity();

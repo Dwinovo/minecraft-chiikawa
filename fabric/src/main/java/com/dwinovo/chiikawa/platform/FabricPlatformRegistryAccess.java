@@ -26,8 +26,6 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     private final Supplier<SensorType<PetPickableItemSensor>> petItemEntitySensor;
     private final Supplier<SensorType<PetPlacesSensor>> petPlacesSensor;
     private final Supplier<SensorType<PetSocialSensor>> petSocialSensor;
-    private final Supplier<Activity> fencerFightActivity;
-    private final Supplier<Activity> archerShootActivity;
     private final Supplier<Activity> musicianPlayActivity;
     private final Supplier<Activity> followOwnerActivity;
     private final Supplier<Activity> stayActivity;
@@ -47,8 +45,6 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
         petPlacesSensor = registerSensor("pet_places_sensor", new SensorType<>(PetPlacesSensor::new));
         petSocialSensor = registerSensor("pet_social_sensor", new SensorType<>(PetSocialSensor::new));
 
-        fencerFightActivity = registerActivity("fencer_fight");
-        archerShootActivity = registerActivity("archer_shoot");
         musicianPlayActivity = registerActivity("musician_play");
         followOwnerActivity = registerActivity("follow_owner");
         stayActivity = registerActivity("stay");
@@ -101,16 +97,6 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     @Override
     public Supplier<SensorType<PetSocialSensor>> petSocialSensor() {
         return petSocialSensor;
-    }
-
-    @Override
-    public Supplier<Activity> fencerFightActivity() {
-        return fencerFightActivity;
-    }
-
-    @Override
-    public Supplier<Activity> archerShootActivity() {
-        return archerShootActivity;
     }
 
     @Override

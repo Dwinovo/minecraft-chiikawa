@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.data.QualificationData;
 import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
+import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
@@ -230,9 +231,11 @@ public final class TestView implements PetView {
         return targets.pickableItem().filter(perceived -> perceived.id().equals(item));
     }
 
+    /** A creature told of by {@link #creature}, or the foe the pet perceives. */
     @Override
     public Optional<GlobalPos> whereIs(UUID creature) {
-        return Optional.ofNullable(creatures.get(creature));
+        return Optional.ofNullable(creatures.get(creature))
+            .or(() -> targets.attackTarget().filter(foe -> foe.id().equals(creature)).map(AttackTarget::where));
     }
 
     @Override

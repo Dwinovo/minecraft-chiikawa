@@ -65,8 +65,8 @@ public final class Errands {
         register(new DeliverErrand());
         register(BlockWorkErrand.weeding());
         register(BlockWorkErrand.pickingMushrooms());
-        register(new CombatErrand<>(ErrandIds.MELEE, ErrandTunings.Footwork.CODEC, () -> InitActivity.FENCER_FIGHT.get(), false));
-        register(new CombatErrand<>(ErrandIds.RANGED, ErrandTunings.Ranged.CODEC, () -> InitActivity.ARCHER_SHOOT.get(), true));
+        register(CombatErrand.fencing());
+        register(CombatErrand.shooting());
         register(new PlayMusicErrand());
     }
 
