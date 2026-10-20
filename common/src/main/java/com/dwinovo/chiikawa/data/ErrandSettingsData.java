@@ -38,7 +38,7 @@ public final class ErrandSettingsData {
     /** @return settings by errand id */
     public static Map<ResourceLocation, ErrandSettings<?>> all() {
         // A crop or a chest a pet could not get to is left alone for ten seconds; it gives up on it as soon as the
-        // brain's mover says it has no way, as the farm behaviors did.
+        // brain's mover says it has no full path to it, as the farm behaviors did when they pathfound before setting off.
         Rests blockWork = Rests.of(NONE, RestSpec.ticksPerSubject(200), NONE);
         ErrandTunings.BlockWork blockWorkTuning = new ErrandTunings.BlockWork(0.8F, 3.0, 0);
         ErrandTunings.Footwork footwork = new ErrandTunings.Footwork(1.0F, 1.2F, 10.0, 3.0, 2);
@@ -68,7 +68,7 @@ public final class ErrandSettingsData {
                 Rests.of(NONE, RestSpec.from(RestSources.MUSIC_RETRY), NONE), new ErrandTunings.PlayMusic(50))),
             // A pet that gave up on the board, or was taken off the walk to it, leaves it alone for half a minute.
             entry(ErrandIds.TAKE_TASK, errand(50, 0.7F, 1200,
-                Rests.of(NONE, RestSpec.ticks(600), RestSpec.ticks(600)), new ErrandTunings.TakeTask(0.7F, 2, 3.0, 0))),
+                Rests.of(NONE, RestSpec.ticks(600), RestSpec.ticks(600)), new ErrandTunings.TakeTask(0.7F, 2, 3.0))),
             entry(ErrandIds.SHOP, errand(50, 0.65F, 1200,
                 Rests.of(RestSpec.ticks(600), RestSpec.ticks(600), NONE), new ErrandTunings.Shop(0.7F, 2, 3.0))),
             entry(ErrandIds.GIFT_OWNER, errand(80, 0.85F, 2400,
@@ -77,9 +77,9 @@ public final class ErrandSettingsData {
             entry(ErrandIds.SOCIALIZE, errand(30, 0.35F, 1200, scene, new ErrandTunings.Socialize(0.6F, 1))),
             entry(ErrandIds.COOPERATE, errand(80, 0.5F, 1200, scene, ErrandTunings.Untuned.NONE)),
             entry(ErrandIds.TAKE_EXAM, errand(80, 0.72F, 2400,
-                Rests.of(NONE, RestSpec.ticks(200), NONE), new ErrandTunings.TakeExam(0.7F, 0.8, 0, 20))),
+                Rests.of(NONE, RestSpec.ticks(200), NONE), new ErrandTunings.TakeExam(0.7F, 0.8, 20))),
             entry(ErrandIds.CHECK_RESULTS, errand(80, 0.72F, 1200,
-                Rests.of(NONE, RestSpec.ticks(1200), NONE), new ErrandTunings.CheckResults(0.7F, 1.2, 0, 60))),
+                Rests.of(NONE, RestSpec.ticks(1200), NONE), new ErrandTunings.CheckResults(0.7F, 1.2, 60))),
             entry(ErrandIds.ANSWER_WHISTLE, errand(50, 0.55F, 12000, giveUp(200), new ErrandTunings.AnswerWhistle(0.7F, 3, 8.0))),
             // The shutter itself reports the wait for the picture, so that every way the errand ends after it
             // already rests for it, and none before it does; when the pet is told the picture was stored the

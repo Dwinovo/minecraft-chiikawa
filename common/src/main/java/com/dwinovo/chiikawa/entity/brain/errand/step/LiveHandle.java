@@ -103,6 +103,11 @@ public final class LiveHandle implements Handle {
             .map(since -> OptionalInt.of((int) (now() - since))).orElse(OptionalInt.empty());
     }
 
+    @Override
+    public boolean walking() {
+        return brain().hasMemoryValue(MemoryModuleType.WALK_TARGET);
+    }
+
     /** The same conditions as the ground navigation of the pet: it plans no path in the air. */
     @Override
     public boolean canFindWay() {

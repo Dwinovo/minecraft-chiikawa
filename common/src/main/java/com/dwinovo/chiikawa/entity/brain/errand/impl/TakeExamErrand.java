@@ -88,13 +88,13 @@ public final class TakeExamErrand implements ErrandType<TakeExamErrand.Sitting, 
         return view.seatedAtExam() || view.examToSit().isPresent() ? Check.OK : Check.fail("no_desk");
     }
 
-    /** The walk lasts as long as the errand may, unless the pet finds no way to the chair. */
+    /** The walk lasts as long as the errand may, unless the brain's mover lets it go short of the chair. */
     @Override
     public Routine routine(Sitting plan, ErrandSettings<ErrandTunings.TakeExam> settings) {
         ErrandTunings.TakeExam tuning = settings.tuning();
         return Routine.of(
-            Routine.step(() -> new WalkTo(new Goal.Chair(plan.desk()), tuning.speed(), RIGHT_UP_TO_IT,
-                tuning.arriveDistance(), settings.maxTicks(), tuning.noWayTicks())),
+            Routine.step(() -> WalkTo.near(new Goal.Chair(plan.desk()), tuning.speed(), RIGHT_UP_TO_IT,
+                tuning.arriveDistance(), settings.maxTicks())),
             Routine.step(() -> new SitDown(plan.desk())),
             Routine.step(() -> new Write(plan.desk(), plan.qualification())),
             Routine.step(() -> new HandIn(plan.desk(), plan.qualification())),

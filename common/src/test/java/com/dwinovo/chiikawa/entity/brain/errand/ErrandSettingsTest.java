@@ -42,7 +42,7 @@ class ErrandSettingsTest {
     private static final String TAKE_TASK = """
         { "priority": 50, "score": 0.7, "max_ticks": 1200, "yields_to": [], "overlays": [],
           "rests": { "done": 0, "gave_up": 600, "interrupted": 600 },
-          "tuning": { "speed": 0.7, "arrive_distance": 2, "take_distance": 3.0, "no_way_ticks": 0 } }""";
+          "tuning": { "speed": 0.7, "arrive_distance": 2, "take_distance": 3.0 } }""";
 
     private static final String HARVEST = PLANT.replace("\"yields_to\": [\"chiikawa:harvest\"]", "\"yields_to\": []");
 

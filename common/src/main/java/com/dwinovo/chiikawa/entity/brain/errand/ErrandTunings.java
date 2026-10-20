@@ -152,15 +152,12 @@ public final class ErrandTunings {
      * @param speed how fast it walks to the board
      * @param arriveDistance how near the walk gets, counted in blocks along each axis; the board is solid
      * @param takeDistance how near it has to be to take a slip
-     * @param noWayTicks how long the mover may have no way to the board before the pet gives up on one: none gives
-     *                   up the first time it says so
      */
-    public record TakeTask(float speed, int arriveDistance, double takeDistance, int noWayTicks) {
+    public record TakeTask(float speed, int arriveDistance, double takeDistance) {
         public static final Codec<TakeTask> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Fields.SPEED.fieldOf("speed").forGetter(TakeTask::speed),
             Fields.BLOCKS.fieldOf("arrive_distance").forGetter(TakeTask::arriveDistance),
-            Fields.DISTANCE.fieldOf("take_distance").forGetter(TakeTask::takeDistance),
-            Fields.PATIENCE.fieldOf("no_way_ticks").forGetter(TakeTask::noWayTicks)
+            Fields.DISTANCE.fieldOf("take_distance").forGetter(TakeTask::takeDistance)
         ).apply(instance, TakeTask::new));
     }
 
@@ -205,15 +202,12 @@ public final class ErrandTunings {
     /**
      * @param speed how fast it walks to the chair
      * @param arriveDistance how near the chair it has to be to sit down on it
-     * @param noWayTicks how long the mover may have no way to the chair before the pet gives up on one: none gives
-     *                   up the first time it says so
      * @param handInTicks how long it stays in its chair handing the paper in: the {@code hand_in} animation's second
      */
-    public record TakeExam(float speed, double arriveDistance, int noWayTicks, int handInTicks) {
+    public record TakeExam(float speed, double arriveDistance, int handInTicks) {
         public static final Codec<TakeExam> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Fields.SPEED.fieldOf("speed").forGetter(TakeExam::speed),
             Fields.DISTANCE.fieldOf("arrive_distance").forGetter(TakeExam::arriveDistance),
-            Fields.PATIENCE.fieldOf("no_way_ticks").forGetter(TakeExam::noWayTicks),
             Fields.TICKS.fieldOf("hand_in_ticks").forGetter(TakeExam::handInTicks)
         ).apply(instance, TakeExam::new));
     }
@@ -221,15 +215,12 @@ public final class ErrandTunings {
     /**
      * @param speed how fast it walks to the chair
      * @param readingDistance how near the chair it has to be to read what is on the desk
-     * @param noWayTicks how long the mover may have no way to the chair before the pet gives up on one: none gives
-     *                   up the first time it says so
      * @param readingTicks how long it stands reading the results before it takes them in
      */
-    public record CheckResults(float speed, double readingDistance, int noWayTicks, int readingTicks) {
+    public record CheckResults(float speed, double readingDistance, int readingTicks) {
         public static final Codec<CheckResults> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Fields.SPEED.fieldOf("speed").forGetter(CheckResults::speed),
             Fields.DISTANCE.fieldOf("reading_distance").forGetter(CheckResults::readingDistance),
-            Fields.PATIENCE.fieldOf("no_way_ticks").forGetter(CheckResults::noWayTicks),
             Fields.TICKS.fieldOf("reading_ticks").forGetter(CheckResults::readingTicks)
         ).apply(instance, CheckResults::new));
     }
