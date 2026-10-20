@@ -89,7 +89,7 @@ class StateOwnershipTest {
             Set.of(PET, MIND, "entity/interact/PetInteractHandler.java", "network/PetServerPacketHandler.java",
                 "client/manual/ManualScene.java")),
         new Rule("the blocks of work the farmer sees",
-            Pattern.compile(WRITE + "(?:InitMemory\\.(?:HARVEST_POS|PLANT_POS|CONTAINER_POS|WEED_POS|MUSHROOM_POS)\\b|\\S*?\\.memory\\(\\))"),
+            Pattern.compile(WRITE + "(?:InitMemory\\.(?:HARVEST_POS|PLANT_POS|CONTAINER_POS|WEED_POS|MUSHROOM_POS|FARM_SIGHTS)\\b|\\S*?\\.memory\\(\\))"),
             Set.of(SENSORS + "PetFarmerWorkSensor.java")),
         new Rule("the present in the paws", Pattern.compile("\\bsetPendingGift\\("),
             Set.of(PET, STEPS + "TakePresent.java", STEPS + "HandOver.java")));
