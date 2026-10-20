@@ -14,14 +14,17 @@ import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
 import com.dwinovo.chiikawa.entity.brain.errand.Plan;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.Continuation;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.Decision;
+import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionTrace;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.Permits;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.Scored;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.BlockWorkErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.CombatErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestStore;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
+import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
@@ -218,13 +221,30 @@ class PetMindDecisionTest {
     }
 
     @Test
+    void theErrandAPetWasJustOnIsTheOneItIsOnOrTheOneThatEndedInTheTickBefore() {
+        DecisionLog log = new DecisionLog();
+        Running running = new Running(ErrandIds.RANGED, new CombatErrand.Duel(UUID.randomUUID()),
+            ErrandSettings.of(ErrandIds.RANGED).orElseThrow(), 0, NOW - 5, Set.of());
+
+        assertNull(PetMind.justBefore(Optional.empty(), log, NOW));
+        assertEquals(ErrandIds.RANGED, PetMind.justBefore(Optional.of(running), log, NOW).id());
+
+        // A fight that ended by itself, such as for a foe put down, leaves the pet on none: it is the fight it was on.
+        log.ended(NOW - 1, ErrandIds.MELEE, Outcome.done(), 30);
+        assertEquals(ErrandIds.MELEE, PetMind.justBefore(Optional.empty(), log, NOW).id());
+        assertEquals(ErrandIds.RANGED, PetMind.justBefore(Optional.of(running), log, NOW).id());
+        // And not one that ended a while ago, since the pet has been doing other things since.
+        assertNull(PetMind.justBefore(Optional.empty(), log, NOW + 5));
+    }
+
+    @Test
     void aPetThatHasEndedWhatItWasDoingTakesUpAnythingWhateverItsPriority() {
         // The floor is the running errand's priority only while it goes on.
         TestView view = view();
-        Plan fighting = new Plan() { };
+        Plan shooting = new CombatErrand.Duel(UUID.randomUUID());
 
-        assertTrue(ending(ErrandIds.MELEE, fighting, view).isPresent());
-        assertEquals(ErrandIds.WANDER, decide(List.of(ErrandIds.MELEE, ErrandIds.WANDER), view, NONE, FixedRandom.floats())
+        assertEquals(Optional.of(Outcome.gaveUp("no_arrows")), ending(ErrandIds.RANGED, shooting, view));
+        assertEquals(ErrandIds.WANDER, decide(List.of(ErrandIds.RANGED, ErrandIds.WANDER), view, NONE, FixedRandom.floats())
             .orElseThrow().type().id());
     }
 
@@ -422,12 +442,12 @@ class PetMindDecisionTest {
 
     /** Something to fight. */
     private static PerceivedTargets foe() {
-        return new PerceivedTargets(Optional.of(east(2)), Optional.empty(), Optional.empty(), Optional.empty(),
+        return new PerceivedTargets(Optional.of(new AttackTarget(UUID.randomUUID(), east(2))), Optional.empty(), Optional.empty(), Optional.empty(),
             Optional.empty(), Optional.empty(), Optional.empty());
     }
 
     private static PerceivedTargets fightAndCrop() {
-        return new PerceivedTargets(Optional.of(east(2)), Optional.of(east(1)), Optional.empty(), Optional.empty(),
+        return new PerceivedTargets(Optional.of(new AttackTarget(UUID.randomUUID(), east(2))), Optional.of(east(1)), Optional.empty(), Optional.empty(),
             Optional.empty(), Optional.empty(), Optional.empty());
     }
 
