@@ -38,9 +38,6 @@ public final class InitActivity {
     // Walking to a labor board to take a slip.
     public static final Supplier<Activity> TAKE_TASK =
         Services.PLATFORM_REGISTRY.takeTaskActivity();
-    // Walking to a shop to spend what the pet has earned.
-    public static final Supplier<Activity> SHOP =
-        Services.PLATFORM_REGISTRY.shopActivity();
     // Going over to another pet to play a scene with it.
     public static final Supplier<Activity> SOCIALIZE =
         Services.PLATFORM_REGISTRY.socializeActivity();
