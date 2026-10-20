@@ -60,9 +60,6 @@ public interface PetView {
     /** @return whether the pet recently failed to take a slip; goes when take_task keeps its rest in the ledger */
     boolean takeTaskCoolingDown();
 
-    /** @return whether the pet has just bought something; goes when shop keeps its rest in the ledger */
-    boolean shopCoolingDown();
-
     /** @return the pet this one has thought of playing a scene with */
     Optional<GlobalPos> socialPartner();
 
