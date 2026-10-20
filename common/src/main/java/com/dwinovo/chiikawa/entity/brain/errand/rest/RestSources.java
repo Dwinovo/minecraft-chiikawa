@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * The named numbers an errand's rest can point at instead of holding its own, so each number
@@ -19,21 +19,21 @@ import net.minecraft.resources.ResourceLocation;
  */
 public final class RestSources {
     /** The least time between two photos, from the camera's {@code cooldown_ticks}. */
-    public static final ResourceLocation CAMERA_COOLDOWN = id("camera_cooldown");
+    public static final Identifier CAMERA_COOLDOWN = id("camera_cooldown");
     /** How long to wait after a photo that did not come back, from the camera's {@code retry_ticks}. */
-    public static final ResourceLocation CAMERA_RETRY = id("camera_retry");
+    public static final Identifier CAMERA_RETRY = id("camera_retry");
     /** How long a photo is waited for while the owner's game draws it. */
-    public static final ResourceLocation PHOTO_UPLOAD_WAIT = id("photo_upload_wait");
+    public static final Identifier PHOTO_UPLOAD_WAIT = id("photo_upload_wait");
     /** The least time between two presents, from {@code pet_gifting}. */
-    public static final ResourceLocation GIFTING_COOLDOWN = id("gifting_cooldown");
+    public static final Identifier GIFTING_COOLDOWN = id("gifting_cooldown");
     /** How long a musician waits after a song that would not start, from the music config. */
-    public static final ResourceLocation MUSIC_RETRY = id("music_retry");
+    public static final Identifier MUSIC_RETRY = id("music_retry");
     /** How long the same two pets leave a scene alone, from {@code pet_interaction}. */
-    public static final ResourceLocation SCENE_COOLDOWN = id("scene_cooldown");
+    public static final Identifier SCENE_COOLDOWN = id("scene_cooldown");
 
-    private static final Set<ResourceLocation> NAMES = Set.of(CAMERA_COOLDOWN, CAMERA_RETRY, PHOTO_UPLOAD_WAIT,
+    private static final Set<Identifier> NAMES = Set.of(CAMERA_COOLDOWN, CAMERA_RETRY, PHOTO_UPLOAD_WAIT,
         GIFTING_COOLDOWN, MUSIC_RETRY, SCENE_COOLDOWN);
-    private static final Map<ResourceLocation, Resolver> RESOLVERS = new ConcurrentHashMap<>();
+    private static final Map<Identifier, Resolver> RESOLVERS = new ConcurrentHashMap<>();
 
     private RestSources() {
     }
@@ -49,12 +49,12 @@ public final class RestSources {
     }
 
     /** @return whether an errand file may point at this name */
-    public static boolean isKnown(ResourceLocation name) {
+    public static boolean isKnown(Identifier name) {
         return NAMES.contains(name);
     }
 
     /** @return every name an errand file may point at */
-    public static Set<ResourceLocation> names() {
+    public static Set<Identifier> names() {
         return NAMES;
     }
 
@@ -64,19 +64,24 @@ public final class RestSources {
      *
      * @throws IllegalArgumentException for a name that is not one of the six
      */
-    public static void register(ResourceLocation name, Resolver resolver) {
+    public static void register(Identifier name, Resolver resolver) {
         if (!isKnown(name)) {
             throw new IllegalArgumentException("Unknown rest source " + name);
         }
         RESOLVERS.put(name, resolver);
     }
 
+    /** Takes what a name resolves to away again, for a case that wants a name nobody has registered. */
+    static void forget(Identifier name) {
+        RESOLVERS.remove(name);
+    }
+
     /** @return what the name resolves to, or nothing while no errand has registered it */
-    public static Optional<Resolver> resolver(ResourceLocation name) {
+    public static Optional<Resolver> resolver(Identifier name) {
         return Optional.ofNullable(RESOLVERS.get(name));
     }
 
-    private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path);
+    private static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(Constants.MOD_ID, path);
     }
 }
