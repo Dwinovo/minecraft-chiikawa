@@ -24,6 +24,19 @@ public final class ServerMusicSystem {
         return get(server).streamManager;
     }
 
+    /**
+     * For what has no server at hand, such as a rest that waits the music's retry: the settings of the server that
+     * is running. A game runs one at a time.
+     *
+     * @return the music settings, or the defaults while no server has used them yet
+     */
+    public static ChiikawaMusicConfig config() {
+        synchronized (SYSTEMS) {
+            return SYSTEMS.values().stream().findFirst().map(system -> system.library.config())
+                .orElse(ChiikawaMusicConfig.DEFAULT);
+        }
+    }
+
     public static void tickServer(MinecraftServer server) {
         ServerMusicSystem system = get(server);
         system.library.tick();
