@@ -63,6 +63,16 @@ public final class InvitationDesk {
     }
 
     /**
+     * The pet that asked has come and the scene begins: the pet is no longer waited for to the end of the invitation, and
+     * is engaged until the scene is over, which the errand playing it is the end of.
+     */
+    public void arrived() {
+        if (engagement != null) {
+            engagement = new Engagement(engagement.initiator(), engagement.scene(), engagement.partnerRank(), Long.MAX_VALUE);
+        }
+    }
+
+    /**
      * The pet that asked is not coming. Forgets it if it is the one the pet had said yes to.
      *
      * @param from who

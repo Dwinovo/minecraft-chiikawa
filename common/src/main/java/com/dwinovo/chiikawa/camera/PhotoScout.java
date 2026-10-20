@@ -7,7 +7,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.impl.HachiwarePet;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
-import com.dwinovo.chiikawa.social.InteractionPlan;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -136,8 +135,7 @@ public final class PhotoScout {
     /** In a scene with another pet, listening to music (which is one), or reading the results of an exam. */
     private static boolean inAMoment(AbstractPet pet) {
         return !pet.getPerformance().isEmpty() || pet.getActivity() == PetActivity.READ_RESULTS
-            || pet.getBrain().getMemory(InitMemory.INTERACTION_PLAN.get())
-                .filter(InteractionPlan::engaged).isPresent();
+            || pet.getMind().errands().isOn(ErrandIds.SOCIALIZE);
     }
 
     /** With nothing to do: sitting where it was told to, or wandering about. */
