@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.init;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.camera.PhotoPlan;
+import com.dwinovo.chiikawa.entity.brain.errand.rest.SubjectRests;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentSwitchLog;
 import com.dwinovo.chiikawa.entity.brain.intent.RunningIntent;
 import com.dwinovo.chiikawa.platform.Services;
@@ -12,7 +13,9 @@ import com.dwinovo.chiikawa.task.FinishedSlip;
 import com.dwinovo.chiikawa.whistle.WhistleCall;
 import com.dwinovo.chiikawa.whistle.WhistleHeard;
 import com.dwinovo.chiikawa.voice.PetSpeech;
+import com.mojang.serialization.Codec;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
@@ -242,6 +245,25 @@ public final class InitMemory {
             BuiltInRegistries.MEMORY_MODULE_TYPE,
             ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "photographed_biomes"),
             () -> new MemoryModuleType<>(Optional.of(ResourceLocation.CODEC.listOf()))
+        );
+
+    /**
+     * When each errand without a store of its own is done resting, in game time; see
+     * {@code RestLedger}. Saved with the pet, so a rest goes on through a save.
+     */
+    public static final Supplier<MemoryModuleType<Map<ResourceLocation, Long>>> ERRAND_RESTS =
+        Services.REGISTRY.<MemoryModuleType<Map<ResourceLocation, Long>>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "errand_rests"),
+            () -> new MemoryModuleType<>(Optional.of(Codec.unboundedMap(ResourceLocation.CODEC, Codec.LONG)))
+        );
+
+    /** The things the pet has lately given up on, and until when it leaves them alone; not saved. */
+    public static final Supplier<MemoryModuleType<SubjectRests>> SUBJECT_RESTS =
+        Services.REGISTRY.<MemoryModuleType<SubjectRests>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "subject_rests"),
+            () -> new MemoryModuleType<>(Optional.empty())
         );
 
     private InitMemory() {
