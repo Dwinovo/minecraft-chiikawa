@@ -1,9 +1,11 @@
 package com.dwinovo.chiikawa.entity.brain.errand.step;
 
+import com.dwinovo.chiikawa.utils.Deliveries;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
@@ -43,6 +45,42 @@ public sealed interface Goal {
 
         @Override
         public boolean lookAt(LiveHandle live) {
+            live.lookAt(pos);
+            return true;
+        }
+    }
+
+    /**
+     * The container a pet delivers to, to the middle of the block, for as long as it is worth the walk: one the pets deliver
+     * to that would still take something from the pet's bag. Looked at each time, since a container can be broken or filled
+     * while its pet is on the way, or the bag emptied, and then there is nowhere to go.
+     *
+     * @param pos the container's block
+     */
+    record Container(BlockPos pos) implements Goal {
+        private boolean worthTheWalk(LiveHandle live) {
+            return live.pet().level() instanceof ServerLevel level && Deliveries.worthVisiting(level, pos, live.pet().getBackpack());
+        }
+
+        @Override
+        public Optional<Vec3> where(LiveHandle live) {
+            return worthTheWalk(live) ? Optional.of(Vec3.atCenterOf(pos)) : Optional.empty();
+        }
+
+        @Override
+        public boolean walkTo(LiveHandle live, float speed, int closeEnough) {
+            if (!worthTheWalk(live)) {
+                return false;
+            }
+            live.walkTo(pos, speed, closeEnough);
+            return true;
+        }
+
+        @Override
+        public boolean lookAt(LiveHandle live) {
+            if (!worthTheWalk(live)) {
+                return false;
+            }
             live.lookAt(pos);
             return true;
         }
