@@ -43,7 +43,7 @@ public class PetPickableItemSensor extends Sensor<AbstractPet>{
         // Nearest reachable item. Sorting before the reachability check means the
         // pathfind usually runs for the nearest candidate only.
         ItemEntity target = level.getEntitiesOfClass(ItemEntity.class, aabb, ItemEntity::isAlive).stream()
-                .filter(e -> PickableItem.of(e).isPresent())
+                .filter(e -> PickableItem.of(entity, e).isPresent())
                 .sorted(Comparator.comparingDouble(entity::distanceToSqr))
                 .filter(e -> Utils.canReach(entity, e.blockPosition()))
                 .findFirst()
