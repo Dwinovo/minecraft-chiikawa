@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.data.ErrandSettingsData;
 import com.dwinovo.chiikawa.entity.brain.errand.overlay.Overlays;
+import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSpec;
 import com.dwinovo.chiikawa.entity.brain.personality.IdleHabits;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
@@ -188,6 +189,19 @@ class ErrandSettingsDataTest {
         assertEquals(600, ticks(all, ErrandIds.TAKE_TASK));
         assertEquals(600, all.get(ErrandIds.TAKE_TASK).rests().interrupted().amount().left().orElseThrow());
         assertEquals(Set.of("taken", "stored", "failed"), all.get(ErrandIds.TAKE_PHOTO).rests().reports().keySet());
+    }
+
+    @Test
+    void aSceneRestsTheFullCooldownFromTheMomentItBeginsAndOnlyBrieflyIfItNeverDid() {
+        for (ResourceLocation errand : List.of(ErrandIds.SOCIALIZE, ErrandIds.COOPERATE)) {
+            ErrandSettings.Rests rests = ErrandSettingsData.all().get(errand).rests();
+
+            // Past the start every way out has been rested by the report; before it, only the guard against asking again at once.
+            assertEquals(RestSpec.NONE, rests.done(), errand.toString());
+            assertEquals(RestSpec.NONE, rests.interrupted(), errand.toString());
+            assertEquals(RestSpec.ticksPerSubject(100), rests.gaveUp(), errand.toString());
+            assertEquals(Map.of("played", RestSpec.fromPerSubject(RestSources.SCENE_COOLDOWN)), rests.reports(), errand.toString());
+        }
     }
 
     private static int ticks(Map<ResourceLocation, ErrandSettings<?>> all, ResourceLocation errand) {

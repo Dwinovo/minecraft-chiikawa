@@ -41,7 +41,8 @@ import net.minecraft.resources.ResourceLocation;
  * has nothing that matters as much; it stops where it is and waits, and nobody else can have it meanwhile. A partner
  * that is playing music is not asked: the pet goes and makes up its audience. Either way the pet walks over, what is
  * handed over in the scene comes out of its own backpack as the two meet, and each plays its part for as long as the
- * scene lasts. However it ends, the two leave that scene alone for a while, each by its own rest.
+ * scene lasts. Once the scene has begun, however it ends, the two leave that scene alone for its cooldown, each by its
+ * own rest; a pet that is turned down, or never answered, is not asked again for a few seconds only.
  */
 public final class SocializeErrand implements ErrandType<SocializeErrand.Visit, ErrandTunings.Socialize> {
     /**

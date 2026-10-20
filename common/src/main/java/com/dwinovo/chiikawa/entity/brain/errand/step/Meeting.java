@@ -17,6 +17,12 @@ import java.util.UUID;
  * <p>Nothing of the other pet is kept but its id; it is found again each time, and found gone.
  */
 public final class Meeting {
+    /**
+     * What a pet reports as the scene begins, so that the pair rest from the scene for its cooldown from then on, however
+     * it ends: the report that the errands of a scene name in their settings.
+     */
+    public static final String PLAYED = "played";
+
     private final UUID other;
     private final PetInteraction.PartnerState partnerState;
     private final boolean visitor;

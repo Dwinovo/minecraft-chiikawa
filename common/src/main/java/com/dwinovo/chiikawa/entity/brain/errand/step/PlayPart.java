@@ -18,6 +18,11 @@ import org.jetbrains.annotations.Nullable;
  * the scene has lasted its time, or, for the pet that is visited, when the pet that came over says it is over; gives
  * up if the other pet is gone, has stopped doing what the scene is for, or says it will not play after all.
  * Always interruptible.
+ *
+ * <p>The scene begins when this step does, for both pets, in the tick the visitor hands over what it brings or the
+ * visited pet is told so, and a scene listening to a busker has no hand-over to begin at. So this is where the pet reports
+ * it {@link Meeting#PLAYED played}: it is the one thing every scene has, and from then on, however the pet is cut short,
+ * the pair leave the scene alone for its cooldown.
  */
 public final class PlayPart implements Step {
     private final Meeting meeting;
@@ -42,6 +47,7 @@ public final class PlayPart implements Step {
     public void begin(Handle handle) {
         startedAt = handle.now();
         part = PartPlayer.begin(LiveHandle.of(handle).pet(), side, startedAt);
+        handle.report(Meeting.PLAYED);
     }
 
     @Override

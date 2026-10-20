@@ -315,7 +315,7 @@ public final class ErrandContractGameTests {
 
     private static long ticksOf(RestSpec spec, Running ran) {
         return spec.amount().map(fixed -> (long) fixed,
-            source -> RestSources.resolver(source).map(resolver -> resolver.ticks(new RestContext(ran.plan().restKey()))).orElse(0L));
+            source -> RestSources.resolver(source).map(resolver -> resolver.ticks(RestContext.of(ran.plan()))).orElse(0L));
     }
 
     /** @return what a pet that is not getting on with the errand is doing, for the case to say so */
