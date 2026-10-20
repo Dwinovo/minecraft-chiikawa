@@ -1,7 +1,6 @@
 package com.dwinovo.chiikawa.init;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.camera.PhotoPlan;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.SubjectRests;
 import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.social.InteractionPlan;
@@ -200,17 +199,6 @@ public final class InitMemory {
             BuiltInRegistries.MEMORY_MODULE_TYPE,
             ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "gift_cooldown"),
             () -> new MemoryModuleType<>(Optional.of(Unit.CODEC))
-        );
-
-    /**
-     * The photo the pet has set off to take, kept from the moment the mind chooses the errand until
-     * it ends, so the behavior carries out what the mind admitted.
-     */
-    public static final Supplier<MemoryModuleType<PhotoPlan>> PHOTO_PLAN =
-        Services.REGISTRY.<MemoryModuleType<PhotoPlan>>register(
-            BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "photo_plan"),
-            () -> new MemoryModuleType<>(Optional.empty())
         );
 
     /** The biomes the pet has taken a photo in, so a new one is worth a photo of its own. */
