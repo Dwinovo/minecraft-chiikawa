@@ -11,7 +11,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.ErrandType;
 import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
 import com.dwinovo.chiikawa.entity.brain.errand.Plan;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
-import com.dwinovo.chiikawa.entity.brain.errand.rest.RestStore;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
@@ -23,6 +22,7 @@ import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.testing.TestErrands;
+import com.dwinovo.chiikawa.testing.TestRests;
 import com.dwinovo.chiikawa.testing.TestPhotos;
 import com.dwinovo.chiikawa.testing.TestView;
 import java.util.List;
@@ -53,7 +53,7 @@ class AdmissionTest {
     private static final PetTask SLIP = new PetTask(ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding"),
         ResourceLocation.fromNamespaceAndPath("chiikawa", "farmer"), PetWorkCounters.WEED, PetTask.NO_ICON, 8,
         ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath("chiikawa", "pet_task/weeding")), 0);
-    private static final RestLedger NO_RESTS = new RestLedger(errand -> RestStore.legacy().of(null, errand), errand -> Optional.empty());
+    private static final RestLedger NO_RESTS = TestRests.noRests();
 
     @BeforeAll
     static void shippedSettings() {

@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.testing;
 
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
+import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSpec;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestStore;
 import java.util.HashMap;
@@ -24,6 +25,11 @@ public final class TestRests {
     /** @return rests of these many ticks for each way an errand ends */
     public static ErrandSettings.Rests ticks(int done, int gaveUp, int interrupted) {
         return ErrandSettings.Rests.of(RestSpec.ticks(done), RestSpec.ticks(gaveUp), RestSpec.ticks(interrupted));
+    }
+
+    /** @return a ledger in which no errand is resting, and nothing it is told is kept */
+    public static RestLedger noRests() {
+        return new RestLedger(errand -> new Store(), errand -> Optional.empty());
     }
 
     /** A store that keeps its rests in a map, one for the errand and one for each subject, and counts what is written. */
