@@ -78,10 +78,6 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
         ACTIVITIES.register("socialize", () -> new Activity(PetActivities.name("socialize")));
     private static final RegistryObject<Activity> COOPERATE =
         ACTIVITIES.register("cooperate", () -> new Activity(PetActivities.name("cooperate")));
-    private static final RegistryObject<Activity> TAKE_EXAM =
-        ACTIVITIES.register("take_exam", () -> new Activity(PetActivities.name("take_exam")));
-    private static final RegistryObject<Activity> CHECK_RESULTS =
-        ACTIVITIES.register("check_results", () -> new Activity(PetActivities.name("check_results")));
     private static final RegistryObject<Activity> ANSWER_WHISTLE =
         ACTIVITIES.register("answer_whistle", () -> new Activity(PetActivities.name("answer_whistle")));
 
@@ -200,16 +196,6 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
     @Override
     public Supplier<LootItemConditionType> qualificationCondition() {
         return QUALIFICATION_CONDITION;
-    }
-
-    @Override
-    public Supplier<Activity> takeExamActivity() {
-        return TAKE_EXAM;
-    }
-
-    @Override
-    public Supplier<Activity> checkResultsActivity() {
-        return CHECK_RESULTS;
     }
 
     @Override
