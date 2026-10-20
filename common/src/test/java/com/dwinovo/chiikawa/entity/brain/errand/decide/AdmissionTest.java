@@ -108,11 +108,39 @@ class AdmissionTest {
     }
 
     @Test
-    void anErrandWithNoDestinationIsUnaffected() {
+    void anErrandWithNoDestinationStartsWhereverThePetIs() {
         TestView far = TestView.at(east(500), FREE);
 
         assertEquals(DecisionTrace.STARTABLE, verdict(ErrandIds.WANDER, far));
-        assertEquals(Optional.empty(), ending(ErrandIds.WANDER, TestErrands.planOf(ErrandIds.WANDER, far), far));
+    }
+
+    @Test
+    void anErrandWithNoDestinationGoesOnOnlyWhileThePetIsWithinTheLeash() {
+        TestView near = TestView.at(east(19), FREE).withSong();
+        TestView far = TestView.at(east(21), FREE).withSong();
+
+        assertEquals(Optional.empty(), ending(ErrandIds.PLAY_MUSIC, TestErrands.planOf(ErrandIds.PLAY_MUSIC, near), near));
+        assertEquals(Optional.of(Outcome.gaveUp("left_area")),
+            ending(ErrandIds.PLAY_MUSIC, TestErrands.planOf(ErrandIds.PLAY_MUSIC, near), far));
+    }
+
+    @Test
+    void aPetWhoseAreaMovesAwayLeavesAnErrandThatStaysWhereItIs() {
+        TestView view = TestView.at(HOME, TestAnchors.following(east(500))).withSong();
+
+        assertEquals(Optional.of(Outcome.gaveUp("left_area")),
+            ending(ErrandIds.PLAY_MUSIC, TestErrands.planOf(ErrandIds.PLAY_MUSIC, view), view));
+    }
+
+    @Test
+    void theWayBackToTheAreaIsAnErrandWithADestinationSoItGoesOnToTheEnd() {
+        TestView far = TestView.at(east(500), FREE);
+
+        assertEquals(Optional.empty(), ending(ErrandIds.WANDER, returning(far), far));
+    }
+
+    private static Plan returning(TestView view) {
+        return TestErrands.offers(ErrandIds.WANDER, view).get(0).plan();
     }
 
     @Test
@@ -190,7 +218,7 @@ class AdmissionTest {
 
         assertEquals(Optional.empty(), destination(ErrandIds.TAKE_EXAM, seated));
         assertEquals(Optional.empty(), ending(ErrandIds.TAKE_EXAM, TestErrands.planOf(ErrandIds.TAKE_EXAM, seated), seated),
-            "the leash does not take it out of its chair");
+            "the desk it sits at is not what the leash measures once it is in the chair");
     }
 
     @Test
