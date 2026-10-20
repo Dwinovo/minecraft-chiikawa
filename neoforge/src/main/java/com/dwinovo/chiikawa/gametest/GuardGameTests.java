@@ -10,12 +10,12 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.combat.PetCombat;
-import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
-import com.dwinovo.chiikawa.init.InitMemory;
+import com.dwinovo.chiikawa.entity.brain.PetMind;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
@@ -262,7 +262,7 @@ public final class GuardGameTests {
         // starts the fight already out of reach and backs off with nothing on top of it to
         // hit, which is right, and not what this case is about.
         pet.getBrain().setMemory(MemoryModuleType.ATTACK_TARGET, zombie);
-        IntentSelector.requestReevaluate(pet);
+        PetMind.nudge(pet, "test");
 
         helper.runAtTickTime(BACK_OFF_TICKS, () -> {
             helper.assertTrue(zombie.getHealth() < zombie.getMaxHealth(),
@@ -328,9 +328,7 @@ public final class GuardGameTests {
 
     /** What the pet thinks it is up to, for a failure message that says something. */
     private static String doing(AbstractPet pet) {
-        String intent = pet.getBrain().getMemory(InitMemory.CURRENT_INTENT.get())
-            .map(running -> running.id().toString())
-            .orElse("nothing");
+        String intent = pet.getIntent().map(ResourceLocation::toString).orElse("nothing");
         String walking = pet.getBrain().getMemory(MemoryModuleType.WALK_TARGET)
             .map(target -> target.getTarget().currentBlockPosition().toShortString())
             .orElse("nowhere");

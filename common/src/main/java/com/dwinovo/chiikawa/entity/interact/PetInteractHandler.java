@@ -3,7 +3,7 @@ package com.dwinovo.chiikawa.entity.interact;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
-import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
+import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
@@ -99,7 +99,7 @@ public final class PetInteractHandler {
             pet.feedDish(DISH_TICKS);
             pet.triggerReaction(PetReaction.HAPPY);
             pet.playTameSound();
-            IntentSelector.requestReevaluate(pet);
+            PetMind.nudge(pet, "fed");
         }
         return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
     }
@@ -145,7 +145,7 @@ public final class PetInteractHandler {
             }
             pet.triggerReaction(PetReaction.HAPPY);
             pet.playTameSound();
-            IntentSelector.requestReevaluate(pet);
+            PetMind.nudge(pet, "paid");
         }
         return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
     }

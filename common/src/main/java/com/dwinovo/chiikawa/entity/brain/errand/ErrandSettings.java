@@ -87,10 +87,15 @@ public record ErrandSettings<T>(int priority, float score, int maxTicks, Rests r
     /**
      * @param errand an errand's id
      * @return the codec of that errand's file, with the tuning of its own shape
+     * @throws IllegalArgumentException for an id that is not an errand's
      */
     @SuppressWarnings("unchecked")
     public static Codec<ErrandSettings<?>> codecOf(ResourceLocation errand) {
-        return (Codec<ErrandSettings<?>>) (Codec<?>) codec(ErrandTunings.codecOf(errand));
+        ErrandType<?, ?> type = Errands.get(errand);
+        if (type == null) {
+            throw new IllegalArgumentException("No such errand " + errand);
+        }
+        return (Codec<ErrandSettings<?>>) (Codec<?>) codec(type.tuningCodec());
     }
 
     /** @return these settings with the errands that go first, as data names them */

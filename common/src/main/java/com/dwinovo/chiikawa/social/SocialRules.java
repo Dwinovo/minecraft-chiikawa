@@ -4,10 +4,8 @@ import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
-import com.dwinovo.chiikawa.entity.brain.intent.IntentCategory;
-import com.dwinovo.chiikawa.entity.brain.intent.PetIntent;
-import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
-import com.dwinovo.chiikawa.entity.brain.intent.RunningIntent;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.init.InitMemory;
 import java.util.List;
 import java.util.Map;
@@ -142,14 +140,9 @@ public final class SocialRules {
      * pottering about. A pet at work is never pulled off it for a scene.
      */
     private static boolean isFree(AbstractPet partner) {
-        return PetConstraints.allows(partner, PetOwnership.of(partner), IntentCategory.SOCIAL)
+        return PetConstraints.allows(partner, PetOwnership.of(partner), ErrandCategory.SOCIAL)
             && !partner.getBrain().hasMemoryValue(InitMemory.INTERACTION_RESERVATION.get())
-            && partner.getBrain().getMemory(InitMemory.CURRENT_INTENT.get())
-                .map(RunningIntent::id)
-                .map(PetIntents::get)
-                .map(PetIntent::category)
-                .filter(category -> category == IntentCategory.WANDER)
-                .isPresent();
+            && partner.getMind().errands().isOn(ErrandIds.WANDER);
     }
 
     private static OptionalInt handOverSlot(AbstractPet pet, PetInteraction interaction) {

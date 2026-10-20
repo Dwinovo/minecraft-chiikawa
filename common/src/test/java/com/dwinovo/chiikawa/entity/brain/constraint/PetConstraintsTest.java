@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.entity.PetDirective;
-import com.dwinovo.chiikawa.entity.brain.intent.IntentCategory;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import java.util.EnumSet;
 import java.util.Optional;
@@ -123,28 +123,28 @@ class PetConstraintsTest {
     @Test
     void followPermitsFollowingWanderingTakingSlipsGivingMeetingPetsExamsPhotosAndDefendingTheOwner() {
         assertPermits(PetDirective.FOLLOW, OWNED,
-            EnumSet.of(IntentCategory.FOLLOW_OWNER, IntentCategory.WANDER, IntentCategory.TAKE_TASK,
-                IntentCategory.GIFT, IntentCategory.COMBAT, IntentCategory.SOCIAL, IntentCategory.EXAM, IntentCategory.PHOTO));
+            EnumSet.of(ErrandCategory.FOLLOW_OWNER, ErrandCategory.WANDER, ErrandCategory.TAKE_TASK,
+                ErrandCategory.GIFT, ErrandCategory.COMBAT, ErrandCategory.SOCIAL, ErrandCategory.EXAM, ErrandCategory.PHOTO));
     }
 
     @Test
     void stayPermitsOnlyStaying() {
-        assertPermits(PetDirective.STAY, OWNED, EnumSet.of(IntentCategory.STAY));
+        assertPermits(PetDirective.STAY, OWNED, EnumSet.of(ErrandCategory.STAY));
     }
 
     @Test
     void freePermitsEverythingAPetDoesOnItsOwnTime() {
-        assertPermits(PetDirective.FREE, OWNED, EnumSet.of(IntentCategory.WANDER, IntentCategory.WORK, IntentCategory.FORAGE,
-            IntentCategory.COMBAT, IntentCategory.PICK_UP, IntentCategory.TAKE_TASK, IntentCategory.SHOP,
-            IntentCategory.GIFT, IntentCategory.SOCIAL, IntentCategory.EXAM, IntentCategory.PHOTO));
+        assertPermits(PetDirective.FREE, OWNED, EnumSet.of(ErrandCategory.WANDER, ErrandCategory.WORK, ErrandCategory.FORAGE,
+            ErrandCategory.COMBAT, ErrandCategory.PICK_UP, ErrandCategory.TAKE_TASK, ErrandCategory.SHOP,
+            ErrandCategory.GIFT, ErrandCategory.SOCIAL, ErrandCategory.EXAM, ErrandCategory.PHOTO));
     }
 
     @Test
     void wildPermitsWanderingForagingFightsTakingSlipsAndMeetingPetsWhateverItsDirective() {
         for (PetDirective directive : PetDirective.values()) {
             assertPermits(directive, PetOwnership.WILD,
-                EnumSet.of(IntentCategory.WANDER, IntentCategory.FORAGE, IntentCategory.COMBAT, IntentCategory.TAKE_TASK,
-                    IntentCategory.SOCIAL, IntentCategory.CURIOUS));
+                EnumSet.of(ErrandCategory.WANDER, ErrandCategory.FORAGE, ErrandCategory.COMBAT, ErrandCategory.TAKE_TASK,
+                    ErrandCategory.SOCIAL, ErrandCategory.CURIOUS));
         }
     }
 
@@ -196,8 +196,8 @@ class PetConstraintsTest {
         return PetConstraints.anchorOf(directive, ownership, PET, ownerPos, home, tethered, Optional.of(TestAnchors.SETTINGS));
     }
 
-    private static void assertPermits(PetDirective directive, PetOwnership ownership, Set<IntentCategory> permitted) {
-        for (IntentCategory category : IntentCategory.values()) {
+    private static void assertPermits(PetDirective directive, PetOwnership ownership, Set<ErrandCategory> permitted) {
+        for (ErrandCategory category : ErrandCategory.values()) {
             assertEquals(permitted.contains(category), PetConstraints.allows(directive, ownership, category),
                 () -> directive + " / " + ownership + " / " + category);
         }

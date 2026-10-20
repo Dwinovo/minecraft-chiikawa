@@ -7,7 +7,7 @@ import com.dwinovo.chiikawa.camera.PhotoOutlook;
 import com.dwinovo.chiikawa.camera.PhotoScout;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetGesture;
-import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
+import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.photo.PhotoSystem;
 import com.dwinovo.chiikawa.photo.PhotoUploads;
@@ -83,7 +83,7 @@ public class TakePhotoBehavior extends Behavior<AbstractPet> {
         ), GIVE_UP_TICKS);
     }
 
-    /** Able to, and with the photo it was sent to take: the selector chose it, and admitted going there. */
+    /** Able to, and with the photo it was sent to take: the mind chose it, and admitted going there. */
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, AbstractPet pet) {
         return PhotoScout.outlook(pet).canContinue().ok() && pet.getBrain().hasMemoryValue(InitMemory.PHOTO_PLAN.get());
@@ -164,7 +164,7 @@ public class TakePhotoBehavior extends Behavior<AbstractPet> {
         pet.getBrain().eraseMemory(MemoryModuleType.LOOK_TARGET);
         // Over: the pet picks what to do next now, and not at its next turn, which would find the
         // photo still its activity.
-        IntentSelector.requestReevaluate(pet);
+        PetMind.nudge(pet, "photo_over");
     }
 
     /**

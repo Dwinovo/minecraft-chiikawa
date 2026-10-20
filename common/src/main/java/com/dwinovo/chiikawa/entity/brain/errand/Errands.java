@@ -1,0 +1,106 @@
+package com.dwinovo.chiikawa.entity.brain.errand;
+
+import com.dwinovo.chiikawa.entity.brain.errand.impl.AnswerWhistleErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.CheckResultsErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.CombatErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.ConstantErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.CooperateErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.FollowOwnerErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.GiftOwnerErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.PlayMusicErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.Requirement;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.ShopErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.SocializeErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.TakeExamErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.TakePhotoErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.TakeTaskErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.TargetErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
+import com.dwinovo.chiikawa.init.InitActivity;
+import com.dwinovo.chiikawa.task.PetWorkCounters;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.schedule.Activity;
+import org.jetbrains.annotations.Nullable;
+
+/**
+ * Registry of every errand a pet can be on, by the id it has always had as an intent. Generic errands
+ * are open to every pet; the others are offered by capabilities through
+ * {@code PetCapability#errands()}.
+ *
+ * <p>How much each matters is not decided here but by the errand's {@link ErrandSettings}: its
+ * priority, which a pet gives way to only for a higher one, its score among the errands of its
+ * priority, and the errands that must have nothing to do before it is started, such as the farmer's
+ * strict order of harvest before plant before deliver. Work the pet's slip counts is raised by
+ * {@code Decision.TASK_BONUS}, and a pet's personality weighs them all.
+ */
+public final class Errands {
+    private static final Map<ResourceLocation, ErrandType<?, ?>> BY_ID = new LinkedHashMap<>();
+
+    /** Errands every pet considers, whatever its capability. */
+    private static final List<ErrandType<?, ?>> GENERIC = List.of(
+        register(new FollowOwnerErrand()),
+        register(new ConstantErrand<>(ErrandIds.STAY, ErrandCategory.STAY, ErrandTunings.Untuned.CODEC,
+            () -> InitActivity.STAY.get())),
+        register(new ConstantErrand<>(ErrandIds.WANDER, ErrandCategory.WANDER, ErrandTunings.Wander.CODEC,
+            () -> Activity.IDLE)),
+        register(new TargetErrand<>(ErrandIds.PICK_UP_ITEM, ErrandCategory.PICK_UP, ErrandTunings.PickUp.CODEC,
+            () -> InitActivity.PICK_UP.get(), PerceivedTargets::pickableItem, "no_item", List.of(), Optional.empty())),
+        register(new TakeTaskErrand()),
+        register(new ShopErrand()),
+        register(new GiftOwnerErrand()),
+        register(new SocializeErrand()),
+        register(new CooperateErrand()),
+        register(new TakeExamErrand()),
+        register(new CheckResultsErrand()),
+        register(new AnswerWhistleErrand()),
+        register(new TakePhotoErrand())
+    );
+
+    static {
+        register(new TargetErrand<>(ErrandIds.HARVEST, ErrandCategory.WORK, ErrandTunings.BlockWork.CODEC,
+            () -> InitActivity.FARMER_HARVEST.get(), PerceivedTargets::harvest, "no_crop", List.of(), Optional.empty()));
+        register(new TargetErrand<>(ErrandIds.PLANT, ErrandCategory.WORK, ErrandTunings.BlockWork.CODEC,
+            () -> InitActivity.FARMER_PLANT.get(), PerceivedTargets::plant, "no_farmland", List.of(), Optional.empty()));
+        register(new TargetErrand<>(ErrandIds.DELIVER, ErrandCategory.WORK, ErrandTunings.Deliver.CODEC,
+            () -> InitActivity.DELEVER.get(), PerceivedTargets::container, "no_container", List.of(), Optional.empty()));
+        register(new TargetErrand<>(ErrandIds.WEED, ErrandCategory.FORAGE, ErrandTunings.BlockWork.CODEC,
+            () -> InitActivity.WEED.get(), PerceivedTargets::weed, "no_weed",
+            List.of(Requirement.wildOrCarrying(PetWorkCounters.WEED)), Optional.of(PetWorkCounters.WEED)));
+        register(new TargetErrand<>(ErrandIds.PICK_MUSHROOM, ErrandCategory.FORAGE, ErrandTunings.BlockWork.CODEC,
+            () -> InitActivity.PICK_MUSHROOM.get(), PerceivedTargets::mushroom, "no_mushroom",
+            List.of(Requirement.wildOrCarrying(PetWorkCounters.PICK_MUSHROOM), Requirement.AT_NIGHT),
+            Optional.of(PetWorkCounters.PICK_MUSHROOM)));
+        register(new CombatErrand<>(ErrandIds.MELEE, ErrandTunings.Footwork.CODEC, () -> InitActivity.FENCER_FIGHT.get(), false));
+        register(new CombatErrand<>(ErrandIds.RANGED, ErrandTunings.Ranged.CODEC, () -> InitActivity.ARCHER_SHOOT.get(), true));
+        register(new PlayMusicErrand());
+    }
+
+    private Errands() {
+    }
+
+    public static @Nullable ErrandType<?, ?> get(ResourceLocation id) {
+        return BY_ID.get(id);
+    }
+
+    /** @return every errand, the generic ones first */
+    public static Collection<ErrandType<?, ?>> all() {
+        return BY_ID.values();
+    }
+
+    /** @return the errands every pet considers */
+    public static List<ErrandType<?, ?>> generic() {
+        return GENERIC;
+    }
+
+    private static <E extends ErrandType<?, ?>> E register(E errand) {
+        if (BY_ID.putIfAbsent(errand.id(), errand) != null) {
+            throw new IllegalStateException("Duplicate errand " + errand.id());
+        }
+        return errand;
+    }
+}

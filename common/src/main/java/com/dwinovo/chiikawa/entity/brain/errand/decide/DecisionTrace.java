@@ -24,6 +24,12 @@ public final class DecisionTrace {
     }
 
     public static final String STARTABLE = "startable";
+    /** The verdict on an errand the owner's directive does not permit. */
+    public static final String NOT_PERMITTED = "not_permitted";
+    /** The verdict on an errand the pet is resting from. */
+    public static final String RESTING = "resting";
+    /** The verdict on an errand with no settings, which is switched off. */
+    public static final String SWITCHED_OFF = "switched_off";
 
     private final List<Line> lines = new ArrayList<>();
     @Nullable

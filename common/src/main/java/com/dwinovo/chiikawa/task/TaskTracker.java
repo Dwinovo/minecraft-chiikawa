@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.task;
 
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
+import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
@@ -64,6 +64,6 @@ public final class TaskTracker {
         pet.triggerReaction(PetReaction.HAPPY);
         pet.playTameSound();
         PetSpeech.say(pet, VoiceMoment.PAID);
-        IntentSelector.requestReevaluate(pet);
+        PetMind.nudge(pet, "slip_done");
     }
 }

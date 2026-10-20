@@ -8,7 +8,7 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * What a pet has decided to take a photo of, as plain data: chosen when the pet decides what to do,
- * so the selector can ask whether it may go there like any other errand, and kept in the pet's
+ * so the pet's mind can ask whether it may go there like any other errand, and kept in the pet's
  * memory for the behavior to carry out.
  *
  * @param kind the kind of photo

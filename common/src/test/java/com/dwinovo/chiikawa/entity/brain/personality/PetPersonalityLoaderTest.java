@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.dwinovo.chiikawa.entity.brain.intent.DayPhase;
-import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
+import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.google.gson.JsonParser;
 import java.util.Map;
 import java.util.Set;
@@ -44,7 +44,7 @@ class PetPersonalityLoaderTest {
         assertTrue(loaded.errors().get(0).contains(USAGI.toString()), loaded.errors()::toString);
         assertTrue(loaded.warnings().isEmpty(), loaded.warnings()::toString);
 
-        assertEquals(1.2F, PetPersonalities.get(CHIIKAWA).multiplier(PetIntents.HARVEST, DayPhase.DAY), 1.0E-6F);
+        assertEquals(1.2F, PetPersonalities.get(CHIIKAWA).multiplier(ErrandIds.HARVEST, DayPhase.DAY), 1.0E-6F);
         assertSame(Personality.DEFAULT, PetPersonalities.get(USAGI));
         assertSame(Personality.DEFAULT, PetPersonalities.get(HACHIWARE));
     }

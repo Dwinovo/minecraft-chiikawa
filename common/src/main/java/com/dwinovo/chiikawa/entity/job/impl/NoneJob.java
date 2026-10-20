@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 
 /**
  * Fallback pet job — pet is holding nothing recognised. Always assumable,
- * lowest priority, and offers no intents beyond the generic ones.
+ * lowest priority, and offers no errands beyond the generic ones.
  */
 public class NoneJob implements PetCapability {
     private final int id;
@@ -32,7 +32,7 @@ public class NoneJob implements PetCapability {
     }
 
     @Override
-    public List<ResourceLocation> intents() {
+    public List<ResourceLocation> errands() {
         return List.of();
     }
 }

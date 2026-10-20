@@ -32,7 +32,7 @@ public record PetAnchor(GlobalPos center, double reach, double leash, boolean fo
 
     /**
      * The one rule for whether an errand may take the pet somewhere, asked by every caller that
-     * needs to know: the selector for each intent, and whatever tells a player beforehand.
+     * needs to know: the pet's mind for each errand, and whatever tells a player beforehand.
      *
      * @param destination where the errand goes
      * @param starting whether the pet is setting off, which asks for the reach, or is on its way,

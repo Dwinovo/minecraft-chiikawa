@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.init;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.job.api.PetCapability;
 import com.dwinovo.chiikawa.entity.job.impl.BasicJob;
 import com.dwinovo.chiikawa.entity.job.impl.MusicianJob;
@@ -42,7 +42,7 @@ public final class InitRegistry {
             FARMER_ID,
             10,
             InitTag.ENTITY_FARMER_TOOLS,
-            List.of(PetIntents.HARVEST, PetIntents.PLANT, PetIntents.DELIVER, PetIntents.WEED, PetIntents.PICK_MUSHROOM)
+            List.of(ErrandIds.HARVEST, ErrandIds.PLANT, ErrandIds.DELIVER, ErrandIds.WEED, ErrandIds.PICK_MUSHROOM)
         )
     );
     public static final Supplier<PetCapability> FENCER = Services.REGISTRY.register(
@@ -52,7 +52,7 @@ public final class InitRegistry {
             FENCER_ID,
             10,
             InitTag.ENTITY_FENCER_TOOLS,
-            List.of(PetIntents.MELEE)
+            List.of(ErrandIds.MELEE)
         )
     );
     public static final Supplier<PetCapability> ARCHER = Services.REGISTRY.register(
@@ -62,7 +62,7 @@ public final class InitRegistry {
             ARCHER_ID,
             10,
             InitTag.ENTITY_ARCHER_TOOLS,
-            List.of(PetIntents.RANGED)
+            List.of(ErrandIds.RANGED)
         )
     );
     public static final Supplier<PetCapability> MUSICIAN = Services.REGISTRY.register(
@@ -72,7 +72,7 @@ public final class InitRegistry {
             MUSICIAN_ID,
             10,
             InitTag.ENTITY_MUSICIAN_TOOLS,
-            List.of(PetIntents.PLAY_MUSIC)
+            List.of(ErrandIds.PLAY_MUSIC)
         )
     );
 

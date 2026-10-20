@@ -1,11 +1,25 @@
 package com.dwinovo.chiikawa.entity.brain.errand.decide;
 
+import com.dwinovo.chiikawa.entity.brain.errand.Check;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandType;
+import com.dwinovo.chiikawa.entity.brain.errand.Offer;
+import com.dwinovo.chiikawa.entity.brain.errand.Plan;
+import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
+import com.dwinovo.chiikawa.entity.brain.errand.run.Routine;
+import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.IntFunction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * What a pet starts next, from the errands it could start: the highest priority that has one wins
@@ -18,6 +32,15 @@ import net.minecraft.util.RandomSource;
  * off it by something of the same priority, and why a personality cannot make play outrank an exam.
  */
 public final class Decision {
+    /** Added to the base score of an errand whose work the pet's slip counts. */
+    public static final float TASK_BONUS = 0.2F;
+    /**
+     * Added to work while a pet is in the mood after a proper meal. Enough to win against
+     * pottering about, not enough to overrule the owner's directive or a slip it carries:
+     * a meal makes a pet keener, not a different pet.
+     */
+    public static final float EAGER_BONUS = 0.15F;
+
     /**
      * @param errand the errand to start
      * @param offer which of its offers to start it with, as an index into its weights
@@ -26,6 +49,114 @@ public final class Decision {
     }
 
     private Decision() {
+    }
+
+    /**
+     * What the pet starts: the errand, how it is set about and the settings it starts with.
+     *
+     * @param type the errand
+     * @param settings its settings, which it keeps for as long as it runs
+     * @param offer the way chosen to go about it
+     * @param ranking the errands of the priority it was chosen from, with the scores they had, best first
+     */
+    public record Started(ErrandType<?, ?> type, ErrandSettings<?> settings, Offer<?> offer, List<Scored> ranking) {
+        /** @return the steps of the errand for this start */
+        public Routine routine() {
+            return routineOf(type, settings, offer);
+        }
+
+        @SuppressWarnings("unchecked")
+        private static <P extends Plan, T> Routine routineOf(ErrandType<P, T> type, ErrandSettings<?> settings, Offer<?> offer) {
+            return type.routine((P) offer.plan(), (ErrandSettings<T>) settings);
+        }
+    }
+
+    /**
+     * Decides what the pet starts. Walks the priorities from the top down to the floor and stops at the
+     * first that has an errand that can start: of the errands offered, only those that get through
+     * the filter ({@code Admission}) and are not held back by an errand they yield to compete, and
+     * of those the best by score, noise and the draw among its offers deciding as in
+     * {@link #pickWithinTier}. What is costly to find out about the pet is found out only for the priorities
+     * that are looked at. An errand that yields to another that can start is held back whatever
+     * its own score: the farmer's strict order, which no score a personality could close. What those
+     * errands in turn yield to does not matter, or plant would start the moment harvest was held back
+     * by something else.
+     *
+     * @param offered the errands the pet's capability offers, in a stable order
+     * @param view the pet
+     * @param permits what the pet is allowed to do
+     * @param rests what the pet is resting from
+     * @param floorExclusive the priority of the errand the pet is on, or {@link Integer#MIN_VALUE} for none:
+     *                       only a strictly higher priority is looked at, so an equal one never interrupts
+     * @param random the noise and the draw among offers; {@code null} to only look: every priority above
+     *               the floor is gone through and noted in the trace, and nothing is picked or drawn
+     * @param now the current game time
+     * @param trace where to note how each errand fared, if somebody is looking
+     * @return what to start, or nothing when no priority above the floor has an errand that can
+     */
+    public static Optional<Started> decide(List<ErrandType<?, ?>> offered, PetView view, Permits permits, RestLedger rests,
+            int floorExclusive, @Nullable RandomSource random, long now, @Nullable DecisionTrace trace) {
+        Map<ErrandType<?, ?>, ErrandSettings<?>> settings = new LinkedHashMap<>();
+        for (ErrandType<?, ?> type : offered) {
+            ErrandSettings.of(type.id()).ifPresentOrElse(found -> settings.put(type, found), () -> {
+                if (trace != null) {
+                    trace.excluded(type.id(), 0, DecisionTrace.SWITCHED_OFF);
+                }
+            });
+        }
+        List<Integer> priorities = settings.values().stream().map(ErrandSettings::priority).distinct()
+            .sorted(Comparator.reverseOrder()).toList();
+        Optional<Started> started = Optional.empty();
+        for (int priority : priorities) {
+            if (priority <= floorExclusive) {
+                break;
+            }
+            List<Admission<?, ?>> admitted = new ArrayList<>();
+            settings.forEach((type, found) -> {
+                if (found.priority() == priority) {
+                    Admission.of(type, found, view, permits, rests, now, trace).ifPresent(admitted::add);
+                }
+            });
+            List<Admission<?, ?>> tier = holdBack(admitted, trace);
+            if (tier.isEmpty()) {
+                continue;
+            }
+            List<Scored> scored = tier.stream().map(admission -> admission.scored(view)).toList();
+            if (trace != null) {
+                scored.forEach(trace::startable);
+            }
+            if (random == null) {
+                continue;
+            }
+            Pick pick = pickWithinTier(scored, view.personality().randomness(), random);
+            if (trace != null) {
+                trace.picked(pick);
+            }
+            Admission<?, ?> chosen = tier.stream().filter(admission -> admission.type().id().equals(pick.errand()))
+                .findFirst().orElseThrow();
+            List<Scored> ranking = scored.stream()
+                .sorted(Comparator.comparingDouble((Scored candidate) -> candidate.score()).reversed()).toList();
+            started = Optional.of(new Started(chosen.type(), chosen.settings(), chosen.offers().get(pick.offer()), ranking));
+            break;
+        }
+        return started;
+    }
+
+    /** Leaves out the errands that yield to another of those that can start. */
+    private static List<Admission<?, ?>> holdBack(List<Admission<?, ?>> admitted, @Nullable DecisionTrace trace) {
+        Set<ResourceLocation> startable = new HashSet<>();
+        admitted.forEach(admission -> startable.add(admission.type().id()));
+        List<Admission<?, ?>> tier = new ArrayList<>();
+        for (Admission<?, ?> admission : admitted) {
+            if (admission.settings().yieldsTo().stream().anyMatch(startable::contains)) {
+                if (trace != null) {
+                    trace.excluded(admission.type().id(), admission.settings().priority(), Check.fail("higher_priority").reasonKey());
+                }
+            } else {
+                tier.add(admission);
+            }
+        }
+        return tier;
     }
 
     /**

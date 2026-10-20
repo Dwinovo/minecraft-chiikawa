@@ -14,7 +14,9 @@ import com.dwinovo.chiikawa.entity.brain.handler.ArcherJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.FarmerJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.FencerJobHandler;
 import com.dwinovo.chiikawa.entity.brain.handler.MusicianJobHandler;
-import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
+import com.dwinovo.chiikawa.entity.brain.PetMind;
+import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
+import com.dwinovo.chiikawa.entity.brain.errand.run.Projection;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
 import com.dwinovo.chiikawa.qualification.LicenceView;
 import com.dwinovo.chiikawa.qualification.PetExams;
@@ -102,7 +104,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Base implementation of a tamable pet with job, inventory, and ranged attack support.
  */
-public class AbstractPet extends TamableAnimal implements RangedAttackMob, ChiikawaAnimated {
+public class AbstractPet extends TamableAnimal implements RangedAttackMob, ChiikawaAnimated, Projection {
     /**
      * The pet's own pockets: slot 0 is what it holds, slot 1 is what it wears, and the
      * rest is room for things — fifteen, three full rows of five in its screen. The bag's
@@ -164,7 +166,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     private static final EntityDataAccessor<Byte> ACTIVITY = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.BYTE);
     /** The slip the pet carries, empty when none. Synced so the client can show and hang it. */
     private static final EntityDataAccessor<CompoundTag> TASK = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.COMPOUND_TAG);
-    /** Id of the intent the pet is following, empty when none. Synced for the backpack screen. */
+    /** Id of the errand the pet is on, empty when none. Synced for the backpack screen. */
     private static final EntityDataAccessor<String> INTENT = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.STRING);
     /**
      * Bought for the owner and not yet handed over; see {@link #setPendingGift}. Synced,
@@ -228,9 +230,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitMemory.INTERACTION_PLAN.get(),
         InitMemory.INTERACTION_RESERVATION.get(),
         InitMemory.SOCIAL_COOLDOWNS.get(),
-        InitMemory.CURRENT_INTENT.get(),
-        InitMemory.INTENT_REEVALUATE.get(),
-        InitMemory.INTENT_SWITCH_LOG.get(),
         InitMemory.LAST_SAID.get(),
         InitMemory.WHISTLE_CALL.get(),
         InitMemory.WHISTLE_HEARD.get(),
@@ -259,6 +258,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     /** What this copy of the pet is saying; see {@link #speak}. Server copy is unused. */
     @Nullable
     private PetSpeech.Heard speech;
+
+    /** What decides what it does; on the server only does it do anything. Made with the pet, never saved. */
+    private final PetMind mind = new PetMind(this);
 
     /** Where it stands with every licence; kept on the server, saved with the pet. */
     private final PetLicences licences = new PetLicences();
@@ -454,7 +456,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     public void setPetDirective(PetDirective directive) {
         this.entityData.set(PET_MODE, (byte) directive.ordinal());
         settleHome();
-        IntentSelector.requestReevaluate(this);
+        PetMind.post(this, new Message.DirectiveChanged());
     }
 
     /**
@@ -523,7 +525,14 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     }
 
     /**
-     * @return the id of the intent the pet is following; readable on both sides
+     * @return what decides what the pet does
+     */
+    public PetMind getMind() {
+        return mind;
+    }
+
+    /**
+     * @return the id of the errand the pet is on; readable on both sides
      */
     public Optional<ResourceLocation> getIntent() {
         String id = this.entityData.get(INTENT);
@@ -531,10 +540,27 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     }
 
     /**
-     * @param intent the intent the pet now follows, {@code null} for none
+     * For the pet's executor alone: shows the errand it is on.
      */
-    public void setIntent(@Nullable ResourceLocation intent) {
-        this.entityData.set(INTENT, intent == null ? "" : intent.toString());
+    @Override
+    public void intent(@Nullable ResourceLocation errand) {
+        this.entityData.set(INTENT, errand == null ? "" : errand.toString());
+    }
+
+    /**
+     * For the pet's executor alone: the pose its step holds.
+     */
+    @Override
+    public void activity(PetActivity activity) {
+        setActivity(activity);
+    }
+
+    /**
+     * For the pet's executor alone: the scene its step plays.
+     */
+    @Override
+    public void performance(String performance) {
+        setPerformance(performance);
     }
 
     /**
@@ -565,7 +591,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * mainhand, and write its id to {@link #PET_JOB}. The brain is <em>not</em>
      * rebuilt — every job's activities live on a single static brain since
      * {@link #makeBrain}, so a job change is just a synced value flip plus a
-     * request for the intent selector to re-pick right away.
+     * tell to the pet's mind to decide again right away.
      */
     public void refreshJobFromMainhand() {
         if (level().isClientSide()) {
@@ -574,7 +600,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         PetCapability best = jobFromMainhand();
         if (best.id() != getPetJobId()) {
             setPetJobId(best.id());
-            IntentSelector.requestReevaluate(this);
+            PetMind.post(this, new Message.CapabilityChanged());
         }
     }
 
@@ -585,7 +611,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     /**
      * Build the entity's brain once, registering <em>all</em> activities up
-     * front. Activities don't run unless the intent selector (see
+     * front. Activities don't run unless the pet's mind (see
      * {@link #customServerAiStep}) chooses them, so the unused activities cost
      * only their flat memory footprint.
      *
@@ -668,13 +694,30 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         }
         PetExams.upkeep(this);
         PetWhistle.hear(this);
-        IntentSelector.tick(this, serverLevel);
+        mind.tick(serverLevel);
         getBrain().tick(serverLevel, this);
         super.customServerAiStep();
     }
 
     public Brain<AbstractPet> getBrain() {
         return (Brain<AbstractPet>) super.getBrain();
+    }
+
+    /** Being hurt is something the pet's mind is told, since it may be time to fight or to flee. */
+    @Override
+    public boolean hurt(DamageSource source, float amount) {
+        boolean hurt = super.hurt(source, amount);
+        if (hurt) {
+            PetMind.post(this, new Message.Hurt(Optional.ofNullable(source.getEntity()).map(Entity::getUUID)));
+        }
+        return hurt;
+    }
+
+    /** Whatever the pet was told and has not heard is not told to whatever takes its place. */
+    @Override
+    public void remove(Entity.RemovalReason reason) {
+        mind.remove();
+        super.remove(reason);
     }
 
     /**
@@ -801,7 +844,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         applyEagerness();
     }
 
-    /** Whether the pet is still in the mood, for the selector and for anything watching. */
+    /** Whether the pet is still in the mood, for the pet's mind and for anything watching. */
     public boolean isEager() {
         return eagerTicksLeft() > 0;
     }

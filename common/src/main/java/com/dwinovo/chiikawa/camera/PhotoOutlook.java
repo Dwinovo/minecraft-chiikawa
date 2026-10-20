@@ -1,12 +1,12 @@
 package com.dwinovo.chiikawa.camera;
 
-import com.dwinovo.chiikawa.entity.brain.intent.IntentCheck;
+import com.dwinovo.chiikawa.entity.brain.errand.Check;
 import java.util.Optional;
 
 /**
- * Whether a pet could take a photo now, as plain facts, the way the rest of what an intent
+ * Whether a pet could take a photo now, as plain facts, the way the rest of what an errand
  * reads is: who it is, what it carries, how its owner is, and what there is to take a photo
- * of. Made by {@link PhotoScout}, read by the intent, and tried without a world.
+ * of. Made by {@link PhotoScout}, read by the errand, and tried without a world.
  *
  * @param photographer whether this kind of pet takes photos at all
  * @param camera the settings of the camera it carries, if it carries one
@@ -25,12 +25,12 @@ public record PhotoOutlook(boolean photographer, Optional<CameraSettings> camera
         Optional.empty());
 
     /** Whether it may set about taking a photo. */
-    public IntentCheck canStart() {
-        IntentCheck able = canContinue();
+    public Check canStart() {
+        Check able = canContinue();
         if (!able.ok()) {
             return able;
         }
-        return plan.isEmpty() ? IntentCheck.fail("nothing_to_shoot") : IntentCheck.OK;
+        return plan.isEmpty() ? Check.fail("nothing_to_shoot") : Check.OK;
     }
 
     /**
@@ -38,22 +38,22 @@ public record PhotoOutlook(boolean photographer, Optional<CameraSettings> camera
      * to put the camera away mid-shot; the rest it takes once the shutter has gone is what
      * ends it, so a pet is not left holding up a camera with nothing to do.
      */
-    public IntentCheck canContinue() {
+    public Check canContinue() {
         if (!photographer) {
-            return IntentCheck.fail("not_photographer");
+            return Check.fail("not_photographer");
         }
         if (camera.isEmpty()) {
-            return IntentCheck.fail("no_camera");
+            return Check.fail("no_camera");
         }
         if (!hasFilm) {
-            return IntentCheck.fail("no_film");
+            return Check.fail("no_film");
         }
         if (!ownerInRange) {
-            return IntentCheck.fail("owner_far");
+            return Check.fail("owner_far");
         }
         if (!ownerCalm) {
-            return IntentCheck.fail("owner_busy");
+            return Check.fail("owner_busy");
         }
-        return coolingDown ? IntentCheck.fail("photo_resting") : IntentCheck.OK;
+        return coolingDown ? Check.fail("photo_resting") : Check.OK;
     }
 }

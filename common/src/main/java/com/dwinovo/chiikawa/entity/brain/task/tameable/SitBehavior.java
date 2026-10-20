@@ -27,7 +27,7 @@ public class SitBehavior<E extends AbstractPet> extends Behavior<E> {
     }
 
     /**
-     * Keeps sitting for as long as the stay activity runs; the intent selector
+     * Keeps sitting for as long as the stay activity runs; the pet's mind
      * stops it when the pet is told to do something else.
      */
     @Override

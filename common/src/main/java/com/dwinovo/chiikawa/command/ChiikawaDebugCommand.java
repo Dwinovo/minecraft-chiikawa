@@ -5,9 +5,9 @@ import com.dwinovo.chiikawa.camera.CameraSettings;
 import com.dwinovo.chiikawa.camera.FilmRolls;
 import com.dwinovo.chiikawa.camera.PhotoScout;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
-import com.dwinovo.chiikawa.entity.brain.intent.IntentSwitchLog;
-import com.dwinovo.chiikawa.init.InitMemory;
+import com.dwinovo.chiikawa.entity.brain.PetMind;
+import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
+import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionTrace;
 import com.dwinovo.chiikawa.photo.PhotoData;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
 import com.dwinovo.chiikawa.photo.PhotoSystem;
@@ -28,6 +28,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -37,10 +38,10 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * {@code /chiikawa debug intent} inspects the intent selector of the pet under the
- * player's crosshair: the slip it carries, every candidate with its permission,
- * condition and score, and, once {@code log on} is set for that pet, its recent intent
- * switches. {@code /chiikawa debug board} lists the day's slips of the labor board under
+ * {@code /chiikawa debug intent} inspects the mind of the pet under the player's
+ * crosshair: the slip it carries and the errand it is on, how every errand fares in a
+ * decision made now (why it cannot start, or its priority and score), and with
+ * {@code log} what it started and ended recently. {@code /chiikawa debug board} lists the day's slips of the labor board under
  * the crosshair. {@code /chiikawa debug photo <entity>} has the player's game draw a photo
  * from an entity's eyes, and puts it on the roll of film in hand, or on a roll of its own.
  */
@@ -66,9 +67,7 @@ public final class ChiikawaDebugCommand {
                 .then(Commands.literal("intent")
                     .executes(context -> showCandidates(context.getSource()))
                     .then(Commands.literal("log")
-                        .executes(context -> showLog(context.getSource()))
-                        .then(Commands.literal("on").executes(context -> setLogging(context.getSource(), true)))
-                        .then(Commands.literal("off").executes(context -> setLogging(context.getSource(), false)))))
+                        .executes(context -> showLog(context.getSource()))))
                 .then(Commands.literal("board")
                     .executes(context -> showBoard(context.getSource())))
                 .then(Commands.literal("photo")
@@ -119,63 +118,47 @@ public final class ChiikawaDebugCommand {
 
     private static int showCandidates(CommandSourceStack source) throws CommandSyntaxException {
         AbstractPet pet = targetedPet(source);
-        IntentSelector.Snapshot snapshot = IntentSelector.describe(pet);
+        PetMind.Look look = pet.getMind().look((ServerLevel) pet.level());
         MutableComponent header = Component.literal("[chiikawa-intent] ").append(pet.getDisplayName()).append(" running: ");
-        header.append(snapshot.running()
-            .map(running -> Component.literal(running.id() + " for " + (snapshot.gameTime() - running.startTick()) + "t"))
+        header.append(look.running()
+            .map(running -> Component.literal(running.errand() + " for " + (look.gameTime() - running.startedAt()) + "t"))
             .orElse(Component.literal("none")));
-        header.append(Component.literal(" (" + snapshot.phase().getSerializedName() + ")"));
+        header.append(Component.literal(" (" + look.phase().getSerializedName() + ")"));
         header.append(Component.literal(pet.getTask()
             .map(task -> " slip " + task.type() + " " + task.progress() + "/" + task.target())
             .orElse(" no slip")));
         source.sendSuccess(() -> header, false);
-        for (IntentSelector.CandidateView view : snapshot.candidates()) {
-            MutableComponent line = Component.literal(" " + view.intent().id() + " ")
-                .append(Component.literal("p" + view.priority() + " "))
-                .append(flag("allowed", view.allowed()))
-                .append(" ")
-                .append(flag("check", view.check().ok()));
-            if (view.check().reasonKey() != null) {
-                line.append(Component.literal(" (").append(Component.translatable(view.check().reasonKey())).append(")"));
+        for (DecisionTrace.Line entry : look.trace().lines()) {
+            boolean startable = entry.verdict().equals(DecisionTrace.STARTABLE);
+            MutableComponent line = Component.literal(" " + entry.errand() + " p" + entry.priority() + " ")
+                .append(flag("startable", startable));
+            if (!startable) {
+                line.append(Component.literal(" (").append(entry.verdict().startsWith("intent.")
+                    ? Component.translatable(entry.verdict()) : Component.literal(entry.verdict())).append(")"));
             }
-            line.append(Component.literal(String.format(Locale.ROOT, " score %.2f", view.score())));
+            entry.score().ifPresent(score -> line.append(Component.literal(String.format(Locale.ROOT, " score %.2f", score))));
             source.sendSuccess(() -> line, false);
         }
-        return snapshot.candidates().size();
+        return look.trace().lines().size();
     }
 
     private static int showLog(CommandSourceStack source) throws CommandSyntaxException {
         AbstractPet pet = targetedPet(source);
-        IntentSwitchLog log = pet.getBrain().getMemory(InitMemory.INTENT_SWITCH_LOG.get()).orElse(null);
-        if (log == null) {
-            source.sendFailure(Component.literal("[chiikawa-intent] Switch log is off for this pet, use /chiikawa debug intent log on"));
-            return 0;
-        }
-        List<IntentSwitchLog.Entry> entries = log.entries();
+        List<DecisionLog.Entry> entries = pet.getMind().log().entries();
         source.sendSuccess(() -> Component.literal("[chiikawa-intent] ").append(pet.getDisplayName())
-            .append(" last " + entries.size() + " switches:"), false);
-        for (IntentSwitchLog.Entry entry : entries) {
-            String top = entry.top().stream()
-                .map(scored -> String.format(Locale.ROOT, "%s p%d %.2f", scored.errand(), scored.priority(), scored.score()))
-                .collect(Collectors.joining(", "));
-            source.sendSuccess(() -> Component.literal(" " + entry.gameTime() + ": " + name(entry.from()) + " -> "
-                + name(entry.to()) + " [" + entry.cause() + "] " + top), false);
+            .append(" last " + entries.size() + " happenings:"), false);
+        for (DecisionLog.Entry entry : entries) {
+            String text = switch (entry) {
+                case DecisionLog.Switched switched -> name(switched.from()) + " -> " + name(switched.to())
+                    + " [" + switched.cause() + "] " + switched.top().stream()
+                        .map(scored -> String.format(Locale.ROOT, "%s p%d %.2f", scored.errand(), scored.priority(), scored.score()))
+                        .collect(Collectors.joining(", "));
+                case DecisionLog.Ended ended -> name(ended.errand()) + " ended " + ended.outcome()
+                    + " after " + ended.ranTicks() + "t";
+            };
+            source.sendSuccess(() -> Component.literal(" " + entry.gameTime() + ": " + text), false);
         }
         return entries.size();
-    }
-
-    private static int setLogging(CommandSourceStack source, boolean enabled) throws CommandSyntaxException {
-        AbstractPet pet = targetedPet(source);
-        if (enabled) {
-            if (!pet.getBrain().hasMemoryValue(InitMemory.INTENT_SWITCH_LOG.get())) {
-                pet.getBrain().setMemory(InitMemory.INTENT_SWITCH_LOG.get(), new IntentSwitchLog());
-            }
-        } else {
-            pet.getBrain().eraseMemory(InitMemory.INTENT_SWITCH_LOG.get());
-        }
-        source.sendSuccess(() -> Component.literal("[chiikawa-intent] Switch log " + (enabled ? "on" : "off") + " for ")
-            .append(pet.getDisplayName()), false);
-        return 1;
     }
 
     private static int showBoard(CommandSourceStack source) throws CommandSyntaxException {

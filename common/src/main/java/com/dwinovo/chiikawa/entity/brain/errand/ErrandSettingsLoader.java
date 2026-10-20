@@ -48,7 +48,7 @@ public final class ErrandSettingsLoader extends SimpleJsonResourceReloadListener
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
         files.forEach((id, json) -> {
-            if (!ErrandIds.ALL.contains(id)) {
+            if (Errands.get(id) == null) {
                 warnings.add(LOG_PREFIX + id + " is skipped, there is no such errand");
                 return;
             }

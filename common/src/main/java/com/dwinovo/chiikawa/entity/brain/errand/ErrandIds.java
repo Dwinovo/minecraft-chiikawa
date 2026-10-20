@@ -1,7 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain.errand;
 
 import com.dwinovo.chiikawa.Constants;
-import java.util.List;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -31,11 +30,6 @@ public final class ErrandIds {
     public static final ResourceLocation CHECK_RESULTS = id("check_results");
     public static final ResourceLocation ANSWER_WHISTLE = id("answer_whistle");
     public static final ResourceLocation TAKE_PHOTO = id("take_photo");
-
-    /** Every errand, in the order above. */
-    public static final List<ResourceLocation> ALL = List.of(FOLLOW_OWNER, STAY, WANDER, PICK_UP_ITEM, HARVEST, PLANT,
-        DELIVER, WEED, PICK_MUSHROOM, MELEE, RANGED, PLAY_MUSIC, TAKE_TASK, SHOP, GIFT_OWNER, SOCIALIZE, COOPERATE,
-        TAKE_EXAM, CHECK_RESULTS, ANSWER_WHISTLE, TAKE_PHOTO);
 
     private ErrandIds() {
     }

@@ -2,9 +2,8 @@ package com.dwinovo.chiikawa.entity.brain.task.social;
 
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.brain.intent.IntentSelector;
-import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
-import com.dwinovo.chiikawa.entity.brain.intent.RunningIntent;
+import com.dwinovo.chiikawa.entity.brain.PetMind;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.social.InteractionPlan;
@@ -81,7 +80,7 @@ public class SocializeBehavior extends Behavior<AbstractPet> {
             AbstractPet partner = plan.partner();
             partner.getBrain().setMemoryWithExpiry(InitMemory.INTERACTION_RESERVATION.get(),
                 new InteractionReservation(pet, plan.partnerSide(), false), interaction.reservationTicks());
-            IntentSelector.requestReevaluate(partner);
+            PetMind.nudge(partner, "invited");
         }
         BehaviorUtils.setWalkAndLookTargetMemories(pet, plan.partner(), SPEED, interaction.approachDistance());
     }
@@ -133,7 +132,7 @@ public class SocializeBehavior extends Behavior<AbstractPet> {
                 .filter(reservation -> reservation.heldBy(pet))
                 .ifPresent(reservation -> {
                     partner.getBrain().eraseMemory(InitMemory.INTERACTION_RESERVATION.get());
-                    IntentSelector.requestReevaluate(partner);
+                    PetMind.nudge(partner, "released");
                 });
             SocialRules.rememberPlayed(plan.id(), plan.interaction(), pet, partner, gameTime);
         }
@@ -195,9 +194,6 @@ public class SocializeBehavior extends Behavior<AbstractPet> {
     /** An idle partner has to have stopped and turned to play along; a musician just carries on. */
     private static boolean partnerReady(InteractionPlan plan) {
         return plan.interaction().partnerState() != PetInteraction.PartnerState.IDLE
-            || plan.partner().getBrain().getMemory(InitMemory.CURRENT_INTENT.get())
-                .map(RunningIntent::id)
-                .filter(PetIntents.COOPERATE::equals)
-                .isPresent();
+            || plan.partner().getMind().errands().isOn(ErrandIds.COOPERATE);
     }
 }

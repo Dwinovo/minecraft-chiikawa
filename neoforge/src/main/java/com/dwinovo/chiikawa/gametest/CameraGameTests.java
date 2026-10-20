@@ -15,7 +15,7 @@ import com.dwinovo.chiikawa.camera.PhotoScout;
 import com.dwinovo.chiikawa.data.ShopCatalogData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
-import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
 import com.dwinovo.chiikawa.init.InitActivity;
 import com.dwinovo.chiikawa.init.InitBlocks;
@@ -412,8 +412,7 @@ public final class CameraGameTests {
         helper.onEachTick(() -> {
             long now = helper.getLevel().getGameTime();
             boolean walking = pet.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET)
-                && pet.getBrain().getMemory(InitMemory.CURRENT_INTENT.get())
-                    .filter(running -> running.id().equals(PetIntents.TAKE_PHOTO)).isPresent();
+                && pet.getIntent().filter(ErrandIds.TAKE_PHOTO::equals).isPresent();
             if (lostAt[0] < 0 && walking && pet.distanceTo(friend) > 6.0F) {
                 friend.discard();
                 lostAt[0] = now;
