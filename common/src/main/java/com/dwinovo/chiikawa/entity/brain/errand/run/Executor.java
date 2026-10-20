@@ -6,7 +6,9 @@ import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
 import com.dwinovo.chiikawa.entity.brain.errand.Plan;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
+import com.dwinovo.chiikawa.entity.brain.errand.overlay.Overlays;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
+import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
@@ -24,12 +26,26 @@ import org.jetbrains.annotations.Nullable;
  * ends once, in this order: the step lets go of what it holds, the routine lets go of what the errand holds
  * across its steps, the walk, gaze and path are cleared, the rest is written, the end is logged, and what the
  * player is told is cleared with it.
+ *
+ * <p>Beside the step, the {@link Overlay}s the errand's settings name are ticked, with an {@link Aside} that says and
+ * glances but cannot walk.
  */
 public final class Executor {
     private final Handle handle;
     private final Projection projection;
     private final RestLedger rests;
     private final DecisionLog log;
+    private final Aside aside = new Aside() {
+        @Override
+        public void say(VoiceMoment moment) {
+            handle.say(moment);
+        }
+
+        @Override
+        public void glance(Entity target, int ticks) {
+            Executor.this.glance(target, ticks);
+        }
+    };
 
     @Nullable
     private Running running;
@@ -113,7 +129,7 @@ public final class Executor {
         return running == null;
     }
 
-    /** One tick of the errand: the time limit, an end that was asked for, then the step. */
+    /** One tick of the errand: the time limit, an end that was asked for, then the step and the overlays beside it. */
     public void tick(long now) {
         if (running == null) {
             return;
@@ -123,6 +139,7 @@ public final class Executor {
         }
         if (!applyPending(now)) {
             apply(step.tick(handle), now);
+            tickOverlays();
         }
         project();
     }
@@ -142,6 +159,13 @@ public final class Executor {
         if (step != null) {
             apply(step.onMessage(handle, message), now);
             project();
+        }
+    }
+
+    /** Ticks the overlays of the errand the pet is still on, if the step did not just end it. */
+    private void tickOverlays() {
+        if (running != null) {
+            running.settings().overlays().forEach(id -> Overlays.get(id).ifPresent(overlay -> overlay.tick(aside)));
         }
     }
 
