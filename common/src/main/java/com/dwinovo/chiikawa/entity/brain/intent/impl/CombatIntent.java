@@ -19,8 +19,6 @@ import net.minecraft.world.entity.schedule.Activity;
  * target back within reach, the pet does not flip between chasing and returning.
  */
 public final class CombatIntent implements PetIntent {
-    private static final float SCORE = 0.8F;
-
     private final ResourceLocation id;
     private final Supplier<Activity> activity;
     private final boolean needsArrows;
@@ -64,11 +62,6 @@ public final class CombatIntent implements PetIntent {
     @Override
     public Optional<GlobalPos> destination(IntentContext ctx) {
         return ctx.targets().attackTarget();
-    }
-
-    @Override
-    public float score(IntentContext ctx) {
-        return SCORE;
     }
 
     private IntentCheck checkArmed(IntentContext ctx) {
