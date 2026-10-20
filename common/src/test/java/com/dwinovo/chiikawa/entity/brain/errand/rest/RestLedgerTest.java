@@ -180,7 +180,17 @@ class RestLedgerTest {
 
     @Test
     void aSourceNobodyRegisteredRestsForNothingAndIsSaidToOnce() {
-        // The music retry is no source any case here registers, so nothing left behind answers for it.
+        // Whichever errand registered the music retry by loading the errands, here nobody has.
+        Optional<RestSources.Resolver> registered = RestSources.resolver(RestSources.MUSIC_RETRY);
+        RestSources.forget(RestSources.MUSIC_RETRY);
+        try {
+            sourceNobodyRegisteredRestsForNothing();
+        } finally {
+            registered.ifPresent(resolver -> RestSources.register(RestSources.MUSIC_RETRY, resolver));
+        }
+    }
+
+    private void sourceNobodyRegisteredRestsForNothing() {
         ErrandSettings<String> missing = TestRests.settings(1200, new ErrandSettings.Rests(RestSpec.ticks(0),
             RestSpec.from(RestSources.MUSIC_RETRY), RestSpec.ticks(0), Map.of()));
         RestLedger sourced = ledger(missing);

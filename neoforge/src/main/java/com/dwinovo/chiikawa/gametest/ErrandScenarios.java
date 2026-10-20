@@ -1,8 +1,10 @@
 package com.dwinovo.chiikawa.gametest;
 
+import static com.dwinovo.chiikawa.gametest.GameTestKit.addSong;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.carries;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.ownedPet;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.readySong;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 
 import com.dwinovo.chiikawa.block.DeskBooking;
@@ -16,9 +18,15 @@ import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.init.InitBlocks;
+import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMemory;
+import com.dwinovo.chiikawa.music.MusicBoxSelection;
+import com.dwinovo.chiikawa.music.MusicTrackView;
+import com.dwinovo.chiikawa.music.PlaybackMode;
+import com.dwinovo.chiikawa.music.ServerMusicLibrary;
+import com.dwinovo.chiikawa.music.ServerMusicSystem;
 import com.dwinovo.chiikawa.photo.PhotoSystem;
 import com.dwinovo.chiikawa.qualification.ExamStage;
 import com.dwinovo.chiikawa.qualification.Licence;
@@ -38,6 +46,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Zombie;
@@ -85,6 +94,9 @@ final class ErrandScenarios {
     private static final BlockPos ARCHER = new BlockPos(3, STAND, 4);
     private static final BlockPos TARGET = new BlockPos(13, STAND, 4);
     private static final int ARROWS = 16;
+    /** A song of silence, short enough to be played to its end in a case that waits for one. */
+    private static final String SONG = "chiikawa_gametest_contract";
+    private static final int SONG_SECONDS = 1;
 
     /**
      * A pet set up to be on one errand.
@@ -120,7 +132,8 @@ final class ErrandScenarios {
         Map.entry(ErrandIds.WEED, ErrandScenarios::weed),
         Map.entry(ErrandIds.PICK_MUSHROOM, ErrandScenarios::pickMushroom),
         Map.entry(ErrandIds.MELEE, ErrandScenarios::melee),
-        Map.entry(ErrandIds.RANGED, ErrandScenarios::ranged));
+        Map.entry(ErrandIds.RANGED, ErrandScenarios::ranged),
+        Map.entry(ErrandIds.PLAY_MUSIC, ErrandScenarios::playMusic));
 
     private ErrandScenarios() {
     }
@@ -437,6 +450,28 @@ final class ErrandScenarios {
             return left == ARROWS ? Optional.empty()
                 : Optional.of((ARROWS - left) + " arrows are gone from the quiver, though the pet was cut short before it loosed one");
         });
+    }
+
+    /**
+     * Hachiware with a music box set to play the one song over and over, the song written to the server's music folder the
+     * way a player adds one and imported in its own time: the box is put in the pet's hand once the song is ready. However
+     * it is cut short, no stream of the song is left going for the pet.
+     */
+    private static Scenario playMusic(GameTestHelper helper) {
+        ServerMusicLibrary library = ServerMusicSystem.library(helper.getLevel().getServer());
+        addSong(library, SONG, SONG_SECONDS);
+        AbstractPet pet = GameTestKit.owned(helper, InitEntity.HACHIWARE_PET.get(), new BlockPos(8, STAND, 8));
+        boolean[] given = {false};
+        helper.onEachTick(() -> readySong(library, SONG).filter(track -> !given[0]).ifPresent(track -> {
+            given[0] = true;
+            ItemStack box = new ItemStack(InitItems.MUSIC_BOX.get());
+            box.set(InitDataComponents.MUSIC_BOX_SELECTION.get(), new MusicBoxSelection(track.trackId(), SONG, 1));
+            box.set(InitDataComponents.MUSIC_BOX_MODE.get(), PlaybackMode.REPEAT_ONE);
+            pet.setItemSlot(EquipmentSlot.MAINHAND, box);
+        }));
+        return new Scenario(pet, 1, ran -> readySong(library, SONG).map(MusicTrackView::trackId)
+            .filter(track -> ServerMusicSystem.streams(helper.getLevel().getServer()).isPlaying(pet, track))
+            .map(track -> "the song is still being streamed for the pet"));
     }
 
     /** A zombie that stands still and has one hit left in it. */

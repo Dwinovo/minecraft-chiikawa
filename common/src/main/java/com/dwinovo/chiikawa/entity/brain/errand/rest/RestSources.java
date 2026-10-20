@@ -71,6 +71,11 @@ public final class RestSources {
         RESOLVERS.put(name, resolver);
     }
 
+    /** Takes what a name resolves to away again, for a case that wants a name nobody has registered. */
+    static void forget(ResourceLocation name) {
+        RESOLVERS.remove(name);
+    }
+
     /** @return what the name resolves to, or nothing while no errand has registered it */
     public static Optional<Resolver> resolver(ResourceLocation name) {
         return Optional.ofNullable(RESOLVERS.get(name));

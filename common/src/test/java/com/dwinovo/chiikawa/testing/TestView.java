@@ -11,6 +11,9 @@ import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
+import com.dwinovo.chiikawa.music.MusicBoxSelection;
+import com.dwinovo.chiikawa.music.Playable;
+import com.dwinovo.chiikawa.music.PlaybackMode;
 import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.task.PetTask;
 import java.util.HashMap;
@@ -41,8 +44,7 @@ public final class TestView implements PetView {
     private boolean eager;
     private boolean attackCoolingDown;
     private boolean hasArrows;
-    private boolean hasPlayableSelection;
-    private boolean playingMusic;
+    private Optional<Playable> playableSelection = Optional.empty();
     private Optional<PetExams.Summons> examToSit = Optional.empty();
     private Optional<GlobalPos> resultsDesk = Optional.empty();
     private Optional<GlobalPos> whistleHeard = Optional.empty();
@@ -133,12 +135,7 @@ public final class TestView implements PetView {
 
     /** The held music box selects a song the pet would play now. */
     public TestView withSong() {
-        this.hasPlayableSelection = true;
-        return this;
-    }
-
-    public TestView performing() {
-        this.playingMusic = true;
+        this.playableSelection = Optional.of(new Playable(new MusicBoxSelection("song", "Song", 1), PlaybackMode.ONCE, false));
         return this;
     }
 
@@ -294,13 +291,8 @@ public final class TestView implements PetView {
     }
 
     @Override
-    public boolean hasPlayableSelection() {
-        return hasPlayableSelection;
-    }
-
-    @Override
-    public boolean playingMusic() {
-        return playingMusic;
+    public Optional<Playable> playableSelection() {
+        return playableSelection;
     }
 
     @Override

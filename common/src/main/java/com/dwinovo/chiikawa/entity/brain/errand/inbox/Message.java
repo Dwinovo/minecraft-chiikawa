@@ -160,7 +160,8 @@ public sealed interface Message {
     }
 
     /**
-     * The song the pet was playing has stopped.
+     * The song the pet was playing has run its course. The stream manager tells it of no stop the pet asked for
+     * itself, which the pet knows of already.
      *
      * @param reason why, as a short key for the log
      */

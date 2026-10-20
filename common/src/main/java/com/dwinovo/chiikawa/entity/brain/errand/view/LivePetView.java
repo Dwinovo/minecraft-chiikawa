@@ -1,6 +1,5 @@
 package com.dwinovo.chiikawa.entity.brain.errand.view;
 
-import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.block.ExamDeskBlockEntity;
 import com.dwinovo.chiikawa.camera.PhotoOutlook;
 import com.dwinovo.chiikawa.camera.PhotoScout;
@@ -11,15 +10,18 @@ import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
-import com.dwinovo.chiikawa.entity.brain.task.musician.PlayMusicBehavior;
 import com.dwinovo.chiikawa.gifting.GiftPool;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitMemory;
+import com.dwinovo.chiikawa.music.Playable;
+import com.dwinovo.chiikawa.music.PlaybackMode;
+import com.dwinovo.chiikawa.music.ServerMusicSystem;
 import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.shop.ShopBasket;
 import com.dwinovo.chiikawa.shop.Wallet;
 import com.dwinovo.chiikawa.social.InteractionPlan;
 import com.dwinovo.chiikawa.task.PetTask;
+import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.dwinovo.chiikawa.utils.Utils;
 import com.dwinovo.chiikawa.whistle.WhistleHeard;
 import java.util.Optional;
@@ -59,8 +61,7 @@ public final class LivePetView implements PetView {
     private final Lazy<Boolean> presentToGive;
     private final Lazy<Boolean> attackCoolingDown;
     private final Lazy<Boolean> hasArrows;
-    private final Lazy<Boolean> hasPlayableSelection;
-    private final Lazy<Boolean> playingMusic;
+    private final Lazy<Optional<Playable>> playableSelection;
     private final Lazy<Optional<PetExams.Summons>> examToSit;
     private final Lazy<Optional<GlobalPos>> resultsDesk;
     private final Lazy<Boolean> seatedAtExam;
@@ -93,8 +94,7 @@ public final class LivePetView implements PetView {
         this.presentToGive = new Lazy<>(() -> pet.getOwner() instanceof Player && !GiftPool.of(pet).isEmpty());
         this.attackCoolingDown = new Lazy<>(() -> pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_COOLING_DOWN));
         this.hasArrows = new Lazy<>(() -> !Utils.getArrow(pet).isEmpty());
-        this.hasPlayableSelection = new Lazy<>(() -> PlayMusicBehavior.playableSelection(pet).isPresent());
-        this.playingMusic = new Lazy<>(() -> pet.getActivity() == PetActivity.PLAY_GUITAR);
+        this.playableSelection = new Lazy<>(this::findPlayableSelection);
         this.examToSit = new Lazy<>(() -> PetExams.toSit(pet)
             .filter(summons -> ExamDeskBlockEntity.at(level, summons.desk()).isPresent()));
         this.resultsDesk = new Lazy<>(() -> PetExams.resultsDesk(pet)
@@ -202,13 +202,8 @@ public final class LivePetView implements PetView {
     }
 
     @Override
-    public boolean hasPlayableSelection() {
-        return hasPlayableSelection.get();
-    }
-
-    @Override
-    public boolean playingMusic() {
-        return playingMusic.get();
+    public Optional<Playable> playableSelection() {
+        return playableSelection.get();
     }
 
     @Override
@@ -270,5 +265,17 @@ public final class LivePetView implements PetView {
             .filter(shop -> ShopBasket.wantsAnything(personality(), shop.catalog(),
                 Wallet.count(pet.getBackpack()), ShopBasket.carriedIn(pet.getBackpack())))
             .map(shop -> GlobalPos.of(level.dimension(), shop.getBlockPos()));
+    }
+
+    /**
+     * The song on the held music box, as the pet would play on from it: asked every time the pet decides what to do, so
+     * it only reads. What it last started is the pet's own memory; a slip that counts seconds of music is a street
+     * performance.
+     */
+    private Optional<Playable> findPlayableSelection() {
+        boolean onSlip = pet.getTask().filter(task -> task.counter().equals(PetWorkCounters.PLAY_MUSIC_SECOND)).isPresent();
+        return Playable.of(Playable.held(pet.getMainHandItem()), PlaybackMode.get(pet.getMainHandItem()),
+            pet.getBrain().getMemory(InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get()), onSlip,
+            track -> ServerMusicSystem.library(pet.level().getServer()).getTrack(track).isPresent());
     }
 }

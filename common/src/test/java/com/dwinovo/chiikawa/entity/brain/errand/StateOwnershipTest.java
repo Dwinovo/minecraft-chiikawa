@@ -52,7 +52,7 @@ class StateOwnershipTest {
     private static final List<Rule> RULES = List.of(
         new Rule("the pose", Pattern.compile("\\bsetActivity\\("),
             Set.of(PET),
-            Set.of(BEHAVIORS + "musician/PlayMusicBehavior.java", "music/ServerMusicStreamManager.java")),
+            Set.of()),
         new Rule("the scene", Pattern.compile("\\bsetPerformance\\("),
             Set.of(PET),
             Set.of("social/PartPlayer.java")),
@@ -63,16 +63,19 @@ class StateOwnershipTest {
             Pattern.compile(WRITE + "MemoryModuleType\\.(?:WALK_TARGET|LOOK_TARGET|PATH)\\b"
                 + "|\\bsetWalkAndLookTargetMemories\\(|\\blookAt(?:Entity|EachOther|Entities)\\("),
             Set.of(HANDLE),
-            Set.of(PET, BEHAVIORS + "idle/GlanceBehavior.java", BEHAVIORS + "musician/PlayMusicBehavior.java",
-                BEHAVIORS + "social/CooperateBehavior.java", BEHAVIORS + "social/SocializeBehavior.java",
-                BEHAVIORS + "tameable/AnchorLeashBehavior.java", BEHAVIORS + "tameable/AnswerWhistleBehavior.java",
-                BEHAVIORS + "tameable/FollowOwnerBehavior.java", BEHAVIORS + "tameable/RandomWalkTask.java",
-                BEHAVIORS + "tameable/SitBehavior.java")),
+            Set.of(PET, BEHAVIORS + "idle/GlanceBehavior.java", BEHAVIORS + "social/CooperateBehavior.java",
+                BEHAVIORS + "social/SocializeBehavior.java", BEHAVIORS + "tameable/AnchorLeashBehavior.java",
+                BEHAVIORS + "tameable/AnswerWhistleBehavior.java", BEHAVIORS + "tameable/FollowOwnerBehavior.java",
+                BEHAVIORS + "tameable/RandomWalkTask.java", BEHAVIORS + "tameable/SitBehavior.java")),
         new Rule("a rest",
             Pattern.compile(WRITE + "InitMemory\\.(?:PHOTO_COOLDOWN|GIFT_COOLDOWN|SHOP_COOLDOWN|TAKE_TASK_COOLDOWN"
                 + "|MUSICIAN_RESTING|SOCIAL_COOLDOWNS|ERRAND_RESTS|SUBJECT_RESTS)\\b"),
             Set.of(RESTS),
-            Set.of(BEHAVIORS + "musician/PlayMusicBehavior.java", "social/SocialRules.java")),
+            Set.of("social/SocialRules.java")),
+        new Rule("what the musician has played",
+            Pattern.compile(WRITE + "InitMemory\\.(?:MUSICIAN_LAST_MUSIC_SIGNATURE|MUSICIAN_NOW_PLAYING)\\b"),
+            Set.of(STEPS + "Busk.java"),
+            Set.of()),
         new Rule("the bow in use", Pattern.compile("\\b(?:pet|entity)\\.(?:start|stop)UsingItem\\("),
             Set.of(HANDLE),
             Set.of()),
@@ -94,8 +97,7 @@ class StateOwnershipTest {
     private static final Pattern NOT_FOR_ERRANDS = Pattern.compile("\\bgetBrain\\(\\)|\\bgetRandom\\(\\)|\\bInitMemory\\b|\\bsetMemory\\b");
     private static final String ERRANDS = "entity/brain/errand/impl/";
     /** The errands still carried out by an old activity, which reach into the pet as the behaviors did. */
-    private static final Set<String> LEGACY_ERRANDS = Set.of(ERRANDS + "AnswerWhistleErrand.java",
-        ERRANDS + "PlayMusicErrand.java");
+    private static final Set<String> LEGACY_ERRANDS = Set.of(ERRANDS + "AnswerWhistleErrand.java");
 
     @Test
     void eachPieceOfStateIsWrittenByItsOwnerAndTheLegacyWritersOnly() {

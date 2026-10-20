@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
+import com.dwinovo.chiikawa.music.Playable;
 import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.task.PetTask;
 import java.util.Optional;
@@ -76,11 +77,8 @@ public interface PetView {
     /** @return whether the pet carries arrows */
     boolean hasArrows();
 
-    /** @return whether the held music box selects a song the pet would play now */
-    boolean hasPlayableSelection();
-
-    /** @return whether the pet is performing */
-    boolean playingMusic();
+    /** @return the song the held music box selects, if the pet would play it now */
+    Optional<Playable> playableSelection();
 
     /** @return the exam the pet is signed up for and the desk it is to sit it at, while it can still sit it there */
     Optional<PetExams.Summons> examToSit();
