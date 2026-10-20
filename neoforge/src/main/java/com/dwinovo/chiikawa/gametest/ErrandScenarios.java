@@ -7,6 +7,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 
 import com.dwinovo.chiikawa.block.DeskBooking;
 import com.dwinovo.chiikawa.block.ExamDeskBlockEntity;
+import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
 import com.dwinovo.chiikawa.camera.PhotoResults;
 import com.dwinovo.chiikawa.camera.PhotoScout;
 import com.dwinovo.chiikawa.data.QualificationData;
@@ -22,6 +23,7 @@ import com.dwinovo.chiikawa.photo.PhotoSystem;
 import com.dwinovo.chiikawa.qualification.ExamStage;
 import com.dwinovo.chiikawa.qualification.Licence;
 import com.dwinovo.chiikawa.shop.Wallet;
+import com.dwinovo.chiikawa.task.BoardSlot;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -55,6 +57,8 @@ final class ErrandScenarios {
     private static final int COOKIES = 3;
     /** Enough for anything on the list, so what the pet does at the counter is about wanting rather than affording. */
     private static final int WAGES = 8;
+    /** How far along the floor a pet is from the board it is to take a slip from: a walk of many ticks. */
+    private static final int BOARD_AWAY = 7;
     /** The step of a photo at which the shutter goes: after the walk and the aim. */
     private static final int SHUTTER_STEP = 2;
 
@@ -83,6 +87,7 @@ final class ErrandScenarios {
         ErrandIds.TAKE_PHOTO, ErrandScenarios::takePhoto,
         ErrandIds.GIFT_OWNER, ErrandScenarios::giftOwner,
         ErrandIds.SHOP, ErrandScenarios::shop,
+        ErrandIds.TAKE_TASK, ErrandScenarios::takeTask,
         ErrandIds.TAKE_EXAM, ErrandScenarios::takeExam,
         ErrandIds.CHECK_RESULTS, ErrandScenarios::checkResults);
 
@@ -167,6 +172,31 @@ final class ErrandScenarios {
             }
             if (goods && !paid) {
                 return Optional.of("the pet has goods it did not pay for");
+            }
+            return Optional.empty();
+        });
+    }
+
+    /**
+     * A farmer with a hoe and a labor board some blocks off that has a weeding slip first: a walk of many ticks to the board.
+     * The pet holds the slip on the board or has taken it, and the board and the pet agree about it: a slip is up on the
+     * board or on the pet, never both and never neither.
+     */
+    private static Scenario takeTask(GameTestHelper helper) {
+        BlockPos at = BoardGameTests.weedingBoard(helper);
+        helper.setBlock(at, InitBlocks.LABOR_BOARD.get());
+        LaborBoardBlockEntity board = (LaborBoardBlockEntity) helper.getBlockEntity(at);
+        BlockPos from = new BlockPos(at.getX() >= BOARD_AWAY + 1 ? at.getX() - BOARD_AWAY : at.getX() + BOARD_AWAY, STAND, at.getZ());
+        AbstractPet pet = GameTestKit.holding(GameTestKit.worker(helper, from), Items.WOODEN_HOE);
+        return new Scenario(pet, 3, ran -> {
+            if (board.isReservedBy(pet)) {
+                return Optional.of("the pet still holds a slip on the board");
+            }
+            long taken = board.today().stream().filter(BoardSlot::claimed).count();
+            long carried = pet.getTask().isPresent() ? 1 : 0;
+            if (taken != carried) {
+                return Optional.of(taken > carried ? "a slip is marked taken on the board, though the pet carries none"
+                    : "the pet carries a slip the board does not have marked taken");
             }
             return Optional.empty();
         });

@@ -68,13 +68,12 @@ class StateOwnershipTest {
                 BEHAVIORS + "social/CooperateBehavior.java", BEHAVIORS + "social/SocializeBehavior.java",
                 BEHAVIORS + "tameable/AnchorLeashBehavior.java", BEHAVIORS + "tameable/AnswerWhistleBehavior.java",
                 BEHAVIORS + "tameable/FollowOwnerBehavior.java", BEHAVIORS + "tameable/RandomWalkTask.java",
-                BEHAVIORS + "tameable/SitBehavior.java", BEHAVIORS + "tameable/TakeTaskBehavior.java")),
+                BEHAVIORS + "tameable/SitBehavior.java")),
         new Rule("a rest",
             Pattern.compile(WRITE + "InitMemory\\.(?:PHOTO_COOLDOWN|GIFT_COOLDOWN|SHOP_COOLDOWN|TAKE_TASK_COOLDOWN"
                 + "|MUSICIAN_RESTING|SOCIAL_COOLDOWNS|ERRAND_RESTS|SUBJECT_RESTS)\\b"),
             Set.of(RESTS),
-            Set.of(BEHAVIORS + "musician/PlayMusicBehavior.java", BEHAVIORS + "tameable/TakeTaskBehavior.java",
-                "social/SocialRules.java")),
+            Set.of(BEHAVIORS + "musician/PlayMusicBehavior.java", "social/SocialRules.java")),
         new Rule("the present in the paws", Pattern.compile("\\bsetPendingGift\\("),
             Set.of(PET, STEPS + "TakePresent.java", STEPS + "HandOver.java"),
             Set.of()));
