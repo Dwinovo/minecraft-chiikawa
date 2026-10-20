@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.camera.CameraSettings;
 import com.dwinovo.chiikawa.camera.PhotoDelivery;
 import com.dwinovo.chiikawa.camera.PhotoPlan;
+import com.dwinovo.chiikawa.camera.PhotoResults;
 import com.dwinovo.chiikawa.camera.PhotoScout;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Cue;
@@ -22,7 +23,9 @@ import net.minecraft.server.level.ServerPlayer;
  * a pet, is cued to turn to the camera and strike a pose of its own. Candid, nobody says a word and a pet being
  * photographed is left entirely alone: it goes on with what it was doing, which is what the photo is of.
  *
- * <p>An action of one tick, so it is never cut half way.
+ * <p>An action of one tick, so it is never cut half way. It reports {@link PhotoResults#TAKEN}, so that the
+ * wait for the picture is rested from the shutter: a pet cut short in the next tick does not set off for
+ * another photo while the first is still on its way.
  */
 public final class Shutter implements Step {
     /** The pose whoever is photographed strikes. */
@@ -61,6 +64,8 @@ public final class Shutter implements Step {
             PhotoSystem.of(level.getServer()).request(owner, pet, camera,
                 new PhotoDelivery(pet, photo.camera(), photo.kind(), photo.name(), PhotoScout.biomeOf(pet)));
         }
+        // From here the picture is being waited for, whatever becomes of the pet: it rests for the upload.
+        handle.report(PhotoResults.TAKEN);
         return StepStatus.DONE;
     }
 

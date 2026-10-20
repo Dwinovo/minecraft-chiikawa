@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.SharedConstants;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -26,9 +26,10 @@ import org.junit.jupiter.api.Test;
 class ErrandSettingsTest {
     private static final String PHOTO = """
         { "priority": 40, "score": 0.45, "max_ticks": 1200, "yields_to": [], "overlays": [],
-          "rests": { "done": { "from": "chiikawa:photo_upload_wait" }, "gave_up": { "from": "chiikawa:camera_retry" },
+          "rests": { "done": 0, "gave_up": { "from": "chiikawa:camera_retry" },
                      "interrupted": 0,
-                     "reports": { "stored": { "from": "chiikawa:camera_cooldown" }, "failed": { "from": "chiikawa:camera_retry" } } },
+                     "reports": { "taken": { "from": "chiikawa:photo_upload_wait" }, "stored": { "from": "chiikawa:camera_cooldown" },
+                                  "failed": { "from": "chiikawa:camera_retry" } } },
           "tuning": { "speed": 0.7, "stand_back": 4, "hold_ticks": 20, "look_back_ticks": 60, "view_distance": 16.0,
                       "max_walk_ticks": 400, "no_way_ticks": 100 } }""";
 
@@ -52,11 +53,11 @@ class ErrandSettingsTest {
         assertEquals(40, settings.priority());
         assertEquals(0.45F, settings.score());
         assertEquals(1200, settings.maxTicks());
-        assertEquals(RestSpec.from(RestSources.PHOTO_UPLOAD_WAIT), settings.rests().done());
+        assertEquals(RestSpec.NONE, settings.rests().done());
         assertEquals(RestSpec.from(RestSources.CAMERA_RETRY), settings.rests().gaveUp());
         assertEquals(RestSpec.NONE, settings.rests().interrupted());
-        assertEquals(Map.of("stored", RestSpec.from(RestSources.CAMERA_COOLDOWN), "failed", RestSpec.from(RestSources.CAMERA_RETRY)),
-            settings.rests().reports());
+        assertEquals(Map.of("taken", RestSpec.from(RestSources.PHOTO_UPLOAD_WAIT), "stored", RestSpec.from(RestSources.CAMERA_COOLDOWN),
+            "failed", RestSpec.from(RestSources.CAMERA_RETRY)), settings.rests().reports());
         assertEquals(new ErrandTunings.TakePhoto(0.7F, 4, 20, 60, 16.0, 400, 100), settings.tuning());
     }
 
@@ -123,7 +124,7 @@ class ErrandSettingsTest {
 
     @Test
     void everyNamedSourceCanBePointedAt() {
-        for (ResourceLocation name : RestSources.names()) {
+        for (Identifier name : RestSources.names()) {
             assertEquals(RestSpec.from(name), rest("{ \"from\": \"" + name + "\" }"));
         }
         assertEquals(6, RestSources.names().size());
@@ -165,7 +166,7 @@ class ErrandSettingsTest {
 
     @Test
     void anErrandYieldsOnlyToAnotherOfItsOwnPriority() {
-        Map<ResourceLocation, ErrandSettings<?>> all = decoded(Map.of(ErrandIds.HARVEST, HARVEST, ErrandIds.PLANT, PLANT));
+        Map<Identifier, ErrandSettings<?>> all = decoded(Map.of(ErrandIds.HARVEST, HARVEST, ErrandIds.PLANT, PLANT));
 
         assertEquals(Optional.empty(), all.get(ErrandIds.PLANT).problemAmong(ErrandIds.PLANT, all));
         assertEquals(Optional.empty(), all.get(ErrandIds.HARVEST).problemAmong(ErrandIds.HARVEST, all));
@@ -173,7 +174,7 @@ class ErrandSettingsTest {
 
     @Test
     void anErrandThatYieldsToOneOfAnotherPriorityOrToItselfOrToNoneIsFlagged() {
-        Map<ResourceLocation, ErrandSettings<?>> all = decoded(Map.of(
+        Map<Identifier, ErrandSettings<?>> all = decoded(Map.of(
             ErrandIds.HARVEST, HARVEST.replace("\"priority\": 50", "\"priority\": 30"), ErrandIds.PLANT, PLANT));
         assertTrue(all.get(ErrandIds.PLANT).problemAmong(ErrandIds.PLANT, all).isPresent(), "another priority");
 
@@ -210,8 +211,8 @@ class ErrandSettingsTest {
 
     @Test
     void aFileNamedForNoErrandIsWarnedAboutAndSkipped() {
-        ResourceLocation stranger = ResourceLocation.fromNamespaceAndPath("chiikawa", "sulk");
-        Map<ResourceLocation, JsonElement> files = files(Map.of(ErrandIds.HARVEST, HARVEST));
+        Identifier stranger = Identifier.fromNamespaceAndPath("chiikawa", "sulk");
+        Map<Identifier, JsonElement> files = files(Map.of(ErrandIds.HARVEST, HARVEST));
         files.put(stranger, JsonParser.parseString(HARVEST));
 
         Loaded loaded = ErrandSettingsLoader.load(files);
@@ -224,7 +225,7 @@ class ErrandSettingsTest {
 
     @Test
     void anErrandWithNoSettingsIsOff() {
-        Map<ResourceLocation, ErrandSettings<?>> before = ErrandSettings.all();
+        Map<Identifier, ErrandSettings<?>> before = ErrandSettings.all();
         try {
             ErrandSettings.replaceAll(Map.of());
 
@@ -245,19 +246,19 @@ class ErrandSettingsTest {
         return RestSpec.CODEC.encodeStart(JsonOps.INSTANCE, spec).getOrThrow().toString();
     }
 
-    private static com.mojang.serialization.DataResult<? extends ErrandSettings<?>> parse(ResourceLocation errand, String json) {
+    private static com.mojang.serialization.DataResult<? extends ErrandSettings<?>> parse(Identifier errand, String json) {
         Codec<ErrandSettings<?>> codec = ErrandSettings.codecOf(errand);
         return codec.parse(JsonOps.INSTANCE, JsonParser.parseString(json));
     }
 
-    private static Map<ResourceLocation, ErrandSettings<?>> decoded(Map<ResourceLocation, String> json) {
-        Map<ResourceLocation, ErrandSettings<?>> all = new HashMap<>();
+    private static Map<Identifier, ErrandSettings<?>> decoded(Map<Identifier, String> json) {
+        Map<Identifier, ErrandSettings<?>> all = new HashMap<>();
         json.forEach((errand, text) -> all.put(errand, parse(errand, text).getOrThrow()));
         return all;
     }
 
-    private static Map<ResourceLocation, JsonElement> files(Map<ResourceLocation, String> json) {
-        Map<ResourceLocation, JsonElement> files = new HashMap<>();
+    private static Map<Identifier, JsonElement> files(Map<Identifier, String> json) {
+        Map<Identifier, JsonElement> files = new HashMap<>();
         json.forEach((errand, text) -> files.put(errand, JsonParser.parseString(text)));
         return files;
     }
