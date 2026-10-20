@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.init;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.SubjectRests;
+import com.dwinovo.chiikawa.entity.brain.sensor.FarmSights;
 import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.social.InteractionPlan;
 import com.dwinovo.chiikawa.social.SocialCooldowns;
@@ -53,6 +54,17 @@ public final class InitMemory {
             BuiltInRegistries.MEMORY_MODULE_TYPE,
             ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "mushroom_pos"),
             () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC))
+        );
+
+    /**
+     * The blocks of work the farmer sensor saw after the one in each of the five memories above, which is the one it
+     * chose; see {@link FarmSights}. Not saved: the sensor sees them again when the pet is back.
+     */
+    public static final Supplier<MemoryModuleType<FarmSights>> FARM_SIGHTS =
+        Services.REGISTRY.<MemoryModuleType<FarmSights>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "farm_sights"),
+            () -> new MemoryModuleType<>(Optional.empty())
         );
 
     public static final Supplier<MemoryModuleType<net.minecraft.world.entity.item.ItemEntity>> PICKABLE_ITEM =
