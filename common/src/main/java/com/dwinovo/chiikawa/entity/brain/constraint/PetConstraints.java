@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.constraint;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
-import com.dwinovo.chiikawa.entity.brain.intent.IntentCategory;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import java.util.Optional;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.world.entity.LivingEntity;
@@ -88,17 +88,17 @@ public final class PetConstraints {
     /**
      * @param pet the pet
      * @param ownership the pet's ownership
-     * @param category an intent category
-     * @return whether the pet's directive permits intents of {@code category}
+     * @param category an errand category
+     * @return whether the pet's directive permits errands of {@code category}
      */
-    public static boolean allows(AbstractPet pet, PetOwnership ownership, IntentCategory category) {
+    public static boolean allows(AbstractPet pet, PetOwnership ownership, ErrandCategory category) {
         return allows(pet.getPetDirective(), ownership, category);
     }
 
     /**
      * Pure permission table. Wild pets ignore the directive.
      */
-    static boolean allows(PetDirective directive, PetOwnership ownership, IntentCategory category) {
+    static boolean allows(PetDirective directive, PetOwnership ownership, ErrandCategory category) {
         boolean wild = ownership instanceof PetOwnership.Wild;
         return switch (category) {
             case FOLLOW_OWNER -> !wild && directive == PetDirective.FOLLOW;

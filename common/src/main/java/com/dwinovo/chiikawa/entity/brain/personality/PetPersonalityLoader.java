@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.personality;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.entity.brain.intent.PetIntents;
+import com.dwinovo.chiikawa.entity.brain.errand.Errands;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
@@ -52,7 +52,7 @@ public final class PetPersonalityLoader extends SimpleJsonResourceReloadListener
             .ifSuccess(personality -> {
                 personalities.put(entityId, personality);
                 personality.intentIds().stream()
-                    .filter(intent -> PetIntents.get(intent) == null)
+                    .filter(intent -> Errands.get(intent) == null)
                     .sorted()
                     .forEach(intent -> warnings.add(LOG_PREFIX + entityId + " weighs unknown intent " + intent));
             })

@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.personality;
 
 import com.dwinovo.chiikawa.anim.state.PetReaction;
-import com.dwinovo.chiikawa.entity.brain.intent.DayPhase;
+import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.HashSet;
@@ -33,7 +33,7 @@ import net.minecraft.world.item.ItemStack;
  * @param intentMultipliers score multiplier per intent id; unlisted intents keep 1
  * @param routine extra score multipliers per intent id for a part of the day
  * @param randomness how far the pet's choices stray from the best score among intents of the
- *                   same priority, from 0 to 1; see {@code IntentSelector#choose}
+ *                   same priority, from 0 to 1; see {@code Decision#pickWithinTier}
  * @param wildTools the tools a wild pet of this kind may spawn holding, by weight;
  *                  {@code minecraft:air} weighs spawning empty-handed
  * @param likes what this kind of pet would spend its own money on, by weight. A pet with
