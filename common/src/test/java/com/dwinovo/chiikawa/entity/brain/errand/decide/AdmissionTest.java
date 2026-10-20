@@ -14,6 +14,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestStore;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
+import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
@@ -118,7 +119,7 @@ class AdmissionTest {
         TestView view = TestView.at(HOME, FREE).ownership(PetOwnership.WILD).phase(DayPhase.NIGHT).withPresent().armedWithArrows()
             .shopWorthVisiting(east(1)).offeringBoard(east(2)).socialPartner(east(3)).examDesk(east(4))
             .resultsDesk(east(5)).whistleHeard(east(6)).ownerPos(east(7))
-            .targets(new PerceivedTargets(Optional.of(east(8)), Optional.of(east(9)), Optional.of(east(10)),
+            .targets(new PerceivedTargets(Optional.of(new AttackTarget(UUID.randomUUID(), east(8))), Optional.of(east(9)), Optional.of(east(10)),
                 Optional.of(east(11)), Optional.of(east(12)), Optional.of(east(13)), Optional.of(new PickableItem(UUID.randomUUID(), east(14)))));
 
         assertEquals(Optional.of(east(1)), destination(ErrandIds.SHOP, view));
