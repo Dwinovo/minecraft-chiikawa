@@ -27,8 +27,8 @@ class OfferPurityContractTest {
             TestView view = ErrandFixtures.of(errand.id()).orElseThrow(() -> new AssertionError(errand.id() + " has no fixture"));
             List<?> before = snapshot(view);
 
-            List<? extends Offer<?>> first = TestErrands.offers(errand.id(), view);
-            List<? extends Offer<?>> second = TestErrands.offers(errand.id(), view);
+            Offers<?> first = TestErrands.answer(errand.id(), view);
+            Offers<?> second = TestErrands.answer(errand.id(), view);
 
             assertFalse(first.isEmpty(), errand.id().toString());
             assertEquals(first, second, errand.id().toString());
@@ -37,17 +37,14 @@ class OfferPurityContractTest {
     }
 
     @Test
-    void whatIsAskedOfAnErrandThatOffersNothingIsPureToo() {
+    void theReasonAnErrandOffersNothingIsPureToo() {
         Errands.all().forEach(errand -> {
             // The fixture of any other errand is a pet it has nothing to offer, most of the time.
             Errands.all().stream().filter(other -> other != errand).forEach(other -> {
                 TestView elsewhere = ErrandFixtures.of(other.id()).orElseThrow();
                 List<?> before = snapshot(elsewhere);
 
-                assertEquals(TestErrands.offers(errand.id(), elsewhere), TestErrands.offers(errand.id(), elsewhere));
-                if (TestErrands.offers(errand.id(), elsewhere).isEmpty()) {
-                    assertEquals(TestErrands.whyNoOffer(errand.id(), elsewhere), TestErrands.whyNoOffer(errand.id(), elsewhere));
-                }
+                assertEquals(TestErrands.answer(errand.id(), elsewhere), TestErrands.answer(errand.id(), elsewhere));
                 assertEquals(before, snapshot(elsewhere));
             });
         });

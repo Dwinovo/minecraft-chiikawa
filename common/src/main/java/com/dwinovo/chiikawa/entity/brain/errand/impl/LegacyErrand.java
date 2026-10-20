@@ -5,13 +5,13 @@ import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandType;
 import com.dwinovo.chiikawa.entity.brain.errand.Offer;
+import com.dwinovo.chiikawa.entity.brain.errand.Offers;
 import com.dwinovo.chiikawa.entity.brain.errand.Plan;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestStore;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Routine;
 import com.dwinovo.chiikawa.entity.brain.errand.step.LegacyActivityStep;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.mojang.serialization.Codec;
-import java.util.List;
 import java.util.function.Supplier;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.schedule.Activity;
@@ -73,13 +73,9 @@ public abstract class LegacyErrand<P extends Plan, T> implements ErrandType<P, T
     }
 
     @Override
-    public final List<Offer<P>> offers(PetView view, T tuning) {
-        return canStart(view, tuning).ok() ? List.of(Offer.of(plan(view, tuning))) : List.of();
-    }
-
-    @Override
-    public final Check whyNoOffer(PetView view, T tuning) {
-        return canStart(view, tuning);
+    public final Offers<P> offers(PetView view, T tuning) {
+        Check start = canStart(view, tuning);
+        return start.ok() ? Offers.of(Offer.of(plan(view, tuning))) : Offers.none(start);
     }
 
     @Override

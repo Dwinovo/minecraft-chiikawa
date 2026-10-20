@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandType;
 import com.dwinovo.chiikawa.entity.brain.errand.Offer;
+import com.dwinovo.chiikawa.entity.brain.errand.Offers;
 import com.dwinovo.chiikawa.entity.brain.errand.Plan;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
@@ -42,11 +43,11 @@ record Admission<P extends Plan, T>(ErrandType<P, T> type, ErrandSettings<T> set
             return out(trace, type, priority, DecisionTrace.RESTING);
         }
         T tuning = (T) settings.tuning();
-        List<Offer<P>> offers = type.offers(view, tuning);
+        Offers<P> offers = type.offers(view, tuning);
         if (offers.isEmpty()) {
-            return out(trace, type, priority, type.whyNoOffer(view, tuning).reasonKey());
+            return out(trace, type, priority, offers.check().reasonKey());
         }
-        List<Offer<P>> unrested = offers.stream().filter(offer -> offer.plan().subject()
+        List<Offer<P>> unrested = offers.list().stream().filter(offer -> offer.plan().subject()
             .filter(subject -> rests.resting(type.id(), subject, now)).isEmpty()).toList();
         if (unrested.isEmpty()) {
             return out(trace, type, priority, DecisionTrace.RESTING);

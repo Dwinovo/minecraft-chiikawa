@@ -4,7 +4,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.rest.RestStore;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Routine;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.mojang.serialization.Codec;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
@@ -31,17 +30,12 @@ public interface ErrandType<P extends Plan, T> {
     Codec<T> tuningCodec();
 
     /**
-     * The ways the pet could set out on this errand now; none when it could not. Pure: reads only
-     * the view, draws nothing from a random and writes nothing, and answers the same when asked
-     * twice, since it is asked of errands that are only being looked at.
+     * The ways the pet could set out on this errand now, or why it could not. Pure: reads only the
+     * view, draws nothing from a random and writes nothing, and answers the same when asked twice,
+     * since it is asked of errands that are only being looked at. The reason is what the debug command
+     * shows, so it is the condition itself and not a second look at it.
      */
-    List<Offer<P>> offers(PetView view, T tuning);
-
-    /**
-     * @return why {@link #offers} gives none, as a failed check with a translation key, for the debug
-     *         command. Asked only then, and pure like {@link #offers}
-     */
-    Check whyNoOffer(PetView view, T tuning);
+    Offers<P> offers(PetView view, T tuning);
 
     /**
      * How much the pet fancies this among the errands of its priority, from 0 to 1, before its
