@@ -32,6 +32,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.view.LivePetView;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.qualification.ExamStage;
 import com.dwinovo.chiikawa.qualification.PetExams;
+import com.dwinovo.chiikawa.task.SlipWages;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import java.util.ArrayList;
 import java.util.List;
@@ -182,7 +183,10 @@ public final class PetMind {
         return new Look(executor.running(), level.getGameTime(), view.phase(), trace);
     }
 
-    /** Whoever is photographed turns to the camera, if it is not looking at something of its own, strikes a pose and says something. */
+    /**
+     * Whoever is photographed turns to the camera, if it is not looking at something of its own, strikes a pose and says
+     * something; whoever has been paid shows it.
+     */
     private void apply(Cue cue) {
         switch (cue) {
             case Cue.Pose pose -> {
@@ -192,6 +196,7 @@ public final class PetMind {
                 handle.gesture(pose.gesture());
                 handle.say(pose.line());
             }
+            case Cue.Paid paid -> SlipWages.rejoice(pet);
         }
     }
 
@@ -234,6 +239,10 @@ public final class PetMind {
             // A pet on its way to hear them at the desk hears them there, once it has read what is on it.
             case Message.ResultsDue due -> new Message.ResultsDue(due.id(),
                 visitingResultsOf(due.id()) ? Optional.empty() : PetExams.grant(pet, due.id()));
+            case Message.SlipCompleted completed -> {
+                SlipWages.pay(pet, completed.task());
+                yield completed;
+            }
         };
         return new Message.Settled(kept);
     }
@@ -255,6 +264,8 @@ public final class PetMind {
                 due.heard().ifPresent(result -> PetExams.show(pet, due.id(), result));
                 decideNow = true;
             }
+            // Paid, it can go for another slip.
+            case Message.SlipCompleted completed -> decideNow = true;
         }
     }
 

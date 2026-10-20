@@ -56,11 +56,13 @@ public final class ErrandSettingsLoader extends SimpleJsonResourceReloadListener
                 .ifSuccess(parsed -> decoded.put(id, parsed))
                 .ifError(error -> errors.add(LOG_PREFIX + id + " is switched off, failed to parse: " + error.message()));
         });
-        // What one file says about the others can only be checked with all of them read.
+        // What one file says about the others can only be checked with all of them read, and what only the
+        // errand knows to ask of its own, with the errand.
         Map<ResourceLocation, ErrandSettings<?>> settings = new HashMap<>();
-        decoded.forEach((id, parsed) -> parsed.problemAmong(id, decoded).ifPresentOrElse(
-            problem -> errors.add(LOG_PREFIX + id + " is switched off, " + problem),
-            () -> settings.put(id, parsed)));
+        decoded.forEach((id, parsed) -> parsed.problemAmong(id, decoded).or(() -> parsed.problemFor(Errands.get(id)))
+            .ifPresentOrElse(
+                problem -> errors.add(LOG_PREFIX + id + " is switched off, " + problem),
+                () -> settings.put(id, parsed)));
         return new Loaded(settings, errors, warnings);
     }
 
