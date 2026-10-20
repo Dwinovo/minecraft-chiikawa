@@ -78,8 +78,7 @@ public final class ErrandContractGameTests {
     private static final Set<ResourceLocation> LEGACY = Set.of(ErrandIds.FOLLOW_OWNER, ErrandIds.STAY, ErrandIds.WANDER,
         ErrandIds.HARVEST, ErrandIds.PLANT, ErrandIds.DELIVER, ErrandIds.WEED, ErrandIds.PICK_MUSHROOM, ErrandIds.MELEE,
         ErrandIds.RANGED, ErrandIds.PLAY_MUSIC, ErrandIds.TAKE_TASK, ErrandIds.SHOP, ErrandIds.GIFT_OWNER,
-        ErrandIds.SOCIALIZE, ErrandIds.COOPERATE, ErrandIds.TAKE_EXAM, ErrandIds.CHECK_RESULTS, ErrandIds.ANSWER_WHISTLE,
-        ErrandIds.TAKE_PHOTO);
+        ErrandIds.SOCIALIZE, ErrandIds.COOPERATE, ErrandIds.TAKE_EXAM, ErrandIds.CHECK_RESULTS, ErrandIds.ANSWER_WHISTLE);
 
     /** Where in an errand's routine a pet is cut short. */
     private enum Point {
@@ -155,10 +154,18 @@ public final class ErrandContractGameTests {
         helper.succeed();
     }
 
+    /**
+     * A case of its own batch, so that it runs alone: a pet in the yard next to it, such as another case's, is a friend
+     * for a photographer to take a photo of and a rival for a pet to pick up an item from.
+     */
     private static TestFunction testOf(String what, ResourceLocation errand, int timeoutTicks,
             Consumer<GameTestHelper> body) {
-        return new TestFunction(BATCH, ErrandContractGameTests.class.getSimpleName().toLowerCase() + "." + what + "_"
-            + errand.getPath(), TEMPLATE, timeoutTicks, 0L, true, body);
+        return new TestFunction(BATCH + "_" + what + "_" + errand.getPath(),
+            ErrandContractGameTests.class.getSimpleName().toLowerCase() + "." + what + "_" + errand.getPath(), TEMPLATE,
+            timeoutTicks, 0L, true, helper -> {
+                settleWorld(helper.getLevel(), Difficulty.NORMAL, NOON);
+                body.accept(helper);
+            });
     }
 
     /**
@@ -252,7 +259,7 @@ public final class ErrandContractGameTests {
             String at = " (cut short at " + points[next[0]] + ")";
             helper.assertTrue(ended.get().outcome() instanceof Outcome.Interrupted, id + " ended " + ended.get().outcome() + at);
             assertRested(helper, pet, watch.seen, ended.get());
-            Residue.none(helper, pet, scenario);
+            Residue.none(helper, pet, scenario, watch.seen);
             told[0] = -1;
             if (++next[0] == points.length) {
                 helper.succeed();
@@ -277,7 +284,9 @@ public final class ErrandContractGameTests {
         RestLedger ledger = new RestLedger(errand -> Errands.get(errand).restStore().of(pet.getBrain(), errand), ErrandSettings::of);
         long left = ran.plan().subject().map(subject -> ledger.remaining(id, subject, now)).orElseGet(() -> ledger.remaining(id, now));
         long expected = Math.max(0L, ticks - (now - ended.gameTime()));
-        helper.assertTrue(left == expected, id + " " + ended.outcome() + " leaves " + left + " ticks of rest, not " + expected);
+        // A rest kept in a memory has run down by one in the tick it was written in, since the brain ticks after the mind.
+        helper.assertTrue(left == expected || left == expected - 1,
+            id + " " + ended.outcome() + " leaves " + left + " ticks of rest, not " + expected);
     }
 
     private static Optional<Running> runningOn(AbstractPet pet, ResourceLocation id) {
