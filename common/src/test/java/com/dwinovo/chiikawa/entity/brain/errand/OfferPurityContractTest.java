@@ -54,7 +54,7 @@ class OfferPurityContractTest {
     private static List<?> snapshot(PetView view) {
         return List.of(view.pos(), view.phase(), view.ownership(), view.personality(), view.anchor(), view.follow(),
             view.targets(), view.slip(), view.ownerPos(), view.eager(), view.offeringBoard(), view.shopWorthVisiting(),
-            view.socialPartner(), view.playingAlong(),
+            view.socialIdea(), view.engagement(),
             view.carryingGift(), view.presentToGive(), view.attackCoolingDown(), view.hasArrows(),
             view.playableSelection(), view.examToSit(), view.resultsDesk(), view.seatedAtExam(),
             view.whistleHeard(), view.photo());
