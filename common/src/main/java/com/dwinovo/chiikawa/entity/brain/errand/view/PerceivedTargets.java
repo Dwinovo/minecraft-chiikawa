@@ -1,17 +1,20 @@
 package com.dwinovo.chiikawa.entity.brain.errand.view;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.sensor.FarmTarget;
 import com.dwinovo.chiikawa.init.InitMemory;
 import java.util.Optional;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import net.minecraft.world.level.Level;
 
 /**
  * Read-only positions of what the sensors currently remember. Sensors write these
  * whatever the directive; errands decide whether to act on them.
+ *
+ * <p>The blocks of work the farmer sensor remembers are shown only while they still are what they were
+ * remembered as, as an item is only while it is lying there: the sensor looks again every second, and a pet
+ * that has just reaped a crop is not to set off for it once more in the meantime.
  */
 public record PerceivedTargets(
     Optional<GlobalPos> attackTarget,
@@ -27,15 +30,14 @@ public record PerceivedTargets(
 
     public static PerceivedTargets capture(AbstractPet pet) {
         Brain<AbstractPet> brain = pet.getBrain();
-        ResourceKey<Level> dimension = pet.level().dimension();
         return new PerceivedTargets(
             brain.getMemory(MemoryModuleType.ATTACK_TARGET)
                 .map(target -> GlobalPos.of(target.level().dimension(), target.blockPosition())),
-            brain.getMemory(InitMemory.HARVEST_POS.get()).map(pos -> GlobalPos.of(dimension, pos)),
-            brain.getMemory(InitMemory.PLANT_POS.get()).map(pos -> GlobalPos.of(dimension, pos)),
-            brain.getMemory(InitMemory.CONTAINER_POS.get()).map(pos -> GlobalPos.of(dimension, pos)),
-            brain.getMemory(InitMemory.WEED_POS.get()).map(pos -> GlobalPos.of(dimension, pos)),
-            brain.getMemory(InitMemory.MUSHROOM_POS.get()).map(pos -> GlobalPos.of(dimension, pos)),
+            FarmTarget.HARVEST.seenBy(pet),
+            FarmTarget.PLANT.seenBy(pet),
+            FarmTarget.DELIVER.seenBy(pet),
+            FarmTarget.WEED.seenBy(pet),
+            FarmTarget.MUSHROOM.seenBy(pet),
             brain.getMemory(InitMemory.PICKABLE_ITEM.get()).flatMap(item -> PickableItem.of(pet, item))
         );
     }

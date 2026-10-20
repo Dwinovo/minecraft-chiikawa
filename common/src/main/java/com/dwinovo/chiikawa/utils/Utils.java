@@ -19,15 +19,6 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 public class Utils {
 
     /**
-     * Distance² at which a pet is "close enough" to act on a farm work target
-     * (plant/harvest). Must comfortably cover where navigation actually stops:
-     * diagonally adjacent is ~2.0, and on soul sand the entity sinks a little
-     * which nudges it further — so a tight 1.0 left pets frozen next to a crop
-     * until nudged. 3.0 (≈1.73 blocks) clears all adjacent standing positions.
-     */
-    public static final double WORK_REACH_SQR = 3.0D;
-
-    /**
      * Returns true if the crop at the position can be harvested.
      * @param world the server world
      * @param pos the block position
