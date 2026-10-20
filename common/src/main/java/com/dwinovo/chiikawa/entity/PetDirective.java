@@ -10,7 +10,7 @@ import net.minecraft.network.chat.Component;
  * be reordered.
  *
  * <p>Inside the AI only {@link com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints}
- * reads it; behaviors, sensors and intents see the anchor and permissions derived
+ * reads it; errands, sensors and the mind see the anchor and permissions derived
  * from it instead.
  */
 public enum PetDirective {

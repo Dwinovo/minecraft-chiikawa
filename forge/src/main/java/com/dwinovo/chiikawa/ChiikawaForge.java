@@ -2,7 +2,6 @@ package com.dwinovo.chiikawa;
 
 import com.dwinovo.chiikawa.command.ChiikawaDebugCommand;
 import com.dwinovo.chiikawa.command.ChiikawaMusicCommand;
-import com.dwinovo.chiikawa.init.InitActivity;
 import com.dwinovo.chiikawa.init.InitCapabilities;
 import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.init.InitEntity;
@@ -68,7 +67,6 @@ public class ChiikawaForge {
         InitRegistry.init();
         InitMemory.init();
         InitSensor.init();
-        InitActivity.init();
         InitLootConditions.init();
         InitSounds.init();
         InitMenu.init();

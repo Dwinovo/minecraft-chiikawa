@@ -72,9 +72,9 @@ import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * For each native errand, a setup in which it is the best thing its pet can do and a way to tell whether
+ * For each errand, a setup in which it is the best thing its pet can do and a way to tell whether
  * it was carried out cleanly. The contract cases in {@link ErrandContractGameTests} are made from these, so
- * an errand that goes native adds its setup here and gets its three cases.
+ * an errand that adds its setup here gets its three cases.
  *
  * <p>Each setup is a plain static method of a helper and returns a plain record, so a branch that
  * registers its cases another way rewrites that registration and leaves these as they are.
@@ -173,7 +173,7 @@ final class ErrandScenarios {
     private ErrandScenarios() {
     }
 
-    /** @return the errands that have a scenario, which are the native ones */
+    /** @return the errands that have a scenario, which are all of them */
     static Set<ResourceLocation> ids() {
         return BY_ERRAND.keySet();
     }
