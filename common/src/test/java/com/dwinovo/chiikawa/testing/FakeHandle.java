@@ -9,6 +9,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.run.Handle;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalInt;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -48,8 +49,13 @@ public final class FakeHandle implements Handle {
     }
 
     @Override
-    public int blockedTicks() {
-        return 0;
+    public OptionalInt blockedTicks() {
+        return OptionalInt.empty();
+    }
+
+    @Override
+    public boolean canFindWay() {
+        return true;
     }
 
     @Override
