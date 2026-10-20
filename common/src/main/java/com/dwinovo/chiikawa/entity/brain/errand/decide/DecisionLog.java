@@ -2,7 +2,9 @@ package com.dwinovo.chiikawa.entity.brain.errand.decide;
 
 import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
 import java.util.ArrayDeque;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,6 +55,16 @@ public final class DecisionLog {
     /** Notes that an errand ended. */
     public void ended(long gameTime, ResourceLocation errand, Outcome outcome, long ranTicks) {
         add(new Ended(gameTime, errand, outcome, ranTicks));
+    }
+
+    /** @return the last errand that ended, if the log still has one */
+    public Optional<Ended> lastEnded() {
+        for (Iterator<Entry> newest = entries.descendingIterator(); newest.hasNext();) {
+            if (newest.next() instanceof Ended ended) {
+                return Optional.of(ended);
+            }
+        }
+        return Optional.empty();
     }
 
     /** @return what is recorded, oldest first */

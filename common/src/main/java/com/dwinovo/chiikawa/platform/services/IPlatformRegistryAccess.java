@@ -25,21 +25,6 @@ public interface IPlatformRegistryAccess {
     /** Notices the other pets a pet could play a scene with. */
     Supplier<SensorType<PetSocialSensor>> petSocialSensor();
 
-    /**
-     * Brain {@link Activity} owning the fencer job's combat behaviors
-     * (walk-to-target + melee swing). Replaces fencer's earlier reuse of
-     * vanilla {@link Activity#WORK}, which conflicted with archer when both
-     * jobs' behaviors were registered on the same brain.
-     */
-    Supplier<Activity> fencerFightActivity();
-
-    /**
-     * Brain {@link Activity} owning the archer job's ranged-attack behavior.
-     * Sibling to {@link #fencerFightActivity} — distinct activity per job so
-     * static brain registration doesn't conflate combat styles.
-     */
-    Supplier<Activity> archerShootActivity();
-
     Supplier<Activity> musicianPlayActivity();
 
     Supplier<Activity> followOwnerActivity();
