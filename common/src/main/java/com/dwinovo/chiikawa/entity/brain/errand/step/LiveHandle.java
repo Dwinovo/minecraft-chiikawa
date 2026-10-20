@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.errand.step;
 
 import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
+import com.dwinovo.chiikawa.block.ExamDeskBlockEntity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetGesture;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
@@ -14,6 +15,7 @@ import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -55,6 +57,11 @@ public final class LiveHandle implements Handle {
     Optional<Entity> creature(UUID id) {
         return pet.level() instanceof ServerLevel level ? Optional.ofNullable(level.getEntity(id)).filter(Entity::isAlive)
             : Optional.empty();
+    }
+
+    /** @return the exam desk at that place, while it is in the pet's world and loaded and has not been broken */
+    Optional<ExamDeskBlockEntity> examDesk(GlobalPos desk) {
+        return ExamDeskBlockEntity.at(pet.level(), desk);
     }
 
     /** @return the pet's owner, while they are a player in the pet's world */

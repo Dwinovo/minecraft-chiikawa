@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.errand.step;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
@@ -44,6 +45,35 @@ public sealed interface Goal {
         public boolean lookAt(LiveHandle live) {
             live.lookAt(pos);
             return true;
+        }
+    }
+
+    /**
+     * The chair of an exam desk, to the middle of the floor it stands on, which is where a pet sits down from. The desk
+     * is looked for each time and the chair is gone with it, since a desk can be broken while its pet is on the way.
+     *
+     * @param desk the desk
+     */
+    record Chair(GlobalPos desk) implements Goal {
+        @Override
+        public Optional<Vec3> where(LiveHandle live) {
+            return live.examDesk(desk).map(found -> Vec3.atBottomCenterOf(found.chair()));
+        }
+
+        @Override
+        public boolean walkTo(LiveHandle live, float speed, int closeEnough) {
+            return live.examDesk(desk).map(found -> {
+                live.walkTo(found.chair(), speed, closeEnough);
+                return true;
+            }).orElse(false);
+        }
+
+        @Override
+        public boolean lookAt(LiveHandle live) {
+            return live.examDesk(desk).map(found -> {
+                live.lookAt(found.chair());
+                return true;
+            }).orElse(false);
         }
     }
 

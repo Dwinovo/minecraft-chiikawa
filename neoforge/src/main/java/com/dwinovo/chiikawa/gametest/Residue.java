@@ -9,7 +9,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
 /**
- * What a pet that has left an errand must not still be holding: a walk, a gaze, a path, a pose, a scene,
+ * What a pet that has left an errand must not still be holding: a walk, a gaze, a path, a pose, a seat, a scene,
  * a drawn bow, a present in its paws, and whatever the errand's scenario says is its own to put right. An
  * errand that is cut short leaves nothing of itself behind.
  *
@@ -34,6 +34,9 @@ final class Residue {
         }
         if (pet.getActivity() != PetActivity.NONE) {
             left.add("the pose " + pet.getActivity());
+        }
+        if (pet.getMind().errands().seated()) {
+            left.add("a seat at a desk");
         }
         if (!pet.getPerformance().isEmpty()) {
             left.add("the scene " + pet.getPerformance());

@@ -62,10 +62,6 @@ public interface IPlatformRegistryAccess {
 
     Supplier<Activity> cooperateActivity();
 
-    Supplier<Activity> takeExamActivity();
-
-    Supplier<Activity> checkResultsActivity();
-
     Supplier<Activity> answerWhistleActivity();
 
     Supplier<MenuType<PetBackpackMenu>> petBackpackMenu();

@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
+import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.task.PetTask;
 import java.util.Optional;
 import java.util.UUID;
@@ -84,13 +85,13 @@ public interface PetView {
     /** @return whether the pet is performing */
     boolean playingMusic();
 
-    /** @return the exam desk the pet is signed up at, while it can still sit its exam there */
-    Optional<GlobalPos> examDesk();
+    /** @return the exam the pet is signed up for and the desk it is to sit it at, while it can still sit it there */
+    Optional<PetExams.Summons> examToSit();
 
     /** @return the exam desk the pet sat an exam at, while it has the results to go and see there this morning */
     Optional<GlobalPos> resultsDesk();
 
-    /** @return whether the pet is in its chair at an exam desk, at the paper or handing it in */
+    /** @return whether the pet is in its chair at an exam desk, at the paper or handing it in, by what its errand says */
     boolean seatedAtExam();
 
     /** @return where a whistle was blown that this wild pet has set off for, once it has had time to react */

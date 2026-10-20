@@ -2,8 +2,9 @@ package com.dwinovo.chiikawa.qualification;
 
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.block.ExamDeskBlockEntity;
-import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.PetMind;
+import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
 import com.dwinovo.chiikawa.voice.PetSpeech;
@@ -17,13 +18,21 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * A pet and its licences' exams, from the pet's side: the exam it is signed up to sit now,
- * the results it has to go and see, the once-a-second upkeep that lets it off an exam it
- * missed or whose desk is gone and tells it results it did not go to see, handing a paper
+ * the results it has to go and see, the once-a-second upkeep that has it let off an exam it
+ * missed or whose desk is gone and told results it did not go to see, handing a paper
  * in, and hearing how it went. Signing up is {@link ExamEnrollment}'s business.
+ *
+ * <p>The upkeep only tells the pet's mind, as the pet's other surroundings do; what changes in the licence
+ * when it is told, {@link #excuse} and {@link #grant}, is what the mind keeps the moment it is told, and
+ * what the pet makes of it, {@link #tellCalledOff} and {@link #show}, is for its next tick.
  */
 public final class PetExams {
     /** How often a pet looks at the clock. */
     public static final int UPKEEP_TICKS = 20;
+    /** Why an exam was called off: the desk it was to be sat at is gone. */
+    public static final String DESK_GONE = "desk_gone";
+    /** Why an exam was called off: the pet did not sit it in time. */
+    public static final String MISSED = "missed";
 
     private PetExams() {
     }
@@ -48,9 +57,12 @@ public final class PetExams {
         return Optional.empty();
     }
 
-    /** Whether the pet is in its chair at an exam desk, at the paper or handing it in. */
+    /**
+     * Whether the pet is in its chair at an exam desk, at the paper or handing it in: what its errand says,
+     * and not how it happens to be drawn.
+     */
     public static boolean seatedAtExam(AbstractPet pet) {
-        return pet.getActivity() == PetActivity.EXAM;
+        return pet.getMind().errands().seated();
     }
 
     /** The desk this pet sat at and goes back to this morning to see how it did, if any. */
@@ -65,10 +77,9 @@ public final class PetExams {
     }
 
     /**
-     * Once a second: shows the owner's screen where the pet stands; lets it off an exam it can
-     * no longer sit, or whose desk has gone, and tells its owner so; and tells it results it
-     * has missed the morning to go and see, or that it has no desk to go and see them at.
-     * Wild pets have nothing to do with exams.
+     * Once a second: shows the owner's screen where the pet stands; tells the pet's mind of an exam it can
+     * no longer sit, or whose desk has gone, and of results it has missed the morning to go and see, or that
+     * it has no desk to go and see them at. Wild pets have nothing to do with exams.
      */
     public static void upkeep(AbstractPet pet) {
         if (pet.tickCount % UPKEEP_TICKS != 0 || !pet.isTame()) {
@@ -79,22 +90,31 @@ public final class PetExams {
             Licence licence = pet.licences().get(id);
             Optional<ExamStage.Called> call = licence.call();
             if (call.isPresent() && ExamDeskBlockEntity.isGone(pet.level(), call.get().desk())) {
-                pet.licences().set(id, licence.excused());
-                pet.tellOwner(Component.translatable("message.chiikawa.exam.desk_gone", pet.getDisplayName(), name(id)));
+                PetMind.post(pet, new Message.ExamCalledOff(id, DESK_GONE));
             } else if (QualificationExam.missedCall(licence, dayTime)) {
-                pet.licences().set(id, licence.excused());
-                pet.tellOwner(Component.translatable("message.chiikawa.exam.missed", pet.getDisplayName(), name(id)));
+                PetMind.post(pet, new Message.ExamCalledOff(id, MISSED));
             }
+            // What a call-off changed in the licence was kept as the pet was told, so this is the licence it left.
             Licence now = pet.licences().get(id);
             boolean deskGone = now.paper().filter(sat -> ExamDeskBlockEntity.isGone(pet.level(), sat.desk())).isPresent();
             if (QualificationExam.mustHearResults(now, dayTime)
                     || QualificationExam.resultsOut(now, dayTime) && deskGone) {
-                hearResults(pet, id);
+                PetMind.post(pet, new Message.ResultsDue(id));
             }
         });
         pet.showLicences(Qualifications.all().entrySet().stream()
             .map(entry -> LicenceView.of(entry.getKey(), entry.getValue(), pet.licences().get(entry.getKey()), dayTime))
             .toList());
+    }
+
+    /** Lets the pet off an exam it was signed up for and cannot sit: as if it had not been. */
+    public static void excuse(AbstractPet pet, ResourceLocation id) {
+        pet.licences().set(id, pet.licences().get(id).excused());
+    }
+
+    /** Tells the owner an exam is off, and why: {@link #DESK_GONE} or {@link #MISSED}. */
+    public static void tellCalledOff(AbstractPet pet, ResourceLocation id, String reason) {
+        pet.tellOwner(Component.translatable("message.chiikawa.exam." + reason, pet.getDisplayName(), name(id)));
     }
 
     /**
@@ -118,28 +138,33 @@ public final class PetExams {
         Qualifications.all().keySet().stream()
             .filter(id -> QualificationExam.resultsOut(pet.licences().get(id), dayTime))
             .toList()
-            .forEach(id -> hearResults(pet, id));
+            .forEach(id -> grant(pet, id).ifPresent(result -> show(pet, id, result)));
     }
 
     /**
-     * Hears one result: up a grade, or one more fail to try again after. The pet shows it and
-     * says so, and its owner reads it in chat.
+     * Hears one result, which is when the licence changes: up a grade, or one more fail to try again after.
+     *
+     * @return how it went, if there was a result to hear
      */
-    public static void hearResults(AbstractPet pet, ResourceLocation id) {
+    public static Optional<ExamResult> grant(AbstractPet pet, ResourceLocation id) {
         Licence licence = pet.licences().get(id);
         Optional<ExamStage.Sat> paper = licence.paper();
         Optional<Qualification> qualification = Qualifications.get(id);
         if (paper.isEmpty() || qualification.isEmpty()) {
-            return;
+            return Optional.empty();
         }
-        boolean passed = paper.get().passed();
         int rank = qualification.get().rank(licence.held() + 1);
         pet.licences().set(id, licence.announced());
-        pet.triggerReaction(passed ? PetReaction.HAPPY
+        return Optional.of(new ExamResult(paper.get().passed(), rank));
+    }
+
+    /** The pet shows how an exam went and says so, and its owner reads it in chat. */
+    public static void show(AbstractPet pet, ResourceLocation id, ExamResult result) {
+        pet.triggerReaction(result.passed() ? PetReaction.HAPPY
             : PetPersonalities.of(pet.getType()).leaning(id).failReaction());
-        PetSpeech.say(pet, passed ? VoiceMoment.EXAM_PASS : VoiceMoment.EXAM_FAIL);
-        pet.tellOwner(Component.translatable(passed ? "message.chiikawa.exam.passed" : "message.chiikawa.exam.failed",
-            pet.getDisplayName(), name(id), rank));
+        PetSpeech.say(pet, result.passed() ? VoiceMoment.EXAM_PASS : VoiceMoment.EXAM_FAIL);
+        pet.tellOwner(Component.translatable(result.passed() ? "message.chiikawa.exam.passed" : "message.chiikawa.exam.failed",
+            pet.getDisplayName(), name(id), result.rank()));
     }
 
     /** @return the licence this is the book for, if it is one */

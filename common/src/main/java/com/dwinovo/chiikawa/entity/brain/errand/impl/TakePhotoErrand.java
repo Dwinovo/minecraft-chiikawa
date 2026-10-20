@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.ToIntFunction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
@@ -122,7 +123,7 @@ public final class TakePhotoErrand implements ErrandType<TakePhotoErrand.Shot, E
             tuning.standBack() + 1.0, tuning.maxWalkTicks(), tuning.noWayTicks()))));
         parts.add(Routine.step(() -> new Aim(gaze, camera.aimTicks(), PetActivity.PHOTO)));
         parts.add(Routine.step(() -> new Shutter(photo, camera, tuning.lookBackTicks())));
-        parts.add(Routine.step(() -> new Hold(tuning.holdTicks(), PetActivity.PHOTO, Optional.of(gaze),
+        parts.add(Routine.step(() -> new Hold(tuning.holdTicks(), PetActivity.PHOTO, Set.of(), Optional.of(gaze),
             TakePhotoErrand::pictureBack)));
         return Routine.of(parts.toArray(Routine.Part[]::new));
     }

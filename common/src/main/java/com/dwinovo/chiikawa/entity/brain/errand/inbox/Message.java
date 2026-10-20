@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.errand.inbox;
 
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
+import com.dwinovo.chiikawa.qualification.ExamResult;
 import com.dwinovo.chiikawa.task.PetTask;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,23 +18,24 @@ import net.minecraft.world.item.ItemStack;
  *
  * <p>A message is read at the pet's next tick, and one that waits when the pet is removed from the world
  * is lost with the inbox. So what a message makes durable, anything saved with the pet or the world such as a
- * shot on its film roll or the rest the pet takes after it, is not left to the tick: a {@link Durable} message
- * is applied as it is told, and only what concerns deciding and the errand under way, a step's ending, a
- * nudge, waits in the inbox as a {@link Settled} one. See {@code PetMind}.
+ * shot on its film roll, the rest the pet takes after it or a change to its licence, is not left to the tick: a
+ * {@link Durable} message is applied as it is told, and only what concerns deciding and the errand under way, a
+ * step's ending, a nudge, waits in the inbox as a {@link Settled} one. See {@code PetMind}.
  */
 public sealed interface Message {
     /**
      * A message with something to keep: it has effects that must outlive the inbox, the rests it makes the pet
-     * take among them, which the pet's mind applies the moment it is told, on the server thread, and then
-     * queues what is left of it as {@link Settled}. Each kind is applied in one place, the mind's {@code keep},
-     * which is the only writer of what it makes durable.
+     * take and the changes to its licences among them, which the pet's mind applies the moment it is told, on
+     * the server thread, and then queues what is left of it as {@link Settled}. Each kind is applied in one
+     * place, the mind's {@code keep}, which is the only writer of what it makes durable.
      */
-    sealed interface Durable extends Message permits PhotoResult {
+    sealed interface Durable extends Message permits PhotoResult, ExamCalledOff, ResultsDue {
     }
 
     /**
-     * A {@link Durable} message after its durable effects were applied, which is the form the inbox holds:
-     * what is left for the next tick is to decide and to tell the errand under way.
+     * A {@link Durable} message after its durable effects were applied, which is the form the inbox holds, and
+     * carries whatever applying them found: what is left for the next tick is to decide, to tell the errand under
+     * way and to have the pet show what it makes of the news.
      *
      * @param message what was told
      */
@@ -92,20 +94,29 @@ public sealed interface Message {
     }
 
     /**
-     * The exam the pet is signed up for will not be held.
+     * The exam the pet is signed up for will not be held. Its durable part is that the pet is let off it; telling
+     * the owner and ending the sitting of it that the pet is at wait for the pet's next tick.
      *
      * @param id the qualification
      * @param reason why, as a short key for the owner's message
      */
-    record ExamCalledOff(ResourceLocation id, String reason) implements Message {
+    record ExamCalledOff(ResourceLocation id, String reason) implements Durable {
     }
 
     /**
-     * The results of an exam are out and the pet has not heard them.
+     * The results of an exam are out and the pet has not heard them. Its durable part is hearing them, which is
+     * when the licence changes; how the pet takes the news waits for the pet's next tick, and is told by what
+     * the first part found.
      *
      * @param id the qualification
+     * @param heard how the exam went, once the licence was granted; empty as the message is told, and when
+     *              there was nothing to hear, or the pet was on its way to hear them itself
      */
-    record ResultsDue(ResourceLocation id) implements Message {
+    record ResultsDue(ResourceLocation id, Optional<ExamResult> heard) implements Durable {
+        /** @return the message as it is told, with nothing heard yet */
+        public ResultsDue(ResourceLocation id) {
+            this(id, Optional.empty());
+        }
     }
 
     /**
