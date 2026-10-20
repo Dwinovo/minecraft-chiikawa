@@ -36,7 +36,7 @@ public record PerceivedTargets(
             brain.getMemory(InitMemory.CONTAINER_POS.get()).map(pos -> GlobalPos.of(dimension, pos)),
             brain.getMemory(InitMemory.WEED_POS.get()).map(pos -> GlobalPos.of(dimension, pos)),
             brain.getMemory(InitMemory.MUSHROOM_POS.get()).map(pos -> GlobalPos.of(dimension, pos)),
-            brain.getMemory(InitMemory.PICKABLE_ITEM.get()).flatMap(PickableItem::of)
+            brain.getMemory(InitMemory.PICKABLE_ITEM.get()).flatMap(item -> PickableItem.of(pet, item))
         );
     }
 }
