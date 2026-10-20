@@ -8,7 +8,6 @@ import com.dwinovo.chiikawa.entity.brain.sensor.PetSocialSensor;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import java.util.function.Supplier;
 import net.minecraft.world.entity.ai.sensing.SensorType;
-import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 
@@ -24,8 +23,6 @@ public interface IPlatformRegistryAccess {
 
     /** Notices the other pets a pet could play a scene with. */
     Supplier<SensorType<PetSocialSensor>> petSocialSensor();
-
-    Supplier<Activity> answerWhistleActivity();
 
     Supplier<MenuType<PetBackpackMenu>> petBackpackMenu();
 
