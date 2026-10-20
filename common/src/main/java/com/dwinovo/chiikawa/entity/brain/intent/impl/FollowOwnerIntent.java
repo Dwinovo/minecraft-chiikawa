@@ -1,5 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.intent.impl;
 
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandTunings;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCategory;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentCheck;
 import com.dwinovo.chiikawa.entity.brain.intent.IntentContext;
@@ -17,13 +19,11 @@ import net.minecraft.world.entity.schedule.Activity;
  * wanders.
  *
  * <p>Starts at the follow distance the anchor settings give and keeps going until the pet
- * has arrived, like 0.0.9. The score grows with distance, so the further the owner
- * gets the more it outweighs anything done on the way.
+ * has arrived, like 0.0.9. The score grows with distance, from the errand's own score up to
+ * its {@code max_score}, so the further the owner gets the more it outweighs the other errands
+ * of its priority.
  */
 public final class FollowOwnerIntent implements PetIntent {
-    private static final float MIN_SCORE = 0.5F;
-    private static final float MAX_SCORE = 1.0F;
-
     @Override
     public ResourceLocation id() {
         return PetIntents.FOLLOW_OWNER;
@@ -64,9 +64,10 @@ public final class FollowOwnerIntent implements PetIntent {
     }
 
     @Override
-    public float score(IntentContext ctx) {
+    public float score(IntentContext ctx, ErrandSettings<?> settings) {
         double progress = (distanceToOwner(ctx) - ctx.follow().start()) / (ctx.follow().reach() - ctx.follow().start());
-        return MIN_SCORE + (MAX_SCORE - MIN_SCORE) * (float) Math.max(0.0, Math.min(1.0, progress));
+        float max = ((ErrandTunings.FollowOwner) settings.tuning()).maxScore();
+        return settings.score() + (max - settings.score()) * (float) Math.max(0.0, Math.min(1.0, progress));
     }
 
     private static double distanceToOwner(IntentContext ctx) {
