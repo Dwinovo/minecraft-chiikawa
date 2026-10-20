@@ -94,6 +94,9 @@ public sealed interface Message {
 
     /** What came back of a photo the pet asked its owner's game for. */
     sealed interface PhotoResult extends Message {
+        /** @return the camera item the photo was taken with, which the rest after it depends on */
+        ResourceLocation camera();
+
         /**
          * The picture was kept.
          *

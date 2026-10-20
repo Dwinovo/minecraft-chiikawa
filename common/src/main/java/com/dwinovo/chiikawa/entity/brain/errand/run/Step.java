@@ -53,6 +53,14 @@ public interface Step {
         return "";
     }
 
+    /**
+     * @return whether the step sets the pet's gaze again every tick, so that a passing glance at something else
+     *         would be overwritten at once and is left out
+     */
+    default boolean holdsGaze() {
+        return false;
+    }
+
     /** @return what this step makes of the pet, for the systems that ask */
     default Set<StepTag> tags() {
         return Set.of();

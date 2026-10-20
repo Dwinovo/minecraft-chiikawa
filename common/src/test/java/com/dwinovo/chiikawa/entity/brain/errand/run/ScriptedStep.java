@@ -13,6 +13,7 @@ final class ScriptedStep implements Step {
     int ticked;
     int released;
     boolean interruptible = true;
+    boolean holdsGaze;
     PetActivity pose = PetActivity.NONE;
     String performance = "";
     Set<StepTag> tags = Set.of();
@@ -61,6 +62,11 @@ final class ScriptedStep implements Step {
     @Override
     public void release(Handle handle) {
         released++;
+    }
+
+    @Override
+    public boolean holdsGaze() {
+        return holdsGaze;
     }
 
     @Override

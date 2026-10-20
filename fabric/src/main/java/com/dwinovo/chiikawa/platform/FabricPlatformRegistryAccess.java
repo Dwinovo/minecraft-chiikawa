@@ -44,7 +44,6 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     private final Supplier<Activity> takeExamActivity;
     private final Supplier<Activity> checkResultsActivity;
     private final Supplier<Activity> answerWhistleActivity;
-    private final Supplier<Activity> takePhotoActivity;
     private final Supplier<MenuType<PetBackpackMenu>> petBackpackMenu;
     private final Supplier<LootItemConditionType> qualificationCondition;
 
@@ -76,7 +75,6 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
         takeExamActivity = registerActivity("take_exam");
         checkResultsActivity = registerActivity("check_results");
         answerWhistleActivity = registerActivity("answer_whistle");
-        takePhotoActivity = registerActivity("take_photo");
 
         petBackpackMenu = registerMenu("pet_backpack", new ExtendedScreenHandlerType<>(PetBackpackMenu::new, PetBackpackMenu.OPENING_DATA));
     }
@@ -218,11 +216,6 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     @Override
     public Supplier<Activity> answerWhistleActivity() {
         return answerWhistleActivity;
-    }
-
-    @Override
-    public Supplier<Activity> takePhotoActivity() {
-        return takePhotoActivity;
     }
 
     @Override

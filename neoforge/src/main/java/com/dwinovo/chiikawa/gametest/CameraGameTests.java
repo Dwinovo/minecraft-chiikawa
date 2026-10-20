@@ -17,7 +17,6 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
-import com.dwinovo.chiikawa.init.InitActivity;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
@@ -233,7 +232,7 @@ public final class CameraGameTests {
             helper.assertFalse(answered.isEmpty(), "Hachiware never asked for a photo");
             helper.assertTrue(storedWhileHolding[0], "the picture was not stored while the camera was up");
             helper.assertFalse(shotRolls(pet).isEmpty(), "the picture was not kept");
-            helper.assertFalse(pet.getBrain().isActive(InitActivity.TAKE_PHOTO.get()), "Hachiware was still taking the photo");
+            helper.assertFalse(pet.getIntent().filter(ErrandIds.TAKE_PHOTO::equals).isPresent(), "Hachiware was still taking the photo");
             long rest = pet.getBrain().getTimeUntilExpiry(InitMemory.PHOTO_COOLDOWN.get());
             helper.assertTrue(rest > camera().cooldownTicks() - SETTLED_TICKS && rest <= camera().cooldownTicks(),
                 "Hachiware rests " + rest + " ticks from photos after it, not the camera's " + camera().cooldownTicks());
@@ -420,7 +419,7 @@ public final class CameraGameTests {
             if (lostAt[0] >= 0 && now - lostAt[0] >= RESTING_AFTER) {
                 helper.assertTrue(pet.getBrain().hasMemoryValue(InitMemory.PHOTO_COOLDOWN.get()),
                     "the pet is not resting " + (now - lostAt[0]) + " ticks after it lost its subject");
-                helper.assertFalse(pet.getBrain().isActive(InitActivity.TAKE_PHOTO.get()),
+                helper.assertFalse(pet.getIntent().filter(ErrandIds.TAKE_PHOTO::equals).isPresent(),
                     "the pet set off again " + (now - lostAt[0]) + " ticks after it lost its subject");
                 helper.assertTrue(photos.waiting().isEmpty(), "the pet asked for a photo of nobody");
             }

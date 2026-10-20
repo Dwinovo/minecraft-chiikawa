@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.testing;
 import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.errand.inbox.Cue;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Handle;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
@@ -14,10 +15,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
-/** A handle on no pet, that counts how often the walk and the gaze were cleared and notes what it was asked to say. */
+/** A handle on no pet, that counts how often the walk and the gaze were cleared or glanced away and notes what it was asked to say. */
 public final class FakeHandle implements Handle {
     public int walkCleared;
     public int lookCleared;
+    public int glances;
     public long now;
     public final List<VoiceMoment> said = new ArrayList<>();
 
@@ -51,6 +53,11 @@ public final class FakeHandle implements Handle {
 
     @Override
     public void lookAt(Entity target) {
+    }
+
+    @Override
+    public void lookAt(Entity target, int ticks) {
+        glances++;
     }
 
     @Override
@@ -112,5 +119,9 @@ public final class FakeHandle implements Handle {
 
     @Override
     public void post(AbstractPet other, Message message) {
+    }
+
+    @Override
+    public void cue(AbstractPet other, Cue cue) {
     }
 }

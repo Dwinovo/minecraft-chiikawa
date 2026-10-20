@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.errand.run;
 import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.errand.inbox.Cue;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import net.minecraft.core.BlockPos;
@@ -30,6 +31,9 @@ public interface Handle {
     int blockedTicks();
 
     void lookAt(Entity target);
+
+    /** Looks at a creature for this long, and then lets go of the gaze by itself. */
+    void lookAt(Entity target, int ticks);
 
     void lookAt(Vec3 target);
 
@@ -68,6 +72,9 @@ public interface Handle {
 
     /** Tells another pet something, as the inbox of that pet takes it. */
     void post(AbstractPet other, Message message);
+
+    /** Has another pet do something at once and in passing, as that pet takes a cue. */
+    void cue(AbstractPet other, Cue cue);
 
     /** @return the current game time */
     long now();

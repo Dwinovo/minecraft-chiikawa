@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.gametest;
 
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -19,8 +20,8 @@ final class Residue {
     private Residue() {
     }
 
-    /** Fails the case if the pet is still holding anything of the errand it has just left. */
-    static void none(GameTestHelper helper, AbstractPet pet, ErrandScenarios.Scenario scenario) {
+    /** Fails the case if the pet is still holding anything of the errand it has just left, which was at the step {@code ran} last showed. */
+    static void none(GameTestHelper helper, AbstractPet pet, ErrandScenarios.Scenario scenario, Running ran) {
         List<String> left = new ArrayList<>();
         if (pet.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET)) {
             left.add("a place to walk to");
@@ -43,7 +44,7 @@ final class Residue {
         if (!pet.getPendingGift().isEmpty()) {
             left.add("a present in its paws");
         }
-        scenario.untidy().get().ifPresent(left::add);
+        scenario.untidy().apply(ran).ifPresent(left::add);
         helper.assertTrue(left.isEmpty(), "the pet left its errand still holding " + String.join(", ", left));
     }
 }

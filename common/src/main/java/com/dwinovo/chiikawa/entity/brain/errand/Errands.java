@@ -16,6 +16,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.impl.TakeExamErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.TakePhotoErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.TakeTaskErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.TargetErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.init.InitActivity;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
@@ -101,6 +102,7 @@ public final class Errands {
         if (BY_ID.putIfAbsent(errand.id(), errand) != null) {
             throw new IllegalStateException("Duplicate errand " + errand.id());
         }
+        errand.restSources().forEach(RestSources::register);
         return errand;
     }
 }

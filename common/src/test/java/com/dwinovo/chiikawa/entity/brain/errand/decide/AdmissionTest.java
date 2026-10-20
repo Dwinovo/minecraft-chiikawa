@@ -3,9 +3,6 @@ package com.dwinovo.chiikawa.entity.brain.errand.decide;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.dwinovo.chiikawa.camera.CameraSettings;
-import com.dwinovo.chiikawa.camera.PhotoOutlook;
-import com.dwinovo.chiikawa.camera.PhotoPlan;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
@@ -23,6 +20,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.testing.TestErrands;
+import com.dwinovo.chiikawa.testing.TestPhotos;
 import com.dwinovo.chiikawa.testing.TestView;
 import java.util.Optional;
 import java.util.Set;
@@ -32,7 +30,6 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -167,12 +164,13 @@ class AdmissionTest {
         return ending(ErrandIds.TAKE_PHOTO, TestErrands.planOf(ErrandIds.TAKE_PHOTO, view), view);
     }
 
+    private static final UUID FRIEND = UUID.fromString("00000000-0000-0000-0000-0000000000a2");
+
+    /** A photo of a friend where it is, or of a view when there is none. */
     private static TestView photoOf(Optional<GlobalPos> where) {
-        PhotoOutlook outlook = new PhotoOutlook(true, Optional.of(new CameraSettings(
-            ResourceLocation.fromNamespaceAndPath("chiikawa", "film"), 64.0, 12000, 600, 320, 240, 70,
-            new CameraSettings.Subjects(1, 1, 1), 40, 8, 0.5F)), true, true, true, false,
-            Optional.of(new PhotoPlan(PhotoSubject.FRIEND, Optional.empty(), "", Vec3.ZERO, where)));
-        return TestView.at(HOME, FREE).photo(outlook);
+        TestView view = TestView.at(HOME, FREE);
+        return where.map(found -> view.creature(FRIEND, found).photo(TestPhotos.ready(TestPhotos.of(PhotoSubject.FRIEND, FRIEND))))
+            .orElseGet(() -> view.photo(TestPhotos.ready(TestPhotos.view())));
     }
 
     @Test

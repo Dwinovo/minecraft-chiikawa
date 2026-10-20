@@ -1,10 +1,12 @@
 package com.dwinovo.chiikawa.entity.brain;
 
+import com.dwinovo.chiikawa.camera.PhotoResults;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandType;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandView;
 import com.dwinovo.chiikawa.entity.brain.errand.Errands;
 import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
@@ -13,11 +15,14 @@ import com.dwinovo.chiikawa.entity.brain.errand.decide.Decision;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionTrace;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.Permits;
+import com.dwinovo.chiikawa.entity.brain.errand.inbox.Cue;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Inbox;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.InvitationDesk;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
+import com.dwinovo.chiikawa.entity.brain.errand.rest.RestContext;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Executor;
+import com.dwinovo.chiikawa.entity.brain.errand.run.Handle;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.entity.brain.errand.step.LiveHandle;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
@@ -29,6 +34,7 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -66,6 +72,7 @@ public final class PetMind {
     private final InvitationDesk desk = new InvitationDesk();
     private final DecisionLog log = new DecisionLog();
     private final RestLedger rests;
+    private final Handle handle;
     private final Executor executor;
     private final ErrandView errands;
     /** Set when the pet has been told something that may change its mind, until it next decides. */
@@ -77,7 +84,8 @@ public final class PetMind {
         this.rests = new RestLedger(
             errand -> Errands.get(errand).restStore().of(pet.getBrain(), errand),
             errand -> Optional.ofNullable(ErrandSettings.all().get(errand)));
-        this.executor = new Executor(new LiveHandle(pet), pet, rests, log);
+        this.handle = new LiveHandle(pet);
+        this.executor = new Executor(handle, pet, rests, log);
         this.errands = ErrandView.of(executor, desk);
     }
 
@@ -89,6 +97,16 @@ public final class PetMind {
     public static void post(AbstractPet pet, Message message) {
         if (!pet.level().isClientSide()) {
             pet.getMind().inbox.post(message, pet.level().getGameTime());
+        }
+    }
+
+    /**
+     * Has a pet do something at once and in passing, which is not queued and moves nothing of its body: a pet
+     * whose own mind is off does it too. A no-op on a client.
+     */
+    public static void cue(AbstractPet pet, Cue cue) {
+        if (!pet.level().isClientSide()) {
+            pet.getMind().apply(cue);
         }
     }
 
@@ -136,6 +154,19 @@ public final class PetMind {
         return new Look(executor.running(), level.getGameTime(), view.phase(), trace);
     }
 
+    /** Whoever is photographed turns to the camera, if it is not looking at something of its own, strikes a pose and says something. */
+    private void apply(Cue cue) {
+        switch (cue) {
+            case Cue.Pose pose -> {
+                if (pet.level() instanceof ServerLevel level && level.getEntity(pose.photographer()) instanceof LivingEntity photographer) {
+                    executor.glance(photographer, pose.lookTicks());
+                }
+                handle.gesture(pose.gesture());
+                handle.say(pose.line());
+            }
+        }
+    }
+
     private void handle(Message message, long now) {
         switch (message) {
             case Message.Nudge nudge -> decideNow = true;
@@ -145,6 +176,11 @@ public final class PetMind {
             case Message.Moved moved -> {
                 executor.requestEnd(Outcome.interrupted("moved"));
                 decideNow = true;
+            }
+            case Message.PhotoResult result -> {
+                rests.afterReport(ErrandIds.TAKE_PHOTO, PhotoResults.received(pet, result), RestContext.of(result.camera()), now);
+                // The photo errand may be holding the pose for it, and puts the camera away.
+                executor.deliver(result, now);
             }
             default -> executor.deliver(message, now);
         }

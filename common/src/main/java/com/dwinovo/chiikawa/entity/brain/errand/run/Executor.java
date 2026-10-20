@@ -10,6 +10,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -123,6 +124,16 @@ public final class Executor {
             apply(step.tick(handle), now);
         }
         project();
+    }
+
+    /**
+     * A passing look at something, for as long as given: unless the step the pet is at holds its gaze
+     * itself, which would overwrite it in the next tick. Reaches a pet on no errand as well.
+     */
+    public void glance(Entity target, int ticks) {
+        if (step == null || !step.holdsGaze()) {
+            handle.lookAt(target, ticks);
+        }
     }
 
     /** Tells the step the pet is at something that concerns its errand. */

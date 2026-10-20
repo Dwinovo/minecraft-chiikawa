@@ -10,15 +10,11 @@ import com.dwinovo.chiikawa.photo.PhotoSubject;
 import com.dwinovo.chiikawa.social.InteractionPlan;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import net.minecraft.core.GlobalPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -33,35 +29,29 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Looks round a pet for a photo to take, and for what it would take it of. This is where a
  * pet is read: the facts go into a {@link PhotoOutlook}, which is plain data and has the
- * rules, and the choice among the good moments is {@link PhotoSubjects}, which is pure. The choice
- * is made here, as the pet decides what to do, and carried by a {@link PhotoPlan}.
+ * rules, with a {@link PhotoPlan} for every good moment there is. The choice among the moments is
+ * not made here: the errand offers them, weighted by what the pet fancies, and the decision draws.
  *
- * <p>Only reads. Called every time a pet decides what to do next, so it must not change the
- * world or the pet.
+ * <p>Only reads, and draws nothing from the pet's random. Called every time a pet decides what to
+ * do next, and by the debug command, so it must not change the world or the pet.
  */
 public final class PhotoScout {
     private PhotoScout() {
     }
 
-    /**
-     * A {@link PhotoPlan} with its subject found: what the behavior carries out.
-     *
-     * @param kind the kind of photo
-     * @param target who is in it, when somebody is
-     * @param name who is in it, by name, for the photo's caption; nothing for a view
-     * @param facing which way a pet that has nobody to turn to faces
-     */
-    public record Shot(PhotoSubject kind, Optional<LivingEntity> target, String name, Vec3 facing) {
+    /** A camera a pet carries: the item it is and how it behaves. */
+    private record Equipped(ResourceLocation item, CameraSettings settings) {
     }
 
-    /** The settings of the camera a pet carries, the first it comes to. */
-    public static Optional<CameraSettings> cameraOf(AbstractPet pet) {
+    /** The camera a pet carries, the first it comes to. */
+    private static Optional<Equipped> equipped(AbstractPet pet) {
         for (int slot = 0; slot < pet.getBackpack().getContainerSize(); slot++) {
             ItemStack stack = pet.getBackpack().getItem(slot);
             if (!stack.isEmpty()) {
-                Optional<CameraSettings> camera = CameraSettings.of(BuiltInRegistries.ITEM.getKey(stack.getItem()));
+                ResourceLocation item = BuiltInRegistries.ITEM.getKey(stack.getItem());
+                Optional<CameraSettings> camera = CameraSettings.of(item);
                 if (camera.isPresent()) {
-                    return camera;
+                    return Optional.of(new Equipped(item, camera.get()));
                 }
             }
         }
@@ -78,68 +68,37 @@ public final class PhotoScout {
         if (!(pet instanceof HachiwarePet)) {
             return PhotoOutlook.NONE;
         }
-        Optional<CameraSettings> camera = cameraOf(pet);
+        Optional<Equipped> equipped = equipped(pet);
+        Optional<CameraSettings> camera = equipped.map(Equipped::settings);
         boolean hasFilm = camera.filter(settings -> FilmRolls.hasRoom(pet.getBackpack(), filmOf(settings))).isPresent();
         LivingEntity owner = pet.getOwner();
         boolean ownerInRange = owner instanceof ServerPlayer && owner.isAlive()
             && camera.filter(settings -> pet.distanceTo(owner) <= settings.ownerRange()).isPresent();
-        Optional<PhotoPlan> plan = camera.isEmpty() ? Optional.empty()
-            : remembered(pet).or(() -> chosen(pet, camera.get(), owner));
-        return new PhotoOutlook(true, camera, hasFilm, ownerInRange, ownerCalm(owner),
-            pet.getBrain().hasMemoryValue(InitMemory.PHOTO_COOLDOWN.get()), plan);
+        List<PhotoPlan> moments = equipped.map(found -> moments(pet, owner, found.item())).orElse(List.of());
+        return new PhotoOutlook(true, camera, hasFilm, ownerInRange, ownerCalm(owner), moments);
     }
 
     /**
-     * The plan the pet is carrying out, if it has one and its subject is still about, with the subject
-     * where it is now: a pet that has set off for somebody goes on for them, not for whoever it would
-     * pick this time.
+     * What the pet could take a photo of, and who it would turn to for it: a plan for every kind of photo
+     * there is a good moment for now, in the order of the kinds.
      */
-    private static Optional<PhotoPlan> remembered(AbstractPet pet) {
-        return pet.getBrain().getMemory(InitMemory.PHOTO_PLAN.get()).flatMap(plan -> {
-            if (plan.subject().isEmpty()) {
-                return Optional.of(plan);
-            }
-            return subjectOf(pet.level(), plan).map(subject -> plan.at(positionOf(subject)));
-        });
-    }
-
-    /**
-     * What the pet would take a photo of, and who it would turn to for it: drawn from the moments there
-     * are by what it fancies.
-     */
-    private static Optional<PhotoPlan> chosen(AbstractPet pet, CameraSettings camera, LivingEntity owner) {
-        return PhotoSubjects.choose(moments(pet, owner), camera.subjects(), pet.getRandom()).flatMap(kind -> {
-            Vec3 facing = facing(pet);
-            return switch (kind) {
-                case OWNER -> Optional.ofNullable(owner).map(person -> planFor(kind, person, person.getName().getString(), facing));
-                case FRIEND -> friend(pet).map(friend -> planFor(kind, friend, friend.getDisplayName().getString(), facing));
-                case SCENERY -> Optional.of(new PhotoPlan(kind, Optional.empty(), "", facing, Optional.empty()));
-            };
-        });
-    }
-
-    private static PhotoPlan planFor(PhotoSubject kind, LivingEntity subject, String name, Vec3 facing) {
-        return new PhotoPlan(kind, Optional.of(subject.getUUID()), name, facing, Optional.of(positionOf(subject)));
-    }
-
-    private static GlobalPos positionOf(LivingEntity entity) {
-        return GlobalPos.of(entity.level().dimension(), entity.blockPosition());
-    }
-
-    private static Optional<LivingEntity> subjectOf(Level level, PhotoPlan plan) {
-        return plan.subject().flatMap(id -> level instanceof ServerLevel server && server.getEntity(id) instanceof LivingEntity found
-            && found.isAlive() ? Optional.of(found) : Optional.empty());
-    }
-
-    /**
-     * The plan with its subject found, nothing when the subject is gone by the time the pet comes to it.
-     * Hands the entity to the behavior, which carries the plan out.
-     */
-    public static Optional<Shot> resolve(Level level, PhotoPlan plan) {
-        if (plan.subject().isEmpty()) {
-            return Optional.of(new Shot(plan.kind(), Optional.empty(), plan.name(), plan.facing()));
+    private static List<PhotoPlan> moments(AbstractPet pet, LivingEntity owner, ResourceLocation camera) {
+        List<PhotoPlan> moments = new ArrayList<>();
+        Optional<NearestVisibleLivingEntities> visible = pet.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
+        Optional<AbstractPet> friend = friend(pet);
+        Vec3 facing = facing(pet);
+        if (owner != null && visible.filter(seen -> seen.contains(owner)).isPresent()) {
+            moments.add(planFor(camera, PhotoSubject.OWNER, owner, owner.getName().getString(), facing));
         }
-        return subjectOf(level, plan).map(subject -> new Shot(plan.kind(), Optional.of(subject), plan.name(), plan.facing()));
+        friend.ifPresent(found -> moments.add(planFor(camera, PhotoSubject.FRIEND, found, found.getDisplayName().getString(), facing)));
+        if (sceneryWorthTaking(pet)) {
+            moments.add(new PhotoPlan(camera, PhotoSubject.SCENERY, Optional.empty(), "", facing));
+        }
+        return moments;
+    }
+
+    private static PhotoPlan planFor(ResourceLocation camera, PhotoSubject kind, LivingEntity subject, String name, Vec3 facing) {
+        return new PhotoPlan(camera, kind, Optional.of(subject.getUUID()), name, facing);
     }
 
     /** The biome the pet stands in. */
@@ -154,22 +113,6 @@ public final class PhotoScout {
             && !(owner instanceof Player player && player.getAbilities().flying)
             // The game keeps the last thing that hurt someone for two seconds.
             && owner.getLastDamageSource() == null;
-    }
-
-    /** The kinds of photo there is a good moment for now. */
-    private static Set<PhotoSubject> moments(AbstractPet pet, LivingEntity owner) {
-        Set<PhotoSubject> moments = EnumSet.noneOf(PhotoSubject.class);
-        Optional<NearestVisibleLivingEntities> visible = pet.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
-        if (owner != null && visible.filter(seen -> seen.contains(owner)).isPresent()) {
-            moments.add(PhotoSubject.OWNER);
-        }
-        if (friend(pet).isPresent()) {
-            moments.add(PhotoSubject.FRIEND);
-        }
-        if (sceneryWorthTaking(pet)) {
-            moments.add(PhotoSubject.SCENERY);
-        }
-        return moments;
     }
 
     /**

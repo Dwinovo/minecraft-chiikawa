@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetGesture;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
+import com.dwinovo.chiikawa.entity.brain.errand.inbox.Cue;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Handle;
 import com.dwinovo.chiikawa.task.TaskTracker;
@@ -88,6 +89,11 @@ public final class LiveHandle implements Handle {
     }
 
     @Override
+    public void lookAt(Entity target, int ticks) {
+        brain().setMemoryWithExpiry(MemoryModuleType.LOOK_TARGET, new EntityTracker(target, true), ticks);
+    }
+
+    @Override
     public void lookAt(Vec3 target) {
         brain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(target));
     }
@@ -168,6 +174,11 @@ public final class LiveHandle implements Handle {
     @Override
     public void post(AbstractPet other, Message message) {
         PetMind.post(other, message);
+    }
+
+    @Override
+    public void cue(AbstractPet other, Cue cue) {
+        PetMind.cue(other, cue);
     }
 
     @Override

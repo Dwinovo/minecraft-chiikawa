@@ -72,8 +72,6 @@ public interface IPlatformRegistryAccess {
 
     Supplier<Activity> answerWhistleActivity();
 
-    Supplier<Activity> takePhotoActivity();
-
     Supplier<MenuType<PetBackpackMenu>> petBackpackMenu();
 
     Supplier<LootItemConditionType> qualificationCondition();

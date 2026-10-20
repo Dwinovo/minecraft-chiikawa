@@ -1,14 +1,13 @@
 package com.dwinovo.chiikawa.entity.brain.errand;
 
-import com.dwinovo.chiikawa.camera.CameraSettings;
 import com.dwinovo.chiikawa.camera.PhotoOutlook;
-import com.dwinovo.chiikawa.camera.PhotoPlan;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
 import com.dwinovo.chiikawa.testing.TestAnchors;
+import com.dwinovo.chiikawa.testing.TestPhotos;
 import com.dwinovo.chiikawa.testing.TestView;
 import java.util.Map;
 import java.util.Optional;
@@ -18,7 +17,6 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 
 /**
  * For each errand, a pet that has something to offer it: the view the contract tests ask every errand
@@ -31,6 +29,7 @@ public final class ErrandFixtures {
         ResourceLocation.withDefaultNamespace("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     private static final UUID ITEM = UUID.fromString("00000000-0000-0000-0000-0000000000a1");
+    private static final UUID FRIEND = UUID.fromString("00000000-0000-0000-0000-0000000000a2");
 
     private static final Map<ResourceLocation, TestView> BY_ERRAND = Map.ofEntries(
         Map.entry(ErrandIds.FOLLOW_OWNER, TestView.at(east(9), TestAnchors.following(HOME))),
@@ -62,7 +61,7 @@ public final class ErrandFixtures {
         Map.entry(ErrandIds.TAKE_EXAM, free().examDesk(east(2))),
         Map.entry(ErrandIds.CHECK_RESULTS, free().resultsDesk(east(2))),
         Map.entry(ErrandIds.ANSWER_WHISTLE, free().ownership(PetOwnership.WILD).whistleHeard(east(2))),
-        Map.entry(ErrandIds.TAKE_PHOTO, free().photo(readyToShoot())));
+        Map.entry(ErrandIds.TAKE_PHOTO, free().creature(FRIEND, east(4)).photo(readyToShoot())));
 
     private ErrandFixtures() {
     }
@@ -86,9 +85,6 @@ public final class ErrandFixtures {
     }
 
     private static PhotoOutlook readyToShoot() {
-        return new PhotoOutlook(true, Optional.of(new CameraSettings(
-            ResourceLocation.fromNamespaceAndPath("chiikawa", "film"), 64.0, 12000, 600, 320, 240, 70,
-            new CameraSettings.Subjects(1, 1, 1), 40, 8, 0.5F)), true, true, true, false,
-            Optional.of(new PhotoPlan(PhotoSubject.FRIEND, Optional.empty(), "", Vec3.ZERO, Optional.of(east(4)))));
+        return TestPhotos.ready(TestPhotos.of(PhotoSubject.FRIEND, FRIEND));
     }
 }
