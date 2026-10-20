@@ -7,6 +7,7 @@ import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
+import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.task.PetTask;
 import java.util.Optional;
@@ -222,6 +223,12 @@ public final class TestView implements PetView {
     @Override
     public PerceivedTargets targets() {
         return targets;
+    }
+
+    /** The item the pet perceives is the only one there is. */
+    @Override
+    public Optional<PickableItem> pickable(UUID item) {
+        return targets.pickableItem().filter(perceived -> perceived.id().equals(item));
     }
 
     @Override

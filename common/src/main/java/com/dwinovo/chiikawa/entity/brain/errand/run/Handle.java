@@ -23,7 +23,7 @@ public interface Handle {
     /** Sets off for a creature, following it as it moves. */
     void walkTo(Entity target, float speed, int closeEnough);
 
-    /** Stops walking: forgets where it was going and the path to it. */
+    /** Stops walking: forgets where it was going, the path to it, and that it could not find one. */
     void stopWalking();
 
     /** @return for how many ticks the pet has wanted to walk and been unable to */

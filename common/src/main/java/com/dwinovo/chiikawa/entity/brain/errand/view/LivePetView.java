@@ -23,8 +23,11 @@ import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.utils.Utils;
 import com.dwinovo.chiikawa.whistle.WhistleHeard;
 import java.util.Optional;
+import java.util.UUID;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
@@ -245,6 +248,12 @@ public final class LivePetView implements PetView {
     @Override
     public PhotoOutlook photo() {
         return photo.get();
+    }
+
+    @Override
+    public Optional<PickableItem> pickable(UUID item) {
+        return pet.level() instanceof ServerLevel level && level.getEntity(item) instanceof ItemEntity found
+            ? PickableItem.of(found) : Optional.empty();
     }
 
     private Optional<GlobalPos> findOfferingBoard() {

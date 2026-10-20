@@ -60,11 +60,15 @@ public final class ErrandTunings {
     /**
      * @param speed how fast it walks to the item
      * @param pickupDistance how near it has to be to pick it up
+     * @param maxWalkTicks the longest it walks to an item before it decides the item is not worth the walk
+     * @param noWayTicks how long it has to be unable to find a way before it gives up on one
      */
-    public record PickUp(float speed, double pickupDistance) {
+    public record PickUp(float speed, double pickupDistance, int maxWalkTicks, int noWayTicks) {
         public static final Codec<PickUp> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Fields.SPEED.fieldOf("speed").forGetter(PickUp::speed),
-            Fields.DISTANCE.fieldOf("pickup_distance").forGetter(PickUp::pickupDistance)
+            Fields.DISTANCE.fieldOf("pickup_distance").forGetter(PickUp::pickupDistance),
+            Fields.TICKS.fieldOf("max_walk_ticks").forGetter(PickUp::maxWalkTicks),
+            Fields.TICKS.fieldOf("no_way_ticks").forGetter(PickUp::noWayTicks)
         ).apply(instance, PickUp::new));
     }
 

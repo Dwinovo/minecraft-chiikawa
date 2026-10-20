@@ -6,11 +6,13 @@ import com.dwinovo.chiikawa.camera.PhotoPlan;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
+import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.testing.TestView;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;
@@ -28,13 +30,14 @@ public final class ErrandFixtures {
         ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
         ResourceLocation.withDefaultNamespace("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
+    private static final UUID ITEM = UUID.fromString("00000000-0000-0000-0000-0000000000a1");
 
     private static final Map<ResourceLocation, TestView> BY_ERRAND = Map.ofEntries(
         Map.entry(ErrandIds.FOLLOW_OWNER, TestView.at(east(9), TestAnchors.following(HOME))),
         Map.entry(ErrandIds.STAY, free()),
         Map.entry(ErrandIds.WANDER, free()),
         Map.entry(ErrandIds.PICK_UP_ITEM, free().targets(targets(Optional.empty(), Optional.empty(), Optional.empty(),
-            Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(east(2))))),
+            Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(new PickableItem(ITEM, east(2)))))),
         Map.entry(ErrandIds.HARVEST, free().targets(targets(Optional.empty(), Optional.of(east(2)), Optional.empty(),
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()))),
         Map.entry(ErrandIds.PLANT, free().targets(targets(Optional.empty(), Optional.empty(), Optional.of(east(2)),
@@ -78,7 +81,7 @@ public final class ErrandFixtures {
     }
 
     private static PerceivedTargets targets(Optional<GlobalPos> attack, Optional<GlobalPos> harvest, Optional<GlobalPos> plant,
-            Optional<GlobalPos> container, Optional<GlobalPos> weed, Optional<GlobalPos> mushroom, Optional<GlobalPos> item) {
+            Optional<GlobalPos> container, Optional<GlobalPos> weed, Optional<GlobalPos> mushroom, Optional<PickableItem> item) {
         return new PerceivedTargets(attack, harvest, plant, container, weed, mushroom, item);
     }
 

@@ -15,7 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.schedule.Activity;
 
 /**
- * Acts on one sensed target, such as a crop to harvest or an item to pick up. Starts
+ * Acts on one sensed target, such as a crop to harvest or a chest to fill. Starts
  * while its requirements hold and the sensor remembers a target within the anchor's
  * reach.
  *

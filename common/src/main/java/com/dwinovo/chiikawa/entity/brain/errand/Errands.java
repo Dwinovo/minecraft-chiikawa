@@ -7,6 +7,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.impl.ConstantErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.CooperateErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.FollowOwnerErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.GiftOwnerErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.PickUpItemErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.PlayMusicErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.Requirement;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.ShopErrand;
@@ -48,8 +49,7 @@ public final class Errands {
             () -> InitActivity.STAY.get())),
         register(new ConstantErrand<>(ErrandIds.WANDER, ErrandCategory.WANDER, ErrandTunings.Wander.CODEC,
             () -> Activity.IDLE)),
-        register(new TargetErrand<>(ErrandIds.PICK_UP_ITEM, ErrandCategory.PICK_UP, ErrandTunings.PickUp.CODEC,
-            () -> InitActivity.PICK_UP.get(), PerceivedTargets::pickableItem, "no_item", List.of(), Optional.empty())),
+        register(new PickUpItemErrand()),
         register(new TakeTaskErrand()),
         register(new ShopErrand()),
         register(new GiftOwnerErrand()),

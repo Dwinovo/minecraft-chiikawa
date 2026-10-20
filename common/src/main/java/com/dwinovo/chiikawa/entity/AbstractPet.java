@@ -636,7 +636,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         BrainUtils.addFollowOwnerTasks(brain);
         BrainUtils.addStayTasks(brain);
         BrainUtils.addIdleTasks(brain);
-        BrainUtils.addPickUpTasks(brain);
         BrainUtils.addTakeTaskTasks(brain);
         BrainUtils.addShopTasks(brain);
         BrainUtils.addGiftTasks(brain);
@@ -653,7 +652,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         MusicianJobHandler.registerActivities(brain);
 
         brain.setCoreActivities(java.util.Set.of(Activity.CORE));
-        brain.setDefaultActivity(Activity.IDLE);
+        brain.setDefaultActivity(BrainUtils.HELD);
         return brain;
     }
 

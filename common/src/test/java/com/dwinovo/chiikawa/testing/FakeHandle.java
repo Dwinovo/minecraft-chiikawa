@@ -6,17 +6,20 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Handle;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 
-/** A handle on no pet, that only counts how often the walk and the gaze were cleared. */
+/** A handle on no pet, that counts how often the walk and the gaze were cleared and notes what it was asked to say. */
 public final class FakeHandle implements Handle {
     public int walkCleared;
     public int lookCleared;
     public long now;
+    public final List<VoiceMoment> said = new ArrayList<>();
 
     @Override
     public void stopWalking() {
@@ -80,6 +83,7 @@ public final class FakeHandle implements Handle {
 
     @Override
     public void say(VoiceMoment moment) {
+        said.add(moment);
     }
 
     @Override
