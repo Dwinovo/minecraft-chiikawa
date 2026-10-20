@@ -177,7 +177,8 @@ public final class WhistleGameTests {
                 PetWhistle.Heard heard = PetWhistle.blow(owner, PetDirective.FOLLOW, SHORT);
 
                 helper.assertTrue(heard.nobody(), Component.literal("heard by " + heard));
-                helper.assertFalse(pet.getBrain().hasMemoryValue(InitMemory.WHISTLE_CALL.get()), Component.literal("an order was left for it"));
+                // The blow counts an owned pet where it tells it the order, so none counted is no order queued for it.
+                helper.assertTrue(heard.owned() == 0, Component.literal("an order was left for it"));
             })
             .thenIdle(ANSWER_TICKS)
             .thenExecute(() -> {
