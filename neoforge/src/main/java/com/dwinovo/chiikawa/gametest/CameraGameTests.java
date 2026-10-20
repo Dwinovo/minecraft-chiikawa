@@ -291,7 +291,8 @@ public final class CameraGameTests {
 
     /**
      * The picture comes back in the very tick the pet is unloaded, before it has read anything it was told: the
-     * shot is on the roll in its bag as it is told, so it is on the roll of the pet that is loaded again.
+     * shot is on the roll in its bag as it is told, so it is on the roll of the pet that is loaded again, and so
+     * is the camera's rest for it.
      */
     @GameTest(template = "floor16", batch = "chiikawa_camera_unloaded", timeoutTicks = SHOT_TICKS)
     public static void a_photo_that_comes_back_as_the_pet_is_unloaded_is_on_its_roll_when_it_is_loaded_again(
@@ -309,15 +310,20 @@ public final class CameraGameTests {
             unloaded[0] = true;
             send(photos, owner, photos.waiting().iterator().next(), validPicture());
             helper.assertTrue(shotRolls(pet).size() == 1, "the shot was not on the roll as the pet was told of it");
-            pet.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
-
+            // A chunk saves its entities as it unloads them, and removing a living entity clears its memories.
             CompoundTag saved = new CompoundTag();
             helper.assertTrue(pet.save(saved), "the unloaded pet was not saved");
+            pet.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
+
             AbstractPet loaded = (AbstractPet) EntityType.create(saved, helper.getLevel()).orElseThrow();
             List<ItemStack> rolls = shotRolls(loaded);
             helper.assertTrue(rolls.size() == 1 && FilmItem.rollOf(rolls.get(0)).shots().size() == 1,
                 "the pet loaded again has " + rolls.size() + " rolls with shots on");
             helper.assertTrue(count(loaded, InitItems.FILM.get()) == ROLLS, "the roll was not made of one of the fresh ones");
+            // The rest for the kept photo, not the short one for waiting for it that the shutter began.
+            long rest = loaded.getBrain().getTimeUntilExpiry(InitMemory.PHOTO_COOLDOWN.get());
+            helper.assertTrue(rest > PhotoUploads.WAIT_TICKS && rest <= camera().cooldownTicks(),
+                "the pet loaded again rests " + rest + " ticks from photos, not the camera's " + camera().cooldownTicks());
             helper.succeed();
         });
     }
