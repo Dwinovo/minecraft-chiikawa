@@ -88,8 +88,8 @@ public final class TakeTaskErrand implements ErrandType<TakeTaskErrand.Trip, Err
         ErrandTunings.TakeTask tuning = settings.tuning();
         return Routine.of(
             Routine.step(() -> new ReserveSlip(plan.board())),
-            Routine.step(() -> new WalkTo(new Goal.Place(plan.board().pos()), tuning.speed(), tuning.arriveDistance(),
-                tuning.takeDistance(), settings.maxTicks(), tuning.noWayTicks())),
+            Routine.step(() -> WalkTo.near(new Goal.Place(plan.board().pos()), tuning.speed(), tuning.arriveDistance(),
+                tuning.takeDistance(), settings.maxTicks())),
             Routine.step(() -> new ClaimSlip(plan.board()))).releasing(handle -> ReserveSlip.letGo(handle, plan.board()));
     }
 

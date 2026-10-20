@@ -74,13 +74,13 @@ public final class CheckResultsErrand implements ErrandType<CheckResultsErrand.V
         return view.resultsDesk().isPresent() ? Check.OK : Check.fail("no_desk");
     }
 
-    /** The walk lasts as long as the errand may, unless the pet finds no way to the chair. */
+    /** The walk lasts as long as the errand may, unless the brain's mover lets it go short of the chair. */
     @Override
     public Routine routine(Visit plan, ErrandSettings<ErrandTunings.CheckResults> settings) {
         ErrandTunings.CheckResults tuning = settings.tuning();
         return Routine.of(
-            Routine.step(() -> new WalkTo(new Goal.Chair(plan.desk()), tuning.speed(), RIGHT_UP_TO_IT,
-                tuning.readingDistance(), settings.maxTicks(), tuning.noWayTicks())),
+            Routine.step(() -> WalkTo.near(new Goal.Chair(plan.desk()), tuning.speed(), RIGHT_UP_TO_IT,
+                tuning.readingDistance(), settings.maxTicks())),
             Routine.step(() -> new Read(plan.desk(), tuning.readingTicks())),
             Routine.step(HearResults::new));
     }
