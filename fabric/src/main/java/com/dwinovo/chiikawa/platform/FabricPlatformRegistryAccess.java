@@ -26,8 +26,6 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     private final Supplier<SensorType<PetPickableItemSensor>> petItemEntitySensor;
     private final Supplier<SensorType<PetPlacesSensor>> petPlacesSensor;
     private final Supplier<SensorType<PetSocialSensor>> petSocialSensor;
-    private final Supplier<Activity> socializeActivity;
-    private final Supplier<Activity> cooperateActivity;
     private final Supplier<Activity> answerWhistleActivity;
     private final Supplier<MenuType<PetBackpackMenu>> petBackpackMenu;
     private final Supplier<LootItemConditionType> qualificationCondition;
@@ -42,8 +40,6 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
         petPlacesSensor = registerSensor("pet_places_sensor", new SensorType<>(PetPlacesSensor::new));
         petSocialSensor = registerSensor("pet_social_sensor", new SensorType<>(PetSocialSensor::new));
 
-        socializeActivity = registerActivity("socialize");
-        cooperateActivity = registerActivity("cooperate");
         answerWhistleActivity = registerActivity("answer_whistle");
 
         petBackpackMenu = registerMenu("pet_backpack", new ExtendedScreenHandlerType<>(PetBackpackMenu::new, PetBackpackMenu.OPENING_DATA));
@@ -91,16 +87,6 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     @Override
     public Supplier<SensorType<PetSocialSensor>> petSocialSensor() {
         return petSocialSensor;
-    }
-
-    @Override
-    public Supplier<Activity> socializeActivity() {
-        return socializeActivity;
-    }
-
-    @Override
-    public Supplier<Activity> cooperateActivity() {
-        return cooperateActivity;
     }
 
     @Override
