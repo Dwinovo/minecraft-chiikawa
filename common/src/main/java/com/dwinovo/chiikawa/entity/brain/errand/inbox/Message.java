@@ -17,16 +17,16 @@ import net.minecraft.world.item.ItemStack;
  *
  * <p>A message is read at the pet's next tick, and one that waits when the pet is removed from the world
  * is lost with the inbox. So what a message makes durable, anything saved with the pet or the world such as a
- * shot on its film roll, is not left to the tick: a {@link Durable} message is applied as it is told, and
- * only what concerns deciding and the errand under way, a rest, a step's ending, a nudge, waits in the inbox
- * as a {@link Settled} one. See {@code PetMind}.
+ * shot on its film roll or the rest the pet takes after it, is not left to the tick: a {@link Durable} message
+ * is applied as it is told, and only what concerns deciding and the errand under way, a step's ending, a
+ * nudge, waits in the inbox as a {@link Settled} one. See {@code PetMind}.
  */
 public sealed interface Message {
     /**
-     * A message with something to keep: it has effects that must outlive the inbox, which the pet's mind
-     * applies the moment it is told, on the server thread, and then queues what is left of it as {@link Settled}.
-     * Each kind is applied in one place, the mind's {@code keep}, which is the only writer of what it makes
-     * durable.
+     * A message with something to keep: it has effects that must outlive the inbox, the rests it makes the pet
+     * take among them, which the pet's mind applies the moment it is told, on the server thread, and then
+     * queues what is left of it as {@link Settled}. Each kind is applied in one place, the mind's {@code keep},
+     * which is the only writer of what it makes durable.
      */
     sealed interface Durable extends Message permits PhotoResult {
     }
@@ -36,9 +36,8 @@ public sealed interface Message {
      * what is left for the next tick is to decide and to tell the errand under way.
      *
      * @param message what was told
-     * @param report what the durable part found, for the rest ledger to rest by, if it has something to say
      */
-    record Settled(Durable message, Optional<String> report) implements Message {
+    record Settled(Durable message) implements Message {
     }
 
     /**
