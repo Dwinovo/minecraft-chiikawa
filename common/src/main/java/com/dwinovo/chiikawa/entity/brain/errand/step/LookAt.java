@@ -37,6 +37,11 @@ public final class LookAt implements Step {
     }
 
     @Override
+    public boolean holdsGaze() {
+        return true;
+    }
+
+    @Override
     public void release(Handle handle) {
         handle.clearLook();
     }

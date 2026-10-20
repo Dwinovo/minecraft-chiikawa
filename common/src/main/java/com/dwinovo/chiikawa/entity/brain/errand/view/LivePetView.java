@@ -27,6 +27,7 @@ import java.util.UUID;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -254,6 +255,12 @@ public final class LivePetView implements PetView {
     public Optional<PickableItem> pickable(UUID item) {
         return pet.level() instanceof ServerLevel level && level.getEntity(item) instanceof ItemEntity found
             ? PickableItem.of(pet, found) : Optional.empty();
+    }
+
+    @Override
+    public Optional<GlobalPos> whereIs(UUID creature) {
+        return pet.level() instanceof ServerLevel level && level.getEntity(creature) instanceof LivingEntity found && found.isAlive()
+            ? Optional.of(GlobalPos.of(found.level().dimension(), found.blockPosition())) : Optional.empty();
     }
 
     private Optional<GlobalPos> findOfferingBoard() {
