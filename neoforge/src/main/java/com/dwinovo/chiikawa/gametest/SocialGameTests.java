@@ -20,6 +20,8 @@ import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
+import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
+import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.init.InitEntity;
@@ -91,6 +93,12 @@ public final class SocialGameTests {
     private static final String SONG = "chiikawa_gametest_busking";
     /** Longer than walking over and listening all the way through, so Hachiware is still playing after. */
     private static final int SONG_SECONDS = 50;
+
+    /** The few seconds a pet that was turned down is held back from asking again. */
+    private static final int TURNED_DOWN_REST_TICKS = 100;
+
+    /** How far a rest may have run down between being made and being looked at. */
+    private static final int RUN_DOWN_TICKS = 20;
 
     private static final int STAND = 2;
 
@@ -280,6 +288,72 @@ public final class SocialGameTests {
             .thenExecute(() -> thinkOf(momonga, PetInteractionData.CLING, chiikawa))
             .thenExecuteFor(LEAVE_IT_TICKS, () -> helper.assertFalse(reservedBy(chiikawa, momonga),
                 "Momonga went back to Chiikawa for the same scene"))
+            .thenSucceed();
+    }
+
+    /**
+     * A pet that is turned down, or is never answered, has not played anything: it is held back from asking the same
+     * pet only for a few seconds, so that it is not asking again in the very next breath, and not for the day that a
+     * scene played rests the pair.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = SETTLE_TICKS + SCENE_TICKS + TURNED_DOWN_REST_TICKS)
+    public static void a_pet_turned_down_may_ask_again_in_a_few_seconds_and_not_a_day(GameTestHelper helper) {
+        AbstractPet momonga = wild(helper, InitEntity.MOMONGA_PET.get(), new BlockPos(4, STAND, 8));
+        AbstractPet chiikawa = wild(helper, InitEntity.CHIIKAWA_PET.get(), new BlockPos(8, STAND, 8));
+        PetInteraction cling = scene(PetInteractionData.CLING);
+
+        helper.startSequence()
+            .thenIdle(SETTLE_TICKS)
+            .thenExecute(() -> {
+                // Chiikawa is resting from Momonga's scene, so it says no to being asked, as a pet that has got busy since
+                // Momonga thought of it would; Momonga, who knows nothing of that, sets off to ask.
+                chiikawa.getBrain().setMemory(InitMemory.SOCIAL_COOLDOWNS.get(), SocialCooldowns.NONE.with(
+                    SocialCooldowns.subject(PetInteractionData.CLING, momonga.getUUID()), cling.cooldownTicks(),
+                    helper.getLevel().getGameTime()));
+                thinkOf(momonga, PetInteractionData.CLING, chiikawa);
+            })
+            .thenWaitUntil(() -> helper.assertTrue(endedWith(momonga, ErrandIds.SOCIALIZE, "declined"),
+                "Momonga was never turned down"))
+            .thenExecute(() -> {
+                long left = restLeft(momonga, PetInteractionData.CLING, chiikawa, helper);
+                helper.assertTrue(left > 0 && left <= TURNED_DOWN_REST_TICKS,
+                    "Momonga is held back from Chiikawa for " + left + " ticks, not the few seconds of a refusal");
+                helper.assertTrue(cling.cooldownTicks() > TURNED_DOWN_REST_TICKS * 10,
+                    "a day is not very different from a few seconds in this data pack");
+            })
+            .thenIdle(TURNED_DOWN_REST_TICKS)
+            .thenExecute(() -> helper.assertTrue(SocialRules.accepts(PetInteractionData.CLING, cling, momonga, chiikawa,
+                    helper.getLevel().getGameTime()).isPresent(),
+                "Momonga is still held back from asking Chiikawa, " + restLeft(momonga, PetInteractionData.CLING, chiikawa, helper)
+                    + " ticks later"))
+            .thenSucceed();
+    }
+
+    /**
+     * A scene that has begun rests the pair for its whole cooldown, though one of them is taken away a moment later:
+     * the rest is made as the scene begins, and not left to however it is ended.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = SCENE_TICKS)
+    public static void a_scene_cut_short_after_it_began_rests_the_pair_for_its_whole_cooldown(GameTestHelper helper) {
+        AbstractPet momonga = wild(helper, InitEntity.MOMONGA_PET.get(), new BlockPos(4, STAND, 8));
+        AbstractPet chiikawa = wild(helper, InitEntity.CHIIKAWA_PET.get(), new BlockPos(8, STAND, 8));
+        long cooldown = scene(PetInteractionData.CLING).cooldownTicks();
+
+        helper.startSequence()
+            .thenIdle(SETTLE_TICKS)
+            .thenExecute(() -> thinkOf(momonga, PetInteractionData.CLING, chiikawa))
+            .thenWaitUntil(() -> helper.assertTrue("cling".equals(momonga.getPerformance())
+                    && "clung_to".equals(chiikawa.getPerformance()), "the scene never began"))
+            .thenExecute(() -> PetMind.post(momonga, new Message.Moved("test")))
+            .thenWaitUntil(() -> helper.assertTrue(sceneOver(momonga, chiikawa), "the scene was never ended"))
+            .thenExecute(() -> {
+                helper.assertTrue(restLeft(momonga, PetInteractionData.CLING, chiikawa, helper) > cooldown - RUN_DOWN_TICKS,
+                    "Momonga, who was taken away, rests from Chiikawa for only "
+                        + restLeft(momonga, PetInteractionData.CLING, chiikawa, helper) + " of the " + cooldown + " ticks");
+                helper.assertTrue(restLeft(chiikawa, PetInteractionData.CLING, momonga, helper) > cooldown - RUN_DOWN_TICKS,
+                    "Chiikawa, who was left, rests from Momonga for only "
+                        + restLeft(chiikawa, PetInteractionData.CLING, momonga, helper) + " of the " + cooldown + " ticks");
+            })
             .thenSucceed();
     }
 
@@ -488,6 +562,19 @@ public final class SocialGameTests {
 
     private static boolean runs(AbstractPet pet, ResourceLocation intent) {
         return pet.getIntent().filter(intent::equals).isPresent();
+    }
+
+    /** @return how long the pet has left of resting from this scene with that pet, 0 for none */
+    private static long restLeft(AbstractPet pet, ResourceLocation id, AbstractPet other, GameTestHelper helper) {
+        return pet.getBrain().getMemory(InitMemory.SOCIAL_COOLDOWNS.get())
+            .orElse(SocialCooldowns.NONE)
+            .remaining(SocialCooldowns.subject(id, other.getUUID()), helper.getLevel().getGameTime());
+    }
+
+    /** @return whether the errand has ended with the pet giving up for this reason */
+    private static boolean endedWith(AbstractPet pet, ResourceLocation errand, String reason) {
+        return pet.getMind().log().entries().stream().anyMatch(entry -> entry instanceof DecisionLog.Ended ended
+            && ended.errand().equals(errand) && ended.outcome() instanceof Outcome.GaveUp gaveUp && gaveUp.reason().equals(reason));
     }
 
     private static boolean coolingDown(AbstractPet pet, ResourceLocation id, AbstractPet other, GameTestHelper helper) {
