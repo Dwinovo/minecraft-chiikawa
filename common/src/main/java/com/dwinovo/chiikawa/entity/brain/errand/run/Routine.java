@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.errand.run;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -12,6 +13,10 @@ import java.util.function.Supplier;
  * <p>A routine is made of parts that give their steps one at a time, so a step is made when its turn
  * comes and sees the world as it is then, not as it was when the pet set out: {@link #step} for one,
  * {@link #repeatWhile} for a few that go round while something holds.
+ *
+ * <p>What the steps hold one at a time is let go of by each in its own release. What the errand holds across
+ * several of them, such as a present carried through the walk to whoever it is for, is let go of by the routine's
+ * own release, see {@link #releasing}.
  */
 public final class Routine {
     /** A part of a routine: gives the steps it is made of one at a time, then nothing. */
@@ -25,15 +30,32 @@ public final class Routine {
     }
 
     private final List<Part> parts;
+    private final Consumer<Handle> release;
     private int at;
 
-    private Routine(List<Part> parts) {
+    private Routine(List<Part> parts, Consumer<Handle> release) {
         this.parts = List.copyOf(parts);
+        this.release = release;
     }
 
     /** @return a routine of these parts, one after the other */
     public static Routine of(Part... parts) {
-        return new Routine(List.of(parts));
+        return new Routine(List.of(parts), handle -> {
+        });
+    }
+
+    /**
+     * @param release lets go of what the errand holds from one step to the next: called once however the errand
+     *                ends, after the step it ended at has been released, and also when nothing is held
+     * @return this routine, with that release
+     */
+    public Routine releasing(Consumer<Handle> release) {
+        return new Routine(parts, release);
+    }
+
+    /** Lets go of what the errand holds across its steps. For the executor, as the errand ends. */
+    void release(Handle handle) {
+        release.accept(handle);
     }
 
     /** @return a routine of one step that is already made */

@@ -30,7 +30,8 @@ class StateOwnershipTest {
 
     private static final String PET = "entity/AbstractPet.java";
     private static final String EXECUTOR = "entity/brain/errand/run/Executor.java";
-    private static final String HANDLE = "entity/brain/errand/step/LiveHandle.java";
+    private static final String STEPS = "entity/brain/errand/step/";
+    private static final String HANDLE = STEPS + "LiveHandle.java";
     private static final String RESTS = "entity/brain/errand/rest/RestStore.java";
     private static final String BEHAVIORS = "entity/brain/task/";
 
@@ -68,19 +69,19 @@ class StateOwnershipTest {
                 BEHAVIORS + "idle/GlanceBehavior.java", BEHAVIORS + "musician/PlayMusicBehavior.java",
                 BEHAVIORS + "social/CooperateBehavior.java", BEHAVIORS + "social/SocializeBehavior.java",
                 BEHAVIORS + "tameable/AnchorLeashBehavior.java", BEHAVIORS + "tameable/AnswerWhistleBehavior.java",
-                BEHAVIORS + "tameable/FollowOwnerBehavior.java", BEHAVIORS + "tameable/GiveGiftBehavior.java",
+                BEHAVIORS + "tameable/FollowOwnerBehavior.java",
                 BEHAVIORS + "tameable/GoShoppingBehavior.java", BEHAVIORS + "tameable/RandomWalkTask.java",
                 BEHAVIORS + "tameable/SitBehavior.java", BEHAVIORS + "tameable/TakeTaskBehavior.java")),
         new Rule("a rest",
             Pattern.compile(WRITE + "InitMemory\\.(?:PHOTO_COOLDOWN|GIFT_COOLDOWN|SHOP_COOLDOWN|TAKE_TASK_COOLDOWN"
                 + "|MUSICIAN_RESTING|SOCIAL_COOLDOWNS|ERRAND_RESTS|SUBJECT_RESTS)\\b"),
             Set.of(RESTS),
-            Set.of(BEHAVIORS + "musician/PlayMusicBehavior.java", BEHAVIORS + "tameable/GiveGiftBehavior.java",
+            Set.of(BEHAVIORS + "musician/PlayMusicBehavior.java",
                 BEHAVIORS + "tameable/GoShoppingBehavior.java", BEHAVIORS + "tameable/TakeTaskBehavior.java",
                 "social/SocialRules.java")),
         new Rule("the present in the paws", Pattern.compile("\\bsetPendingGift\\("),
-            Set.of(PET),
-            Set.of(BEHAVIORS + "tameable/GiveGiftBehavior.java")));
+            Set.of(PET, STEPS + "TakePresent.java", STEPS + "HandOver.java"),
+            Set.of()));
 
     /** What an errand that is native, and so composes steps, may not reach for: the pet's brain, its random, its memories. */
     private static final Pattern NOT_FOR_ERRANDS = Pattern.compile("\\bgetBrain\\(\\)|\\bgetRandom\\(\\)|\\bInitMemory\\b|\\bsetMemory\\b");
