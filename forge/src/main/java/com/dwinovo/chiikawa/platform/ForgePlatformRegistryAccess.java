@@ -76,8 +76,6 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
         ACTIVITIES.register("take_task", () -> new Activity(PetActivities.name("take_task")));
     private static final RegistryObject<Activity> SHOP =
         ACTIVITIES.register("shop", () -> new Activity(PetActivities.name("shop")));
-    private static final RegistryObject<Activity> GIFT_OWNER =
-        ACTIVITIES.register("gift_owner", () -> new Activity(PetActivities.name("gift_owner")));
     private static final RegistryObject<Activity> SOCIALIZE =
         ACTIVITIES.register("socialize", () -> new Activity(PetActivities.name("socialize")));
     private static final RegistryObject<Activity> COOPERATE =
@@ -194,11 +192,6 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
     @Override
     public Supplier<Activity> shopActivity() {
         return SHOP;
-    }
-
-    @Override
-    public Supplier<Activity> giftOwnerActivity() {
-        return GIFT_OWNER;
     }
 
     @Override
