@@ -143,12 +143,14 @@ public final class ErrandTunings {
      * @param speed how fast it walks to the board
      * @param arriveDistance how near the walk gets, counted in blocks along each axis; the board is solid
      * @param takeDistance how near it has to be to take a slip
+     * @param noWayTicks how long it has to be unable to find a way to the board before it gives up on one
      */
-    public record TakeTask(float speed, int arriveDistance, double takeDistance) {
+    public record TakeTask(float speed, int arriveDistance, double takeDistance, int noWayTicks) {
         public static final Codec<TakeTask> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Fields.SPEED.fieldOf("speed").forGetter(TakeTask::speed),
             Fields.BLOCKS.fieldOf("arrive_distance").forGetter(TakeTask::arriveDistance),
-            Fields.DISTANCE.fieldOf("take_distance").forGetter(TakeTask::takeDistance)
+            Fields.DISTANCE.fieldOf("take_distance").forGetter(TakeTask::takeDistance),
+            Fields.TICKS.fieldOf("no_way_ticks").forGetter(TakeTask::noWayTicks)
         ).apply(instance, TakeTask::new));
     }
 

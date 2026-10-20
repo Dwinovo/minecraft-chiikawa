@@ -67,7 +67,7 @@ public final class ErrandSettingsData {
                 Rests.of(NONE, RestSpec.from(RestSources.MUSIC_RETRY), NONE), new ErrandTunings.PlayMusic(50))),
             // A pet that gave up on the board, or was taken off the walk to it, leaves it alone for half a minute.
             entry(ErrandIds.TAKE_TASK, errand(50, 0.7F, 1200,
-                Rests.of(NONE, RestSpec.ticks(600), RestSpec.ticks(600)), new ErrandTunings.TakeTask(0.7F, 2, 3.0))),
+                Rests.of(NONE, RestSpec.ticks(600), RestSpec.ticks(600)), new ErrandTunings.TakeTask(0.7F, 2, 3.0, 100))),
             entry(ErrandIds.SHOP, errand(50, 0.65F, 1200,
                 Rests.of(RestSpec.ticks(600), RestSpec.ticks(600), NONE), new ErrandTunings.Shop(0.7F, 2, 3.0))),
             entry(ErrandIds.GIFT_OWNER, errand(80, 0.85F, 2400,

@@ -111,6 +111,7 @@ class ErrandSettingsDataTest {
 
             assertEquals(settings, ErrandSettings.codecOf(errand).parse(JsonOps.INSTANCE, json).getOrThrow(), errand.toString());
             assertEquals(Optional.empty(), settings.problemAmong(errand, ErrandSettingsData.all()), errand.toString());
+            assertEquals(Optional.empty(), settings.problemFor(Errands.get(errand)), errand.toString());
             assertTrue(settings.maxTicks() > 0, errand.toString());
             assertTrue(settings.rests().gaveUp().lasts(), errand + " must rest after giving up");
         });

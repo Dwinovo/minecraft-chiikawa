@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.errand.step;
 import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.block.ExamDeskBlockEntity;
+import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetGesture;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
@@ -62,6 +63,11 @@ public final class LiveHandle implements Handle {
     /** @return the exam desk at that place, while it is in the pet's world and loaded and has not been broken */
     Optional<ExamDeskBlockEntity> examDesk(GlobalPos desk) {
         return ExamDeskBlockEntity.at(pet.level(), desk);
+    }
+
+    /** @return the labor board at that place, while it is in the pet's world and loaded and has not been broken */
+    Optional<LaborBoardBlockEntity> board(GlobalPos board) {
+        return LaborBoardBlockEntity.at(pet.level(), board);
     }
 
     /** @return the pet's owner, while they are a player in the pet's world */
