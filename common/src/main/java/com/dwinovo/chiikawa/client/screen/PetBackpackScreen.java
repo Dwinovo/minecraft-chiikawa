@@ -418,7 +418,7 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         int tab = Tabs.at(this.leftPos, this.topPos, Page.values().length, (int) event.x(), (int) event.y());
-        if (tab >= 0 && event.button() == 0) {
+        if (tab >= 0 && event.isLeft()) {
             if (tab != page.ordinal()) {
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 showPage(Page.values()[tab]);
