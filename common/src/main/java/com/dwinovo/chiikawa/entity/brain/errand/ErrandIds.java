@@ -14,6 +14,7 @@ public final class ErrandIds {
     public static final ResourceLocation PICK_UP_ITEM = id("pick_up_item");
     public static final ResourceLocation TAKE_TASK = id("take_task");
     public static final ResourceLocation SHOP = id("shop");
+    public static final ResourceLocation OFFER_GIFT = id("offer_gift");
     public static final ResourceLocation GIFT_OWNER = id("gift_owner");
     public static final ResourceLocation SOCIALIZE = id("socialize");
     public static final ResourceLocation COOPERATE = id("cooperate");

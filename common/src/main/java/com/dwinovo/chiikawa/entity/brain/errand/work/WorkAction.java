@@ -12,8 +12,10 @@ import com.mojang.serialization.Codec;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * What a pet does for a kind of work, written once in code and named by the errand files that use it: the
@@ -57,6 +59,16 @@ public interface WorkAction<P extends Plan, T> {
     /** Whether the work goes on: the condition to keep at it, as {@link com.dwinovo.chiikawa.entity.brain.errand.ErrandType#stillWanted}. */
     default Check stillWanted(Work<P, T> work, ResourceLocation errand, P plan, PetView view, T tuning) {
         return Check.OK;
+    }
+
+    /**
+     * What the work uses up or shoots, the seeds a farmer plants and the arrows an archer looses: not the tool, which is
+     * the job's. A pet does not give its owner these as presents, see {@code WorkItems}.
+     *
+     * @return whether a stack is such a thing; nothing is, for a work that uses up nothing
+     */
+    default Predicate<ItemStack> materials() {
+        return stack -> false;
     }
 
     /** @return the steps of the work, made for one start and used up by it */

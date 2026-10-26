@@ -4,20 +4,26 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Handle;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Step;
 import com.dwinovo.chiikawa.entity.brain.errand.run.StepStatus;
-import com.dwinovo.chiikawa.gifting.GiftPool;
-import java.util.Optional;
+import com.dwinovo.chiikawa.gifting.GiftChoice;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Takes a present out of the pet's bag into its paws: one of the thing, drawn from what the pet may give by how
- * much it fancies giving each. A pet that is already carrying one, from before it was saved or from the shop, keeps
- * that and takes none. Gives up if there is nothing it may give after all. Done in the tick it takes, so it is never
- * cut half way.
+ * Takes a present out of the pet's bag into its paws: one of the thing it chose, and the present it had in mind is
+ * in its paws and no longer in its mind. Gives up if the thing is not in the bag after all, and then the pet still has
+ * the present in mind. Done in the tick it takes, so it is never cut half way.
  *
- * <p>The present is the pet's to carry until {@link HandOver} gives it, or {@link #putBack} returns it: those and
- * this step are the only writers of what is in the pet's paws.
+ * <p>The present is the pet's to carry until {@code Presents} gives it, or {@link #putBack} returns it: those and
+ * this step are the only writers of what is in the pet's paws, and this step the only one that consumes the present
+ * the pet has in mind.
  */
 public final class TakePresent implements Step {
+    private final GiftChoice.Pick pick;
+
+    /** @param pick what the pet chose to give, and where it has it */
+    public TakePresent(GiftChoice.Pick pick) {
+        this.pick = pick;
+    }
+
     @Override
     public void begin(Handle handle) {
     }
@@ -25,14 +31,11 @@ public final class TakePresent implements Step {
     @Override
     public StepStatus tick(Handle handle) {
         AbstractPet pet = LiveHandle.of(handle).pet();
-        if (!pet.getPendingGift().isEmpty()) {
-            return StepStatus.DONE;
-        }
-        Optional<GiftPool.Candidate> chosen = GiftPool.draw(GiftPool.of(pet), pet.getRandom());
-        if (chosen.isEmpty()) {
+        if (!pet.getBackpack().getItem(pick.slot()).is(pick.item())) {
             return StepStatus.gaveUp("no_present");
         }
-        pet.setPendingGift(pet.getBackpack().removeItem(chosen.get().slot(), 1));
+        pet.setPendingGift(pet.getBackpack().removeItem(pick.slot(), 1));
+        pet.giftIntentions().consume();
         return StepStatus.DONE;
     }
 

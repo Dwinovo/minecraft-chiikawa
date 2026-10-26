@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.entity.job.impl;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.job.api.PetCapability;
+import java.util.Optional;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -35,5 +36,10 @@ public class BasicJob implements PetCapability {
     public boolean canAssume(AbstractPet pet) {
         ItemStack stack = pet.getBackpack().getItem(0);
         return stack.is(toolTag);
+    }
+
+    @Override
+    public Optional<TagKey<Item>> toolTag() {
+        return Optional.of(toolTag);
     }
 }

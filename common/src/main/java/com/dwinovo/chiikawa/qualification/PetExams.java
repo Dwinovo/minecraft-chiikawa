@@ -7,6 +7,7 @@ import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
+import com.dwinovo.chiikawa.gifting.GiftOccasion;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.Map;
@@ -142,7 +143,8 @@ public final class PetExams {
     }
 
     /**
-     * Hears one result, which is when the licence changes: up a grade, or one more fail to try again after.
+     * Hears one result, which is when the licence changes: up a grade, or one more fail to try again after. A pet that
+     * passed may have a present in mind for its owner because of it.
      *
      * @return how it went, if there was a result to hear
      */
@@ -155,6 +157,9 @@ public final class PetExams {
         }
         int rank = qualification.get().rank(licence.held() + 1);
         pet.licences().set(id, licence.announced());
+        if (paper.get().passed()) {
+            PetMind.post(pet, new Message.Occasion(GiftOccasion.PASSED_EXAM, Optional.empty()));
+        }
         return Optional.of(new ExamResult(paper.get().passed(), rank));
     }
 

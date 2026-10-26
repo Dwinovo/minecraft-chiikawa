@@ -34,6 +34,7 @@ class StateOwnershipTest {
     private static final String HANDLE = STEPS + "LiveHandle.java";
     private static final String RESTS = "entity/brain/errand/rest/RestStore.java";
     private static final String SENSORS = "entity/brain/sensor/";
+    private static final String GIFTING = "gifting/";
 
     /**
      * One kind of write, and who does it.
@@ -96,7 +97,14 @@ class StateOwnershipTest {
             Pattern.compile(WRITE + "InitMemory\\.(?:HARVEST_POS|PLANT_POS|CONTAINER_POS|WEED_POS|MUSHROOM_POS)\\b"),
             Set.of()),
         new Rule("the present in the paws", Pattern.compile("\\bsetPendingGift\\("),
-            Set.of(PET, STEPS + "TakePresent.java", STEPS + "HandOver.java")));
+            Set.of(PET, STEPS + "TakePresent.java", GIFTING + "Presents.java")),
+        new Rule("the present a pet has in mind, thought of", Pattern.compile("\\bgiftIntentions\\(\\)\\s*\\.\\s*note\\("),
+            Set.of(MIND)),
+        new Rule("the present a pet has in mind, given up for the one in its paws",
+            Pattern.compile("\\bgiftIntentions\\(\\)\\s*\\.\\s*consume\\("),
+            Set.of(STEPS + "TakePresent.java")),
+        new Rule("the presents an owner was given today", Pattern.compile("\\bGiftLedger\\.of\\([^)]*\\)\\s*\\.\\s*record\\("),
+            Set.of(GIFTING + "Presents.java")));
 
     /** What an errand, which composes steps, may not reach for: the pet's brain, its random, its memories. */
     private static final Pattern NOT_FOR_ERRANDS = Pattern.compile("\\bgetBrain\\(\\)|\\bgetRandom\\(\\)|\\bInitMemory\\b|\\bsetMemory\\b");

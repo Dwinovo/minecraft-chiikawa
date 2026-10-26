@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.errand.inbox;
 
 import com.dwinovo.chiikawa.entity.PetDirective;
+import com.dwinovo.chiikawa.gifting.GiftOccasion;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
 import com.dwinovo.chiikawa.qualification.ExamResult;
 import com.dwinovo.chiikawa.task.PetTask;
@@ -29,7 +30,7 @@ public sealed interface Message {
      * moment it is told, on the server thread, and then queues what is left of it as {@link Settled}. Each kind is
      * applied in one place, the mind's {@code keep}, which is the only writer of what it makes durable.
      */
-    sealed interface Durable extends Message permits PhotoResult, ExamCalledOff, ResultsDue, SlipCompleted {
+    sealed interface Durable extends Message permits PhotoResult, ExamCalledOff, ResultsDue, SlipCompleted, Occasion, GiftClaimed {
     }
 
     /**
@@ -130,6 +131,25 @@ public sealed interface Message {
      * @param task the slip, as it was when it was finished
      */
     record SlipCompleted(PetTask task) implements Durable {
+    }
+
+    /**
+     * Something happened that may put a present in the pet's mind, see {@code GiftOccasion}. Its durable part is the
+     * present, which the pet's mind notes as it is told, if it is to think of one; nothing waits for the pet's next tick.
+     *
+     * @param kind what happened
+     * @param keepsake what the pet sets aside for its owner because of it, a copy, if it does
+     */
+    record Occasion(GiftOccasion kind, Optional<ItemStack> keepsake) implements Durable {
+    }
+
+    /**
+     * The owner took the present from the pet's paws with a click, and did not wait for it to be brought. Its durable
+     * part is the giving, see {@code Presents}; the errand the pet was on ends as it finds there is nothing to give.
+     *
+     * @param player the owner who took it
+     */
+    record GiftClaimed(UUID player) implements Durable {
     }
 
     /**

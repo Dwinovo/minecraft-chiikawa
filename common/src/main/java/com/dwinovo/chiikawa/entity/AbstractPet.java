@@ -20,6 +20,7 @@ import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.qualification.PetLicences;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
 import com.dwinovo.chiikawa.entity.job.api.PetCapability;
+import com.dwinovo.chiikawa.gifting.GiftIntentions;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.init.InitSensor;
@@ -256,6 +257,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     /** Where it stands with every licence; kept on the server, saved with the pet. */
     private final PetLicences licences = new PetLicences();
+
+    /** The present it has in mind for its owner; kept on the server, saved with the pet. */
+    private final GiftIntentions giftIntentions = new GiftIntentions();
     private final SimpleContainer backpack = new SimpleContainer(FULL_BACKPACK_SIZE) {
         @Override
         public void setChanged() {
@@ -1049,6 +1053,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
             tag.putLong("EagerUntil", this.entityData.get(EAGER_UNTIL));
         }
         licences.save(tag);
+        giftIntentions.save(tag, level().registryAccess());
     }
 
     @Override
@@ -1072,6 +1077,12 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         applyEagerness();
         refreshJobFromMainhand();
         licences.load(tag);
+        giftIntentions.load(tag, level().registryAccess());
+    }
+
+    /** @return the present this pet has in mind for its owner, if it has one */
+    public GiftIntentions giftIntentions() {
+        return giftIntentions;
     }
 
     /** @return where this pet stands with every licence */

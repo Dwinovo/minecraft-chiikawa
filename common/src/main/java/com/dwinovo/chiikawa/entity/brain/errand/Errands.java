@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.impl.CheckResultsErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.CooperateErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.FollowOwnerErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.GiftOwnerErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.OfferGiftErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.PickUpItemErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.ShopErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.SocializeErrand;
@@ -48,6 +49,7 @@ public final class Errands {
         register(new PickUpItemErrand()),
         register(new TakeTaskErrand()),
         register(new ShopErrand()),
+        register(new OfferGiftErrand()),
         register(new GiftOwnerErrand()),
         register(new SocializeErrand()),
         register(new CooperateErrand()),

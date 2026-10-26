@@ -145,7 +145,7 @@ class AdmissionTest {
 
     @Test
     void everyErrandSaysWhereItGoes() {
-        TestView view = TestView.at(HOME, FREE).ownership(PetOwnership.WILD).phase(DayPhase.NIGHT).withPresent().armedWithArrows()
+        TestView view = TestView.at(HOME, FREE).ownership(PetOwnership.WILD).phase(DayPhase.NIGHT).holdingGift().armedWithArrows()
             .shopWorthVisiting(east(1)).offeringBoard(east(2)).socialPartner(east(3)).examDesk(east(4))
             .resultsDesk(east(5)).whistleHeard(east(6)).ownerPos(east(7))
             .targets(TestTargets.of(Optional.of(new AttackTarget(UUID.randomUUID(), east(8))), Optional.of(east(9)), Optional.of(east(10)),
@@ -158,6 +158,7 @@ class AdmissionTest {
         assertEquals(Optional.of(east(5)), destination(ErrandIds.CHECK_RESULTS, view));
         assertEquals(Optional.of(east(6)), destination(ErrandIds.ANSWER_WHISTLE, view));
         assertEquals(Optional.of(east(7)), destination(ErrandIds.GIFT_OWNER, view));
+        assertEquals(Optional.of(east(7)), destination(ErrandIds.OFFER_GIFT, view.withPresent()));
         assertEquals(Optional.of(east(8)), destination(WorkData.MELEE, view));
         assertEquals(Optional.of(east(8)), destination(WorkData.RANGED, view));
         assertEquals(Optional.of(east(9)), destination(WorkData.HARVEST, view));
@@ -232,9 +233,12 @@ class AdmissionTest {
 
     @Test
     void aPresentIsOnlyWalkedToAnOwnerWithinTheArea() {
-        assertEquals(DecisionTrace.STARTABLE, verdict(ErrandIds.GIFT_OWNER, TestView.at(HOME, FREE).withPresent().ownerPos(east(10))));
+        assertEquals(DecisionTrace.STARTABLE, verdict(ErrandIds.GIFT_OWNER, TestView.at(HOME, FREE).holdingGift().ownerPos(east(10))));
         assertEquals("intent.chiikawa.fail.out_of_reach",
-            verdict(ErrandIds.GIFT_OWNER, TestView.at(HOME, FREE).withPresent().ownerPos(east(30))));
+            verdict(ErrandIds.GIFT_OWNER, TestView.at(HOME, FREE).holdingGift().ownerPos(east(30))));
+        assertEquals(DecisionTrace.STARTABLE, verdict(ErrandIds.OFFER_GIFT, TestView.at(HOME, FREE).withPresent().ownerPos(east(10))));
+        assertEquals("intent.chiikawa.fail.out_of_reach",
+            verdict(ErrandIds.OFFER_GIFT, TestView.at(HOME, FREE).withPresent().ownerPos(east(30))));
         TestView carrying = TestView.at(HOME, FREE).holdingGift().ownerPos(east(30));
         assertEquals(Optional.of(Outcome.gaveUp("out_of_leash")),
             ending(ErrandIds.GIFT_OWNER, TestErrands.planOf(ErrandIds.GIFT_OWNER, carrying), carrying));

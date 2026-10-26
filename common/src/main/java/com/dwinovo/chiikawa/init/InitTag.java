@@ -24,6 +24,14 @@ public final class InitTag {
     public static final TagKey<Item> CURRENCY = tag("currency");
     /** What a pet treats another to out of its own backpack, see {@code pet_interaction}. */
     public static final TagKey<Item> PET_TREATS = tag("pet_treats");
+    /** The flowers any pet gives its owner, see {@code pet_gifting}. */
+    public static final TagKey<Item> GIFT_FLOWERS = tag("gift_flowers");
+    /** What a pet is glad to have found when it picks it up, and may give its owner for it. */
+    public static final TagKey<Item> GIFT_FINDS = tag("gift_finds");
+    /** The sweets Rakko gives its owner, see {@code pet_gifting}. */
+    public static final TagKey<Item> SWEETS = tag("sweets");
+    /** What no pet gives as a present, whatever else the gifting settings say; empty, for a pack to fill. */
+    public static final TagKey<Item> NEVER_GIFTED = tag("never_gifted");
 
     public static final TagKey<EntityType<?>> ENTITY_HOSTILE_ENTITY = tagEntity("entity_hostile_entity");
     /** The pets creepers keep away from, as they do from cats: see {@code CreeperMixin}. */

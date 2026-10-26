@@ -9,6 +9,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSpec;
 import com.dwinovo.chiikawa.entity.brain.errand.step.Meeting;
 import com.dwinovo.chiikawa.entity.brain.personality.IdleHabits;
+import com.dwinovo.chiikawa.gifting.Presents;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +21,8 @@ import net.minecraft.resources.ResourceLocation;
  * it and how long it leaves it alone afterwards.
  *
  * <p>Fights, the present in a pet's paws, the exam and the invitation of a friend are priority 80; the
- * slip, work and playing music 50; a photo 40; picking things up and calling on a friend 30; pottering
- * about and staying put 10. Within a priority the score settles which comes first.
+ * slip, work and playing music 50; a photo 40; picking things up, taking a present out of the bag and calling on a
+ * friend 30; pottering about and staying put 10. Within a priority the score settles which comes first.
  *
  * <p>An errand with no limit of its own (following and fighting end when they stop being wanted) is given a
  * day; one that walks to something and does one thing to it, half a minute; one that is a habit at a time, a little
@@ -87,9 +88,15 @@ public final class ErrandSettingsData {
                 Rests.of(NONE, RestSpec.ticks(600), RestSpec.ticks(600)), new ErrandTunings.TakeTask(0.7F, 2, 3.0))),
             entry(ErrandIds.SHOP, errand(50, 0.65F, 1200,
                 Rests.of(RestSpec.ticks(600), RestSpec.ticks(600), NONE), new ErrandTunings.Shop(0.7F, 2, 3.0))),
+            // The pet takes the present out of its bag once something has put one in its mind, and is then carrying it. It
+            // does nothing else with its time, so it is done in the tick it begins. It rests from giving a present for as
+            // long as the settings say, in the memory both gift errands share, from the moment it is given.
+            entry(ErrandIds.OFFER_GIFT, errand(30, 0.4F, 100, giveUp(600), ErrandTunings.Untuned.NONE)),
+            // The walk to the owner, or the wait by their bed, is what the time limit is for. A fight at the same priority goes first.
+            // A bedside gift is left when the owner wakes from the night's sleep, just after dawn as the day's clock reads it.
             entry(ErrandIds.GIFT_OWNER, errand(80, 0.85F, 2400,
-                Rests.of(RestSpec.from(RestSources.GIFTING_COOLDOWN), RestSpec.ticks(600), NONE),
-                new ErrandTunings.GiftOwner(1.0F, 1, 2.0))),
+                new Rests(NONE, RestSpec.ticks(600), NONE, Map.of(Presents.GIVEN, RestSpec.from(RestSources.GIFTING_COOLDOWN))),
+                new ErrandTunings.GiftOwner(1.0F, 1, 2.0, 0.77F, 0.8F, 100)).yieldingTo(WorkData.MELEE, WorkData.RANGED)),
             entry(ErrandIds.SOCIALIZE, errand(30, 0.35F, 1200, scene, new ErrandTunings.Socialize(0.6F, 1, 5))),
             entry(ErrandIds.COOPERATE, errand(80, 0.5F, 1200, scene, ErrandTunings.Untuned.NONE)),
             entry(ErrandIds.TAKE_EXAM, errand(80, 0.72F, 2400,

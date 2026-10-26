@@ -2,9 +2,13 @@ package com.dwinovo.chiikawa.task;
 
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.PetMind;
+import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
+import com.dwinovo.chiikawa.gifting.GiftOccasion;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
+import java.util.Optional;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
@@ -26,7 +30,7 @@ public final class SlipWages {
 
     /**
      * Pays the slip out: the reward into the pet's backpack, the slip noted as the last it finished, and one more
-     * slip of practice for the licences it is practice for. Server-side.
+     * slip of practice for the licences it is practice for; and being paid may put a present in its mind. Server-side.
      *
      * @param task the slip, as it was when it was finished
      */
@@ -45,6 +49,7 @@ public final class SlipWages {
                 pet.spawnAtLocation(remainder);
             }
         }
+        PetMind.post(pet, new Message.Occasion(GiftOccasion.GOT_PAID, Optional.empty()));
     }
 
     /** The pet shows it has been paid: a sparkle, joy, the happy sound and something to say. Server-side. */
