@@ -1,12 +1,15 @@
 package com.dwinovo.chiikawa.testing;
 
 import com.dwinovo.chiikawa.data.WorkData;
+import com.dwinovo.chiikawa.entity.brain.combat.Ground;
 import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
 
@@ -16,6 +19,11 @@ import net.minecraft.resources.ResourceLocation;
  */
 public final class TestTargets {
     private TestTargets() {
+    }
+
+    /** @return a foe the pet fights for these reasons */
+    public static AttackTarget foe(UUID id, GlobalPos where, Ground... grounds) {
+        return new AttackTarget(id, where, Set.of(grounds));
     }
 
     /**

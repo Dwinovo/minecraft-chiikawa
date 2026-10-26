@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.errand.work;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.combat.Ground;
 import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.dwinovo.chiikawa.utils.Deliveries;
@@ -8,14 +9,19 @@ import com.dwinovo.chiikawa.utils.Utils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -24,7 +30,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 
 /**
- * What a work is done to, as its file names it: {@code "target": {"type": "foe", "missing": "no_attack_target"}}.
+ * What a work is done to, as its file names it: {@code "target": {"type": "foe", "missing": "no_attack_target",
+ * "grounds": ["self", "owner", "nearby"]}}.
  * Each kind says, in its {@code missing}, why the pet has nothing to do the work to, which is the key of the reason
  * shown for the errand ({@code intent.chiikawa.fail.*}). A work whose action does not take a target has no
  * {@code target}, and the file of an action that cannot use the one it names is turned off, see
@@ -55,18 +62,29 @@ public sealed interface WorkTarget {
     }
 
     /**
-     * The foe the pet's attack sensor names.
+     * The foe the pet's attack sensor names, when the pet fights it for one of these reasons.
      *
      * @param missing the reason key when it names none
+     * @param grounds the grounds the work is for; the pet's foe is its own if it is on one of them
      */
-    record Foe(String missing) implements WorkTarget {
+    record Foe(String missing, Set<Ground> grounds) implements WorkTarget {
         static final MapCodec<Foe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Codec.STRING.fieldOf("missing").forGetter(Foe::missing)
-        ).apply(instance, Foe::new));
+            Codec.STRING.fieldOf("missing").forGetter(Foe::missing),
+            ExtraCodecs.nonEmptyList(Ground.CODEC.listOf()).fieldOf("grounds").forGetter(foe -> List.copyOf(foe.grounds()))
+        ).apply(instance, (missing, grounds) -> new Foe(missing, Set.copyOf(grounds))));
 
-        /** @return the foe the pet's attack sensor names, as long as it is the pet's to fight, see {@link AttackTarget} */
+        public Foe {
+            EnumSet<Ground> kept = EnumSet.noneOf(Ground.class);
+            kept.addAll(grounds);
+            grounds = Collections.unmodifiableSet(kept);
+        }
+
+        /**
+         * @return the foe the pet's attack sensor names, as long as it is the pet's to fight and for a reason this work is
+         *         for, see {@link AttackTarget}
+         */
         public Optional<AttackTarget> in(PetView view) {
-            return view.targets().attackTarget();
+            return view.targets().attackTarget().filter(foe -> foe.grounds().stream().anyMatch(grounds::contains));
         }
 
         @Override

@@ -16,6 +16,7 @@ import com.dwinovo.chiikawa.testing.TestErrands;
 import com.mojang.serialization.JsonOps;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -38,7 +39,7 @@ class WorkDataTest {
         Set<ResourceLocation> errands = Errands.all().stream().map(ErrandType::id).collect(Collectors.toSet());
         Set<ResourceLocation> works = WorkData.all().keySet();
 
-        assertEquals(22, errands.size());
+        assertEquals(26, errands.size());
         assertEquals(errands, ErrandSettingsData.all().keySet(), "settings and errands are each other's");
         assertEquals(errands, ErrandSettings.all().keySet(), "the loader kept every file");
         assertEquals(errands, ErrandFiles.all().keySet(), "every errand has a file");
@@ -80,17 +81,23 @@ class WorkDataTest {
     }
 
     @Test
-    void everySlipCountsAWorksCounterOrTheSlayAndItsJobDoesTheWork() {
+    void everySlipCountsAWorksCounterAndItsJobDoesTheWork() {
         Set<ResourceLocation> counters = WorkData.all().values().stream().flatMap(work -> work.counter().stream())
             .collect(Collectors.toSet());
 
         PetTaskTypeData.all().forEach((slip, type) -> {
-            assertTrue(counters.contains(type.counter()) || type.counter().equals(PetWorkCounters.SLAY),
-                slip + " counts " + type.counter() + ", which no work reports");
-            if (!type.counter().equals(PetWorkCounters.SLAY)) {
-                assertTrue(countedByTheJobOf(type), slip + " is for " + type.capability() + ", whose work never reports " + type.counter());
-            }
+            assertTrue(counters.contains(type.counter()), slip + " counts " + type.counter() + ", which no work reports");
+            assertTrue(countedByTheJobOf(type), slip + " is for " + type.capability() + ", whose work never reports " + type.counter());
         });
+    }
+
+    @Test
+    void theSlayIsTheCounterOfTheHuntsAndOfNoOtherWork() {
+        Set<ResourceLocation> hunts = WorkData.all().entrySet().stream()
+            .filter(work -> work.getValue().counter().equals(Optional.of(PetWorkCounters.SLAY)))
+            .map(Map.Entry::getKey).collect(Collectors.toSet());
+
+        assertEquals(Set.of(WorkData.HUNT_MELEE, WorkData.HUNT_RANGED), hunts);
     }
 
     private static boolean countedByTheJobOf(PetTaskType type) {

@@ -4,19 +4,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.data.WorkData;
+import com.dwinovo.chiikawa.entity.brain.combat.Ground;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandTunings;
-import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.work.action.Duel;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.testing.TestErrands;
+import com.dwinovo.chiikawa.testing.TestTargets;
 import com.dwinovo.chiikawa.testing.TestView;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -48,20 +50,51 @@ class CombatOfferTest {
             assertEquals(new Duel(FOE), TestErrands.planOf(errand, view), errand::toString);
             assertEquals(Optional.of(east(6)), TestErrands.planOf(errand, view).destination(view), errand::toString);
         }
+        TestView hunting = foeOn(Ground.HUNT).armedWithArrows();
+        for (ResourceLocation errand : new ResourceLocation[] {WorkData.HUNT_MELEE, WorkData.HUNT_RANGED}) {
+            assertEquals(new Duel(FOE), TestErrands.planOf(errand, hunting), errand::toString);
+            assertEquals(Optional.of(east(6)), TestErrands.planOf(errand, hunting).destination(hunting), errand::toString);
+        }
+    }
+
+    @Test
+    void aFoeIsFoughtByTheWorkThatIsForTheReasonItIsFoughtFor() {
+        Map<Ground, Boolean> guarded = Map.of(Ground.SELF, true, Ground.OWNER, true, Ground.NEARBY, true, Ground.HUNT, false);
+
+        guarded.forEach((ground, byAGuard) -> {
+            TestView view = foeOn(ground).armedWithArrows();
+
+            for (ResourceLocation errand : new ResourceLocation[] {WorkData.MELEE, WorkData.RANGED}) {
+                assertEquals(byAGuard, !TestErrands.offers(errand, view).isEmpty(), errand + " for a foe on " + ground);
+            }
+            for (ResourceLocation errand : new ResourceLocation[] {WorkData.HUNT_MELEE, WorkData.HUNT_RANGED}) {
+                assertEquals(!byAGuard, !TestErrands.offers(errand, view).isEmpty(), errand + " for a foe on " + ground);
+            }
+        });
+    }
+
+    @Test
+    void aFoeOnSeveralGroundsIsTheGuardsAsMuchAsTheHunters() {
+        TestView view = foeOn(Ground.SELF, Ground.HUNT);
+
+        assertEquals(1, TestErrands.offers(WorkData.MELEE, view).size());
+        assertEquals(1, TestErrands.offers(WorkData.HUNT_MELEE, view).size());
     }
 
     @Test
     void withoutAFoeThereIsNothingToFightAndWhyIsSaid() {
         TestView nobody = TestView.at(HOME, FREE).armedWithArrows();
 
-        assertEquals("intent.chiikawa.fail.no_attack_target", TestErrands.whyNoOffer(WorkData.MELEE, nobody).reasonKey());
-        assertEquals("intent.chiikawa.fail.no_attack_target", TestErrands.whyNoOffer(WorkData.RANGED, nobody).reasonKey());
+        for (ResourceLocation errand : new ResourceLocation[] {WorkData.MELEE, WorkData.RANGED, WorkData.HUNT_MELEE,
+                WorkData.HUNT_RANGED}) {
+            assertEquals("intent.chiikawa.fail.no_attack_target", TestErrands.whyNoOffer(errand, nobody).reasonKey(), errand::toString);
+        }
     }
 
     @Test
     void theReasonThereIsNoFoeIsTheOneTheWorkNames() {
         Work<Duel, ErrandTunings.Footwork> work = new Work<>(WorkActions.STRIKE, ErrandCategory.COMBAT, Optional.empty(),
-            List.of(), Optional.of(new WorkTarget.Foe("no_prey")));
+            List.of(), Optional.of(new WorkTarget.Foe("no_prey", Set.of(Ground.SELF))));
         ErrandTunings.Footwork tuning = (ErrandTunings.Footwork) ErrandSettings.of(WorkData.MELEE).orElseThrow().tuning();
 
         assertEquals("intent.chiikawa.fail.no_prey",
@@ -97,7 +130,12 @@ class CombatOfferTest {
 
     /** A pet with a foe six blocks off. */
     private static TestView fighting() {
-        return TestView.at(HOME, FREE).targets(new PerceivedTargets(Optional.of(new AttackTarget(FOE, east(6))),
+        return foeOn(Ground.SELF, Ground.OWNER, Ground.NEARBY);
+    }
+
+    /** A pet with a foe six blocks off that it fights for these reasons. */
+    private static TestView foeOn(Ground... grounds) {
+        return TestView.at(HOME, FREE).targets(new PerceivedTargets(Optional.of(TestTargets.foe(FOE, east(6), grounds)),
             Map.of(), Optional.empty()));
     }
 
