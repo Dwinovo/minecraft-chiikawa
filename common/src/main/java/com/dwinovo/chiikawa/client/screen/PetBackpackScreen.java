@@ -56,7 +56,7 @@ import net.minecraft.world.item.ItemStack;
  * never moves between pages, so the tabs and the name stay where the hand left them.
  */
 public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> {
-    private static final int PANEL_WIDTH = 192;
+    private static final int PANEL_WIDTH = OrdersLayout.PANEL_WIDTH;
     /** The backpack page, the tallest: the pet's things and the player's under them. */
     private static final int BACKPACK_HEIGHT = 214;
     /** The orders page: three orders, then what the pet may do, how it fights and whether it swaps to a weapon. */
@@ -83,7 +83,7 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     private static final Rect WORK_CARD = new Rect(70, CONTENT_Y, 114, 40);
     private static final int CHIP_H = 20;
 
-    private static final Rect ORDER_FIRST = new Rect(UiStyle.PAD, CONTENT_Y, PANEL_WIDTH - 2 * UiStyle.PAD, 31);
+    private static final Rect ORDER_FIRST = new Rect(UiStyle.PAD, CONTENT_Y, OrdersLayout.CARD_W, 31);
     private static final int ORDER_PITCH = 36;
 
     /** Orders page: the line between the orders and the rules under them. */
@@ -95,9 +95,7 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     /** Orders page: the three stances, then the weapon swap under them. */
     private static final int STANCE_Y = TOGGLE_Y + TOGGLE_H + UiStyle.GAP;
     private static final int STANCE_H = 20;
-    private static final int STANCE_W = (PANEL_WIDTH - 2 * UiStyle.PAD - 2 * UiStyle.GAP) / 3;
-    private static final Rect SWAP = new Rect(UiStyle.PAD, STANCE_Y + STANCE_H + UiStyle.GAP,
-        PANEL_WIDTH - 2 * UiStyle.PAD, STANCE_H);
+    private static final Rect SWAP = new Rect(UiStyle.PAD, STANCE_Y + STANCE_H + UiStyle.GAP, OrdersLayout.CARD_W, STANCE_H);
 
     private static final int[] TAB_TINTS = {UiTheme.ACCENT_PALE, UiTheme.SKY_PALE, UiTheme.LEAF_PALE};
     private static final ItemStack BAG_ICON_STACK = new ItemStack(InitItems.BACKPACK.get());
@@ -358,9 +356,9 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
                 Ui.roundRect(surface, area.x() + 6, area.y() + 6, 19, 19, Ui.CARD_RADIUS - 1,
                     current ? UiTheme.ACCENT_PALE : UiTheme.SURFACE);
                 icon(directive).drawCentered(surface, area.x() + 7, area.y() + 7, 17);
-                surface.drawText(name.getString(), area.x() + 32, area.y() + 6, UiTheme.TEXT);
+                surface.drawText(name.getString(), area.x() + OrdersLayout.ORDER_TEXT_X, area.y() + 6, UiTheme.TEXT);
                 Ui.textClipped(surface, Component.translatable("screen.chiikawa.pet.order." + key(directive) + ".hint").getString(),
-                    area.x() + 32, area.y() + 17, area.width() - 32 - 22, UiTheme.TEXT_MUTED);
+                    area.x() + OrdersLayout.ORDER_TEXT_X, area.y() + 17, OrdersLayout.ORDER_TEXT_W, UiTheme.TEXT_MUTED);
                 if (current) {
                     PixelArt.CHECK.draw(surface, area.right() - 18, UiStyle.centerIn(area.y(), area.height(), 7));
                 }
@@ -419,7 +417,8 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     }
 
     private static Rect stanceArea(CombatStance stance) {
-        return new Rect(UiStyle.PAD + stance.ordinal() * (STANCE_W + UiStyle.GAP), STANCE_Y, STANCE_W, STANCE_H);
+        return new Rect(UiStyle.PAD + stance.ordinal() * (OrdersLayout.STANCE_W + UiStyle.GAP), STANCE_Y,
+            OrdersLayout.STANCE_W, STANCE_H);
     }
 
     /** What the pet has been told it may do, as it is now: the default until the pet is there to ask. */
@@ -470,7 +469,7 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
             (surface, area, hovered, active) -> {
                 int fill = rules().stance() == stance ? UiTheme.ACCENT_SOFT : hovered ? UiTheme.ACCENT_PALE : UiTheme.PANEL;
                 Ui.sticker(surface, area.x(), area.y(), area.width(), area.height(), Ui.CARD_RADIUS, fill);
-                Ui.textCentered(surface, TextClip.clip(name.getString(), area.width() - 2 * UiStyle.GAP, surface::textWidth),
+                Ui.textCentered(surface, TextClip.clip(name.getString(), OrdersLayout.STANCE_TEXT_W, surface::textWidth),
                     area, UiTheme.TEXT);
             },
             () -> tell(rules -> rules.withStance(stance)));
@@ -486,8 +485,7 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
                 int fill = on ? UiTheme.ACCENT_SOFT : hovered ? UiTheme.ACCENT_PALE : UiTheme.PANEL;
                 Ui.sticker(surface, area.x(), area.y(), area.width(), area.height(), Ui.CARD_RADIUS, fill);
                 Ui.textClipped(surface, name.getString(), area.x() + UiStyle.PAD,
-                    UiStyle.centerIn(area.y(), area.height(), surface.lineHeight()), area.width() - UiStyle.PAD - 22,
-                    UiTheme.TEXT);
+                    UiStyle.centerIn(area.y(), area.height(), surface.lineHeight()), OrdersLayout.SWAP_TEXT_W, UiTheme.TEXT);
                 if (on) {
                     PixelArt.CHECK.draw(surface, area.right() - 18, UiStyle.centerIn(area.y(), area.height(), 7));
                 }
