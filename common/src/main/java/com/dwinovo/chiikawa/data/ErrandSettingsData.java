@@ -49,9 +49,9 @@ public final class ErrandSettingsData {
         // A crop or a chest a pet could not get to is left alone for ten seconds; it gives up on it as soon as the
         // brain's mover says it has no full path to it.
         Rests blockWork = Rests.of(NONE, RestSpec.ticksPerSubject(200), NONE);
-        // A crop reaped with the tool wears it; a weed or a mushroom picked by hand, and a seed planted, do not.
-        ErrandTunings.BlockWork reaping = new ErrandTunings.BlockWork(0.8F, 3.0, 0, 1);
-        ErrandTunings.BlockWork byHand = new ErrandTunings.BlockWork(0.8F, 3.0, 0, 0);
+        // A crop reaped with the tool wears it; a weed or a mushroom picked by hand does not.
+        ErrandTunings.HarvestBlock reaping = new ErrandTunings.HarvestBlock(0.8F, 3.0, 0, 1);
+        ErrandTunings.HarvestBlock byHand = new ErrandTunings.HarvestBlock(0.8F, 3.0, 0, 0);
         ErrandTunings.Footwork footwork = new ErrandTunings.Footwork(1.0F, 1.2F, 10.0, 3.0, 2);
         // The scene beginning is a report, and the pair rest the scene's cooldown from then on however it ends, so that
         // finishing and being cut short need rest nothing of their own. An invitation that is declined or not answered, or
@@ -68,14 +68,14 @@ public final class ErrandSettingsData {
                 .withOverlays(Overlays.IDLE_CHATTER)),
             entry(ErrandIds.PICK_UP_ITEM, errand(30, 0.4F, HALF_A_MINUTE,
                 Rests.of(NONE, RestSpec.ticksPerSubject(40), NONE), new ErrandTunings.PickUp(0.7F, 1.5, 400, 0))),
-            entry(ErrandIds.HARVEST, errand(50, 0.6F, HALF_A_MINUTE, blockWork, reaping)),
+            entry(WorkData.HARVEST, errand(50, 0.6F, HALF_A_MINUTE, blockWork, reaping)),
             // The farmer's strict order: harvest, then plant, then deliver.
-            entry(ErrandIds.PLANT, errand(50, 0.6F, HALF_A_MINUTE, blockWork, byHand)
-                .yieldingTo(ErrandIds.HARVEST)),
-            entry(ErrandIds.DELIVER, errand(50, 0.6F, 3000, blockWork, new ErrandTunings.Deliver(0.8F, 2, 3.0, 0))
-                .yieldingTo(ErrandIds.HARVEST, ErrandIds.PLANT)),
-            entry(ErrandIds.WEED, errand(50, 0.5F, HALF_A_MINUTE, blockWork, byHand)),
-            entry(ErrandIds.PICK_MUSHROOM, errand(50, 0.5F, HALF_A_MINUTE, blockWork, byHand)),
+            entry(WorkData.PLANT, errand(50, 0.6F, HALF_A_MINUTE, blockWork, new ErrandTunings.PlantBlock(0.8F, 3.0, 0))
+                .yieldingTo(WorkData.HARVEST)),
+            entry(WorkData.DELIVER, errand(50, 0.6F, 3000, blockWork, new ErrandTunings.Deliver(0.8F, 2, 3.0, 0))
+                .yieldingTo(WorkData.HARVEST, WorkData.PLANT)),
+            entry(WorkData.WEED, errand(50, 0.5F, HALF_A_MINUTE, blockWork, byHand)),
+            entry(WorkData.PICK_MUSHROOM, errand(50, 0.5F, HALF_A_MINUTE, blockWork, byHand)),
             entry(WorkData.MELEE, errand(80, 0.8F, A_DAY, giveUp(20), footwork).startingWith(VoiceMoment.HUNT)),
             entry(WorkData.RANGED, errand(80, 0.8F, A_DAY, giveUp(20), new ErrandTunings.Ranged(footwork, 15.0, 15, 20))
                 .startingWith(VoiceMoment.HUNT)),

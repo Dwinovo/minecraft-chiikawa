@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.resources.Identifier;
@@ -22,10 +23,12 @@ import net.minecraft.resources.Identifier;
  *
  * @param work the errands the job adds to the ones every pet considers, in the order the pet weighs them, which
  *             settles a tie between errands that are otherwise equal
+ * @param sight how the pet looks for the blocks its work is done to; a job whose work is done to blocks must have it
  */
-public record JobWork(List<Identifier> work) {
+public record JobWork(List<Identifier> work, Optional<Sight> sight) {
     public static final Codec<JobWork> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        Identifier.CODEC.listOf().fieldOf("work").forGetter(JobWork::work)
+        Identifier.CODEC.listOf().fieldOf("work").forGetter(JobWork::work),
+        Sight.CODEC.optionalFieldOf("sight").forGetter(JobWork::sight)
     ).apply(instance, JobWork::new));
 
     private static final String LOG_PREFIX = "[chiikawa-job] ";
@@ -52,6 +55,11 @@ public record JobWork(List<Identifier> work) {
             }
         }
         return errands;
+    }
+
+    /** @return how the pet looks for the blocks its job's work is done to, if its job says */
+    public static Optional<Sight> sightOf(AbstractPet pet) {
+        return Optional.ofNullable(byJob.get(pet.getCapabilityId())).flatMap(JobWork::sight);
     }
 
     /** Replaces them all, as a data pack reload does. Public so an in-game case can try other work. */

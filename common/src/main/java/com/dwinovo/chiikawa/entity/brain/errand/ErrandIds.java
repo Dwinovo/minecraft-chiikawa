@@ -12,11 +12,6 @@ public final class ErrandIds {
     public static final Identifier STAY = id("stay");
     public static final Identifier WANDER = id("wander");
     public static final Identifier PICK_UP_ITEM = id("pick_up_item");
-    public static final Identifier HARVEST = id("harvest");
-    public static final Identifier PLANT = id("plant");
-    public static final Identifier DELIVER = id("deliver");
-    public static final Identifier WEED = id("weed");
-    public static final Identifier PICK_MUSHROOM = id("pick_mushroom");
     public static final Identifier TAKE_TASK = id("take_task");
     public static final Identifier SHOP = id("shop");
     public static final Identifier GIFT_OWNER = id("gift_owner");

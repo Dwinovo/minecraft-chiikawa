@@ -41,7 +41,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
  * leaves nothing to wait for.
  */
 public final class BuskAction implements WorkAction<BuskAction.Performance, ErrandTunings.PlayMusic> {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "busk");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "busk");
 
     /**
      * What the pet has set out to play.
@@ -67,8 +67,8 @@ public final class BuskAction implements WorkAction<BuskAction.Performance, Erra
     }
 
     @Override
-    public Offers<Performance> offers(Work<Performance, ErrandTunings.PlayMusic> work, PetView view,
-            ErrandTunings.PlayMusic tuning) {
+    public Offers<Performance> offers(Work<Performance, ErrandTunings.PlayMusic> work, Identifier errand,
+            PetView view, ErrandTunings.PlayMusic tuning) {
         return view.playable(work.countedBy(view))
             .map(song -> Offers.of(Offer.of(new Performance(song))))
             .orElseGet(() -> Offers.none(Check.fail("no_new_song")));
