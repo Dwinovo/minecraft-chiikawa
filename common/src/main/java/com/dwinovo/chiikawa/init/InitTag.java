@@ -26,6 +26,8 @@ public final class InitTag {
     public static final TagKey<Item> PET_TREATS = tag("pet_treats");
 
     public static final TagKey<EntityType<?>> ENTITY_HOSTILE_ENTITY = tagEntity("entity_hostile_entity");
+    /** The pets creepers keep away from, as they do from cats: see {@code CreeperMixin}. */
+    public static final TagKey<EntityType<?>> CREEPERS_AVOID = tagEntity("creepers_avoid");
 
     // Blocks pets can harvest, defined by the entity_harvest_crops tag file.
     public static final TagKey<Block> ENTITY_HARVEST_CROPS = tagBlock("entity_harvest_crops");
