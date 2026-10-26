@@ -2,9 +2,11 @@ package com.dwinovo.chiikawa.entity.brain.errand;
 
 import com.dwinovo.chiikawa.camera.PhotoOutlook;
 import com.dwinovo.chiikawa.data.WorkData;
+import com.dwinovo.chiikawa.entity.brain.combat.Arms;
+import com.dwinovo.chiikawa.entity.brain.combat.Ground;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
-import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
+import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
 import com.dwinovo.chiikawa.testing.TestAnchors;
@@ -51,10 +53,12 @@ public final class ErrandFixtures {
         Map.entry(WorkData.PICK_MUSHROOM, free().ownership(PetOwnership.WILD).phase(DayPhase.NIGHT).targets(TestTargets.of(
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(east(2)),
             Optional.empty()))),
-        Map.entry(WorkData.MELEE, free().targets(TestTargets.of(Optional.of(new AttackTarget(FOE, east(2))), Optional.empty(), Optional.empty(),
-            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()))),
-        Map.entry(WorkData.RANGED, free().armedWithArrows().targets(TestTargets.of(Optional.of(new AttackTarget(FOE, east(2))), Optional.empty(),
-            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()))),
+        Map.entry(WorkData.MELEE, free().targets(foe(Ground.SELF, Ground.OWNER, Ground.NEARBY))),
+        Map.entry(WorkData.RANGED, free().armedWithArrows().targets(foe(Ground.SELF, Ground.OWNER, Ground.NEARBY))),
+        Map.entry(WorkData.HUNT_MELEE, free().targets(foe(Ground.HUNT))),
+        Map.entry(WorkData.HUNT_RANGED, free().armedWithArrows().targets(foe(Ground.HUNT))),
+        Map.entry(ErrandIds.DEFEND_SELF, free().targets(foe(Ground.SELF)).arms(new Arms(false, Optional.of(new Arms.Weapon(2, false))))),
+        Map.entry(ErrandIds.FLEE, free().attackedBy(FOE, east(3))),
         Map.entry(WorkData.PLAY_MUSIC, free().withSong()),
         Map.entry(ErrandIds.TAKE_TASK, free().offeringBoard(east(2))),
         Map.entry(ErrandIds.SHOP, free().shopWorthVisiting(east(2))),
@@ -77,6 +81,12 @@ public final class ErrandFixtures {
 
     private static GlobalPos east(int blocks) {
         return GlobalPos.of(OVERWORLD, HOME.pos().east(blocks));
+    }
+
+    /** A foe two blocks off that the pet fights for these reasons. */
+    private static PerceivedTargets foe(Ground... grounds) {
+        return TestTargets.of(Optional.of(TestTargets.foe(FOE, east(2), grounds)), Optional.empty(), Optional.empty(),
+            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
     }
 
     private static TestView free() {

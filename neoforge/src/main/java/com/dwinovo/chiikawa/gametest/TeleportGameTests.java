@@ -51,7 +51,8 @@ public final class TeleportGameTests {
     /**
      * A fencer fighting a zombie is brought to its owner on the far side of the yard: the fight is over, said to be so
      * because the pet was moved, and the pet does not set off for the zombie it was fighting, which is where it was
-     * and no longer where it is. The pet is watched from the moment it has read that it was moved, not from the moment it
+     * and no longer where it is. The pet is let loose, so what it fights is a hunt, {@code hunt_melee}, and was
+     * {@code melee} before the foes had grounds. The pet is watched from the moment it has read that it was moved, not from the moment it
      * was: the owner's end of the yard may not be ticking yet while the chunks are new, and a pet there reads nothing.
      */
     @GameTest(template = "floor32", batch = BATCH, timeoutTicks = FIGHT_TICKS + WATCH_TICKS + 20)
@@ -68,7 +69,7 @@ public final class TeleportGameTests {
         long[] brought = {-1};
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(WorkData.MELEE), "the pet never went for the zombie"))
+            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(WorkData.HUNT_MELEE), "the pet never went for the zombie"))
             .thenExecute(() -> {
                 helper.assertTrue(pet.teleportToOwner(helper.getLevel(), owner, "test"), "the pet was not brought to its owner");
                 brought[0] = helper.getLevel().getGameTime();
@@ -76,7 +77,7 @@ public final class TeleportGameTests {
             .thenWaitUntil(() -> helper.assertTrue(endedByTheMove(pet, brought[0]),
                 "the fight did not end for the pet having been moved: " + pet.getMind().log().entries()))
             .thenExecuteFor(WATCH_TICKS, () -> {
-                helper.assertFalse(pet.getMind().errands().isOn(WorkData.MELEE), "the pet went back to the fight it was taken away from");
+                helper.assertFalse(pet.getMind().errands().isOn(WorkData.HUNT_MELEE), "the pet went back to the fight it was taken away from");
                 helper.assertTrue(pet.distanceTo(zombie) > BEYOND_THE_SENSOR, "the pet is " + (int) pet.distanceTo(zombie)
                     + " blocks from the zombie");
             })
@@ -86,7 +87,7 @@ public final class TeleportGameTests {
     /** @return whether the pet has ended the fight for having been moved since the game time */
     private static boolean endedByTheMove(AbstractPet pet, long since) {
         return pet.getMind().log().entries().stream().anyMatch(entry ->
-            entry instanceof DecisionLog.Ended ended && ended.errand().equals(WorkData.MELEE)
+            entry instanceof DecisionLog.Ended ended && ended.errand().equals(WorkData.HUNT_MELEE)
                 && ended.gameTime() >= since && ended.outcome() instanceof Outcome.Interrupted interrupted
                 && interrupted.cause().equals("moved"));
     }

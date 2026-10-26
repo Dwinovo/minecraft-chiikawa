@@ -56,6 +56,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.LISTEN, 1)
             .says(VoiceMoment.WHISTLE, 1)
             .says(VoiceMoment.PHOTOGRAPHED, 1)
+            .says(VoiceMoment.SCARED, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.001F));
@@ -76,6 +77,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.LISTEN, 1)
             .says(VoiceMoment.WHISTLE, 1)
             .says(VoiceMoment.PHOTO, 1)
+            .says(VoiceMoment.SCARED, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.002F));
@@ -94,6 +96,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.LISTEN, 1)
             .says(VoiceMoment.WHISTLE, 1)
             .says(VoiceMoment.PHOTOGRAPHED, 1)
+            .says(VoiceMoment.SCARED, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.002F));
@@ -116,18 +119,20 @@ public final class PetVoiceData {
             .says(VoiceMoment.LISTEN, 1)
             .says(VoiceMoment.WHISTLE, 1)
             .says(VoiceMoment.PHOTOGRAPHED, 1)
+            .says(VoiceMoment.SCARED, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.002F)
             .chance(VoiceMoment.LISTEN, 0.5F)
             .cooldown(TALK));
-        // A grown-up of few words: a sigh over something good, a passed exam among them,
-        // and that is all.
+        // A grown-up of few words: a sigh over something good, a passed exam among them, or something
+        // frightening, and that is all.
         add(all, voice("kurimanju")
             .says(VoiceMoment.SHOP, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
+            .says(VoiceMoment.SCARED, 1)
             .cooldown(2 * COOLDOWN));
-        // Hardboiled, a word or two at most, softer only over something sweet.
+        // Hardboiled, a word or two at most, softer only over something sweet, and not a sound when it is frightened.
         add(all, voice("rakko")
             .says(VoiceMoment.TAME, 1)
             .says(VoiceMoment.HUNT, 1)
@@ -157,6 +162,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.LISTEN, 1)
             .says(VoiceMoment.WHISTLE, 1)
             .says(VoiceMoment.PHOTOGRAPHED, 1)
+            .says(VoiceMoment.SCARED, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.0015F));
@@ -169,6 +175,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.GIVEN_COFFEE, 1)
             .says(VoiceMoment.WHISTLE, 1)
             .says(VoiceMoment.PHOTOGRAPHED, 1)
+            .says(VoiceMoment.SCARED, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.0005F)

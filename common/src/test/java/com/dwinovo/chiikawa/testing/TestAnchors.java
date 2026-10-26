@@ -28,6 +28,11 @@ public final class TestAnchors {
         return new PetAnchor(home, SETTINGS.free().reach(), SETTINGS.free().leash(), false, true);
     }
 
+    /** A pet told to sit, which may not move from its seat. */
+    public static PetAnchor sitting(GlobalPos seat) {
+        return new PetAnchor(seat, 0.0, PetAnchor.UNLEASHED, false, false);
+    }
+
     /** A wild pet round where it spawned. */
     public static PetAnchor wild(GlobalPos home) {
         return new PetAnchor(home, SETTINGS.wild().reach(), SETTINGS.wild().leash(), false, true);

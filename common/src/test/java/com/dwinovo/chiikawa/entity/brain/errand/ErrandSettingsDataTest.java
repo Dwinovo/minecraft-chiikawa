@@ -23,11 +23,15 @@ import org.junit.jupiter.api.Test;
 
 /** What the generated errand settings say: that every errand has them, and that they are the order the pets keep. */
 class ErrandSettingsDataTest {
-    /** 0.1.4 implementation plan, "Default priorities". */
+    /** 0.1.4 implementation plan, "Default priorities", and step 3: running at 100, hunting at the priority of work. */
     private static final Map<ResourceLocation, Integer> PRIORITIES = Map.ofEntries(
         Map.entry(ErrandIds.GIFT_OWNER, 80),
         Map.entry(WorkData.MELEE, 80),
         Map.entry(WorkData.RANGED, 80),
+        Map.entry(ErrandIds.DEFEND_SELF, 80),
+        Map.entry(ErrandIds.FLEE, 100),
+        Map.entry(WorkData.HUNT_MELEE, 50),
+        Map.entry(WorkData.HUNT_RANGED, 50),
         Map.entry(ErrandIds.TAKE_EXAM, 80),
         Map.entry(ErrandIds.CHECK_RESULTS, 80),
         Map.entry(ErrandIds.COOPERATE, 80),
@@ -53,6 +57,10 @@ class ErrandSettingsDataTest {
         Map.entry(ErrandIds.GIFT_OWNER, 0.85F),
         Map.entry(WorkData.MELEE, 0.8F),
         Map.entry(WorkData.RANGED, 0.8F),
+        Map.entry(ErrandIds.DEFEND_SELF, 0.8F),
+        Map.entry(ErrandIds.FLEE, 1.0F),
+        Map.entry(WorkData.HUNT_MELEE, 0.8F),
+        Map.entry(WorkData.HUNT_RANGED, 0.8F),
         Map.entry(ErrandIds.TAKE_EXAM, 0.72F),
         Map.entry(ErrandIds.CHECK_RESULTS, 0.72F),
         Map.entry(ErrandIds.COOPERATE, 0.5F),
@@ -123,11 +131,11 @@ class ErrandSettingsDataTest {
         assertEquals(Map.of(
             WorkData.PLANT, List.of(WorkData.HARVEST),
             WorkData.DELIVER, List.of(WorkData.HARVEST, WorkData.PLANT),
-            ErrandIds.GIFT_OWNER, List.of(WorkData.MELEE, WorkData.RANGED)), yields);
+            ErrandIds.GIFT_OWNER, List.of(WorkData.MELEE, WorkData.RANGED, ErrandIds.DEFEND_SELF)), yields);
     }
 
     @Test
-    void onlyTheFightsShoutOnSettingOff() {
+    void onlyTheFightsShoutOnSettingOffAndFleeingScreams() {
         Map<ResourceLocation, Optional<VoiceMoment>> voices = new HashMap<>();
         ErrandSettingsData.all().forEach((errand, settings) -> {
             if (settings.startVoice().isPresent()) {
@@ -135,7 +143,22 @@ class ErrandSettingsDataTest {
             }
         });
 
-        assertEquals(Map.of(WorkData.MELEE, Optional.of(VoiceMoment.HUNT), WorkData.RANGED, Optional.of(VoiceMoment.HUNT)), voices);
+        Optional<VoiceMoment> cry = Optional.of(VoiceMoment.HUNT);
+        assertEquals(Map.of(WorkData.MELEE, cry, WorkData.RANGED, cry, WorkData.HUNT_MELEE, cry, WorkData.HUNT_RANGED, cry,
+            ErrandIds.DEFEND_SELF, cry, ErrandIds.FLEE, Optional.of(VoiceMoment.SCARED)), voices);
+    }
+
+    @Test
+    void aFrightenedPetCowersAsItsCharacterDoesAndUsagiNeverCries() {
+        ErrandTunings.Cowers cowers = ((ErrandTunings.Flee) ErrandSettingsData.all().get(ErrandIds.FLEE).tuning()).cowers();
+        ResourceLocation chiikawa = ResourceLocation.fromNamespaceAndPath("chiikawa", "chiikawa");
+        ResourceLocation usagi = ResourceLocation.fromNamespaceAndPath("chiikawa", "usagi");
+        ResourceLocation rakko = ResourceLocation.fromNamespaceAndPath("chiikawa", "rakko");
+
+        assertEquals(List.of("cry", "hurt"), cowers.of(chiikawa));
+        assertEquals(List.of("yell", "hurt"), cowers.of(usagi));
+        assertEquals(List.of("hurt", "sit"), cowers.of(rakko));
+        assertTrue(!cowers.of(usagi).contains("cry"));
     }
 
     @Test

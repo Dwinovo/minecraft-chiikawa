@@ -10,6 +10,7 @@ import com.dwinovo.chiikawa.entity.PetRules;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -158,6 +159,20 @@ class PetConstraintsTest {
     }
 
     @Test
+    void gettingOutOfHarmsWayIsPermittedWhateverThePetIsToldAndWhoeverItBelongsTo() {
+        PetRules everythingOff = PetRules.DEFAULT.withStance(CombatStance.NONE).withSwap(false);
+        for (PetRules.Toggle toggle : PetRules.Toggle.values()) {
+            everythingOff = everythingOff.with(toggle, false);
+        }
+        for (PetDirective directive : PetDirective.values()) {
+            for (PetOwnership ownership : List.of(OWNED, PetOwnership.WILD)) {
+                assertTrue(PetConstraints.allows(directive, ownership, everythingOff, ErrandCategory.SAFETY),
+                    directive + " / " + ownership);
+            }
+        }
+    }
+
+    @Test
     void everythingSwitchedOffStillLeavesFollowingStayingWanderingAndFighting() {
         PetRules rules = PetRules.DEFAULT;
         for (PetRules.Toggle toggle : PetRules.Toggle.values()) {
@@ -175,19 +190,20 @@ class PetConstraintsTest {
     void followPermitsFollowingWanderingTakingSlipsGivingMeetingPetsExamsPhotosAndDefendingTheOwner() {
         assertPermits(PetDirective.FOLLOW, OWNED,
             EnumSet.of(ErrandCategory.FOLLOW_OWNER, ErrandCategory.WANDER, ErrandCategory.TAKE_TASK,
-                ErrandCategory.GIFT, ErrandCategory.COMBAT, ErrandCategory.SOCIAL, ErrandCategory.EXAM, ErrandCategory.PHOTO));
+                ErrandCategory.GIFT, ErrandCategory.COMBAT, ErrandCategory.SOCIAL, ErrandCategory.EXAM, ErrandCategory.PHOTO,
+                ErrandCategory.SAFETY));
     }
 
     @Test
-    void stayPermitsOnlyStaying() {
-        assertPermits(PetDirective.STAY, OWNED, EnumSet.of(ErrandCategory.STAY));
+    void stayPermitsOnlyStayingAndGettingOutOfHarmsWay() {
+        assertPermits(PetDirective.STAY, OWNED, EnumSet.of(ErrandCategory.STAY, ErrandCategory.SAFETY));
     }
 
     @Test
     void freePermitsEverythingAPetDoesOnItsOwnTime() {
         assertPermits(PetDirective.FREE, OWNED, EnumSet.of(ErrandCategory.WANDER, ErrandCategory.WORK, ErrandCategory.FORAGE,
             ErrandCategory.COMBAT, ErrandCategory.PICK_UP, ErrandCategory.TAKE_TASK, ErrandCategory.SHOP,
-            ErrandCategory.GIFT, ErrandCategory.SOCIAL, ErrandCategory.EXAM, ErrandCategory.PHOTO));
+            ErrandCategory.GIFT, ErrandCategory.SOCIAL, ErrandCategory.EXAM, ErrandCategory.PHOTO, ErrandCategory.SAFETY));
     }
 
     @Test
@@ -195,7 +211,7 @@ class PetConstraintsTest {
         for (PetDirective directive : PetDirective.values()) {
             assertPermits(directive, PetOwnership.WILD,
                 EnumSet.of(ErrandCategory.WANDER, ErrandCategory.FORAGE, ErrandCategory.COMBAT, ErrandCategory.TAKE_TASK,
-                    ErrandCategory.SOCIAL, ErrandCategory.CURIOUS));
+                    ErrandCategory.SOCIAL, ErrandCategory.CURIOUS, ErrandCategory.SAFETY));
         }
     }
 

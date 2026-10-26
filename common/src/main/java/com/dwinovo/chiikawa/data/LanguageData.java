@@ -94,6 +94,8 @@ public final class LanguageData {
                     "上一页", "下一页");
             addIntentNameTranslations(adder, "跟着主人", "坐着", "闲逛", "捡东西", "去领工作牌",
                 "收割", "种地", "送货", "拔草", "采蘑菇", "讨伐", "射箭", "演奏", "去买东西", "送礼物");
+            addCombatTranslations(adder, "清怪", "射击清怪", "自卫", "躲起来",
+                "没有谁在攻击它", "手里已经有武器", "背包里没有可换的武器", "它会还手");
             addSocialTranslations(adder, "找伙伴玩", "陪伙伴玩", "附近没有想一起玩的伙伴", "没有伙伴过来找它");
             addTaskTypeTranslations(adder, "除草", "%s 株", "街头演奏", "%s 秒",
                 "近身讨伐", "远程讨伐", "%s 只", "高级除草");
@@ -231,6 +233,13 @@ public final class LanguageData {
             addVoiceLines(adder, "rakko", VoiceMoment.PHOTOGRAPHED, "……拍吧。");
             addVoiceLines(adder, "shisa", VoiceMoment.PHOTOGRAPHED, "拍好看一点哦～");
             addVoiceLines(adder, "furuhonya", VoiceMoment.PHOTOGRAPHED, "蟹蟹");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.SCARED, "呜哇——！！");
+            addVoiceLines(adder, "hachiware", VoiceMoment.SCARED, "怎、怎么办啊……！");
+            addVoiceLines(adder, "usagi", VoiceMoment.SCARED, "乌拉乌拉乌拉——！！");
+            addVoiceLines(adder, "momonga", VoiceMoment.SCARED, "吓到我了，快安慰我。");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.SCARED, "……哎。");
+            addVoiceLines(adder, "shisa", VoiceMoment.SCARED, "哇、哇啊……！");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.SCARED, "呀……");
             addWhistleTranslations(adder, "口哨糖", "口哨糖（%s）", "按住右键吹：附近的宠物听从当前指令。潜行右键切换指令。", "口哨糖：%s", "%d 只宠物跑过来了", "%d 只宠物坐下了", "%d 只宠物自由活动去了", "%d 只野生宠物好奇地凑了过来", "附近没有宠物听到口哨", "好奇地凑过去", "没听到口哨");
             addSettingsTranslations(adder, "Chiikawa 设置", "野生宠物生成：%s", "说话频率：%s", "对话气泡：%s", "开", "关",
                 "野生生成和说话频率属于世界，进入世界后才能修改", "野生生成和说话频率只有管理员能修改",
@@ -321,6 +330,8 @@ public final class LanguageData {
                     "前のページ", "次のページ");
             addIntentNameTranslations(adder, "飼い主についていく", "おすわり中", "ぶらぶら", "アイテムを拾う", "お仕事カードを取りに行く",
                 "収穫", "種まき", "運ぶ", "草むしり", "キノコ採り", "討伐", "弓で射る", "演奏", "お買い物", "プレゼントを渡す");
+            addCombatTranslations(adder, "敵を探して討つ", "敵を探して射る", "身を守る", "逃げる",
+                "襲ってくる相手がいない", "もう武器を持っている", "持ち替えられる武器がない", "戦って身を守る");
             addSocialTranslations(adder, "なかまのところへ", "なかまに付き合う", "近くに遊びたいなかまがいない", "誰も来ていない");
             addTaskTypeTranslations(adder, "草むしり", "%s本", "路上演奏", "%s秒",
                 "近接討伐", "遠距離討伐", "%s体", "上級草むしり");
@@ -458,6 +469,13 @@ public final class LanguageData {
             addVoiceLines(adder, "rakko", VoiceMoment.PHOTOGRAPHED, "…撮れ");
             addVoiceLines(adder, "shisa", VoiceMoment.PHOTOGRAPHED, "きれいに撮ってくださいね〜");
             addVoiceLines(adder, "furuhonya", VoiceMoment.PHOTOGRAPHED, "カニ");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.SCARED, "ウワーン…!!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.SCARED, "ど、どうしよう…!");
+            addVoiceLines(adder, "usagi", VoiceMoment.SCARED, "ウラウラウラーッ!!");
+            addVoiceLines(adder, "momonga", VoiceMoment.SCARED, "こわい 慰めろ");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.SCARED, "…はぁ");
+            addVoiceLines(adder, "shisa", VoiceMoment.SCARED, "ひ、ひえっ…!");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.SCARED, "ひゃ…");
             addWhistleTranslations(adder, "フエラムネ", "フエラムネ（%s）", "長押しで吹く：近くのペットに今の指示を出す。スニーク右クリックで指示を切り替え。", "フエラムネ：%s", "%d匹が駆け寄ってきた", "%d匹がおすわりした", "%d匹が自由行動に戻った", "野生の%d匹が気になって寄ってきた", "近くに聞こえたペットはいない", "気になって寄っていく", "笛は聞こえない");
             addSettingsTranslations(adder, "ちいかわの設定", "野生の子の出現：%s", "おしゃべりの頻度：%s", "ふきだし：%s", "オン", "オフ",
                 "出現とおしゃべりはワールドの設定です。ワールドの中で変更できます", "出現とおしゃべりの変更は管理者だけができます",
@@ -552,6 +570,8 @@ public final class LanguageData {
             addIntentNameTranslations(adder, "Seguindo o dono", "Sentando", "Passeando", "Pegando um item",
                 "Buscando uma ficha", "Colhendo", "Plantando", "Entregando", "Arrancando ervas daninhas", "Colhendo cogumelos",
                 "Lutando", "Atirando", "Se apresentando", "Fazendo compras", "Trazendo um presente");
+            addCombatTranslations(adder, "Caçando", "Caçando com arco", "Se defendendo", "Se escondendo",
+                "Nada está atacando", "Já está com uma arma na mão", "Nenhuma arma de reserva na mochila", "Revida os ataques");
             addSocialTranslations(adder, "Visitando um amigo", "Brincando junto", "Ninguém por perto com quem queira brincar",
                 "Ninguém está vindo");
             addTaskTypeTranslations(adder, "Capina", "%s ervas daninhas", "Apresentação de Rua", "%ss",
@@ -690,6 +710,13 @@ public final class LanguageData {
             addVoiceLines(adder, "rakko", VoiceMoment.PHOTOGRAPHED, "...Pode ir.");
             addVoiceLines(adder, "shisa", VoiceMoment.PHOTOGRAPHED, "Faz uma bem bonita~");
             addVoiceLines(adder, "furuhonya", VoiceMoment.PHOTOGRAPHED, "Caranguejo");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.SCARED, "Buaaa...!!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.SCARED, "C-como eu faço...!");
+            addVoiceLines(adder, "usagi", VoiceMoment.SCARED, "Ura ura uraaa!!");
+            addVoiceLines(adder, "momonga", VoiceMoment.SCARED, "Que medo! Me consola!");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.SCARED, "...Ai.");
+            addVoiceLines(adder, "shisa", VoiceMoment.SCARED, "A-ai...!");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.SCARED, "Ah...");
             addWhistleTranslations(adder, "Bala de Apito", "Bala de Apito (%s)", "Segure para soprar: os pets por perto seguem a ordem mostrada. Agache + clique com o botão direito para mudá-la.", "Bala de apito: %s", "%d pets vieram correndo", "%d pets se sentaram", "%d pets saíram para passear", "%d pets selvagens vieram dar uma olhada", "Nenhum pet ouviu o apito", "Indo dar uma olhada", "Nenhum apito ouvido");
             addSettingsTranslations(adder, "Configurações do Chiikawa", "Aparição de pets selvagens: %s", "Conversa: %s", "Balões de fala: %s", "Ligado", "Desligado",
                 "A aparição e a conversa pertencem ao mundo; mude-as de dentro de um mundo", "Só operadores podem mudar a aparição e a conversa",
@@ -781,6 +808,8 @@ public final class LanguageData {
             addIntentNameTranslations(adder, "주인 따라가기", "앉아 있기", "어슬렁", "물건 줍기",
                 "전표 받으러 가기", "수확", "심기", "배달", "잡초 뽑기", "버섯 따기",
                 "토벌", "활 쏘기", "연주", "쇼핑", "선물 전달");
+            addCombatTranslations(adder, "사냥", "활 사냥", "스스로 지키기", "숨기",
+                "공격하는 상대가 없어", "이미 무기를 들고 있어", "바꿔 들 무기가 가방에 없어", "맞서 싸워");
             addSocialTranslations(adder, "친구 만나러", "같이 놀기", "같이 놀 친구가 근처에 없어",
                 "아무도 안 왔어");
             addTaskTypeTranslations(adder, "잡초 뽑기", "잡초 %s포기", "길거리 연주", "%s초",
@@ -919,6 +948,13 @@ public final class LanguageData {
             addVoiceLines(adder, "rakko", VoiceMoment.PHOTOGRAPHED, "...찍어.");
             addVoiceLines(adder, "shisa", VoiceMoment.PHOTOGRAPHED, "예쁘게 찍어 주세요~");
             addVoiceLines(adder, "furuhonya", VoiceMoment.PHOTOGRAPHED, "카니");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.SCARED, "으아앙...!!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.SCARED, "어, 어떡해...!");
+            addVoiceLines(adder, "usagi", VoiceMoment.SCARED, "우라우라우라!!");
+            addVoiceLines(adder, "momonga", VoiceMoment.SCARED, "무서워! 위로해!");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.SCARED, "...하아.");
+            addVoiceLines(adder, "shisa", VoiceMoment.SCARED, "히, 히익...!");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.SCARED, "헉...");
             addWhistleTranslations(adder, "피리 사탕", "피리 사탕 (%s)", "길게 눌러 불어. 근처 펫이 표시된 지시를 따라. 웅크리고 우클릭하면 지시를 바꿔.", "피리 사탕: %s", "펫 %d마리가 달려왔어", "펫 %d마리가 앉았어", "펫 %d마리가 자유롭게 돌아다녀", "야생 펫 %d마리가 구경하러 왔어", "호루라기를 들은 펫이 없어", "구경하러 가는 중", "호루라기가 안 들려");
             addSettingsTranslations(adder, "치이카와 설정", "야생 펫 등장: %s", "수다 빈도: %s", "말풍선: %s", "켜짐", "꺼짐",
                 "등장과 수다는 월드 설정이야. 월드 안에서 바꿀 수 있어", "등장과 수다는 관리자만 바꿀 수 있어",
@@ -1013,6 +1049,8 @@ public final class LanguageData {
             addIntentNameTranslations(adder, "Following its owner", "Sitting", "Wandering", "Picking up an item",
                 "Fetching a slip", "Harvesting", "Planting", "Delivering", "Pulling weeds", "Picking mushrooms",
                 "Fighting", "Shooting", "Performing", "Out shopping", "Bringing a present");
+            addCombatTranslations(adder, "Hunting", "Hunting with a bow", "Defending itself", "Hiding",
+                "Nothing is attacking it", "Already holding a weapon", "No spare weapon in the bag", "It fights back");
             addSocialTranslations(adder, "Visiting a friend", "Playing along", "Nobody nearby it feels like playing with",
                 "Nobody is coming over");
             addTaskTypeTranslations(adder, "Weeding", "%s weeds", "Street Performance", "%ss",
@@ -1151,6 +1189,13 @@ public final class LanguageData {
             addVoiceLines(adder, "rakko", VoiceMoment.PHOTOGRAPHED, "...Go ahead.");
             addVoiceLines(adder, "shisa", VoiceMoment.PHOTOGRAPHED, "Make it a nice one~");
             addVoiceLines(adder, "furuhonya", VoiceMoment.PHOTOGRAPHED, "Crab");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.SCARED, "Waaah...!!");
+            addVoiceLines(adder, "hachiware", VoiceMoment.SCARED, "W-what do I do...!");
+            addVoiceLines(adder, "usagi", VoiceMoment.SCARED, "Ura ura uraaa!!");
+            addVoiceLines(adder, "momonga", VoiceMoment.SCARED, "Scary! Comfort me!");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.SCARED, "...Sigh.");
+            addVoiceLines(adder, "shisa", VoiceMoment.SCARED, "E-eek...!");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.SCARED, "Eep...");
             addWhistleTranslations(adder, "Whistle Candy", "Whistle Candy (%s)", "Hold to blow: nearby pets take the order shown. Sneak + right-click to change it.", "Whistle candy: %s", "%d pets came running", "%d pets sat down", "%d pets went off to roam", "%d wild pets came over to look", "No pet heard the whistle", "Coming over to look", "No whistle heard");
             addSettingsTranslations(adder, "Chiikawa Settings", "Wild pet spawning: %s", "Chatter: %s", "Speech bubbles: %s", "On", "Off",
                 "Spawning and chatter belong to the world; change them from inside a world", "Only operators can change spawning and chatter",
@@ -1444,6 +1489,22 @@ public final class LanguageData {
     private static void addBlockTranslations(Adder adder, String laborBoard, String shop) {
         adder.add("block.chiikawa.labor_board", laborBoard);
         adder.add("block.chiikawa.shop", shop);
+    }
+
+    /**
+     * The fights a pet picks and the ones it cannot help: hunting what it finds in its area, taking up a weapon from its bag
+     * to answer an attack, and running from one it will not answer, and why each of them is not what it is doing.
+     */
+    private static void addCombatTranslations(Adder adder, String huntMelee, String huntRanged, String defendSelf, String flee,
+            String noAttacker, String armed, String noSpareWeapon, String fightsBack) {
+        adder.add("intent.chiikawa.hunt_melee", huntMelee);
+        adder.add("intent.chiikawa.hunt_ranged", huntRanged);
+        adder.add("intent.chiikawa.defend_self", defendSelf);
+        adder.add("intent.chiikawa.flee", flee);
+        adder.add("intent.chiikawa.fail.no_attacker", noAttacker);
+        adder.add("intent.chiikawa.fail.armed", armed);
+        adder.add("intent.chiikawa.fail.no_spare_weapon", noSpareWeapon);
+        adder.add("intent.chiikawa.fail.fights_back", fightsBack);
     }
 
     /** Names of what a pet may be doing, shown in its backpack; one per errand. */

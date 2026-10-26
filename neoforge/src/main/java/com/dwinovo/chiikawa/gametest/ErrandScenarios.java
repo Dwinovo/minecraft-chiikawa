@@ -119,6 +119,10 @@ final class ErrandScenarios {
     private static final BlockPos ARCHER = new BlockPos(3, STAND, 4);
     private static final BlockPos TARGET = new BlockPos(13, STAND, 4);
     private static final int ARROWS = 16;
+    /** The pocket of a pet's backpack that a spare weapon is put in: the first that is a pocket for things. */
+    private static final int SPARE_POCKET = 2;
+    /** How long the game remembers a blow for, and a little over: after this long the pet is hurt again, for there to be something to run from. */
+    private static final int FORGETTING_TICKS = 65;
     /** A song of silence, short enough to be played to its end in a case that waits for one. */
     private static final String SONG = "chiikawa_gametest_contract";
     private static final int SONG_SECONDS = 1;
@@ -191,6 +195,10 @@ final class ErrandScenarios {
         Map.entry(WorkData.PICK_MUSHROOM, ErrandScenarios::pickMushroom),
         Map.entry(WorkData.MELEE, ErrandScenarios::melee),
         Map.entry(WorkData.RANGED, ErrandScenarios::ranged),
+        Map.entry(WorkData.HUNT_MELEE, ErrandScenarios::huntMelee),
+        Map.entry(WorkData.HUNT_RANGED, ErrandScenarios::huntRanged),
+        Map.entry(ErrandIds.DEFEND_SELF, ErrandScenarios::defendSelf),
+        Map.entry(ErrandIds.FLEE, ErrandScenarios::flee),
         Map.entry(WorkData.PLAY_MUSIC, ErrandScenarios::playMusic),
         Map.entry(ErrandIds.FOLLOW_OWNER, ErrandScenarios::followOwner),
         Map.entry(ErrandIds.WANDER, ErrandScenarios::wander),
@@ -645,31 +653,105 @@ final class ErrandScenarios {
     }
 
     /**
-     * A pet with a sword and a zombie across the yard, standing where it is and with one hit left in it. It is night, since
-     * a zombie that burns in the sun is put down by the sun and not by the pet. A fight leaves nothing in the world to put
-     * right but what any errand does: the pet is not using anything, and has nowhere left to walk to.
+     * A pet with a sword and a zombie across the yard, standing where it is and with one hit left in it, that has hurt the
+     * pet: a pet let loose fights what hurt it as a guard, not as a hunt, and the zombie is its to answer as long as the pet
+     * remembers it. It is night, since a zombie that burns in the sun is put down by the sun and not by the pet. A fight
+     * leaves nothing in the world to put right but what any errand does: the pet is not using anything, and has nowhere
+     * left to walk to.
      */
     private static Scenario melee(GameTestHelper helper) {
-        settleWorld(helper.getLevel(), Difficulty.NORMAL, GameTestKit.MIDNIGHT);
-        AbstractPet pet = GameTestKit.holding(ownedPet(helper, FIGHTER), Items.IRON_SWORD);
+        AbstractPet pet = fencer(helper);
+        hurtBy(pet, foe(helper, FOE));
+        return new Scenario(pet, 2, ran -> Optional.empty());
+    }
+
+    /** The same pet and the same zombie, which has not hurt the pet: it is a pet let loose clearing what comes by, a hunt. */
+    private static Scenario huntMelee(GameTestHelper helper) {
+        AbstractPet pet = fencer(helper);
         foe(helper, FOE);
         return new Scenario(pet, 2, ran -> Optional.empty());
     }
 
+    private static AbstractPet fencer(GameTestHelper helper) {
+        settleWorld(helper.getLevel(), Difficulty.NORMAL, GameTestKit.MIDNIGHT);
+        return GameTestKit.holding(ownedPet(helper, FIGHTER), Items.IRON_SWORD);
+    }
+
     /**
-     * A pet with a bow and a quiver and a zombie across the yard, in range and standing where it is. However it is cut
-     * short, even with the bow at its full draw, no arrow flies: the quiver is as it was and the bow is down.
+     * A pet with a bow and a quiver and a zombie across the yard, in range and standing where it is, that has hurt the pet.
+     * However it is cut short, even with the bow at its full draw, no arrow flies: the quiver is as it was and the bow is
+     * down.
      */
     private static Scenario ranged(GameTestHelper helper) {
+        AbstractPet pet = archer(helper);
+        hurtBy(pet, foe(helper, TARGET));
+        return new Scenario(pet, 3, ran -> untouchedQuiver(pet));
+    }
+
+    /** The same pet and the same zombie, which has not hurt the pet: a hunt. */
+    private static Scenario huntRanged(GameTestHelper helper) {
+        AbstractPet pet = archer(helper);
+        foe(helper, TARGET);
+        return new Scenario(pet, 3, ran -> untouchedQuiver(pet));
+    }
+
+    private static AbstractPet archer(GameTestHelper helper) {
         settleWorld(helper.getLevel(), Difficulty.NORMAL, GameTestKit.MIDNIGHT);
         AbstractPet pet = GameTestKit.holding(ownedPet(helper, ARCHER), Items.BOW);
         pet.getBackpack().addItem(new ItemStack(Items.ARROW, ARROWS));
-        foe(helper, TARGET);
+        return pet;
+    }
+
+    private static Optional<String> untouchedQuiver(AbstractPet pet) {
+        int left = GameTestKit.count(pet, Items.ARROW);
+        return left == ARROWS ? Optional.empty()
+            : Optional.of((ARROWS - left) + " arrows are gone from the quiver, though the pet was cut short before it loosed one");
+    }
+
+    /**
+     * A farmer with a sword in its bag and a zombie across the yard that has hurt it, standing where it is and with one hit
+     * left in it: it takes the sword up and fights, and is cut short in the swap, in the footwork and in the swing. Wherever
+     * it is, it has its hoe back in its hand and the sword in its bag, as it was.
+     */
+    private static Scenario defendSelf(GameTestHelper helper) {
+        settleWorld(helper.getLevel(), Difficulty.NORMAL, GameTestKit.MIDNIGHT);
+        AbstractPet pet = GameTestKit.holding(ownedPet(helper, FIGHTER), Items.WOODEN_HOE);
+        pet.getBackpack().setItem(SPARE_POCKET, new ItemStack(Items.IRON_SWORD));
+        hurtBy(pet, foe(helper, FOE));
         return new Scenario(pet, 3, ran -> {
-            int left = GameTestKit.count(pet, Items.ARROW);
-            return left == ARROWS ? Optional.empty()
-                : Optional.of((ARROWS - left) + " arrows are gone from the quiver, though the pet was cut short before it loosed one");
+            if (!pet.getMainHandItem().is(Items.WOODEN_HOE)) {
+                return Optional.of("the pet is holding " + pet.getMainHandItem() + ", its hoe is in the bag");
+            }
+            return pet.getBackpack().getItem(SPARE_POCKET).is(Items.IRON_SWORD) ? Optional.empty()
+                : Optional.of("the sword is not back in the bag");
         });
+    }
+
+    /**
+     * A pet with nothing to fight with at its owner's heel and a zombie that keeps hurting it from across the yard, as it
+     * is hurt again whenever the game has forgotten the last time: it runs to its owner and hides behind them, and
+     * cowers, and whatever step it is cut short at, it is not left running, cowering or looking away.
+     */
+    private static Scenario flee(GameTestHelper helper) {
+        settleWorld(helper.getLevel(), Difficulty.NORMAL, GameTestKit.MIDNIGHT);
+        ServerPlayer owner = player(helper);
+        BlockPos across = helper.absolutePos(new BlockPos(14, STAND, 8));
+        owner.teleportTo(across.getX() + 0.5, across.getY(), across.getZ() + 0.5);
+        AbstractPet pet = GameTestKit.wild(helper, InitEntity.USAGI_PET.get(), new BlockPos(5, STAND, 8));
+        pet.tame(owner);
+        pet.setPetDirective(PetDirective.FOLLOW);
+        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(2, STAND, 8));
+        zombie.setNoAi(true);
+        long[] hitAt = {-FORGETTING_TICKS};
+        helper.onEachTick(() -> {
+            long now = helper.getLevel().getGameTime();
+            if (now - hitAt[0] >= FORGETTING_TICKS && !pet.getBrain().hasMemoryValue(MemoryModuleType.HURT_BY)) {
+                hitAt[0] = now;
+                pet.setHealth(pet.getMaxHealth());
+                pet.hurt(zombie.damageSources().mobAttack(zombie), 1.0F);
+            }
+        });
+        return new Scenario(pet, 2, ran -> Optional.empty());
     }
 
     /**
@@ -787,10 +869,16 @@ final class ErrandScenarios {
     }
 
     /** A zombie that stands still and has one hit left in it. */
-    private static void foe(GameTestHelper helper, BlockPos at) {
+    private static Zombie foe(GameTestHelper helper, BlockPos at) {
         Zombie zombie = helper.spawn(EntityType.ZOMBIE, at);
         zombie.setNoAi(true);
         zombie.setHealth(1.0F);
+        return zombie;
+    }
+
+    /** The pet remembers the zombie as what hurt it, as the game's own sensor would have it a moment after a blow. */
+    private static void hurtBy(AbstractPet pet, Zombie zombie) {
+        pet.getBrain().setMemory(MemoryModuleType.HURT_BY_ENTITY, zombie);
     }
 
     /** Watered, or the farmland dries out and turns back to dirt mid-case. */

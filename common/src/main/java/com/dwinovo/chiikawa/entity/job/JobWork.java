@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.ErrandType;
 import com.dwinovo.chiikawa.entity.brain.errand.Errands;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.work.WorkTarget;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
@@ -75,6 +76,11 @@ public record JobWork(List<ResourceLocation> work, Optional<Sight> sight) {
             .filter(work -> work.counts(counter))
             .toList();
         return counting.isEmpty() || counting.stream().anyMatch(work -> work.readyFor(view));
+    }
+
+    /** @return whether the pet's job has work that is done to a target of this kind */
+    public static boolean hasWorkTo(AbstractPet pet, WorkTarget.Kind kind) {
+        return errandsOf(pet).stream().anyMatch(errand -> errand instanceof WorkErrand<?, ?> work && work.takes(kind));
     }
 
     /** @return how the pet looks for the blocks its job's work is done to, if its job says */

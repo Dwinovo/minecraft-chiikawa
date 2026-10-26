@@ -19,6 +19,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.work.WorkAction;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkTarget;
 import com.mojang.serialization.Codec;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Predicate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -74,12 +75,20 @@ public final class ShootAction implements WorkAction<Duel, ErrandTunings.Ranged>
     @Override
     public Routine routine(Work<Duel, ErrandTunings.Ranged> work, Duel plan,
             ErrandSettings<ErrandTunings.Ranged> settings) {
-        ErrandTunings.Ranged tuning = settings.tuning();
+        return Routine.of(fight(plan.foe(), settings.tuning()));
+    }
+
+    /**
+     * @param foe the creature the fight is about
+     * @param tuning how the pet shoots
+     * @return the fight itself: round after round of footwork, a draw and a shot, for as long as the sensor names the foe and it is alive
+     */
+    public static Routine.Part fight(UUID foe, ErrandTunings.Ranged tuning) {
         Stance stance = new Stance(tuning.footwork(), true);
-        return Routine.of(Routine.repeatWhile(Skirmish.whileHunting(plan.foe()),
-            () -> Skirmish.shooting(plan.foe(), stance, tuning.range()),
-            () -> new DrawBow(plan.foe(), stance, tuning.range(), tuning.drawTicks()),
-            () -> new Release(plan.foe(), tuning.cooldownTicks())));
+        return Routine.repeatWhile(Skirmish.whileHunting(foe),
+            () -> Skirmish.shooting(foe, stance, tuning.range()),
+            () -> new DrawBow(foe, stance, tuning.range(), tuning.drawTicks()),
+            () -> new Release(foe, tuning.cooldownTicks()));
     }
 
     /** The arrows a bow shoots. */

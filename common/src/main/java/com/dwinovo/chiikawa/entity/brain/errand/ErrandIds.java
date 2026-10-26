@@ -22,6 +22,8 @@ public final class ErrandIds {
     public static final ResourceLocation CHECK_RESULTS = id("check_results");
     public static final ResourceLocation ANSWER_WHISTLE = id("answer_whistle");
     public static final ResourceLocation TAKE_PHOTO = id("take_photo");
+    public static final ResourceLocation DEFEND_SELF = id("defend_self");
+    public static final ResourceLocation FLEE = id("flee");
 
     private ErrandIds() {
     }

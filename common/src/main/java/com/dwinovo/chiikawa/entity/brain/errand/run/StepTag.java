@@ -7,5 +7,7 @@ public enum StepTag {
     /** Playing a scene with another pet. */
     IN_SCENE,
     /** Playing music for whoever is near. */
-    PLAYING_MUSIC
+    PLAYING_MUSIC,
+    /** Frightened, and cowering until it is safe. */
+    SCARED
 }

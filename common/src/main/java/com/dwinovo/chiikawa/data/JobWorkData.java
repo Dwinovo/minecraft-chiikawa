@@ -25,8 +25,8 @@ public final class JobWorkData {
         return Map.of(
             JobIds.FARMER, new JobWork(List.of(WorkData.HARVEST, WorkData.PLANT, WorkData.DELIVER, WorkData.WEED,
                 WorkData.PICK_MUSHROOM), Optional.of(field)),
-            JobIds.FENCER, new JobWork(List.of(WorkData.MELEE), Optional.empty()),
-            JobIds.ARCHER, new JobWork(List.of(WorkData.RANGED), Optional.empty()),
+            JobIds.FENCER, new JobWork(List.of(WorkData.MELEE, WorkData.HUNT_MELEE), Optional.empty()),
+            JobIds.ARCHER, new JobWork(List.of(WorkData.RANGED, WorkData.HUNT_RANGED), Optional.empty()),
             JobIds.MUSICIAN, new JobWork(List.of(WorkData.PLAY_MUSIC), Optional.empty()));
     }
 }

@@ -3,8 +3,13 @@ package com.dwinovo.chiikawa.entity.brain.constraint;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.PetRules;
+import com.dwinovo.chiikawa.entity.brain.combat.Ground;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
+import com.dwinovo.chiikawa.entity.brain.sensor.FoeCandidates;
+import com.dwinovo.chiikawa.task.PetTask;
+import com.dwinovo.chiikawa.task.PetWorkCounters;
 import java.util.Optional;
+import java.util.Set;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -14,8 +19,8 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
  * anchor (where) and a permission table (what category of errand).
  *
  * <p>This is the only AI class that reads {@link PetDirective}. Every rule that is
- * a mode check, whatever the errand or sensor, lives in {@link #anchorOf} or
- * {@link #allows}, and so does the owner's switching a kind of errand off.
+ * a mode check, whatever the errand or sensor, lives in {@link #anchorOf},
+ * {@link #allows} or {@link #foesOf}, and so does the owner's switching a kind of errand off.
  */
 public final class PetConstraints {
     private PetConstraints() {
@@ -132,7 +137,21 @@ public final class PetConstraints {
             // A photo is taken for an owner, wherever the pet may walk: at heel it takes one on the
             // way, free it takes one of the yard. Told to sit it stays where it sits.
             case PHOTO -> !wild && directive != PetDirective.STAY;
+            // A pet that is hurt and will not fight back runs, whatever else it has been told: the one exception to an
+            // owner's boundaries, and the errand that does it comes back to where the pet was told to be.
+            case SAFETY -> true;
         };
+    }
+
+    /**
+     * @param pet the pet
+     * @param ownership the pet's ownership
+     * @param fights whether the pet's job has work done to a foe
+     * @return the grounds the owner's orders let the pet fight on now, see {@link FoeCandidates}
+     */
+    public static Set<Ground> foesOf(AbstractPet pet, PetOwnership ownership, boolean fights) {
+        boolean slaying = pet.getTask().map(PetTask::counter).filter(PetWorkCounters.SLAY::equals).isPresent();
+        return FoeCandidates.of(pet.getRules().stance(), pet.getPetDirective(), ownership, slaying, fights);
     }
 
     private static Optional<GlobalPos> followableOwnerPos(AbstractPet pet) {

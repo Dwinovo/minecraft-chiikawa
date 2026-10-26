@@ -18,6 +18,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.work.WorkAction;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkTarget;
 import com.mojang.serialization.Codec;
 import java.util.Optional;
+import java.util.UUID;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -66,9 +67,17 @@ public final class StrikeAction implements WorkAction<Duel, ErrandTunings.Footwo
     @Override
     public Routine routine(Work<Duel, ErrandTunings.Footwork> work, Duel plan,
             ErrandSettings<ErrandTunings.Footwork> settings) {
-        Stance stance = new Stance(settings.tuning(), false);
-        return Routine.of(Routine.repeatWhile(Skirmish.whileHunting(plan.foe()),
-            () -> Skirmish.meleeing(plan.foe(), stance), () -> new Swing(plan.foe())));
+        return Routine.of(fight(plan.foe(), settings.tuning()));
+    }
+
+    /**
+     * @param foe the creature the fight is about
+     * @param footwork where the pet stands
+     * @return the fight itself: round after round of footwork and a swing, for as long as the sensor names the foe and it is alive
+     */
+    public static Routine.Part fight(UUID foe, ErrandTunings.Footwork footwork) {
+        Stance stance = new Stance(footwork, false);
+        return Routine.repeatWhile(Skirmish.whileHunting(foe), () -> Skirmish.meleeing(foe, stance), () -> new Swing(foe));
     }
 
     @Override

@@ -67,6 +67,7 @@ class GiftOwnerOfferTest {
 
     @Test
     void aFightAtTheSamePriorityComesFirst() {
-        assertEquals(List.of(WorkData.MELEE, WorkData.RANGED), ErrandSettings.of(ErrandIds.GIFT_OWNER).orElseThrow().yieldsTo());
+        assertEquals(List.of(WorkData.MELEE, WorkData.RANGED, ErrandIds.DEFEND_SELF),
+            ErrandSettings.of(ErrandIds.GIFT_OWNER).orElseThrow().yieldsTo());
     }
 }

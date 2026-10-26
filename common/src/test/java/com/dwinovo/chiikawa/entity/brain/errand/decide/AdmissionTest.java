@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.data.WorkData;
+import com.dwinovo.chiikawa.entity.brain.combat.Ground;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
@@ -14,7 +15,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.Plan;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
-import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
@@ -148,7 +148,7 @@ class AdmissionTest {
         TestView view = TestView.at(HOME, FREE).ownership(PetOwnership.WILD).phase(DayPhase.NIGHT).holdingGift().armedWithArrows()
             .shopWorthVisiting(east(1)).offeringBoard(east(2)).socialPartner(east(3)).examDesk(east(4))
             .resultsDesk(east(5)).whistleHeard(east(6)).ownerPos(east(7))
-            .targets(TestTargets.of(Optional.of(new AttackTarget(UUID.randomUUID(), east(8))), Optional.of(east(9)), Optional.of(east(10)),
+            .targets(TestTargets.of(Optional.of(TestTargets.foe(UUID.randomUUID(), east(8), Ground.SELF)), Optional.of(east(9)), Optional.of(east(10)),
                 Optional.of(east(11)), Optional.of(east(12)), Optional.of(east(13)), Optional.of(new PickableItem(UUID.randomUUID(), east(14)))));
 
         assertEquals(Optional.of(east(1)), destination(ErrandIds.SHOP, view));

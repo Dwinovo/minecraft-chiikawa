@@ -4,6 +4,8 @@ import com.dwinovo.chiikawa.block.ExamDeskBlockEntity;
 import com.dwinovo.chiikawa.camera.PhotoOutlook;
 import com.dwinovo.chiikawa.camera.PhotoScout;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.combat.Arms;
+import com.dwinovo.chiikawa.entity.brain.combat.Ground;
 import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
@@ -11,6 +13,7 @@ import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.InvitationDesk;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
 import com.dwinovo.chiikawa.gifting.GiftOutlook;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitMemory;
@@ -27,6 +30,7 @@ import com.dwinovo.chiikawa.utils.Utils;
 import com.dwinovo.chiikawa.whistle.WhistleHeard;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -66,6 +70,9 @@ public final class LivePetView implements PetView {
     private final Lazy<Optional<GlobalPos>> ownerBedside;
     private final Lazy<Boolean> attackCoolingDown;
     private final Lazy<Boolean> hasArrows;
+    private final Lazy<Optional<Attacker>> attacker;
+    private final Lazy<Set<Ground>> foeGrounds;
+    private final Lazy<Arms> arms;
     private final Lazy<Optional<PetExams.Summons>> examToSit;
     private final Lazy<Optional<GlobalPos>> resultsDesk;
     private final Lazy<Boolean> seatedAtExam;
@@ -97,6 +104,9 @@ public final class LivePetView implements PetView {
         this.ownerBedside = new Lazy<>(this::findOwnerBedside);
         this.attackCoolingDown = new Lazy<>(() -> pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_COOLING_DOWN));
         this.hasArrows = new Lazy<>(() -> !Utils.getArrow(pet).isEmpty());
+        this.attacker = new Lazy<>(() -> Attacker.of(pet));
+        this.foeGrounds = new Lazy<>(() -> PetAttackbleEntitySensor.allowed(pet));
+        this.arms = new Lazy<>(() -> Arms.of(pet));
         this.examToSit = new Lazy<>(() -> PetExams.toSit(pet)
             .filter(summons -> ExamDeskBlockEntity.at(level, summons.desk()).isPresent()));
         this.resultsDesk = new Lazy<>(() -> PetExams.resultsDesk(pet)
@@ -204,6 +214,21 @@ public final class LivePetView implements PetView {
     @Override
     public boolean hasArrows() {
         return hasArrows.get();
+    }
+
+    @Override
+    public Optional<Attacker> attacker() {
+        return attacker.get();
+    }
+
+    @Override
+    public Set<Ground> foeGrounds() {
+        return foeGrounds.get();
+    }
+
+    @Override
+    public Arms arms() {
+        return arms.get();
     }
 
     /**

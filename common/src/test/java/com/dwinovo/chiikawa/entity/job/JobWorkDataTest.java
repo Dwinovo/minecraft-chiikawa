@@ -14,11 +14,11 @@ import org.junit.jupiter.api.Test;
 /** What the generated job files say: the work each job has always had, in the order it has always been listed. */
 class JobWorkDataTest {
     @Test
-    void eachJobHasTheWorkItHadWhenTheCodeListedIt() {
+    void eachJobHasTheWorkItHadWhenTheCodeListedItAndTheFightersALittleHuntingAfterTheirGuardDuty() {
         Map<ResourceLocation, List<ResourceLocation>> expected = Map.of(
             JobIds.FARMER, List.of(WorkData.HARVEST, WorkData.PLANT, WorkData.DELIVER, WorkData.WEED, WorkData.PICK_MUSHROOM),
-            JobIds.FENCER, List.of(WorkData.MELEE),
-            JobIds.ARCHER, List.of(WorkData.RANGED),
+            JobIds.FENCER, List.of(WorkData.MELEE, WorkData.HUNT_MELEE),
+            JobIds.ARCHER, List.of(WorkData.RANGED, WorkData.HUNT_RANGED),
             JobIds.MUSICIAN, List.of(WorkData.PLAY_MUSIC));
 
         assertEquals(expected.keySet(), JobWorkData.all().keySet(), "a pet with no job has no file");

@@ -48,7 +48,10 @@ public interface Step {
         return PetActivity.NONE;
     }
 
-    /** @return the scene animation the pet is in while this step lasts, or empty for none */
+    /**
+     * @return the scene animation the pet is in while this step lasts, or empty for none; several, separated by commas, are
+     *         the ones to try in order of preference, the first the pet's character has being shown
+     */
     default String performance() {
         return "";
     }

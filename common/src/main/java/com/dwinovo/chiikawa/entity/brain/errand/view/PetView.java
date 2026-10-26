@@ -1,6 +1,8 @@
 package com.dwinovo.chiikawa.entity.brain.errand.view;
 
 import com.dwinovo.chiikawa.camera.PhotoOutlook;
+import com.dwinovo.chiikawa.entity.brain.combat.Arms;
+import com.dwinovo.chiikawa.entity.brain.combat.Ground;
 import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
@@ -11,6 +13,7 @@ import com.dwinovo.chiikawa.music.Playable;
 import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.task.PetTask;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.GlobalPos;
 
@@ -84,6 +87,23 @@ public interface PetView {
 
     /** @return whether the pet carries arrows */
     boolean hasArrows();
+
+    /** @return who hurt the pet lately, while the game's hurt-by memory holds it, if it was a creature that is its to answer */
+    Optional<Attacker> attacker();
+
+    /** @return the grounds the owner's orders let the pet fight on now; none for a pet told to sit or not to fight */
+    Set<Ground> foeGrounds();
+
+    /** @return what the pet has to fight with */
+    Arms arms();
+
+    /**
+     * @return whether the pet answers an attack: its orders let it fight for itself and it has a weapon in hand, or in its
+     *         bag to take up. One that does not runs, see {@code flee}
+     */
+    default boolean fightsBack() {
+        return foeGrounds().contains(Ground.SELF) && (arms().wielding() || arms().swap().isPresent());
+    }
 
     /**
      * @param onSlip whether the pet carries a slip that counts the work of playing, which has it play the song over

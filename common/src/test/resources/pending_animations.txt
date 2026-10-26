@@ -1,11 +1,13 @@
 # The Blockbench backlog: every animation the enums mean (the first candidate of each PetActivity, PetAction and
-# PetReaction) that a character able to reach it does not have yet, as `<character> <animation>`. The guitar is asked of
-# Hachiware only, and the generic actions are only what the others fall back to. AnimationBacklogTest holds the list to
+# PetReaction), and the first the flee errand's data names for a character to cower with, that a character able to reach
+# it does not have yet, as `<character> <animation>`. The guitar is asked of Hachiware only, and the generic actions are
+# only what the others fall back to. AnimationBacklogTest holds the list to
 # the files both ways: a line for an animation that exists, or that the character cannot reach, fails it, and so does a
 # missing one with no line. Making an animation takes its line off; the list shrinks to empty.
 
 chiikawa bow_draw
 chiikawa bow_release
+chiikawa cry
 chiikawa deposit
 chiikawa harvest
 chiikawa photo
@@ -91,3 +93,4 @@ usagi revive
 usagi scratch_head
 usagi slash
 usagi sleep
+usagi yell

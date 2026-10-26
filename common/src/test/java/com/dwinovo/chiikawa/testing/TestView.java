@@ -2,11 +2,14 @@ package com.dwinovo.chiikawa.testing;
 
 import com.dwinovo.chiikawa.camera.PhotoOutlook;
 import com.dwinovo.chiikawa.data.QualificationData;
+import com.dwinovo.chiikawa.entity.brain.combat.Arms;
+import com.dwinovo.chiikawa.entity.brain.combat.Ground;
 import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.InvitationDesk;
 import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
+import com.dwinovo.chiikawa.entity.brain.errand.view.Attacker;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.errand.view.Onlooker;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
@@ -21,10 +24,12 @@ import com.dwinovo.chiikawa.music.Playable;
 import com.dwinovo.chiikawa.music.PlaybackMode;
 import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.task.PetTask;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.world.item.Items;
@@ -51,6 +56,9 @@ public final class TestView implements PetView {
     private boolean eager;
     private boolean attackCoolingDown;
     private boolean hasArrows;
+    private Optional<Attacker> attacker = Optional.empty();
+    private Set<Ground> foeGrounds = EnumSet.allOf(Ground.class);
+    private Arms arms = Arms.NONE;
     private Optional<Playable> playableSelection = Optional.empty();
     private Optional<PetExams.Summons> examToSit = Optional.empty();
     private Optional<GlobalPos> resultsDesk = Optional.empty();
@@ -140,6 +148,25 @@ public final class TestView implements PetView {
 
     public TestView armedWithArrows() {
         this.hasArrows = true;
+        return this;
+    }
+
+    /** Something hurt the pet lately, and is standing here. */
+    public TestView attackedBy(UUID who, GlobalPos where) {
+        this.attacker = Optional.of(new Attacker(who, where));
+        this.creatures.put(who, where);
+        return this;
+    }
+
+    /** The grounds the pet's orders let it fight on; all of them, until a test says otherwise. */
+    public TestView fightingOn(Ground... grounds) {
+        this.foeGrounds = Set.of(grounds);
+        return this;
+    }
+
+    /** What the pet has to fight with; nothing, until a test says otherwise. */
+    public TestView arms(Arms arms) {
+        this.arms = arms;
         return this;
     }
 
@@ -326,6 +353,21 @@ public final class TestView implements PetView {
     @Override
     public boolean hasArrows() {
         return hasArrows;
+    }
+
+    @Override
+    public Optional<Attacker> attacker() {
+        return attacker;
+    }
+
+    @Override
+    public Set<Ground> foeGrounds() {
+        return foeGrounds;
+    }
+
+    @Override
+    public Arms arms() {
+        return arms;
     }
 
     @Override
