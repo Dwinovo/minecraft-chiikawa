@@ -46,11 +46,12 @@ public final class StrikeAction implements WorkAction<Duel, ErrandTunings.Footwo
 
     @Override
     public Optional<String> refuses(Optional<WorkTarget> target) {
-        return WorkTarget.neededBy("strike", WorkTarget.Kind.FOE, target);
+        return WorkTarget.neededBy("strike", target, WorkTarget.Kind.FOE);
     }
 
     @Override
-    public Offers<Duel> offers(Work<Duel, ErrandTunings.Footwork> work, PetView view, ErrandTunings.Footwork tuning) {
+    public Offers<Duel> offers(Work<Duel, ErrandTunings.Footwork> work, ResourceLocation errand, PetView view,
+            ErrandTunings.Footwork tuning) {
         WorkTarget.Foe target = work.targetOf(WorkTarget.Foe.class);
         Optional<AttackTarget> foe = target.in(view);
         if (foe.isEmpty()) {

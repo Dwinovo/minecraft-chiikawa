@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.data.WorkData;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import java.util.Map;
@@ -23,7 +24,7 @@ import org.junit.jupiter.api.Test;
 class PetTaskTest {
     private static final ResourceLocation FARMER = id("farmer");
     private static final ResourceLocation GRASS = ResourceLocation.withDefaultNamespace("short_grass");
-    private static final PetTask WEEDING = new PetTask(id("weeding"), FARMER, PetWorkCounters.WEED, GRASS, 3,
+    private static final PetTask WEEDING = new PetTask(id("weeding"), FARMER, WorkData.WEED_PULLED, GRASS, 3,
         ResourceKey.create(Registries.LOOT_TABLE, id("pet_task/weeding")), 0);
 
     @BeforeAll
@@ -52,10 +53,10 @@ class PetTaskTest {
 
     @Test
     void aTypeRollsAFreshSlipOfItsKind() {
-        PetTaskType type = new PetTaskType(FARMER, PetWorkCounters.WEED, GRASS, UniformInt.of(4, 4),
+        PetTaskType type = new PetTaskType(FARMER, WorkData.WEED_PULLED, GRASS, UniformInt.of(4, 4),
             WEEDING.reward(), 1, BoardLevels.FIRST_LEVEL, Optional.empty());
 
-        assertEquals(new PetTask(id("weeding"), FARMER, PetWorkCounters.WEED, GRASS, 4, WEEDING.reward(), 0),
+        assertEquals(new PetTask(id("weeding"), FARMER, WorkData.WEED_PULLED, GRASS, 4, WEEDING.reward(), 0),
             type.roll(id("weeding"), RandomSource.create(1L)));
     }
 

@@ -19,7 +19,8 @@ import net.minecraft.util.profiling.ProfilerFiller;
 /**
  * Server data reload listener for {@code data/<namespace>/pet_job/<job>.json}. A file that fails to parse, or that is
  * named for no job, is skipped with a message, and its job offers the generic errands alone: a job with broken work
- * should do nothing, not take the world down with it. Errand ids that no pack has a file for are only warned about.
+ * should do nothing, not take the world down with it. Errand ids that no pack has a file for are only warned about. A
+ * job that lists work done to blocks must say how its pet looks for them, see {@link Sight}, or it offers no work.
  */
 public final class JobWorkLoader extends SimpleJsonResourceReloadListener {
     public static final String DIRECTORY = "pet_job";
@@ -34,7 +35,8 @@ public final class JobWorkLoader extends SimpleJsonResourceReloadListener {
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
-        Loaded loaded = load(files, InitRegistry.PET_JOB_REGISTRY.keySet(), ErrandSettingsLoader.errandIds(manager));
+        Loaded loaded = load(files, InitRegistry.PET_JOB_REGISTRY.keySet(), ErrandSettingsLoader.errandIds(manager),
+            ErrandSettingsLoader.blockWorkIds(manager));
         loaded.errors().forEach(Constants.LOG::error);
         loaded.warnings().forEach(Constants.LOG::warn);
         JobWork.replaceAll(loaded.work());
@@ -45,9 +47,11 @@ public final class JobWorkLoader extends SimpleJsonResourceReloadListener {
      * @param files parsed JSON by file id, which is the id of the job
      * @param jobs the ids of the jobs there are
      * @param errands the ids of the errands the packs have files for, see {@link ErrandSettingsLoader#errandIds}
+     * @param blockWorks those of them that are done to blocks, see {@link ErrandSettingsLoader#blockWorkIds}
      * @return the work that decoded, and what went wrong with the rest
      */
-    static Loaded load(Map<ResourceLocation, JsonElement> files, Set<ResourceLocation> jobs, Set<ResourceLocation> errands) {
+    static Loaded load(Map<ResourceLocation, JsonElement> files, Set<ResourceLocation> jobs, Set<ResourceLocation> errands,
+            Set<ResourceLocation> blockWorks) {
         Map<ResourceLocation, JobWork> work = new HashMap<>();
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
@@ -58,6 +62,10 @@ public final class JobWorkLoader extends SimpleJsonResourceReloadListener {
             }
             JobWork.CODEC.parse(JsonOps.INSTANCE, json)
                 .ifSuccess(parsed -> {
+                    if (parsed.sight().isEmpty() && parsed.work().stream().anyMatch(blockWorks::contains)) {
+                        errors.add(LOG_PREFIX + id + " offers no work, it lists work done to blocks and has no sight");
+                        return;
+                    }
                     work.put(id, parsed);
                     parsed.work().stream()
                         .filter(errand -> !errands.contains(errand))
