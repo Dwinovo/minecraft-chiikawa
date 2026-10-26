@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.errand.work;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -23,6 +24,7 @@ import com.mojang.serialization.JsonOps;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -55,7 +57,7 @@ class ErrandFileTest {
     void aFileWithAnActionMakesTheWorkErrandAndAFileWithoutOneIsACodeErrandsSettings() {
         Loaded loaded = ErrandSettingsLoader.load(ErrandFiles.all());
 
-        assertEquals(Set.of(WorkData.PLAY_MUSIC), loaded.works().keySet());
+        assertEquals(Set.of(WorkData.MELEE, WorkData.RANGED, WorkData.PLAY_MUSIC), loaded.works().keySet());
         assertEquals(ErrandSettingsData.all(), loaded.settings());
         assertTrue(loaded.errors().isEmpty() && loaded.warnings().isEmpty());
         assertInstanceOf(WorkErrand.class, Errands.get(WorkData.PLAY_MUSIC));
@@ -69,7 +71,7 @@ class ErrandFileTest {
 
             assertNull(Errands.get(WorkData.PLAY_MUSIC));
             assertEquals(Optional.empty(), ErrandSettings.of(WorkData.PLAY_MUSIC));
-            assertEquals(20, Errands.all().size(), "the code errands stay");
+            assertEquals(18, Errands.all().size(), "the code errands stay");
         } finally {
             TestErrands.load();
         }
@@ -86,11 +88,46 @@ class ErrandFileTest {
     @Test
     void aTargetTheActionDoesNotTakeSwitchesTheFileOff() {
         JsonObject file = playMusic();
-        JsonObject target = new JsonObject();
-        target.addProperty("type", "foe");
-        file.add("target", target);
+        file.add("target", foe("no_attack_target"));
 
         assertSwitchedOff(file, "busk takes no target");
+    }
+
+    @Test
+    void aFightFileNamesTheFoeAndWhatToSayWithoutOneAndReadsBackAsItWasWritten() {
+        for (ResourceLocation errand : new ResourceLocation[] {WorkData.MELEE, WorkData.RANGED}) {
+            JsonObject file = ErrandFiles.all().get(errand).deepCopy().getAsJsonObject();
+
+            assertEquals(foe("no_attack_target"), file.get("target"), errand::toString);
+            assertEquals("combat", file.get("category").getAsString(), errand::toString);
+            assertEquals(new JsonArray(), file.get("requires"), errand::toString);
+            // The slay is the death hook's: a counter here would give the fight the slip bonus.
+            assertFalse(file.has("counter"), errand::toString);
+
+            WorkFile<?, ?> read = WorkFile.CODEC.parse(JsonOps.INSTANCE, file).getOrThrow();
+
+            assertEquals(WorkData.all().get(errand), read.work(), errand::toString);
+            assertEquals(new WorkTarget.Foe("no_attack_target"), read.work().target().orElseThrow(), errand::toString);
+            assertEquals(file, WorkFile.CODEC.encodeStart(JsonOps.INSTANCE, read).getOrThrow(), errand::toString);
+        }
+    }
+
+    @Test
+    void aFightWithoutATargetSwitchesTheFileOff() {
+        for (ResourceLocation errand : new ResourceLocation[] {WorkData.MELEE, WorkData.RANGED}) {
+            JsonObject file = ErrandFiles.all().get(errand).deepCopy().getAsJsonObject();
+            file.remove("target");
+
+            assertSwitchedOff(errand, file, errand.equals(WorkData.MELEE) ? "strike needs a foe target" : "shoot needs a foe target");
+        }
+    }
+
+    @Test
+    void aFoeTargetWithoutItsReasonSwitchesTheFileOff() {
+        JsonObject file = ErrandFiles.all().get(WorkData.MELEE).deepCopy().getAsJsonObject();
+        file.get("target").getAsJsonObject().remove("missing");
+
+        assertSwitchedOff(WorkData.MELEE, file, "missing");
     }
 
     @Test
@@ -190,13 +227,24 @@ class ErrandFileTest {
     }
 
     private static void assertSwitchedOff(JsonElement file, String because) {
-        Loaded loaded = ErrandSettingsLoader.load(Map.of(WorkData.PLAY_MUSIC, file));
+        assertSwitchedOff(WorkData.PLAY_MUSIC, file, because);
+    }
+
+    private static void assertSwitchedOff(ResourceLocation errand, JsonElement file, String because) {
+        Loaded loaded = ErrandSettingsLoader.load(Map.of(errand, file));
 
         assertTrue(loaded.works().isEmpty() && loaded.settings().isEmpty(), "still on");
         assertEquals(1, loaded.errors().size(), loaded.errors()::toString);
         assertTrue(loaded.errors().get(0).contains(because), loaded.errors().get(0));
-        assertTrue(loaded.errors().get(0).contains("chiikawa:play_music") && loaded.errors().get(0).contains("switched off"),
+        assertTrue(loaded.errors().get(0).contains(errand.toString()) && loaded.errors().get(0).contains("switched off"),
             loaded.errors().get(0));
+    }
+
+    private static JsonObject foe(String missing) {
+        JsonObject target = new JsonObject();
+        target.addProperty("type", "foe");
+        target.addProperty("missing", missing);
+        return target;
     }
 
     /** @return the file the data generator writes for playing music, to spoil */

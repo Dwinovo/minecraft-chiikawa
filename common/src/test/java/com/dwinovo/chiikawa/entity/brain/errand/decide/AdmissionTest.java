@@ -159,8 +159,8 @@ class AdmissionTest {
         assertEquals(Optional.of(east(5)), destination(ErrandIds.CHECK_RESULTS, view));
         assertEquals(Optional.of(east(6)), destination(ErrandIds.ANSWER_WHISTLE, view));
         assertEquals(Optional.of(east(7)), destination(ErrandIds.GIFT_OWNER, view));
-        assertEquals(Optional.of(east(8)), destination(ErrandIds.MELEE, view));
-        assertEquals(Optional.of(east(8)), destination(ErrandIds.RANGED, view));
+        assertEquals(Optional.of(east(8)), destination(WorkData.MELEE, view));
+        assertEquals(Optional.of(east(8)), destination(WorkData.RANGED, view));
         assertEquals(Optional.of(east(9)), destination(ErrandIds.HARVEST, view));
         assertEquals(Optional.of(east(10)), destination(ErrandIds.PLANT, view));
         assertEquals(Optional.of(east(11)), destination(ErrandIds.DELIVER, view));

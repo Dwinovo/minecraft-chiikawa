@@ -74,8 +74,8 @@ public final class ErrandSettingsData {
                 .yieldingTo(ErrandIds.HARVEST, ErrandIds.PLANT)),
             entry(ErrandIds.WEED, errand(50, 0.5F, HALF_A_MINUTE, blockWork, blockWorkTuning)),
             entry(ErrandIds.PICK_MUSHROOM, errand(50, 0.5F, HALF_A_MINUTE, blockWork, blockWorkTuning)),
-            entry(ErrandIds.MELEE, errand(80, 0.8F, A_DAY, giveUp(20), footwork).startingWith(VoiceMoment.HUNT)),
-            entry(ErrandIds.RANGED, errand(80, 0.8F, A_DAY, giveUp(20), new ErrandTunings.Ranged(footwork, 15.0, 15, 20))
+            entry(WorkData.MELEE, errand(80, 0.8F, A_DAY, giveUp(20), footwork).startingWith(VoiceMoment.HUNT)),
+            entry(WorkData.RANGED, errand(80, 0.8F, A_DAY, giveUp(20), new ErrandTunings.Ranged(footwork, 15.0, 15, 20))
                 .startingWith(VoiceMoment.HUNT)),
             // A song's longest, as the music config bounds it, and a little over.
             entry(WorkData.PLAY_MUSIC, errand(50, 0.6F, 12040,

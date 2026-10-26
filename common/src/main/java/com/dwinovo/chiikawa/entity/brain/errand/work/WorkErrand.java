@@ -38,6 +38,11 @@ public final class WorkErrand<P extends Plan, T> implements ErrandType<P, T> {
         return work.action();
     }
 
+    /** @return whether the work is done to a target of this kind */
+    public boolean takes(WorkTarget.Kind kind) {
+        return work.target().filter(target -> target.kind() == kind).isPresent();
+    }
+
     @Override
     public ResourceLocation id() {
         return id;

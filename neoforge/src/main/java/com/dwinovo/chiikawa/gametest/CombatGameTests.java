@@ -7,9 +7,9 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.ownedPet;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
-import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
 import net.minecraft.core.BlockPos;
@@ -89,10 +89,10 @@ public final class CombatGameTests {
         helper.succeedWhen(() -> {
             helper.assertTrue(!first.isAlive() && !second.isAlive(), "the fencer left a zombie standing");
             helper.assertTrue(pet.getMind().log().entries().stream().anyMatch(entry -> entry instanceof DecisionLog.Ended ended
-                && ended.errand().equals(ErrandIds.MELEE) && ended.outcome() instanceof Outcome.Done),
+                && ended.errand().equals(WorkData.MELEE) && ended.outcome() instanceof Outcome.Done),
                 "the fight with the first zombie did not end done");
             helper.assertFalse(pet.getMind().log().entries().stream().anyMatch(entry -> entry instanceof DecisionLog.Ended ended
-                && ended.errand().equals(ErrandIds.MELEE) && ended.outcome() instanceof Outcome.GaveUp),
+                && ended.errand().equals(WorkData.MELEE) && ended.outcome() instanceof Outcome.GaveUp),
                 "the fencer gave up a fight on the way");
         });
     }

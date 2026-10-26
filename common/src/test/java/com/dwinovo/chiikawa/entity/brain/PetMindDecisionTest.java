@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.data.ErrandSettingsData;
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.brain.errand.Check;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
@@ -21,7 +22,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionTrace;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.Permits;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.Scored;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.BlockWorkErrand;
-import com.dwinovo.chiikawa.entity.brain.errand.impl.CombatErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
@@ -29,6 +29,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
+import com.dwinovo.chiikawa.entity.brain.errand.work.action.Duel;
 import com.dwinovo.chiikawa.entity.brain.personality.IdleHabits;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.task.PetTask;
@@ -101,7 +102,7 @@ class PetMindDecisionTest {
             PAUSE_ONLY, Map.of());
         TestView view = view().personality(keen).targets(fightAndCrop());
 
-        assertEquals(ErrandIds.MELEE, decide(List.of(ErrandIds.HARVEST, ErrandIds.MELEE), view, NONE, FixedRandom.floats())
+        assertEquals(WorkData.MELEE, decide(List.of(ErrandIds.HARVEST, WorkData.MELEE), view, NONE, FixedRandom.floats())
             .orElseThrow().type().id());
     }
 
@@ -110,7 +111,7 @@ class PetMindDecisionTest {
         TestView view = view().targets(foe());
         Permits noFighting = category -> category != ErrandCategory.COMBAT;
 
-        Optional<Decision.Started> started = Decision.decide(offered(List.of(ErrandIds.WANDER, ErrandIds.MELEE, ErrandIds.HARVEST)), view,
+        Optional<Decision.Started> started = Decision.decide(offered(List.of(ErrandIds.WANDER, WorkData.MELEE, ErrandIds.HARVEST)), view,
             noFighting, NO_RESTS, NONE, FixedRandom.floats(), NOW, null);
 
         assertEquals(ErrandIds.WANDER, started.orElseThrow().type().id());
@@ -119,7 +120,7 @@ class PetMindDecisionTest {
 
     @Test
     void returnsNothingWhenNoCandidateCanRun() {
-        assertEquals(Optional.empty(), decide(List.of(ErrandIds.MELEE, ErrandIds.HARVEST), view(), NONE, FixedRandom.floats()));
+        assertEquals(Optional.empty(), decide(List.of(WorkData.MELEE, ErrandIds.HARVEST), view(), NONE, FixedRandom.floats()));
     }
 
     // ---- noise ------------------------------------------------------------------
@@ -187,16 +188,16 @@ class PetMindDecisionTest {
     void aHigherPriorityInterruptsAtOnceWhateverTheNoise() {
         // Wandering draws the most positive noise, the fight the most negative.
         TestView view = view().personality(noisy(0.3F)).targets(foe());
-        Optional<Decision.Started> started = decide(List.of(ErrandIds.WANDER, ErrandIds.MELEE), view, LOW, FixedRandom.floats(1.0F, 0.0F));
+        Optional<Decision.Started> started = decide(List.of(ErrandIds.WANDER, WorkData.MELEE), view, LOW, FixedRandom.floats(1.0F, 0.0F));
 
-        assertEquals(ErrandIds.MELEE, started.orElseThrow().type().id());
+        assertEquals(WorkData.MELEE, started.orElseThrow().type().id());
     }
 
     @Test
     void aLowerPriorityNeverInterrupts() {
         TestView view = view().targets(foe());
 
-        assertEquals(Optional.empty(), decide(List.of(ErrandIds.MELEE, ErrandIds.WANDER, ErrandIds.PICK_UP_ITEM), view, HIGH, FixedRandom.floats()));
+        assertEquals(Optional.empty(), decide(List.of(WorkData.MELEE, ErrandIds.WANDER, ErrandIds.PICK_UP_ITEM), view, HIGH, FixedRandom.floats()));
     }
 
     @Test
@@ -230,16 +231,16 @@ class PetMindDecisionTest {
     @Test
     void theErrandAPetWasJustOnIsTheOneItIsOnOrTheOneThatEndedInTheTickBefore() {
         DecisionLog log = new DecisionLog();
-        Running running = new Running(TestErrands.errand(ErrandIds.RANGED), new CombatErrand.Duel(UUID.randomUUID()),
-            ErrandSettings.of(ErrandIds.RANGED).orElseThrow(), 0, NOW - 5, Set.of());
+        Running running = new Running(TestErrands.errand(WorkData.RANGED), new Duel(UUID.randomUUID()),
+            ErrandSettings.of(WorkData.RANGED).orElseThrow(), 0, NOW - 5, Set.of());
 
         assertNull(PetMind.justBefore(Optional.empty(), log, NOW));
-        assertEquals(ErrandIds.RANGED, PetMind.justBefore(Optional.of(running), log, NOW).id());
+        assertEquals(WorkData.RANGED, PetMind.justBefore(Optional.of(running), log, NOW).id());
 
         // A fight that ended by itself, such as for a foe put down, leaves the pet on none: it is the fight it was on.
-        log.ended(NOW - 1, ErrandIds.MELEE, Outcome.done(), 30);
-        assertEquals(ErrandIds.MELEE, PetMind.justBefore(Optional.empty(), log, NOW).id());
-        assertEquals(ErrandIds.RANGED, PetMind.justBefore(Optional.of(running), log, NOW).id());
+        log.ended(NOW - 1, WorkData.MELEE, Outcome.done(), 30);
+        assertEquals(WorkData.MELEE, PetMind.justBefore(Optional.empty(), log, NOW).id());
+        assertEquals(WorkData.RANGED, PetMind.justBefore(Optional.of(running), log, NOW).id());
         // And not one that ended a while ago, since the pet has been doing other things since.
         assertNull(PetMind.justBefore(Optional.empty(), log, NOW + 5));
     }
@@ -263,10 +264,10 @@ class PetMindDecisionTest {
     void aPetThatHasEndedWhatItWasDoingTakesUpAnythingWhateverItsPriority() {
         // The floor is the running errand's priority only while it goes on.
         TestView view = view();
-        Plan shooting = new CombatErrand.Duel(UUID.randomUUID());
+        Plan shooting = new Duel(UUID.randomUUID());
 
-        assertEquals(Optional.of(Outcome.gaveUp("no_arrows")), ending(ErrandIds.RANGED, shooting, view));
-        assertEquals(ErrandIds.WANDER, decide(List.of(ErrandIds.RANGED, ErrandIds.WANDER), view, NONE, FixedRandom.floats())
+        assertEquals(Optional.of(Outcome.gaveUp("no_arrows")), ending(WorkData.RANGED, shooting, view));
+        assertEquals(ErrandIds.WANDER, decide(List.of(WorkData.RANGED, ErrandIds.WANDER), view, NONE, FixedRandom.floats())
             .orElseThrow().type().id());
     }
 
