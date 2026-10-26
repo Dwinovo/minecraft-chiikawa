@@ -116,7 +116,7 @@ public final class PetMind {
     public PetMind(AbstractPet pet) {
         this.pet = pet;
         this.rests = new RestLedger(
-            errand -> Errands.get(errand).restStore().of(pet.getBrain(), errand),
+            errand -> Errands.restsOf(pet.getBrain(), errand),
             errand -> Optional.ofNullable(ErrandSettings.all().get(errand)));
         this.handle = new LiveHandle(pet);
         this.executor = new Executor(handle, pet, rests, log);
@@ -389,7 +389,7 @@ public final class PetMind {
         String cause = trigger;
         int floor = Integer.MIN_VALUE;
         if (was.isPresent()) {
-            Optional<Outcome> end = Continuation.endOf(was.get(), previous, offered.contains(previous), view, permits);
+            Optional<Outcome> end = Continuation.endOf(was.get(), isOffered(offered, was.get().errand()), view, permits);
             if (end.isPresent()) {
                 if (!executor.end(end.get(), now)) {
                     return;
@@ -421,14 +421,19 @@ public final class PetMind {
      */
     @Nullable
     static ErrandType<?, ?> justBefore(Optional<Running> was, DecisionLog log, long now) {
-        return was.map(Running::errand)
-            .or(() -> log.lastEnded().filter(ended -> ended.gameTime() >= now - 1).map(DecisionLog.Ended::errand))
-            .map(Errands::get).orElse(null);
+        return was.<ErrandType<?, ?>>map(Running::type)
+            .or(() -> log.lastEnded().filter(ended -> ended.gameTime() >= now - 1).map(DecisionLog.Ended::errand).map(Errands::get))
+            .orElse(null);
+    }
+
+    /** @return whether the errand is among those offered, by its id, since a reload of the data makes new types */
+    static boolean isOffered(List<ErrandType<?, ?>> offered, ResourceLocation errand) {
+        return offered.stream().anyMatch(type -> type.id().equals(errand));
     }
 
     private void start(Decision.Started started, @Nullable ErrandType<?, ?> previous, long now) {
         hosting |= started.type().id().equals(ErrandIds.COOPERATE);
-        executor.start(started.type().id(), started.offer().plan(), started.settings(), started.routine(), now);
+        executor.start(started.type(), started.offer().plan(), started.settings(), started.routine(), now);
         // Setting off to fight, rather than turning from one way of fighting to another, is when a pet
         // shouts its battle cry.
         started.settings().startVoice().ifPresent(voice -> {
@@ -458,7 +463,7 @@ public final class PetMind {
                 continue;
             }
             ErrandCategory category = type.category();
-            boolean available = offered.contains(type) && permits.allows(category)
+            boolean available = isOffered(offered, type.id()) && permits.allows(category)
                 && ErrandSettings.of(type.id()).isPresent();
             if (!available) {
                 type.forgetWhenUnavailable().forEach(pet.getBrain()::eraseMemory);
