@@ -10,7 +10,9 @@ import com.dwinovo.chiikawa.entity.brain.errand.rest.RestStore;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Routine;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.mojang.serialization.Codec;
+import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
 /**
  * An errand of a given id and a given answer to whether it goes on, in no registry, for a test of what runs or
@@ -20,6 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 public final class StubErrand implements ErrandType<Plan, String> {
     private final ResourceLocation id;
     private final Check stillWanted;
+    private final Set<MemoryModuleType<?>> progress;
 
     /** @param id the errand's id */
     public StubErrand(ResourceLocation id) {
@@ -31,8 +34,18 @@ public final class StubErrand implements ErrandType<Plan, String> {
      * @param stillWanted what it answers to whether it goes on
      */
     public StubErrand(ResourceLocation id, Check stillWanted) {
+        this(id, stillWanted, Set.of());
+    }
+
+    /**
+     * @param id the errand's id
+     * @param stillWanted what it answers to whether it goes on
+     * @param progress the memories it holds its progress in
+     */
+    public StubErrand(ResourceLocation id, Check stillWanted, Set<MemoryModuleType<?>> progress) {
         this.id = id;
         this.stillWanted = stillWanted;
+        this.progress = progress;
     }
 
     @Override
@@ -63,6 +76,11 @@ public final class StubErrand implements ErrandType<Plan, String> {
     @Override
     public Routine routine(Plan plan, ErrandSettings<String> settings) {
         return Routine.of();
+    }
+
+    @Override
+    public Set<MemoryModuleType<?>> forgetWhenUnavailable() {
+        return progress;
     }
 
     @Override
