@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.gametest;
 
+import static com.dwinovo.chiikawa.gametest.GameTestKit.MIDNIGHT;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.addSong;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.carries;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.ownedPet;
@@ -23,6 +24,8 @@ import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.entity.brain.errand.step.Meeting;
+import com.dwinovo.chiikawa.gifting.GiftOccasion;
+import com.dwinovo.chiikawa.gifting.Presents;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.init.InitEntity;
@@ -42,6 +45,7 @@ import com.dwinovo.chiikawa.social.PetInteraction;
 import com.dwinovo.chiikawa.social.PetInteractions;
 import com.dwinovo.chiikawa.task.BoardSlot;
 import com.dwinovo.chiikawa.whistle.WhistleHeard;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -49,6 +53,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
@@ -66,11 +71,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BedPart;
 
 /**
  * For each errand, a setup in which it is the best thing its pet can do and a way to tell whether
@@ -85,6 +92,11 @@ final class ErrandScenarios {
     /** How far off the owner is, east, along the row of yards. */
     private static final int OWNER_AWAY = 40;
     private static final int FILM = 3;
+    /** The step of a present left by the owner's bed at which the pet waits for the owner to wake, and for how long before they do. */
+    private static final int BED_WAIT_STEP = 1;
+    private static final int BED_WAIT_TICKS = 100;
+    /** When an owner who sleeps through the night wakes, as the level's clock reads it: a day's start. */
+    private static final long DAWN = 24000L;
     private static final int COOKIES = 3;
     /** Enough for anything on the list, so what the pet does at the counter is about wanting rather than affording. */
     private static final int WAGES = 8;
@@ -130,8 +142,9 @@ final class ErrandScenarios {
      *               half taken: the problem, or nothing if all is as it should be; told the errand as it was last seen
      *               running, since what is left behind may be fair where the errand had got to
      * @param again what makes the errand startable again once it was cut short and checked, for an errand that rests for
-     *              longer than the case lasts after every way it ends, such as one that two pets leave alone for a day:
-     *              forgets the rest, which the case has seen is as the errand's data says
+     *              longer than the case lasts after every way it ends, such as one that two pets leave alone for a day, or
+     *              that starts on something the cut took from the pet: forgets the rest, or gives the pet that back, which
+     *              the case has seen is as the errand's data says
      */
     record Scenario(AbstractPet pet, int steps, Function<Running, Optional<String>> reported,
                     Function<Running, Optional<String>> untidy, Runnable again) {
@@ -148,9 +161,24 @@ final class ErrandScenarios {
         }
     }
 
+    /**
+     * A setup the contract cases are made from. An errand has one, and the ones that go about it in more than one way,
+     * such as taking a present to an owner who is awake and to one who is asleep, have a setup for each.
+     *
+     * @param name what tells the setup from the errand's others, in the names of the cases
+     * @param errand the errand the pet is set up for
+     * @param instant whether the errand is done in the tick it begins, so that there is no step to cut it at and it is
+     *                never seen running: its cases are the ones that ask what it offers and see it done, see
+     *                {@link ErrandContractGameTests}
+     * @param setUp the setup
+     */
+    record Case(String name, ResourceLocation errand, boolean instant, Function<GameTestHelper, Scenario> setUp) {
+    }
+
     private static final Map<ResourceLocation, Function<GameTestHelper, Scenario>> BY_ERRAND = Map.ofEntries(
         Map.entry(ErrandIds.PICK_UP_ITEM, ErrandScenarios::pickUpItem),
         Map.entry(ErrandIds.TAKE_PHOTO, ErrandScenarios::takePhoto),
+        Map.entry(ErrandIds.OFFER_GIFT, ErrandScenarios::offerGift),
         Map.entry(ErrandIds.GIFT_OWNER, ErrandScenarios::giftOwner),
         Map.entry(ErrandIds.SHOP, ErrandScenarios::shop),
         Map.entry(ErrandIds.TAKE_TASK, ErrandScenarios::takeTask),
@@ -171,12 +199,27 @@ final class ErrandScenarios {
         Map.entry(ErrandIds.COOPERATE, ErrandScenarios::cooperate),
         Map.entry(ErrandIds.ANSWER_WHISTLE, ErrandScenarios::answerWhistle));
 
+    /** The errands that are done in the tick they begin. */
+    private static final Set<ResourceLocation> INSTANT = Set.of(ErrandIds.OFFER_GIFT);
+
+    /** The setups beside an errand's own, for the other way it goes about it. */
+    private static final List<Case> ALSO = List.of(
+        new Case("gift_owner_bedside", ErrandIds.GIFT_OWNER, false, ErrandScenarios::giftOwnerBedside));
+
     private ErrandScenarios() {
     }
 
     /** @return the errands that have a scenario, which are all of them */
     static Set<ResourceLocation> ids() {
         return BY_ERRAND.keySet();
+    }
+
+    /** @return every setup the contract cases are made from: each errand's own, then those for its other ways */
+    static List<Case> cases() {
+        List<Case> cases = new ArrayList<>();
+        BY_ERRAND.forEach((errand, setUp) -> cases.add(new Case(errand.getPath(), errand, INSTANT.contains(errand), setUp)));
+        cases.addAll(ALSO);
+        return cases;
     }
 
     /** @return the pet and what the errand touches, set up in the case's level */
@@ -267,27 +310,109 @@ final class ErrandScenarios {
     }
 
     /**
-     * A pet with three cookies in its bag and its owner across the yard, which is a present in mind and a walk of many
-     * ticks to the owner. Whatever is cut short, the cookies are all back in the bag and the owner has none, unless the
-     * present was handed over.
+     * A pet with three cookies in its bag, a present in mind and its owner across the yard. The errand takes a cookie out of
+     * the bag and is done in the tick it begins, so there is no step to cut it at: the pet is then carrying the present,
+     * and the errand that takes it to the owner is the next. The case that asks what the errand offers keeps the pet's mind
+     * off, or the pet would have taken the present before it was asked.
      */
-    private static Scenario giftOwner(GameTestHelper helper) {
-        ServerPlayer owner = player(helper);
-        BlockPos across = helper.absolutePos(new BlockPos(10, STAND, 10));
-        owner.teleportTo(across.getX() + 0.5, across.getY(), across.getZ() + 0.5);
+    private static Scenario offerGift(GameTestHelper helper) {
+        ServerPlayer owner = ownerAcross(helper);
         AbstractPet pet = GameTestKit.wild(helper, InitEntity.USAGI_PET.get(), new BlockPos(3, STAND, 3));
         pet.tame(owner);
         pet.setPetDirective(PetDirective.FREE);
         pet.getBackpack().setItem(AbstractPet.BAG_SLOT + 1, new ItemStack(Items.COOKIE, COOKIES));
-        return new Scenario(pet, 3, ran -> {
-            if (GameTestKit.count(pet, Items.COOKIE) != COOKIES) {
-                return Optional.of("the bag has " + GameTestKit.count(pet, Items.COOKIE) + " cookies, not the " + COOKIES + " it had");
+        PetMind.post(pet, new Message.Occasion(GiftOccasion.FILM_FULL, Optional.empty()));
+        return new Scenario(pet, 1, ran -> Optional.empty());
+    }
+
+    /**
+     * A pet carrying a cookie to its owner across the yard, a walk of many ticks. Whatever is cut short, the cookie is back in
+     * the bag and the owner has none, unless the present was handed over; and what makes the errand startable again is a
+     * cookie in the paws once more, since the pet has no other thought of a present.
+     */
+    private static Scenario giftOwner(GameTestHelper helper) {
+        ServerPlayer owner = ownerAcross(helper);
+        AbstractPet pet = GameTestKit.wild(helper, InitEntity.USAGI_PET.get(), new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        pet.setPetDirective(PetDirective.FREE);
+        pet.setPendingGift(new ItemStack(Items.COOKIE));
+        return new Scenario(pet, 2,
+            ran -> owner.getInventory().countItem(Items.COOKIE) > 0 ? Optional.of(Presents.GIVEN) : Optional.empty(),
+            ran -> {
+                if (GameTestKit.count(pet, Items.COOKIE) != 1) {
+                    return Optional.of("the bag has " + GameTestKit.count(pet, Items.COOKIE) + " cookies, not the one it was carrying");
+                }
+                if (owner.getInventory().countItem(Items.COOKIE) > 0) {
+                    return Optional.of("the owner was given the cookie, though the present was not handed over");
+                }
+                return Optional.empty();
+            }, () -> carryACookie(pet));
+    }
+
+    /**
+     * The same pet and present for an owner asleep in a bed some blocks off, in the night, which is when an owner sleeps: the
+     * pet walks to the bed, lies down by it and waits. It is the owner waking that lets it go on, as it would in the morning,
+     * and the owner wakes when the pet has waited a while, so that the case can cut it short at the wait and then at the last
+     * step. Whatever is cut short, the cookie is back in the bag and not on the floor by the bed.
+     */
+    private static Scenario giftOwnerBedside(GameTestHelper helper) {
+        settleWorld(helper.getLevel(), Difficulty.NORMAL, MIDNIGHT);
+        BlockPos head = new BlockPos(10, STAND, 10);
+        BlockState bed = Blocks.RED_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.EAST);
+        helper.setBlock(head.west(), bed.setValue(BedBlock.PART, BedPart.FOOT));
+        helper.setBlock(head, bed.setValue(BedBlock.PART, BedPart.HEAD));
+        ServerPlayer owner = player(helper);
+        BlockPos in = helper.absolutePos(head);
+        owner.teleportTo(in.getX() + 0.5, in.getY() + 0.6, in.getZ() + 0.5);
+        owner.startSleeping(in);
+        AbstractPet pet = GameTestKit.wild(helper, InitEntity.USAGI_PET.get(), new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        pet.setPetDirective(PetDirective.FREE);
+        pet.setPendingGift(new ItemStack(Items.COOKIE));
+        long[] lyingSince = {-1};
+        helper.onEachTick(() -> {
+            long now = helper.getLevel().getGameTime();
+            boolean waiting = pet.getMind().errands().running().filter(running -> running.errand().equals(ErrandIds.GIFT_OWNER)
+                && running.stepIndex() == BED_WAIT_STEP).isPresent();
+            lyingSince[0] = waiting ? (lyingSince[0] < 0 ? now : lyingSince[0]) : -1;
+            if (waiting && owner.isSleeping() && now - lyingSince[0] >= BED_WAIT_TICKS) {
+                helper.getLevel().setDayTime(DAWN);
+                owner.stopSleepInBed(false, true);
             }
-            if (owner.getInventory().countItem(Items.COOKIE) > 0) {
-                return Optional.of("the owner was given a cookie, though the present was not handed over");
-            }
-            return Optional.empty();
         });
+        return new Scenario(pet, 3,
+            ran -> pet.getPendingGift().isEmpty() && GameTestKit.count(pet, Items.COOKIE) == 0
+                ? Optional.of(Presents.GIVEN) : Optional.empty(),
+            ran -> {
+                if (GameTestKit.count(pet, Items.COOKIE) != 1) {
+                    return Optional.of("the bag has " + GameTestKit.count(pet, Items.COOKIE) + " cookies, not the one it was carrying");
+                }
+                if (!helper.getLevel().getEntitiesOfClass(ItemEntity.class, helper.getBounds(), item -> item.getItem().is(Items.COOKIE)).isEmpty()) {
+                    return Optional.of("a cookie was left on the floor, though the owner never woke to it");
+                }
+                return Optional.empty();
+            }, () -> {
+                settleWorld(helper.getLevel(), Difficulty.NORMAL, MIDNIGHT);
+                if (!owner.isSleeping()) {
+                    owner.startSleeping(in);
+                }
+                lyingSince[0] = -1;
+                carryACookie(pet);
+            });
+    }
+
+    /** The pet has a cookie in its paws and nothing else, as it does when it has set off with one. */
+    private static void carryACookie(AbstractPet pet) {
+        pet.getBackpack().clearContent();
+        pet.setPendingGift(new ItemStack(Items.COOKIE));
+    }
+
+    /** The owner, across the yard from where the pet stands, a walk of many ticks and within the area a free pet acts in. */
+    private static ServerPlayer ownerAcross(GameTestHelper helper) {
+        ServerPlayer owner = player(helper);
+        BlockPos across = helper.absolutePos(new BlockPos(10, STAND, 10));
+        owner.teleportTo(across.getX() + 0.5, across.getY(), across.getZ() + 0.5);
+        return owner;
     }
 
     /**

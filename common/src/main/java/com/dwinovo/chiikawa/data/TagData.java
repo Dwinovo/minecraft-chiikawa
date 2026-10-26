@@ -8,6 +8,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.tags.TagAppender;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -107,13 +108,23 @@ public final class TagData {
             .add(Items.COOKIE)
             .add(Items.BREAD)
             .add(Items.BAKED_POTATO);
+        // Flowers are the little things a pet is glad to find, and picks up for it.
+        tags.tag(InitTag.GIFT_FLOWERS)
+            .addOptionalTag(ItemTags.SMALL_FLOWERS);
+        tags.tag(InitTag.GIFT_FINDS)
+            .addOptionalTag(InitTag.GIFT_FLOWERS);
+        // Sweets, which Rakko gives its owner out of its bag; a pack can add to them.
+        tags.tag(InitTag.SWEETS)
+            .add(Items.CAKE, Items.COOKIE, Items.PUMPKIN_PIE, Items.HONEY_BOTTLE, Items.SWEET_BERRIES);
+        tags.tag(InitTag.NEVER_GIFTED);
         tags.tag(InitTag.ENTITY_PICKABLE_ITEMS)
             .add(Items.WHEAT, Items.WHEAT_SEEDS)
             .add(Items.POTATO)
             .add(Items.CARROT)
             .add(Items.BEETROOT)
             .add(Items.MELON_SLICE)
-            .add(Items.PUMPKIN);
+            .add(Items.PUMPKIN)
+            .addOptionalTag(InitTag.GIFT_FINDS);
     }
 
     public static void addEntityTags(TagAppenderProvider<EntityType<?>> tags) {

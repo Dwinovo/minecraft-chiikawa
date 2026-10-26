@@ -34,6 +34,8 @@ import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.errand.view.LivePetView;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkActions;
 import com.dwinovo.chiikawa.entity.job.JobWork;
+import com.dwinovo.chiikawa.gifting.GiftingSettings;
+import com.dwinovo.chiikawa.gifting.Presents;
 import com.dwinovo.chiikawa.qualification.ExamStage;
 import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.social.PetInteraction;
@@ -50,6 +52,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -165,6 +168,15 @@ public final class PetMind {
     public void report(String report) {
         executor.running().ifPresent(running -> rests.afterReport(running.errand(), report,
             RestContext.of(running.plan()), pet.level().getGameTime()));
+    }
+
+    /**
+     * Tells how an errand fared that is not the one the pet is on, or may be on none: the pet rests the errand as its
+     * settings say for the report, at once. For what is done to the pet with its errand not at it, such as a present
+     * the owner took from its paws, see {@code Presents}.
+     */
+    public void report(ResourceLocation errand, String report) {
+        rests.afterReport(errand, report, RestContext.NONE, pet.level().getGameTime());
     }
 
     /** Has the pet decide again at its next tick instead of waiting for its turn. */
@@ -344,6 +356,16 @@ public final class PetMind {
                 SlipWages.pay(pet, completed.task());
                 yield completed;
             }
+            case Message.Occasion occasion -> {
+                thinkOfPresent(occasion, now);
+                yield occasion;
+            }
+            case Message.GiftClaimed claimed -> {
+                if (pet.level().getPlayerByUUID(claimed.player()) instanceof Player owner && pet.isOwnedBy(owner)) {
+                    Presents.give(pet, owner, Presents.How.HAND);
+                }
+                yield claimed;
+            }
         };
         return new Message.Settled(kept);
     }
@@ -367,6 +389,23 @@ public final class PetMind {
             }
             // Paid, it can go for another slip.
             case Message.SlipCompleted completed -> decideNow = true;
+            // Whether it has a present in mind now is for its next decision to find out.
+            case Message.Occasion occasion -> {
+            }
+            // Its paws are empty now, and the errand that was bringing the present finds so when it decides again.
+            case Message.GiftClaimed claimed -> decideNow = true;
+        }
+    }
+
+    /**
+     * An occasion may put a present in the pet's mind: not if the owner's directive does not let it give one, see
+     * {@code GiftOccasion}, nor if it has one in mind already or would be resting from giving one when it is ready to; and
+     * then by the chance the settings give the occasion, drawn from the pet's own random.
+     */
+    private void thinkOfPresent(Message.Occasion occasion, long now) {
+        if (PetConstraints.allows(pet, PetOwnership.of(pet), ErrandCategory.GIFT)) {
+            GiftingSettings.current().ifPresent(settings -> pet.giftIntentions().note(occasion.kind(), occasion.keepsake(), now,
+                rests.remaining(ErrandIds.GIFT_OWNER, now), pet.getRandom(), settings));
         }
     }
 

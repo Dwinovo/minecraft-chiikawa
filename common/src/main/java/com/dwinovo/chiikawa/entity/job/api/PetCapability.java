@@ -1,6 +1,9 @@
 package com.dwinovo.chiikawa.entity.job.api;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import java.util.Optional;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 
 /**
  * What a pet is able to do, assumed from the tool in its main hand (its job).
@@ -18,4 +21,9 @@ public interface PetCapability {
     int priority();
 
     boolean canAssume(AbstractPet pet);
+
+    /** @return the tag of the tools that make a pet assume this job, if the job is assumed by a tool */
+    default Optional<TagKey<Item>> toolTag() {
+        return Optional.empty();
+    }
 }

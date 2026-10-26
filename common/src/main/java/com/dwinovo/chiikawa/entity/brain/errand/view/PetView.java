@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.InvitationDesk;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
+import com.dwinovo.chiikawa.gifting.GiftOutlook;
 import com.dwinovo.chiikawa.music.Playable;
 import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.task.PetTask;
@@ -69,8 +70,14 @@ public interface PetView {
     /** @return whether the pet has something for its owner that it has not handed over */
     boolean carryingGift();
 
-    /** @return whether the pet has something in its bag to give its owner, and is ready to think of giving them something */
-    boolean presentToGive();
+    /** @return whether the pet could set off with a present for its owner, and with what */
+    GiftOutlook gift();
+
+    /**
+     * @return where a pet waits by its owner's bed while they sleep in it, which is beside the bed on the side of its foot,
+     *         while the owner is asleep in a bed in the pet's level
+     */
+    Optional<GlobalPos> ownerBedside();
 
     /** @return whether the pet's attack cooldown is running */
     boolean attackCoolingDown();
