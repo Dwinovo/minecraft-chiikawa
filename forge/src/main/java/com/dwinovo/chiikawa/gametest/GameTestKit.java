@@ -42,6 +42,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.Scoreboard;
 
 /**
  * What the in-game cases share. They run headless in the game itself
@@ -156,6 +158,24 @@ public final class GameTestKit {
         new EmbeddedChannel(connection);
         level.getServer().getPlayerList().placeNewPlayer(connection, player);
         return player;
+    }
+
+    /**
+     * Runs a case with these players in one vanilla team, which is what makes them friends, and takes the team down when
+     * the case is over, however it ends: the stand-in players may all go by one name, which a team goes by, so a team left
+     * behind would have every player of the cases after it in it.
+     */
+    static void asTeam(GameTestHelper helper, Runnable inTheCase, ServerPlayer... players) {
+        Scoreboard scoreboard = helper.getLevel().getScoreboard();
+        PlayerTeam team = scoreboard.addPlayerTeam("chiikawa_friends");
+        try {
+            for (ServerPlayer player : players) {
+                scoreboard.addPlayerToTeam(player.getScoreboardName(), team);
+            }
+            inTheCase.run();
+        } finally {
+            scoreboard.removePlayerTeam(team);
+        }
     }
 
     /**
