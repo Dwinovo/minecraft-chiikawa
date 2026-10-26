@@ -189,6 +189,12 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      */
     private static final EntityDataAccessor<String> PERFORMANCE = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.STRING);
 
+    /**
+     * What the owner has told the pet it may and may not do, as {@link PetRules#CODEC} writes it; empty is the default.
+     * Synced for the owner's screen, which shows it.
+     */
+    private static final EntityDataAccessor<CompoundTag> RULES = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.COMPOUND_TAG);
+
     /** Legacy animation-id namespace for {@link #ANIM_TRIGGER}'s low byte. */
     public static final int TRIGGER_NONE         = 0;
     public static final int TRIGGER_USE_MAINHAND = 1;
@@ -404,6 +410,21 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         this.entityData.set(PET_MODE, (byte) directive.ordinal());
         settleHome();
         PetMind.post(this, new Message.DirectiveChanged());
+    }
+
+    /** @return what the owner has told the pet it may and may not do; on either side */
+    public PetRules getRules() {
+        return PetRules.CODEC.parse(NbtOps.INSTANCE, this.entityData.get(RULES)).result().orElse(PetRules.DEFAULT);
+    }
+
+    /**
+     * Tells the pet what it may and may not do. The owner's alone to give: the screen's payload is the one way in.
+     *
+     * @param rules what the owner wants
+     */
+    public void setRules(PetRules rules) {
+        this.entityData.set(RULES, (CompoundTag) PetRules.CODEC.encodeStart(NbtOps.INSTANCE, rules).getOrThrow());
+        PetMind.post(this, new Message.RulesChanged());
     }
 
     /**
@@ -865,6 +886,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         builder.define(EAGER_UNTIL, 0L);
         builder.define(LICENCES, List.of());
         builder.define(PERFORMANCE, "");
+        builder.define(RULES, new CompoundTag());
     }
 
     /**
@@ -1025,6 +1047,10 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         }
         licences.save(output);
         giftIntentions.save(output);
+        CompoundTag rules = this.entityData.get(RULES);
+        if (!rules.isEmpty()) {
+            output.store("Rules", CompoundTag.CODEC, rules);
+        }
     }
 
     @Override
@@ -1043,6 +1069,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         refreshJobFromMainhand();
         licences.load(input);
         giftIntentions.load(input);
+        this.entityData.set(RULES, input.read("Rules", CompoundTag.CODEC).orElseGet(CompoundTag::new));
     }
 
     /** @return the present this pet has in mind for its owner, if it has one */
