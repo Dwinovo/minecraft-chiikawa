@@ -153,7 +153,7 @@ public final class HuntGameTests {
     }
 
     /** The slip an upgraded board puts up for a fencer. */
-    private static PetTask hunting() {
+    static PetTask hunting() {
         ResourceLocation fencer = Services.REGISTRY.getKey(InitRegistry.PET_JOB_KEY, InitRegistry.FENCER.get());
         return new PetTask(PetTaskTypeData.MELEE_HUNTING, fencer, PetWorkCounters.SLAY, PetTask.NO_ICON, QUARRY,
             PetTaskTypeData.reward(PetTaskTypeData.MELEE_HUNTING), 0);

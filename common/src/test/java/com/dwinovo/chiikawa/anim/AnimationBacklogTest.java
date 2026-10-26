@@ -3,9 +3,13 @@ package com.dwinovo.chiikawa.anim;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
+import com.dwinovo.chiikawa.data.ErrandSettingsData;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandTunings;
 import com.dwinovo.chiikawa.entity.job.impl.MusicianJob;
 import com.google.gson.JsonParser;
 import java.io.IOException;
@@ -19,6 +23,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.minecraft.resources.ResourceLocation;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -35,7 +40,7 @@ import org.junit.jupiter.api.Test;
  * character can assume ({@link MusicianJob#PLAYER}, who plays the guitar), and the two generic actions, which only
  * the deprecated {@link com.dwinovo.chiikawa.entity.AbstractPet#triggerAnim} names and nothing calls: they are what
  * the other actions fall back to. The moves the scenes between pets name are data that needs the entity registry to
- * read, which a test outside a game has not.
+ * read, which a test outside a game has not. How a character cowers is data that needs no registry, and is asked.
  */
 class AnimationBacklogTest {
     private static final Path ANIMATIONS = Path.of("src", "main", "resources", "assets", "chiikawa", "animations");
@@ -52,7 +57,14 @@ class AnimationBacklogTest {
             .forEach(action -> names.add(action.animationCandidates().get(0)));
         Arrays.stream(PetReaction.values()).filter(reaction -> reaction != PetReaction.NONE)
             .forEach(reaction -> names.add(reaction.animationCandidates().get(0)));
+        names.add(cowering(character));
         return names;
+    }
+
+    /** @return the animation the character cowers with when it is frightened, which is the first its data names for it */
+    private static String cowering(String character) {
+        ErrandTunings.Flee flee = (ErrandTunings.Flee) ErrandSettingsData.all().get(ErrandIds.FLEE).tuning();
+        return flee.cowers().of(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, character)).get(0);
     }
 
     /** @return whether the character is the one the musician job is open to, by the name of its class */

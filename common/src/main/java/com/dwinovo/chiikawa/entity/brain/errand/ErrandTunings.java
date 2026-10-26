@@ -2,6 +2,9 @@ package com.dwinovo.chiikawa.entity.brain.errand;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.List;
+import java.util.Map;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 
 /**
@@ -157,6 +160,63 @@ public final class ErrandTunings {
             Fields.TICKS.fieldOf("draw_ticks").forGetter(Ranged::drawTicks),
             Fields.TICKS.fieldOf("cooldown_ticks").forGetter(Ranged::cooldownTicks)
         ).apply(instance, Ranged::new));
+    }
+
+    /**
+     * How a pet fights when it takes up a weapon from its bag to answer an attack, with either.
+     *
+     * @param sword where it stands with a sword
+     * @param bow how it shoots with a bow
+     */
+    public record Defend(Footwork sword, Ranged bow) {
+        public static final Codec<Defend> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Footwork.CODEC.fieldOf("sword").forGetter(Defend::sword),
+            Ranged.CODEC.fieldOf("bow").forGetter(Defend::bow)
+        ).apply(instance, Defend::new));
+    }
+
+    /**
+     * What a pet does with its fear: the animations it tries, in order of preference, the first it has being shown.
+     * Each character has its own, as the series draws it, and the rest the default.
+     *
+     * @param byCharacter the animations of the characters that have their own, by the id of their entity
+     * @param otherwise the animations of the rest
+     */
+    public record Cowers(Map<ResourceLocation, List<String>> byCharacter, List<String> otherwise) {
+        public static final Codec<Cowers> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.unboundedMap(ResourceLocation.CODEC, ExtraCodecs.nonEmptyList(Codec.STRING.listOf()))
+                .fieldOf("by_character").forGetter(Cowers::byCharacter),
+            ExtraCodecs.nonEmptyList(Codec.STRING.listOf()).fieldOf("otherwise").forGetter(Cowers::otherwise)
+        ).apply(instance, Cowers::new));
+
+        /** @return the animations the character cowers with, the one it prefers first */
+        public List<String> of(ResourceLocation character) {
+            return byCharacter.getOrDefault(character, otherwise);
+        }
+    }
+
+    /**
+     * @param speed how fast it runs
+     * @param ownerRange how far off its owner may be for it to run behind them
+     * @param behindOwner how far past its owner, seen from what it runs from, it runs to
+     * @param awayStep how far from what it runs from it runs when it has no owner nor home to run to
+     * @param arriveDistance how near the place it runs to, or its seat, it has to be for that walk to be done
+     * @param safeTicks how long nothing may have hurt it before it comes out of hiding
+     * @param safeDistance how far off what it ran from has to be before it does
+     * @param cowers how it cowers until then
+     */
+    public record Flee(float speed, double ownerRange, double behindOwner, double awayStep, double arriveDistance,
+                       int safeTicks, double safeDistance, Cowers cowers) {
+        public static final Codec<Flee> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Fields.SPEED.fieldOf("speed").forGetter(Flee::speed),
+            Fields.DISTANCE.fieldOf("owner_range").forGetter(Flee::ownerRange),
+            Fields.DISTANCE.fieldOf("behind_owner").forGetter(Flee::behindOwner),
+            Fields.DISTANCE.fieldOf("away_step").forGetter(Flee::awayStep),
+            Fields.DISTANCE.fieldOf("arrive_distance").forGetter(Flee::arriveDistance),
+            Fields.TICKS.fieldOf("safe_ticks").forGetter(Flee::safeTicks),
+            Fields.DISTANCE.fieldOf("safe_distance").forGetter(Flee::safeDistance),
+            Cowers.CODEC.fieldOf("cowers").forGetter(Flee::cowers)
+        ).apply(instance, Flee::new));
     }
 
     /** @param noteParticleIntervalTicks how often a note rises from the pet while it plays */
