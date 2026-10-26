@@ -17,6 +17,7 @@ import com.dwinovo.chiikawa.init.InitTag;
 import com.dwinovo.chiikawa.utils.Utils;
 import com.mojang.serialization.Codec;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -29,6 +30,8 @@ import net.minecraft.world.item.ItemStack;
  */
 public final class PlantBlockAction implements WorkAction<Site, ErrandTunings.PlantBlock> {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "plant_block");
+    /** What a farmer is short of when it has nothing to plant. */
+    private static final LackKey SEEDS = LackKey.tag(InitTag.ENTITY_PLANT_CROPS);
 
     @Override
     public ResourceLocation id() {
@@ -38,6 +41,11 @@ public final class PlantBlockAction implements WorkAction<Site, ErrandTunings.Pl
     @Override
     public Codec<ErrandTunings.PlantBlock> tuningCodec() {
         return ErrandTunings.PlantBlock.CODEC;
+    }
+
+    @Override
+    public Set<LackKey> lacks() {
+        return Set.of(SEEDS);
     }
 
     @Override
@@ -51,7 +59,7 @@ public final class PlantBlockAction implements WorkAction<Site, ErrandTunings.Pl
         Offers<Site> offers = Site.offers(work, errand, view);
         // With no seed there is no soil to look for, and it is the seeds that are missing and not the soil.
         if (offers.isEmpty() && !view.hasSeeds()) {
-            return Offers.none(Check.lack(offers.check().reason(), LackKey.tag(InitTag.ENTITY_PLANT_CROPS)));
+            return Offers.none(Check.lack(offers.check().reason(), SEEDS));
         }
         return offers;
     }

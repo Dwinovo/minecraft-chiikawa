@@ -20,6 +20,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.work.WorkAction;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkTarget;
 import com.mojang.serialization.Codec;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import net.minecraft.resources.ResourceLocation;
@@ -34,6 +35,8 @@ import net.minecraft.world.item.ProjectileWeaponItem;
  */
 public final class ShootAction implements WorkAction<Duel, ErrandTunings.Ranged> {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "shoot");
+    /** What an archer is short of when it has nothing to loose. */
+    private static final LackKey ARROWS = LackKey.tag(ItemTags.ARROWS);
 
     @Override
     public ResourceLocation id() {
@@ -46,6 +49,11 @@ public final class ShootAction implements WorkAction<Duel, ErrandTunings.Ranged>
     }
 
     @Override
+    public Set<LackKey> lacks() {
+        return Set.of(ARROWS);
+    }
+
+    @Override
     public Optional<String> refuses(Optional<WorkTarget> target) {
         return WorkTarget.neededBy("shoot", target, WorkTarget.Kind.FOE);
     }
@@ -55,7 +63,7 @@ public final class ShootAction implements WorkAction<Duel, ErrandTunings.Ranged>
             ErrandTunings.Ranged tuning) {
         // Arrows first: an archer without any is short of them whether or not there is a foe to shoot at, and says so.
         if (!view.hasArrows()) {
-            return Offers.none(Check.lack("no_arrows", LackKey.tag(ItemTags.ARROWS)));
+            return Offers.none(Check.lack("no_arrows", ARROWS));
         }
         WorkTarget.Foe target = work.targetOf(WorkTarget.Foe.class);
         Optional<AttackTarget> foe = target.in(view);
