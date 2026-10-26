@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.data.WorkData;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -256,9 +257,9 @@ class BoardSlipsTest {
 
     private static SortedMap<ResourceLocation, PetTaskType> types() {
         SortedMap<ResourceLocation, PetTaskType> types = new TreeMap<>();
-        types.put(id("weeding"), new PetTaskType(FARMER, PetWorkCounters.WEED, PetTask.NO_ICON,
+        types.put(id("weeding"), new PetTaskType(FARMER, WorkData.WEED_PULLED, PetTask.NO_ICON,
             UniformInt.of(8, 16), reward("weeding"), 3, BoardLevels.FIRST_LEVEL, Optional.empty()));
-        types.put(id("mushroom_picking"), new PetTaskType(FARMER, PetWorkCounters.PICK_MUSHROOM, PetTask.NO_ICON,
+        types.put(id("mushroom_picking"), new PetTaskType(FARMER, WorkData.MUSHROOM_PICKED, PetTask.NO_ICON,
             UniformInt.of(8, 16), reward("mushroom_picking"), 2, BoardLevels.FIRST_LEVEL, Optional.empty()));
         return types;
     }
@@ -268,7 +269,7 @@ class BoardSlipsTest {
     }
 
     private static BoardSlot slot(ResourceLocation capability) {
-        return BoardSlot.open(new PetTask(id("test"), capability, PetWorkCounters.WEED, PetTask.NO_ICON, 10,
+        return BoardSlot.open(new PetTask(id("test"), capability, WorkData.WEED_PULLED, PetTask.NO_ICON, 10,
             reward("test"), 0));
     }
 

@@ -2,6 +2,9 @@ package com.dwinovo.chiikawa.entity.brain.errand.work;
 
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
 import com.dwinovo.chiikawa.entity.brain.errand.work.action.BuskAction;
+import com.dwinovo.chiikawa.entity.brain.errand.work.action.DepositAction;
+import com.dwinovo.chiikawa.entity.brain.errand.work.action.HarvestBlockAction;
+import com.dwinovo.chiikawa.entity.brain.errand.work.action.PlantBlockAction;
 import com.dwinovo.chiikawa.entity.brain.errand.work.action.ShootAction;
 import com.dwinovo.chiikawa.entity.brain.errand.work.action.StrikeAction;
 import com.mojang.serialization.Codec;
@@ -24,8 +27,16 @@ public final class WorkActions {
     /** Fighting the foe with a bow. */
     public static final ShootAction SHOOT = new ShootAction();
 
+    /** Breaking a ripe crop, a weed or a mushroom into the bag. */
+    public static final HarvestBlockAction HARVEST_BLOCK = new HarvestBlockAction();
+    /** Planting a seed from the bag in bare soil. */
+    public static final PlantBlockAction PLANT_BLOCK = new PlantBlockAction();
+    /** Putting what the pet has to deliver in a container. */
+    public static final DepositAction DEPOSIT = new DepositAction();
+
     private static final Map<ResourceLocation, WorkAction<?, ?>> BY_ID = Map.of(
-        BuskAction.ID, BUSK, StrikeAction.ID, STRIKE, ShootAction.ID, SHOOT);
+        BuskAction.ID, BUSK, StrikeAction.ID, STRIKE, ShootAction.ID, SHOOT, HarvestBlockAction.ID, HARVEST_BLOCK,
+        PlantBlockAction.ID, PLANT_BLOCK, DepositAction.ID, DEPOSIT);
 
     /** Reads and writes an action as its id; an id no action has does not read. */
     public static final Codec<WorkAction<?, ?>> CODEC = ResourceLocation.CODEC.comapFlatMap(id -> {

@@ -1,10 +1,8 @@
 package com.dwinovo.chiikawa.entity.brain.errand;
 
 import com.dwinovo.chiikawa.entity.brain.errand.impl.AnswerWhistleErrand;
-import com.dwinovo.chiikawa.entity.brain.errand.impl.BlockWorkErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.CheckResultsErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.CooperateErrand;
-import com.dwinovo.chiikawa.entity.brain.errand.impl.DeliverErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.FollowOwnerErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.GiftOwnerErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.PickUpItemErrand;
@@ -58,14 +56,6 @@ public final class Errands {
         register(new AnswerWhistleErrand()),
         register(new TakePhotoErrand())
     );
-
-    static {
-        register(BlockWorkErrand.harvesting());
-        register(BlockWorkErrand.planting());
-        register(new DeliverErrand());
-        register(BlockWorkErrand.weeding());
-        register(BlockWorkErrand.pickingMushrooms());
-    }
 
     private static volatile Map<ResourceLocation, WorkErrand<?, ?>> works = Map.of();
     private static volatile List<ErrandType<?, ?>> all = List.copyOf(CODE.values());

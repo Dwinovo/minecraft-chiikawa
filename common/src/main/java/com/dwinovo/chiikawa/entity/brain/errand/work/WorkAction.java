@@ -40,11 +40,13 @@ public interface WorkAction<P extends Plan, T> {
     /**
      * The ways the pet could set out on this work now, or why it could not. Pure, as
      * {@link com.dwinovo.chiikawa.entity.brain.errand.ErrandType#offers}.
+     *
+     * @param errand the id of the errand the work is, which is what the pet's sensors keep what they see of it under
      */
-    Offers<P> offers(Work<P, T> work, PetView view, T tuning);
+    Offers<P> offers(Work<P, T> work, ResourceLocation errand, PetView view, T tuning);
 
     /** Whether the work goes on: the condition to keep at it, as {@link com.dwinovo.chiikawa.entity.brain.errand.ErrandType#stillWanted}. */
-    default Check stillWanted(Work<P, T> work, P plan, PetView view, T tuning) {
+    default Check stillWanted(Work<P, T> work, ResourceLocation errand, P plan, PetView view, T tuning) {
         return Check.OK;
     }
 

@@ -3,7 +3,7 @@ package com.dwinovo.chiikawa.platform;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPlacesSensor;
-import com.dwinovo.chiikawa.entity.brain.sensor.PetFarmerWorkSensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetWorkSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetSocialSensor;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
@@ -20,7 +20,7 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 
 public final class FabricPlatformRegistryAccess implements IPlatformRegistryAccess {
     private final Supplier<SensorType<PetAttackbleEntitySensor>> petAttackbleEntitySensor;
-    private final Supplier<SensorType<PetFarmerWorkSensor>> petFarmerWorkSensor;
+    private final Supplier<SensorType<PetWorkSensor>> petWorkSensor;
     private final Supplier<SensorType<PetPickableItemSensor>> petItemEntitySensor;
     private final Supplier<SensorType<PetPlacesSensor>> petPlacesSensor;
     private final Supplier<SensorType<PetSocialSensor>> petSocialSensor;
@@ -32,7 +32,7 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
             new LootItemConditionType(QualificationCondition.CODEC));
         qualificationCondition = () -> qualification;
         petAttackbleEntitySensor = registerSensor("pet_attackble_entity_sensor", new SensorType<>(PetAttackbleEntitySensor::new));
-        petFarmerWorkSensor = registerSensor("pet_farmer_work_sensor", new SensorType<>(PetFarmerWorkSensor::new));
+        petWorkSensor = registerSensor("pet_work_sensor", new SensorType<>(PetWorkSensor::new));
         petItemEntitySensor = registerSensor("pet_item_entity_sensor", new SensorType<>(PetPickableItemSensor::new));
         petPlacesSensor = registerSensor("pet_places_sensor", new SensorType<>(PetPlacesSensor::new));
         petSocialSensor = registerSensor("pet_social_sensor", new SensorType<>(PetSocialSensor::new));
@@ -60,8 +60,8 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     }
 
     @Override
-    public Supplier<SensorType<PetFarmerWorkSensor>> petFarmerWorkSensor() {
-        return petFarmerWorkSensor;
+    public Supplier<SensorType<PetWorkSensor>> petWorkSensor() {
+        return petWorkSensor;
     }
 
     @Override

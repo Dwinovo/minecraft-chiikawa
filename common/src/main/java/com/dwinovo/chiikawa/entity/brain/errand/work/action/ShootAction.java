@@ -41,11 +41,12 @@ public final class ShootAction implements WorkAction<Duel, ErrandTunings.Ranged>
 
     @Override
     public Optional<String> refuses(Optional<WorkTarget> target) {
-        return WorkTarget.neededBy("shoot", WorkTarget.Kind.FOE, target);
+        return WorkTarget.neededBy("shoot", target, WorkTarget.Kind.FOE);
     }
 
     @Override
-    public Offers<Duel> offers(Work<Duel, ErrandTunings.Ranged> work, PetView view, ErrandTunings.Ranged tuning) {
+    public Offers<Duel> offers(Work<Duel, ErrandTunings.Ranged> work, ResourceLocation errand, PetView view,
+            ErrandTunings.Ranged tuning) {
         WorkTarget.Foe target = work.targetOf(WorkTarget.Foe.class);
         Optional<AttackTarget> foe = target.in(view);
         if (foe.isEmpty()) {
@@ -62,7 +63,7 @@ public final class ShootAction implements WorkAction<Duel, ErrandTunings.Ranged>
 
     /** Between shots the pet goes on, whatever its attack cooldown, for as long as it has arrows. */
     @Override
-    public Check stillWanted(Work<Duel, ErrandTunings.Ranged> work, Duel plan, PetView view,
+    public Check stillWanted(Work<Duel, ErrandTunings.Ranged> work, ResourceLocation errand, Duel plan, PetView view,
             ErrandTunings.Ranged tuning) {
         return view.hasArrows() ? Check.OK : Check.fail("no_arrows");
     }

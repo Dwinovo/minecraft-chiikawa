@@ -21,24 +21,24 @@ import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionTrace;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.Permits;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.Scored;
-import com.dwinovo.chiikawa.entity.brain.errand.impl.BlockWorkErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
+import com.dwinovo.chiikawa.entity.brain.errand.work.action.Site;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.dwinovo.chiikawa.entity.brain.errand.work.action.Duel;
 import com.dwinovo.chiikawa.entity.brain.personality.IdleHabits;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.task.PetTask;
-import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.dwinovo.chiikawa.testing.FixedRandom;
 import com.dwinovo.chiikawa.testing.StubErrand;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.testing.TestErrands;
 import com.dwinovo.chiikawa.testing.TestRests;
+import com.dwinovo.chiikawa.testing.TestTargets;
 import com.dwinovo.chiikawa.testing.TestView;
 import java.util.HashMap;
 import java.util.List;
@@ -98,11 +98,11 @@ class PetMindDecisionTest {
     @Test
     void aHigherPriorityWinsWhateverItsScore() {
         // A farmer who thinks the world of harvesting still drops it for a fight.
-        Personality keen = new Personality(Map.of(ErrandIds.HARVEST, 100.0F), Map.of(), 0.0F, List.of(), List.of(),
+        Personality keen = new Personality(Map.of(WorkData.HARVEST, 100.0F), Map.of(), 0.0F, List.of(), List.of(),
             PAUSE_ONLY, Map.of());
         TestView view = view().personality(keen).targets(fightAndCrop());
 
-        assertEquals(WorkData.MELEE, decide(List.of(ErrandIds.HARVEST, WorkData.MELEE), view, NONE, FixedRandom.floats())
+        assertEquals(WorkData.MELEE, decide(List.of(WorkData.HARVEST, WorkData.MELEE), view, NONE, FixedRandom.floats())
             .orElseThrow().type().id());
     }
 
@@ -111,7 +111,7 @@ class PetMindDecisionTest {
         TestView view = view().targets(foe());
         Permits noFighting = category -> category != ErrandCategory.COMBAT;
 
-        Optional<Decision.Started> started = Decision.decide(offered(List.of(ErrandIds.WANDER, WorkData.MELEE, ErrandIds.HARVEST)), view,
+        Optional<Decision.Started> started = Decision.decide(offered(List.of(ErrandIds.WANDER, WorkData.MELEE, WorkData.HARVEST)), view,
             noFighting, NO_RESTS, NONE, FixedRandom.floats(), NOW, null);
 
         assertEquals(ErrandIds.WANDER, started.orElseThrow().type().id());
@@ -120,7 +120,7 @@ class PetMindDecisionTest {
 
     @Test
     void returnsNothingWhenNoCandidateCanRun() {
-        assertEquals(Optional.empty(), decide(List.of(WorkData.MELEE, ErrandIds.HARVEST), view(), NONE, FixedRandom.floats()));
+        assertEquals(Optional.empty(), decide(List.of(WorkData.MELEE, WorkData.HARVEST), view(), NONE, FixedRandom.floats()));
     }
 
     // ---- noise ------------------------------------------------------------------
@@ -141,17 +141,17 @@ class PetMindDecisionTest {
         Personality restless = new Personality(Map.of(ErrandIds.WANDER, 100.0F), Map.of(), 1.0F, List.of(), List.of(),
             PAUSE_ONLY, Map.of());
         TestView view = view().personality(restless).targets(farm(true, false, false));
-        List<ResourceLocation> offered = List.of(ErrandIds.WANDER, ErrandIds.HARVEST);
+        List<ResourceLocation> offered = List.of(ErrandIds.WANDER, WorkData.HARVEST);
 
-        assertEquals(ErrandIds.HARVEST, decide(offered, view, NONE, FixedRandom.floats(1.0F, 0.0F)).orElseThrow().type().id());
-        assertEquals(ErrandIds.HARVEST, decide(offered, view, NONE, FixedRandom.floats(0.0F, 1.0F)).orElseThrow().type().id());
+        assertEquals(WorkData.HARVEST, decide(offered, view, NONE, FixedRandom.floats(1.0F, 0.0F)).orElseThrow().type().id());
+        assertEquals(WorkData.HARVEST, decide(offered, view, NONE, FixedRandom.floats(0.0F, 1.0F)).orElseThrow().type().id());
     }
 
     @Test
     void nothingIsDrawnWhereNothingIsUndecided() {
         // FixedRandom throws on a draw it has no value for.
         TestView crop = view().personality(noisy(1.0F)).targets(farm(true, false, false));
-        assertEquals(ErrandIds.HARVEST, decide(List.of(ErrandIds.WANDER, ErrandIds.HARVEST), crop, NONE, FixedRandom.floats())
+        assertEquals(WorkData.HARVEST, decide(List.of(ErrandIds.WANDER, WorkData.HARVEST), crop, NONE, FixedRandom.floats())
             .orElseThrow().type().id());
         assertEquals(ErrandIds.PICK_UP_ITEM, decide(List.of(ErrandIds.SOCIALIZE, ErrandIds.PICK_UP_ITEM), partnerAndItem(), NONE,
             FixedRandom.floats()).orElseThrow().type().id());
@@ -163,7 +163,7 @@ class PetMindDecisionTest {
     void anEqualPriorityNeverInterrupts() {
         // Planting while the crop beside it ripens: harvest is of its priority and scores more.
         TestView view = view().targets(farm(true, true, false));
-        List<ResourceLocation> offered = List.of(ErrandIds.PLANT, ErrandIds.HARVEST);
+        List<ResourceLocation> offered = List.of(WorkData.PLANT, WorkData.HARVEST);
 
         // However far the other scores, and whatever the noise.
         for (float randomness : new float[] {0.0F, 0.3F, 1.0F}) {
@@ -176,11 +176,11 @@ class PetMindDecisionTest {
     @Test
     void aRunningErrandIsNotEndedBecauseOneItYieldsToCouldStart() {
         TestView ripe = view().targets(farm(true, true, false));
-        Plan planting = TestErrands.planOf(ErrandIds.PLANT, ripe);
+        Plan planting = TestErrands.planOf(WorkData.PLANT, ripe);
 
         // Starting plant waits for harvest; going on with plant does not.
-        assertEquals(Optional.empty(), ending(ErrandIds.PLANT, planting, ripe));
-        assertEquals(ErrandIds.HARVEST, decide(List.of(ErrandIds.PLANT, ErrandIds.HARVEST), ripe, NONE, FixedRandom.floats())
+        assertEquals(Optional.empty(), ending(WorkData.PLANT, planting, ripe));
+        assertEquals(WorkData.HARVEST, decide(List.of(WorkData.PLANT, WorkData.HARVEST), ripe, NONE, FixedRandom.floats())
             .orElseThrow().type().id());
     }
 
@@ -225,7 +225,7 @@ class PetMindDecisionTest {
     void endsTheRunningErrandWhenItsConditionFails() {
         TestView cropGone = view();
 
-        assertEquals(Optional.of(Outcome.gaveUp("no_crop")), ending(ErrandIds.HARVEST, new BlockWorkErrand.Work(east(1)), cropGone));
+        assertEquals(Optional.of(Outcome.gaveUp("no_crop")), ending(WorkData.HARVEST, new Site(east(1)), cropGone));
     }
 
     @Test
@@ -277,7 +277,7 @@ class PetMindDecisionTest {
     void anErrandCarriesThePriorityAndWeighedScoreOfItsSettings() {
         Personality personality = new Personality(Map.of(ErrandIds.WANDER, 2.0F),
             Map.of(DayPhase.NIGHT, Map.of(ErrandIds.WANDER, 3.0F)), 0.0F, List.of(), List.of(), PAUSE_ONLY, Map.of());
-        List<ResourceLocation> offered = List.of(ErrandIds.WANDER, ErrandIds.HARVEST);
+        List<ResourceLocation> offered = List.of(ErrandIds.WANDER, WorkData.HARVEST);
         TestView day = view().personality(personality).phase(DayPhase.DAY);
         TestView night = view().personality(personality).phase(DayPhase.NIGHT);
 
@@ -306,14 +306,14 @@ class PetMindDecisionTest {
     void anErrandWithoutSettingsIsSwitchedOff() {
         Map<ResourceLocation, ErrandSettings<?>> shipped = ErrandSettingsData.all();
         Map<ResourceLocation, ErrandSettings<?>> withoutHarvest = new HashMap<>(shipped);
-        withoutHarvest.remove(ErrandIds.HARVEST);
+        withoutHarvest.remove(WorkData.HARVEST);
         try {
             ErrandSettings.replaceAll(withoutHarvest);
             TestView view = view().targets(farm(true, false, false));
 
-            assertEquals(ErrandIds.WANDER, decide(List.of(ErrandIds.WANDER, ErrandIds.HARVEST), view, NONE, FixedRandom.floats())
+            assertEquals(ErrandIds.WANDER, decide(List.of(ErrandIds.WANDER, WorkData.HARVEST), view, NONE, FixedRandom.floats())
                 .orElseThrow().type().id());
-            assertEquals(DecisionTrace.SWITCHED_OFF, verdicts(look(List.of(ErrandIds.WANDER, ErrandIds.HARVEST), view)).get(ErrandIds.HARVEST));
+            assertEquals(DecisionTrace.SWITCHED_OFF, verdicts(look(List.of(ErrandIds.WANDER, WorkData.HARVEST), view)).get(WorkData.HARVEST));
         } finally {
             ErrandSettings.replaceAll(shipped);
         }
@@ -326,13 +326,13 @@ class PetMindDecisionTest {
         // Multipliers that would put deliver over plant over harvest, and as much noise as a
         // personality may have.
         Personality inverted = new Personality(
-            Map.of(ErrandIds.HARVEST, 0.1F, ErrandIds.PLANT, 5.0F, ErrandIds.DELIVER, 10.0F),
-            Map.of(DayPhase.DAY, Map.of(ErrandIds.PLANT, 2.0F)), 1.0F, List.of(), List.of(), PAUSE_ONLY, Map.of());
+            Map.of(WorkData.HARVEST, 0.1F, WorkData.PLANT, 5.0F, WorkData.DELIVER, 10.0F),
+            Map.of(DayPhase.DAY, Map.of(WorkData.PLANT, 2.0F)), 1.0F, List.of(), List.of(), PAUSE_ONLY, Map.of());
         TestView everything = view().personality(inverted).targets(farm(true, true, true));
 
         for (float noise = 0.0F; noise <= 1.0F; noise += 0.125F) {
             Optional<Decision.Started> started = decide(farm(), everything, NONE, FixedRandom.floats(noise, 1.0F - noise));
-            assertEquals(ErrandIds.HARVEST, started.orElseThrow().type().id());
+            assertEquals(WorkData.HARVEST, started.orElseThrow().type().id());
         }
     }
 
@@ -341,17 +341,17 @@ class PetMindDecisionTest {
         Map<ResourceLocation, String> bothReady = verdicts(look(farm(), view().targets(farm(true, true, false))));
         Map<ResourceLocation, String> cropNotRipe = verdicts(look(farm(), view().targets(farm(false, true, false))));
 
-        assertEquals(DecisionTrace.STARTABLE, bothReady.get(ErrandIds.HARVEST));
-        assertEquals("intent.chiikawa.fail.higher_priority", bothReady.get(ErrandIds.PLANT));
-        assertEquals(DecisionTrace.STARTABLE, cropNotRipe.get(ErrandIds.PLANT));
+        assertEquals(DecisionTrace.STARTABLE, bothReady.get(WorkData.HARVEST));
+        assertEquals("intent.chiikawa.fail.higher_priority", bothReady.get(WorkData.PLANT));
+        assertEquals(DecisionTrace.STARTABLE, cropNotRipe.get(WorkData.PLANT));
     }
 
     @Test
     void deliverWaitsForHarvestAndPlant() {
-        String withCrop = verdicts(look(farm(), view().targets(farm(true, false, true)))).get(ErrandIds.DELIVER);
-        String withFarmland = verdicts(look(farm(), view().targets(farm(false, true, true)))).get(ErrandIds.DELIVER);
-        String withBoth = verdicts(look(farm(), view().targets(farm(true, true, true)))).get(ErrandIds.DELIVER);
-        String withNeither = verdicts(look(farm(), view().targets(farm(false, false, true)))).get(ErrandIds.DELIVER);
+        String withCrop = verdicts(look(farm(), view().targets(farm(true, false, true)))).get(WorkData.DELIVER);
+        String withFarmland = verdicts(look(farm(), view().targets(farm(false, true, true)))).get(WorkData.DELIVER);
+        String withBoth = verdicts(look(farm(), view().targets(farm(true, true, true)))).get(WorkData.DELIVER);
+        String withNeither = verdicts(look(farm(), view().targets(farm(false, false, true)))).get(WorkData.DELIVER);
 
         assertEquals("intent.chiikawa.fail.higher_priority", withCrop);
         assertEquals("intent.chiikawa.fail.higher_priority", withFarmland);
@@ -364,16 +364,16 @@ class PetMindDecisionTest {
         // A crop is ripe, but harvest is not among the errands offered, say to a pet of another job.
         TestView view = view().targets(farm(true, true, false));
 
-        assertEquals(ErrandIds.PLANT, decide(List.of(ErrandIds.PLANT), view, NONE, FixedRandom.floats()).orElseThrow().type().id());
+        assertEquals(WorkData.PLANT, decide(List.of(WorkData.PLANT), view, NONE, FixedRandom.floats()).orElseThrow().type().id());
     }
 
     @Test
     void anUnreachableCropDoesNotHoldPlantingBack() {
         // Harvest cannot start for a crop beyond the area, so it holds nothing back.
-        TestView view = view().targets(new PerceivedTargets(Optional.empty(), Optional.of(east(30)), Optional.of(east(2)),
+        TestView view = view().targets(TestTargets.of(Optional.empty(), Optional.of(east(30)), Optional.of(east(2)),
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
 
-        assertEquals(ErrandIds.PLANT, decide(List.of(ErrandIds.HARVEST, ErrandIds.PLANT), view, NONE, FixedRandom.floats())
+        assertEquals(WorkData.PLANT, decide(List.of(WorkData.HARVEST, WorkData.PLANT), view, NONE, FixedRandom.floats())
             .orElseThrow().type().id());
     }
 
@@ -381,29 +381,29 @@ class PetMindDecisionTest {
 
     @Test
     void workTheCarriedSlipCountsIsPreferred() {
-        PerceivedTargets targets = new PerceivedTargets(Optional.empty(), Optional.of(east(1)), Optional.empty(), Optional.empty(),
+        PerceivedTargets targets = TestTargets.of(Optional.empty(), Optional.of(east(1)), Optional.empty(), Optional.empty(),
             Optional.of(east(1)), Optional.empty(), Optional.empty());
         TestView view = view().targets(targets).slip(weeding());
-        List<ResourceLocation> offered = List.of(ErrandIds.HARVEST, ErrandIds.WEED);
+        List<ResourceLocation> offered = List.of(WorkData.HARVEST, WorkData.WEED);
 
         Map<ResourceLocation, Float> scores = scores(look(offered, view));
 
-        assertEquals(0.6F, scores.get(ErrandIds.HARVEST), 1.0E-6F);
-        assertEquals(0.5F + Decision.TASK_BONUS, scores.get(ErrandIds.WEED), 1.0E-6F);
-        assertEquals(ErrandIds.WEED, decide(offered, view, NONE, FixedRandom.floats()).orElseThrow().type().id());
+        assertEquals(0.6F, scores.get(WorkData.HARVEST), 1.0E-6F);
+        assertEquals(0.5F + Decision.TASK_BONUS, scores.get(WorkData.WEED), 1.0E-6F);
+        assertEquals(WorkData.WEED, decide(offered, view, NONE, FixedRandom.floats()).orElseThrow().type().id());
     }
 
     @Test
     void followingDoesNotTearAPetOffTheSlipItIsWorkingOff() {
         GlobalPos owner = GlobalPos.of(OVERWORLD, PET.pos().west(11));
-        PerceivedTargets weeds = new PerceivedTargets(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+        PerceivedTargets weeds = TestTargets.of(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
             Optional.of(east(-4)), Optional.empty(), Optional.empty());
         TestView view = TestView.at(PET, TestAnchors.following(owner)).targets(weeds).slip(weeding());
-        List<ResourceLocation> offered = List.of(ErrandIds.FOLLOW_OWNER, ErrandIds.WEED);
+        List<ResourceLocation> offered = List.of(ErrandIds.FOLLOW_OWNER, WorkData.WEED);
 
         Map<ResourceLocation, Float> scores = scores(look(offered, view));
         assertTrue(scores.containsKey(ErrandIds.FOLLOW_OWNER), "the owner is far enough to call it");
-        assertTrue(scores.get(ErrandIds.FOLLOW_OWNER) > scores.get(ErrandIds.WEED), "and the call outscores the weeding");
+        assertTrue(scores.get(ErrandIds.FOLLOW_OWNER) > scores.get(WorkData.WEED), "and the call outscores the weeding");
         assertEquals(Optional.empty(), decide(offered, view, MIDDLE, FixedRandom.floats()), "but it is of the same priority");
     }
 
@@ -412,13 +412,13 @@ class PetMindDecisionTest {
     @Test
     void aMealTipsTheScalesTowardsWorkAndNothingElse() {
         TestView crop = view().targets(farm(true, false, false));
-        List<ResourceLocation> offered = List.of(ErrandIds.WANDER, ErrandIds.HARVEST);
+        List<ResourceLocation> offered = List.of(ErrandIds.WANDER, WorkData.HARVEST);
 
         Map<ResourceLocation, Float> hungry = scores(look(offered, crop));
         Map<ResourceLocation, Float> full = scores(look(offered, view().targets(crop.targets()).fed()));
 
         assertEquals(hungry.get(ErrandIds.WANDER), full.get(ErrandIds.WANDER), 1.0E-6F);
-        assertEquals(hungry.get(ErrandIds.HARVEST) + Decision.EAGER_BONUS, full.get(ErrandIds.HARVEST), 1.0E-6F);
+        assertEquals(hungry.get(WorkData.HARVEST) + Decision.EAGER_BONUS, full.get(WorkData.HARVEST), 1.0E-6F);
     }
 
     @Test
@@ -452,25 +452,25 @@ class PetMindDecisionTest {
     /** A free pet with an item to pick up and a pet to call on. */
     private static TestView partnerAndItem() {
         return view().socialPartner(east(3))
-            .targets(new PerceivedTargets(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+            .targets(TestTargets.of(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
                 Optional.empty(), Optional.of(new PickableItem(UUID.randomUUID(), east(2)))));
     }
 
     /** A crop to harvest, farmland to plant and a chest to fill, each as near as the pet may go. */
     private static PerceivedTargets farm(boolean crop, boolean farmland, boolean container) {
-        return new PerceivedTargets(Optional.empty(), crop ? Optional.of(east(1)) : Optional.empty(),
+        return TestTargets.of(Optional.empty(), crop ? Optional.of(east(1)) : Optional.empty(),
             farmland ? Optional.of(east(2)) : Optional.empty(), container ? Optional.of(east(3)) : Optional.empty(),
             Optional.empty(), Optional.empty(), Optional.empty());
     }
 
     /** Something to fight. */
     private static PerceivedTargets foe() {
-        return new PerceivedTargets(Optional.of(new AttackTarget(UUID.randomUUID(), east(2))), Optional.empty(), Optional.empty(), Optional.empty(),
+        return TestTargets.of(Optional.of(new AttackTarget(UUID.randomUUID(), east(2))), Optional.empty(), Optional.empty(), Optional.empty(),
             Optional.empty(), Optional.empty(), Optional.empty());
     }
 
     private static PerceivedTargets fightAndCrop() {
-        return new PerceivedTargets(Optional.of(new AttackTarget(UUID.randomUUID(), east(2))), Optional.of(east(1)), Optional.empty(), Optional.empty(),
+        return TestTargets.of(Optional.of(new AttackTarget(UUID.randomUUID(), east(2))), Optional.of(east(1)), Optional.empty(), Optional.empty(),
             Optional.empty(), Optional.empty(), Optional.empty());
     }
 
@@ -479,7 +479,7 @@ class PetMindDecisionTest {
     }
 
     private static List<ResourceLocation> farm() {
-        return List.of(ErrandIds.WANDER, ErrandIds.HARVEST, ErrandIds.PLANT, ErrandIds.DELIVER);
+        return List.of(ErrandIds.WANDER, WorkData.HARVEST, WorkData.PLANT, WorkData.DELIVER);
     }
 
     private static List<ErrandType<?, ?>> offered(List<ResourceLocation> ids) {
@@ -524,7 +524,7 @@ class PetMindDecisionTest {
 
     private static PetTask weeding() {
         return new PetTask(ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding"),
-            ResourceLocation.fromNamespaceAndPath("chiikawa", "farmer"), PetWorkCounters.WEED, PetTask.NO_ICON, 8,
+            ResourceLocation.fromNamespaceAndPath("chiikawa", "farmer"), WorkData.WEED_PULLED, PetTask.NO_ICON, 8,
             ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath("chiikawa", "pet_task/weeding")), 0);
     }
 }

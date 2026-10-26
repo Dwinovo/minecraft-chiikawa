@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.google.gson.Gson;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkFile;
+import com.dwinovo.chiikawa.entity.brain.errand.work.WorkTarget;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
@@ -56,6 +57,24 @@ public final class ErrandSettingsLoader extends SimpleJsonResourceReloadListener
     public static Set<ResourceLocation> errandIds(ResourceManager manager) {
         FileToIdConverter files = FileToIdConverter.json(DIRECTORY);
         return files.listMatchingResources(manager).keySet().stream().map(files::fileToId).collect(Collectors.toSet());
+    }
+
+    /**
+     * @param manager the data packs in force
+     * @return the id of every errand whose file says it is done to blocks the work sensor finds, so that the jobs that
+     *         list them can be checked without another loader's state, as {@link #errandIds} does for what exists
+     */
+    public static Set<ResourceLocation> blockWorkIds(ResourceManager manager) {
+        Map<ResourceLocation, JsonElement> files = new HashMap<>();
+        scanDirectory(manager, DIRECTORY, new Gson(), files);
+        return files.entrySet().stream().filter(file -> targetsBlocks(file.getValue())).map(Map.Entry::getKey)
+            .collect(Collectors.toSet());
+    }
+
+    /** @return whether a file names a target that is blocks the work sensor finds; a file that does not parse names none */
+    private static boolean targetsBlocks(JsonElement json) {
+        return json instanceof JsonObject file && file.has("target") && WorkTarget.CODEC.parse(JsonOps.INSTANCE, file.get("target"))
+            .result().filter(WorkTarget.BlockTarget.class::isInstance).isPresent();
     }
 
     /**

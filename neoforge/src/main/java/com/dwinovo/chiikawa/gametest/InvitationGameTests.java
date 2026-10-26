@@ -7,6 +7,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.data.PetInteractionData;
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
@@ -60,13 +61,13 @@ public final class InvitationGameTests {
             Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE));
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(farmer.getMind().errands().isOn(ErrandIds.PLANT), "the farmer never set off to sow"))
+            .thenWaitUntil(() -> helper.assertTrue(farmer.getMind().errands().isOn(WorkData.PLANT), "the farmer never set off to sow"))
             .thenExecute(() -> ask(helper, farmer, UUID.randomUUID()))
             .thenIdle(ANSWER_TICKS)
             .thenExecuteFor(ANSWER_TICKS, () -> {
                 helper.assertTrue(farmer.getMind().errands().engagedWith(now(helper)).isEmpty(), "the farmer said yes to a visit");
                 helper.assertFalse(farmer.getMind().errands().isOn(ErrandIds.COOPERATE), "the farmer stopped to play along");
-                helper.assertTrue(farmer.getMind().errands().isOn(ErrandIds.PLANT), "the farmer was called away from its sowing");
+                helper.assertTrue(farmer.getMind().errands().isOn(WorkData.PLANT), "the farmer was called away from its sowing");
             })
             .thenSucceed();
     }

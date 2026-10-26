@@ -12,7 +12,6 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.data.JobWorkData;
 import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandType;
 import com.dwinovo.chiikawa.entity.brain.errand.Errands;
 import com.dwinovo.chiikawa.entity.job.JobIds;
@@ -100,8 +99,8 @@ public final class JobGameTests {
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
 
         helper.assertTrue(offeredBy(pet).equals(generic()), "a pet with no job was offered more than every pet is");
-        helper.assertTrue(offeredBy(holding(pet, Items.WOODEN_HOE)).equals(withWork(ErrandIds.HARVEST, ErrandIds.PLANT,
-            ErrandIds.DELIVER, ErrandIds.WEED, ErrandIds.PICK_MUSHROOM)), "a farmer was not offered the farmer's work in order");
+        helper.assertTrue(offeredBy(holding(pet, Items.WOODEN_HOE)).equals(withWork(WorkData.HARVEST, WorkData.PLANT,
+            WorkData.DELIVER, WorkData.WEED, WorkData.PICK_MUSHROOM)), "a farmer was not offered the farmer's work in order");
         helper.assertTrue(offeredBy(holding(pet, Items.IRON_SWORD)).equals(withWork(WorkData.MELEE)),
             "a fencer was not offered melee");
         helper.assertTrue(offeredBy(holding(pet, Items.BOW)).equals(withWork(WorkData.RANGED)),
@@ -114,10 +113,11 @@ public final class JobGameTests {
     public static void a_job_naming_a_missing_errand_is_offered_without_it(GameTestHelper helper) {
         AbstractPet pet = holding(wildPet(helper, new BlockPos(3, STAND, 3)), Items.WOODEN_HOE);
         try {
-            JobWork.replaceAll(Map.of(JobIds.FARMER, new JobWork(List.of(ErrandIds.HARVEST,
-                ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "sulk"), ErrandIds.PLANT))));
+            JobWork.replaceAll(Map.of(JobIds.FARMER, new JobWork(List.of(WorkData.HARVEST,
+                ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "sulk"), WorkData.PLANT),
+                JobWorkData.all().get(JobIds.FARMER).sight())));
 
-            helper.assertTrue(offeredBy(pet).equals(withWork(ErrandIds.HARVEST, ErrandIds.PLANT)),
+            helper.assertTrue(offeredBy(pet).equals(withWork(WorkData.HARVEST, WorkData.PLANT)),
                 "the missing errand was offered, or kept the others from it");
         } finally {
             JobWork.replaceAll(JobWorkData.all());

@@ -8,6 +8,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.wildWorker;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.data.PetTaskTypeData;
 import com.dwinovo.chiikawa.data.QualificationData;
@@ -16,7 +17,6 @@ import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.item.PetDollData;
 import com.dwinovo.chiikawa.task.PetTask;
-import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.dwinovo.chiikawa.task.TaskTracker;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
@@ -127,7 +127,7 @@ public final class SlipGameTests {
         pet.setTask(weeding());
         int practice = pet.licences().get(QualificationData.WEEDING).practice();
 
-        TaskTracker.advance(pet, PetWorkCounters.WEED, WEEDS);
+        TaskTracker.advance(pet, WorkData.WEED_PULLED, WEEDS);
         // A chunk saves its entities as it unloads them, and removing a living entity clears its memories.
         CompoundTag saved = new CompoundTag();
         helper.assertTrue(pet.save(saved), "the unloaded pet was not saved");
@@ -145,7 +145,7 @@ public final class SlipGameTests {
     /** A weeding slip as a board would hand one out. */
     private static PetTask weeding() {
         ResourceLocation farmer = InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FARMER.get());
-        return new PetTask(PetTaskTypeData.WEEDING, farmer, PetWorkCounters.WEED, PetTask.NO_ICON, WEEDS,
+        return new PetTask(PetTaskTypeData.WEEDING, farmer, WorkData.WEED_PULLED, PetTask.NO_ICON, WEEDS,
             PetTaskTypeData.reward(PetTaskTypeData.WEEDING), 0);
     }
 }

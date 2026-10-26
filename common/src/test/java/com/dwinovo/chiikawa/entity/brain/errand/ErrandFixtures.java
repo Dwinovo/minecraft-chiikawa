@@ -5,11 +5,11 @@ import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
-import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.testing.TestPhotos;
+import com.dwinovo.chiikawa.testing.TestTargets;
 import com.dwinovo.chiikawa.testing.TestView;
 import java.util.Map;
 import java.util.Optional;
@@ -38,22 +38,22 @@ public final class ErrandFixtures {
         Map.entry(ErrandIds.FOLLOW_OWNER, TestView.at(east(9), TestAnchors.following(HOME))),
         Map.entry(ErrandIds.STAY, free()),
         Map.entry(ErrandIds.WANDER, free()),
-        Map.entry(ErrandIds.PICK_UP_ITEM, free().targets(targets(Optional.empty(), Optional.empty(), Optional.empty(),
+        Map.entry(ErrandIds.PICK_UP_ITEM, free().targets(TestTargets.of(Optional.empty(), Optional.empty(), Optional.empty(),
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(new PickableItem(ITEM, east(2)))))),
-        Map.entry(ErrandIds.HARVEST, free().targets(targets(Optional.empty(), Optional.of(east(2)), Optional.empty(),
+        Map.entry(WorkData.HARVEST, free().targets(TestTargets.of(Optional.empty(), Optional.of(east(2)), Optional.empty(),
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()))),
-        Map.entry(ErrandIds.PLANT, free().targets(targets(Optional.empty(), Optional.empty(), Optional.of(east(2)),
+        Map.entry(WorkData.PLANT, free().targets(TestTargets.of(Optional.empty(), Optional.empty(), Optional.of(east(2)),
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()))),
-        Map.entry(ErrandIds.DELIVER, free().targets(targets(Optional.empty(), Optional.empty(), Optional.empty(),
+        Map.entry(WorkData.DELIVER, free().targets(TestTargets.of(Optional.empty(), Optional.empty(), Optional.empty(),
             Optional.of(east(2)), Optional.empty(), Optional.empty(), Optional.empty()))),
-        Map.entry(ErrandIds.WEED, free().ownership(PetOwnership.WILD).targets(targets(Optional.empty(), Optional.empty(),
+        Map.entry(WorkData.WEED, free().ownership(PetOwnership.WILD).targets(TestTargets.of(Optional.empty(), Optional.empty(),
             Optional.empty(), Optional.empty(), Optional.of(east(2)), Optional.empty(), Optional.empty()))),
-        Map.entry(ErrandIds.PICK_MUSHROOM, free().ownership(PetOwnership.WILD).phase(DayPhase.NIGHT).targets(targets(
+        Map.entry(WorkData.PICK_MUSHROOM, free().ownership(PetOwnership.WILD).phase(DayPhase.NIGHT).targets(TestTargets.of(
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(east(2)),
             Optional.empty()))),
-        Map.entry(WorkData.MELEE, free().targets(targets(Optional.of(new AttackTarget(FOE, east(2))), Optional.empty(), Optional.empty(),
+        Map.entry(WorkData.MELEE, free().targets(TestTargets.of(Optional.of(new AttackTarget(FOE, east(2))), Optional.empty(), Optional.empty(),
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()))),
-        Map.entry(WorkData.RANGED, free().armedWithArrows().targets(targets(Optional.of(new AttackTarget(FOE, east(2))), Optional.empty(),
+        Map.entry(WorkData.RANGED, free().armedWithArrows().targets(TestTargets.of(Optional.of(new AttackTarget(FOE, east(2))), Optional.empty(),
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()))),
         Map.entry(WorkData.PLAY_MUSIC, free().withSong()),
         Map.entry(ErrandIds.TAKE_TASK, free().offeringBoard(east(2))),
@@ -80,11 +80,6 @@ public final class ErrandFixtures {
 
     private static TestView free() {
         return TestView.at(HOME, TestAnchors.free(HOME));
-    }
-
-    private static PerceivedTargets targets(Optional<AttackTarget> attack, Optional<GlobalPos> harvest, Optional<GlobalPos> plant,
-            Optional<GlobalPos> container, Optional<GlobalPos> weed, Optional<GlobalPos> mushroom, Optional<PickableItem> item) {
-        return new PerceivedTargets(attack, harvest, plant, container, weed, mushroom, item);
     }
 
     private static PhotoOutlook readyToShoot() {

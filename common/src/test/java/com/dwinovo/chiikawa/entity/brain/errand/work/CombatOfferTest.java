@@ -15,6 +15,7 @@ import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.testing.TestErrands;
 import com.dwinovo.chiikawa.testing.TestView;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -97,7 +98,7 @@ class CombatOfferTest {
     /** A pet with a foe six blocks off. */
     private static TestView fighting() {
         return TestView.at(HOME, FREE).targets(new PerceivedTargets(Optional.of(new AttackTarget(FOE, east(6))),
-            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()));
+            Map.of(), Optional.empty()));
     }
 
     private static GlobalPos east(int blocks) {

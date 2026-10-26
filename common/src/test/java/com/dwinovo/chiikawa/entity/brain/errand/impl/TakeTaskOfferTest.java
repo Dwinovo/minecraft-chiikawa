@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.errand.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
@@ -10,7 +11,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandTunings;
 import com.dwinovo.chiikawa.task.BoardSlips;
 import com.dwinovo.chiikawa.task.PetTask;
-import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.testing.TestErrands;
 import com.dwinovo.chiikawa.testing.TestView;
@@ -49,7 +49,7 @@ class TakeTaskOfferTest {
     @Test
     void carriesOneSlipAtATime() {
         PetTask slip = new PetTask(ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding"),
-            ResourceLocation.fromNamespaceAndPath("chiikawa", "farmer"), PetWorkCounters.WEED, PetTask.NO_ICON, 8,
+            ResourceLocation.fromNamespaceAndPath("chiikawa", "farmer"), WorkData.WEED_PULLED, PetTask.NO_ICON, 8,
             ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath("chiikawa", "pet_task/weeding")), 0);
 
         assertEquals("intent.chiikawa.fail.has_slip", TestErrands.whyNoOffer(ErrandIds.TAKE_TASK, boardAt(1).slip(slip)).reasonKey());
