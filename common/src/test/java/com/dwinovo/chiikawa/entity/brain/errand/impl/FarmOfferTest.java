@@ -4,13 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
-import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.SubjectRests;
-import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
+import com.dwinovo.chiikawa.entity.brain.errand.work.action.Site;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.testing.TestErrands;
+import com.dwinovo.chiikawa.testing.TestTargets;
 import com.dwinovo.chiikawa.testing.TestView;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
@@ -38,14 +39,14 @@ class FarmOfferTest {
     void theBlockTheSensorRemembersIsWhereThePetGoesAndWhatItRestsOn() {
         TestView view = remembered(east(3), east(5), east(7));
 
-        for (ResourceLocation errand : new ResourceLocation[] {ErrandIds.HARVEST, ErrandIds.PLANT, ErrandIds.DELIVER}) {
+        for (ResourceLocation errand : new ResourceLocation[] {WorkData.HARVEST, WorkData.PLANT, WorkData.DELIVER}) {
             assertEquals(1, TestErrands.offers(errand, view).size(), errand::toString);
         }
-        assertEquals(Optional.of(east(3)), TestErrands.planOf(ErrandIds.HARVEST, view).destination(view));
-        assertEquals(Optional.of(east(5)), TestErrands.planOf(ErrandIds.PLANT, view).destination(view));
-        assertEquals(Optional.of(east(7)), TestErrands.planOf(ErrandIds.DELIVER, view).destination(view));
-        assertEquals(Optional.of(SubjectRests.subject(east(3).pos())), TestErrands.planOf(ErrandIds.HARVEST, view).subject());
-        assertEquals(Optional.of(SubjectRests.subject(east(7).pos())), TestErrands.planOf(ErrandIds.DELIVER, view).subject());
+        assertEquals(Optional.of(east(3)), TestErrands.planOf(WorkData.HARVEST, view).destination(view));
+        assertEquals(Optional.of(east(5)), TestErrands.planOf(WorkData.PLANT, view).destination(view));
+        assertEquals(Optional.of(east(7)), TestErrands.planOf(WorkData.DELIVER, view).destination(view));
+        assertEquals(Optional.of(SubjectRests.subject(east(3).pos())), TestErrands.planOf(WorkData.HARVEST, view).subject());
+        assertEquals(Optional.of(SubjectRests.subject(east(7).pos())), TestErrands.planOf(WorkData.DELIVER, view).subject());
     }
 
     @Test
@@ -58,35 +59,35 @@ class FarmOfferTest {
     void withoutABlockThereIsNothingToOfferAndWhyIsSaid() {
         TestView nothing = TestView.at(HOME, FREE);
 
-        assertEquals("intent.chiikawa.fail.no_crop", TestErrands.whyNoOffer(ErrandIds.HARVEST, nothing).reasonKey());
-        assertEquals("intent.chiikawa.fail.no_farmland", TestErrands.whyNoOffer(ErrandIds.PLANT, nothing).reasonKey());
-        assertEquals("intent.chiikawa.fail.no_container", TestErrands.whyNoOffer(ErrandIds.DELIVER, nothing).reasonKey());
+        assertEquals("intent.chiikawa.fail.no_crop", TestErrands.whyNoOffer(WorkData.HARVEST, nothing).reasonKey());
+        assertEquals("intent.chiikawa.fail.no_farmland", TestErrands.whyNoOffer(WorkData.PLANT, nothing).reasonKey());
+        assertEquals("intent.chiikawa.fail.no_container", TestErrands.whyNoOffer(WorkData.DELIVER, nothing).reasonKey());
     }
 
     @Test
     void aWalkToACropGoesOnOnlyWhileTheSensorStillRemembersThatCrop() {
-        BlockWorkErrand.Work toThree = new BlockWorkErrand.Work(east(3));
+        Site toThree = new Site(east(3));
 
-        assertTrue(TestErrands.stillWanted(ErrandIds.HARVEST, toThree, remembered(east(3), east(5), east(7))).ok());
+        assertTrue(TestErrands.stillWanted(WorkData.HARVEST, toThree, remembered(east(3), east(5), east(7))).ok());
         // The crop is gone, or the sensor has moved on to another: either way the pet's crop is not the one remembered.
         assertEquals("intent.chiikawa.fail.no_crop",
-            TestErrands.stillWanted(ErrandIds.HARVEST, toThree, TestView.at(HOME, FREE)).reasonKey());
-        assertEquals("intent.chiikawa.fail.no_crop", TestErrands.stillWanted(ErrandIds.HARVEST, toThree,
+            TestErrands.stillWanted(WorkData.HARVEST, toThree, TestView.at(HOME, FREE)).reasonKey());
+        assertEquals("intent.chiikawa.fail.no_crop", TestErrands.stillWanted(WorkData.HARVEST, toThree,
             remembered(east(4), east(5), east(7))).reasonKey());
     }
 
     @Test
     void aDeliveryIsNotAskedWhetherItWantsToGoOnWhenItsBagHasJustBeenEmptied() {
-        DeliverErrand.Trip trip = new DeliverErrand.Trip(east(7));
+        Site trip = new Site(east(7));
 
         // The sensor forgets the container once there is nothing to put in it, which is the delivery done and not given up.
-        assertTrue(TestErrands.stillWanted(ErrandIds.DELIVER, trip, TestView.at(HOME, FREE)).ok());
-        assertEquals(ErrandCategory.WORK, TestErrands.errand(ErrandIds.DELIVER).category());
+        assertTrue(TestErrands.stillWanted(WorkData.DELIVER, trip, TestView.at(HOME, FREE)).ok());
+        assertEquals(ErrandCategory.WORK, TestErrands.errand(WorkData.DELIVER).category());
     }
 
     /** A crop, soil and a container, each as far east of home as given. */
     private static TestView remembered(GlobalPos crop, GlobalPos soil, GlobalPos container) {
-        return TestView.at(HOME, FREE).targets(new PerceivedTargets(Optional.empty(), Optional.of(crop), Optional.of(soil),
+        return TestView.at(HOME, FREE).targets(TestTargets.of(Optional.empty(), Optional.of(crop), Optional.of(soil),
             Optional.of(container), Optional.empty(), Optional.empty(), Optional.empty()));
     }
 

@@ -43,6 +43,11 @@ public final class WorkErrand<P extends Plan, T> implements ErrandType<P, T> {
         return work.target().filter(target -> target.kind() == kind).isPresent();
     }
 
+    /** @return the kind of block the work is done to, if it is done to a block the work sensor finds */
+    public Optional<WorkTarget.BlockTarget> blocks() {
+        return work.target().filter(WorkTarget.BlockTarget.class::isInstance).map(WorkTarget.BlockTarget.class::cast);
+    }
+
     @Override
     public ResourceLocation id() {
         return id;
@@ -61,13 +66,13 @@ public final class WorkErrand<P extends Plan, T> implements ErrandType<P, T> {
     @Override
     public Offers<P> offers(PetView view, T tuning) {
         Check required = required(view);
-        return required.ok() ? work.action().offers(work, view, tuning) : Offers.none(required);
+        return required.ok() ? work.action().offers(work, id, view, tuning) : Offers.none(required);
     }
 
     @Override
     public Check stillWanted(P plan, PetView view, T tuning) {
         Check required = required(view);
-        return required.ok() ? work.action().stillWanted(work, plan, view, tuning) : required;
+        return required.ok() ? work.action().stillWanted(work, id, plan, view, tuning) : required;
     }
 
     @Override
