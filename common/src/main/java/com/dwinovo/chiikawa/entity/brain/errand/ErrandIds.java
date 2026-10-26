@@ -19,7 +19,6 @@ public final class ErrandIds {
     public static final ResourceLocation PICK_MUSHROOM = id("pick_mushroom");
     public static final ResourceLocation MELEE = id("melee");
     public static final ResourceLocation RANGED = id("ranged");
-    public static final ResourceLocation PLAY_MUSIC = id("play_music");
     public static final ResourceLocation TAKE_TASK = id("take_task");
     public static final ResourceLocation SHOP = id("shop");
     public static final ResourceLocation GIFT_OWNER = id("gift_owner");

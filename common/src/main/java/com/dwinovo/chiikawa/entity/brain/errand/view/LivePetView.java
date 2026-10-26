@@ -23,7 +23,6 @@ import com.dwinovo.chiikawa.shop.Wallet;
 import com.dwinovo.chiikawa.social.PetInteractions;
 import com.dwinovo.chiikawa.social.SocialRules;
 import com.dwinovo.chiikawa.task.PetTask;
-import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.dwinovo.chiikawa.utils.Utils;
 import com.dwinovo.chiikawa.whistle.WhistleHeard;
 import java.util.Optional;
@@ -64,7 +63,6 @@ public final class LivePetView implements PetView {
     private final Lazy<Boolean> presentToGive;
     private final Lazy<Boolean> attackCoolingDown;
     private final Lazy<Boolean> hasArrows;
-    private final Lazy<Optional<Playable>> playableSelection;
     private final Lazy<Optional<PetExams.Summons>> examToSit;
     private final Lazy<Optional<GlobalPos>> resultsDesk;
     private final Lazy<Boolean> seatedAtExam;
@@ -95,7 +93,6 @@ public final class LivePetView implements PetView {
         this.presentToGive = new Lazy<>(() -> pet.getOwner() instanceof Player && !GiftPool.of(pet).isEmpty());
         this.attackCoolingDown = new Lazy<>(() -> pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_COOLING_DOWN));
         this.hasArrows = new Lazy<>(() -> !Utils.getArrow(pet).isEmpty());
-        this.playableSelection = new Lazy<>(this::findPlayableSelection);
         this.examToSit = new Lazy<>(() -> PetExams.toSit(pet)
             .filter(summons -> ExamDeskBlockEntity.at(level, summons.desk()).isPresent()));
         this.resultsDesk = new Lazy<>(() -> PetExams.resultsDesk(pet)
@@ -200,9 +197,15 @@ public final class LivePetView implements PetView {
         return hasArrows.get();
     }
 
+    /**
+     * The song on the held music box, as the pet would play on from it: asked every time the pet decides what to do, so
+     * it only reads. What it last started is the pet's own memory; a slip that counts the work is a street performance.
+     */
     @Override
-    public Optional<Playable> playableSelection() {
-        return playableSelection.get();
+    public Optional<Playable> playable(boolean onSlip) {
+        return Playable.of(Playable.held(pet.getMainHandItem()), PlaybackMode.get(pet.getMainHandItem()),
+            pet.getBrain().getMemory(InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get()), onSlip,
+            track -> ServerMusicSystem.library(pet.level().getServer()).getTrack(track).isPresent());
     }
 
     @Override
@@ -287,17 +290,5 @@ public final class LivePetView implements PetView {
                     rank.getAsInt(), idea.partner().getUUID(),
                     GlobalPos.of(idea.partner().level().dimension(), idea.partner().blockPosition())));
             });
-    }
-
-    /**
-     * The song on the held music box, as the pet would play on from it: asked every time the pet decides what to do, so
-     * it only reads. What it last started is the pet's own memory; a slip that counts seconds of music is a street
-     * performance.
-     */
-    private Optional<Playable> findPlayableSelection() {
-        boolean onSlip = pet.getTask().filter(task -> task.counter().equals(PetWorkCounters.PLAY_MUSIC_SECOND)).isPresent();
-        return Playable.of(Playable.held(pet.getMainHandItem()), PlaybackMode.get(pet.getMainHandItem()),
-            pet.getBrain().getMemory(InitMemory.MUSICIAN_LAST_MUSIC_SIGNATURE.get()), onSlip,
-            track -> ServerMusicSystem.library(pet.level().getServer()).getTrack(track).isPresent());
     }
 }
