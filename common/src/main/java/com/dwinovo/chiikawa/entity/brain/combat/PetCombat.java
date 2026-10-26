@@ -86,8 +86,10 @@ public final class PetCombat {
      *
      * @param explosive it goes off when it gets close enough — a creeper, fuse or no fuse
      * @param armed the fuse is already going
+     * @param guarding the pet is fighting it for its own sake or its owner's, or because it is near, and not as a hunt
+     *                 (see {@link Ground#guarding}): it comes first, as a fight of defence does
      */
-    public record Foe(int id, double distance, boolean explosive, boolean armed) {
+    public record Foe(int id, double distance, boolean explosive, boolean armed, boolean guarding) {
     }
 
     private PetCombat() {
@@ -163,16 +165,33 @@ public final class PetCombat {
      * Which one to fight. The nearest, <b>but the one already being fought stays chosen</b>
      * while it is still worth fighting: picking the nearest afresh every scan means a pet
      * in a crowd turns towards a new one every couple of seconds and never finishes any of
-     * them.
+     * them. A fight of defence comes before a hunt: whatever the pet is hunting, something that hurts
+     * it or is after its owner is the one it turns on, and a hunt is only chosen from what is left.
      *
      * @param kept the id of the target the pet already has, or {@link #NO_FOE}
      */
     public static OptionalInt pick(List<Foe> foes, int kept, boolean hasRanged) {
-        Foe best = null;
+        OptionalInt chosen = pickAmong(foes, true, kept, hasRanged);
+        if (chosen.isEmpty()) {
+            chosen = pickAmong(foes, false, kept, hasRanged);
+        }
+        if (chosen.isPresent()) {
+            return chosen;
+        }
+        // Nothing worth fighting, but something worth backing away from: it is still the
+        // target, because a pet with no target stands where it is and waits for the bang.
         Foe fallback = null;
         for (Foe foe : foes) {
-            if (!fightable(foe, hasRanged)) {
-                fallback = nearer(fallback, foe);
+            fallback = nearer(fallback, foe);
+        }
+        return fallback == null ? OptionalInt.empty() : OptionalInt.of(fallback.id());
+    }
+
+    /** The one to fight of those fought for this reason, or none if there is nothing worth fighting among them. */
+    private static OptionalInt pickAmong(List<Foe> foes, boolean guarding, int kept, boolean hasRanged) {
+        Foe best = null;
+        for (Foe foe : foes) {
+            if (foe.guarding() != guarding || !fightable(foe, hasRanged)) {
                 continue;
             }
             if (foe.id() == kept) {
@@ -180,10 +199,7 @@ public final class PetCombat {
             }
             best = nearer(best, foe);
         }
-        // Nothing worth fighting, but something worth backing away from: it is still the
-        // target, because a pet with no target stands where it is and waits for the bang.
-        Foe chosen = best != null ? best : fallback;
-        return chosen == null ? OptionalInt.empty() : OptionalInt.of(chosen.id());
+        return best == null ? OptionalInt.empty() : OptionalInt.of(best.id());
     }
 
     /** The nearer of the two, and the lower id when they are the same distance off. */
@@ -198,11 +214,13 @@ public final class PetCombat {
     /**
      * Reads a live entity into the shape the rules take. The one place that knows what a
      * creeper looks like from the outside, so the sensor and the feet cannot disagree.
+     *
+     * @param guarding whether the pet fights it as a guard and not as a hunt; the feet have no use of it
      */
-    public static Foe of(Entity entity, double distance) {
+    public static Foe of(Entity entity, double distance, boolean guarding) {
         boolean armed = entity instanceof Creeper creeper
             && (creeper.getSwellDir() > 0 || creeper.isIgnited());
-        return new Foe(entity.getId(), distance, explodes(entity), armed);
+        return new Foe(entity.getId(), distance, explodes(entity), armed, guarding);
     }
 
     /**
