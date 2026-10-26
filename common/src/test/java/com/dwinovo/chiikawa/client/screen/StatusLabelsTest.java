@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import com.dwinovo.chiikawa.data.LanguageData;
 import com.dwinovo.chiikawa.entity.brain.errand.LackKey;
-import com.dwinovo.chiikawa.init.InitTag;
+import com.dwinovo.chiikawa.entity.brain.errand.work.WorkActions;
 import com.dwinovo.chiikawa.testing.MinecraftFont;
 import com.dwinovo.chiikawa.ui.TextWrap;
 import java.util.ArrayList;
@@ -15,21 +15,26 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ItemTags;
+import net.minecraft.SharedConstants;
+import net.minecraft.server.Bootstrap;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
  * Every word drawn on the cards of the status page fits the room the screen draws them in, in every language, measured with
- * the game's own font: what the pet would do next, why it is not at work, and what it is short of. The cards break a long line
+ * the game's own font: what the pet would do next, why it is not at work, and what it is short of, which is every lack an action says it can report ({@code WorkAction#lacks}). The cards break a long line
  * in two as the screen does and cut what is longer with an ellipsis, so what is checked here is that nothing is ever cut. The
  * questions under the cursor are not here, which have the room of the screen.
  */
 class StatusLabelsTest {
     private static final String NAME = "intent.chiikawa.";
     private static final String REASON = "intent.chiikawa.fail.";
-    private static final List<LackKey> LACKS = List.of(LackKey.tag(InitTag.ENTITY_PLANT_CROPS), LackKey.tag(ItemTags.ARROWS),
-        LackKey.item(ResourceLocation.fromNamespaceAndPath("chiikawa", "music_box")));
+
+    @BeforeAll
+    static void bootstrap() {
+        SharedConstants.tryDetectVersion();
+        Bootstrap.bootStrap();
+    }
 
     @Test
     void whatThePetWouldDoNextFitsItsCard() {
@@ -56,11 +61,13 @@ class StatusLabelsTest {
 
     @Test
     void whatThePetIsShortOfFitsItsCardWithTheWordsForNeedingIt() {
+        List<LackKey> lacks = WorkActions.all().stream().flatMap(action -> action.lacks().stream()).toList();
+        assertFalse(lacks.isEmpty(), "no action names what a pet can be short of");
         List<String> tooWide = new ArrayList<>();
         for (String locale : LanguageData.LOCALES) {
             Map<String, String> words = collect(locale);
             String needs = words.get("screen.chiikawa.pet.outlook.lacks");
-            for (LackKey lack : LACKS) {
+            for (LackKey lack : lacks) {
                 String name = words.get(lack.translationKey());
                 if (needs == null || name == null) {
                     tooWide.add(locale + " has no words for " + (needs == null ? "needing" : lack.translationKey()));
