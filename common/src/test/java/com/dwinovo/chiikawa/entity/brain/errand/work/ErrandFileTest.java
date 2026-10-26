@@ -21,6 +21,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -57,7 +59,8 @@ class ErrandFileTest {
     void aFileWithAnActionMakesTheWorkErrandAndAFileWithoutOneIsACodeErrandsSettings() {
         Loaded loaded = ErrandSettingsLoader.load(ErrandFiles.all());
 
-        assertEquals(Set.of(WorkData.MELEE, WorkData.RANGED, WorkData.PLAY_MUSIC), loaded.works().keySet());
+        assertEquals(Set.of(WorkData.HARVEST, WorkData.PLANT, WorkData.DELIVER, WorkData.WEED, WorkData.PICK_MUSHROOM, WorkData.MELEE,
+            WorkData.RANGED, WorkData.PLAY_MUSIC), loaded.works().keySet());
         assertEquals(ErrandSettingsData.all(), loaded.settings());
         assertTrue(loaded.errors().isEmpty() && loaded.warnings().isEmpty());
         assertInstanceOf(WorkErrand.class, Errands.get(WorkData.PLAY_MUSIC));
@@ -71,7 +74,7 @@ class ErrandFileTest {
 
             assertNull(Errands.get(WorkData.PLAY_MUSIC));
             assertEquals(Optional.empty(), ErrandSettings.of(WorkData.PLAY_MUSIC));
-            assertEquals(18, Errands.all().size(), "the code errands stay");
+            assertEquals(13, Errands.all().size(), "the code errands stay");
         } finally {
             TestErrands.load();
         }
@@ -110,6 +113,123 @@ class ErrandFileTest {
             assertEquals(new WorkTarget.Foe("no_attack_target"), read.work().target().orElseThrow(), errand::toString);
             assertEquals(file, WorkFile.CODEC.encodeStart(JsonOps.INSTANCE, read).getOrThrow(), errand::toString);
         }
+    }
+
+    @Test
+    void theFarmFilesNameTheirTargetsAndReadBackAsTheyWereWritten() {
+        Map<ResourceLocation, JsonObject> targets = Map.of(
+            WorkData.HARVEST, target("ripe_crop", "no_crop"),
+            WorkData.PLANT, target("plantable_soil", "no_farmland"),
+            WorkData.DELIVER, container("no_container"),
+            WorkData.WEED, blocks("#chiikawa:entity_weeds", "no_weed"),
+            WorkData.PICK_MUSHROOM, blocks("#chiikawa:entity_mushrooms", "no_mushroom"));
+
+        targets.forEach((errand, target) -> {
+            JsonObject file = ErrandFiles.all().get(errand).deepCopy().getAsJsonObject();
+
+            assertEquals(target, file.get("target"), errand::toString);
+            WorkFile<?, ?> read = WorkFile.CODEC.parse(JsonOps.INSTANCE, file).getOrThrow();
+
+            assertEquals(WorkData.all().get(errand), read.work(), errand::toString);
+            assertEquals(file, WorkFile.CODEC.encodeStart(JsonOps.INSTANCE, read).getOrThrow(), errand::toString);
+        });
+    }
+
+    @Test
+    void theFarmFilesKeepWhatTheFarmErrandsAlwaysHad() {
+        Map<ResourceLocation, JsonObject> files = new HashMap<>();
+        for (ResourceLocation errand : WorkData.all().keySet()) {
+            files.put(errand, ErrandFiles.all().get(errand).deepCopy().getAsJsonObject());
+        }
+
+        assertEquals("chiikawa:harvest_block", files.get(WorkData.HARVEST).get("action").getAsString());
+        assertEquals("chiikawa:plant_block", files.get(WorkData.PLANT).get("action").getAsString());
+        assertEquals("chiikawa:deposit", files.get(WorkData.DELIVER).get("action").getAsString());
+        assertEquals("chiikawa:harvest_block", files.get(WorkData.WEED).get("action").getAsString());
+        assertEquals("chiikawa:harvest_block", files.get(WorkData.PICK_MUSHROOM).get("action").getAsString());
+        for (ResourceLocation errand : new ResourceLocation[] {WorkData.HARVEST, WorkData.PLANT, WorkData.DELIVER}) {
+            assertEquals("work", files.get(errand).get("category").getAsString(), errand::toString);
+            assertFalse(files.get(errand).has("counter"), errand::toString);
+            assertEquals(new JsonArray(), files.get(errand).get("requires"), errand::toString);
+        }
+        for (ResourceLocation errand : new ResourceLocation[] {WorkData.WEED, WorkData.PICK_MUSHROOM}) {
+            assertEquals("forage", files.get(errand).get("category").getAsString(), errand::toString);
+            assertEquals(errand.toString(), files.get(errand).get("counter").getAsString(), errand::toString);
+        }
+        assertEquals(strings("wild_or_slip"), files.get(WorkData.WEED).get("requires"));
+        assertEquals(strings("wild_or_slip", "at_night"), files.get(WorkData.PICK_MUSHROOM).get("requires"));
+        // Only the reaping wears the tool; planting has no such number to set.
+        assertEquals(1, tuning(files, WorkData.HARVEST).get("tool_wear").getAsInt());
+        assertEquals(0, tuning(files, WorkData.WEED).get("tool_wear").getAsInt());
+        assertEquals(0, tuning(files, WorkData.PICK_MUSHROOM).get("tool_wear").getAsInt());
+        assertFalse(tuning(files, WorkData.PLANT).has("tool_wear"));
+    }
+
+    @Test
+    void eachActionRefusesTheTargetsItDoesNotTake() {
+        Map<String, JsonObject> targets = Map.of(
+            "foe", foe("no_attack_target"),
+            "ripe_crop", target("ripe_crop", "no_crop"),
+            "plantable_soil", target("plantable_soil", "no_farmland"),
+            "blocks", blocks("#chiikawa:entity_weeds", "no_weed"),
+            "container", container("no_container"));
+        Map<ResourceLocation, Set<String>> taken = Map.of(
+            WorkData.MELEE, Set.of("foe"),
+            WorkData.RANGED, Set.of("foe"),
+            WorkData.HARVEST, Set.of("ripe_crop", "blocks"),
+            WorkData.PLANT, Set.of("plantable_soil"),
+            WorkData.DELIVER, Set.of("container"),
+            WorkData.PLAY_MUSIC, Set.of());
+
+        taken.forEach((errand, kinds) -> targets.forEach((kind, target) -> {
+            JsonObject file = ErrandFiles.all().get(errand).deepCopy().getAsJsonObject();
+            file.add("target", target);
+
+            Map<ResourceLocation, JsonElement> files = new HashMap<>(ErrandFiles.all());
+            files.put(errand, file);
+            Loaded loaded = ErrandSettingsLoader.load(files);
+            String what = errand + " given a " + kind;
+            if (kinds.contains(kind)) {
+                assertTrue(loaded.works().containsKey(errand), what);
+                assertTrue(loaded.errors().isEmpty(), what);
+            } else {
+                assertFalse(loaded.works().containsKey(errand), what);
+                // What yields to it is switched off with it, so it is the refusal of its own file that is looked for.
+                List<String> refusals = loaded.errors().stream().filter(error -> error.contains(errand + " is switched off")).toList();
+                assertEquals(1, refusals.size(), what);
+                assertTrue(refusals.get(0).contains("not a " + kind) || refusals.get(0).contains("takes no target"), refusals.get(0));
+            }
+        }));
+    }
+
+    @Test
+    void aBlockWorkWithoutATargetSwitchesTheFileOff() {
+        Map<ResourceLocation, String> refusal = Map.of(
+            WorkData.HARVEST, "harvest_block needs a ripe_crop or blocks target",
+            WorkData.PLANT, "plant_block needs a plantable_soil target",
+            WorkData.DELIVER, "deposit needs a container target");
+
+        refusal.forEach((errand, because) -> {
+            JsonObject file = ErrandFiles.all().get(errand).deepCopy().getAsJsonObject();
+            file.remove("target");
+
+            assertSwitchedOff(errand, file, because);
+        });
+    }
+
+    @Test
+    void aBlockTargetNeedsItsReasonAndItsTagsWrittenAsTags() {
+        JsonObject file = ErrandFiles.all().get(WorkData.WEED).deepCopy().getAsJsonObject();
+        file.get("target").getAsJsonObject().remove("missing");
+        assertSwitchedOff(WorkData.WEED, file, "missing");
+
+        file = ErrandFiles.all().get(WorkData.WEED).deepCopy().getAsJsonObject();
+        file.get("target").getAsJsonObject().addProperty("blocks", "chiikawa:entity_weeds");
+        assertSwitchedOff(WorkData.WEED, file, "tag id");
+
+        file = ErrandFiles.all().get(WorkData.DELIVER).deepCopy().getAsJsonObject();
+        file.get("target").getAsJsonObject().remove("items");
+        assertSwitchedOff(WorkData.DELIVER, file, "items");
     }
 
     @Test
@@ -178,11 +298,11 @@ class ErrandFileTest {
 
     @Test
     void aWorkFileUnderTheIdOfACodeErrandSwitchesThatErrandOff() {
-        Loaded loaded = ErrandSettingsLoader.load(Map.of(ErrandIds.HARVEST, playMusic()));
+        Loaded loaded = ErrandSettingsLoader.load(Map.of(ErrandIds.WANDER, playMusic()));
 
         assertTrue(loaded.works().isEmpty() && loaded.settings().isEmpty());
         assertEquals(1, loaded.errors().size());
-        assertTrue(loaded.errors().get(0).contains("chiikawa:harvest") && loaded.errors().get(0).contains("written in code"),
+        assertTrue(loaded.errors().get(0).contains("chiikawa:wander") && loaded.errors().get(0).contains("written in code"),
             loaded.errors().get(0));
     }
 
@@ -240,11 +360,44 @@ class ErrandFileTest {
             loaded.errors().get(0));
     }
 
-    private static JsonObject foe(String missing) {
+    private static JsonObject target(String type, String missing) {
         JsonObject target = new JsonObject();
-        target.addProperty("type", "foe");
+        target.addProperty("type", type);
         target.addProperty("missing", missing);
         return target;
+    }
+
+    private static JsonObject blocks(String tag, String missing) {
+        JsonObject target = new JsonObject();
+        target.addProperty("type", "blocks");
+        target.addProperty("blocks", tag);
+        target.addProperty("missing", missing);
+        return target;
+    }
+
+    private static JsonObject container(String missing) {
+        JsonObject target = new JsonObject();
+        target.addProperty("type", "container");
+        target.addProperty("blocks", "#chiikawa:entity_delever_container");
+        target.addProperty("items", "#chiikawa:entity_deliver_items");
+        target.addProperty("missing", missing);
+        return target;
+    }
+
+    private static JsonArray strings(String... values) {
+        JsonArray array = new JsonArray();
+        for (String value : values) {
+            array.add(value);
+        }
+        return array;
+    }
+
+    private static JsonObject tuning(Map<ResourceLocation, JsonObject> files, ResourceLocation errand) {
+        return files.get(errand).getAsJsonObject("tuning");
+    }
+
+    private static JsonObject foe(String missing) {
+        return target("foe", missing);
     }
 
     /** @return the file the data generator writes for playing music, to spoil */
