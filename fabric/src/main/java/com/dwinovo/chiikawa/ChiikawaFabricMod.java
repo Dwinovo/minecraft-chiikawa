@@ -32,6 +32,7 @@ import com.dwinovo.chiikawa.whistle.WhistleSettingsLoader;
 import com.dwinovo.chiikawa.camera.CameraSettingsLoader;
 import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettingsLoader;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettingsLoader;
+import com.dwinovo.chiikawa.entity.job.JobWorkLoader;
 import com.dwinovo.chiikawa.gifting.GiftingSettingsLoader;
 import com.dwinovo.chiikawa.photo.PhotoSystem;
 import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
@@ -98,6 +99,7 @@ public class ChiikawaFabricMod implements ModInitializer {
         FabricReloadListeners.register(PackType.SERVER_DATA, PetVoiceLoader.ID, new PetVoiceLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, PetInteractionLoader.ID, new PetInteractionLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, ErrandSettingsLoader.ID, new ErrandSettingsLoader());
+        FabricReloadListeners.register(PackType.SERVER_DATA, JobWorkLoader.ID, new JobWorkLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, QualificationLoader.ID,
             new QualificationLoader(task -> PetTaskTypes.all().containsKey(task)));
         // A licence is checked against the slip types, which have to be loaded by then.
