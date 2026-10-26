@@ -14,11 +14,16 @@ class PetCombatTest {
     private static final double MELEE_REACH = 2.5;
 
     private static Foe plain(int id, double distance) {
-        return new Foe(id, distance, false, false);
+        return new Foe(id, distance, false, false, true);
+    }
+
+    /** One the pet is only hunting. */
+    private static Foe hunted(int id, double distance) {
+        return new Foe(id, distance, false, false, false);
     }
 
     private static Foe creeper(int id, double distance, boolean lit) {
-        return new Foe(id, distance, true, lit);
+        return new Foe(id, distance, true, lit, true);
     }
 
     // ---- where to stand --------------------------------------------------------
@@ -137,6 +142,30 @@ class PetCombatTest {
 
         assertEquals(OptionalInt.of(1), PetCombat.pick(lit, PetCombat.NO_FOE, false));
         assertEquals(OptionalInt.of(1), PetCombat.pick(lit, PetCombat.NO_FOE, true));
+    }
+
+    @Test
+    void aFightOfDefenceComesBeforeAHuntWhateverIsNearerOrAlreadyBeingFought() {
+        List<Foe> foes = List.of(hunted(1, 2.0), plain(2, 9.0));
+
+        assertEquals(OptionalInt.of(2), PetCombat.pick(foes, PetCombat.NO_FOE, false), "a pet hunting turned from what hurts it");
+        assertEquals(OptionalInt.of(2), PetCombat.pick(foes, 1, false), "a pet kept to its hunt with something at it");
+    }
+
+    @Test
+    void aHuntIsChosenAndKeptWhenThereIsNothingToDefendAgainst() {
+        List<Foe> foes = List.of(hunted(1, 8.0), hunted(2, 3.0));
+
+        assertEquals(OptionalInt.of(2), PetCombat.pick(foes, PetCombat.NO_FOE, false));
+        assertEquals(OptionalInt.of(1), PetCombat.pick(foes, 1, false));
+    }
+
+    @Test
+    void aCreeperWorthBackingAwayFromIsOnlyWhatIsLeftOfAHuntAndADefence() {
+        List<Foe> foes = List.of(creeper(1, 4.0, true), hunted(2, 9.0));
+
+        assertEquals(OptionalInt.of(2), PetCombat.pick(foes, PetCombat.NO_FOE, false));
+        assertEquals(OptionalInt.of(1), PetCombat.pick(List.of(creeper(1, 4.0, true)), PetCombat.NO_FOE, false));
     }
 
     @Test

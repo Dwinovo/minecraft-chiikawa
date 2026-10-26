@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.data.ErrandSettingsData;
 import com.dwinovo.chiikawa.data.WorkData;
+import com.dwinovo.chiikawa.entity.brain.combat.Ground;
 import com.dwinovo.chiikawa.entity.brain.errand.Check;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
@@ -24,7 +25,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.decide.Scored;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
-import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.work.action.Site;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
@@ -465,13 +465,13 @@ class PetMindDecisionTest {
 
     /** Something to fight. */
     private static PerceivedTargets foe() {
-        return TestTargets.of(Optional.of(new AttackTarget(UUID.randomUUID(), east(2))), Optional.empty(), Optional.empty(), Optional.empty(),
-            Optional.empty(), Optional.empty(), Optional.empty());
+        return TestTargets.of(Optional.of(TestTargets.foe(UUID.randomUUID(), east(2), Ground.SELF, Ground.OWNER, Ground.NEARBY)),
+            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
     }
 
     private static PerceivedTargets fightAndCrop() {
-        return TestTargets.of(Optional.of(new AttackTarget(UUID.randomUUID(), east(2))), Optional.of(east(1)), Optional.empty(), Optional.empty(),
-            Optional.empty(), Optional.empty(), Optional.empty());
+        return TestTargets.of(Optional.of(TestTargets.foe(UUID.randomUUID(), east(2), Ground.SELF, Ground.OWNER, Ground.NEARBY)),
+            Optional.of(east(1)), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
     }
 
     private static Personality noisy(float randomness) {
