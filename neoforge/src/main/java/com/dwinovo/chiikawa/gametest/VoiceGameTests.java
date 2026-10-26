@@ -28,6 +28,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.gametest.GameTestHolder;
@@ -69,6 +70,22 @@ public final class VoiceGameTests {
 
         assertSaid(helper, pet, VoiceMoment.HURT);
         helper.succeed();
+    }
+
+    /**
+     * Kurimanju says nothing when it is hurt, so the sigh it has for being frightened is heard: hit by something it will
+     * not fight, it runs with it. A pet that cries out when it is hurt has been quiet for a while by the time it runs.
+     */
+    @GameTest(template = "floor8", batch = "chiikawa_voice_scared", timeoutTicks = 200)
+    public static void a_frightened_kurimanju_sighs_as_it_runs(GameTestHelper helper) {
+        quietYard(helper, MIDNIGHT);
+        AbstractPet pet = pet(helper, InitEntity.KURIMANJU_PET.get(), new BlockPos(3, STAND, 3), false);
+        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(6, STAND, 6));
+        zombie.setNoAi(true);
+
+        pet.hurt(zombie.damageSources().mobAttack(zombie), 1.0F);
+
+        helper.succeedWhen(() -> assertSaid(helper, pet, VoiceMoment.SCARED));
     }
 
     /** Rakko takes a hit without a word: a moment with no lines passes in silence. */
