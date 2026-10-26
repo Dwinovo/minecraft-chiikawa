@@ -7,6 +7,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.data.ErrandSettingsData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandType;
 import com.dwinovo.chiikawa.entity.brain.errand.Errands;
@@ -24,6 +25,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.view.LivePetView;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +39,6 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestGenerator;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.TestFunction;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
@@ -52,7 +53,11 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
  * drawing from its random; it ends within its time limit and rests as its data says; and cut short at the
  * start, in the middle and at the last step, it ends interrupted and leaves nothing of itself behind.
  *
- * <p>The cases are made when the game registers them, one set for each errand that has a scenario.
+ * <p>An errand that goes about it in more than one way has a scenario for each. An errand done in the tick it begins has
+ * no step to cut it at and is never seen running: it has the case that asks what it offers, and one that sees it done
+ * and rested as its data says, which are the two a pet with no mind of its own and a pet with one can show.
+ *
+ * <p>The cases are made when the game registers them, one set for each scenario.
  */
 @GameTestHolder(Constants.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -102,17 +107,18 @@ public final class ErrandContractGameTests {
 
     /**
      * What the pet is, to the last of what an errand could change by asking: its memories, its bag, its synced data and
-     * where it stands.
+     * where it stands. The synced data is kept as it reads, since a stack in it is a copy every time it is asked and
+     * stacks are not equal to their copies.
      */
     private record Snapshot(Map<MemoryModuleType<?>, ?> memories, List<String> bag,
-                            List<SynchedEntityData.DataValue<?>> data, Vec3 position) {
+                            List<String> data, Vec3 position) {
         static Snapshot of(AbstractPet pet) {
             List<String> bag = new ArrayList<>();
             for (int slot = 0; slot < pet.getBackpack().getContainerSize(); slot++) {
                 bag.add(pet.getBackpack().getItem(slot).toString());
             }
-            return new Snapshot(new HashMap<>(pet.getBrain().getMemories()), bag, pet.getEntityData().getNonDefaultValues(),
-                pet.position());
+            return new Snapshot(new HashMap<>(pet.getBrain().getMemories()), bag,
+                pet.getEntityData().getNonDefaultValues().stream().map(Object::toString).toList(), pet.position());
         }
     }
 
@@ -125,12 +131,16 @@ public final class ErrandContractGameTests {
     @GameTestGenerator
     public static Collection<TestFunction> contract_cases() {
         List<TestFunction> cases = new ArrayList<>();
-        for (ResourceLocation errand : new TreeSet<>(ErrandScenarios.ids())) {
-            int limit = ErrandSettingsData.all().get(errand).maxTicks();
-            cases.add(testOf("offer_is_pure", errand, PURITY_CASE_TICKS, helper -> offerIsPure(helper, errand)));
-            cases.add(testOf("ends_in_time", errand, SETTLING + limit + GRACE, helper -> endsInTime(helper, errand)));
-            cases.add(testOf("interrupted_leaves_nothing", errand, INTERRUPT_CASE_TICKS,
-                helper -> interruptedLeavesNothing(helper, errand)));
+        for (ErrandScenarios.Case scenario : ErrandScenarios.cases().stream().sorted(Comparator.comparing(ErrandScenarios.Case::name)).toList()) {
+            int limit = ErrandSettingsData.all().get(scenario.errand()).maxTicks();
+            cases.add(testOf("offer_is_pure", scenario, PURITY_CASE_TICKS, helper -> offerIsPure(helper, scenario)));
+            if (scenario.instant()) {
+                cases.add(testOf("is_done_at_once", scenario, PURITY_CASE_TICKS, helper -> isDoneAtOnce(helper, scenario)));
+                continue;
+            }
+            cases.add(testOf("ends_in_time", scenario, SETTLING + limit + GRACE, helper -> endsInTime(helper, scenario)));
+            cases.add(testOf("interrupted_leaves_nothing", scenario, INTERRUPT_CASE_TICKS,
+                helper -> interruptedLeavesNothing(helper, scenario)));
         }
         return cases;
     }
@@ -151,10 +161,10 @@ public final class ErrandContractGameTests {
      * A case of its own batch, so that it runs alone: a pet in the yard next to it, such as another case's, is a friend
      * for a photographer to take a photo of and a rival for a pet to pick up an item from.
      */
-    private static TestFunction testOf(String what, ResourceLocation errand, int timeoutTicks,
+    private static TestFunction testOf(String what, ErrandScenarios.Case scenario, int timeoutTicks,
             Consumer<GameTestHelper> body) {
-        return new TestFunction(BATCH + "_" + what + "_" + errand.getPath(),
-            ErrandContractGameTests.class.getSimpleName().toLowerCase() + "." + what + "_" + errand.getPath(), TEMPLATE,
+        return new TestFunction(BATCH + "_" + what + "_" + scenario.name(),
+            ErrandContractGameTests.class.getSimpleName().toLowerCase() + "." + what + "_" + scenario.name(), TEMPLATE,
             timeoutTicks, 0L, true, helper -> {
                 settleWorld(helper.getLevel(), Difficulty.NORMAL, NOON);
                 body.accept(helper);
@@ -165,9 +175,14 @@ public final class ErrandContractGameTests {
      * Asked what it offers, twice, the errand answers the same, leaves the pet exactly as it was and draws
      * nothing from its random.
      */
-    private static void offerIsPure(GameTestHelper helper, ResourceLocation id) {
-        ErrandScenarios.Scenario scenario = ErrandScenarios.setUp(id, helper);
+    private static void offerIsPure(GameTestHelper helper, ErrandScenarios.Case setUp) {
+        ResourceLocation id = setUp.errand();
+        ErrandScenarios.Scenario scenario = setUp.setUp().apply(helper);
         AbstractPet pet = scenario.pet();
+        if (setUp.instant()) {
+            // An errand done in the tick it begins is gone before it can be asked about, if the pet is free to start it.
+            pet.setNoAi(true);
+        }
         boolean[] done = {false};
         helper.onEachTick(() -> {
             if (done[0] || ask(id, pet).isEmpty()) {
@@ -193,8 +208,9 @@ public final class ErrandContractGameTests {
      * Once it is under way the errand ends within its time limit, and the pet rests from it for as long as
      * its data says for the way it ended.
      */
-    private static void endsInTime(GameTestHelper helper, ResourceLocation id) {
-        ErrandScenarios.Scenario scenario = ErrandScenarios.setUp(id, helper);
+    private static void endsInTime(GameTestHelper helper, ErrandScenarios.Case setUp) {
+        ResourceLocation id = setUp.errand();
+        ErrandScenarios.Scenario scenario = setUp.setUp().apply(helper);
         AbstractPet pet = scenario.pet();
         Watch watch = new Watch();
         boolean[] done = {false};
@@ -224,8 +240,9 @@ public final class ErrandContractGameTests {
      * ticks, the pet rests from it as its data says, and it holds nothing of it. One pet goes through all
      * three, since an interrupted errand is one it may set off on again.
      */
-    private static void interruptedLeavesNothing(GameTestHelper helper, ResourceLocation id) {
-        ErrandScenarios.Scenario scenario = ErrandScenarios.setUp(id, helper);
+    private static void interruptedLeavesNothing(GameTestHelper helper, ErrandScenarios.Case setUp) {
+        ResourceLocation id = setUp.errand();
+        ErrandScenarios.Scenario scenario = setUp.setUp().apply(helper);
         AbstractPet pet = scenario.pet();
         Point[] points = Point.values();
         Watch watch = new Watch();
@@ -262,6 +279,30 @@ public final class ErrandContractGameTests {
             if (++next[0] == points.length) {
                 helper.succeed();
             }
+        });
+    }
+
+    /**
+     * An errand done in the tick it begins is done, within that tick, and the pet rests from it as its data says for an
+     * errand that is done. Nothing of it was seen running, so what it ran as is worked out from its settings.
+     */
+    private static void isDoneAtOnce(GameTestHelper helper, ErrandScenarios.Case setUp) {
+        ResourceLocation id = setUp.errand();
+        ErrandScenarios.Scenario scenario = setUp.setUp().apply(helper);
+        AbstractPet pet = scenario.pet();
+        helper.runAtTickTime(SETTLING, () -> helper.assertTrue(endedSince(pet, id, -1).isPresent(),
+            "the pet never did " + id + ": " + whereItStands(pet, id)));
+        helper.onEachTick(() -> {
+            Optional<DecisionLog.Ended> ended = endedSince(pet, id, -1);
+            if (ended.isEmpty()) {
+                return;
+            }
+            helper.assertTrue(ended.get().outcome() instanceof Outcome.Done, id + " ended " + ended.get().outcome());
+            helper.assertTrue(ended.get().ranTicks() <= 1, id + " took " + ended.get().ranTicks() + " ticks, which is not at once");
+            Running ran = new Running(Errands.get(id), new Plan() {
+            }, ErrandSettings.of(id).orElseThrow(), 0, ended.get().gameTime() - ended.get().ranTicks(), Set.of());
+            assertRested(helper, pet, scenario, ran, ended.get());
+            helper.succeed();
         });
     }
 
