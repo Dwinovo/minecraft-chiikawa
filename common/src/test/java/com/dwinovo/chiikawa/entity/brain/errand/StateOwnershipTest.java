@@ -55,6 +55,10 @@ class StateOwnershipTest {
             Set.of(PET)),
         new Rule("the errand shown", Pattern.compile("\\bsetIntent\\(|\\.intent\\(|entityData\\.set\\(INTENT\\b"),
             Set.of(PET, EXECUTOR)),
+        new Rule("the icon over the head", Pattern.compile("\\bprojection\\.icon\\(|entityData\\.set\\(ICON\\b"),
+            Set.of(PET, EXECUTOR)),
+        new Rule("the remarks a pet has made", Pattern.compile(WRITE + "InitMemory\\.REMARK_RESTS\\b"),
+            Set.of("entity/brain/errand/remark/Remarks.java")),
         new Rule("the walk, the gaze and the path",
             Pattern.compile(WRITE + "MemoryModuleType\\.(?:WALK_TARGET|LOOK_TARGET|PATH)\\b"
                 + "|\\bsetWalkAndLookTargetMemories\\(|\\blookAt(?:Entity|EachOther|Entities)\\("),
