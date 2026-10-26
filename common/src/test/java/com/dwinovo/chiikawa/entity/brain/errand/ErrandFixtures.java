@@ -51,9 +51,9 @@ public final class ErrandFixtures {
         Map.entry(ErrandIds.PICK_MUSHROOM, free().ownership(PetOwnership.WILD).phase(DayPhase.NIGHT).targets(targets(
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(east(2)),
             Optional.empty()))),
-        Map.entry(ErrandIds.MELEE, free().targets(targets(Optional.of(new AttackTarget(FOE, east(2))), Optional.empty(), Optional.empty(),
+        Map.entry(WorkData.MELEE, free().targets(targets(Optional.of(new AttackTarget(FOE, east(2))), Optional.empty(), Optional.empty(),
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()))),
-        Map.entry(ErrandIds.RANGED, free().armedWithArrows().targets(targets(Optional.of(new AttackTarget(FOE, east(2))), Optional.empty(),
+        Map.entry(WorkData.RANGED, free().armedWithArrows().targets(targets(Optional.of(new AttackTarget(FOE, east(2))), Optional.empty(),
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()))),
         Map.entry(WorkData.PLAY_MUSIC, free().withSong()),
         Map.entry(ErrandIds.TAKE_TASK, free().offeringBoard(east(2))),
