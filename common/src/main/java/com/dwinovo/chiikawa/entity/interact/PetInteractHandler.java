@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.entity.interact;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
+import com.dwinovo.chiikawa.entity.PetFriends;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
@@ -41,6 +42,8 @@ public final class PetInteractHandler {
         Level level = pet.level();
         boolean isTame = pet.isTame();
         boolean isOwner = pet.isOwnedBy(player);
+        // The owner's friends may tell it what to do and look after it, but what is the owner's is theirs alone.
+        boolean mayCommand = PetFriends.mayCommand(pet, player);
         boolean isSneaking = player.isShiftKeyDown();
         ItemStack held = player.getItemInHand(hand);
         boolean isFood = held.is(InitTag.ENTITY_TAME_FOODS);
@@ -48,20 +51,20 @@ public final class PetInteractHandler {
         if (!isTame && isFood) {
             return handleTame(level, pet, player, hand);
         }
-        if (isTame && isOwner && held.is(InitItems.SIMPLE_DISH.get())) {
+        if (mayCommand && held.is(InitItems.SIMPLE_DISH.get())) {
             return handleDish(level, pet, player, hand);
         }
         if (isTame && isOwner && PetExams.bookOf(held).isPresent()) {
             return handleBook(level, pet, player, hand, PetExams.bookOf(held).get());
         }
-        if (isTame && isOwner && Wallet.isMoney(held)) {
+        if (mayCommand && Wallet.isMoney(held)) {
             return handleGiveMoney(level, pet, player, hand);
         }
-        if (isTame && isOwner && isFood) {
+        if (mayCommand && isFood) {
             return handleFeed(level, pet, player, hand);
         }
-        if (isTame && isOwner && isSneaking) {
-            return handleDirectiveChange(level, pet);
+        if (mayCommand && isSneaking) {
+            return handleDirectiveChange(level, pet, player);
         }
         if (isTame && isOwner && !isSneaking && held.isEmpty() && !pet.getPendingGift().isEmpty()) {
             return handleClaimGift(level, pet, player);
@@ -178,13 +181,12 @@ public final class PetInteractHandler {
         return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
     }
 
-    private static InteractionResult handleDirectiveChange(Level level, AbstractPet pet) {
+    /** The one who crouched is told what the pet was told, whether they are its owner or a friend. */
+    private static InteractionResult handleDirectiveChange(Level level, AbstractPet pet, Player player) {
         if (!level.isClientSide()) {
             PetDirective next = pet.getPetDirective().next();
             pet.setPetDirective(next);
-            if (pet.getOwner() instanceof Player owner) {
-                owner.displayClientMessage(next.message(pet), true);
-            }
+            player.displayClientMessage(next.message(pet), true);
         }
         return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
     }

@@ -1,15 +1,19 @@
 package com.dwinovo.chiikawa.gametest;
 
 import static com.dwinovo.chiikawa.gametest.GameTestKit.NOON;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.asTeam;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.CombatStance;
 import com.dwinovo.chiikawa.entity.PetDirective;
+import com.dwinovo.chiikawa.entity.PetRules;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.network.PetServerPacketHandler;
+import com.dwinovo.chiikawa.shop.Wallet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
@@ -160,6 +164,128 @@ public final class InteractGameTests {
 
         helper.assertFalse(stranger.containerMenu instanceof PetBackpackMenu,
             "a stranger got into somebody else's pet's backpack");
+        helper.succeed();
+    }
+
+    /** A player in the owner's team is the owner's friend, and may tell the pet to sit as the owner does, crouching. */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void a_teammate_can_tell_a_pet_to_sit(GameTestHelper helper) {
+        ServerPlayer owner = player(helper);
+        ServerPlayer friend = player(helper);
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        pet.setPetDirective(PetDirective.FOLLOW);
+        friend.setShiftKeyDown(true);
+        friend.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+
+        asTeam(helper, () -> {
+            pet.mobInteract(friend, InteractionHand.MAIN_HAND);
+
+            helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, "a teammate's crouching click did not sit the pet down");
+            helper.succeed();
+        }, owner, friend);
+    }
+
+    /** Somebody in no team with the owner is nobody's friend: crouching and clicking changes nothing. */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void a_stranger_cannot_tell_a_pet_to_sit(GameTestHelper helper) {
+        ServerPlayer owner = player(helper);
+        ServerPlayer stranger = player(helper);
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        pet.setPetDirective(PetDirective.FOLLOW);
+        stranger.setShiftKeyDown(true);
+        stranger.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+
+        pet.mobInteract(stranger, InteractionHand.MAIN_HAND);
+
+        helper.assertTrue(pet.getPetDirective() == PetDirective.FOLLOW, "a stranger's crouching click changed the pet's orders");
+        helper.succeed();
+    }
+
+    /** The pet's bag has the owner's money and things in it: a friend does not get into it. */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void a_teammate_cannot_open_the_backpack(GameTestHelper helper) {
+        ServerPlayer owner = player(helper);
+        ServerPlayer friend = player(helper);
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        friend.setShiftKeyDown(false);
+        friend.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+
+        asTeam(helper, () -> {
+            pet.mobInteract(friend, InteractionHand.MAIN_HAND);
+
+            helper.assertFalse(friend.containerMenu instanceof PetBackpackMenu, "a teammate got into the pet's backpack");
+            helper.succeed();
+        }, owner, friend);
+    }
+
+    /** A friend may look after the pet: a snack heals it, and money goes into its bag. */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void a_teammate_can_feed_and_pay(GameTestHelper helper) {
+        ServerPlayer owner = player(helper);
+        ServerPlayer friend = player(helper);
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        pet.setHealth(pet.getMaxHealth() - WOUND);
+        float hurt = pet.getHealth();
+        friend.setShiftKeyDown(false);
+
+        asTeam(helper, () -> {
+            friend.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.COOKIE));
+            pet.mobInteract(friend, InteractionHand.MAIN_HAND);
+            helper.assertTrue(pet.getHealth() > hurt, "a snack from a teammate was none the better for it");
+
+            int money = Wallet.count(pet.getBackpack());
+            friend.setItemInHand(InteractionHand.MAIN_HAND, Wallet.coins(2));
+            pet.mobInteract(friend, InteractionHand.MAIN_HAND);
+            helper.assertTrue(Wallet.count(pet.getBackpack()) == money + 2, "a teammate's money did not go into the pet's bag");
+            helper.succeed();
+        }, owner, friend);
+    }
+
+    /** What the pet may do is for its owner to say: a stranger's rules are not heard, and a friend's are not either. */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void a_stranger_cannot_change_the_rules(GameTestHelper helper) {
+        ServerPlayer owner = player(helper);
+        ServerPlayer stranger = player(helper);
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        stranger.setPos(helper.absoluteVec(new BlockPos(3, STAND, 5).getCenter()));
+        PetRules rules = PetRules.DEFAULT.with(PetRules.Toggle.SHOP, false).withStance(CombatStance.NONE);
+
+        helper.assertFalse(PetServerPacketHandler.rule(stranger, pet, rules), "a stranger's rules were heard");
+        helper.assertTrue(pet.getRules().equals(PetRules.DEFAULT), "the pet took rules from a stranger");
+        helper.succeed();
+    }
+
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void a_teammate_cannot_change_the_rules(GameTestHelper helper) {
+        ServerPlayer owner = player(helper);
+        ServerPlayer friend = player(helper);
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        friend.setPos(helper.absoluteVec(new BlockPos(3, STAND, 5).getCenter()));
+
+        asTeam(helper, () -> {
+            helper.assertFalse(PetServerPacketHandler.rule(friend, pet, PetRules.DEFAULT.withSwap(false)), "a teammate's rules were heard");
+            helper.assertTrue(pet.getRules().equals(PetRules.DEFAULT), "the pet took rules from a teammate");
+            helper.succeed();
+        }, owner, friend);
+    }
+
+    /** The owner's rules from the screen are heard, from near enough, and the pet keeps them with its save. */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void an_owner_can_change_the_rules_from_the_screen(GameTestHelper helper) {
+        ServerPlayer owner = player(helper);
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        owner.setPos(helper.absoluteVec(new BlockPos(3, STAND, 5).getCenter()));
+        PetRules rules = PetRules.DEFAULT.with(PetRules.Toggle.PHOTO, false).withStance(CombatStance.RETALIATE).withSwap(false);
+
+        helper.assertTrue(PetServerPacketHandler.rule(owner, pet, rules), "the owner's rules were refused");
+        helper.assertTrue(pet.getRules().equals(rules), "the pet did not take its owner's rules");
         helper.succeed();
     }
 }

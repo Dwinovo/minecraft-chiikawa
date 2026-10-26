@@ -31,7 +31,7 @@ class WhistleTest {
 
     private static Hearing hear(PetDirective order, PetOwnership ownership, boolean sameLevel, double distance,
                                 boolean seatedAtExam) {
-        return WhistleHearing.of(ME, order, ownership, sameLevel, distance * distance, RANGE, seatedAtExam);
+        return WhistleHearing.of(ME, order, ownership, false, sameLevel, distance * distance, RANGE, seatedAtExam);
     }
 
     @Test

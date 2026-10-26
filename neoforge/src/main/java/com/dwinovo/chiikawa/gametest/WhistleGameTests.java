@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.gametest;
 
 import static com.dwinovo.chiikawa.gametest.GameTestKit.NOON;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.asTeam;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
@@ -189,6 +190,38 @@ public final class WhistleGameTests {
                 helper.assertTrue(pet.getMind().errands().seated(), "the pet at its desk was got up");
             })
             .thenSucceed();
+    }
+
+    /** A teammate of the owner is the owner's friend, and the pet comes to a friend's whistle as it does to its owner's. */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = ANSWER_TICKS + 20)
+    public static void a_teammates_whistle_is_obeyed_by_the_owners_pet(GameTestHelper helper) {
+        ServerPlayer owner = ownerAt(helper, new BlockPos(14, STAND, 14));
+        ServerPlayer friend = ownerAt(helper, new BlockPos(2, STAND, 2));
+        AbstractPet pet = owned(helper, owner, new BlockPos(4, STAND, 2), PetDirective.STAY);
+
+        asTeam(helper, () -> {
+            PetWhistle.Heard heard = PetWhistle.blow(friend, PetDirective.FOLLOW, SHORT);
+
+            helper.assertTrue(heard.owned() == 1 && heard.wild() == 0, "heard by " + heard);
+        }, owner, friend);
+        helper.succeedWhen(() ->
+            helper.assertTrue(pet.getPetDirective() == PetDirective.FOLLOW, "the pet did not come to a teammate's whistle"));
+    }
+
+    /** Somebody who is nobody's friend whistles for somebody else's pet in vain. */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = ANSWER_TICKS + 20)
+    public static void a_strangers_whistle_does_not_call_somebody_elses_pet(GameTestHelper helper) {
+        ServerPlayer owner = ownerAt(helper, new BlockPos(14, STAND, 14));
+        ServerPlayer stranger = ownerAt(helper, new BlockPos(2, STAND, 2));
+        AbstractPet pet = owned(helper, owner, new BlockPos(4, STAND, 2), PetDirective.STAY);
+
+        PetWhistle.Heard heard = PetWhistle.blow(stranger, PetDirective.FOLLOW, SHORT);
+
+        helper.assertTrue(heard.nobody(), "heard by " + heard);
+        helper.runAfterDelay(ANSWER_TICKS, () -> {
+            helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, "the pet came to a stranger's whistle");
+            helper.succeed();
+        });
     }
 
     /** A player, in survival, standing at {@code rel}. */
