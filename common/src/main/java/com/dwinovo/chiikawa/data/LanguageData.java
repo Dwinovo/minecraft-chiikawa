@@ -338,7 +338,7 @@ public final class LanguageData {
                     "自分で持ってきて渡してくれる",
                     "そばにいて、敵が来たら戦う",
                     "その場から動かない",
-                    "家の近くで働いたり、買い物したり、カードを取ったり");
+                    "家の近くで働いて買い物する");
             addPetRulesTranslations(adder,
                     "お買い物",
                     "プレゼント",
@@ -568,9 +568,9 @@ public final class LanguageData {
                     "Mesada: %1$s × %2$s",
                     "Um presente para você",
                     "Vai trazer por conta própria",
-                    "Fica com você e entra em ação quando algo ataca",
-                    "Fica exatamente onde está",
-                    "Trabalha, faz compras e pega fichas perto de casa");
+                    "Fica com você e luta",
+                    "Fica parado onde está",
+                    "Trabalha perto de casa");
             addPetRulesTranslations(adder,
                     "Compras",
                     "Presentes",
@@ -799,7 +799,7 @@ public final class LanguageData {
                     "직접 가져올 거야",
                     "옆에 있다가 공격받으면 나서",
                     "그 자리에 있어",
-                    "집 근처에서 일하고, 쇼핑하고, 전표를 받아");
+                    "집 근처에서 일하고 쇼핑해");
             addPetRulesTranslations(adder,
                     "쇼핑",
                     "선물",
@@ -1029,9 +1029,9 @@ public final class LanguageData {
                     "Pocket money: %1$s × %2$s",
                     "A present for you",
                     "It will bring it over itself",
-                    "Stays by you and steps in when something attacks",
+                    "Stays close and fights",
                     "Stays right where it is",
-                    "Works, shops and takes slips around home");
+                    "Works around home");
             addPetRulesTranslations(adder,
                     "Shopping",
                     "Giving presents",
@@ -1040,7 +1040,7 @@ public final class LanguageData {
                     "Visiting friends",
                     "On: does this on its own",
                     "Off: will not do this",
-                    "Hunt foes",
+                    "Hunt",
                     "Goes after the hostile mobs it sees nearby",
                     "Guard me",
                     "Fights only what attacks you or what you are fighting",
