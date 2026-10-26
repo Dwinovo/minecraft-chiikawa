@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.errand.Check;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandTunings;
+import com.dwinovo.chiikawa.entity.brain.errand.LackKey;
 import com.dwinovo.chiikawa.entity.brain.errand.Offers;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestStore;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Routine;
@@ -12,6 +13,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.dwinovo.chiikawa.entity.brain.errand.work.Work;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkAction;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkTarget;
+import com.dwinovo.chiikawa.init.InitTag;
 import com.dwinovo.chiikawa.utils.Utils;
 import com.mojang.serialization.Codec;
 import java.util.Optional;
@@ -46,7 +48,12 @@ public final class PlantBlockAction implements WorkAction<Site, ErrandTunings.Pl
     @Override
     public Offers<Site> offers(Work<Site, ErrandTunings.PlantBlock> work, ResourceLocation errand, PetView view,
             ErrandTunings.PlantBlock tuning) {
-        return Site.offers(work, errand, view);
+        Offers<Site> offers = Site.offers(work, errand, view);
+        // With no seed there is no soil to look for, and it is the seeds that are missing and not the soil.
+        if (offers.isEmpty() && !view.hasSeeds()) {
+            return Offers.none(Check.lack(offers.check().reason(), LackKey.tag(InitTag.ENTITY_PLANT_CROPS)));
+        }
+        return offers;
     }
 
     @Override
