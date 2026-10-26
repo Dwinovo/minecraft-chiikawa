@@ -60,8 +60,8 @@ public final class PersonalityData {
             .build());
         // Cheerful, often playing music.
         all.put(id(InitEntity.HACHIWARE_PET.get()), personality()
-            .weigh(1.3F, ErrandIds.PLAY_MUSIC)
-            .at(DayPhase.EVENING, 1.2F, ErrandIds.PLAY_MUSIC)
+            .weigh(1.3F, WorkData.PLAY_MUSIC)
+            .at(DayPhase.EVENING, 1.2F, WorkData.PLAY_MUSIC)
             .randomness(0.08F)
             .wildTool(Items.WOODEN_HOE, 3)
             .wildTool(Items.STONE_HOE, 1)
