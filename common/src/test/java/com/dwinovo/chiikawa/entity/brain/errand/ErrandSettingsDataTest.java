@@ -43,6 +43,7 @@ class ErrandSettingsDataTest {
         Map.entry(ErrandIds.FOLLOW_OWNER, 50),
         Map.entry(ErrandIds.TAKE_PHOTO, 40),
         Map.entry(ErrandIds.PICK_UP_ITEM, 30),
+        Map.entry(ErrandIds.OFFER_GIFT, 30),
         Map.entry(ErrandIds.SOCIALIZE, 30),
         Map.entry(ErrandIds.WANDER, 10),
         Map.entry(ErrandIds.STAY, 10));
@@ -67,6 +68,7 @@ class ErrandSettingsDataTest {
         Map.entry(ErrandIds.FOLLOW_OWNER, 0.5F),
         Map.entry(ErrandIds.TAKE_PHOTO, 0.45F),
         Map.entry(ErrandIds.PICK_UP_ITEM, 0.4F),
+        Map.entry(ErrandIds.OFFER_GIFT, 0.4F),
         Map.entry(ErrandIds.SOCIALIZE, 0.35F),
         Map.entry(ErrandIds.WANDER, 0.05F),
         Map.entry(ErrandIds.STAY, 1.0F));
@@ -110,7 +112,7 @@ class ErrandSettingsDataTest {
     }
 
     @Test
-    void theFarmersOrderIsDataAndNothingElseYields() {
+    void theFarmersOrderAndTheFightsBeforeAPresentAreDataAndNothingElseYields() {
         Map<ResourceLocation, List<ResourceLocation>> yields = new HashMap<>();
         ErrandSettingsData.all().forEach((errand, settings) -> {
             if (!settings.yieldsTo().isEmpty()) {
@@ -120,7 +122,8 @@ class ErrandSettingsDataTest {
 
         assertEquals(Map.of(
             WorkData.PLANT, List.of(WorkData.HARVEST),
-            WorkData.DELIVER, List.of(WorkData.HARVEST, WorkData.PLANT)), yields);
+            WorkData.DELIVER, List.of(WorkData.HARVEST, WorkData.PLANT),
+            ErrandIds.GIFT_OWNER, List.of(WorkData.MELEE, WorkData.RANGED)), yields);
     }
 
     @Test

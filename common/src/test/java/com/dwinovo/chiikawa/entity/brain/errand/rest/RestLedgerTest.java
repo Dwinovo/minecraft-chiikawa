@@ -29,6 +29,7 @@ class RestLedgerTest {
     private static final int CAMERA_COOLDOWN = 12000;
     private static final int RETRY = 300;
     private static final int SCENE_COOLDOWN = 24000;
+    private static final int GIFT_COOLDOWN = 24000;
     private static final int SCENE_GUARD = 100;
 
     private final TestRests.Store store = new TestRests.Store();
@@ -211,6 +212,51 @@ class RestLedgerTest {
 
         sourced.afterReport(PHOTO, "failed", RestContext.of(id("other_camera")), NOW);
         assertEquals(5, sourced.remaining(PHOTO, NOW), "a report says what it is about itself");
+    }
+
+    @Test
+    void aPresentGivenRestsThePetForTheGiftingCooldownAndNoWayTheErrandEndsAfterwardsCutsItShort() {
+        Optional<RestSources.Resolver> registered = RestSources.resolver(RestSources.GIFTING_COOLDOWN);
+        RestSources.register(RestSources.GIFTING_COOLDOWN, context -> GIFT_COOLDOWN);
+        try {
+            presentGiven();
+        } finally {
+            registered.ifPresent(resolver -> RestSources.register(RestSources.GIFTING_COOLDOWN, resolver));
+        }
+    }
+
+    private void presentGiven() {
+        ErrandSettings<String> gift = giftRests();
+        RestLedger gifts = ledger(gift);
+
+        gifts.afterReport(PHOTO, "given", RestContext.NONE, NOW);
+        assertEquals(GIFT_COOLDOWN, gifts.remaining(PHOTO, NOW), "the cooldown runs from the giving");
+
+        gifts.afterOutcome(running(PHOTO, gift, new Plan() {
+        }), Outcome.done(), NOW + 1);
+        gifts.afterOutcome(running(PHOTO, gift, new Plan() {
+        }), Outcome.gaveUp("no_gift"), NOW + 2);
+        gifts.afterOutcome(running(PHOTO, gift, new Plan() {
+        }), Outcome.interrupted("moved"), NOW + 3);
+
+        assertEquals(GIFT_COOLDOWN - 3, gifts.remaining(PHOTO, NOW + 3),
+            "done rests for nothing, and giving up for half a minute never takes it down");
+    }
+
+    @Test
+    void aPresentNeverGivenRestsOnlyAsLongAsTheErrandGaveUpFor() {
+        RestLedger gifts = ledger(giftRests());
+
+        gifts.afterOutcome(running(PHOTO, giftRests(), new Plan() {
+        }), Outcome.gaveUp("unreachable"), NOW);
+
+        assertEquals(600, gifts.remaining(PHOTO, NOW));
+    }
+
+    /** The rests of the gift errand: none for finishing, half a minute for giving up, and the cooldown once a present is given. */
+    private static ErrandSettings<String> giftRests() {
+        return TestRests.settings(2400, new ErrandSettings.Rests(RestSpec.ticks(0), RestSpec.ticks(600), RestSpec.ticks(0),
+            Map.of("given", RestSpec.from(RestSources.GIFTING_COOLDOWN))));
     }
 
     @Test

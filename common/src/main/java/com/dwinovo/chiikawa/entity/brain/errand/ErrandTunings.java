@@ -196,12 +196,19 @@ public final class ErrandTunings {
      * @param speed how fast it walks to the owner
      * @param arriveDistance how near the walk aims: inside reach, not at the edge of it
      * @param reach how near it has to be to hold the present out
+     * @param morningFrom the time of day after which an owner has woken in the morning, as the level's clock reads it: a
+     *                    cat leaves its morning gift only then
+     * @param morningTo the time of day before which they have
+     * @param sleptTicks how long the owner has to have slept to have woken, as the game counts it
      */
-    public record GiftOwner(float speed, int arriveDistance, double reach) {
+    public record GiftOwner(float speed, int arriveDistance, double reach, float morningFrom, float morningTo, int sleptTicks) {
         public static final Codec<GiftOwner> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Fields.SPEED.fieldOf("speed").forGetter(GiftOwner::speed),
             Fields.BLOCKS.fieldOf("arrive_distance").forGetter(GiftOwner::arriveDistance),
-            Fields.DISTANCE.fieldOf("reach").forGetter(GiftOwner::reach)
+            Fields.DISTANCE.fieldOf("reach").forGetter(GiftOwner::reach),
+            Codec.floatRange(0.0F, 1.0F).fieldOf("morning_from").forGetter(GiftOwner::morningFrom),
+            Codec.floatRange(0.0F, 1.0F).fieldOf("morning_to").forGetter(GiftOwner::morningTo),
+            Fields.BLOCKS.fieldOf("slept_ticks").forGetter(GiftOwner::sleptTicks)
         ).apply(instance, GiftOwner::new));
     }
 
