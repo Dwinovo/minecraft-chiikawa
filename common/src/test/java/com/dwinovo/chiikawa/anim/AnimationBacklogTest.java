@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
+import com.dwinovo.chiikawa.entity.job.impl.MusicianJob;
 import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -21,27 +22,42 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 /**
- * Animations ship as named candidates with fallbacks, so a pet whose model lacks the first does the next; what the
- * code names and the files do not have yet is the animators' backlog, and it is written down in
+ * Animations ship as named candidates with fallbacks, so a pet whose model lacks the first does the next; the first
+ * candidate is the animation meant, the rest are what a pet without it does meanwhile. What the code means and a
+ * character that can reach it does not have yet is the animators' backlog, and it is written down in
  * {@code pending_animations.txt}, one line for each character that lacks one. The list is held to the files both ways:
  * a name that is lacking and not on the list fails, so a new candidate cannot be added without the backlog saying so,
- * and a line for an animation that has been made, or that nothing names any more, fails too, so the list shrinks to
- * empty as the animations are made.
+ * and a line for an animation that has been made, or that nothing asks of the character, fails too, so the list shrinks
+ * to empty as the animations are made.
  *
- * <p>The names read are those of the enums, {@link PetActivity}, {@link PetAction} and {@link PetReaction}. The moves
- * the scenes between pets name are data that needs the entity registry to read, which a test outside a game has not.
+ * <p>A character is asked only for what it can reach. The first candidates of {@link PetActivity}, {@link PetAction} and
+ * {@link PetReaction} are asked of every character, except those of an activity that belongs to a job only one
+ * character can assume ({@link MusicianJob#PLAYER}, who plays the guitar), and the two generic actions, which only
+ * the deprecated {@link com.dwinovo.chiikawa.entity.AbstractPet#triggerAnim} names and nothing calls: they are what
+ * the other actions fall back to. The moves the scenes between pets name are data that needs the entity registry to
+ * read, which a test outside a game has not.
  */
 class AnimationBacklogTest {
     private static final Path ANIMATIONS = Path.of("src", "main", "resources", "assets", "chiikawa", "animations");
     private static final Path PENDING = Path.of("src", "test", "resources", "pending_animations.txt");
 
-    /** @return the animations the enums name, by any pet that is in the activity, makes the move or has the reaction */
-    private static Set<String> named() {
+    /** @return the animation meant by each value of the enums, the first of its candidates, that the character can reach */
+    private static Set<String> asked(String character) {
         Set<String> names = new TreeSet<>();
-        Arrays.stream(PetActivity.values()).forEach(activity -> names.addAll(activity.animationCandidates()));
-        Arrays.stream(PetAction.values()).forEach(action -> names.addAll(action.animationCandidates()));
-        Arrays.stream(PetReaction.values()).forEach(reaction -> names.addAll(reaction.animationCandidates()));
+        Arrays.stream(PetActivity.values()).filter(activity -> activity != PetActivity.NONE)
+            .filter(activity -> activity != PetActivity.PLAY_GUITAR || plays(character))
+            .forEach(activity -> names.add(activity.animationCandidates().get(0)));
+        Arrays.stream(PetAction.values())
+            .filter(action -> action != PetAction.NONE && action != PetAction.GENERIC_USE_MAINHAND && action != PetAction.GENERIC_SWORD_ATTACK)
+            .forEach(action -> names.add(action.animationCandidates().get(0)));
+        Arrays.stream(PetReaction.values()).filter(reaction -> reaction != PetReaction.NONE)
+            .forEach(reaction -> names.add(reaction.animationCandidates().get(0)));
         return names;
+    }
+
+    /** @return whether the character is the one the musician job is open to, by the name of its class */
+    private static boolean plays(String character) {
+        return MusicianJob.PLAYER.getSimpleName().equalsIgnoreCase(character + "Pet");
     }
 
     /** @return the animations each character has, by the name of its file */
@@ -73,7 +89,7 @@ class AnimationBacklogTest {
     @Test
     void whatTheEnumsNameAndACharacterLacksIsOnTheBacklogAndNothingElseIs() {
         Set<String> lacking = new TreeSet<>();
-        made().forEach((character, animations) -> named().stream().filter(name -> !animations.contains(name))
+        made().forEach((character, animations) -> asked(character).stream().filter(name -> !animations.contains(name))
             .forEach(name -> lacking.add(character + " " + name)));
         Set<String> pending = pending();
 
@@ -82,8 +98,8 @@ class AnimationBacklogTest {
         Set<String> stale = new TreeSet<>(pending);
         stale.removeAll(lacking);
 
-        assertEquals(Set.of(), unlisted, "named by the code, not in the character's file and not on the backlog: add the animation or the line");
-        assertEquals(Set.of(), stale, "on the backlog, though the animation exists or nothing names it: take the line off");
+        assertEquals(Set.of(), unlisted, "meant by the code for this character, not in its file and not on the backlog: add the animation or the line");
+        assertEquals(Set.of(), stale, "on the backlog, though the animation exists or the character cannot reach it: take the line off");
     }
 
     @Test
