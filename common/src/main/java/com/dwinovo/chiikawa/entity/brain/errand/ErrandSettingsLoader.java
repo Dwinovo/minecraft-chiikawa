@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -37,6 +40,16 @@ public final class ErrandSettingsLoader extends SimpleJsonResourceReloadListener
         loaded.warnings().forEach(Constants.LOG::warn);
         ErrandSettings.replaceAll(loaded.settings());
         Constants.LOG.info(LOG_PREFIX + "loaded settings for {} errands", loaded.settings().size());
+    }
+
+    /**
+     * @param manager the data packs in force
+     * @return the id of every errand file the packs have: the one way to ask what errands the packs have, since what
+     *         {@link ErrandSettings#all} holds is only the files that were valid, and not yet when another loader runs
+     */
+    public static Set<ResourceLocation> errandIds(ResourceManager manager) {
+        FileToIdConverter files = FileToIdConverter.json(DIRECTORY);
+        return files.listMatchingResources(manager).keySet().stream().map(files::fileToId).collect(Collectors.toSet());
     }
 
     /**
