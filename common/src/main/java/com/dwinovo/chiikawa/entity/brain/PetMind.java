@@ -32,6 +32,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.entity.brain.errand.step.LiveHandle;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.errand.view.LivePetView;
+import com.dwinovo.chiikawa.entity.brain.errand.work.WorkActions;
 import com.dwinovo.chiikawa.entity.job.JobWork;
 import com.dwinovo.chiikawa.qualification.ExamStage;
 import com.dwinovo.chiikawa.qualification.PetExams;
@@ -448,17 +449,7 @@ public final class PetMind {
 
     /** Erases the progress memories of errands the pet can currently not pursue. */
     private void forgetUnavailable(List<ErrandType<?, ?>> offered, Permits permits) {
-        for (ErrandType<?, ?> type : Errands.all()) {
-            if (type.forgetWhenUnavailable().isEmpty()) {
-                continue;
-            }
-            ErrandCategory category = type.category();
-            boolean available = isOffered(offered, type.id()) && permits.allows(category)
-                && ErrandSettings.of(type.id()).isPresent();
-            if (!available) {
-                type.forgetWhenUnavailable().forEach(pet.getBrain()::eraseMemory);
-            }
-        }
+        Forgetting.of(Errands.all(), WorkActions.all(), offered, permits).forEach(pet.getBrain()::eraseMemory);
     }
 
     private static String describe(Outcome outcome) {

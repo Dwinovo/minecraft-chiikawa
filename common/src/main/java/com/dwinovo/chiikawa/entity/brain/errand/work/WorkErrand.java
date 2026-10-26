@@ -11,9 +11,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.run.Routine;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.mojang.serialization.Codec;
 import java.util.Optional;
-import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
 /**
  * The errand a {@link Work} makes: its requirements first, then its action, which does the rest. Made by the loader
@@ -33,6 +31,11 @@ public final class WorkErrand<P extends Plan, T> implements ErrandType<P, T> {
     public WorkErrand(ResourceLocation id, Work<P, T> work) {
         this.id = id;
         this.work = work;
+    }
+
+    /** @return what does the work; the progress it leaves in memory is its own, see {@link WorkAction#forgetWhenUnavailable} */
+    public WorkAction<P, T> action() {
+        return work.action();
     }
 
     @Override
@@ -70,11 +73,6 @@ public final class WorkErrand<P extends Plan, T> implements ErrandType<P, T> {
     @Override
     public Optional<ResourceLocation> workCounter() {
         return work.counter();
-    }
-
-    @Override
-    public Set<MemoryModuleType<?>> forgetWhenUnavailable() {
-        return work.action().forgetWhenUnavailable();
     }
 
     @Override
