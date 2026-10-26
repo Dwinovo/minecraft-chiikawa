@@ -10,6 +10,7 @@ import com.dwinovo.chiikawa.data.PetInteractionData;
 import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
+import com.dwinovo.chiikawa.entity.PetRules;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
@@ -94,6 +95,34 @@ public final class InvitationGameTests {
                     "Chiikawa did not wait for the pet that asked first");
                 helper.assertTrue(chiikawa.getMind().errands().isOn(ErrandIds.COOPERATE), "Chiikawa did not stop to play along");
             })
+            .thenSucceed();
+    }
+
+    /**
+     * Asked to play by another pet, one whose owner has switched visiting off turns it down and stays on what it was at;
+     * one with no such word beside it says yes.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = ANSWER_TICKS + LONG_WAIT)
+    public static void a_pet_told_not_to_socialise_turns_down_an_invitation(GameTestHelper helper) {
+        AbstractPet told = GameTestKit.owned(helper, InitEntity.CHIIKAWA_PET.get(), new BlockPos(4, STAND, 4));
+        AbstractPet open = GameTestKit.owned(helper, InitEntity.CHIIKAWA_PET.get(), new BlockPos(11, STAND, 11));
+        // Told to sit so it never sets off itself, to be the one asking: a pet whose asker is gone gives the visit up at once.
+        AbstractPet asker = GameTestKit.owned(helper, InitEntity.MOMONGA_PET.get(), new BlockPos(8, STAND, 8));
+        asker.setPetDirective(PetDirective.STAY);
+        told.setRules(PetRules.DEFAULT.with(PetRules.Toggle.SOCIAL, false));
+
+        helper.onEachTick(() -> {
+            helper.assertTrue(told.getMind().errands().engagedWith(now(helper)).isEmpty(), "the pet told not to socialise said yes");
+            helper.assertFalse(told.getMind().errands().isOn(ErrandIds.COOPERATE), "the pet told not to socialise played along");
+        });
+        helper.startSequence()
+            .thenIdle(ANSWER_TICKS)
+            .thenExecute(() -> {
+                ask(helper, told, asker.getUUID());
+                ask(helper, open, asker.getUUID());
+            })
+            .thenWaitUntil(() -> helper.assertTrue(open.getMind().errands().isOn(ErrandIds.COOPERATE),
+                "the pet that was not told anything did not play along"))
             .thenSucceed();
     }
 
