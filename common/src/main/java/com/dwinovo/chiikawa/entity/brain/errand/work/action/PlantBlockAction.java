@@ -12,10 +12,13 @@ import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.dwinovo.chiikawa.entity.brain.errand.work.Work;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkAction;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkTarget;
+import com.dwinovo.chiikawa.utils.Utils;
 import com.mojang.serialization.Codec;
 import java.util.Optional;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Walks to the bare soil the work sensor chose and plants a seed from the bag in it. Which seed is the soil's to say,
@@ -60,6 +63,12 @@ public final class PlantBlockAction implements WorkAction<Site, ErrandTunings.Pl
         return Routine.of(
             Site.walk(soil, tuning.speed(), tuning.reachSqr(), settings.maxTicks(), tuning.noWayTicks()),
             Routine.step(() -> new Plant(soil)));
+    }
+
+    /** The seeds, as the crop handlers say which they are. */
+    @Override
+    public Predicate<ItemStack> materials() {
+        return Utils::isSeed;
     }
 
     @Override

@@ -55,7 +55,7 @@ class OfferPurityContractTest {
         return List.of(view.pos(), view.phase(), view.ownership(), view.personality(), view.anchor(), view.follow(),
             view.targets(), view.slip(), view.ownerPos(), view.eager(), view.offeringBoard(), view.shopWorthVisiting(),
             view.socialIdea(), view.engagement(),
-            view.carryingGift(), view.presentToGive(), view.attackCoolingDown(), view.hasArrows(),
+            view.carryingGift(), view.gift(), view.ownerBedside(), view.attackCoolingDown(), view.hasArrows(),
             view.playable(false), view.playable(true), view.examToSit(), view.resultsDesk(), view.seatedAtExam(),
             view.whistleHeard(), view.photo());
     }

@@ -4,6 +4,9 @@ import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
+import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
+import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
+import com.dwinovo.chiikawa.gifting.GiftOccasion;
 import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
@@ -11,11 +14,13 @@ import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.shop.Wallet;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
@@ -57,6 +62,9 @@ public final class PetInteractHandler {
         }
         if (isTame && isOwner && isSneaking) {
             return handleDirectiveChange(level, pet);
+        }
+        if (isTame && isOwner && !isSneaking && held.isEmpty() && !pet.getPendingGift().isEmpty()) {
+            return handleClaimGift(level, pet, player);
         }
         if (isTame && isOwner && !isSneaking && !isFood) {
             return handleOpenMenu(level, pet, player);
@@ -100,6 +108,7 @@ public final class PetInteractHandler {
             pet.triggerReaction(PetReaction.HAPPY);
             pet.playTameSound();
             PetMind.nudge(pet, "fed");
+            PetMind.post(pet, new Message.Occasion(GiftOccasion.WAS_TREATED, Optional.empty()));
         }
         return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
     }
@@ -146,18 +155,24 @@ public final class PetInteractHandler {
             pet.triggerReaction(PetReaction.HAPPY);
             pet.playTameSound();
             PetMind.nudge(pet, "paid");
+            PetMind.post(pet, new Message.Occasion(GiftOccasion.WAS_TREATED, Optional.empty()));
         }
         return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
     }
 
+    /** A snack heals the pet, and one it likes may put a present in its mind. */
     private static InteractionResult handleFeed(Level level, AbstractPet pet, Player player, InteractionHand hand) {
         if (!level.isClientSide()) {
+            Item food = player.getItemInHand(hand).getItem();
             if (!player.isCreative()) {
                 player.getItemInHand(hand).shrink(1);
             }
             if (pet.getHealth() < pet.getMaxHealth()) {
                 pet.heal(FEED_HEAL);
                 pet.triggerReaction(PetReaction.HAPPY);
+            }
+            if (PetPersonalities.of(pet.getType()).likes().stream().anyMatch(liking -> liking.item() == food)) {
+                PetMind.post(pet, new Message.Occasion(GiftOccasion.WAS_TREATED, Optional.empty()));
             }
         }
         return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
@@ -170,6 +185,17 @@ public final class PetInteractHandler {
             if (pet.getOwner() instanceof Player owner) {
                 owner.displayClientMessage(next.message(pet), true);
             }
+        }
+        return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
+    }
+
+    /**
+     * The owner takes the present the pet is carrying from its paws, instead of waiting for it to be brought. A click
+     * on a pet that carries one is that and not the opening of its bag, as with a hand free it can only be.
+     */
+    private static InteractionResult handleClaimGift(Level level, AbstractPet pet, Player player) {
+        if (!level.isClientSide()) {
+            PetMind.post(pet, new Message.GiftClaimed(player.getUUID()));
         }
         return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
     }
