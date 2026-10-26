@@ -58,6 +58,12 @@ public final class NeoForgeModNetworking {
                     PetServerPacketHandler.handleDirective(payload, player);
                 }
             });
+        registrar.playToServer(PetPayloads.PetRulesPayload.TYPE, PetPayloads.PetRulesPayload.STREAM_CODEC,
+            (payload, context) -> {
+                if (context.player() instanceof ServerPlayer player) {
+                    PetServerPacketHandler.handleRules(payload, player);
+                }
+            });
         registrar.playToClient(ShopPayloads.ShopPricesPayload.TYPE, ShopPayloads.ShopPricesPayload.STREAM_CODEC);
         registrar.playToClient(ManualPayloads.OpenHandbookPayload.TYPE, ManualPayloads.OpenHandbookPayload.STREAM_CODEC);
         registrar.playToServer(ShopPayloads.ShopTradePayload.TYPE, ShopPayloads.ShopTradePayload.STREAM_CODEC,
