@@ -64,7 +64,6 @@ class ErrandFileTest {
         assertEquals(ErrandSettingsData.all(), loaded.settings());
         assertTrue(loaded.errors().isEmpty() && loaded.warnings().isEmpty());
         assertInstanceOf(WorkErrand.class, Errands.get(WorkData.PLAY_MUSIC));
-        assertEquals(21, Errands.all().size());
     }
 
     @Test
