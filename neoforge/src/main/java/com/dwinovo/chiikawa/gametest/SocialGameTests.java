@@ -303,17 +303,18 @@ public final class SocialGameTests {
         AbstractPet momonga = wild(helper, InitEntity.MOMONGA_PET.get(), start);
         AbstractPet chiikawa = wild(helper, InitEntity.CHIIKAWA_PET.get(), partnerAt);
         PetInteraction cling = scene(PetInteractionData.CLING);
+        // Chiikawa is resting from Momonga's scene, so it says no to being asked, as a pet that has got busy since Momonga
+        // thought of it would. From the start: Momonga's sensor may think of the scene itself while the pets settle, and
+        // Chiikawa would play along with a Momonga that had not been turned down, and the case would wait for a refusal
+        // that was never going to come.
+        chiikawa.getBrain().setMemory(InitMemory.SOCIAL_COOLDOWNS.get(), SocialCooldowns.NONE.with(
+            SocialCooldowns.subject(PetInteractionData.CLING, momonga.getUUID()), cling.cooldownTicks(),
+            helper.getLevel().getGameTime()));
 
         helper.startSequence()
             .thenIdle(SETTLE_TICKS)
-            .thenExecute(() -> {
-                // Chiikawa is resting from Momonga's scene, so it says no to being asked, as a pet that has got busy since
-                // Momonga thought of it would; Momonga, who knows nothing of that, sets off to ask.
-                chiikawa.getBrain().setMemory(InitMemory.SOCIAL_COOLDOWNS.get(), SocialCooldowns.NONE.with(
-                    SocialCooldowns.subject(PetInteractionData.CLING, momonga.getUUID()), cling.cooldownTicks(),
-                    helper.getLevel().getGameTime()));
-                thinkOf(momonga, PetInteractionData.CLING, chiikawa);
-            })
+            // Momonga, who knows nothing of that, sets off to ask, if it has not already.
+            .thenExecute(() -> thinkOf(momonga, PetInteractionData.CLING, chiikawa))
             .thenWaitUntil(() -> helper.assertTrue(timesTurnedDown(momonga) == 1, "Momonga was never turned down"))
             .thenExecute(() -> {
                 long left = restLeft(momonga, PetInteractionData.CLING, chiikawa, helper);
