@@ -91,7 +91,13 @@ public enum PetActivity {
      * Holding the camera up to take a photo, until the shutter has gone. A pet with no animation
      * for it just stands there, as it does at rest.
      */
-    PHOTO(13, 0, "photo");
+    PHOTO(13, 0, "photo"),
+
+    /**
+     * Lying quiet, asleep or waiting for someone to wake, as a pet does by its owner's bed. A pet with no animation for it
+     * sits, and failing that stands, as it does at rest.
+     */
+    SLEEP(14, 0, "sleep", "sit", "idle");
 
     private static final PetActivity[] BY_NETWORK_ID = buildLookup();
 
