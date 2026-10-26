@@ -77,19 +77,33 @@ public final class ErrandTunings {
 
     /**
      * @param speed how fast it walks to the block
-     * @param reachSqr how near to the block's middle it has to be to work it, squared
+     * @param reachSqr how near to the block's middle it has to be to break it, squared
      * @param noWayTicks how long the mover may have no way to the block before the pet gives up on one: none gives
      *                   up the first time it says so
      * @param toolWear how much the tool in the pet's hand wears each time it breaks the block: none for a plant pulled
-     *                 by hand, and for work that breaks nothing
+     *                 by hand
      */
-    public record BlockWork(float speed, double reachSqr, int noWayTicks, int toolWear) {
-        public static final Codec<BlockWork> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Fields.SPEED.fieldOf("speed").forGetter(BlockWork::speed),
-            Codec.doubleRange(0.0, 65536.0).fieldOf("reach_sqr").forGetter(BlockWork::reachSqr),
-            Fields.PATIENCE.fieldOf("no_way_ticks").forGetter(BlockWork::noWayTicks),
-            Fields.BLOCKS.fieldOf("tool_wear").forGetter(BlockWork::toolWear)
-        ).apply(instance, BlockWork::new));
+    public record HarvestBlock(float speed, double reachSqr, int noWayTicks, int toolWear) {
+        public static final Codec<HarvestBlock> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Fields.SPEED.fieldOf("speed").forGetter(HarvestBlock::speed),
+            Codec.doubleRange(0.0, 65536.0).fieldOf("reach_sqr").forGetter(HarvestBlock::reachSqr),
+            Fields.PATIENCE.fieldOf("no_way_ticks").forGetter(HarvestBlock::noWayTicks),
+            Fields.BLOCKS.fieldOf("tool_wear").forGetter(HarvestBlock::toolWear)
+        ).apply(instance, HarvestBlock::new));
+    }
+
+    /**
+     * @param speed how fast it walks to the soil
+     * @param reachSqr how near to the soil's middle it has to be to plant in it, squared
+     * @param noWayTicks how long the mover may have no way to the soil before the pet gives up on one: none gives
+     *                   up the first time it says so
+     */
+    public record PlantBlock(float speed, double reachSqr, int noWayTicks) {
+        public static final Codec<PlantBlock> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Fields.SPEED.fieldOf("speed").forGetter(PlantBlock::speed),
+            Codec.doubleRange(0.0, 65536.0).fieldOf("reach_sqr").forGetter(PlantBlock::reachSqr),
+            Fields.PATIENCE.fieldOf("no_way_ticks").forGetter(PlantBlock::noWayTicks)
+        ).apply(instance, PlantBlock::new));
     }
 
     /**
