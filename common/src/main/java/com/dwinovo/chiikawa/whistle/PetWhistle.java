@@ -15,8 +15,8 @@ import net.minecraft.server.level.ServerPlayer;
  * Blowing a whistle for the pets near the blower. Knows nothing about the item that was blown: the order
  * and how a whistle behaves are handed in, and who hears it is {@link WhistleHearing}'s to say.
  *
- * <p>What a pet makes of the whistle is its own to do: this only tells it. The blower's own pets are told
- * the order, and each takes it after a wait of its own, see {@link Message.WhistleOrder}. Wild pets that hear a
+ * <p>What a pet makes of the whistle is its own to do: this only tells it. The blower's own pets, and those of their
+ * friends, are told the order, and each takes it after a wait of its own, see {@link Message.WhistleOrder}. Wild pets that hear a
  * call are told where it was blown from and for how long it interests them, see {@link Message.WhistleHeard}; they
  * are never tamed by it and their order is never touched.
  */
@@ -44,7 +44,7 @@ public final class PetWhistle {
         for (AbstractPet pet : level.getEntitiesOfClass(AbstractPet.class,
                 owner.getBoundingBox().inflate(settings.range()), AbstractPet::isAlive)) {
             Hearing hearing = WhistleHearing.of(owner.getUUID(), order, PetOwnership.of(pet),
-                pet.level() == level, pet.distanceToSqr(owner), settings.range(),
+                pet.isAlliedTo(owner), pet.level() == level, pet.distanceToSqr(owner), settings.range(),
                 PetExams.seatedAtExam(pet));
             switch (hearing) {
                 case OWNED -> {
