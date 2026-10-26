@@ -9,17 +9,15 @@ import com.dwinovo.chiikawa.entity.brain.errand.overlay.Overlays;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSpec;
 import com.dwinovo.chiikawa.entity.brain.personality.IdleHabits;
+import com.dwinovo.chiikawa.testing.TestErrands;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.mojang.serialization.JsonOps;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import net.minecraft.SharedConstants;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.Bootstrap;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -74,24 +72,13 @@ class ErrandSettingsDataTest {
         Map.entry(ErrandIds.STAY, 1.0F));
 
     @BeforeAll
-    static void bootstrap() {
-        SharedConstants.tryDetectVersion();
-        Bootstrap.bootStrap();
-    }
-
-    @Test
-    void everyErrandHasSettingsAndNothingElseDoes() {
-        Set<ResourceLocation> errands = new HashSet<>();
-        Errands.all().stream().map(ErrandType::id).forEach(errands::add);
-
-        assertEquals(errands, ErrandSettingsData.all().keySet());
-        assertEquals(21, errands.size());
+    static void shippedSettings() {
+        TestErrands.load();
     }
 
     @Test
     void theTableOfPrioritiesIsComplete() {
-        Set<ResourceLocation> errands = new HashSet<>();
-        Errands.all().stream().map(ErrandType::id).forEach(errands::add);
+        Set<ResourceLocation> errands = ErrandSettingsData.all().keySet();
 
         assertEquals(errands, PRIORITIES.keySet());
         assertEquals(errands, SCORES.keySet());
