@@ -9,7 +9,10 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.PetMind;
+import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
+import com.dwinovo.chiikawa.gifting.GiftOccasion;
 import com.dwinovo.chiikawa.init.InitMemory;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +34,7 @@ import net.minecraft.util.Unit;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
@@ -135,6 +139,33 @@ public final class SaveGameTests {
 
         helper.assertTrue(forgotten(loaded).isEmpty(), "the pet lost " + forgotten(loaded) + " for a memory it has no place for");
         helper.assertFalse(memoriesOf(save(loaded)).contains(UNLISTED), "the memory it has no place for was saved again");
+        helper.succeed();
+    }
+
+    /**
+     * The present a pet has in mind is saved with the pet, in its own NBT and not among the memories, so a save of 0.1.3
+     * holds none and loads a pet with none, and a save of 0.1.4 holds it and loads it back, the other memories with it.
+     */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 20)
+    public static void a_present_in_mind_is_saved_with_the_pet_and_a_save_without_one_loads_none(GameTestHelper helper) {
+        AbstractPet pet = ownedPet(helper, new BlockPos(3, STAND, 3));
+        // A finished roll of film is the occasion that is certain, and the pet has the roll to give.
+        PetMind.post(pet, new Message.Occasion(GiftOccasion.FILM_FULL, Optional.of(new ItemStack(Items.PAPER))));
+        helper.assertTrue(pet.giftIntentions().held().isPresent(), "the pet did not think of a present");
+        CompoundTag saved = save(pet);
+        helper.assertTrue(saved.contains("GiftIntention"), "the present in mind was not saved");
+        helper.assertFalse(memoriesOf(saved).getAllKeys().stream().anyMatch(key -> key.contains("gift_intention")),
+            "the present in mind was saved among the memories");
+
+        AbstractPet loaded = (AbstractPet) EntityType.create(saved, helper.getLevel()).orElseThrow();
+        helper.assertTrue(loaded.giftIntentions().held().map(held -> held.occasion() == GiftOccasion.FILM_FULL
+            && held.readyAt() == pet.giftIntentions().held().orElseThrow().readyAt()
+            && held.keepsake().filter(keepsake -> keepsake.is(Items.PAPER)).isPresent()).orElse(false),
+            "the present in mind was not as it was after a save and a load: " + loaded.giftIntentions().held());
+
+        saved.remove("GiftIntention");
+        helper.assertTrue(((AbstractPet) EntityType.create(saved, helper.getLevel()).orElseThrow()).giftIntentions().held().isEmpty(),
+            "a save from before presents were thought of loaded one");
         helper.succeed();
     }
 

@@ -73,7 +73,7 @@ class ErrandFileTest {
 
             assertNull(Errands.get(WorkData.PLAY_MUSIC));
             assertEquals(Optional.empty(), ErrandSettings.of(WorkData.PLAY_MUSIC));
-            assertEquals(13, Errands.all().size(), "the code errands stay");
+            assertEquals(14, Errands.all().size(), "the code errands stay");
         } finally {
             TestErrands.load();
         }

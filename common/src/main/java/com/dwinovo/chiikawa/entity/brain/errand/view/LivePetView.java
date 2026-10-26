@@ -11,7 +11,7 @@ import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.InvitationDesk;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
-import com.dwinovo.chiikawa.gifting.GiftPool;
+import com.dwinovo.chiikawa.gifting.GiftOutlook;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.music.Playable;
@@ -31,10 +31,12 @@ import java.util.UUID;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BedBlock;
 
 /**
  * A view of a live pet, for one evaluation. Each fact is worked out the first time an errand asks
@@ -60,7 +62,8 @@ public final class LivePetView implements PetView {
     private final Lazy<Optional<SocialIdea>> socialIdea;
     private final Lazy<Optional<InvitationDesk.Engagement>> engagement;
     private final Lazy<Boolean> carryingGift;
-    private final Lazy<Boolean> presentToGive;
+    private final Lazy<GiftOutlook> gift;
+    private final Lazy<Optional<GlobalPos>> ownerBedside;
     private final Lazy<Boolean> attackCoolingDown;
     private final Lazy<Boolean> hasArrows;
     private final Lazy<Optional<PetExams.Summons>> examToSit;
@@ -90,7 +93,8 @@ public final class LivePetView implements PetView {
         this.engagement = new Lazy<>(() -> pet.getMind().errands().engagement(level.getGameTime())
             .filter(asked -> PetInteractions.all().containsKey(asked.scene())));
         this.carryingGift = new Lazy<>(() -> pet.getOwner() instanceof Player && !pet.getPendingGift().isEmpty());
-        this.presentToGive = new Lazy<>(() -> pet.getOwner() instanceof Player && !GiftPool.of(pet).isEmpty());
+        this.gift = new Lazy<>(() -> GiftOutlook.of(pet));
+        this.ownerBedside = new Lazy<>(this::findOwnerBedside);
         this.attackCoolingDown = new Lazy<>(() -> pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_COOLING_DOWN));
         this.hasArrows = new Lazy<>(() -> !Utils.getArrow(pet).isEmpty());
         this.examToSit = new Lazy<>(() -> PetExams.toSit(pet)
@@ -183,8 +187,13 @@ public final class LivePetView implements PetView {
     }
 
     @Override
-    public boolean presentToGive() {
-        return presentToGive.get();
+    public GiftOutlook gift() {
+        return gift.get();
+    }
+
+    @Override
+    public Optional<GlobalPos> ownerBedside() {
+        return ownerBedside.get();
     }
 
     @Override
@@ -250,6 +259,16 @@ public final class LivePetView implements PetView {
     public Optional<GlobalPos> whereIs(UUID creature) {
         return pet.level() instanceof ServerLevel level && level.getEntity(creature) instanceof LivingEntity found && found.isAlive()
             ? Optional.of(GlobalPos.of(found.level().dimension(), found.blockPosition())) : Optional.empty();
+    }
+
+    /** As a cat finds its owner's bed to lie at the foot of: the bed the owner is asleep in, and the block past its foot. */
+    private Optional<GlobalPos> findOwnerBedside() {
+        Level level = pet.level();
+        if (!(pet.getOwner() instanceof Player owner) || !owner.isSleeping()) {
+            return Optional.empty();
+        }
+        return owner.getSleepingPos().filter(bed -> level.getBlockState(bed).is(BlockTags.BEDS)).map(bed -> GlobalPos.of(level.dimension(),
+            level.getBlockState(bed).getOptionalValue(BedBlock.FACING).map(facing -> bed.relative(facing.getOpposite())).orElse(bed)));
     }
 
     private Optional<GlobalPos> findOfferingBoard() {
