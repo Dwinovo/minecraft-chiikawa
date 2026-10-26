@@ -1,0 +1,101 @@
+# The Blockbench backlog: every animation the enums name (PetActivity, PetAction, PetReaction) that a character's
+# animation file does not have yet, as `<character> <animation>`. AnimationBacklogTest holds the list to the files both
+# ways: a line for an animation that exists, or that nothing names, fails it, and so does a missing one with no line.
+# Making an animation takes its line off; the list shrinks to empty.
+
+chiikawa bow_draw
+chiikawa bow_release
+chiikawa deposit
+chiikawa guitar
+chiikawa harvest
+chiikawa photo
+chiikawa pickup
+chiikawa plant
+chiikawa scratch_head
+chiikawa slash
+chiikawa sleep
+
+furuhonya bow_draw
+furuhonya bow_release
+furuhonya deposit
+furuhonya guitar
+furuhonya harvest
+furuhonya photo
+furuhonya pickup
+furuhonya plant
+furuhonya revive
+furuhonya scratch_head
+furuhonya slash
+furuhonya sleep
+
+hachiware bow_draw
+hachiware bow_release
+hachiware confused
+hachiware deposit
+hachiware harvest
+hachiware pickup
+hachiware plant
+hachiware slash
+hachiware sword_attack
+
+kurimanju bow_draw
+kurimanju bow_release
+kurimanju deposit
+kurimanju guitar
+kurimanju harvest
+kurimanju photo
+kurimanju pickup
+kurimanju plant
+kurimanju revive
+kurimanju scratch_head
+kurimanju slash
+kurimanju sleep
+
+momonga bow_draw
+momonga bow_release
+momonga deposit
+momonga guitar
+momonga harvest
+momonga photo
+momonga pickup
+momonga plant
+momonga scratch_head
+momonga slash
+momonga sleep
+
+rakko bow_draw
+rakko bow_release
+rakko deposit
+rakko guitar
+rakko harvest
+rakko photo
+rakko pickup
+rakko plant
+rakko revive
+rakko scratch_head
+rakko slash
+rakko sleep
+
+shisa bow_draw
+shisa bow_release
+shisa deposit
+shisa guitar
+shisa harvest
+shisa photo
+shisa pickup
+shisa plant
+shisa scratch_head
+shisa slash
+
+usagi bow_draw
+usagi bow_release
+usagi deposit
+usagi guitar
+usagi harvest
+usagi photo
+usagi pickup
+usagi plant
+usagi revive
+usagi scratch_head
+usagi slash
+usagi sleep
