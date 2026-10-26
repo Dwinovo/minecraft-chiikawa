@@ -29,8 +29,8 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * Registry of every errand a pet can be on, by its id. Generic errands
- * are open to every pet; the others are offered by capabilities through
- * {@code PetCapability#errands()}.
+ * are open to every pet; the others are offered by a job through
+ * its work, see {@link com.dwinovo.chiikawa.entity.job.JobWork}.
  *
  * <p>How much each matters is not decided here but by the errand's {@link ErrandSettings}: its
  * priority, which a pet gives way to only for a higher one, its score among the errands of its

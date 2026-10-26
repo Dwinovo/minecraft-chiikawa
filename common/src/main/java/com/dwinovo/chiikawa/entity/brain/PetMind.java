@@ -32,7 +32,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.entity.brain.errand.step.LiveHandle;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.errand.view.LivePetView;
-import com.dwinovo.chiikawa.init.InitRegistry;
+import com.dwinovo.chiikawa.entity.job.JobWork;
 import com.dwinovo.chiikawa.qualification.ExamStage;
 import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.social.PetInteraction;
@@ -42,7 +42,6 @@ import com.dwinovo.chiikawa.task.SlipWages;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.dwinovo.chiikawa.whistle.WhistleHeard;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.GlobalPos;
@@ -223,7 +222,7 @@ public final class PetMind {
     public Look look(ServerLevel level) {
         LivePetView view = LivePetView.of(pet);
         DecisionTrace trace = new DecisionTrace();
-        Decision.decide(offered(), view, permits(view), rests, Integer.MIN_VALUE, null, level.getGameTime(), trace);
+        Decision.decide(JobWork.errandsOf(pet), view, permits(view), rests, Integer.MIN_VALUE, null, level.getGameTime(), trace);
         return new Look(executor.running(), level.getGameTime(), view.phase(), trace);
     }
 
@@ -381,7 +380,7 @@ public final class PetMind {
     private void decide(long now, String trigger) {
         LivePetView view = LivePetView.of(pet);
         Permits permits = permits(view);
-        List<ErrandType<?, ?>> offered = offered();
+        List<ErrandType<?, ?>> offered = JobWork.errandsOf(pet);
         forgetUnavailable(offered, permits);
 
         Optional<Running> was = executor.running();
@@ -445,15 +444,6 @@ public final class PetMind {
 
     private Permits permits(LivePetView view) {
         return category -> PetConstraints.allows(pet, view.ownership(), category);
-    }
-
-    /** The generic errands plus those of the pet's capability. */
-    private List<ErrandType<?, ?>> offered() {
-        List<ErrandType<?, ?>> offered = new ArrayList<>(Errands.generic());
-        for (ResourceLocation id : InitRegistry.getCapabilityFromId(pet.getPetJobId()).errands()) {
-            offered.add(Errands.get(id));
-        }
-        return offered;
     }
 
     /** Erases the progress memories of errands the pet can currently not pursue. */
