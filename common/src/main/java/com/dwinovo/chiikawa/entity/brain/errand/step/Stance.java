@@ -37,7 +37,7 @@ public final class Stance {
     void hold(LiveHandle live, LivingEntity foe) {
         AbstractPet pet = live.pet();
         brokenOff = PetCombat.breakingOff(pet.getHealth() / pet.getMaxHealth(), brokenOff);
-        Band band = PetCombat.band(brokenOff, shooting, PetCombat.of(foe, 0.0),
+        Band band = PetCombat.band(brokenOff, shooting, PetCombat.of(foe, 0.0, false),
             PetCombat.meleeFar(pet.getBbWidth(), foe.getBbWidth()));
         double distance = pet.distanceTo(foe);
 

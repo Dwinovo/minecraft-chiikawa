@@ -93,6 +93,9 @@ class StateOwnershipTest {
             Pattern.compile("\\bsetRules\\(|entityData\\.set\\(RULES\\b"),
             // The owner's own hand, through the payload the screen sends; and the pet reading its own save.
             Set.of(PET, "network/PetServerPacketHandler.java")),
+        new Rule("the tool a pet has put aside for a weapon from its bag",
+            Pattern.compile("\\b(?:lendTool|takeToolBack)\\("),
+            Set.of(PET, STEPS + "SwapToWeapon.java")),
         new Rule("the blocks of work the sensor sees",
             Pattern.compile(WRITE + "InitMemory\\.WORK_SIGHTS\\b"),
             Set.of(SENSORS + "PetWorkSensor.java")),

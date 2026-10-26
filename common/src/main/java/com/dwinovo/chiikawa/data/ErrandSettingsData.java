@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.data;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings.Rests;
@@ -20,9 +21,10 @@ import net.minecraft.resources.ResourceLocation;
  * The generated errand settings, by the id of the errand: how much each matters, how a pet goes about
  * it and how long it leaves it alone afterwards.
  *
- * <p>Fights, the present in a pet's paws, the exam and the invitation of a friend are priority 80; the
- * slip, work and playing music 50; a photo 40; picking things up, taking a present out of the bag and calling on a
- * friend 30; pottering about and staying put 10. Within a priority the score settles which comes first.
+ * <p>Running from harm is priority 100. Fights in defence, the present in a pet's paws, the exam and the invitation of a
+ * friend are priority 80; the slip, work, hunting and playing music 50; a photo 40; picking things up, taking a present out of
+ * the bag and calling on a friend 30; pottering about and staying put 10. Within a priority the score settles which comes
+ * first.
  *
  * <p>An errand with no limit of its own (following and fighting end when they stop being wanted) is given a
  * day; one that walks to something and does one thing to it, half a minute; one that is a habit at a time, a little
@@ -54,6 +56,11 @@ public final class ErrandSettingsData {
         ErrandTunings.HarvestBlock reaping = new ErrandTunings.HarvestBlock(0.8F, 3.0, 0, 1);
         ErrandTunings.HarvestBlock byHand = new ErrandTunings.HarvestBlock(0.8F, 3.0, 0, 0);
         ErrandTunings.Footwork footwork = new ErrandTunings.Footwork(1.0F, 1.2F, 10.0, 3.0, 2);
+        ErrandTunings.Ranged bow = new ErrandTunings.Ranged(footwork, 15.0, 15, 20);
+        // Chiikawa cries and Usagi yells, and never cries; the rest only flinch, and sit with it.
+        ErrandTunings.Cowers cowers = new ErrandTunings.Cowers(Map.of(
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "chiikawa"), List.of("cry", "hurt"),
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "usagi"), List.of("yell", "hurt")), List.of("hurt", "sit"));
         // The scene beginning is a report, and the pair rest the scene's cooldown from then on however it ends, so that
         // finishing and being cut short need rest nothing of their own. An invitation that is declined or not answered, or
         // a walk that never gets there, never began it: those rest the pair only a few seconds, so that they are not asked
@@ -78,8 +85,16 @@ public final class ErrandSettingsData {
             entry(WorkData.WEED, errand(50, 0.5F, HALF_A_MINUTE, blockWork, byHand)),
             entry(WorkData.PICK_MUSHROOM, errand(50, 0.5F, HALF_A_MINUTE, blockWork, byHand)),
             entry(WorkData.MELEE, errand(80, 0.8F, A_DAY, giveUp(20), footwork).startingWith(VoiceMoment.HUNT)),
-            entry(WorkData.RANGED, errand(80, 0.8F, A_DAY, giveUp(20), new ErrandTunings.Ranged(footwork, 15.0, 15, 20))
+            entry(WorkData.RANGED, errand(80, 0.8F, A_DAY, giveUp(20), bow).startingWith(VoiceMoment.HUNT)),
+            // A hunt is a fight a pet picks, so it matters as work does; with a slip for putting monsters down it is the work.
+            entry(WorkData.HUNT_MELEE, errand(50, 0.8F, A_DAY, giveUp(20), footwork).startingWith(VoiceMoment.HUNT)),
+            entry(WorkData.HUNT_RANGED, errand(50, 0.8F, A_DAY, giveUp(20), bow).startingWith(VoiceMoment.HUNT)),
+            // A pet that is attacked and has only a weapon in its bag takes it up for the fight and puts its tool back after.
+            entry(ErrandIds.DEFEND_SELF, errand(80, 0.8F, A_DAY, giveUp(20), new ErrandTunings.Defend(footwork, bow))
                 .startingWith(VoiceMoment.HUNT)),
+            // Hiding is over when nothing has hurt the pet for three seconds and what did is eight blocks off.
+            entry(ErrandIds.FLEE, errand(100, 1.0F, 1200, giveUp(20),
+                new ErrandTunings.Flee(1.3F, 16.0, 2.0, 12.0, 1.5, 60, 8.0, cowers)).startingWith(VoiceMoment.SCARED)),
             // A song's longest, as the music config bounds it, and a little over.
             entry(WorkData.PLAY_MUSIC, errand(50, 0.6F, 12040,
                 Rests.of(NONE, RestSpec.from(RestSources.MUSIC_RETRY), NONE), new ErrandTunings.PlayMusic(50))),
@@ -96,7 +111,8 @@ public final class ErrandSettingsData {
             // A bedside gift is left when the owner wakes from the night's sleep, just after dawn as the day's clock reads it.
             entry(ErrandIds.GIFT_OWNER, errand(80, 0.85F, 2400,
                 new Rests(NONE, RestSpec.ticks(600), NONE, Map.of(Presents.GIVEN, RestSpec.from(RestSources.GIFTING_COOLDOWN))),
-                new ErrandTunings.GiftOwner(1.0F, 1, 2.0, 0.77F, 0.8F, 100)).yieldingTo(WorkData.MELEE, WorkData.RANGED)),
+                new ErrandTunings.GiftOwner(1.0F, 1, 2.0, 0.77F, 0.8F, 100))
+                .yieldingTo(WorkData.MELEE, WorkData.RANGED, ErrandIds.DEFEND_SELF)),
             entry(ErrandIds.SOCIALIZE, errand(30, 0.35F, 1200, scene, new ErrandTunings.Socialize(0.6F, 1, 5))),
             entry(ErrandIds.COOPERATE, errand(80, 0.5F, 1200, scene, ErrandTunings.Untuned.NONE)),
             entry(ErrandIds.TAKE_EXAM, errand(80, 0.72F, 2400,
