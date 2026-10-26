@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.errand.run;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -9,6 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandType;
+import com.dwinovo.chiikawa.entity.brain.errand.Errands;
 import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
 import com.dwinovo.chiikawa.entity.brain.errand.Plan;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
@@ -16,13 +19,20 @@ import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.errand.overlay.Overlays;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
 import com.dwinovo.chiikawa.testing.FakeHandle;
+import com.dwinovo.chiikawa.testing.StubErrand;
+import com.dwinovo.chiikawa.testing.TestErrands;
 import com.dwinovo.chiikawa.testing.TestRests;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
+import com.mojang.serialization.Dynamic;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.Brain;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +40,7 @@ import org.junit.jupiter.api.Test;
 /** How an errand is run and, above all, how it ends: once, between steps, leaving nothing behind. */
 class ExecutorTest {
     private static final ResourceLocation ERRAND = ResourceLocation.fromNamespaceAndPath("chiikawa", "work");
+    private static final ErrandType<?, ?> TYPE = new StubErrand(ERRAND);
     private static final int DONE_REST = 100;
     private static final int GAVE_UP_REST = 200;
     private static final int INTERRUPTED_REST = 50;
@@ -161,6 +172,32 @@ class ExecutorTest {
     }
 
     @Test
+    void anErrandKeepsTheTypeItStartedAsWhateverIsReloadedAfterwards() {
+        ErrandType<?, ?> reloaded = new StubErrand(ERRAND);
+        start(Routine.single(ScriptedStep.running()), 0);
+
+        assertSame(TYPE, executor.running().orElseThrow().type());
+        assertEquals(ERRAND, executor.running().orElseThrow().errand());
+        assertNotSame(reloaded, executor.running().orElseThrow().type(), "a reload makes new types, it does not change the one under way");
+    }
+
+    @Test
+    void anErrandThatNoLongerExistsEndsLikeAnyOtherAndRestsNothing() {
+        // As a pet is left by a data pack reload that took away the errand it was on.
+        TestErrands.load();
+        Executor orphaned = new Executor(handle, projection,
+            new RestLedger(errand -> Errands.restsOf(brain(), errand), errand -> Optional.empty()), log);
+        orphaned.start(TYPE, PLAN, settings, Routine.single(ScriptedStep.running()), 0);
+
+        orphaned.requestEnd(Outcome.interrupted("higher"));
+        orphaned.tick(1);
+
+        assertFalse(orphaned.running().isPresent());
+        assertEquals(Outcome.interrupted("higher"), onlyEnding());
+        assertEquals(0L, Errands.restsOf(brain(), ERRAND).remaining(null, 1), "there is nothing for a rest to be kept in");
+    }
+
+    @Test
     void everyKindOfEndReleasesTheStepOnceAndRestsOnceAsTheSettingsSay() {
         record Ending(Outcome outcome, int rest) {
         }
@@ -170,7 +207,7 @@ class ExecutorTest {
             DecisionLog fresher = new DecisionLog();
             Executor each = executorOver(fresh, fresher);
             ScriptedStep step = ScriptedStep.running();
-            each.start(ERRAND, PLAN, settings, Routine.single(step), 0);
+            each.start(TYPE, PLAN, settings, Routine.single(step), 0);
 
             switch (ending.outcome()) {
                 case Outcome.Done done -> step.then(StepStatus.DONE);
@@ -194,7 +231,7 @@ class ExecutorTest {
             List<Integer> stepsReleased = new ArrayList<>();
             ScriptedStep step = ScriptedStep.running();
             Executor each = executorOver(new TestRests.Store(), new DecisionLog());
-            each.start(ERRAND, PLAN, settings, Routine.single(step).releasing(h -> stepsReleased.add(step.released)), 0);
+            each.start(TYPE, PLAN, settings, Routine.single(step).releasing(h -> stepsReleased.add(step.released)), 0);
 
             switch (outcome) {
                 case Outcome.Done done -> step.then(StepStatus.DONE);
@@ -338,7 +375,7 @@ class ExecutorTest {
         ErrandSettings<String> chatting = new ErrandSettings<>(settings.priority(), settings.score(), MAX_TICKS, settings.rests(),
             List.of(), List.of(Overlays.IDLE_CHATTER), Optional.empty(), "");
         ScriptedStep step = ScriptedStep.running().then(StepStatus.RUNNING).then(StepStatus.RUNNING).then(StepStatus.DONE);
-        executor.start(ERRAND, PLAN, chatting, Routine.single(step), 0);
+        executor.start(TYPE, PLAN, chatting, Routine.single(step), 0);
 
         executor.tick(1);
         executor.tick(2);
@@ -362,12 +399,18 @@ class ExecutorTest {
         assertEquals(List.of(), handle.said);
     }
 
+    private static Brain<?> brain() {
+        CompoundTag saved = new CompoundTag();
+        saved.put("memories", new CompoundTag());
+        return Brain.<LivingEntity>provider(List.of(), List.of()).makeBrain(new Dynamic<>(NbtOps.INSTANCE, saved));
+    }
+
     private Executor executorOver(TestRests.Store rests, DecisionLog decisions) {
         return new Executor(handle, projection, new RestLedger(errand -> rests, errand -> Optional.empty()), decisions);
     }
 
     private void start(Routine routine, long now) {
-        executor.start(ERRAND, PLAN, settings, routine, now);
+        executor.start(TYPE, PLAN, settings, routine, now);
     }
 
     private Outcome onlyEnding() {

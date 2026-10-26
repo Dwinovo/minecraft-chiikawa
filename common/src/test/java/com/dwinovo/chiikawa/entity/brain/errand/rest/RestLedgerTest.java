@@ -8,6 +8,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
 import com.dwinovo.chiikawa.entity.brain.errand.Plan;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
+import com.dwinovo.chiikawa.testing.StubErrand;
 import com.dwinovo.chiikawa.testing.TestRests;
 import java.util.ArrayList;
 import java.util.List;
@@ -265,7 +266,7 @@ class RestLedgerTest {
     }
 
     private static Running running(ResourceLocation errand, ErrandSettings<?> settings, Plan plan) {
-        return new Running(errand, plan, settings, 0, 0L, Set.of());
+        return new Running(new StubErrand(errand), plan, settings, 0, 0L, Set.of());
     }
 
     private static Plan subject(String subject) {

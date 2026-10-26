@@ -17,6 +17,18 @@ import org.jetbrains.annotations.Nullable;
  * <p>Several kinds of storage hold the rests, see {@link Kind}; the ledger does not care which.
  */
 public interface RestStore {
+    /** The store of an errand that no longer exists: it has no rests, and keeps none that it is told. */
+    RestStore NONE = new RestStore() {
+        @Override
+        public long remaining(@Nullable String subject, long now) {
+            return 0L;
+        }
+
+        @Override
+        public void restFor(@Nullable String subject, long ticks, long now) {
+        }
+    };
+
     /**
      * @param subject what the rest is on, or {@code null} for the errand as a whole; a store that keeps
      *                one rest for the errand ignores it

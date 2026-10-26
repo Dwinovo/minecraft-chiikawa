@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.errand.run;
 
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandType;
 import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
 import com.dwinovo.chiikawa.entity.brain.errand.Plan;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
@@ -11,7 +12,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.Optional;
 import java.util.Set;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
@@ -87,18 +87,18 @@ public final class Executor {
     /**
      * Sets off on an errand.
      *
-     * @param errand its id
+     * @param type the errand
      * @param plan what the pet means to do
-     * @param settings how it goes; the errand keeps these however the data is reloaded
+     * @param settings how it goes; the errand keeps these, and the type, however the data is reloaded
      * @param routine its steps, made for this start and not used for another
      * @param now the current game time
      * @throws IllegalStateException if the pet is still on another errand
      */
-    public void start(ResourceLocation errand, Plan plan, ErrandSettings<?> settings, Routine routine, long now) {
+    public void start(ErrandType<?, ?> type, Plan plan, ErrandSettings<?> settings, Routine routine, long now) {
         if (running != null) {
-            throw new IllegalStateException("Still on " + running.errand() + ", end it before starting " + errand);
+            throw new IllegalStateException("Still on " + running.errand() + ", end it before starting " + type.id());
         }
-        this.running = new Running(errand, plan, settings, 0, now, Set.of());
+        this.running = new Running(type, plan, settings, 0, now, Set.of());
         this.routine = routine;
         this.pending = null;
         this.stepsBegun = 0;

@@ -3,9 +3,11 @@ package com.dwinovo.chiikawa.entity.brain;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.data.ErrandSettingsData;
+import com.dwinovo.chiikawa.entity.brain.errand.Check;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
@@ -32,6 +34,7 @@ import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.dwinovo.chiikawa.testing.FixedRandom;
+import com.dwinovo.chiikawa.testing.StubErrand;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.testing.TestErrands;
 import com.dwinovo.chiikawa.testing.TestRests;
@@ -227,7 +230,7 @@ class PetMindDecisionTest {
     @Test
     void theErrandAPetWasJustOnIsTheOneItIsOnOrTheOneThatEndedInTheTickBefore() {
         DecisionLog log = new DecisionLog();
-        Running running = new Running(ErrandIds.RANGED, new CombatErrand.Duel(UUID.randomUUID()),
+        Running running = new Running(TestErrands.errand(ErrandIds.RANGED), new CombatErrand.Duel(UUID.randomUUID()),
             ErrandSettings.of(ErrandIds.RANGED).orElseThrow(), 0, NOW - 5, Set.of());
 
         assertNull(PetMind.justBefore(Optional.empty(), log, NOW));
@@ -239,6 +242,21 @@ class PetMindDecisionTest {
         assertEquals(ErrandIds.RANGED, PetMind.justBefore(Optional.of(running), log, NOW).id());
         // And not one that ended a while ago, since the pet has been doing other things since.
         assertNull(PetMind.justBefore(Optional.empty(), log, NOW + 5));
+    }
+
+    @Test
+    void anErrandGoesOnAfterAReloadMadeNewTypesOfEveryErrandAsTheTypeItStartedAs() {
+        // The pet is on an errand that wants to go on. The reload has made a type of it that would not, and the mind offers that.
+        ResourceLocation id = ResourceLocation.fromNamespaceAndPath("chiikawa", "work");
+        ErrandType<?, ?> started = new StubErrand(id);
+        ErrandType<?, ?> reloaded = new StubErrand(id, Check.fail("gone"));
+        Running running = new Running(started, new Plan() {
+        }, TestRests.settings(1200, TestRests.ticks(0, 0, 0)), 0, NOW - 5, Set.of());
+
+        assertTrue(PetMind.isOffered(List.of(reloaded), running.errand()), "by id, not by the type it started as");
+        assertFalse(PetMind.isOffered(List.of(reloaded), ErrandIds.WANDER));
+        assertEquals(Optional.empty(), Continuation.endOf(running, PetMind.isOffered(List.of(reloaded), running.errand()), view(), ALL));
+        assertSame(started, PetMind.justBefore(Optional.of(running), new DecisionLog(), NOW));
     }
 
     @Test
@@ -499,8 +517,8 @@ class PetMindDecisionTest {
     }
 
     private static Optional<Outcome> ending(ResourceLocation id, Plan plan, PetView view) {
-        Running running = new Running(id, plan, ErrandSettings.of(id).orElseThrow(), 0, NOW - 5, Set.of());
-        return Continuation.endOf(running, TestErrands.errand(id), true, view, ALL);
+        Running running = new Running(TestErrands.errand(id), plan, ErrandSettings.of(id).orElseThrow(), 0, NOW - 5, Set.of());
+        return Continuation.endOf(running, true, view, ALL);
     }
 
     private static PetTask weeding() {

@@ -284,7 +284,7 @@ public final class ErrandContractGameTests {
         long reported = scenario.reported().apply(ran).map(report -> ticksOf(rests.reports().get(report), ran)).orElse(0L);
 
         long now = helper.getLevel().getGameTime();
-        RestLedger ledger = new RestLedger(errand -> Errands.get(errand).restStore().of(pet.getBrain(), errand), ErrandSettings::of);
+        RestLedger ledger = new RestLedger(errand -> Errands.restsOf(pet.getBrain(), errand), ErrandSettings::of);
         long left = ran.plan().subject().map(subject -> ledger.remaining(id, subject, now)).orElseGet(() -> ledger.remaining(id, now));
         // A rest kept in a memory has run down by one in the tick it was written in, since the brain ticks after the mind.
         if (reported > ticks) {
@@ -307,7 +307,7 @@ public final class ErrandContractGameTests {
     /** @return what a pet that is not getting on with the errand is doing, for the case to say so */
     private static String whereItStands(AbstractPet pet, ResourceLocation id) {
         long now = pet.level().getGameTime();
-        RestLedger ledger = new RestLedger(errand -> Errands.get(errand).restStore().of(pet.getBrain(), errand), ErrandSettings::of);
+        RestLedger ledger = new RestLedger(errand -> Errands.restsOf(pet.getBrain(), errand), ErrandSettings::of);
         return "on " + pet.getMind().errands().running().map(Running::errand).orElse(null) + " at step "
             + pet.getMind().errands().running().map(Running::stepIndex).orElse(-1) + ", resting from it for "
             + ledger.remaining(id, now) + " ticks, at " + pet.position() + ", and its log ends "

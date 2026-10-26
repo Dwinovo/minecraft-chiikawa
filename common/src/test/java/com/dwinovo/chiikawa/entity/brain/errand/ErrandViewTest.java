@@ -17,6 +17,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.run.Step;
 import com.dwinovo.chiikawa.entity.brain.errand.run.StepStatus;
 import com.dwinovo.chiikawa.entity.brain.errand.run.StepTag;
 import com.dwinovo.chiikawa.testing.FakeHandle;
+import com.dwinovo.chiikawa.testing.StubErrand;
 import com.dwinovo.chiikawa.testing.TestRests;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -61,7 +62,7 @@ class ErrandViewTest {
 
     @Test
     void itSaysWhichErrandHowMuchItMattersAndWhatTheStepMakesOfThePet() {
-        executor.start(EXAM, new Plan() {
+        executor.start(new StubErrand(EXAM), new Plan() {
         }, TestRests.settings(100, TestRests.ticks(0, 10, 0)), Routine.single(new Seated()), 0);
 
         assertEquals(Optional.of(EXAM), view.errand());

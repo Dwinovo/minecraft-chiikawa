@@ -18,11 +18,13 @@ import com.dwinovo.chiikawa.entity.brain.errand.impl.TakePhotoErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.TakeTaskErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.WanderErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
+import com.dwinovo.chiikawa.entity.brain.errand.rest.RestStore;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ai.Brain;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -72,6 +74,15 @@ public final class Errands {
 
     public static @Nullable ErrandType<?, ?> get(ResourceLocation id) {
         return BY_ID.get(id);
+    }
+
+    /**
+     * @return where the brain keeps this errand's rests: none, for an errand that is no more, as one a data pack
+     *         reload took away from a pet that was on it
+     */
+    public static RestStore restsOf(Brain<?> brain, ResourceLocation id) {
+        ErrandType<?, ?> type = get(id);
+        return type == null ? RestStore.NONE : type.restStore().of(brain, id);
     }
 
     /** @return every errand, the generic ones first */

@@ -75,8 +75,8 @@ class AdmissionTest {
 
     /** @return how the errand ends for a pet that set out with this plan, or nothing if it goes on */
     private static Optional<Outcome> ending(ResourceLocation id, Plan plan, PetView view) {
-        Running running = new Running(id, plan, ErrandSettings.of(id).orElseThrow(), 0, 0L, Set.of());
-        return Continuation.endOf(running, TestErrands.errand(id), true, view, category -> true);
+        Running running = new Running(TestErrands.errand(id), plan, ErrandSettings.of(id).orElseThrow(), 0, 0L, Set.of());
+        return Continuation.endOf(running, true, view, category -> true);
     }
 
     private static TestView shopAt(int blocks) {
@@ -243,12 +243,10 @@ class AdmissionTest {
     @Test
     void anErrandThatIsNoLongerOfferedOrPermittedEndsAsTheCapabilityOrTheDirectiveChanged() {
         TestView view = shopAt(5);
-        Running running = new Running(ErrandIds.SHOP, TestErrands.planOf(ErrandIds.SHOP, view),
+        Running running = new Running(TestErrands.errand(ErrandIds.SHOP), TestErrands.planOf(ErrandIds.SHOP, view),
             ErrandSettings.of(ErrandIds.SHOP).orElseThrow(), 0, 0L, Set.of());
-        ErrandType<?, ?> shop = TestErrands.errand(ErrandIds.SHOP);
-
-        assertEquals(Optional.of(Outcome.interrupted("capability")), Continuation.endOf(running, shop, false, view, category -> true));
-        assertEquals(Optional.of(Outcome.interrupted("directive")), Continuation.endOf(running, shop, true, view, category -> false));
-        assertTrue(Continuation.endOf(running, shop, true, view, category -> true).isEmpty());
+        assertEquals(Optional.of(Outcome.interrupted("capability")), Continuation.endOf(running, false, view, category -> true));
+        assertEquals(Optional.of(Outcome.interrupted("directive")), Continuation.endOf(running, true, view, category -> false));
+        assertTrue(Continuation.endOf(running, true, view, category -> true).isEmpty());
     }
 }
