@@ -54,7 +54,9 @@ public enum VoiceMoment implements StringRepresentable {
     /** Pressing the shutter: Hachiware taking a photo. */
     PHOTO,
     /** Being the one a photo is taken of, as the shutter goes. */
-    PHOTOGRAPHED;
+    PHOTOGRAPHED,
+    /** Hurt by something it does not fight, and running from it: Chiikawa cries, Usagi yells, Rakko takes it on the chin. */
+    SCARED;
 
     public static final Codec<VoiceMoment> CODEC = StringRepresentable.fromEnum(VoiceMoment::values);
 

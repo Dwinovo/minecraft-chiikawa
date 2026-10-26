@@ -84,6 +84,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
@@ -215,6 +216,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         MemoryModuleType.WALK_TARGET,
         MemoryModuleType.ATTACK_TARGET,
         MemoryModuleType.ATTACK_COOLING_DOWN,
+        MemoryModuleType.HURT_BY,
         MemoryModuleType.HURT_BY_ENTITY,
         MemoryModuleType.HOME,
         InitMemory.WORK_SIGHTS.get(),
@@ -266,6 +268,14 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     /** The present it has in mind for its owner; kept on the server, saved with the pet. */
     private final GiftIntentions giftIntentions = new GiftIntentions();
+    /** No tool is put aside, see {@link #lentTool}. */
+    private static final int NOT_LENT = -1;
+    /**
+     * The pocket of the backpack that holds the tool the pet put aside to take up a weapon, or {@link #NOT_LENT}. Not saved:
+     * a pet is saved with its tool in its hand, as {@link #itemsAsKept} has it, so that a weapon swapped in for a fight is
+     * never what a pet is found holding. Written only by the pet's swap steps, through {@link #lendTool} and {@link #takeToolBack}.
+     */
+    private int lentTool = NOT_LENT;
     private final SimpleContainer backpack = new SimpleContainer(FULL_BACKPACK_SIZE) {
         @Override
         public void setChanged() {
@@ -284,6 +294,45 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     public SimpleContainer getBackpack() {
         return backpack;
+    }
+
+    /**
+     * Takes up the weapon in this pocket of the backpack, the tool in the hand going into the pocket in its place; the
+     * pet's job is then the weapon's. For the swap step of the pet's errand alone, which gives the tool back when it ends.
+     *
+     * @param pocket the pocket of the weapon
+     */
+    public void lendTool(int pocket) {
+        if (lentTool == NOT_LENT) {
+            exchangeHandWith(pocket);
+            lentTool = pocket;
+        }
+    }
+
+    /** Takes up the tool put aside for a weapon again, the weapon going back where it came from; nothing if none was. */
+    public void takeToolBack() {
+        if (lentTool != NOT_LENT) {
+            exchangeHandWith(lentTool);
+            lentTool = NOT_LENT;
+        }
+    }
+
+    private void exchangeHandWith(int pocket) {
+        ItemStack inHand = backpack.getItem(MAINHAND_SLOT);
+        backpack.setItem(MAINHAND_SLOT, backpack.getItem(pocket));
+        backpack.setItem(pocket, inHand);
+    }
+
+    /** @return the items of the backpack as they are saved: with the tool back in the hand, if it is put aside for a weapon */
+    private NonNullList<ItemStack> itemsAsKept() {
+        NonNullList<ItemStack> items = backpack.getItems();
+        if (lentTool == NOT_LENT || lentTool >= items.size()) {
+            return items;
+        }
+        NonNullList<ItemStack> kept = NonNullList.of(ItemStack.EMPTY, items.toArray(new ItemStack[0]));
+        kept.set(MAINHAND_SLOT, items.get(lentTool));
+        kept.set(lentTool, items.get(MAINHAND_SLOT));
+        return kept;
     }
 
     /**
@@ -1034,7 +1083,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     @Override
     public void addAdditionalSaveData(ValueOutput output) {
         super.addAdditionalSaveData(output);
-        ContainerHelper.saveAllItems(output.child("Backpack"), backpack.getItems());
+        ContainerHelper.saveAllItems(output.child("Backpack"), itemsAsKept());
         output.putInt("PetJob", getPetJobId());
         output.putByte("PetMode", this.entityData.get(PET_MODE));
         output.storeNullable("Task", PetTask.CODEC, this.entityData.get(TASK).orElse(null));

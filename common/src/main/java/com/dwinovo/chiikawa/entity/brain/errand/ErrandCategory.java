@@ -36,7 +36,9 @@ public enum ErrandCategory implements StringRepresentable {
     /** A wild pet going over to see who whistled. Wild pets only: an owner's pet takes the order itself. */
     CURIOUS,
     /** Taking a photo of the owner, a friend or the view, where the pet may walk. */
-    PHOTO;
+    PHOTO,
+    /** Getting out of harm's way: the one thing a pet does whatever it is told, a pet told to sit included. */
+    SAFETY;
 
     /** The category as a work file names it. */
     public static final Codec<ErrandCategory> CODEC = StringRepresentable.fromEnum(ErrandCategory::values);
