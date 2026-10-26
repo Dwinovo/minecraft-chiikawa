@@ -8,6 +8,6 @@ public enum StepTag {
     IN_SCENE,
     /** Playing music for whoever is near. */
     PLAYING_MUSIC,
-    /** Frightened, and cowering until it is safe. */
+    /** Frightened, and running from what hurt it or cowering until it is safe. */
     SCARED
 }

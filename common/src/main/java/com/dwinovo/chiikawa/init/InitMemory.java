@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.init;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.entity.brain.errand.remark.RemarkRests;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.SubjectRests;
 import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.social.InteractionPlan;
@@ -27,6 +28,10 @@ public final class InitMemory {
      * save's entry for it is dropped alone, and never by deleting its registration. A memory that has no codec is never
      * saved and may go. Nothing reads or writes the five below since 0.1.4, when the work sensor's WORK_SIGHTS, which is
      * not saved, replaced them: a pet has no place for them, and getMemory on one throws.
+     *
+     * A memory that is new gets no codec, so it is never saved and no save can come to hold an id a build does not know.
+     * What has to outlast a save goes into the pet's own NBT, a world's saved data or the value of a memory that is already
+     * saved.
      */
     public static final Supplier<MemoryModuleType<BlockPos>> HARVEST_POS =
         Services.REGISTRY.<MemoryModuleType<BlockPos>>register(
@@ -226,6 +231,14 @@ public final class InitMemory {
         Services.REGISTRY.<MemoryModuleType<SubjectRests>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
             ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "subject_rests"),
+            () -> new MemoryModuleType<>(Optional.empty())
+        );
+
+    /** The remarks the pet has made and until when it leaves each alone; not saved. */
+    public static final Supplier<MemoryModuleType<RemarkRests>> REMARK_RESTS =
+        Services.REGISTRY.<MemoryModuleType<RemarkRests>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "remark_rests"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 

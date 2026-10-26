@@ -45,7 +45,10 @@ record Admission<P extends Plan, T>(ErrandType<P, T> type, ErrandSettings<T> set
         T tuning = (T) settings.tuning();
         Offers<P> offers = type.offers(view, tuning);
         if (offers.isEmpty()) {
-            return out(trace, type, priority, offers.check().reasonKey());
+            if (trace != null) {
+                trace.unmet(type.id(), priority, offers.check());
+            }
+            return Optional.empty();
         }
         List<Offer<P>> unrested = offers.list().stream().filter(offer -> offer.plan().subject()
             .filter(subject -> rests.resting(type.id(), subject, now)).isEmpty()).toList();

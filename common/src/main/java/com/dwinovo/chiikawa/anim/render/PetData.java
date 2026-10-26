@@ -28,7 +28,12 @@ public enum PetData {
      * {@link com.dwinovo.chiikawa.client.voice.SpeechBubbleRenderer}; set only while it has
      * one up. Worked out at extract time, as vanilla works out a name tag.
      */
-    SPEECH;
+    SPEECH,
+    /**
+     * What is on the pet's mind, drawn on a card over its head by
+     * {@link com.dwinovo.chiikawa.client.voice.PetIconRenderer}; set only while it shows one.
+     */
+    ICON;
 
     /** Cached values() to avoid per-frame allocation; treat as immutable. */
     public static final PetData[] VALUES = values();
