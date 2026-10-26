@@ -1,10 +1,13 @@
 package com.dwinovo.chiikawa.entity.brain.errand;
 
+import java.util.Locale;
+import net.minecraft.util.StringRepresentable;
+
 /**
  * What kind of thing an errand does. The owner's directive permits or forbids
  * whole categories; see {@link com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints#allows}.
  */
-public enum ErrandCategory {
+public enum ErrandCategory implements StringRepresentable {
     FOLLOW_OWNER,
     STAY,
     WANDER,
@@ -32,5 +35,10 @@ public enum ErrandCategory {
     /** A wild pet going over to see who whistled. Wild pets only: an owner's pet takes the order itself. */
     CURIOUS,
     /** Taking a photo of the owner, a friend or the view, where the pet may walk. */
-    PHOTO
+    PHOTO;
+
+    @Override
+    public String getSerializedName() {
+        return name().toLowerCase(Locale.ROOT);
+    }
 }

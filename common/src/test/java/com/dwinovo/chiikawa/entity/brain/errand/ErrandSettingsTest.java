@@ -12,8 +12,13 @@ import com.dwinovo.chiikawa.task.BoardSlips;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +26,17 @@ import java.util.Optional;
 import java.util.Set;
 import net.minecraft.SharedConstants;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.Bootstrap;
+import net.minecraft.server.packs.PackLocationInfo;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.PathPackResources;
+import net.minecraft.server.packs.repository.PackSource;
+import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.minecraft.util.StringRepresentable;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 /** The settings a pack gives an errand, and what the loader does with a file that is wrong. */
 class ErrandSettingsTest {
@@ -67,6 +80,39 @@ class ErrandSettingsTest {
         assertEquals(Map.of("taken", RestSpec.from(RestSources.PHOTO_UPLOAD_WAIT), "stored", RestSpec.from(RestSources.CAMERA_COOLDOWN),
             "failed", RestSpec.from(RestSources.CAMERA_RETRY)), settings.rests().reports());
         assertEquals(new ErrandTunings.TakePhoto(0.7F, 4, 20, 60, 16.0, 400, 100), settings.tuning());
+    }
+
+    @Test
+    void aFileMayHaveFieldsAlongsideTheSettings() {
+        Codec<Pair<String, ErrandSettings<ErrandTunings.TakeTask>>> beside = Codec.mapPair(
+            Codec.STRING.fieldOf("action"), ErrandSettings.mapCodec(ErrandTunings.TakeTask.CODEC)).codec();
+        Pair<String, ErrandSettings<ErrandTunings.TakeTask>> parsed = beside.parse(JsonOps.INSTANCE,
+            JsonParser.parseString(TAKE_TASK.replace("{ \"priority\"", "{ \"action\": \"busk\", \"priority\""))).getOrThrow();
+
+        assertEquals("busk", parsed.getFirst());
+        assertEquals(50, parsed.getSecond().priority());
+    }
+
+    @Test
+    void aCategoryIsNamedInLowerCaseAndEachByItsOwnName() {
+        assertEquals("pick_up", ErrandCategory.PICK_UP.getSerializedName());
+        assertEquals(ErrandCategory.values().length,
+            Arrays.stream(ErrandCategory.values()).map(StringRepresentable::getSerializedName).distinct().count());
+    }
+
+    @Test
+    void theErrandsAPackHasAreTheFilesInItsErrandDirectory(@TempDir Path root) throws IOException {
+        write(root.resolve("data/chiikawa/pet_errand/harvest.json"));
+        write(root.resolve("data/chiikawa/pet_errand/take_photo.json"));
+        write(root.resolve("data/other/pet_errand/sulk.json"));
+        write(root.resolve("data/chiikawa/pet_errand/notes.txt"));
+        write(root.resolve("data/chiikawa/pet_job/farmer.json"));
+
+        try (MultiPackResourceManager manager = new MultiPackResourceManager(PackType.SERVER_DATA, List.of(new PathPackResources(
+            new PackLocationInfo("test", Component.literal("test"), PackSource.BUILT_IN, Optional.empty()), root)))) {
+            assertEquals(Set.of(ErrandIds.HARVEST, ErrandIds.TAKE_PHOTO, ResourceLocation.fromNamespaceAndPath("other", "sulk")),
+                ErrandSettingsLoader.errandIds(manager));
+        }
     }
 
     @Test
@@ -272,6 +318,11 @@ class ErrandSettingsTest {
         } finally {
             ErrandSettings.replaceAll(before);
         }
+    }
+
+    private static void write(Path file) throws IOException {
+        Files.createDirectories(file.getParent());
+        Files.writeString(file, "{}");
     }
 
     private static RestSpec rest(String json) {

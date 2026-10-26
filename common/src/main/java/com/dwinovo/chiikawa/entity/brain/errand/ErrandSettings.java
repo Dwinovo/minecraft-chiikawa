@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSpec;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Collections;
 import java.util.List;
@@ -69,10 +70,10 @@ public record ErrandSettings<T>(int priority, float score, int maxTicks, Rests r
     /**
      * @param tuning the codec of the errand's own numbers
      * @param <T> their shape
-     * @return the codec of a whole file
+     * @return the fields of a whole file, so that a file may have others alongside them
      */
-    public static <T> Codec<ErrandSettings<T>> codec(Codec<T> tuning) {
-        return RecordCodecBuilder.create(instance -> instance.group(
+    public static <T> MapCodec<ErrandSettings<T>> mapCodec(Codec<T> tuning) {
+        return RecordCodecBuilder.mapCodec(instance -> instance.group(
             ExtraCodecs.NON_NEGATIVE_INT.fieldOf("priority").forGetter(ErrandSettings::priority),
             Codec.floatRange(0.0F, 1.0F).fieldOf("score").forGetter(ErrandSettings::score),
             ExtraCodecs.POSITIVE_INT.fieldOf("max_ticks").forGetter(ErrandSettings::maxTicks),
@@ -100,7 +101,7 @@ public record ErrandSettings<T>(int priority, float score, int maxTicks, Rests r
         if (type == null) {
             throw new IllegalArgumentException("No such errand " + errand);
         }
-        return (Codec<ErrandSettings<?>>) (Codec<?>) codec(type.tuningCodec());
+        return (Codec<ErrandSettings<?>>) (Codec<?>) mapCodec(type.tuningCodec()).codec();
     }
 
     /** @return these settings with the errands that go first, as data names them */
