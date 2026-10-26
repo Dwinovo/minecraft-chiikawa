@@ -44,7 +44,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 public final class BuskAction implements WorkAction<BuskAction.Performance, ErrandTunings.PlayMusic> {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "busk");
     /** What a pet is short of when the box it holds has no song to play. */
-    private static final ResourceLocation MUSIC_BOX = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "music_box");
+    private static final LackKey MUSIC_BOX = LackKey.item(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "music_box"));
 
     /**
      * What the pet has set out to play.
@@ -65,6 +65,11 @@ public final class BuskAction implements WorkAction<BuskAction.Performance, Erra
     }
 
     @Override
+    public Set<LackKey> lacks() {
+        return Set.of(MUSIC_BOX);
+    }
+
+    @Override
     public Optional<String> refuses(Optional<WorkTarget> target) {
         return target.map(ignored -> "busk takes no target");
     }
@@ -75,7 +80,7 @@ public final class BuskAction implements WorkAction<BuskAction.Performance, Erra
         return view.playable(work.countedBy(view))
             .map(song -> Offers.of(Offer.of(new Performance(song))))
             .orElseGet(() -> Offers.none(view.playable(true).isPresent() ? Check.fail("no_new_song")
-                : Check.lack("no_new_song", LackKey.item(MUSIC_BOX))));
+                : Check.lack("no_new_song", MUSIC_BOX)));
     }
 
     @Override
