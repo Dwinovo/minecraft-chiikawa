@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.dwinovo.chiikawa.data.ErrandFiles;
 import com.dwinovo.chiikawa.data.ErrandSettingsData;
 import com.dwinovo.chiikawa.data.WorkData;
+import com.dwinovo.chiikawa.entity.brain.combat.Ground;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
@@ -60,7 +61,7 @@ class ErrandFileTest {
         Loaded loaded = ErrandSettingsLoader.load(ErrandFiles.all());
 
         assertEquals(Set.of(WorkData.HARVEST, WorkData.PLANT, WorkData.DELIVER, WorkData.WEED, WorkData.PICK_MUSHROOM, WorkData.MELEE,
-            WorkData.RANGED, WorkData.PLAY_MUSIC), loaded.works().keySet());
+            WorkData.RANGED, WorkData.HUNT_MELEE, WorkData.HUNT_RANGED, WorkData.PLAY_MUSIC), loaded.works().keySet());
         assertEquals(ErrandSettingsData.all(), loaded.settings());
         assertTrue(loaded.errors().isEmpty() && loaded.warnings().isEmpty());
         assertInstanceOf(WorkErrand.class, Errands.get(WorkData.PLAY_MUSIC));
@@ -73,7 +74,7 @@ class ErrandFileTest {
 
             assertNull(Errands.get(WorkData.PLAY_MUSIC));
             assertEquals(Optional.empty(), ErrandSettings.of(WorkData.PLAY_MUSIC));
-            assertEquals(14, Errands.all().size(), "the code errands stay");
+            assertEquals(16, Errands.all().size(), "the code errands stay");
         } finally {
             TestErrands.load();
         }
@@ -90,28 +91,51 @@ class ErrandFileTest {
     @Test
     void aTargetTheActionDoesNotTakeSwitchesTheFileOff() {
         JsonObject file = playMusic();
-        file.add("target", foe("no_attack_target"));
+        file.add("target", foe("no_attack_target", "self"));
 
         assertSwitchedOff(file, "busk takes no target");
     }
 
     @Test
-    void aFightFileNamesTheFoeAndWhatToSayWithoutOneAndReadsBackAsItWasWritten() {
+    void aFightInDefenceFileNamesTheGroundsOfDefenceAndNoCounterAndReadsBackAsItWasWritten() {
         for (ResourceLocation errand : new ResourceLocation[] {WorkData.MELEE, WorkData.RANGED}) {
             JsonObject file = ErrandFiles.all().get(errand).deepCopy().getAsJsonObject();
 
-            assertEquals(foe("no_attack_target"), file.get("target"), errand::toString);
+            assertEquals(foe("no_attack_target", "self", "owner", "nearby"), file.get("target"), errand::toString);
             assertEquals("combat", file.get("category").getAsString(), errand::toString);
             assertEquals(new JsonArray(), file.get("requires"), errand::toString);
-            // The slay is the death hook's: a counter here would give the fight the slip bonus.
+            // The slay is the death hook's, and a fight at this priority has no use for the slip bonus on top of it.
             assertFalse(file.has("counter"), errand::toString);
+            assertEquals(80, file.get("priority").getAsInt(), errand::toString);
 
             WorkFile<?, ?> read = WorkFile.CODEC.parse(JsonOps.INSTANCE, file).getOrThrow();
 
             assertEquals(WorkData.all().get(errand), read.work(), errand::toString);
-            assertEquals(new WorkTarget.Foe("no_attack_target"), read.work().target().orElseThrow(), errand::toString);
+            assertEquals(new WorkTarget.Foe("no_attack_target", Set.of(Ground.SELF, Ground.OWNER, Ground.NEARBY)),
+                read.work().target().orElseThrow(), errand::toString);
             assertEquals(file, WorkFile.CODEC.encodeStart(JsonOps.INSTANCE, read).getOrThrow(), errand::toString);
         }
+    }
+
+    @Test
+    void aHuntFileNamesTheHuntAndTheSlayAndNothingElseNamesTheSlay() {
+        for (ResourceLocation errand : new ResourceLocation[] {WorkData.HUNT_MELEE, WorkData.HUNT_RANGED}) {
+            JsonObject file = ErrandFiles.all().get(errand).deepCopy().getAsJsonObject();
+
+            assertEquals(foe("no_attack_target", "hunt"), file.get("target"), errand::toString);
+            assertEquals("combat", file.get("category").getAsString(), errand::toString);
+            assertEquals(new JsonArray(), file.get("requires"), errand::toString);
+            assertEquals("chiikawa:slay", file.get("counter").getAsString(), errand::toString);
+            assertEquals(50, file.get("priority").getAsInt(), errand::toString);
+
+            WorkFile<?, ?> read = WorkFile.CODEC.parse(JsonOps.INSTANCE, file).getOrThrow();
+
+            assertEquals(WorkData.all().get(errand), read.work(), errand::toString);
+            assertEquals(new WorkTarget.Foe("no_attack_target", Set.of(Ground.HUNT)), read.work().target().orElseThrow(),
+                errand::toString);
+            assertEquals(file, WorkFile.CODEC.encodeStart(JsonOps.INSTANCE, read).getOrThrow(), errand::toString);
+        }
+
     }
 
     @Test
@@ -167,7 +191,7 @@ class ErrandFileTest {
     @Test
     void eachActionRefusesTheTargetsItDoesNotTake() {
         Map<String, JsonObject> targets = Map.of(
-            "foe", foe("no_attack_target"),
+            "foe", foe("no_attack_target", "self"),
             "ripe_crop", target("ripe_crop", "no_crop"),
             "plantable_soil", target("plantable_soil", "no_farmland"),
             "blocks", blocks("#chiikawa:entity_weeds", "no_weed"),
@@ -175,6 +199,8 @@ class ErrandFileTest {
         Map<ResourceLocation, Set<String>> taken = Map.of(
             WorkData.MELEE, Set.of("foe"),
             WorkData.RANGED, Set.of("foe"),
+            WorkData.HUNT_MELEE, Set.of("foe"),
+            WorkData.HUNT_RANGED, Set.of("foe"),
             WorkData.HARVEST, Set.of("ripe_crop", "blocks"),
             WorkData.PLANT, Set.of("plantable_soil"),
             WorkData.DELIVER, Set.of("container"),
@@ -233,12 +259,29 @@ class ErrandFileTest {
 
     @Test
     void aFightWithoutATargetSwitchesTheFileOff() {
-        for (ResourceLocation errand : new ResourceLocation[] {WorkData.MELEE, WorkData.RANGED}) {
+        for (ResourceLocation errand : new ResourceLocation[] {WorkData.MELEE, WorkData.RANGED, WorkData.HUNT_MELEE,
+                WorkData.HUNT_RANGED}) {
             JsonObject file = ErrandFiles.all().get(errand).deepCopy().getAsJsonObject();
             file.remove("target");
 
-            assertSwitchedOff(errand, file, errand.equals(WorkData.MELEE) ? "strike needs a foe target" : "shoot needs a foe target");
+            assertSwitchedOff(errand, file, errand.equals(WorkData.MELEE) || errand.equals(WorkData.HUNT_MELEE)
+                ? "strike needs a foe target" : "shoot needs a foe target");
         }
+    }
+
+    @Test
+    void aFoeTargetWithNoGroundsSwitchesTheFileOff() {
+        JsonObject file = ErrandFiles.all().get(WorkData.HUNT_MELEE).deepCopy().getAsJsonObject();
+        file.get("target").getAsJsonObject().add("grounds", new JsonArray());
+        assertSwitchedOff(WorkData.HUNT_MELEE, file, "List must have contents");
+
+        file = ErrandFiles.all().get(WorkData.HUNT_MELEE).deepCopy().getAsJsonObject();
+        file.get("target").getAsJsonObject().remove("grounds");
+        assertSwitchedOff(WorkData.HUNT_MELEE, file, "grounds");
+
+        file = ErrandFiles.all().get(WorkData.HUNT_MELEE).deepCopy().getAsJsonObject();
+        file.get("target").getAsJsonObject().add("grounds", strings("the_moon"));
+        assertSwitchedOff(WorkData.HUNT_MELEE, file, "the_moon");
     }
 
     @Test
@@ -395,8 +438,10 @@ class ErrandFileTest {
         return files.get(errand).getAsJsonObject("tuning");
     }
 
-    private static JsonObject foe(String missing) {
-        return target("foe", missing);
+    private static JsonObject foe(String missing, String... grounds) {
+        JsonObject foe = target("foe", missing);
+        foe.add("grounds", strings(grounds));
+        return foe;
     }
 
     /** @return the file the data generator writes for playing music, to spoil */
