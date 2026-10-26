@@ -21,8 +21,7 @@ public final class Continuation {
     }
 
     /**
-     * @param running the errand the pet is on
-     * @param type that errand
+     * @param running the errand the pet is on, which has the type it started as, whatever has been reloaded since
      * @param offered whether the pet's capability still offers it
      * @param view the pet
      * @param permits what the pet is allowed to do
@@ -30,15 +29,14 @@ public final class Continuation {
      *         it by a change of capability or directive, and gave up when the errand no longer wants to
      *         go on, or what it was heading for, or the pet itself when the errand heads nowhere, is out of the pet's area
      */
-    public static Optional<Outcome> endOf(Running running, ErrandType<?, ?> type, boolean offered, PetView view,
-            Permits permits) {
+    public static Optional<Outcome> endOf(Running running, boolean offered, PetView view, Permits permits) {
         if (!offered) {
             return Optional.of(Outcome.interrupted("capability"));
         }
-        if (!permits.allows(type.category())) {
+        if (!permits.allows(running.type().category())) {
             return Optional.of(Outcome.interrupted("directive"));
         }
-        Check wanted = stillWanted(type, running, view);
+        Check wanted = stillWanted(running.type(), running, view);
         if (!wanted.ok()) {
             return Optional.of(Outcome.gaveUp(wanted.reason()));
         }
