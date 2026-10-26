@@ -13,35 +13,41 @@ class PetTargetingTest {
 
     @Test
     void neverTargetsItself() {
-        assertTrue(PetTargeting.isProtected(true, false, OWNER, MOB, null));
-        assertTrue(PetTargeting.isProtected(true, false, null, MOB, null));
+        assertTrue(PetTargeting.isProtected(true, false, false, OWNER, MOB, null));
+        assertTrue(PetTargeting.isProtected(true, false, false, null, MOB, null));
     }
 
     @Test
     void neverTargetsOwner() {
-        assertTrue(PetTargeting.isProtected(false, true, OWNER, OWNER, null));
-        assertTrue(PetTargeting.isProtected(false, false, OWNER, OWNER, null));
+        assertTrue(PetTargeting.isProtected(false, true, false, OWNER, OWNER, null));
+        assertTrue(PetTargeting.isProtected(false, false, false, OWNER, OWNER, null));
     }
 
     @Test
     void neverTargetsAnyPlayer() {
-        assertTrue(PetTargeting.isProtected(false, true, OWNER, STRANGER, null));
-        assertTrue(PetTargeting.isProtected(false, true, null, STRANGER, null));
+        assertTrue(PetTargeting.isProtected(false, true, false, OWNER, STRANGER, null));
+        assertTrue(PetTargeting.isProtected(false, true, false, null, STRANGER, null));
+    }
+
+    @Test
+    void neverTargetsAnAllyWhoeverItIs() {
+        assertTrue(PetTargeting.isProtected(false, false, true, OWNER, MOB, null));
+        assertTrue(PetTargeting.isProtected(false, false, true, null, MOB, STRANGER));
     }
 
     @Test
     void neverTargetsPetsOfTheSameOwner() {
-        assertTrue(PetTargeting.isProtected(false, false, OWNER, MOB, OWNER));
+        assertTrue(PetTargeting.isProtected(false, false, false, OWNER, MOB, OWNER));
     }
 
     @Test
     void targetsHostilesAndOtherOwnersPets() {
-        assertFalse(PetTargeting.isProtected(false, false, OWNER, MOB, null));
-        assertFalse(PetTargeting.isProtected(false, false, OWNER, MOB, STRANGER));
+        assertFalse(PetTargeting.isProtected(false, false, false, OWNER, MOB, null));
+        assertFalse(PetTargeting.isProtected(false, false, false, OWNER, MOB, STRANGER));
     }
 
     @Test
     void untamedPetDoesNotTreatOwnerlessMobsAsAllies() {
-        assertFalse(PetTargeting.isProtected(false, false, null, MOB, null));
+        assertFalse(PetTargeting.isProtected(false, false, false, null, MOB, null));
     }
 }
