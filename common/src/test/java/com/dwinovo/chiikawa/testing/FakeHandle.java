@@ -9,6 +9,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.run.Handle;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalInt;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -23,6 +24,8 @@ public final class FakeHandle implements Handle {
     public int glances;
     public long now;
     public final List<VoiceMoment> said = new ArrayList<>();
+    public final List<Optional<String>> saidAbout = new ArrayList<>();
+    public final List<String> gestures = new ArrayList<>();
     public final List<String> reported = new ArrayList<>();
 
     @Override
@@ -102,11 +105,14 @@ public final class FakeHandle implements Handle {
 
     @Override
     public void gesture(String name) {
+        gestures.add(name);
     }
 
     @Override
-    public void say(VoiceMoment moment) {
+    public boolean say(VoiceMoment moment, Optional<String> subject) {
         said.add(moment);
+        saidAbout.add(subject);
+        return true;
     }
 
     @Override
