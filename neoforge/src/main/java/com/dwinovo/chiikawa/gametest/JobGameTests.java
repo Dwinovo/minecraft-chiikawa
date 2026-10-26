@@ -10,6 +10,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.data.JobWorkData;
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandType;
@@ -101,9 +102,9 @@ public final class JobGameTests {
         helper.assertTrue(offeredBy(pet).equals(generic()), "a pet with no job was offered more than every pet is");
         helper.assertTrue(offeredBy(holding(pet, Items.WOODEN_HOE)).equals(withWork(ErrandIds.HARVEST, ErrandIds.PLANT,
             ErrandIds.DELIVER, ErrandIds.WEED, ErrandIds.PICK_MUSHROOM)), "a farmer was not offered the farmer's work in order");
-        helper.assertTrue(offeredBy(holding(pet, Items.IRON_SWORD)).equals(withWork(ErrandIds.MELEE)),
+        helper.assertTrue(offeredBy(holding(pet, Items.IRON_SWORD)).equals(withWork(WorkData.MELEE)),
             "a fencer was not offered melee");
-        helper.assertTrue(offeredBy(holding(pet, Items.BOW)).equals(withWork(ErrandIds.RANGED)),
+        helper.assertTrue(offeredBy(holding(pet, Items.BOW)).equals(withWork(WorkData.RANGED)),
             "an archer was not offered ranged");
         helper.succeed();
     }

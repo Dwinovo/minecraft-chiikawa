@@ -2,6 +2,8 @@ package com.dwinovo.chiikawa.entity.brain.errand.work;
 
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
 import com.dwinovo.chiikawa.entity.brain.errand.work.action.BuskAction;
+import com.dwinovo.chiikawa.entity.brain.errand.work.action.ShootAction;
+import com.dwinovo.chiikawa.entity.brain.errand.work.action.StrikeAction;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import java.util.Collection;
@@ -17,7 +19,13 @@ public final class WorkActions {
     /** Playing the song on the held music box. */
     public static final BuskAction BUSK = new BuskAction();
 
-    private static final Map<ResourceLocation, WorkAction<?, ?>> BY_ID = Map.of(BuskAction.ID, BUSK);
+    /** Fighting the foe with a sword. */
+    public static final StrikeAction STRIKE = new StrikeAction();
+    /** Fighting the foe with a bow. */
+    public static final ShootAction SHOOT = new ShootAction();
+
+    private static final Map<ResourceLocation, WorkAction<?, ?>> BY_ID = Map.of(
+        BuskAction.ID, BUSK, StrikeAction.ID, STRIKE, ShootAction.ID, SHOOT);
 
     /** Reads and writes an action as its id; an id no action has does not read. */
     public static final Codec<WorkAction<?, ?>> CODEC = ResourceLocation.CODEC.comapFlatMap(id -> {

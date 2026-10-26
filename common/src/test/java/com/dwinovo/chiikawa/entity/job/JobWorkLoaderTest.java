@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.entity.job;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.google.gson.JsonParser;
 import java.util.List;
@@ -17,7 +18,7 @@ import org.junit.jupiter.api.Test;
 /** What the loader does with a job file that is wrong: it costs that job its work and nothing else. */
 class JobWorkLoaderTest {
     private static final Set<ResourceLocation> JOBS = Set.of(JobIds.FARMER, JobIds.FENCER);
-    private static final Set<ResourceLocation> ERRANDS = Set.of(ErrandIds.HARVEST, ErrandIds.PLANT, ErrandIds.MELEE);
+    private static final Set<ResourceLocation> ERRANDS = Set.of(ErrandIds.HARVEST, ErrandIds.PLANT, WorkData.MELEE);
 
     @BeforeAll
     static void bootstrap() {
