@@ -126,14 +126,15 @@ public final class BoardSlips {
      * @param wild whether the pet has no owner
      * @param timeOfDay ticks since sunrise
      * @param gameTime the current game time, for reservations
-     * @param mayTake whether the pet may take a slip at all, such as one that asks a licence of it
+     * @param mayTake whether the pet may take a slip at all, such as one that asks a licence of it or work it cannot do now;
+     *        asked of a slip it holds too, so a hold it can no longer use is not claimed
      * @return the slip's index
      */
     public static OptionalInt find(List<BoardSlot> slots, ResourceLocation capability, UUID pet, boolean wild,
             long timeOfDay, long gameTime, Predicate<PetTask> mayTake) {
         for (int i = 0; i < slots.size(); i++) {
             BoardSlot slot = slots.get(i);
-            if (slot.reservedBy(pet, gameTime) && slot.slip().capability().equals(capability)) {
+            if (slot.reservedBy(pet, gameTime) && slot.slip().capability().equals(capability) && mayTake.test(slot.slip())) {
                 return OptionalInt.of(i);
             }
         }
