@@ -217,6 +217,14 @@ class BoardSlipsTest {
         assertEquals(OptionalInt.of(1), BoardSlips.find(slots, FARMER, PET, false, NOON, NOW, slip -> slip != first));
     }
 
+    /** A hold the pet can no longer use, such as a slip for music after its song is gone, is not found to be claimed. */
+    @Test
+    void aSlipTheHeldPetMayNoLongerTakeIsNotFound() {
+        List<BoardSlot> slots = List.of(slot(FARMER).reserve(PET, NOW + 10));
+
+        assertEquals(OptionalInt.empty(), BoardSlips.find(slots, FARMER, PET, false, NOON, NOW, slip -> false));
+    }
+
     @Test
     void wildPetsOnlyTakeWhatIsLeftLaterInTheDay() {
         List<BoardSlot> slots = List.of(slot(FARMER));
