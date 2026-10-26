@@ -1,9 +1,10 @@
 package com.dwinovo.chiikawa.testing;
 
-import com.dwinovo.chiikawa.data.ErrandSettingsData;
+import com.dwinovo.chiikawa.data.ErrandFiles;
 import com.dwinovo.chiikawa.entity.brain.errand.Check;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandType;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettingsLoader;
 import com.dwinovo.chiikawa.entity.brain.errand.Errands;
 import com.dwinovo.chiikawa.entity.brain.errand.Offer;
 import com.dwinovo.chiikawa.entity.brain.errand.Offers;
@@ -15,19 +16,23 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 
 /**
- * The errand settings a game has once its data packs are loaded, for a test that decides without a
- * server: the ones the mod ships, as the data generator writes them. And the errands asked what they
- * offer with those settings' tuning, for a test that asks one question of one errand.
+ * The errands and their settings a game has once its data packs are loaded, for a test that decides without a
+ * server: the ones the mod ships, as the data generator writes them, read by the loader a game reads them with.
+ * And the errands asked what they offer with those settings' tuning, for a test that asks one question of one errand.
  */
 public final class TestErrands {
     private TestErrands() {
     }
 
-    /** Makes the shipped settings the ones in force. */
+    /** Makes the shipped errands and settings the ones in force. */
     public static void load() {
         SharedConstants.tryDetectVersion();
         Bootstrap.bootStrap();
-        ErrandSettings.replaceAll(ErrandSettingsData.all());
+        ErrandSettingsLoader.Loaded loaded = ErrandSettingsLoader.load(ErrandFiles.all());
+        if (!loaded.errors().isEmpty() || !loaded.warnings().isEmpty()) {
+            throw new IllegalStateException("The shipped errand files do not load: " + loaded.errors() + loaded.warnings());
+        }
+        loaded.install();
     }
 
     /** @return the errand with this id */

@@ -56,7 +56,7 @@ class OfferPurityContractTest {
             view.targets(), view.slip(), view.ownerPos(), view.eager(), view.offeringBoard(), view.shopWorthVisiting(),
             view.socialIdea(), view.engagement(),
             view.carryingGift(), view.presentToGive(), view.attackCoolingDown(), view.hasArrows(),
-            view.playableSelection(), view.examToSit(), view.resultsDesk(), view.seatedAtExam(),
+            view.playable(false), view.playable(true), view.examToSit(), view.resultsDesk(), view.seatedAtExam(),
             view.whistleHeard(), view.photo());
     }
 }

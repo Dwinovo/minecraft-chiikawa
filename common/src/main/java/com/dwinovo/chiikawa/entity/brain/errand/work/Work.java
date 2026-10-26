@@ -1,0 +1,44 @@
+package com.dwinovo.chiikawa.entity.brain.errand.work;
+
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
+import com.dwinovo.chiikawa.entity.brain.errand.Plan;
+import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
+import com.dwinovo.chiikawa.task.PetTask;
+import java.util.List;
+import java.util.Optional;
+import net.minecraft.resources.ResourceLocation;
+
+/**
+ * One kind of work, as its errand file defines it: which action does it, what kind of errand it is, what
+ * it counts towards a slip, what the pet must meet before it sets off and what it is done to. Everything
+ * else about the errand is its {@link com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings}.
+ *
+ * @param action what the pet does
+ * @param category what kind of errand it is, which the owner's directive permits or forbids
+ * @param counter the work counter its steps report, which a slip that counts it prefers the errand for
+ * @param requires further conditions, checked in order before the action's own
+ * @param target what the action is done to, for an action that takes one
+ * @param <P> the shape of the action's plans
+ * @param <T> the shape of the action's tuning
+ */
+public record Work<P extends Plan, T>(WorkAction<P, T> action, ErrandCategory category,
+                                      Optional<ResourceLocation> counter, List<WorkRequirement> requires,
+                                      Optional<WorkTarget> target) {
+    public Work {
+        requires = List.copyOf(requires);
+    }
+
+    /** @return whether the pet carries a slip that counts this work */
+    public boolean countedBy(PetView view) {
+        return counter.flatMap(count -> view.slip().map(PetTask::counter).filter(count::equals)).isPresent();
+    }
+
+    /** @return what is wrong with this work that a file cannot be read for, or nothing */
+    Optional<String> problem() {
+        Optional<String> refused = action.refuses(target);
+        if (refused.isPresent()) {
+            return refused;
+        }
+        return requires.stream().flatMap(requirement -> requirement.problemWith(this).stream()).findFirst();
+    }
+}

@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.errand.decide;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
@@ -119,9 +120,9 @@ class AdmissionTest {
         TestView near = TestView.at(east(19), FREE).withSong();
         TestView far = TestView.at(east(21), FREE).withSong();
 
-        assertEquals(Optional.empty(), ending(ErrandIds.PLAY_MUSIC, TestErrands.planOf(ErrandIds.PLAY_MUSIC, near), near));
+        assertEquals(Optional.empty(), ending(WorkData.PLAY_MUSIC, TestErrands.planOf(WorkData.PLAY_MUSIC, near), near));
         assertEquals(Optional.of(Outcome.gaveUp("left_area")),
-            ending(ErrandIds.PLAY_MUSIC, TestErrands.planOf(ErrandIds.PLAY_MUSIC, near), far));
+            ending(WorkData.PLAY_MUSIC, TestErrands.planOf(WorkData.PLAY_MUSIC, near), far));
     }
 
     @Test
@@ -129,7 +130,7 @@ class AdmissionTest {
         TestView view = TestView.at(HOME, TestAnchors.following(east(500))).withSong();
 
         assertEquals(Optional.of(Outcome.gaveUp("left_area")),
-            ending(ErrandIds.PLAY_MUSIC, TestErrands.planOf(ErrandIds.PLAY_MUSIC, view), view));
+            ending(WorkData.PLAY_MUSIC, TestErrands.planOf(WorkData.PLAY_MUSIC, view), view));
     }
 
     @Test
@@ -177,7 +178,7 @@ class AdmissionTest {
             TestErrands.offers(habitual, view).forEach(offer -> assertEquals(Optional.empty(), offer.plan().destination(view)));
         }
         assertEquals(Optional.empty(), destination(ErrandIds.COOPERATE, view));
-        assertEquals(Optional.empty(), destination(ErrandIds.PLAY_MUSIC, view));
+        assertEquals(Optional.empty(), destination(WorkData.PLAY_MUSIC, view));
     }
 
     private static Optional<GlobalPos> destination(ResourceLocation id, TestView view) {

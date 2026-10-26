@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.google.gson.JsonParser;
@@ -56,7 +57,7 @@ class PetPersonalityLoaderTest {
               "intent_multipliers": { "chiikawa:play_music": 1.3, "chiikawa:sing": 2.0 },
               "routine": { "EVENING": { "chiikawa:dance": 1.5 } }
             }
-            """)), Set.of(ErrandIds.PLAY_MUSIC));
+            """)), Set.of(WorkData.PLAY_MUSIC));
 
         assertEquals(Set.of(HACHIWARE), loaded.personalities().keySet());
         assertTrue(loaded.errors().isEmpty(), loaded.errors()::toString);

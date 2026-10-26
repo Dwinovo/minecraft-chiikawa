@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain.errand;
 
+import com.mojang.serialization.Codec;
 import java.util.Locale;
 import net.minecraft.util.StringRepresentable;
 
@@ -36,6 +37,9 @@ public enum ErrandCategory implements StringRepresentable {
     CURIOUS,
     /** Taking a photo of the owner, a friend or the view, where the pet may walk. */
     PHOTO;
+
+    /** The category as a work file names it. */
+    public static final Codec<ErrandCategory> CODEC = StringRepresentable.fromEnum(ErrandCategory::values);
 
     @Override
     public String getSerializedName() {

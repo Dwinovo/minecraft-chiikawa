@@ -23,6 +23,6 @@ public final class JobWorkData {
                 ErrandIds.PICK_MUSHROOM)),
             JobIds.FENCER, new JobWork(List.of(ErrandIds.MELEE)),
             JobIds.ARCHER, new JobWork(List.of(ErrandIds.RANGED)),
-            JobIds.MUSICIAN, new JobWork(List.of(ErrandIds.PLAY_MUSIC)));
+            JobIds.MUSICIAN, new JobWork(List.of(WorkData.PLAY_MUSIC)));
     }
 }

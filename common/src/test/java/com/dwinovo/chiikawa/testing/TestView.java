@@ -308,8 +308,8 @@ public final class TestView implements PetView {
     }
 
     @Override
-    public Optional<Playable> playableSelection() {
-        return playableSelection;
+    public Optional<Playable> playable(boolean onSlip) {
+        return playableSelection.map(song -> new Playable(song.selection(), song.mode(), onSlip));
     }
 
     @Override

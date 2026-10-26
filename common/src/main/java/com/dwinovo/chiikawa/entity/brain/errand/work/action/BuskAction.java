@@ -1,11 +1,9 @@
-package com.dwinovo.chiikawa.entity.brain.errand.impl;
+package com.dwinovo.chiikawa.entity.brain.errand.work.action;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.errand.Check;
-import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
-import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandTunings;
-import com.dwinovo.chiikawa.entity.brain.errand.ErrandType;
 import com.dwinovo.chiikawa.entity.brain.errand.Offer;
 import com.dwinovo.chiikawa.entity.brain.errand.Offers;
 import com.dwinovo.chiikawa.entity.brain.errand.Plan;
@@ -14,9 +12,11 @@ import com.dwinovo.chiikawa.entity.brain.errand.rest.RestStore;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Routine;
 import com.dwinovo.chiikawa.entity.brain.errand.step.Busk;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
+import com.dwinovo.chiikawa.entity.brain.errand.work.Work;
+import com.dwinovo.chiikawa.entity.brain.errand.work.WorkAction;
+import com.dwinovo.chiikawa.entity.brain.errand.work.WorkTarget;
 import com.dwinovo.chiikawa.music.Playable;
 import com.dwinovo.chiikawa.music.ServerMusicSystem;
-import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.mojang.serialization.Codec;
 import java.util.Map;
 import java.util.Optional;
@@ -26,8 +26,8 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
 /**
  * Performs the song selected on the held music box: once per selection, or over and over
- * while the pet carries a street performance slip. A continuous playback mode of the box
- * keeps the errand available after each song, so it goes on for as long as the pet has
+ * while the pet carries a slip that counts the work. A continuous playback mode of the box
+ * keeps the work available after each song, so it goes on for as long as the pet has
  * nothing better to do. What the pet plays and for how long is {@link Busk}'s; a song that is over is the
  * errand done, and the next song is the next errand.
  *
@@ -40,7 +40,9 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
  * the pet still for good while the server's streams are all taken. A song that played to its end, or was cut short,
  * leaves nothing to wait for.
  */
-public final class PlayMusicErrand implements ErrandType<PlayMusicErrand.Performance, ErrandTunings.PlayMusic> {
+public final class BuskAction implements WorkAction<BuskAction.Performance, ErrandTunings.PlayMusic> {
+    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "busk");
+
     /**
      * What the pet has set out to play.
      *
@@ -51,12 +53,7 @@ public final class PlayMusicErrand implements ErrandType<PlayMusicErrand.Perform
 
     @Override
     public ResourceLocation id() {
-        return ErrandIds.PLAY_MUSIC;
-    }
-
-    @Override
-    public ErrandCategory category() {
-        return ErrandCategory.WORK;
+        return ID;
     }
 
     @Override
@@ -65,20 +62,22 @@ public final class PlayMusicErrand implements ErrandType<PlayMusicErrand.Perform
     }
 
     @Override
-    public Offers<Performance> offers(PetView view, ErrandTunings.PlayMusic tuning) {
-        return view.playableSelection()
+    public Optional<String> refuses(Optional<WorkTarget> target) {
+        return target.map(ignored -> "busk takes no target");
+    }
+
+    @Override
+    public Offers<Performance> offers(Work<Performance, ErrandTunings.PlayMusic> work, PetView view,
+            ErrandTunings.PlayMusic tuning) {
+        return view.playable(work.countedBy(view))
             .map(song -> Offers.of(Offer.of(new Performance(song))))
             .orElseGet(() -> Offers.none(Check.fail("no_new_song")));
     }
 
     @Override
-    public Routine routine(Performance plan, ErrandSettings<ErrandTunings.PlayMusic> settings) {
-        return Routine.single(new Busk(plan.song(), settings.tuning().noteParticleIntervalTicks()));
-    }
-
-    @Override
-    public Optional<ResourceLocation> workCounter() {
-        return Optional.of(PetWorkCounters.PLAY_MUSIC_SECOND);
+    public Routine routine(Work<Performance, ErrandTunings.PlayMusic> work, Performance plan,
+            ErrandSettings<ErrandTunings.PlayMusic> settings) {
+        return Routine.single(new Busk(plan.song(), settings.tuning().noteParticleIntervalTicks(), work.counter()));
     }
 
     @Override

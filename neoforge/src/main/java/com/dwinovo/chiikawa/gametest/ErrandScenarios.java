@@ -14,6 +14,7 @@ import com.dwinovo.chiikawa.camera.PhotoResults;
 import com.dwinovo.chiikawa.camera.PhotoScout;
 import com.dwinovo.chiikawa.data.PetInteractionData;
 import com.dwinovo.chiikawa.data.QualificationData;
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
@@ -162,7 +163,7 @@ final class ErrandScenarios {
         Map.entry(ErrandIds.PICK_MUSHROOM, ErrandScenarios::pickMushroom),
         Map.entry(ErrandIds.MELEE, ErrandScenarios::melee),
         Map.entry(ErrandIds.RANGED, ErrandScenarios::ranged),
-        Map.entry(ErrandIds.PLAY_MUSIC, ErrandScenarios::playMusic),
+        Map.entry(WorkData.PLAY_MUSIC, ErrandScenarios::playMusic),
         Map.entry(ErrandIds.FOLLOW_OWNER, ErrandScenarios::followOwner),
         Map.entry(ErrandIds.WANDER, ErrandScenarios::wander),
         Map.entry(ErrandIds.STAY, ErrandScenarios::stay),

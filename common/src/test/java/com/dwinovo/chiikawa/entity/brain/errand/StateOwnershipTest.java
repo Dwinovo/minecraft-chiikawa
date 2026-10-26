@@ -96,7 +96,7 @@ class StateOwnershipTest {
 
     /** What an errand, which composes steps, may not reach for: the pet's brain, its random, its memories. */
     private static final Pattern NOT_FOR_ERRANDS = Pattern.compile("\\bgetBrain\\(\\)|\\bgetRandom\\(\\)|\\bInitMemory\\b|\\bsetMemory\\b");
-    private static final String ERRANDS = "entity/brain/errand/impl/";
+    private static final List<String> ERRANDS = List.of("entity/brain/errand/impl/", "entity/brain/errand/work/");
 
     @Test
     void eachPieceOfStateIsWrittenByItsOwnerOnly() {
@@ -115,7 +115,7 @@ class StateOwnershipTest {
     @Test
     void anErrandComposesStepsAndReachesIntoNothing() {
         Set<String> reaching = filesMatching(sources(), NOT_FOR_ERRANDS).stream()
-            .filter(file -> file.startsWith(ERRANDS)).collect(Collectors.toCollection(TreeSet::new));
+            .filter(file -> ERRANDS.stream().anyMatch(file::startsWith)).collect(Collectors.toCollection(TreeSet::new));
 
         assertEquals(Set.of(), reaching, "an errand reaches for the brain, the random or the memories: only steps do");
     }

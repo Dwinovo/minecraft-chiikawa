@@ -17,8 +17,8 @@ import net.minecraft.util.profiling.ProfilerFiller;
 
 /**
  * Server data reload listener for {@code data/<namespace>/pet_task/<id>.json}. A file
- * that fails to parse is skipped; a type naming a capability or work counter that does
- * not exist is kept but warned about, since no pet could ever take or finish it.
+ * that fails to parse is skipped; a type naming a capability that does not exist is kept but
+ * warned about, since no pet could ever take or finish it.
  */
 public final class PetTaskTypeLoader extends SimpleJsonResourceReloadListener {
     public static final String DIRECTORY = "pet_task";
@@ -55,9 +55,6 @@ public final class PetTaskTypeLoader extends SimpleJsonResourceReloadListener {
                 if (!knownCapability.test(type.capability())) {
                     warnings.add(LOG_PREFIX + id + " is for unknown capability " + type.capability());
                 }
-                if (!PetWorkCounters.ALL.contains(type.counter())) {
-                    warnings.add(LOG_PREFIX + id + " counts unknown work " + type.counter());
-                }
             })
             .ifError(error -> errors.add(LOG_PREFIX + id + " is skipped, failed to parse: " + error.message())));
         return new Loaded(types, errors, warnings);
@@ -66,7 +63,7 @@ public final class PetTaskTypeLoader extends SimpleJsonResourceReloadListener {
     /**
      * @param types decoded task types by id
      * @param errors one message per file that could not be decoded
-     * @param warnings one message per unknown capability or work counter
+     * @param warnings one message per unknown capability
      */
     record Loaded(Map<ResourceLocation, PetTaskType> types, List<String> errors, List<String> warnings) {
     }

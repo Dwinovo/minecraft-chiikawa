@@ -1,10 +1,10 @@
-package com.dwinovo.chiikawa.entity.brain.errand.impl;
+package com.dwinovo.chiikawa.entity.brain.errand.work;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
-import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.testing.TestErrands;
 import com.dwinovo.chiikawa.testing.TestView;
@@ -33,21 +33,21 @@ class PlayMusicOfferTest {
     void aSongThePetWouldPlayIsOneOfferThatGoesNowhere() {
         TestView view = TestView.at(HOME, FREE).withSong();
 
-        assertEquals(1, TestErrands.offers(ErrandIds.PLAY_MUSIC, view).size());
-        assertTrue(TestErrands.planOf(ErrandIds.PLAY_MUSIC, view).destination(view).isEmpty());
+        assertEquals(1, TestErrands.offers(WorkData.PLAY_MUSIC, view).size());
+        assertTrue(TestErrands.planOf(WorkData.PLAY_MUSIC, view).destination(view).isEmpty());
     }
 
     @Test
     void withoutOneThereIsNothingToPlayAndWhyIsSaid() {
         assertEquals("intent.chiikawa.fail.no_new_song",
-            TestErrands.whyNoOffer(ErrandIds.PLAY_MUSIC, TestView.at(HOME, FREE)).reasonKey());
+            TestErrands.whyNoOffer(WorkData.PLAY_MUSIC, TestView.at(HOME, FREE)).reasonKey());
     }
 
     @Test
     void thePerformanceGoesOnUntilItsStepEndsItWhateverTheBoxSelectsNext() {
         TestView view = TestView.at(HOME, FREE).withSong();
 
-        assertTrue(TestErrands.stillWanted(ErrandIds.PLAY_MUSIC, TestErrands.planOf(ErrandIds.PLAY_MUSIC, view),
+        assertTrue(TestErrands.stillWanted(WorkData.PLAY_MUSIC, TestErrands.planOf(WorkData.PLAY_MUSIC, view),
             TestView.at(HOME, FREE)).ok());
     }
 }

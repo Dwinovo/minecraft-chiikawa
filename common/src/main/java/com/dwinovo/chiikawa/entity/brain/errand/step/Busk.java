@@ -14,10 +14,10 @@ import com.dwinovo.chiikawa.music.PlaybackMode;
 import com.dwinovo.chiikawa.music.ServerMusicLibrary;
 import com.dwinovo.chiikawa.music.ServerMusicStreamManager;
 import com.dwinovo.chiikawa.music.ServerMusicSystem;
-import com.dwinovo.chiikawa.task.PetWorkCounters;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
@@ -38,6 +38,7 @@ public final class Busk implements Step {
 
     private final Playable song;
     private final int noteInterval;
+    private final Optional<ResourceLocation> counter;
     /** The track the stream plays; empty while there is none, as long as the step has not started one. */
     private String trackId = "";
     /** Why the stream could not be started, if it could not. */
@@ -47,10 +48,12 @@ public final class Busk implements Step {
     /**
      * @param song what to play
      * @param noteInterval how often a note rises from the pet while it plays, in ticks
+     * @param counter the work counter each second of the song is reported to, if the work has one
      */
-    public Busk(Playable song, int noteInterval) {
+    public Busk(Playable song, int noteInterval, Optional<ResourceLocation> counter) {
         this.song = song;
         this.noteInterval = noteInterval;
+        this.counter = counter;
     }
 
     /** @return the memories that hold what the pet has played, which only make sense while it can play */
@@ -100,7 +103,7 @@ public final class Busk implements Step {
         lookAtOwner(handle, pet);
         spawnNote((ServerLevel) pet.level(), pet, handle.now());
         if (++ticksPlayed % TICKS_PER_SECOND == 0) {
-            handle.reportWork(PetWorkCounters.PLAY_MUSIC_SECOND, 1);
+            counter.ifPresent(count -> handle.reportWork(count, 1));
         }
         return StepStatus.RUNNING;
     }
