@@ -19,6 +19,8 @@ import com.dwinovo.chiikawa.entity.brain.errand.step.Lid;
 import com.dwinovo.chiikawa.entity.brain.errand.step.OpenContainer;
 import com.dwinovo.chiikawa.entity.brain.errand.step.WalkTo;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
+import com.dwinovo.chiikawa.init.InitTag;
+import com.dwinovo.chiikawa.utils.Deliveries;
 import com.mojang.serialization.Codec;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
@@ -39,6 +41,9 @@ import net.minecraft.resources.ResourceLocation;
  * to the container, or found nothing to put in it, leaves that container alone for a while.
  */
 public final class DeliverErrand implements ErrandType<DeliverErrand.Trip, ErrandTunings.Deliver> {
+    /** The containers the pets deliver to and the things they deliver, which this errand is the one to name. */
+    public static final Deliveries DELIVERIES = new Deliveries(InitTag.ENTITY_DELEVER_CONTAINER, InitTag.ENTITY_DELIVER_ITEMS);
+
     /**
      * What the pet has set out to do.
      *
@@ -84,10 +89,11 @@ public final class DeliverErrand implements ErrandType<DeliverErrand.Trip, Erran
         BlockPos container = plan.container().pos();
         Lid lid = new Lid(container);
         return Routine.of(
-            Routine.step(() -> new WalkTo(new Goal.Container(container), tuning.speed(), tuning.arriveDistance(), tuning.reach(),
+            Routine.step(() -> new WalkTo(new Goal.Container(container, DELIVERIES), tuning.speed(), tuning.arriveDistance(), tuning.reach(),
                 settings.maxTicks(), tuning.noWayTicks())),
-            Routine.step(() -> new OpenContainer(container, lid)),
-            Routine.repeatWhile(DepositOne.whileItemsFit(container), () -> new DepositOne(container)),
+            Routine.step(() -> new OpenContainer(container, lid, DELIVERIES)),
+            Routine.repeatWhile(DepositOne.whileItemsFit(container, DELIVERIES),
+                () -> new DepositOne(container, DELIVERIES)),
             Routine.step(() -> new CloseContainer(lid))).releasing(lid::lowerIfRaised);
     }
 

@@ -19,14 +19,17 @@ import net.minecraft.server.level.ServerLevel;
 public final class OpenContainer implements Step {
     private final BlockPos container;
     private final Lid lid;
+    private final Deliveries deliveries;
 
     /**
      * @param container the container's block
      * @param lid the lid of that container for this trip, which is told it is raised
+     * @param deliveries which containers and which things the delivery is about
      */
-    public OpenContainer(BlockPos container, Lid lid) {
+    public OpenContainer(BlockPos container, Lid lid, Deliveries deliveries) {
         this.container = container;
         this.lid = lid;
+        this.deliveries = deliveries;
     }
 
     @Override
@@ -36,10 +39,10 @@ public final class OpenContainer implements Step {
     @Override
     public StepStatus tick(Handle handle) {
         AbstractPet pet = LiveHandle.of(handle).pet();
-        if (!(pet.level() instanceof ServerLevel level) || !Deliveries.isContainer(level, container)) {
+        if (!(pet.level() instanceof ServerLevel level) || !deliveries.isContainer(level, container)) {
             return StepStatus.gaveUp("gone");
         }
-        if (!Deliveries.worthVisiting(level, container, pet.getBackpack())) {
+        if (!deliveries.worthVisiting(level, container, pet.getBackpack())) {
             return StepStatus.gaveUp("nothing_to_deliver");
         }
         pet.getNavigation().stop();

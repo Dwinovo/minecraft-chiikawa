@@ -58,10 +58,12 @@ public sealed interface Goal {
      * while its pet is on the way, or the bag emptied, and then there is nowhere to go.
      *
      * @param pos the container's block
+     * @param deliveries which containers and which things the delivery is about
      */
-    record Container(BlockPos pos) implements Goal {
+    record Container(BlockPos pos, Deliveries deliveries) implements Goal {
         private boolean worthTheWalk(LiveHandle live) {
-            return live.pet().level() instanceof ServerLevel level && Deliveries.worthVisiting(level, pos, live.pet().getBackpack());
+            return live.pet().level() instanceof ServerLevel level
+                && deliveries.worthVisiting(level, pos, live.pet().getBackpack());
         }
 
         @Override

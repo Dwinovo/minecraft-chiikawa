@@ -2,9 +2,9 @@ package com.dwinovo.chiikawa.entity.brain.sensor;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.DeliverErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.SubjectRests;
 import com.dwinovo.chiikawa.init.InitMemory;
-import com.dwinovo.chiikawa.utils.Deliveries;
 import com.dwinovo.chiikawa.utils.Utils;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +32,8 @@ public enum FarmTarget {
     PLANT(ErrandIds.PLANT, InitMemory.PLANT_POS, Utils::isPlantableBase, pet -> !Utils.getSeed(pet).isEmpty()),
     /** A container that would take something from the pet's bag, so none to look for while the bag has nothing to deliver. */
     DELIVER(ErrandIds.DELIVER, InitMemory.CONTAINER_POS,
-        (level, pet, pos) -> Deliveries.worthVisiting(level, pos, pet.getBackpack()), pet -> Deliveries.hasItems(pet.getBackpack())),
+        (level, pet, pos) -> DeliverErrand.DELIVERIES.worthVisiting(level, pos, pet.getBackpack()),
+        pet -> DeliverErrand.DELIVERIES.hasItems(pet.getBackpack())),
     /** A wild plant to pull up. */
     WEED(ErrandIds.WEED, InitMemory.WEED_POS, (level, pet, pos) -> Utils.isWeed(level, pos), pet -> true),
     /** A mushroom to pick. */
