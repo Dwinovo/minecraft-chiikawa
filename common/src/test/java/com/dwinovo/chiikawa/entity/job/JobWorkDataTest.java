@@ -17,8 +17,8 @@ class JobWorkDataTest {
     void eachJobHasTheWorkItHadWhenTheCodeListedIt() {
         Map<ResourceLocation, List<ResourceLocation>> expected = Map.of(
             JobIds.FARMER, List.of(ErrandIds.HARVEST, ErrandIds.PLANT, ErrandIds.DELIVER, ErrandIds.WEED, ErrandIds.PICK_MUSHROOM),
-            JobIds.FENCER, List.of(ErrandIds.MELEE),
-            JobIds.ARCHER, List.of(ErrandIds.RANGED),
+            JobIds.FENCER, List.of(WorkData.MELEE),
+            JobIds.ARCHER, List.of(WorkData.RANGED),
             JobIds.MUSICIAN, List.of(WorkData.PLAY_MUSIC));
 
         assertEquals(expected.keySet(), JobWorkData.all().keySet(), "a pet with no job has no file");
