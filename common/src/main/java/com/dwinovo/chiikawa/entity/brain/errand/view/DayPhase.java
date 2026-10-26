@@ -25,6 +25,11 @@ public enum DayPhase implements StringRepresentable {
     private static final int NIGHT_START = 13000;
     private static final int MORNING_START = 23000;
 
+    /** @return the part of the day in this level: the clock it keeps, or the one hour a level with a fixed time stands at */
+    public static DayPhase in(Level level) {
+        return of(level.dimensionType().fixedTime().orElse(level.getDayTime()));
+    }
+
     /**
      * @param dayTime time of day in ticks; any value, taken modulo a day
      * @return the phase of the day at that time

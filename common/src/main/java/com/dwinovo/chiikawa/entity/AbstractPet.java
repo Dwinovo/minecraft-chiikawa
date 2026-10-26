@@ -12,6 +12,7 @@ import com.dwinovo.chiikawa.anim.state.PetAnimContext;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
+import com.dwinovo.chiikawa.entity.brain.errand.run.PetIcon;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Projection;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.FloatBehavior;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
@@ -189,6 +190,11 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * {@link #ACTIVITY}, but named by data rather than by code.
      */
     private static final EntityDataAccessor<String> PERFORMANCE = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.STRING);
+    /**
+     * The picture over the pet's head, as a {@link PetIcon}'s id; see {@link #icon}. Not saved: the executor works it out
+     * again as the pet is back.
+     */
+    private static final EntityDataAccessor<Byte> ICON = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.BYTE);
 
     /**
      * What the owner has told the pet it may and may not do, as {@link PetRules#CODEC} writes it; empty is the default.
@@ -237,7 +243,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitMemory.GIFT_COOLDOWN.get(),
         InitMemory.PHOTOGRAPHED_BIOMES.get(),
         InitMemory.ERRAND_RESTS.get(),
-        InitMemory.SUBJECT_RESTS.get()
+        InitMemory.SUBJECT_RESTS.get(),
+        InitMemory.REMARK_RESTS.get()
     );
     private static final java.util.List<net.minecraft.world.entity.ai.sensing.SensorType<? extends net.minecraft.world.entity.ai.sensing.Sensor<? super AbstractPet>>> SENSOR_TYPES = java.util.List.of(
         net.minecraft.world.entity.ai.sensing.SensorType.HURT_BY,
@@ -575,6 +582,21 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     @Override
     public void performance(String performance) {
         setPerformance(performance);
+    }
+
+    /**
+     * For the pet's executor alone: the picture over the pet's head.
+     */
+    @Override
+    public void icon(PetIcon icon) {
+        this.entityData.set(ICON, icon.id());
+    }
+
+    /**
+     * @return the picture over the pet's head; readable on both sides
+     */
+    public PetIcon getIcon() {
+        return PetIcon.byId(this.entityData.get(ICON));
     }
 
     /**
@@ -935,6 +957,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         builder.define(EAGER_UNTIL, 0L);
         builder.define(LICENCES, List.of());
         builder.define(PERFORMANCE, "");
+        builder.define(ICON, PetIcon.NONE.id());
         builder.define(RULES, new CompoundTag());
     }
 
@@ -1040,9 +1063,10 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      *
      * @param line the translation key of what it says
      * @param ticks how long the words stay up
+     * @param subject the translation key of what the words are about, for a line that has the place for it
      */
-    public void speak(String line, int ticks) {
-        speech = new PetSpeech.Heard(line, tickCount, ticks);
+    public void speak(String line, int ticks, Optional<String> subject) {
+        speech = new PetSpeech.Heard(line, tickCount, ticks, subject);
         playOnce(TALK_CONTROLLER, List.of(PetSpeech.mouth(line)));
     }
 
