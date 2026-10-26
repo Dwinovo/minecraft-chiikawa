@@ -1,0 +1,33 @@
+package com.dwinovo.chiikawa.entity.brain.errand.work;
+
+import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
+import com.dwinovo.chiikawa.entity.brain.errand.work.action.BuskAction;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import java.util.Map;
+import net.minecraft.resources.ResourceLocation;
+
+/**
+ * The actions an errand file can name, by id: {@code "action": "chiikawa:busk"}. The names are fixed here and checked
+ * when an errand file is loaded: a file naming one that is not on this list is turned off. The actions register what
+ * their rests point at once, as this class loads, so that a reload does not do it again.
+ */
+public final class WorkActions {
+    /** Playing the song on the held music box. */
+    public static final BuskAction BUSK = new BuskAction();
+
+    private static final Map<ResourceLocation, WorkAction<?, ?>> BY_ID = Map.of(BuskAction.ID, BUSK);
+
+    /** Reads and writes an action as its id; an id no action has does not read. */
+    public static final Codec<WorkAction<?, ?>> CODEC = ResourceLocation.CODEC.comapFlatMap(id -> {
+        WorkAction<?, ?> action = BY_ID.get(id);
+        return action == null ? DataResult.error(() -> id + " is no work action") : DataResult.success(action);
+    }, WorkAction::id);
+
+    static {
+        BY_ID.values().forEach(action -> action.restSources().forEach(RestSources::register));
+    }
+
+    private WorkActions() {
+    }
+}
