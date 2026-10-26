@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
 import com.dwinovo.chiikawa.entity.brain.errand.work.action.BuskAction;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import java.util.Collection;
 import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
 
@@ -29,5 +30,10 @@ public final class WorkActions {
     }
 
     private WorkActions() {
+    }
+
+    /** @return every action */
+    public static Collection<WorkAction<?, ?>> all() {
+        return BY_ID.values();
     }
 }
