@@ -22,20 +22,26 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  */
 public final class DepositOne implements Step {
     private final BlockPos container;
+    private final Deliveries deliveries;
 
-    /** @param container the container's block */
-    public DepositOne(BlockPos container) {
+    /**
+     * @param container the container's block
+     * @param deliveries which containers and which things the delivery is about
+     */
+    public DepositOne(BlockPos container, Deliveries deliveries) {
         this.container = container;
+        this.deliveries = deliveries;
     }
 
     /**
      * @param container the container's block
+     * @param deliveries which containers and which things the delivery is about
      * @return whether to go on putting things in: while the pet has something to deliver and the container would take it
      */
-    public static Predicate<Handle> whileItemsFit(BlockPos container) {
+    public static Predicate<Handle> whileItemsFit(BlockPos container, Deliveries deliveries) {
         return handle -> {
             AbstractPet pet = LiveHandle.of(handle).pet();
-            return pet.level() instanceof ServerLevel level && Deliveries.worthVisiting(level, container, pet.getBackpack());
+            return pet.level() instanceof ServerLevel level && deliveries.worthVisiting(level, container, pet.getBackpack());
         };
     }
 
@@ -49,7 +55,7 @@ public final class DepositOne implements Step {
         if (!(pet.level() instanceof ServerLevel level)) {
             return StepStatus.gaveUp("gone");
         }
-        ItemStack source = Deliveries.first(pet.getBackpack());
+        ItemStack source = deliveries.first(pet.getBackpack());
         if (source.isEmpty()) {
             return StepStatus.DONE;
         }
