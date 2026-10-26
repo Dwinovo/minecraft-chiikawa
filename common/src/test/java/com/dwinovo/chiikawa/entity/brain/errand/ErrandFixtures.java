@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.errand;
 
 import com.dwinovo.chiikawa.camera.PhotoOutlook;
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
@@ -54,7 +55,7 @@ public final class ErrandFixtures {
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()))),
         Map.entry(ErrandIds.RANGED, free().armedWithArrows().targets(targets(Optional.of(new AttackTarget(FOE, east(2))), Optional.empty(),
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()))),
-        Map.entry(ErrandIds.PLAY_MUSIC, free().withSong()),
+        Map.entry(WorkData.PLAY_MUSIC, free().withSong()),
         Map.entry(ErrandIds.TAKE_TASK, free().offeringBoard(east(2))),
         Map.entry(ErrandIds.SHOP, free().shopWorthVisiting(east(2))),
         Map.entry(ErrandIds.GIFT_OWNER, free().withPresent().ownerPos(east(2))),

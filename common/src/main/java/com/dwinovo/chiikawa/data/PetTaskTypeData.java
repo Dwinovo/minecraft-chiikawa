@@ -45,7 +45,7 @@ public final class PetTaskTypeData {
             WEEDING, new PetTaskType(farmer, PetWorkCounters.WEED, vanilla("short_grass"),
                 UniformInt.of(8, 16), reward(WEEDING), 5, BoardLevels.FIRST_LEVEL, Optional.empty()),
             // Seconds of music.
-            STREET_PERFORMANCE, new PetTaskType(musician, PetWorkCounters.PLAY_MUSIC_SECOND, vanilla("note_block"),
+            STREET_PERFORMANCE, new PetTaskType(musician, WorkData.PLAY_MUSIC_SECOND, vanilla("note_block"),
                 UniformInt.of(120, 240), reward(STREET_PERFORMANCE), 1, BoardLevels.FIRST_LEVEL, Optional.empty()),
             // Hunting pays the most and asks the most: a pet that falls loses the slip.
             // It waits for an upgrade, so paying a board up buys new work and not only

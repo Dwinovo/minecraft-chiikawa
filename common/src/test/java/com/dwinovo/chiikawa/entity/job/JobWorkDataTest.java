@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.entity.job;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.dwinovo.chiikawa.data.JobWorkData;
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.mojang.serialization.JsonOps;
 import java.util.List;
@@ -18,7 +19,7 @@ class JobWorkDataTest {
             JobIds.FARMER, List.of(ErrandIds.HARVEST, ErrandIds.PLANT, ErrandIds.DELIVER, ErrandIds.WEED, ErrandIds.PICK_MUSHROOM),
             JobIds.FENCER, List.of(ErrandIds.MELEE),
             JobIds.ARCHER, List.of(ErrandIds.RANGED),
-            JobIds.MUSICIAN, List.of(ErrandIds.PLAY_MUSIC));
+            JobIds.MUSICIAN, List.of(WorkData.PLAY_MUSIC));
 
         assertEquals(expected.keySet(), JobWorkData.all().keySet(), "a pet with no job has no file");
         expected.forEach((job, work) -> assertEquals(work, JobWorkData.all().get(job).work(), job.toString()));
