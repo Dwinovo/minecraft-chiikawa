@@ -19,7 +19,6 @@ public final class ErrandIds {
     public static final Identifier PICK_MUSHROOM = id("pick_mushroom");
     public static final Identifier MELEE = id("melee");
     public static final Identifier RANGED = id("ranged");
-    public static final Identifier PLAY_MUSIC = id("play_music");
     public static final Identifier TAKE_TASK = id("take_task");
     public static final Identifier SHOP = id("shop");
     public static final Identifier GIFT_OWNER = id("gift_owner");
