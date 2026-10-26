@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.errand.Check;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandTunings;
+import com.dwinovo.chiikawa.entity.brain.errand.LackKey;
 import com.dwinovo.chiikawa.entity.brain.errand.Offer;
 import com.dwinovo.chiikawa.entity.brain.errand.Offers;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestStore;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 
@@ -51,13 +53,14 @@ public final class ShootAction implements WorkAction<Duel, ErrandTunings.Ranged>
     @Override
     public Offers<Duel> offers(Work<Duel, ErrandTunings.Ranged> work, ResourceLocation errand, PetView view,
             ErrandTunings.Ranged tuning) {
+        // Arrows first: an archer without any is short of them whether or not there is a foe to shoot at, and says so.
+        if (!view.hasArrows()) {
+            return Offers.none(Check.lack("no_arrows", LackKey.tag(ItemTags.ARROWS)));
+        }
         WorkTarget.Foe target = work.targetOf(WorkTarget.Foe.class);
         Optional<AttackTarget> foe = target.in(view);
         if (foe.isEmpty()) {
             return Offers.none(Check.fail(target.missing()));
-        }
-        if (!view.hasArrows()) {
-            return Offers.none(Check.fail("no_arrows"));
         }
         if (view.attackCoolingDown()) {
             return Offers.none(Check.fail("attack_cooling_down"));
