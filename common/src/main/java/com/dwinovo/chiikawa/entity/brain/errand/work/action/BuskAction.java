@@ -67,8 +67,8 @@ public final class BuskAction implements WorkAction<BuskAction.Performance, Erra
     }
 
     @Override
-    public Offers<Performance> offers(Work<Performance, ErrandTunings.PlayMusic> work, PetView view,
-            ErrandTunings.PlayMusic tuning) {
+    public Offers<Performance> offers(Work<Performance, ErrandTunings.PlayMusic> work, ResourceLocation errand,
+            PetView view, ErrandTunings.PlayMusic tuning) {
         return view.playable(work.countedBy(view))
             .map(song -> Offers.of(Offer.of(new Performance(song))))
             .orElseGet(() -> Offers.none(Check.fail("no_new_song")));

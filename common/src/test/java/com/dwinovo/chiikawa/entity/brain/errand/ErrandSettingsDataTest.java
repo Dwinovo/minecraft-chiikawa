@@ -35,11 +35,11 @@ class ErrandSettingsDataTest {
         Map.entry(ErrandIds.COOPERATE, 80),
         Map.entry(ErrandIds.TAKE_TASK, 50),
         Map.entry(ErrandIds.SHOP, 50),
-        Map.entry(ErrandIds.HARVEST, 50),
-        Map.entry(ErrandIds.PLANT, 50),
-        Map.entry(ErrandIds.DELIVER, 50),
-        Map.entry(ErrandIds.WEED, 50),
-        Map.entry(ErrandIds.PICK_MUSHROOM, 50),
+        Map.entry(WorkData.HARVEST, 50),
+        Map.entry(WorkData.PLANT, 50),
+        Map.entry(WorkData.DELIVER, 50),
+        Map.entry(WorkData.WEED, 50),
+        Map.entry(WorkData.PICK_MUSHROOM, 50),
         Map.entry(WorkData.PLAY_MUSIC, 50),
         Map.entry(ErrandIds.ANSWER_WHISTLE, 50),
         Map.entry(ErrandIds.FOLLOW_OWNER, 50),
@@ -59,11 +59,11 @@ class ErrandSettingsDataTest {
         Map.entry(ErrandIds.COOPERATE, 0.5F),
         Map.entry(ErrandIds.TAKE_TASK, 0.7F),
         Map.entry(ErrandIds.SHOP, 0.65F),
-        Map.entry(ErrandIds.HARVEST, 0.6F),
-        Map.entry(ErrandIds.PLANT, 0.6F),
-        Map.entry(ErrandIds.DELIVER, 0.6F),
-        Map.entry(ErrandIds.WEED, 0.5F),
-        Map.entry(ErrandIds.PICK_MUSHROOM, 0.5F),
+        Map.entry(WorkData.HARVEST, 0.6F),
+        Map.entry(WorkData.PLANT, 0.6F),
+        Map.entry(WorkData.DELIVER, 0.6F),
+        Map.entry(WorkData.WEED, 0.5F),
+        Map.entry(WorkData.PICK_MUSHROOM, 0.5F),
         Map.entry(WorkData.PLAY_MUSIC, 0.6F),
         Map.entry(ErrandIds.ANSWER_WHISTLE, 0.55F),
         Map.entry(ErrandIds.FOLLOW_OWNER, 0.5F),
@@ -132,8 +132,8 @@ class ErrandSettingsDataTest {
         });
 
         assertEquals(Map.of(
-            ErrandIds.PLANT, List.of(ErrandIds.HARVEST),
-            ErrandIds.DELIVER, List.of(ErrandIds.HARVEST, ErrandIds.PLANT)), yields);
+            WorkData.PLANT, List.of(WorkData.HARVEST),
+            WorkData.DELIVER, List.of(WorkData.HARVEST, WorkData.PLANT)), yields);
     }
 
     @Test
@@ -179,7 +179,7 @@ class ErrandSettingsDataTest {
         assertEquals(600, ticks(all, ErrandIds.SHOP));
         assertEquals(200, ticks(all, ErrandIds.TAKE_EXAM));
         assertEquals(1200, ticks(all, ErrandIds.CHECK_RESULTS));
-        assertEquals(200, ticks(all, ErrandIds.HARVEST));
+        assertEquals(200, ticks(all, WorkData.HARVEST));
         assertEquals(40, ticks(all, ErrandIds.PICK_UP_ITEM));
         assertEquals(20, ticks(all, WorkData.MELEE));
         for (ResourceLocation errand : List.of(ErrandIds.FOLLOW_OWNER, ErrandIds.STAY, ErrandIds.WANDER)) {

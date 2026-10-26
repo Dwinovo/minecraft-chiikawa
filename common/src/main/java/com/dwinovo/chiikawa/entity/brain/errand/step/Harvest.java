@@ -5,9 +5,9 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Handle;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Step;
 import com.dwinovo.chiikawa.entity.brain.errand.run.StepStatus;
+import com.dwinovo.chiikawa.entity.brain.errand.work.WorkTarget;
 import com.dwinovo.chiikawa.utils.Utils;
 import java.util.Optional;
-import java.util.function.BiPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -24,20 +24,19 @@ import net.minecraft.world.entity.EquipmentSlot;
  */
 public final class Harvest implements Step {
     private final BlockPos target;
-    private final BiPredicate<ServerLevel, BlockPos> holds;
+    private final WorkTarget.BlockTarget kind;
     private final Optional<ResourceLocation> workCounter;
     private final int toolWear;
 
     /**
      * @param target the block
-     * @param holds whether the block there is still one to harvest
+     * @param kind what the block is, which it is checked against again when the pet gets there
      * @param workCounter the work each harvested block reports, if the work has one
      * @param toolWear how much the tool in the pet's hand wears each time, none for none
      */
-    public Harvest(BlockPos target, BiPredicate<ServerLevel, BlockPos> holds, Optional<ResourceLocation> workCounter,
-            int toolWear) {
+    public Harvest(BlockPos target, WorkTarget.BlockTarget kind, Optional<ResourceLocation> workCounter, int toolWear) {
         this.target = target;
-        this.holds = holds;
+        this.kind = kind;
         this.workCounter = workCounter;
         this.toolWear = toolWear;
     }
@@ -49,7 +48,7 @@ public final class Harvest implements Step {
     @Override
     public StepStatus tick(Handle handle) {
         AbstractPet pet = LiveHandle.of(handle).pet();
-        if (!(pet.level() instanceof ServerLevel level) || !holds.test(level, target)) {
+        if (!(pet.level() instanceof ServerLevel level) || !kind.holds(level, pet, target)) {
             return StepStatus.gaveUp("gone");
         }
         handle.action(PetAction.HARVEST);
