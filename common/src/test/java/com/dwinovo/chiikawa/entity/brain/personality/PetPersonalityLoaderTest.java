@@ -36,7 +36,7 @@ class PetPersonalityLoaderTest {
     void unparsableFileFallsBackToTheDefaultPersonality() {
         PetPersonalityLoader.Loaded loaded = PetPersonalityLoader.load(Map.of(
             CHIIKAWA, JsonParser.parseString("{ \"intent_multipliers\": { \"chiikawa:harvest\": 1.2 } }"),
-            USAGI, JsonParser.parseString("{ \"randomness\": \"very\" }")));
+            USAGI, JsonParser.parseString("{ \"randomness\": \"very\" }")), Set.of(ErrandIds.HARVEST));
         PetPersonalities.replaceAll(loaded.personalities());
 
         assertEquals(Set.of(CHIIKAWA), loaded.personalities().keySet());
@@ -56,12 +56,22 @@ class PetPersonalityLoaderTest {
               "intent_multipliers": { "chiikawa:play_music": 1.3, "chiikawa:sing": 2.0 },
               "routine": { "EVENING": { "chiikawa:dance": 1.5 } }
             }
-            """)));
+            """)), Set.of(ErrandIds.PLAY_MUSIC));
 
         assertEquals(Set.of(HACHIWARE), loaded.personalities().keySet());
         assertTrue(loaded.errors().isEmpty(), loaded.errors()::toString);
         assertEquals(2, loaded.warnings().size(), loaded.warnings()::toString);
         assertTrue(loaded.warnings().get(0).contains("chiikawa:dance"), loaded.warnings()::toString);
         assertTrue(loaded.warnings().get(1).contains("chiikawa:sing"), loaded.warnings()::toString);
+    }
+
+    @Test
+    void anErrandIsKnownByTheFilesThePacksHaveAndNotByWhatTheCodeRegisters() {
+        PetPersonalityLoader.Loaded loaded = PetPersonalityLoader.load(Map.of(HACHIWARE, JsonParser.parseString(
+            "{ \"intent_multipliers\": { \"chiikawa:play_music\": 1.3 } }")), Set.of());
+
+        assertEquals(Set.of(HACHIWARE), loaded.personalities().keySet());
+        assertEquals(1, loaded.warnings().size(), loaded.warnings()::toString);
+        assertTrue(loaded.warnings().get(0).contains("chiikawa:play_music"), loaded.warnings()::toString);
     }
 }
