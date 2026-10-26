@@ -100,7 +100,7 @@ class ForgettingTest {
         }
 
         @Override
-        public Offers<Plan> offers(Work<Plan, String> work, PetView view, String tuning) {
+        public Offers<Plan> offers(Work<Plan, String> work, ResourceLocation errand, PetView view, String tuning) {
             return Offers.none(Check.fail("stub"));
         }
 
