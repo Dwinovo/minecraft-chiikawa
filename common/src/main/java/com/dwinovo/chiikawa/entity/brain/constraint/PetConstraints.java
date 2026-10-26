@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.constraint;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
+import com.dwinovo.chiikawa.entity.PetRules;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import java.util.Optional;
 import net.minecraft.core.GlobalPos;
@@ -9,12 +10,12 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
 /**
- * Turns the owner's {@link PetDirective} into what the AI may do: an anchor (where)
- * and a permission table (what category of errand).
+ * Turns the owner's {@link PetDirective} and {@link PetRules} into what the AI may do: an
+ * anchor (where) and a permission table (what category of errand).
  *
  * <p>This is the only AI class that reads {@link PetDirective}. Every rule that is
  * a mode check, whatever the errand or sensor, lives in {@link #anchorOf} or
- * {@link #allows}.
+ * {@link #allows}, and so does the owner's switching a kind of errand off.
  */
 public final class PetConstraints {
     private PetConstraints() {
@@ -92,13 +93,17 @@ public final class PetConstraints {
      * @return whether the pet's directive permits errands of {@code category}
      */
     public static boolean allows(AbstractPet pet, PetOwnership ownership, ErrandCategory category) {
-        return allows(pet.getPetDirective(), ownership, category);
+        return allows(pet.getPetDirective(), ownership, pet.getRules(), category);
     }
 
     /**
-     * Pure permission table. Wild pets ignore the directive.
+     * Pure permission table. Wild pets ignore the directive. A kind of errand the owner has switched off is not
+     * permitted whatever the directive says.
      */
-    static boolean allows(PetDirective directive, PetOwnership ownership, ErrandCategory category) {
+    static boolean allows(PetDirective directive, PetOwnership ownership, PetRules rules, ErrandCategory category) {
+        if (!rules.permits(category)) {
+            return false;
+        }
         boolean wild = ownership instanceof PetOwnership.Wild;
         return switch (category) {
             case FOLLOW_OWNER -> !wild && directive == PetDirective.FOLLOW;

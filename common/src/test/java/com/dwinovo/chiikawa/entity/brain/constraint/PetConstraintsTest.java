@@ -4,7 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.entity.CombatStance;
 import com.dwinovo.chiikawa.entity.PetDirective;
+import com.dwinovo.chiikawa.entity.PetRules;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import java.util.EnumSet;
@@ -121,6 +123,55 @@ class PetConstraintsTest {
     // ---- permission table ------------------------------------------------------
 
     @Test
+    void eachSwitchForbidsItsCategoryAndNothingElse() {
+        for (PetDirective directive : PetDirective.values()) {
+            for (PetRules.Toggle toggle : PetRules.Toggle.values()) {
+                PetRules rules = PetRules.DEFAULT.with(toggle, false);
+                for (ErrandCategory category : ErrandCategory.values()) {
+                    boolean expected = category != toggle.category()
+                        && PetConstraints.allows(directive, OWNED, PetRules.DEFAULT, category);
+                    assertEquals(expected, PetConstraints.allows(directive, OWNED, rules, category),
+                        () -> directive + " / " + toggle + " off / " + category);
+                }
+            }
+        }
+    }
+
+    @Test
+    void aSwitchOffForbidsItsCategoryEvenInTheDirectiveThatPermitsItMost() {
+        assertFalse(PetConstraints.allows(PetDirective.FREE, OWNED, PetRules.DEFAULT.with(PetRules.Toggle.SHOP, false), ErrandCategory.SHOP));
+        assertFalse(PetConstraints.allows(PetDirective.FOLLOW, OWNED, PetRules.DEFAULT.with(PetRules.Toggle.GIFT, false), ErrandCategory.GIFT));
+        assertFalse(PetConstraints.allows(PetDirective.FOLLOW, OWNED, PetRules.DEFAULT.with(PetRules.Toggle.SOCIAL, false), ErrandCategory.SOCIAL));
+        assertFalse(PetConstraints.allows(PetDirective.FOLLOW, OWNED, PetRules.DEFAULT.with(PetRules.Toggle.PHOTO, false), ErrandCategory.PHOTO));
+        assertFalse(PetConstraints.allows(PetDirective.FREE, OWNED, PetRules.DEFAULT.with(PetRules.Toggle.PICK_UP, false), ErrandCategory.PICK_UP));
+    }
+
+    @Test
+    void theStanceAndTheSwapForbidNothing() {
+        PetRules rules = PetRules.DEFAULT.withStance(CombatStance.NONE).withSwap(false);
+        for (PetDirective directive : PetDirective.values()) {
+            for (ErrandCategory category : ErrandCategory.values()) {
+                assertEquals(PetConstraints.allows(directive, OWNED, PetRules.DEFAULT, category),
+                    PetConstraints.allows(directive, OWNED, rules, category), directive + " / " + category);
+            }
+        }
+    }
+
+    @Test
+    void everythingSwitchedOffStillLeavesFollowingStayingWanderingAndFighting() {
+        PetRules rules = PetRules.DEFAULT;
+        for (PetRules.Toggle toggle : PetRules.Toggle.values()) {
+            rules = rules.with(toggle, false);
+        }
+
+        assertTrue(PetConstraints.allows(PetDirective.FOLLOW, OWNED, rules, ErrandCategory.FOLLOW_OWNER));
+        assertTrue(PetConstraints.allows(PetDirective.FOLLOW, OWNED, rules, ErrandCategory.WANDER));
+        assertTrue(PetConstraints.allows(PetDirective.FOLLOW, OWNED, rules, ErrandCategory.COMBAT));
+        assertTrue(PetConstraints.allows(PetDirective.STAY, OWNED, rules, ErrandCategory.STAY));
+        assertTrue(PetConstraints.allows(PetDirective.FREE, OWNED, rules, ErrandCategory.WORK));
+    }
+
+    @Test
     void followPermitsFollowingWanderingTakingSlipsGivingMeetingPetsExamsPhotosAndDefendingTheOwner() {
         assertPermits(PetDirective.FOLLOW, OWNED,
             EnumSet.of(ErrandCategory.FOLLOW_OWNER, ErrandCategory.WANDER, ErrandCategory.TAKE_TASK,
@@ -198,7 +249,7 @@ class PetConstraintsTest {
 
     private static void assertPermits(PetDirective directive, PetOwnership ownership, Set<ErrandCategory> permitted) {
         for (ErrandCategory category : ErrandCategory.values()) {
-            assertEquals(permitted.contains(category), PetConstraints.allows(directive, ownership, category),
+            assertEquals(permitted.contains(category), PetConstraints.allows(directive, ownership, PetRules.DEFAULT, category),
                 () -> directive + " / " + ownership + " / " + category);
         }
     }

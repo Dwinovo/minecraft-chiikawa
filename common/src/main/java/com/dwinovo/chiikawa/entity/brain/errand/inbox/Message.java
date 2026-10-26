@@ -55,6 +55,10 @@ public sealed interface Message {
     record DirectiveChanged() implements Message {
     }
 
+    /** The owner changed what the pet may and may not do, see {@code PetRules}. */
+    record RulesChanged() implements Message {
+    }
+
     /** The pet was given a tool or lost one, and is able to do other work. */
     record CapabilityChanged() implements Message {
     }
