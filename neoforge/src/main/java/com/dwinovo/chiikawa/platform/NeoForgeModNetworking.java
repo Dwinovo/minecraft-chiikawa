@@ -95,6 +95,7 @@ public final class NeoForgeModNetworking {
             });
         registrar.playToClient(VoicePayloads.PetSpeechPayload.TYPE, VoicePayloads.PetSpeechPayload.STREAM_CODEC);
         registrar.playToClient(PetPayloads.PetGesturePayload.TYPE, PetPayloads.PetGesturePayload.STREAM_CODEC);
+        registrar.playToClient(PetPayloads.PetOutlookPayload.TYPE, PetPayloads.PetOutlookPayload.STREAM_CODEC);
         registrar.playToClient(SettingsPayloads.WorldSettingsPayload.TYPE, SettingsPayloads.WorldSettingsPayload.STREAM_CODEC);
         registrar.playToServer(SettingsPayloads.ChangeWorldSettingsPayload.TYPE, SettingsPayloads.ChangeWorldSettingsPayload.STREAM_CODEC,
             (payload, context) -> {
@@ -130,6 +131,7 @@ public final class NeoForgeModNetworking {
         event.register(MusicPayloads.MusicStreamStopPayload.TYPE, (payload, context) -> ClientMusicPacketHandler.handleStreamStop(payload));
         event.register(VoicePayloads.PetSpeechPayload.TYPE, (payload, context) -> ClientVoicePacketHandler.handleSpeech(payload));
         event.register(PetPayloads.PetGesturePayload.TYPE, (payload, context) -> ClientPetPacketHandler.handleGesture(payload));
+        event.register(PetPayloads.PetOutlookPayload.TYPE, (payload, context) -> ClientPetPacketHandler.handleOutlook(payload));
         event.register(SettingsPayloads.WorldSettingsPayload.TYPE, (payload, context) -> ClientSettingsPacketHandler.handleWorld(payload));
         event.register(PhotoPayloads.TakePhotoPayload.TYPE, (payload, context) -> ClientPhotoPacketHandler.handleTake(payload));
         event.register(PhotoPayloads.DownloadPhotoPayload.TYPE, (payload, context) -> ClientPhotoPacketHandler.handleDownload(payload));

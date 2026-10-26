@@ -53,6 +53,7 @@ public final class FabricModNetworking {
         PayloadTypeRegistry.serverboundPlay().register(MusicPayloads.MusicCatalogRequestPayload.TYPE, MusicPayloads.MusicCatalogRequestPayload.STREAM_CODEC);
         PayloadTypeRegistry.clientboundPlay().register(VoicePayloads.PetSpeechPayload.TYPE, VoicePayloads.PetSpeechPayload.STREAM_CODEC);
         PayloadTypeRegistry.clientboundPlay().register(PetPayloads.PetGesturePayload.TYPE, PetPayloads.PetGesturePayload.STREAM_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(PetPayloads.PetOutlookPayload.TYPE, PetPayloads.PetOutlookPayload.STREAM_CODEC);
         PayloadTypeRegistry.clientboundPlay().register(SettingsPayloads.WorldSettingsPayload.TYPE, SettingsPayloads.WorldSettingsPayload.STREAM_CODEC);
         PayloadTypeRegistry.serverboundPlay().register(SettingsPayloads.ChangeWorldSettingsPayload.TYPE, SettingsPayloads.ChangeWorldSettingsPayload.STREAM_CODEC);
         PayloadTypeRegistry.clientboundPlay().register(PhotoPayloads.TakePhotoPayload.TYPE, PhotoPayloads.TakePhotoPayload.STREAM_CODEC);
@@ -105,6 +106,8 @@ public final class FabricModNetworking {
             (payload, context) -> context.client().execute(() -> ClientVoicePacketHandler.handleSpeech(payload)));
         ClientPlayNetworking.registerGlobalReceiver(PetPayloads.PetGesturePayload.TYPE,
             (payload, context) -> context.client().execute(() -> ClientPetPacketHandler.handleGesture(payload)));
+        ClientPlayNetworking.registerGlobalReceiver(PetPayloads.PetOutlookPayload.TYPE,
+            (payload, context) -> context.client().execute(() -> ClientPetPacketHandler.handleOutlook(payload)));
         ClientPlayNetworking.registerGlobalReceiver(SettingsPayloads.WorldSettingsPayload.TYPE,
             (payload, context) -> context.client().execute(() -> ClientSettingsPacketHandler.handleWorld(payload)));
         ClientPlayNetworking.registerGlobalReceiver(PhotoPayloads.TakePhotoPayload.TYPE,

@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Cue;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
+import java.util.Optional;
 import java.util.OptionalInt;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -76,7 +77,17 @@ public interface Handle {
     /** Strikes a pose of the pet's own by name, if it has one. */
     void gesture(String name);
 
-    void say(VoiceMoment moment);
+    default void say(VoiceMoment moment) {
+        say(moment, Optional.empty());
+    }
+
+    /**
+     * Says something fitting the moment about something, if the pet has something to say and has not said too much of late.
+     *
+     * @param subject the translation key of what the line is about, for a line that has the place for it
+     * @return whether it said it
+     */
+    boolean say(VoiceMoment moment, Optional<String> subject);
 
     void tellOwner(Component message);
 
