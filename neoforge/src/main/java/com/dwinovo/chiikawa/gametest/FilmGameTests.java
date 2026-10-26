@@ -8,6 +8,7 @@ import com.dwinovo.chiikawa.photo.PhotoData;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
@@ -52,9 +53,10 @@ public final class FilmGameTests {
         ItemStack open = FilmRolls.begin(film(), EXPOSURES, shot());
         bag.setItem(5, open);
 
-        boolean recorded = FilmRolls.record(bag, film(), EXPOSURES, shot(), dropped -> { });
+        Optional<ItemStack> recorded = FilmRolls.record(bag, film(), EXPOSURES, shot(), dropped -> { });
 
-        helper.assertTrue(recorded, Component.literal("the shot was not recorded"));
+        helper.assertTrue(recorded.isPresent(), Component.literal("the shot was not recorded"));
+        helper.assertTrue(recorded.get() == open, Component.literal("the roll the shot is on is not the one that was open"));
         helper.assertTrue(FilmItem.rollOf(open).shots().size() == 2, Component.literal("the open roll has " + FilmItem.rollOf(open).shots().size()));
         helper.assertTrue(bag.getItem(2).getCount() == 3, Component.literal("a fresh roll was begun while one had room"));
         helper.succeed();
@@ -66,9 +68,9 @@ public final class FilmGameTests {
         SimpleContainer bag = new SimpleContainer(8);
         bag.setItem(4, new ItemStack(film(), 3));
 
-        boolean recorded = FilmRolls.record(bag, film(), EXPOSURES, shot(), dropped -> { });
+        Optional<ItemStack> recorded = FilmRolls.record(bag, film(), EXPOSURES, shot(), dropped -> { });
 
-        helper.assertTrue(recorded, Component.literal("the shot was not recorded"));
+        helper.assertTrue(recorded.isPresent(), Component.literal("the shot was not recorded"));
         helper.assertTrue(bag.getItem(4).getCount() == 2 && !FilmItem.rollOf(bag.getItem(4)).started(),
             Component.literal("the pile was not one fewer: " + bag.getItem(4)));
         List<ItemStack> rolls = rollsIn(bag);
@@ -98,11 +100,11 @@ public final class FilmGameTests {
 
         helper.assertTrue(FilmItem.rollOf(full).full(), Component.literal("a roll of one is not full with one shot"));
         helper.assertFalse(FilmRolls.hasRoom(bag, film()), Component.literal("a full roll has room"));
-        helper.assertFalse(FilmRolls.record(bag, film(), EXPOSURES, shot(), dropped -> { }), Component.literal("a shot went on a full roll"));
+        helper.assertTrue(FilmRolls.record(bag, film(), EXPOSURES, shot(), dropped -> { }).isEmpty(), Component.literal("a shot went on a full roll"));
 
         bag.setItem(3, new ItemStack(film()));
         helper.assertTrue(FilmRolls.hasRoom(bag, film()), Component.literal("fresh film has no room"));
-        helper.assertTrue(FilmRolls.record(bag, film(), EXPOSURES, shot(), dropped -> { }), Component.literal("no new roll was begun"));
+        helper.assertTrue(FilmRolls.record(bag, film(), EXPOSURES, shot(), dropped -> { }).isPresent(), Component.literal("no new roll was begun"));
         helper.assertTrue(FilmItem.rollOf(full).shots().size() == 1, Component.literal("the full roll took another shot"));
         helper.succeed();
     }
@@ -114,7 +116,7 @@ public final class FilmGameTests {
         bag.setItem(0, new ItemStack(film(), 2));
         List<ItemStack> dropped = new ArrayList<>();
 
-        boolean recorded = FilmRolls.record(bag, film(), EXPOSURES, shot(), dropped::add);
+        boolean recorded = FilmRolls.record(bag, film(), EXPOSURES, shot(), dropped::add).isPresent();
 
         helper.assertTrue(recorded && dropped.size() == 1 && FilmItem.rollOf(dropped.get(0)).started(),
             Component.literal("the roll was lost: " + dropped));
