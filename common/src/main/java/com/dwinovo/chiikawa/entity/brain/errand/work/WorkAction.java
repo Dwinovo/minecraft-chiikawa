@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.errand.work;
 
 import com.dwinovo.chiikawa.entity.brain.errand.Check;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
+import com.dwinovo.chiikawa.entity.brain.errand.LackKey;
 import com.dwinovo.chiikawa.entity.brain.errand.Offers;
 import com.dwinovo.chiikawa.entity.brain.errand.Plan;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
@@ -38,6 +39,17 @@ public interface WorkAction<P extends Plan, T> {
      *         fails it is switched off
      */
     Optional<String> refuses(Optional<WorkTarget> target);
+
+    /**
+     * What the pet can say it is short of when this action has nothing to offer, as the {@link LackKey}s its
+     * {@link #offers} puts in a {@link Check}: the one list that offer code and the tests that every lack has words
+     * in every language both read, so a lack cannot be added to the one and forgotten in the other.
+     *
+     * @return the lacks the action reports; none, for an action that is never short of anything
+     */
+    default Set<LackKey> lacks() {
+        return Set.of();
+    }
 
     /**
      * The ways the pet could set out on this work now, or why it could not. Pure, as
