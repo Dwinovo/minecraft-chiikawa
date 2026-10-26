@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -70,8 +71,16 @@ public final class TagData {
         // the series; the sweets it buys for itself are among them.
         tags.add(InitTag.PET_TREATS,
             Items.COOKED_BEEF, Items.PUMPKIN_PIE, Items.SWEET_BERRIES, Items.COOKIE, Items.BREAD, Items.BAKED_POTATO);
+        // Flowers are the little things a pet is glad to find, and picks up for it.
+        tags.addOptionalTag(InitTag.GIFT_FLOWERS, ItemTags.SMALL_FLOWERS.location());
+        tags.addOptionalTag(InitTag.GIFT_FINDS, InitTag.GIFT_FLOWERS.location());
+        // Sweets, which Rakko gives its owner out of its bag; a pack can add to them.
+        tags.add(InitTag.SWEETS,
+            Items.CAKE, Items.COOKIE, Items.PUMPKIN_PIE, Items.HONEY_BOTTLE, Items.SWEET_BERRIES);
+        tags.add(InitTag.NEVER_GIFTED);
         tags.add(InitTag.ENTITY_PICKABLE_ITEMS,
             Items.WHEAT, Items.WHEAT_SEEDS, Items.POTATO, Items.CARROT, Items.BEETROOT, Items.MELON_SLICE, Items.PUMPKIN);
+        tags.addOptionalTag(InitTag.ENTITY_PICKABLE_ITEMS, InitTag.GIFT_FINDS.location());
     }
 
     public static void addEntityTags(TagAppenderProvider<EntityType<?>> tags) {
