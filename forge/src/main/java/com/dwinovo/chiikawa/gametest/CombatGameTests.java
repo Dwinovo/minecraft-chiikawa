@@ -75,6 +75,10 @@ public final class CombatGameTests {
     /**
      * A fight is about the foe the pet set off for, and over when that one is down: the pet is done with it, rests from
      * nothing, and sets off for the next the moment it is named, so a field of zombies is cleared one after another.
+     *
+     * <p>A pet let loose clears what comes by as a hunt, not as a guard, so the fights it is seen to end are those of
+     * {@code hunt_melee}: before the foes had grounds they were {@code melee}, which is what a pet at its owner's side
+     * fights for with the same foes.
      */
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = FIGHT_TICKS)
     public static void a_fencer_goes_on_to_the_next_foe_when_one_falls(GameTestHelper helper) {
@@ -89,10 +93,10 @@ public final class CombatGameTests {
         helper.succeedWhen(() -> {
             helper.assertTrue(!first.isAlive() && !second.isAlive(), "the fencer left a zombie standing");
             helper.assertTrue(pet.getMind().log().entries().stream().anyMatch(entry -> entry instanceof DecisionLog.Ended ended
-                && ended.errand().equals(WorkData.MELEE) && ended.outcome() instanceof Outcome.Done),
+                && ended.errand().equals(WorkData.HUNT_MELEE) && ended.outcome() instanceof Outcome.Done),
                 "the fight with the first zombie did not end done");
             helper.assertFalse(pet.getMind().log().entries().stream().anyMatch(entry -> entry instanceof DecisionLog.Ended ended
-                && ended.errand().equals(WorkData.MELEE) && ended.outcome() instanceof Outcome.GaveUp),
+                && ended.errand().equals(WorkData.HUNT_MELEE) && ended.outcome() instanceof Outcome.GaveUp),
                 "the fencer gave up a fight on the way");
         });
     }

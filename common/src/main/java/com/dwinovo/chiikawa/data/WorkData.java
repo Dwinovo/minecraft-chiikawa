@@ -1,15 +1,18 @@
 package com.dwinovo.chiikawa.data;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.entity.brain.combat.Ground;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.entity.brain.errand.work.Work;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkActions;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkRequirement;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkTarget;
 import com.dwinovo.chiikawa.init.InitTag;
+import com.dwinovo.chiikawa.task.PetWorkCounters;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -28,10 +31,14 @@ public final class WorkData {
     public static final ResourceLocation WEED = id("weed");
     /** Picking a mushroom. */
     public static final ResourceLocation PICK_MUSHROOM = id("pick_mushroom");
-    /** Fighting the foe with a sword. */
+    /** Fighting with a sword what hurts the pet, what is about its owner and what comes by. */
     public static final ResourceLocation MELEE = id("melee");
-    /** Fighting the foe with a bow. */
+    /** Fighting the same with a bow. */
     public static final ResourceLocation RANGED = id("ranged");
+    /** Hunting the hostile things in the area with a sword, a little at a time, as a free pet does. */
+    public static final ResourceLocation HUNT_MELEE = id("hunt_melee");
+    /** Hunting them with a bow. */
+    public static final ResourceLocation HUNT_RANGED = id("hunt_ranged");
     /** Playing the song on the held music box. */
     public static final ResourceLocation PLAY_MUSIC = id("play_music");
     /** One second of a performance, which a street performance slip counts. */
@@ -46,27 +53,34 @@ public final class WorkData {
 
     /** @return works by errand id */
     public static Map<ResourceLocation, Work<?, ?>> all() {
-        // Fights name no counter: the slay is reported by the death hook, and one here would give them the slip bonus.
-        Optional<WorkTarget> foe = Optional.of(new WorkTarget.Foe("no_attack_target"));
-        return Map.of(
-            HARVEST, new Work<>(WorkActions.HARVEST_BLOCK, ErrandCategory.WORK, Optional.empty(), List.of(),
-                Optional.of(new WorkTarget.RipeCrop("no_crop"))),
-            PLANT, new Work<>(WorkActions.PLANT_BLOCK, ErrandCategory.WORK, Optional.empty(), List.of(),
-                Optional.of(new WorkTarget.PlantableSoil("no_farmland"))),
-            DELIVER, new Work<>(WorkActions.DEPOSIT, ErrandCategory.WORK, Optional.empty(), List.of(),
+        // A fight in defence names no counter: the slay is reported by the death hook, and one here would give it the slip
+        // bonus at a priority that is already the highest a work has. A hunt names it, and has the bonus at its own.
+        Optional<WorkTarget> guard = Optional.of(new WorkTarget.Foe("no_attack_target",
+            Set.of(Ground.SELF, Ground.OWNER, Ground.NEARBY)));
+        Optional<WorkTarget> hunt = Optional.of(new WorkTarget.Foe("no_attack_target", Set.of(Ground.HUNT)));
+        return Map.ofEntries(
+            Map.entry(HARVEST, new Work<>(WorkActions.HARVEST_BLOCK, ErrandCategory.WORK, Optional.empty(), List.of(),
+                Optional.of(new WorkTarget.RipeCrop("no_crop")))),
+            Map.entry(PLANT, new Work<>(WorkActions.PLANT_BLOCK, ErrandCategory.WORK, Optional.empty(), List.of(),
+                Optional.of(new WorkTarget.PlantableSoil("no_farmland")))),
+            Map.entry(DELIVER, new Work<>(WorkActions.DEPOSIT, ErrandCategory.WORK, Optional.empty(), List.of(),
                 Optional.of(new WorkTarget.Container(InitTag.ENTITY_DELEVER_CONTAINER, InitTag.ENTITY_DELIVER_ITEMS,
-                    "no_container"))),
+                    "no_container")))),
             // A wild pet forages on its own; an owned one only on a slip that counts it, since on its own it would
             // strip the grass and mushrooms its owner keeps around the base.
-            WEED, new Work<>(WorkActions.HARVEST_BLOCK, ErrandCategory.FORAGE, Optional.of(WEED_PULLED),
-                List.of(WorkRequirement.WILD_OR_SLIP), Optional.of(new WorkTarget.Blocks(InitTag.ENTITY_WEEDS, "no_weed"))),
-            PICK_MUSHROOM, new Work<>(WorkActions.HARVEST_BLOCK, ErrandCategory.FORAGE, Optional.of(MUSHROOM_PICKED),
+            Map.entry(WEED, new Work<>(WorkActions.HARVEST_BLOCK, ErrandCategory.FORAGE, Optional.of(WEED_PULLED),
+                List.of(WorkRequirement.WILD_OR_SLIP), Optional.of(new WorkTarget.Blocks(InitTag.ENTITY_WEEDS, "no_weed")))),
+            Map.entry(PICK_MUSHROOM, new Work<>(WorkActions.HARVEST_BLOCK, ErrandCategory.FORAGE, Optional.of(MUSHROOM_PICKED),
                 List.of(WorkRequirement.WILD_OR_SLIP, WorkRequirement.AT_NIGHT),
-                Optional.of(new WorkTarget.Blocks(InitTag.ENTITY_MUSHROOMS, "no_mushroom"))),
-            MELEE, new Work<>(WorkActions.STRIKE, ErrandCategory.COMBAT, Optional.empty(), List.of(), foe),
-            RANGED, new Work<>(WorkActions.SHOOT, ErrandCategory.COMBAT, Optional.empty(), List.of(), foe),
-            PLAY_MUSIC, new Work<>(WorkActions.BUSK, ErrandCategory.WORK, Optional.of(PLAY_MUSIC_SECOND), List.of(),
-                Optional.empty()));
+                Optional.of(new WorkTarget.Blocks(InitTag.ENTITY_MUSHROOMS, "no_mushroom")))),
+            Map.entry(MELEE, new Work<>(WorkActions.STRIKE, ErrandCategory.COMBAT, Optional.empty(), List.of(), guard)),
+            Map.entry(RANGED, new Work<>(WorkActions.SHOOT, ErrandCategory.COMBAT, Optional.empty(), List.of(), guard)),
+            Map.entry(HUNT_MELEE, new Work<>(WorkActions.STRIKE, ErrandCategory.COMBAT, Optional.of(PetWorkCounters.SLAY),
+                List.of(), hunt)),
+            Map.entry(HUNT_RANGED, new Work<>(WorkActions.SHOOT, ErrandCategory.COMBAT, Optional.of(PetWorkCounters.SLAY),
+                List.of(), hunt)),
+            Map.entry(PLAY_MUSIC, new Work<>(WorkActions.BUSK, ErrandCategory.WORK, Optional.of(PLAY_MUSIC_SECOND), List.of(),
+                Optional.empty())));
     }
 
     private static ResourceLocation id(String path) {
