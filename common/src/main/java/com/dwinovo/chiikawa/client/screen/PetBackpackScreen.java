@@ -6,10 +6,13 @@ import com.dwinovo.chiikawa.client.ui.mc.GuiSurface;
 import com.dwinovo.chiikawa.client.ui.mc.ItemIcon;
 import com.dwinovo.chiikawa.client.ui.mc.UiButton;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.CombatStance;
 import com.dwinovo.chiikawa.entity.PetDirective;
+import com.dwinovo.chiikawa.entity.PetRules;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.network.PetPayloads.PetDirectivePayload;
+import com.dwinovo.chiikawa.network.PetPayloads.PetRulesPayload;
 import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.qualification.LicenceView;
 import com.dwinovo.chiikawa.shop.Wallet;
@@ -30,6 +33,7 @@ import com.dwinovo.chiikawa.ui.widget.Tooltip;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -44,7 +48,7 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * A pet's screen, in three pages behind three tabs: what it carries, how it is keeping,
- * and what it has been told to do.
+ * and what it has been told to do and may do.
  *
  * <p>Drawn after Chiikawa Pocket — paper stickers in an ink line, the pet's name on a
  * wooden board hung across the top edge, colour only where it means something — and
@@ -55,7 +59,10 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
     private static final int PANEL_WIDTH = 192;
     /** The backpack page, the tallest: the pet's things and the player's under them. */
     private static final int BACKPACK_HEIGHT = 214;
-    private static final int ORDERS_HEIGHT = 136;
+    /** The orders page: three orders, then what the pet may do, how it fights and whether it swaps to a weapon. */
+    private static final int ORDERS_HEIGHT = 217;
+    /** The tallest page, which the panel's top edge is placed for. */
+    private static final int TALLEST = Math.max(BACKPACK_HEIGHT, ORDERS_HEIGHT);
 
     /** Where the hearts sit: under the name board, above everything on the page. */
     private static final int HEARTS_Y = 12;
@@ -78,6 +85,19 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
 
     private static final Rect ORDER_FIRST = new Rect(UiStyle.PAD, CONTENT_Y, PANEL_WIDTH - 2 * UiStyle.PAD, 31);
     private static final int ORDER_PITCH = 36;
+
+    /** Orders page: the line between the orders and the rules under them. */
+    private static final int RULES_DIVIDER_Y = 131;
+    /** Orders page: the switches for the five kinds of errand, a chip each across the card. */
+    private static final int TOGGLE_Y = 137;
+    private static final int TOGGLE_H = 24;
+    private static final int TOGGLE_W = (PANEL_WIDTH - 2 * UiStyle.PAD - 4 * UiStyle.GAP) / 5;
+    /** Orders page: the three stances, then the weapon swap under them. */
+    private static final int STANCE_Y = TOGGLE_Y + TOGGLE_H + UiStyle.GAP;
+    private static final int STANCE_H = 20;
+    private static final int STANCE_W = (PANEL_WIDTH - 2 * UiStyle.PAD - 2 * UiStyle.GAP) / 3;
+    private static final Rect SWAP = new Rect(UiStyle.PAD, STANCE_Y + STANCE_H + UiStyle.GAP,
+        PANEL_WIDTH - 2 * UiStyle.PAD, STANCE_H);
 
     private static final int[] TAB_TINTS = {UiTheme.ACCENT_PALE, UiTheme.SKY_PALE, UiTheme.LEAF_PALE};
     private static final ItemStack BAG_ICON_STACK = new ItemStack(InitItems.BACKPACK.get());
@@ -119,7 +139,7 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
         super.init();
         // The top edge is placed for the tallest page and stays put for the others.
         this.leftPos = (this.width - PANEL_WIDTH) / 2;
-        this.topPos = (this.height - BACKPACK_HEIGHT + Tabs.HEIGHT) / 2;
+        this.topPos = (this.height - TALLEST + Tabs.HEIGHT) / 2;
         showPage(page);
     }
 
@@ -133,6 +153,13 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
             for (int i = 0; i < orders.length; i++) {
                 addRenderableWidget(orderButton(orders[i], i));
             }
+            for (PetRules.Toggle toggle : PetRules.Toggle.values()) {
+                addRenderableWidget(toggleButton(toggle));
+            }
+            for (CombatStance stance : CombatStance.values()) {
+                addRenderableWidget(stanceButton(stance));
+            }
+            addRenderableWidget(swapButton());
         }
     }
 
@@ -171,9 +198,7 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
         switch (page) {
             case BACKPACK -> drawBackpack(graphics, surface, pet, mouseX, mouseY);
             case STATUS -> drawStatus(graphics, surface, pet, mouseX, mouseY);
-            case ORDERS -> {
-                // The three orders are buttons, and draw themselves.
-            }
+            case ORDERS -> drawRules(surface);
         }
     }
 
@@ -361,6 +386,122 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
             case FOLLOW -> PixelArt.PAWS;
             case STAY -> PixelArt.CUSHION;
             case FREE -> PixelArt.TUFT;
+        };
+    }
+
+    // ---- the rules ---------------------------------------------------------------------
+
+    /**
+     * What waits under the orders. The rules are buttons and draw themselves; this draws the line between them and the
+     * orders and leaves each one's words for the cursor.
+     */
+    private void drawRules(GuiSurface surface) {
+        Ui.divider(surface, this.leftPos, this.topPos + RULES_DIVIDER_Y, this.imageWidth);
+        PetRules rules = rules();
+        for (PetRules.Toggle toggle : PetRules.Toggle.values()) {
+            notes.add(new HoverNote(toggleArea(toggle).offset(this.leftPos, this.topPos), List.of(
+                Component.translatable("screen.chiikawa.pet.rules." + toggle.getSerializedName()).getString(),
+                Component.translatable(rules.permits(toggle.category()) ? "screen.chiikawa.pet.rules.on"
+                    : "screen.chiikawa.pet.rules.off").getString())));
+        }
+        for (CombatStance stance : CombatStance.values()) {
+            String key = "screen.chiikawa.pet.stance." + stance.getSerializedName();
+            notes.add(new HoverNote(stanceArea(stance).offset(this.leftPos, this.topPos), List.of(
+                Component.translatable(key).getString(), Component.translatable(key + ".hint").getString())));
+        }
+        notes.add(new HoverNote(SWAP.offset(this.leftPos, this.topPos), List.of(
+            Component.translatable("screen.chiikawa.pet.swap").getString(),
+            Component.translatable("screen.chiikawa.pet.swap.hint").getString())));
+    }
+
+    private static Rect toggleArea(PetRules.Toggle toggle) {
+        return new Rect(UiStyle.PAD + toggle.ordinal() * (TOGGLE_W + UiStyle.GAP), TOGGLE_Y, TOGGLE_W, TOGGLE_H);
+    }
+
+    private static Rect stanceArea(CombatStance stance) {
+        return new Rect(UiStyle.PAD + stance.ordinal() * (STANCE_W + UiStyle.GAP), STANCE_Y, STANCE_W, STANCE_H);
+    }
+
+    /** What the pet has been told it may do, as it is now: the default until the pet is there to ask. */
+    private PetRules rules() {
+        AbstractPet pet = this.menu.getPet(Minecraft.getInstance().level);
+        return pet == null ? PetRules.DEFAULT : pet.getRules();
+    }
+
+    /** Asks the server to change the rules, if the change is one. */
+    private void tell(UnaryOperator<PetRules> change) {
+        AbstractPet pet = this.menu.getPet(Minecraft.getInstance().level);
+        if (pet != null) {
+            PetRules now = pet.getRules();
+            PetRules next = change.apply(now);
+            if (!next.equals(now)) {
+                Services.NETWORK.sendToServer(new PetRulesPayload(pet.getId(), next));
+            }
+        }
+    }
+
+    /** One kind of errand, as a chip with its picture: pink while the pet may do it, flat and struck through while not. */
+    private UiButton toggleButton(PetRules.Toggle toggle) {
+        Rect at = toggleArea(toggle).offset(this.leftPos, this.topPos);
+        return UiButton.painted(at.x(), at.y(), at.width(), at.height(),
+            Component.translatable("screen.chiikawa.pet.rules." + toggle.getSerializedName()),
+            (surface, area, hovered, active) -> {
+                boolean allowed = rules().permits(toggle.category());
+                int fill = allowed ? UiTheme.ACCENT_SOFT : hovered ? UiTheme.ACCENT_PALE : UiTheme.SURFACE;
+                Ui.sticker(surface, area.x(), area.y(), area.width(), area.height(), Ui.CARD_RADIUS, fill);
+                int x = area.x() + (area.width() - UiStyle.ICON) / 2;
+                int y = UiStyle.centerIn(area.y(), area.height(), UiStyle.ICON);
+                icon(toggle).drawCentered(surface, x, y, UiStyle.ICON);
+                if (!allowed) {
+                    // A stroke from the lower left to the upper right, as on a sign that forbids.
+                    for (int step = 0; step < UiStyle.ICON; step++) {
+                        surface.fillRect(x + step, y + UiStyle.ICON - 1 - step, 2, 1, UiTheme.INK);
+                    }
+                }
+            },
+            () -> tell(rules -> rules.with(toggle, !rules.permits(toggle.category()))));
+    }
+
+    /** One of the three stances, as a card in a row of them: the one in force is pink. */
+    private UiButton stanceButton(CombatStance stance) {
+        Rect at = stanceArea(stance).offset(this.leftPos, this.topPos);
+        Component name = Component.translatable("screen.chiikawa.pet.stance." + stance.getSerializedName());
+        return UiButton.painted(at.x(), at.y(), at.width(), at.height(), name,
+            (surface, area, hovered, active) -> {
+                int fill = rules().stance() == stance ? UiTheme.ACCENT_SOFT : hovered ? UiTheme.ACCENT_PALE : UiTheme.PANEL;
+                Ui.sticker(surface, area.x(), area.y(), area.width(), area.height(), Ui.CARD_RADIUS, fill);
+                Ui.textCentered(surface, TextClip.clip(name.getString(), area.width() - 2 * UiStyle.GAP, surface::textWidth),
+                    area, UiTheme.TEXT);
+            },
+            () -> tell(rules -> rules.withStance(stance)));
+    }
+
+    /** Whether the pet swaps to a weapon from its bag to fight back: a card the width of the page, ticked while it does. */
+    private UiButton swapButton() {
+        Rect at = SWAP.offset(this.leftPos, this.topPos);
+        Component name = Component.translatable("screen.chiikawa.pet.swap");
+        return UiButton.painted(at.x(), at.y(), at.width(), at.height(), name,
+            (surface, area, hovered, active) -> {
+                boolean on = rules().swapWeapons();
+                int fill = on ? UiTheme.ACCENT_SOFT : hovered ? UiTheme.ACCENT_PALE : UiTheme.PANEL;
+                Ui.sticker(surface, area.x(), area.y(), area.width(), area.height(), Ui.CARD_RADIUS, fill);
+                Ui.textClipped(surface, name.getString(), area.x() + UiStyle.PAD,
+                    UiStyle.centerIn(area.y(), area.height(), surface.lineHeight()), area.width() - UiStyle.PAD - 22,
+                    UiTheme.TEXT);
+                if (on) {
+                    PixelArt.CHECK.draw(surface, area.right() - 18, UiStyle.centerIn(area.y(), area.height(), 7));
+                }
+            },
+            () -> tell(rules -> rules.withSwap(!rules.swapWeapons())));
+    }
+
+    private static PixelArt icon(PetRules.Toggle toggle) {
+        return switch (toggle) {
+            case SHOP -> PixelArt.SHOP;
+            case GIFT -> PixelArt.GIFT;
+            case PHOTO -> PixelArt.PHOTO;
+            case PICK_UP -> PixelArt.PICK_UP;
+            case SOCIAL -> PixelArt.SOCIAL;
         };
     }
 

@@ -80,6 +80,68 @@ public record PixelArt(String... rows) {
         "..XggggggX..",
         ".XXXXXXXXXX.");
 
+    /** A shop front under its striped awning: going shopping. */
+    public static final PixelArt SHOP = new PixelArt(
+        "XXXXXXXXXXXXXX",
+        "XpWpWpWpWpWpWX",
+        "XpWpWpWpWpWpWX",
+        "XXXXXXXXXXXXXX",
+        ".XwwwwwwwwwwX.",
+        ".XwwXXXXXXwwX.",
+        ".XwwXllllXwwX.",
+        ".XwwXllllXwwX.",
+        ".XwwXXXXXXwwX.",
+        ".XwwwwwwwwwwX.",
+        ".XXXXXXXXXXXX.");
+
+    /** A wrapped box with a pink ribbon: a present. */
+    public static final PixelArt GIFT = new PixelArt(
+        "..XXX...XXX..",
+        ".XpppX.XpppX.",
+        ".XpppXXXpppX.",
+        "XXXXXXXXXXXXX",
+        "XwwwwwpwwwwwX",
+        "XXXXXXpXXXXXX",
+        "XwwwwwpwwwwwX",
+        "XwwwwwpwwwwwX",
+        "XwwwwwpwwwwwX",
+        "XwwwwwpwwwwwX",
+        ".XXXXXXXXXXX.");
+
+    /** A camera with its lens and its flash: taking a photo. */
+    public static final PixelArt PHOTO = new PixelArt(
+        "....XXXX......",
+        "XXXXXXXXXXXXXX",
+        "XwwwwXXXXwwppX",
+        "XwwwXddddXwwwX",
+        "XwwwXdWddXwwwX",
+        "XwwwXddddXwwwX",
+        "XwwwwXXXXwwwwX",
+        "XwwwwwwwwwwwwX",
+        "XXXXXXXXXXXXXX");
+
+    /** A basket with a leaf and a berry in it: picking things up. */
+    public static final PixelArt PICK_UP = new PixelArt(
+        "....XXXXXX....",
+        "...X.gg.ppX...",
+        ".XXXXXXXXXXXX.",
+        "XlolololololoX",
+        "XololololololX",
+        "XlolololololoX",
+        ".XololololoX..",
+        "..XlolololoX..",
+        "...XXXXXXXX...");
+
+    /** Two round faces side by side: calling on a friend. */
+    public static final PixelArt SOCIAL = new PixelArt(
+        "..XXXX..XXXX..",
+        ".XwwwwXXwwwwX.",
+        "XwwXwwXXwwXwwX",
+        "XwwwwwXXwwwwwX",
+        "XppwwwXXwwwppX",
+        ".XwwwwXXwwwwX.",
+        "..XXXX..XXXX..");
+
     /** A tick: this is the one that is picked. */
     public static final PixelArt CHECK = new PixelArt(
         "........XX",
