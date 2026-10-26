@@ -1,15 +1,20 @@
-package com.dwinovo.chiikawa.entity.brain.errand.impl;
+package com.dwinovo.chiikawa.entity.brain.errand.work;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
-import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandTunings;
 import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
+import com.dwinovo.chiikawa.entity.brain.errand.work.action.Duel;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.testing.TestErrands;
 import com.dwinovo.chiikawa.testing.TestView;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -38,8 +43,8 @@ class CombatOfferTest {
     void theFoeTheSensorNamesIsTheOneThePetSetsOffAgainstAndWhereItGoes() {
         TestView view = fighting().armedWithArrows();
 
-        for (ResourceLocation errand : new ResourceLocation[] {ErrandIds.MELEE, ErrandIds.RANGED}) {
-            assertEquals(new CombatErrand.Duel(FOE), TestErrands.planOf(errand, view), errand::toString);
+        for (ResourceLocation errand : new ResourceLocation[] {WorkData.MELEE, WorkData.RANGED}) {
+            assertEquals(new Duel(FOE), TestErrands.planOf(errand, view), errand::toString);
             assertEquals(Optional.of(east(6)), TestErrands.planOf(errand, view).destination(view), errand::toString);
         }
     }
@@ -48,35 +53,45 @@ class CombatOfferTest {
     void withoutAFoeThereIsNothingToFightAndWhyIsSaid() {
         TestView nobody = TestView.at(HOME, FREE).armedWithArrows();
 
-        assertEquals("intent.chiikawa.fail.no_attack_target", TestErrands.whyNoOffer(ErrandIds.MELEE, nobody).reasonKey());
-        assertEquals("intent.chiikawa.fail.no_attack_target", TestErrands.whyNoOffer(ErrandIds.RANGED, nobody).reasonKey());
+        assertEquals("intent.chiikawa.fail.no_attack_target", TestErrands.whyNoOffer(WorkData.MELEE, nobody).reasonKey());
+        assertEquals("intent.chiikawa.fail.no_attack_target", TestErrands.whyNoOffer(WorkData.RANGED, nobody).reasonKey());
+    }
+
+    @Test
+    void theReasonThereIsNoFoeIsTheOneTheWorkNames() {
+        Work<Duel, ErrandTunings.Footwork> work = new Work<>(WorkActions.STRIKE, ErrandCategory.COMBAT, Optional.empty(),
+            List.of(), Optional.of(new WorkTarget.Foe("no_prey")));
+        ErrandTunings.Footwork tuning = (ErrandTunings.Footwork) ErrandSettings.of(WorkData.MELEE).orElseThrow().tuning();
+
+        assertEquals("intent.chiikawa.fail.no_prey",
+            new WorkErrand<>(WorkData.MELEE, work).offers(TestView.at(HOME, FREE), tuning).check().reasonKey());
     }
 
     @Test
     void anArcherNeedsArrowsAndASwordsmanDoesNot() {
         TestView noArrows = fighting();
 
-        assertEquals(1, TestErrands.offers(ErrandIds.MELEE, noArrows).size());
-        assertEquals("intent.chiikawa.fail.no_arrows", TestErrands.whyNoOffer(ErrandIds.RANGED, noArrows).reasonKey());
+        assertEquals(1, TestErrands.offers(WorkData.MELEE, noArrows).size());
+        assertEquals("intent.chiikawa.fail.no_arrows", TestErrands.whyNoOffer(WorkData.RANGED, noArrows).reasonKey());
     }
 
     @Test
     void aFightDoesNotStartWhileThePetHoldsOffItsNextAttack() {
         TestView resting = fighting().armedWithArrows().attackResting();
 
-        assertEquals("intent.chiikawa.fail.attack_cooling_down", TestErrands.whyNoOffer(ErrandIds.MELEE, resting).reasonKey());
-        assertEquals("intent.chiikawa.fail.attack_cooling_down", TestErrands.whyNoOffer(ErrandIds.RANGED, resting).reasonKey());
+        assertEquals("intent.chiikawa.fail.attack_cooling_down", TestErrands.whyNoOffer(WorkData.MELEE, resting).reasonKey());
+        assertEquals("intent.chiikawa.fail.attack_cooling_down", TestErrands.whyNoOffer(WorkData.RANGED, resting).reasonKey());
     }
 
     @Test
     void aFightGoesOnBetweenSwingsAndShotsForAsLongAsAnArcherHasArrows() {
-        CombatErrand.Duel duel = new CombatErrand.Duel(FOE);
+        Duel duel = new Duel(FOE);
         TestView withArrows = fighting().attackResting().armedWithArrows();
         TestView without = fighting().attackResting();
 
-        assertTrue(TestErrands.stillWanted(ErrandIds.MELEE, duel, without).ok());
-        assertTrue(TestErrands.stillWanted(ErrandIds.RANGED, duel, withArrows).ok());
-        assertEquals("intent.chiikawa.fail.no_arrows", TestErrands.stillWanted(ErrandIds.RANGED, duel, without).reasonKey());
+        assertTrue(TestErrands.stillWanted(WorkData.MELEE, duel, without).ok());
+        assertTrue(TestErrands.stillWanted(WorkData.RANGED, duel, withArrows).ok());
+        assertEquals("intent.chiikawa.fail.no_arrows", TestErrands.stillWanted(WorkData.RANGED, duel, without).reasonKey());
     }
 
     /** A pet with a foe six blocks off. */
