@@ -78,8 +78,11 @@ public interface PetView {
     /** @return whether the pet carries arrows */
     boolean hasArrows();
 
-    /** @return the song the held music box selects, if the pet would play it now */
-    Optional<Playable> playableSelection();
+    /**
+     * @param onSlip whether the pet carries a slip that counts the work of playing, which has it play the song over
+     * @return the song the held music box selects, if the pet would play it now
+     */
+    Optional<Playable> playable(boolean onSlip);
 
     /** @return the exam the pet is signed up for and the desk it is to sit it at, while it can still sit it there */
     Optional<PetExams.Summons> examToSit();
