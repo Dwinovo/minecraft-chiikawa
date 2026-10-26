@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.data;
 
 import com.dwinovo.chiikawa.init.InitBlocks;
+import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
 import net.minecraft.core.registries.Registries;
@@ -150,5 +151,7 @@ public final class TagData {
             .add(EntityType.ZOGLIN)
             .add(EntityType.ZOMBIE)
             .add(EntityType.ZOMBIE_VILLAGER);
+        tags.tag(InitTag.CREEPERS_AVOID)
+            .add(InitEntity.HACHIWARE_PET.get());
     }
 }
