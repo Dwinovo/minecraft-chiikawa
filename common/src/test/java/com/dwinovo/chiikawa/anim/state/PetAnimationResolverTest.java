@@ -12,11 +12,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class PetAnimationResolverTest {
 
     @Test
-    void sitOverridesMovement() {
+    void sitOverridesWhateverTheJobIsDoing() {
+        PetAnimContext context = PetAnimContext.base(
+                PetDirective.STAY, /*jobId=*/2, /*walkSpeed=*/0.0f, PetActivity.NONE);
+
+        assertEquals(List.of("sit", "idle"), PetAnimationResolver.resolve(context));
+    }
+
+    /** A pet told to sit that runs, as it does from what hurts it, is not drawn sitting. */
+    @Test
+    void aSittingPetThatMovesMoves() {
         PetAnimContext context = PetAnimContext.base(
                 PetDirective.STAY, /*jobId=*/2, /*walkSpeed=*/1.0f, PetActivity.NONE);
 
-        assertEquals(List.of("sit", "idle"), PetAnimationResolver.resolve(context));
+        assertEquals(List.of("walk", "run", "idle"), PetAnimationResolver.resolve(context));
     }
 
     @Test
@@ -58,6 +67,15 @@ class PetAnimationResolverTest {
                 PetDirective.FREE, /*jobId=*/1, /*walkSpeed=*/0.0f, PetActivity.NONE, "cling");
 
         assertEquals(List.of("cling", "work_idle_farmer", "idle"), PetAnimationResolver.resolve(context));
+    }
+
+    /** How a pet cowers is the first of several it has, and a sitting pet that cowers is drawn cowering. */
+    @Test
+    void severalAnimationsForAPerformanceAreTriedInOrderBeforeWhatThePetWouldDoAnyway() {
+        PetAnimContext context = PetAnimContext.base(
+                PetDirective.STAY, /*jobId=*/0, /*walkSpeed=*/0.0f, PetActivity.NONE, "cry,hurt");
+
+        assertEquals(List.of("cry", "hurt", "sit", "idle"), PetAnimationResolver.resolve(context));
     }
 
     @Test
