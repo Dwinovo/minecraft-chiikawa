@@ -1,10 +1,12 @@
 package com.dwinovo.chiikawa.client.ui;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.network.PetPayloads.PetOutlookPayload;
 import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.qualification.LicenceView;
 import com.dwinovo.chiikawa.qualification.PetExams;
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -50,6 +52,21 @@ public final class PetStatusText {
     /** What a job is called; the same name the backpack tooltip uses. */
     public static Component jobName(ResourceLocation capability) {
         return Component.translatable("tooltip." + capability.getNamespace() + ".pet_job." + capability.getPath());
+    }
+
+    /** What the pet would do next, in a word or two. */
+    public static Component next(ResourceLocation errand) {
+        return intentName(errand);
+    }
+
+    /**
+     * @return why the pet is not at work: what it is short of if that is the matter, and otherwise what its work said; nothing
+     *         while it is at work
+     */
+    public static Optional<Component> notWorking(PetOutlookPayload outlook) {
+        return outlook.lackKey().<Component>map(lack -> Component.translatable("screen.chiikawa.pet.outlook.lacks",
+                Component.translatable(lack)))
+            .or(() -> outlook.whyNotKey().map(Component::translatable));
     }
 
     private static Component intentName(ResourceLocation intent) {

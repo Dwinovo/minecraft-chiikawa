@@ -12,6 +12,7 @@ import com.dwinovo.chiikawa.entity.PetRules;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.network.PetPayloads.PetDirectivePayload;
+import com.dwinovo.chiikawa.network.PetPayloads.PetOutlookPayload;
 import com.dwinovo.chiikawa.network.PetPayloads.PetRulesPayload;
 import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.qualification.LicenceView;
@@ -21,6 +22,7 @@ import com.dwinovo.chiikawa.ui.DrawSurface;
 import com.dwinovo.chiikawa.ui.PixelArt;
 import com.dwinovo.chiikawa.ui.Rect;
 import com.dwinovo.chiikawa.ui.TextClip;
+import com.dwinovo.chiikawa.ui.TextWrap;
 import com.dwinovo.chiikawa.ui.Ui;
 import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.UiTheme;
@@ -318,16 +320,51 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
                 PetStatusText.licenceRank(licence).getString(), UiTheme.LEAF_PALE,
                 PetStatusText.licenceNotes(licence).stream().map(Component::getString).toList()) + UiStyle.GAP;
         }
+        drawOutlook(surface, y + CHIP_H + UiStyle.GAP);
+    }
+
+    /**
+     * What the server last said of the pet, under its job: what it would do next, and why it is not at work, a card each. The
+     * space is kept for them before the server has said anything, so the page does not jump when it does.
+     */
+    private void drawOutlook(GuiSurface surface, int top) {
+        Optional<PetOutlookPayload> outlook = this.menu.outlook();
+        outlook.flatMap(PetOutlookPayload::next).ifPresent(next -> outlookCard(surface, top, PixelArt.NEXT, UiTheme.LEAF_PALE,
+            PetStatusText.next(next).getString(), "screen.chiikawa.pet.outlook.next"));
+        outlook.flatMap(PetStatusText::notWorking).ifPresent(why -> {
+            boolean lacking = outlook.get().lackKey().isPresent();
+            outlookCard(surface, top + StatusLayout.ROW_H + UiStyle.GAP, lacking ? PixelArt.QUESTION : PixelArt.SLIP,
+                lacking ? UiTheme.ACCENT_PALE : UiTheme.SURFACE, why.getString(), "screen.chiikawa.pet.outlook.why");
+        });
+    }
+
+    /** A card with a picture and a few words, and what they are the answer to under the cursor. */
+    private void outlookCard(GuiSurface surface, int top, PixelArt sprite, int fill, String words, String question) {
+        Rect card = new Rect(this.leftPos + UiStyle.PAD, top, StatusLayout.CARD_W, StatusLayout.ROW_H);
+        Ui.sticker(surface, card.x(), card.y(), card.width(), card.height(), Ui.CARD_RADIUS, fill);
+        sprite.drawCentered(surface, card.x() + UiStyle.GAP, UiStyle.centerIn(card.y(), card.height(), StatusLayout.ROW_ICON_W),
+            StatusLayout.ROW_ICON_W);
+        List<String> lines = TextWrap.wrap(words, StatusLayout.ROW_TEXT_W, surface::textWidth);
+        if (lines.size() > StatusLayout.ROW_LINES) {
+            lines = new ArrayList<>(lines.subList(0, StatusLayout.ROW_LINES));
+            lines.set(StatusLayout.ROW_LINES - 1, TextClip.clip(lines.get(StatusLayout.ROW_LINES - 1) + "…",
+                StatusLayout.ROW_TEXT_W, surface::textWidth));
+        }
+        int textTop = UiStyle.centerIn(card.y(), card.height(), lines.size() * UiStyle.LINE - (UiStyle.LINE - surface.lineHeight()));
+        for (int line = 0; line < lines.size(); line++) {
+            surface.drawText(lines.get(line), card.x() + StatusLayout.ROW_TEXT_X, textTop + line * UiStyle.LINE, UiTheme.TEXT);
+        }
+        notes.add(new HoverNote(card, List.of(Component.translatable(question).getString())));
     }
 
     /**
      * How tall the status page is: the picture and what is beside it, the present when
-     * there is one, and the job chip under that.
+     * there is one, the job chip under that, and the two cards of what the pet would do next and why it is not at work.
      */
     private int statusHeight() {
         AbstractPet pet = this.menu.getPet(Minecraft.getInstance().level);
         boolean gift = pet != null && !pet.getPendingGift().isEmpty();
-        return PORTRAIT.bottom() + 6 + (gift ? 36 : 0) + CHIP_H + UiStyle.PAD;
+        return PORTRAIT.bottom() + 6 + (gift ? 36 : 0) + CHIP_H + UiStyle.GAP + StatusLayout.OUTLOOK_H + UiStyle.PAD;
     }
 
     /** A small sticker: a picture and a few words, with more waiting under the cursor. */

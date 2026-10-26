@@ -70,6 +70,7 @@ public final class LivePetView implements PetView {
     private final Lazy<Optional<GlobalPos>> ownerBedside;
     private final Lazy<Boolean> attackCoolingDown;
     private final Lazy<Boolean> hasArrows;
+    private final Lazy<Boolean> hasSeeds;
     private final Lazy<Optional<Attacker>> attacker;
     private final Lazy<Set<Ground>> foeGrounds;
     private final Lazy<Arms> arms;
@@ -84,7 +85,7 @@ public final class LivePetView implements PetView {
         Level level = pet.level();
         this.pos = new Lazy<>(() -> GlobalPos.of(level.dimension(), pet.blockPosition()));
         // A level without a day cycle, like the Nether, stays at its fixed time of day.
-        this.phase = new Lazy<>(() -> DayPhase.of(level.dimensionType().fixedTime().orElse(level.getDayTime())));
+        this.phase = new Lazy<>(() -> DayPhase.in(level));
         this.ownership = new Lazy<>(() -> PetOwnership.of(pet));
         this.personality = new Lazy<>(() -> PetPersonalities.of(pet.getType()));
         this.anchor = new Lazy<>(() -> PetConstraints.anchorOf(pet, ownership()));
@@ -104,6 +105,7 @@ public final class LivePetView implements PetView {
         this.ownerBedside = new Lazy<>(this::findOwnerBedside);
         this.attackCoolingDown = new Lazy<>(() -> pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_COOLING_DOWN));
         this.hasArrows = new Lazy<>(() -> !Utils.getArrow(pet).isEmpty());
+        this.hasSeeds = new Lazy<>(() -> !Utils.getSeed(pet).isEmpty());
         this.attacker = new Lazy<>(() -> Attacker.of(pet));
         this.foeGrounds = new Lazy<>(() -> PetAttackbleEntitySensor.allowed(pet));
         this.arms = new Lazy<>(() -> Arms.of(pet));
@@ -214,6 +216,11 @@ public final class LivePetView implements PetView {
     @Override
     public boolean hasArrows() {
         return hasArrows.get();
+    }
+
+    @Override
+    public boolean hasSeeds() {
+        return hasSeeds.get();
     }
 
     @Override

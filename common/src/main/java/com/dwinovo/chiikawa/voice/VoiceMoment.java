@@ -56,7 +56,14 @@ public enum VoiceMoment implements StringRepresentable {
     /** Being the one a photo is taken of, as the shutter goes. */
     PHOTOGRAPHED,
     /** Hurt by something it does not fight, and running from it: Chiikawa cries, Usagi yells, Rakko takes it on the chin. */
-    SCARED;
+    SCARED,
+    /**
+     * Short of something its work needs and with its owner by to hear it, as a remark: the line has a place for what it is short
+     * of, which the pet's game puts in. Hachiware says {@link #TROUBLE} instead.
+     */
+    MISSING,
+    /** Short of something its work needs, Hachiware's way: it trusts that something will turn up. */
+    TROUBLE;
 
     public static final Codec<VoiceMoment> CODEC = StringRepresentable.fromEnum(VoiceMoment::values);
 

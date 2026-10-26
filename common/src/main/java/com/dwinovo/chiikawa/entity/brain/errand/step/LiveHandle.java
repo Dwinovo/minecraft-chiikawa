@@ -189,8 +189,8 @@ public final class LiveHandle implements Handle {
     }
 
     @Override
-    public void say(VoiceMoment moment) {
-        PetSpeech.say(pet, moment);
+    public boolean say(VoiceMoment moment, Optional<String> subject) {
+        return PetSpeech.say(pet, moment, subject).isPresent();
     }
 
     @Override

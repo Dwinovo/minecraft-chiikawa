@@ -31,6 +31,17 @@ public final class PetSpeech {
      * @return the translation key of what it said, or nothing when it kept quiet
      */
     public static Optional<String> say(AbstractPet pet, VoiceMoment moment) {
+        return say(pet, moment, Optional.empty());
+    }
+
+    /**
+     * As {@link #say(AbstractPet, VoiceMoment)}, about something: a line with a place for it is told what to put there.
+     * Whether the pet speaks up at all is the same, the world's chatter setting included: a pet in a world with none
+     * says nothing about anything.
+     *
+     * @param subject the translation key of what the line is about; each player's game puts it in their language
+     */
+    public static Optional<String> say(AbstractPet pet, VoiceMoment moment, Optional<String> subject) {
         if (!(pet.level() instanceof ServerLevel level) || !pet.isAlive()) {
             return Optional.empty();
         }
@@ -49,7 +60,7 @@ public final class PetSpeech {
         }
         pet.getBrain().setMemory(InitMemory.LAST_SAID.get(), new Said(line.get(), now, voice.talkTicks()));
         Services.NETWORK.sendToPlayersNear(level, pet.position(), range,
-            new PetSpeechPayload(pet.getId(), line.get(), voice.talkTicks()));
+            new PetSpeechPayload(pet.getId(), line.get(), voice.talkTicks(), subject));
         return line;
     }
 
@@ -93,8 +104,9 @@ public final class PetSpeech {
      * @param line the translation key of what it said
      * @param since the pet's tick count when it started saying it
      * @param ticks how long the line stays up over its head
+     * @param subject the translation key of what the line is about, for a line that has the place for it
      */
-    public record Heard(String line, int since, int ticks) {
+    public record Heard(String line, int since, int ticks, Optional<String> subject) {
         /** How many ticks the line has left up, counting the part of a tick already drawn. */
         public float left(int tickCount, float partialTick) {
             return ticks - (tickCount - since + partialTick);

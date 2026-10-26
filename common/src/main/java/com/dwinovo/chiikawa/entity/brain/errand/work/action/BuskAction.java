@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.errand.Check;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandTunings;
+import com.dwinovo.chiikawa.entity.brain.errand.LackKey;
 import com.dwinovo.chiikawa.entity.brain.errand.Offer;
 import com.dwinovo.chiikawa.entity.brain.errand.Offers;
 import com.dwinovo.chiikawa.entity.brain.errand.Plan;
@@ -42,6 +43,8 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
  */
 public final class BuskAction implements WorkAction<BuskAction.Performance, ErrandTunings.PlayMusic> {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "busk");
+    /** What a pet is short of when the box it holds has no song to play. */
+    private static final ResourceLocation MUSIC_BOX = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "music_box");
 
     /**
      * What the pet has set out to play.
@@ -71,7 +74,8 @@ public final class BuskAction implements WorkAction<BuskAction.Performance, Erra
             PetView view, ErrandTunings.PlayMusic tuning) {
         return view.playable(work.countedBy(view))
             .map(song -> Offers.of(Offer.of(new Performance(song))))
-            .orElseGet(() -> Offers.none(Check.fail("no_new_song")));
+            .orElseGet(() -> Offers.none(view.playable(true).isPresent() ? Check.fail("no_new_song")
+                : Check.lack("no_new_song", LackKey.item(MUSIC_BOX))));
     }
 
     @Override

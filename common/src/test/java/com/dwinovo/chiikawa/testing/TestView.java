@@ -56,10 +56,12 @@ public final class TestView implements PetView {
     private boolean eager;
     private boolean attackCoolingDown;
     private boolean hasArrows;
+    private boolean hasSeeds;
     private Optional<Attacker> attacker = Optional.empty();
     private Set<Ground> foeGrounds = EnumSet.allOf(Ground.class);
     private Arms arms = Arms.NONE;
     private Optional<Playable> playableSelection = Optional.empty();
+    private boolean songPlayed;
     private Optional<PetExams.Summons> examToSit = Optional.empty();
     private Optional<GlobalPos> resultsDesk = Optional.empty();
     private Optional<GlobalPos> whistleHeard = Optional.empty();
@@ -151,6 +153,12 @@ public final class TestView implements PetView {
         return this;
     }
 
+    /** The pet carries a seed. */
+    public TestView carryingSeeds() {
+        this.hasSeeds = true;
+        return this;
+    }
+
     /** Something hurt the pet lately, and is standing here. */
     public TestView attackedBy(UUID who, GlobalPos where) {
         this.attacker = Optional.of(new Attacker(who, where));
@@ -173,6 +181,13 @@ public final class TestView implements PetView {
     /** The held music box selects a song the pet would play now. */
     public TestView withSong() {
         this.playableSelection = Optional.of(new Playable(new MusicBoxSelection("song", "Song", 1), PlaybackMode.ONCE, false));
+        return this;
+    }
+
+    /** The held music box selects a song the pet has played already: it plays it again only on a slip. */
+    public TestView withSongPlayed() {
+        withSong();
+        this.songPlayed = true;
         return this;
     }
 
@@ -356,6 +371,11 @@ public final class TestView implements PetView {
     }
 
     @Override
+    public boolean hasSeeds() {
+        return hasSeeds;
+    }
+
+    @Override
     public Optional<Attacker> attacker() {
         return attacker;
     }
@@ -372,7 +392,7 @@ public final class TestView implements PetView {
 
     @Override
     public Optional<Playable> playable(boolean onSlip) {
-        return playableSelection.map(song -> new Playable(song.selection(), song.mode(), onSlip));
+        return playableSelection.filter(song -> onSlip || !songPlayed).map(song -> new Playable(song.selection(), song.mode(), onSlip));
     }
 
     @Override

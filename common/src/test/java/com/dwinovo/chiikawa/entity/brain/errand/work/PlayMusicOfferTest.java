@@ -6,9 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
+import com.dwinovo.chiikawa.entity.brain.errand.Check;
+import com.dwinovo.chiikawa.entity.brain.errand.LackKey;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.testing.TestErrands;
 import com.dwinovo.chiikawa.testing.TestView;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;
@@ -42,6 +45,16 @@ class PlayMusicOfferTest {
     void withoutOneThereIsNothingToPlayAndWhyIsSaid() {
         assertEquals("intent.chiikawa.fail.no_new_song",
             TestErrands.whyNoOffer(WorkData.PLAY_MUSIC, TestView.at(HOME, FREE)).reasonKey());
+    }
+
+    @Test
+    void aBoxWithNoSongToPlayLacksTheBoxButASongThatIsPlayedAlreadyLacksNothing() {
+        Check noSong = TestErrands.whyNoOffer(WorkData.PLAY_MUSIC, TestView.at(HOME, FREE));
+        Check played = TestErrands.whyNoOffer(WorkData.PLAY_MUSIC, TestView.at(HOME, FREE).withSongPlayed());
+
+        assertEquals(Optional.of(LackKey.item(ResourceLocation.fromNamespaceAndPath("chiikawa", "music_box"))), noSong.lack());
+        assertEquals("intent.chiikawa.fail.no_new_song", played.reasonKey());
+        assertEquals(Optional.empty(), played.lack());
     }
 
     @Test

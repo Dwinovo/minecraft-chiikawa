@@ -11,6 +11,8 @@ import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Executor;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Handle;
+import com.dwinovo.chiikawa.entity.brain.errand.run.PetIcon;
+import com.dwinovo.chiikawa.entity.brain.errand.run.PetIcons;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Projection;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Routine;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Step;
@@ -48,8 +50,12 @@ class ErrandViewTest {
             @Override
             public void performance(String performance) {
             }
+
+            @Override
+            public void icon(PetIcon icon) {
+            }
         },
-        new RestLedger(errand -> new TestRests.Store(), errand -> Optional.empty()), new DecisionLog());
+        new RestLedger(errand -> new TestRests.Store(), errand -> Optional.empty()), new DecisionLog(), () -> PetIcons.Signs.NONE);
     private final ErrandView view = ErrandView.of(executor, desk);
 
     @Test

@@ -18,22 +18,27 @@ import com.dwinovo.chiikawa.entity.brain.errand.decide.Decision;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionTrace;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.Permits;
+import com.dwinovo.chiikawa.entity.brain.errand.decide.WhyNot;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.CheckResultsErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.TakeExamErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Cue;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Inbox;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.InvitationDesk;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
+import com.dwinovo.chiikawa.entity.brain.errand.remark.Remarks;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestContext;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Executor;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Handle;
+import com.dwinovo.chiikawa.entity.brain.errand.run.PetIcons;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.entity.brain.errand.step.LiveHandle;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.errand.view.LivePetView;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkActions;
+import com.dwinovo.chiikawa.entity.brain.errand.work.WorkErrand;
 import com.dwinovo.chiikawa.entity.job.JobWork;
+import com.dwinovo.chiikawa.gifting.GiftOutlook;
 import com.dwinovo.chiikawa.gifting.GiftingSettings;
 import com.dwinovo.chiikawa.gifting.Presents;
 import com.dwinovo.chiikawa.qualification.ExamStage;
@@ -47,6 +52,8 @@ import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.dwinovo.chiikawa.whistle.WhistleHeard;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -110,6 +117,11 @@ public final class PetMind {
     private final Handle handle;
     private final Executor executor;
     private final ErrandView errands;
+    /**
+     * Why the pet is not at work, as its last decision found; not saved. The one account its head icon, its remarks and
+     * its screen are made from, written by {@link #decide} alone.
+     */
+    private Optional<WhyNot> whyNot = Optional.empty();
     /** Set when the pet has been told something that may change its mind, until it next decides. */
     private boolean decideNow;
     /** Whether the pet has been on cooperate since it last said yes to an invitation: it is let go of when that ends. */
@@ -122,7 +134,7 @@ public final class PetMind {
             errand -> Errands.restsOf(pet.getBrain(), errand),
             errand -> Optional.ofNullable(ErrandSettings.all().get(errand)));
         this.handle = new LiveHandle(pet);
-        this.executor = new Executor(handle, pet, rests, log);
+        this.executor = new Executor(handle, pet, rests, log, this::iconSigns);
         this.errands = ErrandView.of(executor, desk);
     }
 
@@ -189,6 +201,11 @@ public final class PetMind {
         return errands;
     }
 
+    /** @return why the pet is not at work, as its last decision found; nothing while it is at work or has none to do */
+    public Optional<WhyNot> whyNot() {
+        return whyNot;
+    }
+
     /** @return the pet's most recent errands and what became of them */
     public DecisionLog log() {
         return log;
@@ -199,6 +216,7 @@ public final class PetMind {
         inbox.clear();
         desk.clear();
         hosting = false;
+        whyNot = Optional.empty();
     }
 
     public void tick(ServerLevel level) {
@@ -214,6 +232,7 @@ public final class PetMind {
             decide(now, trigger);
         }
         executor.tick(now);
+        Remarks.tick(pet, executor.aside(), whyNot);
         if (hosting && !errands.isOn(ErrandIds.COOPERATE)) {
             // Whatever ended it, the pet is no longer waited for, nor waiting.
             hosting = false;
@@ -440,7 +459,11 @@ public final class PetMind {
             }
         }
 
-        Optional<Decision.Started> started = Decision.decide(offered, view, permits, rests, floor, pet.getRandom(), now, null);
+        DecisionTrace trace = new DecisionTrace();
+        Optional<Decision.Started> started = Decision.decide(offered, view, permits, rests, floor, pet.getRandom(), now, trace);
+        Set<ResourceLocation> work = offered.stream().filter(WorkErrand.class::isInstance).map(ErrandType::id)
+            .collect(Collectors.toSet());
+        whyNot = WhyNot.of(trace, work::contains, now).map(found -> found.lastingFrom(whyNot));
         if (started.isPresent()) {
             if (executor.running().isPresent()) {
                 if (!executor.end(Outcome.interrupted("higher"), now)) {
@@ -481,6 +504,12 @@ public final class PetMind {
                 PetSpeech.say(pet, voice);
             }
         });
+    }
+
+    /** @return what the icon over the pet's head is worked out from besides the step the pet is at */
+    private PetIcons.Signs iconSigns() {
+        return new PetIcons.Signs(!pet.getPendingGift().isEmpty(), !GiftOutlook.of(pet).picks().isEmpty(), whyNot,
+            DayPhase.in(pet.level()));
     }
 
     private Permits permits(LivePetView view) {

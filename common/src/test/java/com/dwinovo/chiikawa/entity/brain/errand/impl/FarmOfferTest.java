@@ -6,9 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
+import com.dwinovo.chiikawa.entity.brain.errand.Check;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
+import com.dwinovo.chiikawa.entity.brain.errand.LackKey;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.SubjectRests;
 import com.dwinovo.chiikawa.entity.brain.errand.work.action.Site;
+import com.dwinovo.chiikawa.init.InitTag;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.testing.TestErrands;
 import com.dwinovo.chiikawa.testing.TestTargets;
@@ -62,6 +65,19 @@ class FarmOfferTest {
         assertEquals("intent.chiikawa.fail.no_crop", TestErrands.whyNoOffer(WorkData.HARVEST, nothing).reasonKey());
         assertEquals("intent.chiikawa.fail.no_farmland", TestErrands.whyNoOffer(WorkData.PLANT, nothing).reasonKey());
         assertEquals("intent.chiikawa.fail.no_container", TestErrands.whyNoOffer(WorkData.DELIVER, nothing).reasonKey());
+    }
+
+    @Test
+    void aPlanterWithNoSeedLacksSeedsAndOneWithSeedsButNoSoilLacksNothing() {
+        Check noSeeds = TestErrands.whyNoOffer(WorkData.PLANT, TestView.at(HOME, FREE));
+        Check noSoil = TestErrands.whyNoOffer(WorkData.PLANT, TestView.at(HOME, FREE).carryingSeeds());
+
+        // The reason is the one the work names either way, and with it what is short when it is the seeds.
+        assertEquals("intent.chiikawa.fail.no_farmland", noSeeds.reasonKey());
+        assertEquals(Optional.of(LackKey.tag(InitTag.ENTITY_PLANT_CROPS)), noSeeds.lack());
+        assertEquals("intent.chiikawa.fail.no_farmland", noSoil.reasonKey());
+        assertEquals(Optional.empty(), noSoil.lack());
+        assertEquals(Optional.empty(), TestErrands.whyNoOffer(WorkData.HARVEST, TestView.at(HOME, FREE)).lack());
     }
 
     @Test

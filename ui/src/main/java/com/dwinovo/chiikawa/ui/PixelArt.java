@@ -142,6 +142,44 @@ public record PixelArt(String... rows) {
         ".XwwwwXXwwwwX.",
         "..XXXX..XXXX..");
 
+    /** An exclamation mark on a pink disc: something is wrong, run. */
+    public static final PixelArt ALERT = new PixelArt(
+        "....XXXXX....",
+        "..XXpppppXX..",
+        ".XppppXppppX.",
+        ".XppppXppppX.",
+        ".XppppXppppX.",
+        ".XppppXppppX.",
+        ".XpppppppppX.",
+        ".XppppXppppX.",
+        ".XpppppppppX.",
+        "..XXpppppXX..",
+        "....XXXXX....");
+
+    /** A question mark on a paper disc: something is missing. */
+    public static final PixelArt QUESTION = new PixelArt(
+        "....XXXXX....",
+        "..XXwwwwwXX..",
+        ".XwwwXXXwwwX.",
+        ".XwwXwwwXwwX.",
+        ".XwwwwwwXwwX.",
+        ".XwwwwwXwwwX.",
+        ".XwwwwXwwwwX.",
+        ".XwwwwwwwwwX.",
+        ".XwwwwXwwwwX.",
+        "..XXwwwwwXX..",
+        "....XXXXX....");
+
+    /** An arrow pointing on: what comes next. */
+    public static final PixelArt NEXT = new PixelArt(
+        "......X...",
+        "......XX..",
+        "XXXXXXXXX.",
+        "XXXXXXXXXX",
+        "XXXXXXXXX.",
+        "......XX..",
+        "......X...");
+
     /** A tick: this is the one that is picked. */
     public static final PixelArt CHECK = new PixelArt(
         "........XX",

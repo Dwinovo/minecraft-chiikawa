@@ -18,6 +18,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.errand.overlay.Overlays;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
+import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.testing.FakeHandle;
 import com.dwinovo.chiikawa.testing.StubErrand;
 import com.dwinovo.chiikawa.testing.TestErrands;
@@ -50,6 +51,8 @@ class ExecutorTest {
 
     private final FakeHandle handle = new FakeHandle();
     private final Projected projection = new Projected();
+    /** What the icon is worked out from besides the step, which a case sets. */
+    private PetIcons.Signs signs = PetIcons.Signs.NONE;
     private final TestRests.Store store = new TestRests.Store();
     private final DecisionLog log = new DecisionLog();
     private final ErrandSettings<String> settings =
@@ -76,6 +79,41 @@ class ExecutorTest {
         start(Routine.single(ScriptedStep.running()), 2);
         executor.glance(null, 60);
         assertEquals(2, handle.glances);
+    }
+
+    @Test
+    void theIconIsWorkedOutFromTheStepAndWhatElseThePetIsAskedAndPublishedWhenItChanges() {
+        assertEquals(PetIcon.NONE, projection.icon);
+
+        ScriptedStep frightened = ScriptedStep.running();
+        frightened.tags = Set.of(StepTag.SCARED);
+        start(Routine.single(frightened), 0);
+        assertEquals(PetIcon.SCARED, projection.icon, "a step tagged scared shows it as it begins");
+
+        executor.end(Outcome.interrupted("test"), 1);
+        assertEquals(PetIcon.NONE, projection.icon, "and no more once the step is over");
+    }
+
+    @Test
+    void aPetOnNoErrandHasItsIconWorkedOutAsWellAtEveryTick() {
+        signs = new PetIcons.Signs(true, false, Optional.empty(), DayPhase.DAY);
+        executor.tick(1);
+        assertEquals(PetIcon.GIFT, projection.icon, "a present is shown by a pet that is on no errand");
+
+        signs = PetIcons.Signs.NONE;
+        executor.tick(2);
+        assertEquals(PetIcon.NONE, projection.icon);
+    }
+
+    @Test
+    void anAsideSaysAboutSomethingAndMakesAMoveButDoesNotMoveThePet() {
+        executor.aside().say(VoiceMoment.MISSING, Optional.of("tag.item.minecraft.arrows"));
+        executor.aside().gesture("scratch_head");
+
+        assertEquals(List.of(VoiceMoment.MISSING), handle.said);
+        assertEquals(List.of(Optional.of("tag.item.minecraft.arrows")), handle.saidAbout);
+        assertEquals(List.of("scratch_head"), handle.gestures);
+        assertEquals(0, handle.walkCleared);
     }
 
     @Test
@@ -186,7 +224,7 @@ class ExecutorTest {
         // As a pet is left by a data pack reload that took away the errand it was on.
         TestErrands.load();
         Executor orphaned = new Executor(handle, projection,
-            new RestLedger(errand -> Errands.restsOf(brain(), errand), errand -> Optional.empty()), log);
+            new RestLedger(errand -> Errands.restsOf(brain(), errand), errand -> Optional.empty()), log, () -> signs);
         orphaned.start(TYPE, PLAN, settings, Routine.single(ScriptedStep.running()), 0);
 
         orphaned.requestEnd(Outcome.interrupted("higher"));
@@ -406,7 +444,7 @@ class ExecutorTest {
     }
 
     private Executor executorOver(TestRests.Store rests, DecisionLog decisions) {
-        return new Executor(handle, projection, new RestLedger(errand -> rests, errand -> Optional.empty()), decisions);
+        return new Executor(handle, projection, new RestLedger(errand -> rests, errand -> Optional.empty()), decisions, () -> signs);
     }
 
     private void start(Routine routine, long now) {
@@ -424,6 +462,7 @@ class ExecutorTest {
         ResourceLocation intent;
         PetActivity activity = PetActivity.NONE;
         String performance = "";
+        PetIcon icon = PetIcon.NONE;
 
         @Override
         public void intent(@Nullable ResourceLocation errand) {
@@ -438,6 +477,11 @@ class ExecutorTest {
         @Override
         public void performance(String performance) {
             this.performance = performance;
+        }
+
+        @Override
+        public void icon(PetIcon icon) {
+            this.icon = icon;
         }
     }
 }

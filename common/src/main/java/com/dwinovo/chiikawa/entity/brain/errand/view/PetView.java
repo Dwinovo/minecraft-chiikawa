@@ -88,6 +88,9 @@ public interface PetView {
     /** @return whether the pet carries arrows */
     boolean hasArrows();
 
+    /** @return whether the pet carries a seed it could plant, on some soil or other */
+    boolean hasSeeds();
+
     /** @return who hurt the pet lately, while the game's hurt-by memory holds it, if it was a creature that is its to answer */
     Optional<Attacker> attacker();
 
