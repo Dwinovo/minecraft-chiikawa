@@ -59,6 +59,7 @@ public final class DataGenerators {
         event.getGenerator().addProvider(true, new PetSpawnProvider(output));
         event.getGenerator().addProvider(true, new PetInteractionProvider(output));
         event.getGenerator().addProvider(true, new ErrandSettingsProvider(output));
+        event.getGenerator().addProvider(true, new JobWorkProvider(output));
         event.getGenerator().addProvider(true, new QualificationProvider(output));
         // Entity tags.
         event.getGenerator().addProvider(true, 
