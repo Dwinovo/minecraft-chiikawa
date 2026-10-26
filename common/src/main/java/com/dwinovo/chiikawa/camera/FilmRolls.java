@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.camera;
 import com.dwinovo.chiikawa.item.FilmItem;
 import com.dwinovo.chiikawa.photo.FilmRoll;
 import com.dwinovo.chiikawa.photo.PhotoData;
+import java.util.Optional;
 import java.util.function.Consumer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -58,16 +59,16 @@ public final class FilmRolls {
      *
      * @param exposures how many shots a roll begun now holds
      * @param overflow where a roll goes that there is no room for beside the film it came from
-     * @return whether there was film to record it on
+     * @return the roll the shot is on, nothing if there was no film to record it on
      */
-    public static boolean record(SimpleContainer container, Item film, int exposures, PhotoData shot,
+    public static Optional<ItemStack> record(SimpleContainer container, Item film, int exposures, PhotoData shot,
             Consumer<ItemStack> overflow) {
         for (int slot = 0; slot < container.getContainerSize(); slot++) {
             ItemStack stack = container.getItem(slot);
             if (isOpen(stack, film)) {
                 add(stack, shot);
                 container.setChanged();
-                return true;
+                return Optional.of(stack);
             }
         }
         for (int slot = 0; slot < container.getContainerSize(); slot++) {
@@ -84,9 +85,9 @@ public final class FilmRolls {
                     }
                 }
                 container.setChanged();
-                return true;
+                return Optional.of(roll);
             }
         }
-        return false;
+        return Optional.empty();
     }
 }

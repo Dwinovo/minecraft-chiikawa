@@ -38,7 +38,7 @@ class WorkDataTest {
         Set<ResourceLocation> errands = Errands.all().stream().map(ErrandType::id).collect(Collectors.toSet());
         Set<ResourceLocation> works = WorkData.all().keySet();
 
-        assertEquals(21, errands.size());
+        assertEquals(22, errands.size());
         assertEquals(errands, ErrandSettingsData.all().keySet(), "settings and errands are each other's");
         assertEquals(errands, ErrandSettings.all().keySet(), "the loader kept every file");
         assertEquals(errands, ErrandFiles.all().keySet(), "every errand has a file");
