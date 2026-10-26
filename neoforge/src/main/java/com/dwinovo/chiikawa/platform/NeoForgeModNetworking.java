@@ -104,6 +104,8 @@ public final class NeoForgeModNetworking {
             (payload, context) -> ClientVoicePacketHandler.handleSpeech(payload));
         registrar.playToClient(PetPayloads.PetGesturePayload.TYPE, PetPayloads.PetGesturePayload.STREAM_CODEC,
             (payload, context) -> ClientPetPacketHandler.handleGesture(payload));
+        registrar.playToClient(PetPayloads.PetOutlookPayload.TYPE, PetPayloads.PetOutlookPayload.STREAM_CODEC,
+            (payload, context) -> ClientPetPacketHandler.handleOutlook(payload));
         registrar.playToClient(SettingsPayloads.WorldSettingsPayload.TYPE, SettingsPayloads.WorldSettingsPayload.STREAM_CODEC,
             (payload, context) -> ClientSettingsPacketHandler.handleWorld(payload));
         registrar.playToServer(SettingsPayloads.ChangeWorldSettingsPayload.TYPE, SettingsPayloads.ChangeWorldSettingsPayload.STREAM_CODEC,

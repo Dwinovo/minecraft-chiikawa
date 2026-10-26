@@ -9,6 +9,7 @@ import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandTunings;
+import com.dwinovo.chiikawa.entity.brain.errand.LackKey;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.work.action.Duel;
 import com.dwinovo.chiikawa.testing.TestAnchors;
@@ -24,6 +25,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.level.Level;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -107,6 +109,19 @@ class CombatOfferTest {
 
         assertEquals(1, TestErrands.offers(WorkData.MELEE, noArrows).size());
         assertEquals("intent.chiikawa.fail.no_arrows", TestErrands.whyNoOffer(WorkData.RANGED, noArrows).reasonKey());
+    }
+
+    @Test
+    void anArcherWithoutArrowsLacksArrowsWithOrWithoutAFoeAndASwordsmanLacksNothing() {
+        TestView noArrows = fighting();
+        TestView nobodyAndNoArrows = TestView.at(HOME, FREE);
+
+        for (ResourceLocation errand : new ResourceLocation[] {WorkData.RANGED, WorkData.HUNT_RANGED}) {
+            assertEquals(Optional.of(LackKey.tag(ItemTags.ARROWS)), TestErrands.whyNoOffer(errand, noArrows).lack(), errand::toString);
+            assertEquals(Optional.of(LackKey.tag(ItemTags.ARROWS)), TestErrands.whyNoOffer(errand, nobodyAndNoArrows).lack(),
+                errand::toString);
+        }
+        assertEquals(Optional.empty(), TestErrands.whyNoOffer(WorkData.MELEE, nobodyAndNoArrows).lack());
     }
 
     @Test

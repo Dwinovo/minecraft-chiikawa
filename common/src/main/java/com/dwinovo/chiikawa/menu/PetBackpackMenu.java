@@ -3,11 +3,16 @@ package com.dwinovo.chiikawa.menu;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitMenu;
 import com.dwinovo.chiikawa.item.BagItem;
+import com.dwinovo.chiikawa.network.PetPayloads.PetOutlookPayload;
+import com.dwinovo.chiikawa.platform.Services;
 
 import io.netty.buffer.ByteBuf;
+import java.util.Optional;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -54,6 +59,14 @@ public class PetBackpackMenu extends AbstractContainerMenu {
     private boolean slotsShown = true;
     /** Which entity the pet is, fixed when the menu is opened; the client finds the pet in its level by it. */
     private final int petId;
+    /** How often the server tells the player who has the menu open what the pet would do next and why it is not at work. */
+    private static final int OUTLOOK_INTERVAL = 20;
+    /** Who has the menu open, on the server; the outlook is for them alone. */
+    private final ServerPlayer viewer;
+    /** Ticks of the server's sync left before the outlook is sent again; the first is sent at once. */
+    private int untilOutlook;
+    /** What the server last said of the pet, on the client. */
+    private Optional<PetOutlookPayload> outlook = Optional.empty();
 
     /**
      * How the pet's id travels when the menu is opened, as the horse screen's does: a whole int in the
@@ -84,6 +97,7 @@ public class PetBackpackMenu extends AbstractContainerMenu {
         this.pet = pet;
         this.petId = petId;
         this.level = playerInventory.player.level();
+        this.viewer = playerInventory.player instanceof ServerPlayer player ? player : null;
 
         SimpleContainer handler = pet != null ? pet.getBackpack() : new SimpleContainer(petSlots());
         this.petContainer = handler;
@@ -136,6 +150,35 @@ public class PetBackpackMenu extends AbstractContainerMenu {
      */
     private AbstractPet pet() {
         return pet != null ? pet : getPet(level);
+    }
+
+    /**
+     * As a container menu syncs its slots, the server also tells the player who has the menu open what the pet would do next
+     * and why it is not at work, every {@link #OUTLOOK_INTERVAL} ticks: not to anyone else, and not from the pet's tick,
+     * which knows nothing of who is looking.
+     */
+    @Override
+    public void broadcastChanges() {
+        super.broadcastChanges();
+        if (viewer != null && pet != null && --untilOutlook <= 0) {
+            untilOutlook = OUTLOOK_INTERVAL;
+            if (pet.level() instanceof ServerLevel level && Services.NETWORK.canReceive(viewer, PetOutlookPayload.TYPE)) {
+                Services.NETWORK.sendToClient(viewer, PetOutlookPayload.of(pet.getId(), pet.getMind().look(level),
+                    pet.getMind().whyNot()));
+            }
+        }
+    }
+
+    /** Takes what the server said of the pet, if it is of this menu's pet. Client only. */
+    public void receive(PetOutlookPayload said) {
+        if (said.pet() == petId) {
+            this.outlook = Optional.of(said);
+        }
+    }
+
+    /** @return what the server last said of the pet, once it has said anything. Client only. */
+    public Optional<PetOutlookPayload> outlook() {
+        return outlook;
     }
 
     /** Shows or hides every slot, for the page of the pet screen that is open. Client only. */
