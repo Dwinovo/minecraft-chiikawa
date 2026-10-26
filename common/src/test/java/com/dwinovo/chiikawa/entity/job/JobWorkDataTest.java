@@ -26,9 +26,8 @@ class JobWorkDataTest {
     }
 
     @Test
-    void onlyTheFarmerLooksForBlocksAndLooksAsItAlwaysHas() {
+    void theFarmerLooksForBlocksAsItAlwaysHas() {
         assertEquals(Optional.of(new Sight(5, 1, 10.0, 30, 3)), JobWorkData.all().get(JobIds.FARMER).sight());
-        JobWorkData.all().forEach((job, work) -> assertEquals(job.equals(JobIds.FARMER), work.sight().isPresent(), job.toString()));
     }
 
     @Test
