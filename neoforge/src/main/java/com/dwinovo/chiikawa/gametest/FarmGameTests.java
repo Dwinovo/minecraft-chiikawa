@@ -7,6 +7,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
@@ -163,7 +164,8 @@ public final class FarmGameTests {
             helper.assertTrue(!container.isEmpty(), "the chest is still empty; the pet was "
                 + pet.getIntent().map(Object::toString).orElse("doing nothing")
                 + " and had been told about a container at "
-                + pet.getBrain().getMemory(InitMemory.CONTAINER_POS.get()).map(Object::toString).orElse("nowhere"));
+                + pet.getBrain().getMemory(InitMemory.WORK_SIGHTS.get()).map(sights -> sights.get(WorkData.DELIVER))
+                    .map(Object::toString).orElse("nowhere"));
         });
     }
 
@@ -187,7 +189,7 @@ public final class FarmGameTests {
         boolean[] setOffForTheChest = {false};
 
         helper.onEachTick(() -> {
-            if (!setOffForTheChest[0] && pet.getIntent().filter(ErrandIds.DELIVER::equals).isPresent()) {
+            if (!setOffForTheChest[0] && pet.getIntent().filter(WorkData.DELIVER::equals).isPresent()) {
                 setOffForTheChest[0] = true;
                 long ripe = field.stream().filter(crop -> helper.getBlockState(crop).getBlock() == Blocks.WHEAT
                     && helper.getBlockState(crop).getValue(CropBlock.AGE) == CropBlock.MAX_AGE).count();
@@ -312,7 +314,7 @@ public final class FarmGameTests {
                 ripeWheat(helper, open);
                 return;
             }
-            if (setOff[0] < 0L && pet.getIntent().filter(ErrandIds.HARVEST::equals).isPresent()) {
+            if (setOff[0] < 0L && pet.getIntent().filter(WorkData.HARVEST::equals).isPresent()) {
                 setOff[0] = helper.getTick();
             }
             if (carries(pet, Items.WHEAT)) {
@@ -325,7 +327,7 @@ public final class FarmGameTests {
 
     private static Optional<DecisionLog.Ended> harvestEnded(AbstractPet pet) {
         return pet.getMind().log().entries().stream()
-            .filter(entry -> entry instanceof DecisionLog.Ended ended && ended.errand().equals(ErrandIds.HARVEST))
+            .filter(entry -> entry instanceof DecisionLog.Ended ended && ended.errand().equals(WorkData.HARVEST))
             .map(DecisionLog.Ended.class::cast).findFirst();
     }
 

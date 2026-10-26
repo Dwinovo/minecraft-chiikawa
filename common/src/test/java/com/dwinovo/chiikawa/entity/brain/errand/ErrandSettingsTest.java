@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettingsLoader.Loaded;
 import com.dwinovo.chiikawa.entity.brain.errand.overlay.Overlays;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
@@ -50,16 +51,17 @@ class ErrandSettingsTest {
                       "max_walk_ticks": 400, "no_way_ticks": 100 } }""";
 
     private static final String PLANT = """
-        { "priority": 50, "score": 0.6, "max_ticks": 600, "yields_to": ["chiikawa:harvest"], "overlays": [],
+        { "priority": 50, "score": 0.6, "max_ticks": 600, "yields_to": ["chiikawa:stay"], "overlays": [],
           "rests": { "done": 0, "gave_up": { "ticks": 200, "per": "subject" }, "interrupted": 0 },
-          "tuning": { "speed": 0.8, "reach_sqr": 3.0, "no_way_ticks": 0, "tool_wear": 0 } }""";
+          "tuning": { "speed": 0.8, "pickup_distance": 3.0, "max_walk_ticks": 600, "no_way_ticks": 0 } }""";
 
     private static final String TAKE_TASK = """
         { "priority": 50, "score": 0.7, "max_ticks": 1200, "yields_to": [], "overlays": [],
           "rests": { "done": 0, "gave_up": 600, "interrupted": 600 },
           "tuning": { "speed": 0.7, "arrive_distance": 2, "take_distance": 3.0 } }""";
 
-    private static final String HARVEST = PLANT.replace("\"yields_to\": [\"chiikawa:harvest\"]", "\"yields_to\": []");
+    private static final String HARVEST = PLANT.replace("\"yields_to\": [\"chiikawa:stay\"]", "\"yields_to\": []")
+        .replace("\"tuning\": { \"speed\": 0.8, \"pickup_distance\": 3.0, \"max_walk_ticks\": 600, \"no_way_ticks\": 0 }", "\"tuning\": {}");
 
     @BeforeAll
     static void bootstrap() {
@@ -110,14 +112,29 @@ class ErrandSettingsTest {
 
         try (MultiPackResourceManager manager = new MultiPackResourceManager(PackType.SERVER_DATA, List.of(new PathPackResources(
             new PackLocationInfo("test", Component.literal("test"), PackSource.BUILT_IN, Optional.empty()), root)))) {
-            assertEquals(Set.of(ErrandIds.HARVEST, ErrandIds.TAKE_PHOTO, ResourceLocation.fromNamespaceAndPath("other", "sulk")),
+            assertEquals(Set.of(WorkData.HARVEST, ErrandIds.TAKE_PHOTO, ResourceLocation.fromNamespaceAndPath("other", "sulk")),
                 ErrandSettingsLoader.errandIds(manager));
         }
     }
 
     @Test
+    void theErrandsAPackHasThatAreDoneToBlocksAreTheOnesWhoseFileNamesABlockTarget(@TempDir Path root) throws IOException {
+        Path errands = root.resolve("data/chiikawa/pet_errand");
+        Files.createDirectories(errands);
+        Files.writeString(errands.resolve("harvest.json"), "{ \"target\": { \"type\": \"ripe_crop\", \"missing\": \"no_crop\" } }");
+        Files.writeString(errands.resolve("melee.json"), "{ \"target\": { \"type\": \"foe\", \"missing\": \"no_attack_target\" } }");
+        Files.writeString(errands.resolve("play_music.json"), "{ \"action\": \"chiikawa:busk\" }");
+        Files.writeString(errands.resolve("take_photo.json"), "{ \"target\": 5 }");
+
+        try (MultiPackResourceManager manager = new MultiPackResourceManager(PackType.SERVER_DATA, List.of(new PathPackResources(
+            new PackLocationInfo("test", Component.literal("test"), PackSource.BUILT_IN, Optional.empty()), root)))) {
+            assertEquals(Set.of(WorkData.HARVEST), ErrandSettingsLoader.blockWorkIds(manager));
+        }
+    }
+
+    @Test
     void settingsEncodeToWhatTheyParseFrom() {
-        decoded(Map.of(ErrandIds.TAKE_PHOTO, PHOTO, ErrandIds.PLANT, PLANT)).forEach((errand, settings) -> {
+        decoded(Map.of(ErrandIds.TAKE_PHOTO, PHOTO, ErrandIds.PICK_UP_ITEM, PLANT)).forEach((errand, settings) -> {
             JsonElement encoded = ErrandSettings.codecOf(errand).encodeStart(JsonOps.INSTANCE, settings).getOrThrow();
 
             assertEquals(settings, ErrandSettings.codecOf(errand).parse(JsonOps.INSTANCE, encoded).getOrThrow());
@@ -137,17 +154,17 @@ class ErrandSettingsTest {
 
     @Test
     void theVoiceOnSettingOffIsRead() {
-        ErrandSettings<?> settings = parse(ErrandIds.PLANT, PLANT.replace("\"overlays\": [],", "\"overlays\": [], \"start_voice\": \"hunt\",")).getOrThrow();
+        ErrandSettings<?> settings = parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"overlays\": [],", "\"overlays\": [], \"start_voice\": \"hunt\",")).getOrThrow();
 
         assertEquals(Optional.of(VoiceMoment.HUNT), settings.startVoice());
     }
 
     @Test
     void anOverlayIsOneOfTheOnesTheModHasAndAnyOtherSwitchesTheErrandOff() {
-        ErrandSettings<?> chatting = parse(ErrandIds.PLANT, PLANT.replace("\"overlays\": []", "\"overlays\": [\"chiikawa:idle_chatter\"]")).getOrThrow();
+        ErrandSettings<?> chatting = parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"overlays\": []", "\"overlays\": [\"chiikawa:idle_chatter\"]")).getOrThrow();
 
         assertEquals(List.of(Overlays.IDLE_CHATTER), chatting.overlays());
-        assertTrue(parse(ErrandIds.PLANT, PLANT.replace("\"overlays\": []", "\"overlays\": [\"chiikawa:idle_chater\"]")).isError());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"overlays\": []", "\"overlays\": [\"chiikawa:idle_chater\"]")).isError());
     }
 
     @Test
@@ -194,85 +211,85 @@ class ErrandSettingsTest {
 
     @Test
     void anErrandThatGivesUpMustRestAfterwards() {
-        assertTrue(parse(ErrandIds.PLANT, PLANT.replace("{ \"ticks\": 200, \"per\": \"subject\" }", "0")).isError());
-        assertTrue(parse(ErrandIds.PLANT, PLANT.replace("{ \"ticks\": 200, \"per\": \"subject\" }",
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("{ \"ticks\": 200, \"per\": \"subject\" }", "0")).isError());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("{ \"ticks\": 200, \"per\": \"subject\" }",
             "{ \"ticks\": 0, \"per\": \"subject\" }")).isError());
-        assertTrue(parse(ErrandIds.PLANT, PLANT.replace("\"gave_up\": { \"ticks\": 200, \"per\": \"subject\" }, ", "")).isError(),
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"gave_up\": { \"ticks\": 200, \"per\": \"subject\" }, ", "")).isError(),
             "and say how long");
-        assertTrue(parse(ErrandIds.PLANT, PLANT.replace("{ \"ticks\": 200, \"per\": \"subject\" }",
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("{ \"ticks\": 200, \"per\": \"subject\" }",
             "{ \"from\": \"chiikawa:camera_retry\" }")).isSuccess(), "a source is taken to give something");
     }
 
     @Test
     void theOtherRestsMayBeNothing() {
-        assertTrue(parse(ErrandIds.PLANT, PLANT).isSuccess());
-        assertTrue(parse(ErrandIds.PLANT, PLANT.replace("\"done\": 0", "\"done\": 600")).isSuccess());
-        assertTrue(parse(ErrandIds.PLANT, PLANT.replace("\"interrupted\": 0", "\"interrupted\": 600")).isSuccess());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT).isSuccess());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"done\": 0", "\"done\": 600")).isSuccess());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"interrupted\": 0", "\"interrupted\": 600")).isSuccess());
     }
 
     @Test
     void anErrandThatNeverEndsOrHasNoPriorityIsRejected() {
-        assertTrue(parse(ErrandIds.PLANT, PLANT.replace("\"max_ticks\": 600", "\"max_ticks\": 0")).isError());
-        assertTrue(parse(ErrandIds.PLANT, PLANT.replace("\"max_ticks\": 600", "\"max_ticks\": -5")).isError());
-        assertTrue(parse(ErrandIds.PLANT, PLANT.replace("\"priority\": 50", "\"priority\": -1")).isError());
-        assertTrue(parse(ErrandIds.PLANT, PLANT.replace("\"score\": 0.6", "\"score\": 1.5")).isError());
-        assertTrue(parse(ErrandIds.PLANT, PLANT.replace("\"max_ticks\": 600, ", "")).isError());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"max_ticks\": 600", "\"max_ticks\": 0")).isError());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"max_ticks\": 600", "\"max_ticks\": -5")).isError());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"priority\": 50", "\"priority\": -1")).isError());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"score\": 0.6", "\"score\": 1.5")).isError());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"max_ticks\": 600, ", "")).isError());
     }
 
     @Test
     void aPetMayBeToldToGiveUpTheFirstTimeThereIsNoWay() {
-        assertEquals(0, ((ErrandTunings.BlockWork) parse(ErrandIds.PLANT, PLANT).getOrThrow().tuning()).noWayTicks());
+        assertEquals(0, ((ErrandTunings.PickUp) parse(ErrandIds.PICK_UP_ITEM, PLANT).getOrThrow().tuning()).noWayTicks());
         assertEquals(100, ((ErrandTunings.TakePhoto) parse(ErrandIds.TAKE_PHOTO, PHOTO).getOrThrow().tuning()).noWayTicks());
     }
 
     @Test
     void aTuningOfTheWrongShapeIsRejected() {
-        assertTrue(parse(ErrandIds.PLANT, PLANT.replace("\"reach_sqr\": 3.0", "\"stand_back\": 3")).isError());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"pickup_distance\": 3.0", "\"stand_back\": 3")).isError());
         assertTrue(parse(ErrandIds.TAKE_PHOTO, PHOTO.replace("\"no_way_ticks\": 100", "\"no_way_ticks\": -1")).isError());
-        assertTrue(parse(ErrandIds.STAY, PLANT.replace("\"tuning\": { \"speed\": 0.8, \"reach_sqr\": 3.0, \"no_way_ticks\": 0, \"tool_wear\": 0 }", "\"tuning\": {}")).isSuccess());
+        assertTrue(parse(ErrandIds.STAY, PLANT.replace("\"tuning\": { \"speed\": 0.8, \"pickup_distance\": 3.0, \"max_walk_ticks\": 600, \"no_way_ticks\": 0 }", "\"tuning\": {}")).isSuccess());
     }
 
     @Test
     void anErrandYieldsOnlyToAnotherOfItsOwnPriority() {
-        Map<ResourceLocation, ErrandSettings<?>> all = decoded(Map.of(ErrandIds.HARVEST, HARVEST, ErrandIds.PLANT, PLANT));
+        Map<ResourceLocation, ErrandSettings<?>> all = decoded(Map.of(ErrandIds.STAY, HARVEST, ErrandIds.PICK_UP_ITEM, PLANT));
 
-        assertEquals(Optional.empty(), all.get(ErrandIds.PLANT).problemAmong(ErrandIds.PLANT, all));
-        assertEquals(Optional.empty(), all.get(ErrandIds.HARVEST).problemAmong(ErrandIds.HARVEST, all));
+        assertEquals(Optional.empty(), all.get(ErrandIds.PICK_UP_ITEM).problemAmong(ErrandIds.PICK_UP_ITEM, all));
+        assertEquals(Optional.empty(), all.get(ErrandIds.STAY).problemAmong(ErrandIds.STAY, all));
     }
 
     @Test
     void anErrandThatYieldsToOneOfAnotherPriorityOrToItselfOrToNoneIsFlagged() {
         Map<ResourceLocation, ErrandSettings<?>> all = decoded(Map.of(
-            ErrandIds.HARVEST, HARVEST.replace("\"priority\": 50", "\"priority\": 30"), ErrandIds.PLANT, PLANT));
-        assertTrue(all.get(ErrandIds.PLANT).problemAmong(ErrandIds.PLANT, all).isPresent(), "another priority");
+            ErrandIds.STAY, HARVEST.replace("\"priority\": 50", "\"priority\": 30"), ErrandIds.PICK_UP_ITEM, PLANT));
+        assertTrue(all.get(ErrandIds.PICK_UP_ITEM).problemAmong(ErrandIds.PICK_UP_ITEM, all).isPresent(), "another priority");
 
-        all = decoded(Map.of(ErrandIds.PLANT, PLANT));
-        assertTrue(all.get(ErrandIds.PLANT).problemAmong(ErrandIds.PLANT, all).isPresent(), "not there");
+        all = decoded(Map.of(ErrandIds.PICK_UP_ITEM, PLANT));
+        assertTrue(all.get(ErrandIds.PICK_UP_ITEM).problemAmong(ErrandIds.PICK_UP_ITEM, all).isPresent(), "not there");
 
-        all = decoded(Map.of(ErrandIds.PLANT, PLANT.replace("chiikawa:harvest", "chiikawa:plant")));
-        assertTrue(all.get(ErrandIds.PLANT).problemAmong(ErrandIds.PLANT, all).isPresent(), "itself");
+        all = decoded(Map.of(ErrandIds.PICK_UP_ITEM, PLANT.replace("chiikawa:stay", "chiikawa:pick_up_item")));
+        assertTrue(all.get(ErrandIds.PICK_UP_ITEM).problemAmong(ErrandIds.PICK_UP_ITEM, all).isPresent(), "itself");
     }
 
     @Test
     void theLoaderKeepsWhatDecodesAndSaysWhatDoesNot() {
         Loaded loaded = ErrandSettingsLoader.load(files(Map.of(
-            ErrandIds.HARVEST, HARVEST,
-            ErrandIds.PLANT, PLANT.replace("\"max_ticks\": 600", "\"max_ticks\": 0"),
+            ErrandIds.STAY, HARVEST,
+            ErrandIds.PICK_UP_ITEM, PLANT.replace("\"max_ticks\": 600", "\"max_ticks\": 0"),
             ErrandIds.TAKE_PHOTO, PHOTO)));
 
-        assertEquals(Set.of(ErrandIds.HARVEST, ErrandIds.TAKE_PHOTO), loaded.settings().keySet());
+        assertEquals(Set.of(ErrandIds.STAY, ErrandIds.TAKE_PHOTO), loaded.settings().keySet());
         assertEquals(1, loaded.errors().size());
-        assertTrue(loaded.errors().get(0).contains("chiikawa:plant"), loaded.errors().get(0));
+        assertTrue(loaded.errors().get(0).contains("chiikawa:pick_up_item"), loaded.errors().get(0));
         assertTrue(loaded.warnings().isEmpty());
     }
 
     @Test
     void theLoaderSwitchesOffAnErrandThatYieldsWrongAndNoneOther() {
         Loaded loaded = ErrandSettingsLoader.load(files(Map.of(
-            ErrandIds.HARVEST, HARVEST.replace("\"priority\": 50", "\"priority\": 30"),
-            ErrandIds.PLANT, PLANT)));
+            ErrandIds.STAY, HARVEST.replace("\"priority\": 50", "\"priority\": 30"),
+            ErrandIds.PICK_UP_ITEM, PLANT)));
 
-        assertEquals(Set.of(ErrandIds.HARVEST), loaded.settings().keySet(), "harvest itself is fine");
+        assertEquals(Set.of(ErrandIds.STAY), loaded.settings().keySet(), "harvest itself is fine");
         assertEquals(1, loaded.errors().size());
         assertTrue(loaded.errors().get(0).contains("yields_to"), loaded.errors().get(0));
     }
@@ -280,26 +297,26 @@ class ErrandSettingsTest {
     @Test
     void theLoaderSwitchesOffAnErrandWhoseSettingsItsOwnRulesRefuse() {
         Loaded loaded = ErrandSettingsLoader.load(files(Map.of(
-            ErrandIds.HARVEST, HARVEST,
+            ErrandIds.STAY, HARVEST,
             ErrandIds.TAKE_TASK, TAKE_TASK.replace("\"max_ticks\": 1200", "\"max_ticks\": " + (BoardSlips.RESERVATION_TICKS + 1)))));
 
-        assertEquals(Set.of(ErrandIds.HARVEST), loaded.settings().keySet());
+        assertEquals(Set.of(ErrandIds.STAY), loaded.settings().keySet());
         assertEquals(1, loaded.errors().size());
         assertTrue(loaded.errors().get(0).contains("chiikawa:take_task") && loaded.errors().get(0).contains("max_ticks"),
             loaded.errors().get(0));
-        assertEquals(Set.of(ErrandIds.HARVEST, ErrandIds.TAKE_TASK), ErrandSettingsLoader.load(files(Map.of(
-            ErrandIds.HARVEST, HARVEST, ErrandIds.TAKE_TASK, TAKE_TASK))).settings().keySet());
+        assertEquals(Set.of(ErrandIds.STAY, ErrandIds.TAKE_TASK), ErrandSettingsLoader.load(files(Map.of(
+            ErrandIds.STAY, HARVEST, ErrandIds.TAKE_TASK, TAKE_TASK))).settings().keySet());
     }
 
     @Test
     void aFileNamedForNoErrandIsWarnedAboutAndSkipped() {
         ResourceLocation stranger = ResourceLocation.fromNamespaceAndPath("chiikawa", "sulk");
-        Map<ResourceLocation, JsonElement> files = files(Map.of(ErrandIds.HARVEST, HARVEST));
+        Map<ResourceLocation, JsonElement> files = files(Map.of(ErrandIds.STAY, HARVEST));
         files.put(stranger, JsonParser.parseString(HARVEST));
 
         Loaded loaded = ErrandSettingsLoader.load(files);
 
-        assertEquals(Set.of(ErrandIds.HARVEST), loaded.settings().keySet());
+        assertEquals(Set.of(ErrandIds.STAY), loaded.settings().keySet());
         assertTrue(loaded.errors().isEmpty());
         assertEquals(1, loaded.warnings().size());
         assertTrue(loaded.warnings().get(0).contains("chiikawa:sulk"));
@@ -311,10 +328,10 @@ class ErrandSettingsTest {
         try {
             ErrandSettings.replaceAll(Map.of());
 
-            assertEquals(Optional.empty(), ErrandSettings.of(ErrandIds.PLANT));
-            assertEquals(Optional.empty(), ErrandSettings.of(ErrandIds.PLANT));
-            ErrandSettings.replaceAll(decoded(Map.of(ErrandIds.PLANT, PLANT)));
-            assertTrue(ErrandSettings.of(ErrandIds.PLANT).isPresent());
+            assertEquals(Optional.empty(), ErrandSettings.of(ErrandIds.PICK_UP_ITEM));
+            assertEquals(Optional.empty(), ErrandSettings.of(ErrandIds.PICK_UP_ITEM));
+            ErrandSettings.replaceAll(decoded(Map.of(ErrandIds.PICK_UP_ITEM, PLANT)));
+            assertTrue(ErrandSettings.of(ErrandIds.PICK_UP_ITEM).isPresent());
         } finally {
             ErrandSettings.replaceAll(before);
         }

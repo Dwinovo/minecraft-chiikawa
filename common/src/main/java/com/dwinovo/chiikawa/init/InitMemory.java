@@ -2,7 +2,6 @@ package com.dwinovo.chiikawa.init;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.SubjectRests;
-import com.dwinovo.chiikawa.entity.brain.sensor.FarmSights;
 import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.social.InteractionPlan;
 import com.dwinovo.chiikawa.social.SocialCooldowns;
@@ -21,6 +20,14 @@ import net.minecraft.util.Unit;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
 public final class InitMemory {
+    /*
+     * An id a save may hold stays registered, with its codec, for as long as a save of a build that wrote it may exist.
+     * A save with a memory id nobody registered loads its pet with none of its memories (vanilla's Brain codec reads the
+     * entries as one result), so a memory is retired from the pets by taking it out of AbstractPet.MEMORY_TYPES, where a
+     * save's entry for it is dropped alone, and never by deleting its registration. A memory that has no codec is never
+     * saved and may go. Nothing reads or writes the five below since 0.1.4, when the work sensor's WORK_SIGHTS, which is
+     * not saved, replaced them: a pet has no place for them, and getMemory on one throws.
+     */
     public static final Supplier<MemoryModuleType<BlockPos>> HARVEST_POS =
         Services.REGISTRY.<MemoryModuleType<BlockPos>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
@@ -57,13 +64,13 @@ public final class InitMemory {
         );
 
     /**
-     * The blocks of work the farmer sensor saw after the one in each of the five memories above, which is the one it
-     * chose; see {@link FarmSights}. Not saved: the sensor sees them again when the pet is back.
+     * The blocks of work the work sensor saw, for each errand done to blocks, nearest first: the first is the one it
+     * chose. Not saved: the sensor sees them again when the pet is back; see {@link com.dwinovo.chiikawa.entity.brain.sensor.WorkSights}.
      */
-    public static final Supplier<MemoryModuleType<FarmSights>> FARM_SIGHTS =
-        Services.REGISTRY.<MemoryModuleType<FarmSights>>register(
+    public static final Supplier<MemoryModuleType<Map<ResourceLocation, List<BlockPos>>>> WORK_SIGHTS =
+        Services.REGISTRY.<MemoryModuleType<Map<ResourceLocation, List<BlockPos>>>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "farm_sights"),
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "work_sights"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
