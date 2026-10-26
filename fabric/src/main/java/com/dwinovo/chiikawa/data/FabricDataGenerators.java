@@ -31,6 +31,7 @@ public class FabricDataGenerators implements DataGeneratorEntrypoint {
         pack.addProvider((net.minecraft.data.DataProvider.Factory<PetSpawnProvider>) PetSpawnProvider::new);
         pack.addProvider((net.minecraft.data.DataProvider.Factory<PetInteractionProvider>) PetInteractionProvider::new);
         pack.addProvider((net.minecraft.data.DataProvider.Factory<ErrandSettingsProvider>) ErrandSettingsProvider::new);
+        pack.addProvider((net.minecraft.data.DataProvider.Factory<JobWorkProvider>) JobWorkProvider::new);
         pack.addProvider((net.minecraft.data.DataProvider.Factory<QualificationProvider>) QualificationProvider::new);
         pack.addProvider((net.minecraft.data.DataProvider.Factory<ManualProvider>) ManualProvider::new);
         pack.addProvider((output, registries) -> new ModAdvancementProvider(output, registries));

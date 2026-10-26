@@ -1,13 +1,12 @@
 package com.dwinovo.chiikawa.init;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
+import com.dwinovo.chiikawa.entity.job.JobIds;
 import com.dwinovo.chiikawa.entity.job.api.PetCapability;
 import com.dwinovo.chiikawa.entity.job.impl.BasicJob;
 import com.dwinovo.chiikawa.entity.job.impl.MusicianJob;
 import com.dwinovo.chiikawa.entity.job.impl.NoneJob;
 import com.dwinovo.chiikawa.platform.Services;
-import java.util.List;
 import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -26,53 +25,49 @@ public final class InitRegistry {
 
     public static final Registry<PetCapability> PET_JOB_REGISTRY = Services.REGISTRY.createRegistry(
         PET_JOB_KEY,
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "none"),
+        JobIds.NONE,
         true
     );
 
     public static final Supplier<PetCapability> NONE = Services.REGISTRY.register(
         PET_JOB_REGISTRY,
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "none"),
+        JobIds.NONE,
         () -> new NoneJob(NONE_ID)
     );
     public static final Supplier<PetCapability> FARMER = Services.REGISTRY.register(
         PET_JOB_REGISTRY,
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "farmer"),
+        JobIds.FARMER,
         () -> new BasicJob(
             FARMER_ID,
             10,
-            InitTag.ENTITY_FARMER_TOOLS,
-            List.of(ErrandIds.HARVEST, ErrandIds.PLANT, ErrandIds.DELIVER, ErrandIds.WEED, ErrandIds.PICK_MUSHROOM)
+            InitTag.ENTITY_FARMER_TOOLS
         )
     );
     public static final Supplier<PetCapability> FENCER = Services.REGISTRY.register(
         PET_JOB_REGISTRY,
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "fencer"),
+        JobIds.FENCER,
         () -> new BasicJob(
             FENCER_ID,
             10,
-            InitTag.ENTITY_FENCER_TOOLS,
-            List.of(ErrandIds.MELEE)
+            InitTag.ENTITY_FENCER_TOOLS
         )
     );
     public static final Supplier<PetCapability> ARCHER = Services.REGISTRY.register(
         PET_JOB_REGISTRY,
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "archer"),
+        JobIds.ARCHER,
         () -> new BasicJob(
             ARCHER_ID,
             10,
-            InitTag.ENTITY_ARCHER_TOOLS,
-            List.of(ErrandIds.RANGED)
+            InitTag.ENTITY_ARCHER_TOOLS
         )
     );
     public static final Supplier<PetCapability> MUSICIAN = Services.REGISTRY.register(
         PET_JOB_REGISTRY,
-        ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "musician"),
+        JobIds.MUSICIAN,
         () -> new MusicianJob(
             MUSICIAN_ID,
             10,
-            InitTag.ENTITY_MUSICIAN_TOOLS,
-            List.of(ErrandIds.PLAY_MUSIC)
+            InitTag.ENTITY_MUSICIAN_TOOLS
         )
     );
 

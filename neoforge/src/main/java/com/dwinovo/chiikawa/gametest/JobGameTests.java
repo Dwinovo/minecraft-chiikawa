@@ -9,14 +9,24 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.data.JobWorkData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandType;
+import com.dwinovo.chiikawa.entity.brain.errand.Errands;
+import com.dwinovo.chiikawa.entity.job.JobIds;
+import com.dwinovo.chiikawa.entity.job.JobWork;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitRegistry;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.Items;
@@ -83,6 +93,37 @@ public final class JobGameTests {
         helper.succeed();
     }
 
+    /** What each job adds to what every pet does is what the pack's job files say, in their order. */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void a_job_offers_the_errands_its_file_names_in_order(GameTestHelper helper) {
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+
+        helper.assertTrue(offeredBy(pet).equals(generic()), "a pet with no job was offered more than every pet is");
+        helper.assertTrue(offeredBy(holding(pet, Items.WOODEN_HOE)).equals(withWork(ErrandIds.HARVEST, ErrandIds.PLANT,
+            ErrandIds.DELIVER, ErrandIds.WEED, ErrandIds.PICK_MUSHROOM)), "a farmer was not offered the farmer's work in order");
+        helper.assertTrue(offeredBy(holding(pet, Items.IRON_SWORD)).equals(withWork(ErrandIds.MELEE)),
+            "a fencer was not offered melee");
+        helper.assertTrue(offeredBy(holding(pet, Items.BOW)).equals(withWork(ErrandIds.RANGED)),
+            "an archer was not offered ranged");
+        helper.succeed();
+    }
+
+    /** A job file that names an errand nothing registers costs the job that one errand, not the pet its brain. */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void a_job_naming_a_missing_errand_is_offered_without_it(GameTestHelper helper) {
+        AbstractPet pet = holding(wildPet(helper, new BlockPos(3, STAND, 3)), Items.WOODEN_HOE);
+        try {
+            JobWork.replaceAll(Map.of(JobIds.FARMER, new JobWork(List.of(ErrandIds.HARVEST,
+                ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "sulk"), ErrandIds.PLANT))));
+
+            helper.assertTrue(offeredBy(pet).equals(withWork(ErrandIds.HARVEST, ErrandIds.PLANT)),
+                "the missing errand was offered, or kept the others from it");
+        } finally {
+            JobWork.replaceAll(JobWorkData.all());
+        }
+        helper.succeed();
+    }
+
     /** The one job that is not the tool's alone: only Hachiware plays. */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void only_hachiware_takes_the_music_box(GameTestHelper helper) {
@@ -126,5 +167,19 @@ public final class JobGameTests {
         helper.setBlock(crop.below(), Blocks.FARMLAND);
         BlockState ripe = Blocks.WHEAT.defaultBlockState().setValue(CropBlock.AGE, CropBlock.MAX_AGE);
         helper.setBlock(crop, ripe);
+    }
+
+    private static List<ResourceLocation> offeredBy(AbstractPet pet) {
+        return JobWork.errandsOf(pet).stream().map(ErrandType::id).toList();
+    }
+
+    private static List<ResourceLocation> generic() {
+        return Errands.generic().stream().map(ErrandType::id).toList();
+    }
+
+    private static List<ResourceLocation> withWork(ResourceLocation... work) {
+        List<ResourceLocation> all = new ArrayList<>(generic());
+        all.addAll(List.of(work));
+        return all;
     }
 }

@@ -5,9 +5,11 @@ import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.personality.IdleHabits;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
+import com.dwinovo.chiikawa.entity.job.JobIds;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -27,9 +29,8 @@ import net.minecraft.world.level.ItemLike;
  * items, so a wandering pet still reacts to those whatever its randomness.
  */
 public final class PersonalityData {
-    private static final List<ResourceLocation> FARMING = List.of(ErrandIds.HARVEST, ErrandIds.PLANT, ErrandIds.DELIVER,
-        ErrandIds.WEED, ErrandIds.PICK_MUSHROOM);
-    private static final List<ResourceLocation> FIGHTING = List.of(ErrandIds.MELEE, ErrandIds.RANGED);
+    private static final List<ResourceLocation> FARMING = workOf(JobIds.FARMER);
+    private static final List<ResourceLocation> FIGHTING = workOf(JobIds.FENCER, JobIds.ARCHER);
 
     private PersonalityData() {
     }
@@ -200,6 +201,11 @@ public final class PersonalityData {
             .licence(QualificationData.WEEDING, 1.0F, 0.1F)
             .build());
         return all;
+    }
+
+    /** @return the work of these jobs, as the jobs' data lists it */
+    private static List<ResourceLocation> workOf(ResourceLocation... jobs) {
+        return Arrays.stream(jobs).flatMap(job -> JobWorkData.all().get(job).work().stream()).toList();
     }
 
     private static ResourceLocation id(EntityType<?> type) {

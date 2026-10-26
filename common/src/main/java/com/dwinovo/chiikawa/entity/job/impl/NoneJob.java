@@ -2,12 +2,10 @@ package com.dwinovo.chiikawa.entity.job.impl;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.job.api.PetCapability;
-import java.util.List;
-import net.minecraft.resources.ResourceLocation;
 
 /**
  * Fallback pet job — pet is holding nothing recognised. Always assumable,
- * lowest priority, and offers no errands beyond the generic ones.
+ * lowest priority, and has no work of its own: only the generic errands.
  */
 public class NoneJob implements PetCapability {
     private final int id;
@@ -29,10 +27,5 @@ public class NoneJob implements PetCapability {
     @Override
     public boolean canAssume(AbstractPet pet) {
         return true;
-    }
-
-    @Override
-    public List<ResourceLocation> errands() {
-        return List.of();
     }
 }
