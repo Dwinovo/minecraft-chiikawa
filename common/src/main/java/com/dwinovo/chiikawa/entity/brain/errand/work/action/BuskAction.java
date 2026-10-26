@@ -75,6 +75,11 @@ public final class BuskAction implements WorkAction<BuskAction.Performance, Erra
     }
 
     @Override
+    public boolean readyFor(Work<Performance, ErrandTunings.PlayMusic> work, PetView view, ErrandTunings.PlayMusic tuning) {
+        return view.playable(true).isPresent();
+    }
+
+    @Override
     public Routine routine(Work<Performance, ErrandTunings.PlayMusic> work, Performance plan,
             ErrandSettings<ErrandTunings.PlayMusic> settings) {
         return Routine.single(new Busk(plan.song(), settings.tuning().noteParticleIntervalTicks(), work.counter()));

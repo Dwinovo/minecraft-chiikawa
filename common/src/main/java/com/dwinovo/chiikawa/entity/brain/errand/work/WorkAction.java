@@ -45,6 +45,15 @@ public interface WorkAction<P extends Plan, T> {
      */
     Offers<P> offers(Work<P, T> work, ResourceLocation errand, PetView view, T tuning);
 
+    /**
+     * Whether the pet has what the work takes to be done from its slip: asked before a labor board hands the pet a slip
+     * that counts the work, so a slip is not taken that the pet then cannot work on. Pure, as {@link #offers}. Not the
+     * offer itself, which also depends on the moment; only what the work needs to be possible at all.
+     */
+    default boolean readyFor(Work<P, T> work, PetView view, T tuning) {
+        return true;
+    }
+
     /** Whether the work goes on: the condition to keep at it, as {@link com.dwinovo.chiikawa.entity.brain.errand.ErrandType#stillWanted}. */
     default Check stillWanted(Work<P, T> work, ResourceLocation errand, P plan, PetView view, T tuning) {
         return Check.OK;

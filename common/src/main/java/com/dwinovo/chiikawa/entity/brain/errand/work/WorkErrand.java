@@ -48,6 +48,20 @@ public final class WorkErrand<P extends Plan, T> implements ErrandType<P, T> {
         return work.target().filter(WorkTarget.BlockTarget.class::isInstance).map(WorkTarget.BlockTarget.class::cast);
     }
 
+    /** @return whether the work counts this counter */
+    public boolean counts(ResourceLocation counter) {
+        return work.counter().filter(counter::equals).isPresent();
+    }
+
+    /**
+     * @return whether the pet has what the action takes to work from a slip that counts this work, see
+     *         {@link WorkAction#readyFor}; not while the errand is switched off for want of settings
+     */
+    @SuppressWarnings("unchecked")
+    public boolean readyFor(PetView view) {
+        return ErrandSettings.of(id).filter(settings -> work.action().readyFor(work, view, (T) settings.tuning())).isPresent();
+    }
+
     @Override
     public ResourceLocation id() {
         return id;
