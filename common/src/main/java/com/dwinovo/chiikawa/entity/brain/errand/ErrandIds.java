@@ -14,6 +14,7 @@ public final class ErrandIds {
     public static final Identifier PICK_UP_ITEM = id("pick_up_item");
     public static final Identifier TAKE_TASK = id("take_task");
     public static final Identifier SHOP = id("shop");
+    public static final Identifier OFFER_GIFT = id("offer_gift");
     public static final Identifier GIFT_OWNER = id("gift_owner");
     public static final Identifier SOCIALIZE = id("socialize");
     public static final Identifier COOPERATE = id("cooperate");
