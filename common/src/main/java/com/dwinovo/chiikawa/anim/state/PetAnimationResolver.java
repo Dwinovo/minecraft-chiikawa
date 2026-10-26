@@ -43,11 +43,10 @@ public final class PetAnimationResolver {
             return candidates;
         }
 
-        // A part in a scene with another pet, named by data: first if this pet has it,
-        // otherwise whatever it would be doing anyway.
+        // A part in a scene with another pet, or a way of cowering, named by data: the first of them this pet has,
+        // otherwise whatever it would be doing anyway. Several are separated by commas, the one preferred first.
         if (!safe.performance().isEmpty()) {
-            List<String> candidates = new ArrayList<>();
-            candidates.add(safe.performance());
+            List<String> candidates = new ArrayList<>(List.of(safe.performance().split(",")));
             candidates.addAll(resolveLoop(safe));
             return candidates;
         }
@@ -57,7 +56,8 @@ public final class PetAnimationResolver {
 
     /** The base loop from directive, movement and job. */
     private static List<String> resolveLoop(PetAnimContext safe) {
-        if (safe.directive() == PetDirective.STAY) {
+        // Sitting is sitting still: a pet told to sit that runs, as one does from what hurts it, runs.
+        if (safe.directive() == PetDirective.STAY && safe.locomotion() == PetLocomotion.IDLE) {
             return List.of("sit", "idle");
         }
 
