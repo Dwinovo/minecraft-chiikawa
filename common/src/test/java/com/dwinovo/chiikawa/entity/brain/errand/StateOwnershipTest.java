@@ -88,9 +88,13 @@ class StateOwnershipTest {
             // whistled, which the pet's mind takes once the pet's wait is over.
             Set.of(PET, MIND, "entity/interact/PetInteractHandler.java", "network/PetServerPacketHandler.java",
                 "client/manual/ManualScene.java")),
-        new Rule("the blocks of work the farmer sees",
-            Pattern.compile(WRITE + "(?:InitMemory\\.(?:HARVEST_POS|PLANT_POS|CONTAINER_POS|WEED_POS|MUSHROOM_POS|FARM_SIGHTS)\\b|\\S*?\\.memory\\(\\))"),
-            Set.of(SENSORS + "PetFarmerWorkSensor.java")),
+        new Rule("the blocks of work the sensor sees",
+            Pattern.compile(WRITE + "InitMemory\\.WORK_SIGHTS\\b"),
+            Set.of(SENSORS + "PetWorkSensor.java")),
+        // Retired in 0.1.4 and kept registered only so that the saves that hold them still load: nobody writes them.
+        new Rule("the blocks of work the farmer saw before the work sensor",
+            Pattern.compile(WRITE + "InitMemory\\.(?:HARVEST_POS|PLANT_POS|CONTAINER_POS|WEED_POS|MUSHROOM_POS)\\b"),
+            Set.of()),
         new Rule("the present in the paws", Pattern.compile("\\bsetPendingGift\\("),
             Set.of(PET, STEPS + "TakePresent.java", STEPS + "HandOver.java")));
 

@@ -15,15 +15,14 @@ import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
-import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
 import com.dwinovo.chiikawa.task.PetTask;
-import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.testing.TestErrands;
 import com.dwinovo.chiikawa.testing.TestRests;
+import com.dwinovo.chiikawa.testing.TestTargets;
 import com.dwinovo.chiikawa.testing.TestPhotos;
 import com.dwinovo.chiikawa.testing.TestView;
 import java.util.List;
@@ -52,7 +51,7 @@ class AdmissionTest {
     private static final PetAnchor FREE =
         TestAnchors.free(HOME);
     private static final PetTask SLIP = new PetTask(ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding"),
-        ResourceLocation.fromNamespaceAndPath("chiikawa", "farmer"), PetWorkCounters.WEED, PetTask.NO_ICON, 8,
+        ResourceLocation.fromNamespaceAndPath("chiikawa", "farmer"), WorkData.WEED_PULLED, PetTask.NO_ICON, 8,
         ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath("chiikawa", "pet_task/weeding")), 0);
     private static final RestLedger NO_RESTS = TestRests.noRests();
 
@@ -149,7 +148,7 @@ class AdmissionTest {
         TestView view = TestView.at(HOME, FREE).ownership(PetOwnership.WILD).phase(DayPhase.NIGHT).withPresent().armedWithArrows()
             .shopWorthVisiting(east(1)).offeringBoard(east(2)).socialPartner(east(3)).examDesk(east(4))
             .resultsDesk(east(5)).whistleHeard(east(6)).ownerPos(east(7))
-            .targets(new PerceivedTargets(Optional.of(new AttackTarget(UUID.randomUUID(), east(8))), Optional.of(east(9)), Optional.of(east(10)),
+            .targets(TestTargets.of(Optional.of(new AttackTarget(UUID.randomUUID(), east(8))), Optional.of(east(9)), Optional.of(east(10)),
                 Optional.of(east(11)), Optional.of(east(12)), Optional.of(east(13)), Optional.of(new PickableItem(UUID.randomUUID(), east(14)))));
 
         assertEquals(Optional.of(east(1)), destination(ErrandIds.SHOP, view));
@@ -161,11 +160,11 @@ class AdmissionTest {
         assertEquals(Optional.of(east(7)), destination(ErrandIds.GIFT_OWNER, view));
         assertEquals(Optional.of(east(8)), destination(WorkData.MELEE, view));
         assertEquals(Optional.of(east(8)), destination(WorkData.RANGED, view));
-        assertEquals(Optional.of(east(9)), destination(ErrandIds.HARVEST, view));
-        assertEquals(Optional.of(east(10)), destination(ErrandIds.PLANT, view));
-        assertEquals(Optional.of(east(11)), destination(ErrandIds.DELIVER, view));
-        assertEquals(Optional.of(east(12)), destination(ErrandIds.WEED, view));
-        assertEquals(Optional.of(east(13)), destination(ErrandIds.PICK_MUSHROOM, view));
+        assertEquals(Optional.of(east(9)), destination(WorkData.HARVEST, view));
+        assertEquals(Optional.of(east(10)), destination(WorkData.PLANT, view));
+        assertEquals(Optional.of(east(11)), destination(WorkData.DELIVER, view));
+        assertEquals(Optional.of(east(12)), destination(WorkData.WEED, view));
+        assertEquals(Optional.of(east(13)), destination(WorkData.PICK_MUSHROOM, view));
         assertEquals(Optional.of(east(14)), destination(ErrandIds.PICK_UP_ITEM, view));
     }
 

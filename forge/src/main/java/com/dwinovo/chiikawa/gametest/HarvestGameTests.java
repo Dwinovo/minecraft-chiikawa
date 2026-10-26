@@ -7,19 +7,18 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.data.PetTaskTypeData;
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.errand.run.StepStatus;
 import com.dwinovo.chiikawa.entity.brain.errand.step.Harvest;
 import com.dwinovo.chiikawa.entity.brain.errand.step.LiveHandle;
+import com.dwinovo.chiikawa.entity.brain.errand.work.WorkTarget;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.task.PetTask;
-import com.dwinovo.chiikawa.task.PetWorkCounters;
-import com.dwinovo.chiikawa.utils.Utils;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.function.BiPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
@@ -48,17 +47,22 @@ public final class HarvestGameTests {
     private static final String BATCH = "chiikawa_harvest";
     private static final int STAND = 2;
 
+    /** The targets of the shipped works that break a block: what says a block is a weed, a mushroom, a ripe crop. */
+    private static final WorkTarget.BlockTarget WEEDS = (WorkTarget.BlockTarget) WorkData.all().get(WorkData.WEED).target().orElseThrow();
+    private static final WorkTarget.BlockTarget MUSHROOMS = (WorkTarget.BlockTarget) WorkData.all().get(WorkData.PICK_MUSHROOM).target().orElseThrow();
+    private static final WorkTarget.BlockTarget RIPE_CROP = (WorkTarget.BlockTarget) WorkData.all().get(WorkData.HARVEST).target().orElseThrow();
+
     /** A weed or a mushroom, with the work it counts as and what says it is one. */
-    private record Forage(Block block, ResourceLocation counter, BiPredicate<ServerLevel, BlockPos> holds) {
+    private record Forage(Block block, ResourceLocation counter, WorkTarget.BlockTarget holds) {
     }
 
     private static final List<Forage> FORAGE = List.of(
-        new Forage(Blocks.SHORT_GRASS, PetWorkCounters.WEED, Utils::isWeed),
-        new Forage(Blocks.TALL_GRASS, PetWorkCounters.WEED, Utils::isWeed),
-        new Forage(Blocks.FERN, PetWorkCounters.WEED, Utils::isWeed),
-        new Forage(Blocks.LARGE_FERN, PetWorkCounters.WEED, Utils::isWeed),
-        new Forage(Blocks.RED_MUSHROOM, PetWorkCounters.PICK_MUSHROOM, Utils::isMushroom),
-        new Forage(Blocks.BROWN_MUSHROOM, PetWorkCounters.PICK_MUSHROOM, Utils::isMushroom));
+        new Forage(Blocks.SHORT_GRASS, WorkData.WEED_PULLED, WEEDS),
+        new Forage(Blocks.TALL_GRASS, WorkData.WEED_PULLED, WEEDS),
+        new Forage(Blocks.FERN, WorkData.WEED_PULLED, WEEDS),
+        new Forage(Blocks.LARGE_FERN, WorkData.WEED_PULLED, WEEDS),
+        new Forage(Blocks.RED_MUSHROOM, WorkData.MUSHROOM_PICKED, MUSHROOMS),
+        new Forage(Blocks.BROWN_MUSHROOM, WorkData.MUSHROOM_PICKED, MUSHROOMS));
 
     @BeforeBatch(batch = BATCH)
     public static void settle(ServerLevel level) {
@@ -111,7 +115,7 @@ public final class HarvestGameTests {
         }
 
         BlockPos nothing = helper.absolutePos(new BlockPos(14, STAND, 2));
-        helper.assertTrue(new Harvest(nothing, Utils::isWeed, Optional.of(PetWorkCounters.WEED), 0).tick(handle)
+        helper.assertTrue(new Harvest(nothing, WEEDS, Optional.of(WorkData.WEED_PULLED), 0).tick(handle)
             .equals(StepStatus.gaveUp("gone")), "a step on a place with no weed did not give up");
         helper.succeed();
     }
@@ -132,14 +136,14 @@ public final class HarvestGameTests {
             level.setBlockAndUpdate(crop, ((CropBlock) Blocks.WHEAT).getStateForAge(CropBlock.MAX_AGE));
         }
 
-        helper.assertTrue(new Harvest(worn, Utils::canHarvesr, Optional.empty(), 1).tick(handle).equals(StepStatus.DONE),
+        helper.assertTrue(new Harvest(worn, RIPE_CROP, Optional.empty(), 1).tick(handle).equals(StepStatus.DONE),
             "the crop was not reaped");
         helper.assertTrue(pet.getMainHandItem().getDamageValue() == 1, "the hoe wore " + pet.getMainHandItem().getDamageValue());
         helper.assertTrue(level.getBlockState(worn).is(Blocks.WHEAT) && !((CropBlock) Blocks.WHEAT).isMaxAge(level.getBlockState(worn)),
             "the crop was not put back young");
         helper.assertTrue(bag(pet).getOrDefault(Items.WHEAT.getDescriptionId(), 0) == 1, "the bag has " + bag(pet));
 
-        helper.assertTrue(new Harvest(spared, Utils::canHarvesr, Optional.empty(), 0).tick(handle).equals(StepStatus.DONE),
+        helper.assertTrue(new Harvest(spared, RIPE_CROP, Optional.empty(), 0).tick(handle).equals(StepStatus.DONE),
             "the second crop was not reaped");
         helper.assertTrue(pet.getMainHandItem().getDamageValue() == 1, "a work with no wear wore the hoe");
         helper.succeed();
