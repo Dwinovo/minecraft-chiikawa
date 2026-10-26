@@ -260,6 +260,7 @@ public final class PetMind {
         switch (message) {
             case Message.Nudge nudge -> decideNow = true;
             case Message.DirectiveChanged changed -> decideNow = true;
+            case Message.RulesChanged changed -> decideNow = true;
             case Message.CapabilityChanged changed -> decideNow = true;
             case Message.Hurt hurt -> decideNow = true;
             case Message.Moved moved -> {
