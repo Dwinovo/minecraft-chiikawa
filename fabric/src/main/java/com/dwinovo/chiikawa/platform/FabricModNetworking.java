@@ -40,6 +40,7 @@ public final class FabricModNetworking {
         PayloadTypeRegistry.playS2C().register(ExamDeskPayloads.DeskViewPayload.TYPE, ExamDeskPayloads.DeskViewPayload.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(ExamDeskPayloads.SignUpPayload.TYPE, ExamDeskPayloads.SignUpPayload.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(PetPayloads.PetDirectivePayload.TYPE, PetPayloads.PetDirectivePayload.STREAM_CODEC);
+        PayloadTypeRegistry.playC2S().register(PetPayloads.PetRulesPayload.TYPE, PetPayloads.PetRulesPayload.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(ShopPayloads.ShopPricesPayload.TYPE, ShopPayloads.ShopPricesPayload.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(ManualPayloads.OpenHandbookPayload.TYPE, ManualPayloads.OpenHandbookPayload.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(ShopPayloads.ShopTradePayload.TYPE, ShopPayloads.ShopTradePayload.STREAM_CODEC);
@@ -71,6 +72,8 @@ public final class FabricModNetworking {
             (payload, context) -> context.server().execute(() -> ExamDeskServerPacketHandler.handleSignUp(payload, context.player())));
         ServerPlayNetworking.registerGlobalReceiver(PetPayloads.PetDirectivePayload.TYPE,
             (payload, context) -> context.server().execute(() -> PetServerPacketHandler.handleDirective(payload, context.player())));
+        ServerPlayNetworking.registerGlobalReceiver(PetPayloads.PetRulesPayload.TYPE,
+            (payload, context) -> context.server().execute(() -> PetServerPacketHandler.handleRules(payload, context.player())));
         ServerPlayNetworking.registerGlobalReceiver(ShopPayloads.ShopTradePayload.TYPE,
             (payload, context) -> context.server().execute(() -> ShopServerPacketHandler.handleTrade(payload, context.player())));
         ServerPlayNetworking.registerGlobalReceiver(SettingsPayloads.ChangeWorldSettingsPayload.TYPE,

@@ -89,6 +89,10 @@ class StateOwnershipTest {
             // whistled, which the pet's mind takes once the pet's wait is over.
             Set.of(PET, MIND, "entity/interact/PetInteractHandler.java", "network/PetServerPacketHandler.java",
                 "client/manual/ManualScene.java")),
+        new Rule("what the owner has told the pet it may do",
+            Pattern.compile("\\bsetRules\\(|entityData\\.set\\(RULES\\b"),
+            // The owner's own hand, through the payload the screen sends; and the pet reading its own save.
+            Set.of(PET, "network/PetServerPacketHandler.java")),
         new Rule("the blocks of work the sensor sees",
             Pattern.compile(WRITE + "InitMemory\\.WORK_SIGHTS\\b"),
             Set.of(SENSORS + "PetWorkSensor.java")),
