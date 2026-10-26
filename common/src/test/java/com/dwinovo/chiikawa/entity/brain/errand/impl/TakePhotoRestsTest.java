@@ -47,7 +47,7 @@ class TakePhotoRestsTest {
         inForce = CameraSettings.all();
         CameraSettings.replaceAll(Map.of(TestPhotos.CAMERA_ITEM, CAMERA));
         ledger = new RestLedger(errand -> store, ErrandSettings::of);
-        photo = new Running(PHOTO, new TakePhotoErrand.Shot(TestPhotos.view()), ErrandSettings.of(PHOTO).orElseThrow(), 0, 0L, Set.of());
+        photo = new Running(Errands.get(PHOTO), new TakePhotoErrand.Shot(TestPhotos.view()), ErrandSettings.of(PHOTO).orElseThrow(), 0, 0L, Set.of());
     }
 
     @AfterEach
