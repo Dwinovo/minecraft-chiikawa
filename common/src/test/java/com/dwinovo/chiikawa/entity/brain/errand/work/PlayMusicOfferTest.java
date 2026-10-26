@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.errand.work;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.data.WorkData;
@@ -49,5 +50,23 @@ class PlayMusicOfferTest {
 
         assertTrue(TestErrands.stillWanted(WorkData.PLAY_MUSIC, TestErrands.planOf(WorkData.PLAY_MUSIC, view),
             TestView.at(HOME, FREE)).ok());
+    }
+
+    /** What a labor board asks before it hands the pet a slip for music: a song to play, as the performance would need. */
+    @Test
+    void aPetIsReadyForTheMusicSlipOnlyWithASongToPlay() {
+        WorkErrand<?, ?> errand = (WorkErrand<?, ?>) TestErrands.errand(WorkData.PLAY_MUSIC);
+
+        assertTrue(errand.counts(WorkData.PLAY_MUSIC_SECOND));
+        assertTrue(errand.readyFor(TestView.at(HOME, FREE).withSong()));
+        assertFalse(errand.readyFor(TestView.at(HOME, FREE)));
+    }
+
+    /** Work with nothing special to need is always ready: the board's slip for it is nobody's loss. */
+    @Test
+    void workThatNeedsNothingInParticularIsAlwaysReady() {
+        WorkErrand<?, ?> weeding = (WorkErrand<?, ?>) TestErrands.errand(WorkData.WEED);
+
+        assertTrue(weeding.readyFor(TestView.at(HOME, FREE)));
     }
 }
