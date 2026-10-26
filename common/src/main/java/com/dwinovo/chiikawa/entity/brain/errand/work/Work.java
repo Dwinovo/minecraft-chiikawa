@@ -33,6 +33,11 @@ public record Work<P extends Plan, T>(WorkAction<P, T> action, ErrandCategory ca
         return counter.flatMap(count -> view.slip().map(PetTask::counter).filter(count::equals)).isPresent();
     }
 
+    /** @return the target, which is of the kind the action takes: {@link WorkAction#refuses} has seen to that when the file is read */
+    public <K extends WorkTarget> K targetOf(Class<K> kind) {
+        return kind.cast(target.orElseThrow());
+    }
+
     /** @return what is wrong with this work that a file cannot be read for, or nothing */
     Optional<String> problem() {
         Optional<String> refused = action.refuses(target);

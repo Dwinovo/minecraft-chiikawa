@@ -6,9 +6,9 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
-import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
 import com.dwinovo.chiikawa.init.InitEntity;
@@ -69,7 +69,7 @@ public final class TeleportGameTests {
         long[] brought = {-1};
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(ErrandIds.MELEE), "the pet never went for the zombie"))
+            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(WorkData.MELEE), "the pet never went for the zombie"))
             .thenExecute(() -> {
                 helper.assertTrue(pet.teleportToOwner(helper.getLevel(), owner, "test"), "the pet was not brought to its owner");
                 brought[0] = helper.getLevel().getGameTime();
@@ -77,12 +77,12 @@ public final class TeleportGameTests {
             // The pet is told as it is moved and reads it at its next tick.
             .thenIdle(TOLD_TICKS)
             .thenExecuteFor(WATCH_TICKS, () -> {
-                helper.assertFalse(pet.getMind().errands().isOn(ErrandIds.MELEE), "the pet went back to the fight it was taken away from");
+                helper.assertFalse(pet.getMind().errands().isOn(WorkData.MELEE), "the pet went back to the fight it was taken away from");
                 helper.assertTrue(pet.distanceTo(zombie) > BEYOND_THE_SENSOR, "the pet is " + (int) pet.distanceTo(zombie)
                     + " blocks from the zombie");
             })
             .thenExecute(() -> helper.assertTrue(pet.getMind().log().entries().stream().anyMatch(entry ->
-                    entry instanceof DecisionLog.Ended ended && ended.errand().equals(ErrandIds.MELEE)
+                    entry instanceof DecisionLog.Ended ended && ended.errand().equals(WorkData.MELEE)
                         && ended.gameTime() >= brought[0] && ended.outcome() instanceof Outcome.Interrupted interrupted
                         && interrupted.cause().equals("moved")),
                 "the fight did not end for the pet having been moved: " + pet.getMind().log().entries()))
