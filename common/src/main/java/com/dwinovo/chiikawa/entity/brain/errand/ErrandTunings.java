@@ -80,12 +80,15 @@ public final class ErrandTunings {
      * @param reachSqr how near to the block's middle it has to be to work it, squared
      * @param noWayTicks how long the mover may have no way to the block before the pet gives up on one: none gives
      *                   up the first time it says so
+     * @param toolWear how much the tool in the pet's hand wears each time it breaks the block: none for a plant pulled
+     *                 by hand, and for work that breaks nothing
      */
-    public record BlockWork(float speed, double reachSqr, int noWayTicks) {
+    public record BlockWork(float speed, double reachSqr, int noWayTicks, int toolWear) {
         public static final Codec<BlockWork> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Fields.SPEED.fieldOf("speed").forGetter(BlockWork::speed),
             Codec.doubleRange(0.0, 65536.0).fieldOf("reach_sqr").forGetter(BlockWork::reachSqr),
-            Fields.PATIENCE.fieldOf("no_way_ticks").forGetter(BlockWork::noWayTicks)
+            Fields.PATIENCE.fieldOf("no_way_ticks").forGetter(BlockWork::noWayTicks),
+            Fields.BLOCKS.fieldOf("tool_wear").forGetter(BlockWork::toolWear)
         ).apply(instance, BlockWork::new));
     }
 
