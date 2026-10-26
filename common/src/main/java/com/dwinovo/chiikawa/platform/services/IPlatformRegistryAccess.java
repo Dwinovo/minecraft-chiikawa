@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.platform.services;
 
 import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPlacesSensor;
-import com.dwinovo.chiikawa.entity.brain.sensor.PetFarmerWorkSensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetWorkSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetSocialSensor;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
@@ -15,7 +15,7 @@ import com.mojang.serialization.MapCodec;
 public interface IPlatformRegistryAccess {
     Supplier<SensorType<PetAttackbleEntitySensor>> petAttackbleEntitySensor();
 
-    Supplier<SensorType<PetFarmerWorkSensor>> petFarmerWorkSensor();
+    Supplier<SensorType<PetWorkSensor>> petWorkSensor();
 
     Supplier<SensorType<PetPickableItemSensor>> petItemEntitySensor();
 
