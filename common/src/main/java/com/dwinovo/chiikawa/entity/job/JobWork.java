@@ -4,6 +4,8 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandType;
 import com.dwinovo.chiikawa.entity.brain.errand.Errands;
+import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
+import com.dwinovo.chiikawa.entity.brain.errand.work.WorkErrand;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.ArrayList;
@@ -55,6 +57,24 @@ public record JobWork(List<ResourceLocation> work, Optional<Sight> sight) {
             }
         }
         return errands;
+    }
+
+    /**
+     * Whether the pet is ready for the work its job does that counts this counter, see
+     * {@link com.dwinovo.chiikawa.entity.brain.errand.work.WorkAction#readyFor}: the one answer to whether a slip of that
+     * counter is worth the pet taking. A counter no work of the job counts, such as a hunting slip's, asks nothing of the
+     * pet. Pure.
+     *
+     * @param pet a pet
+     * @param view what the pet perceives
+     * @param counter the work counter of a slip
+     */
+    public static boolean readyFor(AbstractPet pet, PetView view, ResourceLocation counter) {
+        List<WorkErrand<?, ?>> counting = errandsOf(pet).stream()
+            .filter(WorkErrand.class::isInstance).<WorkErrand<?, ?>>map(WorkErrand.class::cast)
+            .filter(work -> work.counts(counter))
+            .toList();
+        return counting.isEmpty() || counting.stream().anyMatch(work -> work.readyFor(view));
     }
 
     /** @return how the pet looks for the blocks its job's work is done to, if its job says */
