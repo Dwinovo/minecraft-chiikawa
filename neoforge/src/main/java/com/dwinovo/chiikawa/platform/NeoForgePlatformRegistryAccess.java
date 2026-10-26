@@ -3,7 +3,7 @@ package com.dwinovo.chiikawa.platform;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPlacesSensor;
-import com.dwinovo.chiikawa.entity.brain.sensor.PetFarmerWorkSensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetWorkSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetSocialSensor;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
@@ -32,8 +32,8 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
 
     private static final DeferredHolder<SensorType<?>, SensorType<PetAttackbleEntitySensor>> PET_ATTACKBLE_ENTITY_SENSOR =
         SENSOR_TYPES.register("pet_attackble_entity_sensor", () -> new SensorType<>(PetAttackbleEntitySensor::new));
-    private static final DeferredHolder<SensorType<?>, SensorType<PetFarmerWorkSensor>> PET_FARMER_WORK_SENSOR =
-        SENSOR_TYPES.register("pet_farmer_work_sensor", () -> new SensorType<>(PetFarmerWorkSensor::new));
+    private static final DeferredHolder<SensorType<?>, SensorType<PetWorkSensor>> PET_WORK_SENSOR =
+        SENSOR_TYPES.register("pet_work_sensor", () -> new SensorType<>(PetWorkSensor::new));
     private static final DeferredHolder<SensorType<?>, SensorType<PetPickableItemSensor>> PET_ITEM_ENTITY_SENSOR =
         SENSOR_TYPES.register("pet_item_entity_sensor", () -> new SensorType<>(PetPickableItemSensor::new));
     private static final DeferredHolder<SensorType<?>, SensorType<PetPlacesSensor>> PET_PLACES_SENSOR =
@@ -58,8 +58,8 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
     }
 
     @Override
-    public Supplier<SensorType<PetFarmerWorkSensor>> petFarmerWorkSensor() {
-        return PET_FARMER_WORK_SENSOR;
+    public Supplier<SensorType<PetWorkSensor>> petWorkSensor() {
+        return PET_WORK_SENSOR;
     }
 
     @Override

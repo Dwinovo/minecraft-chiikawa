@@ -5,6 +5,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.ownedPet;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
@@ -45,7 +46,7 @@ public final class RestGameTests {
         ErrandIds.TAKE_PHOTO, RestStore.memory(InitMemory.PHOTO_COOLDOWN),
         ErrandIds.GIFT_OWNER, RestStore.memory(InitMemory.GIFT_COOLDOWN),
         ErrandIds.SHOP, RestStore.shared(),
-        ErrandIds.HARVEST, RestStore.subjects());
+        WorkData.HARVEST, RestStore.subjects());
 
     @BeforeBatch(batch = BATCH)
     public static void settle(ServerLevel level) {
@@ -105,15 +106,15 @@ public final class RestGameTests {
         long now = helper.getLevel().getGameTime();
         RestLedger ledger = ledgerOf(pet);
         KINDS.get(ErrandIds.SHOP).of(pet.getBrain(), ErrandIds.SHOP).restFor(null, SHOP_REST, now);
-        KINDS.get(ErrandIds.HARVEST).of(pet.getBrain(), ErrandIds.HARVEST).restFor(CROP, CROP_REST, now);
+        KINDS.get(WorkData.HARVEST).of(pet.getBrain(), WorkData.HARVEST).restFor(CROP, CROP_REST, now);
         helper.assertTrue(ledger.remaining(ErrandIds.SHOP, now) == SHOP_REST, "the shop rest was not written");
-        helper.assertTrue(ledger.resting(ErrandIds.HARVEST, CROP, now), "the rest on the crop was not written");
+        helper.assertTrue(ledger.resting(WorkData.HARVEST, CROP, now), "the rest on the crop was not written");
 
         RestLedger after = ledgerOf(readBack(helper, pet));
 
         helper.assertTrue(after.remaining(ErrandIds.SHOP, now) == SHOP_REST,
             "after a save the shop rest was " + after.remaining(ErrandIds.SHOP, now) + " ticks, not " + SHOP_REST);
-        helper.assertFalse(after.resting(ErrandIds.HARVEST, CROP, now), "a rest on a subject survived a save");
+        helper.assertFalse(after.resting(WorkData.HARVEST, CROP, now), "a rest on a subject survived a save");
         helper.succeed();
     }
 
