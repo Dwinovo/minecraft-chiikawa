@@ -13,7 +13,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.rest.RestStore;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.SubjectRests;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Routine;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Step;
-import com.dwinovo.chiikawa.entity.brain.errand.step.Collect;
 import com.dwinovo.chiikawa.entity.brain.errand.step.Goal;
 import com.dwinovo.chiikawa.entity.brain.errand.step.Harvest;
 import com.dwinovo.chiikawa.entity.brain.errand.step.Plant;
@@ -21,9 +20,11 @@ import com.dwinovo.chiikawa.entity.brain.errand.step.WalkTo;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
+import com.dwinovo.chiikawa.utils.Utils;
 import com.mojang.serialization.Codec;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -67,18 +68,19 @@ public final class BlockWorkErrand implements ErrandType<BlockWorkErrand.Work, E
     private final String missingReason;
     private final List<Requirement> requirements;
     private final Optional<ResourceLocation> workCounter;
-    private final Function<BlockPos, Step> action;
+    private final BiFunction<BlockPos, ErrandTunings.BlockWork, Step> action;
 
     /**
      * @param remembered which block the sensor remembers for this work
      * @param missingReason failure reason when there is none
      * @param requirements further conditions, checked in order before the block
      * @param workCounter the work counter its steps report, see {@link ErrandType#workCounter}
-     * @param action what is done to the block once the pet is there
+     * @param action what is done to the block once the pet is there, given the block and the errand's tuning
      */
     private BlockWorkErrand(ResourceLocation id, ErrandCategory category,
             Function<PerceivedTargets, Optional<GlobalPos>> remembered, String missingReason, List<Requirement> requirements,
-            Optional<ResourceLocation> workCounter, Function<BlockPos, Step> action) {
+            Optional<ResourceLocation> workCounter,
+            BiFunction<BlockPos, ErrandTunings.BlockWork, Step> action) {
         this.id = id;
         this.category = category;
         this.remembered = remembered;
@@ -91,26 +93,29 @@ public final class BlockWorkErrand implements ErrandType<BlockWorkErrand.Work, E
     /** @return reaping the ripe crop the sensor remembers */
     public static BlockWorkErrand harvesting() {
         return new BlockWorkErrand(ErrandIds.HARVEST, ErrandCategory.WORK, PerceivedTargets::harvest, "no_crop", List.of(),
-            Optional.empty(), Harvest::new);
+            Optional.empty(), (block, tuning) -> new Harvest(block, Utils::canHarvesr, Optional.empty(), tuning.toolWear()));
     }
 
     /** @return planting a seed in the bare soil the sensor remembers */
     public static BlockWorkErrand planting() {
         return new BlockWorkErrand(ErrandIds.PLANT, ErrandCategory.WORK, PerceivedTargets::plant, "no_farmland", List.of(),
-            Optional.empty(), Plant::new);
+            Optional.empty(), (block, tuning) -> new Plant(block));
     }
 
     /** @return pulling up the weed the sensor remembers */
     public static BlockWorkErrand weeding() {
+        Optional<ResourceLocation> counter = Optional.of(PetWorkCounters.WEED);
         return new BlockWorkErrand(ErrandIds.WEED, ErrandCategory.FORAGE, PerceivedTargets::weed, "no_weed",
-            List.of(Requirement.wildOrCarrying(PetWorkCounters.WEED)), Optional.of(PetWorkCounters.WEED), Collect::weed);
+            List.of(Requirement.wildOrCarrying(PetWorkCounters.WEED)), counter,
+            (block, tuning) -> new Harvest(block, Utils::isWeed, counter, tuning.toolWear()));
     }
 
     /** @return picking the mushroom the sensor remembers, at night */
     public static BlockWorkErrand pickingMushrooms() {
+        Optional<ResourceLocation> counter = Optional.of(PetWorkCounters.PICK_MUSHROOM);
         return new BlockWorkErrand(ErrandIds.PICK_MUSHROOM, ErrandCategory.FORAGE, PerceivedTargets::mushroom, "no_mushroom",
-            List.of(Requirement.wildOrCarrying(PetWorkCounters.PICK_MUSHROOM), Requirement.AT_NIGHT),
-            Optional.of(PetWorkCounters.PICK_MUSHROOM), Collect::mushroom);
+            List.of(Requirement.wildOrCarrying(PetWorkCounters.PICK_MUSHROOM), Requirement.AT_NIGHT), counter,
+            (block, tuning) -> new Harvest(block, Utils::isMushroom, counter, tuning.toolWear()));
     }
 
     @Override
@@ -166,7 +171,7 @@ public final class BlockWorkErrand implements ErrandType<BlockWorkErrand.Work, E
         return Routine.of(
             Routine.step(() -> new WalkTo(new Goal.Place(block), tuning.speed(), RIGHT_UP_TO_IT, Math.sqrt(tuning.reachSqr()),
                 settings.maxTicks(), tuning.noWayTicks())),
-            Routine.step(() -> action.apply(block)));
+            Routine.step(() -> action.apply(block, tuning)));
     }
 
     @Override
