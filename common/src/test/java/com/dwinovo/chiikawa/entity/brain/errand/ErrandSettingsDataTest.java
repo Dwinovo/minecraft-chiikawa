@@ -28,8 +28,8 @@ class ErrandSettingsDataTest {
     /** 0.1.4 implementation plan, "Default priorities". */
     private static final Map<ResourceLocation, Integer> PRIORITIES = Map.ofEntries(
         Map.entry(ErrandIds.GIFT_OWNER, 80),
-        Map.entry(ErrandIds.MELEE, 80),
-        Map.entry(ErrandIds.RANGED, 80),
+        Map.entry(WorkData.MELEE, 80),
+        Map.entry(WorkData.RANGED, 80),
         Map.entry(ErrandIds.TAKE_EXAM, 80),
         Map.entry(ErrandIds.CHECK_RESULTS, 80),
         Map.entry(ErrandIds.COOPERATE, 80),
@@ -52,8 +52,8 @@ class ErrandSettingsDataTest {
     /** The scores the intents have today, which the scores here must not move. */
     private static final Map<ResourceLocation, Float> SCORES = Map.ofEntries(
         Map.entry(ErrandIds.GIFT_OWNER, 0.85F),
-        Map.entry(ErrandIds.MELEE, 0.8F),
-        Map.entry(ErrandIds.RANGED, 0.8F),
+        Map.entry(WorkData.MELEE, 0.8F),
+        Map.entry(WorkData.RANGED, 0.8F),
         Map.entry(ErrandIds.TAKE_EXAM, 0.72F),
         Map.entry(ErrandIds.CHECK_RESULTS, 0.72F),
         Map.entry(ErrandIds.COOPERATE, 0.5F),
@@ -145,7 +145,7 @@ class ErrandSettingsDataTest {
             }
         });
 
-        assertEquals(Map.of(ErrandIds.MELEE, Optional.of(VoiceMoment.HUNT), ErrandIds.RANGED, Optional.of(VoiceMoment.HUNT)), voices);
+        assertEquals(Map.of(WorkData.MELEE, Optional.of(VoiceMoment.HUNT), WorkData.RANGED, Optional.of(VoiceMoment.HUNT)), voices);
     }
 
     @Test
@@ -181,7 +181,7 @@ class ErrandSettingsDataTest {
         assertEquals(1200, ticks(all, ErrandIds.CHECK_RESULTS));
         assertEquals(200, ticks(all, ErrandIds.HARVEST));
         assertEquals(40, ticks(all, ErrandIds.PICK_UP_ITEM));
-        assertEquals(20, ticks(all, ErrandIds.MELEE));
+        assertEquals(20, ticks(all, WorkData.MELEE));
         for (ResourceLocation errand : List.of(ErrandIds.FOLLOW_OWNER, ErrandIds.STAY, ErrandIds.WANDER)) {
             assertEquals(20, ticks(all, errand), errand.toString());
             assertEquals(RestSpec.NONE, all.get(errand).rests().done(), errand.toString());
