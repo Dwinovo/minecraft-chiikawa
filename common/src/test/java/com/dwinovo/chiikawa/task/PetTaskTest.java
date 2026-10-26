@@ -71,7 +71,7 @@ class PetTaskTest {
     }
 
     @Test
-    void loaderSkipsBrokenFilesAndWarnsAboutUnknownCapabilitiesOrWork() {
+    void loaderSkipsBrokenFilesAndWarnsAboutUnknownCapabilities() {
         PetTaskTypeLoader.Loaded loaded = PetTaskTypeLoader.load(Map.of(
             id("good"), JsonParser.parseString("""
                 { "capability": "chiikawa:farmer", "counter": "chiikawa:weed", "icon": "minecraft:short_grass",
@@ -84,7 +84,8 @@ class PetTaskTest {
 
         assertEquals(Set.of(id("good"), id("odd")), loaded.types().keySet());
         assertEquals(1, loaded.errors().size());
-        assertEquals(2, loaded.warnings().size());
+        // A counter no work reports is not judged here: which works there are is the errand files' to say.
+        assertEquals(1, loaded.warnings().size());
     }
 
     private static ResourceLocation id(String path) {
