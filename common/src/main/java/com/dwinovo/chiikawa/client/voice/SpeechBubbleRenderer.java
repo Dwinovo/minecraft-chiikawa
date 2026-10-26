@@ -1,7 +1,6 @@
 package com.dwinovo.chiikawa.client.voice;
 
 import com.dwinovo.chiikawa.client.settings.ClientSettingsStore;
-import com.dwinovo.chiikawa.client.ui.mc.WorldSurface;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.ui.widget.Bubble;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -18,15 +17,9 @@ import org.joml.Quaternionf;
  * turned speech bubbles off in the settings does not get it at all, and it fades at the end.
  * The pet opens its mouth either way: that is the pet's, not the bubble's.
  *
- * <p>It always sits at the same height: one line above the spot where the game draws a
- * name tag, whether a name tag is showing there or not. So it clears a named pet's name
- * and never moves while it is up, however the player looks at the pet or walks about.
+ * <p>It sits where {@link OverHead} puts what is over a pet's head.
  */
 public final class SpeechBubbleRenderer {
-    /** How far above the name-tag spot the bubble sits, in blocks: one line of a name tag. */
-    private static final float ABOVE_NAME = 0.28F;
-    /** Text pixels to blocks, as the game draws a name tag. */
-    private static final float SCALE = 0.025F;
     /** How long a line takes to fade at the end of its time, in ticks. */
     private static final float FADE_TICKS = 10.0F;
 
@@ -36,19 +29,13 @@ public final class SpeechBubbleRenderer {
             return;
         }
         pet.getSpeech().ifPresent(speech -> {
-            // 1.20.4 puts a name tag at a height of its own rather than at an attachment point.
-            poseStack.pushPose();
-            poseStack.translate(0.0F, pet.getNameTagOffsetY() + ABOVE_NAME, 0.0F);
-            poseStack.mulPose(cameraOrientation);
-            // Before 1.21 the camera's rotation is a half turn about y short of the later one,
-            // so every axis is flipped to land in the same frame; flipping x alone, as this
-            // version's own name tag does, would leave z pointing away and bury the text in its card.
-            poseStack.scale(-SCALE, -SCALE, -SCALE);
             float left = speech.left(pet.tickCount, partialTick);
-            WorldSurface surface = new WorldSurface(poseStack, bufferSource, font, Mth.clamp(left / FADE_TICKS, 0.0F, 1.0F));
-            Bubble bubble = new Bubble(Component.translatable(speech.line()).getString());
-            bubble.draw(surface, -bubble.width(surface) / 2, -bubble.height(surface) - Bubble.TAIL, 0);
-            poseStack.popPose();
+            OverHead.draw(pet, poseStack, bufferSource, font, cameraOrientation, partialTick,
+                Mth.clamp(left / FADE_TICKS, 0.0F, 1.0F), surface -> {
+                    Bubble bubble = new Bubble(Component.translatable(speech.line(),
+                        speech.subject().map(Component::translatable).orElse(Component.empty())).getString());
+                    bubble.draw(surface, -bubble.width(surface) / 2, -bubble.height(surface) - Bubble.TAIL, 0);
+                });
         });
     }
 }

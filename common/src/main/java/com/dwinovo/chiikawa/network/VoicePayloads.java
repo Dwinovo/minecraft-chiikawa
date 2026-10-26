@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.network;
 
 import com.dwinovo.chiikawa.Constants;
+import java.util.Optional;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
@@ -18,10 +19,12 @@ public final class VoicePayloads {
      * @param pet the pet's entity id
      * @param line the translation key of what it said
      * @param ticks how long the line stays up over the pet's head
+     * @param subject the translation key of what the line is about, when it has a place for it
      */
-    public record PetSpeechPayload(int pet, String line, int ticks) implements MusicPayloads.Payload {
+    public record PetSpeechPayload(int pet, String line, int ticks, Optional<String> subject) implements MusicPayloads.Payload {
         public static PetSpeechPayload read(FriendlyByteBuf buffer) {
-            return new PetSpeechPayload(buffer.readVarInt(), buffer.readUtf(), buffer.readVarInt());
+            return new PetSpeechPayload(buffer.readVarInt(), buffer.readUtf(), buffer.readVarInt(),
+                buffer.readOptional(FriendlyByteBuf::readUtf));
         }
 
         @Override
@@ -34,6 +37,7 @@ public final class VoicePayloads {
             buffer.writeVarInt(pet);
             buffer.writeUtf(line);
             buffer.writeVarInt(ticks);
+            buffer.writeOptional(subject, FriendlyByteBuf::writeUtf);
         }
     }
 }
