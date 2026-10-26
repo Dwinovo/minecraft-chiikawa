@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.data.ErrandSettingsData;
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.brain.errand.overlay.Overlays;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSpec;
@@ -39,7 +40,7 @@ class ErrandSettingsDataTest {
         Map.entry(ErrandIds.DELIVER, 50),
         Map.entry(ErrandIds.WEED, 50),
         Map.entry(ErrandIds.PICK_MUSHROOM, 50),
-        Map.entry(ErrandIds.PLAY_MUSIC, 50),
+        Map.entry(WorkData.PLAY_MUSIC, 50),
         Map.entry(ErrandIds.ANSWER_WHISTLE, 50),
         Map.entry(ErrandIds.FOLLOW_OWNER, 50),
         Map.entry(ErrandIds.TAKE_PHOTO, 40),
@@ -63,7 +64,7 @@ class ErrandSettingsDataTest {
         Map.entry(ErrandIds.DELIVER, 0.6F),
         Map.entry(ErrandIds.WEED, 0.5F),
         Map.entry(ErrandIds.PICK_MUSHROOM, 0.5F),
-        Map.entry(ErrandIds.PLAY_MUSIC, 0.6F),
+        Map.entry(WorkData.PLAY_MUSIC, 0.6F),
         Map.entry(ErrandIds.ANSWER_WHISTLE, 0.55F),
         Map.entry(ErrandIds.FOLLOW_OWNER, 0.5F),
         Map.entry(ErrandIds.TAKE_PHOTO, 0.45F),
