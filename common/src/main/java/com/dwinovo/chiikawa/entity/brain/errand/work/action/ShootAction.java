@@ -19,7 +19,10 @@ import com.dwinovo.chiikawa.entity.brain.errand.work.WorkAction;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkTarget;
 import com.mojang.serialization.Codec;
 import java.util.Optional;
+import java.util.function.Predicate;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ProjectileWeaponItem;
 
 /**
  * Fights the foe the attack sensor names with a bow: footwork, and a bow drawn and loosed whenever there is an
@@ -77,6 +80,12 @@ public final class ShootAction implements WorkAction<Duel, ErrandTunings.Ranged>
             () -> Skirmish.shooting(plan.foe(), stance, tuning.range()),
             () -> new DrawBow(plan.foe(), stance, tuning.range(), tuning.drawTicks()),
             () -> new Release(plan.foe(), tuning.cooldownTicks())));
+    }
+
+    /** The arrows a bow shoots. */
+    @Override
+    public Predicate<ItemStack> materials() {
+        return ProjectileWeaponItem.ARROW_ONLY;
     }
 
     @Override

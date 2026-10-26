@@ -14,16 +14,20 @@ import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
 import com.dwinovo.chiikawa.entity.brain.errand.view.SocialIdea;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
+import com.dwinovo.chiikawa.gifting.GiftChoice;
+import com.dwinovo.chiikawa.gifting.GiftOutlook;
 import com.dwinovo.chiikawa.music.MusicBoxSelection;
 import com.dwinovo.chiikawa.music.Playable;
 import com.dwinovo.chiikawa.music.PlaybackMode;
 import com.dwinovo.chiikawa.qualification.PetExams;
 import com.dwinovo.chiikawa.task.PetTask;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.world.item.Items;
 
 /**
  * A {@link PetView} built by hand for tests: an owned pet by day with a default personality,
@@ -52,7 +56,8 @@ public final class TestView implements PetView {
     private Optional<GlobalPos> resultsDesk = Optional.empty();
     private Optional<GlobalPos> whistleHeard = Optional.empty();
     private PhotoOutlook photo = PhotoOutlook.NONE;
-    private boolean presentToGive;
+    private GiftOutlook gift = GiftOutlook.NONE;
+    private Optional<GlobalPos> ownerBedside = Optional.empty();
     private boolean seatedAtExam;
     private Optional<GlobalPos> ownerPos = Optional.empty();
     private final Map<UUID, GlobalPos> creatures = new HashMap<>();
@@ -162,9 +167,20 @@ public final class TestView implements PetView {
         return this;
     }
 
-    /** The pet has something in its bag it may give its owner, and is ready to. */
+    /** The pet has a present in mind that it is ready to give, a cookie it has in its bag, and its owner may be given more. */
     public TestView withPresent() {
-        this.presentToGive = true;
+        return gift(new GiftOutlook(true, 3, List.of(new GiftChoice.Pick(2, Items.COOKIE, 1))));
+    }
+
+    /** What the pet could give its owner now. */
+    public TestView gift(GiftOutlook gift) {
+        this.gift = gift;
+        return this;
+    }
+
+    /** The owner is asleep in a bed, and a pet waits at this place by it. */
+    public TestView ownerAsleepBeside(GlobalPos bedside) {
+        this.ownerBedside = Optional.of(bedside);
         return this;
     }
 
@@ -293,8 +309,13 @@ public final class TestView implements PetView {
     }
 
     @Override
-    public boolean presentToGive() {
-        return presentToGive;
+    public GiftOutlook gift() {
+        return gift;
+    }
+
+    @Override
+    public Optional<GlobalPos> ownerBedside() {
+        return ownerBedside;
     }
 
     @Override

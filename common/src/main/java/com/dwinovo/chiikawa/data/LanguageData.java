@@ -87,6 +87,7 @@ public final class LanguageData {
             addExamDeskOddsTranslations(adder, "基础 %s%%", "多干活 +%s%%", "之前落榜 +%s%%", "读过参考书 +%s%%",
                 "性格 ×%s", "通过率 %s（最高 %s%%）");
             addPetNewsTranslations(adder, "%1$s 把 %2$s 送给了你");
+            addGiftTranslations(adder, "准备礼物", "心里没想着要送礼物", "今天已经送够了", "包里没有可送的东西", "%1$s 把 %2$s 放在了你的床边");
             addRecallTranslations(adder, "叫回了 %s 只宠物", "你没有宠物可叫",
                     "%s 没有应声，上次见到它的地方已经没它了");
             addShopScreenTranslations(adder, "商店", "买 %s", "卖 %s", "今天什么都不卖",
@@ -297,6 +298,7 @@ public final class LanguageData {
             addExamDeskOddsTranslations(adder, "基本 %s%%", "よく働いた +%s%%", "前に落ちた +%s%%", "参考書を読んだ +%s%%",
                 "性格 ×%s", "合格率 %s（最高 %s%%）");
             addPetNewsTranslations(adder, "%1$sが%2$sをくれた");
+            addGiftTranslations(adder, "プレゼントを用意する", "プレゼントを考えていない", "今日はもう十分にあげた", "あげられるものがない", "%1$sが%2$sをベッドのそばに置いていった");
             addRecallTranslations(adder, "ペットが%s匹戻ってきた", "呼べるペットがいない",
                     "%sから返事がない。最後に見かけた場所にはもういない");
             addShopScreenTranslations(adder, "お店", "買う %s", "売る %s", "今日は売り物がありません",
@@ -510,6 +512,7 @@ public final class LanguageData {
             addExamDeskOddsTranslations(adder, "Base %s%%", "Trabalho feito +%s%%", "Reprovações anteriores +%s%%", "Leu o guia +%s%%",
                 "Personalidade ×%s", "Chance de passar %s (máx. %s%%)");
             addPetNewsTranslations(adder, "%1$s deu %2$s para você");
+            addGiftTranslations(adder, "Separando um presente", "Não pensa em dar um presente", "O dono já ganhou presentes demais hoje", "Nada para dar de presente", "%1$s deixou %2$s ao lado da sua cama");
             addRecallTranslations(adder, "%s veio correndo", "Você não tem pets para chamar",
                     "%s não respondeu; sumiu de onde foi visto pela última vez");
             addShopScreenTranslations(adder, "Loja", "Comprar %s", "Vender %s", "Nada à venda hoje",
@@ -722,6 +725,7 @@ public final class LanguageData {
             addExamDeskOddsTranslations(adder, "기초 %s%%", "일한 양 +%s%%", "이전에 낙방 +%s%%", "참고서를 읽음 +%s%%",
                 "성격 ×%s", "합격 확률 %s (최대 %s%%)");
             addPetNewsTranslations(adder, "%1$s(이)가 너에게 %2$s을(를) 줬어");
+            addGiftTranslations(adder, "선물 꺼내기", "선물할 생각이 없어", "오늘은 선물을 충분히 했어", "줄 만한 게 없어", "%1$s(이)가 침대 옆에 %2$s을(를) 두고 갔어");
             addRecallTranslations(adder, "%s마리가 달려왔어", "부를 펫이 없어",
                     "%s(은)는 대답이 없어. 마지막으로 본 곳에 없어");
             addShopScreenTranslations(adder, "상점", "%s 사기", "%s 팔기", "오늘은 파는 게 없어",
@@ -937,6 +941,7 @@ public final class LanguageData {
             addExamDeskOddsTranslations(adder, "Base %s%%", "Work done +%s%%", "Failed before +%s%%", "Read the guide +%s%%",
                 "Personality ×%s", "Pass chance %s (best %s%%)");
             addPetNewsTranslations(adder, "%1$s gave you %2$s");
+            addGiftTranslations(adder, "Getting a present ready", "No present in mind", "Owner has had enough presents today", "Nothing to give", "%1$s left %2$s by your bed");
             addRecallTranslations(adder, "%s came running", "You have no pets to call",
                     "%s did not answer; it is gone from where it was last seen");
             addShopScreenTranslations(adder, "Shop", "Buy %s", "Sell %s", "Nothing for sale today",
@@ -1341,6 +1346,19 @@ public final class LanguageData {
      */
     private static void addPetNewsTranslations(Adder adder, String given) {
         adder.add("message.chiikawa.gift.given", given);
+    }
+
+    /**
+     * The present a pet takes out of its bag to give: what it is doing, why it is not, and what its owner reads when it
+     * leaves one by their bed. Numbered, as the news above is.
+     */
+    private static void addGiftTranslations(Adder adder, String offerGift, String noPresentInMind, String ownerGivenEnough,
+            String noPresent, String leftByBed) {
+        adder.add("intent.chiikawa.offer_gift", offerGift);
+        adder.add("intent.chiikawa.fail.no_present_in_mind", noPresentInMind);
+        adder.add("intent.chiikawa.fail.owner_given_enough", ownerGivenEnough);
+        adder.add("intent.chiikawa.fail.no_present", noPresent);
+        adder.add("message.chiikawa.gift.left_by_bed", leftByBed);
     }
 
     private static void addBlockTranslations(Adder adder, String laborBoard, String shop) {
