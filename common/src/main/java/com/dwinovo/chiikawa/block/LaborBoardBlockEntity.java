@@ -2,6 +2,8 @@ package com.dwinovo.chiikawa.block;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
+import com.dwinovo.chiikawa.entity.brain.errand.view.LivePetView;
+import com.dwinovo.chiikawa.entity.job.JobWork;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.network.BoardPayloads;
 import com.dwinovo.chiikawa.task.BoardLevels;
@@ -185,10 +187,14 @@ public class LaborBoardBlockEntity extends BlockEntity {
             level.getDayTime() % Level.TICKS_PER_DAY, level.getGameTime(), slip -> mayTake(pet, slip));
     }
 
-    /** Whether {@code pet} holds what a slip of this type asks of it: a slip that asks nothing, anyone may take. */
+    /**
+     * Whether {@code pet} holds what a slip of this type asks of it, and could do the work it counts: a slip that asks
+     * nothing, anyone may take. Pure, since offering, holding and claiming a slip all ask it.
+     */
     private static boolean mayTake(AbstractPet pet, PetTask slip) {
         PetTaskType type = PetTaskTypes.all().get(slip.type());
-        return type == null || type.requires().map(requirement -> requirement.metBy(pet.licences())).orElse(true);
+        boolean licensed = type == null || type.requires().map(requirement -> requirement.metBy(pet.licences())).orElse(true);
+        return licensed && JobWork.readyFor(pet, LivePetView.of(pet), slip.counter());
     }
 
     private void update(int index, UnaryOperator<BoardSlot> change) {
