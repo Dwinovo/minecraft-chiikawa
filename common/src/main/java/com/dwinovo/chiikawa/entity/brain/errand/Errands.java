@@ -3,7 +3,6 @@ package com.dwinovo.chiikawa.entity.brain.errand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.AnswerWhistleErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.BlockWorkErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.CheckResultsErrand;
-import com.dwinovo.chiikawa.entity.brain.errand.impl.CombatErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.CooperateErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.DeliverErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.FollowOwnerErrand;
@@ -66,8 +65,6 @@ public final class Errands {
         register(new DeliverErrand());
         register(BlockWorkErrand.weeding());
         register(BlockWorkErrand.pickingMushrooms());
-        register(CombatErrand.fencing());
-        register(CombatErrand.shooting());
     }
 
     private static volatile Map<ResourceLocation, WorkErrand<?, ?>> works = Map.of();

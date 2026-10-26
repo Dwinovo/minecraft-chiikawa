@@ -3,7 +3,9 @@ package com.dwinovo.chiikawa.entity.brain.sensor;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import com.dwinovo.chiikawa.entity.brain.combat.PetCombat;
-import com.dwinovo.chiikawa.init.InitRegistry;
+import com.dwinovo.chiikawa.entity.brain.errand.work.WorkErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.work.WorkTarget;
+import com.dwinovo.chiikawa.entity.job.JobWork;
 import com.dwinovo.chiikawa.init.InitTag;
 import com.dwinovo.chiikawa.utils.Utils;
 import com.google.common.collect.ImmutableSet;
@@ -62,10 +64,9 @@ public class PetAttackbleEntitySensor extends Sensor<AbstractPet> {
 
     @Override
     protected void doTick(ServerLevel level, AbstractPet pet) {
-        // Only fencers and archers ever act on attack targets, so skip the scan for
+        // Only a pet whose job has work against a foe ever acts on attack targets, so skip the scan for
         // other jobs, and leave them none. Whether a pet may fight right now is up to its errands.
-        int jobId = pet.getPetJobId();
-        if (jobId != InitRegistry.FENCER_ID && jobId != InitRegistry.ARCHER_ID) {
+        if (!fights(pet)) {
             pet.getBrain().eraseMemory(MemoryModuleType.ATTACK_TARGET);
             return;
         }
@@ -87,6 +88,12 @@ public class PetAttackbleEntitySensor extends Sensor<AbstractPet> {
                 return;
             }
         }
+    }
+
+    /** @return whether the pet's job has work that is done to a foe */
+    private static boolean fights(AbstractPet pet) {
+        return JobWork.errandsOf(pet).stream()
+            .anyMatch(errand -> errand instanceof WorkErrand<?, ?> work && work.takes(WorkTarget.Kind.FOE));
     }
 
     /**
