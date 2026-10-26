@@ -35,7 +35,7 @@ public final class LanguageData {
             adder.add("manual.chiikawa.more", "更多玩法见官网 →");
             addJobTranslations(adder, "职业", "无", "农夫", "剑士", "弓箭手", "音乐家", "未知");
             addEntityTranslations(adder, "乌萨奇", "小八", "吉伊", "狮萨", "飞鼠", "栗子馒头", "獭师父", "古本屋");
-            addItemTagTranslations(adder, "农夫工具", "剑士工具", "弓箭手工具", "音乐家工具", "驯服食物", "种植作物", "运送物品", "可拾取物品", "请客的吃食");
+            addItemTagTranslations(adder, "农夫工具", "剑士工具", "弓箭手工具", "音乐家工具", "驯服食物", "种子", "运送物品", "可拾取物品", "请客的吃食", "箭");
             addItemTranslations(
                 adder,
                 "乌萨奇刷怪蛋",
@@ -114,6 +114,7 @@ public final class LanguageData {
                     "跟在你身边，有怪就上",
                     "待在原地不动",
                     "在家附近干活、逛街、领牌子");
+            addPetOutlookTranslations(adder, "需要%s", "接下来想做的事", "为什么没在干活");
             addPetRulesTranslations(adder,
                     "逛商店",
                     "送礼物",
@@ -240,6 +241,14 @@ public final class LanguageData {
             addVoiceLines(adder, "kurimanju", VoiceMoment.SCARED, "……哎。");
             addVoiceLines(adder, "shisa", VoiceMoment.SCARED, "哇、哇啊……！");
             addVoiceLines(adder, "furuhonya", VoiceMoment.SCARED, "呀……");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.MISSING, "呜…没有%s了…");
+            addVoiceLines(adder, "hachiware", VoiceMoment.TROUBLE, "总会有办法的！");
+            addVoiceLines(adder, "usagi", VoiceMoment.MISSING, "呀哈！？%s！乌拉！");
+            addVoiceLines(adder, "momonga", VoiceMoment.MISSING, "没有%s！快想办法！");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.MISSING, "……%s没有了啊。");
+            addVoiceLines(adder, "rakko", VoiceMoment.MISSING, "喂，%s没了。");
+            addVoiceLines(adder, "shisa", VoiceMoment.MISSING, "那个…%s没有了呢…");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.MISSING, "……想要%s。");
             addWhistleTranslations(adder, "口哨糖", "口哨糖（%s）", "按住右键吹：附近的宠物听从当前指令。潜行右键切换指令。", "口哨糖：%s", "%d 只宠物跑过来了", "%d 只宠物坐下了", "%d 只宠物自由活动去了", "%d 只野生宠物好奇地凑了过来", "附近没有宠物听到口哨", "好奇地凑过去", "没听到口哨");
             addSettingsTranslations(adder, "Chiikawa 设置", "野生宠物生成：%s", "说话频率：%s", "对话气泡：%s", "开", "关",
                 "野生生成和说话频率属于世界，进入世界后才能修改", "野生生成和说话频率只有管理员能修改",
@@ -270,7 +279,7 @@ public final class LanguageData {
             adder.add("manual.chiikawa.more", "詳しくは公式サイトへ →");
             addJobTranslations(adder, "職業", "なし", "農家", "剣士", "弓使い", "音楽家", "不明");
             addEntityTranslations(adder, "うさぎ", "ハチワレ", "ちいかわ", "シーサー", "モモンガ", "くりまんじゅう", "ラッコ", "古本屋");
-            addItemTagTranslations(adder, "農家の道具", "剣士の道具", "弓使いの道具", "音楽家の道具", "なつかせる食べ物", "植える作物", "運ぶアイテム", "拾えるアイテム", "おごる食べ物");
+            addItemTagTranslations(adder, "農家の道具", "剣士の道具", "弓使いの道具", "音楽家の道具", "なつかせる食べ物", "種", "運ぶアイテム", "拾えるアイテム", "おごる食べ物", "矢");
             addItemTranslations(
                 adder,
                 "うさぎのスポーンエッグ",
@@ -350,6 +359,7 @@ public final class LanguageData {
                     "そばにいて、敵が来たら戦う",
                     "その場から動かない",
                     "家の近くで働いて買い物する");
+            addPetOutlookTranslations(adder, "%sが必要", "次にやりたいこと", "働いていない理由");
             addPetRulesTranslations(adder,
                     "お買い物",
                     "プレゼント",
@@ -476,6 +486,14 @@ public final class LanguageData {
             addVoiceLines(adder, "kurimanju", VoiceMoment.SCARED, "…はぁ");
             addVoiceLines(adder, "shisa", VoiceMoment.SCARED, "ひ、ひえっ…!");
             addVoiceLines(adder, "furuhonya", VoiceMoment.SCARED, "ひゃ…");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.MISSING, "うぅ…%sが ないよぅ…");
+            addVoiceLines(adder, "hachiware", VoiceMoment.TROUBLE, "なんとかなれー！");
+            addVoiceLines(adder, "usagi", VoiceMoment.MISSING, "ヤハ！？ %s！ ウラ〜！");
+            addVoiceLines(adder, "momonga", VoiceMoment.MISSING, "%sが ない！ なんとかしろ");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.MISSING, "…%s、ないのか");
+            addVoiceLines(adder, "rakko", VoiceMoment.MISSING, "おい、%sがねぇぞ");
+            addVoiceLines(adder, "shisa", VoiceMoment.MISSING, "あのぅ、%sが ないさー…");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.MISSING, "…%s、ほしいな");
             addWhistleTranslations(adder, "フエラムネ", "フエラムネ（%s）", "長押しで吹く：近くのペットに今の指示を出す。スニーク右クリックで指示を切り替え。", "フエラムネ：%s", "%d匹が駆け寄ってきた", "%d匹がおすわりした", "%d匹が自由行動に戻った", "野生の%d匹が気になって寄ってきた", "近くに聞こえたペットはいない", "気になって寄っていく", "笛は聞こえない");
             addSettingsTranslations(adder, "ちいかわの設定", "野生の子の出現：%s", "おしゃべりの頻度：%s", "ふきだし：%s", "オン", "オフ",
                 "出現とおしゃべりはワールドの設定です。ワールドの中で変更できます", "出現とおしゃべりの変更は管理者だけができます",
@@ -506,7 +524,7 @@ public final class LanguageData {
             adder.add("manual.chiikawa.more", "Mais no site →");
             addJobTranslations(adder, "Trabalho", "Nenhum", "Agricultura", "Esgrima", "Arqueria", "Música", "Desconhecido");
             addEntityTranslations(adder, "Usagi", "Hachiware", "Chiikawa", "Shisa", "Momonga", "Kurimanju", "Rakko", "Furuhonya");
-            addItemTagTranslations(adder, "Ferramentas de Agricultura", "Ferramentas de Esgrima", "Ferramentas de Arqueria", "Ferramentas de Música", "Comidas para Domar", "Cultivos para Plantar", "Itens para Entregar", "Itens Coletáveis", "Petiscos para Pets");
+            addItemTagTranslations(adder, "Ferramentas de Agricultura", "Ferramentas de Esgrima", "Ferramentas de Arqueria", "Ferramentas de Música", "Comidas para Domar", "Sementes", "Itens para Entregar", "Itens Coletáveis", "Petiscos para Pets", "Flechas");
             addItemTranslations(
                 adder,
                 "Ovo de Usagi",
@@ -591,6 +609,7 @@ public final class LanguageData {
                     "Fica com você e luta",
                     "Fica parado onde está",
                     "Trabalha perto de casa");
+            addPetOutlookTranslations(adder, "Precisa de %s", "O que quer fazer em seguida", "Por que não está trabalhando");
             addPetRulesTranslations(adder,
                     "Compras",
                     "Presentes",
@@ -717,6 +736,14 @@ public final class LanguageData {
             addVoiceLines(adder, "kurimanju", VoiceMoment.SCARED, "...Ai.");
             addVoiceLines(adder, "shisa", VoiceMoment.SCARED, "A-ai...!");
             addVoiceLines(adder, "furuhonya", VoiceMoment.SCARED, "Ah...");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.MISSING, "Buaa... sem %s...");
+            addVoiceLines(adder, "hachiware", VoiceMoment.TROUBLE, "Vai dar um jeito!");
+            addVoiceLines(adder, "usagi", VoiceMoment.MISSING, "Iaha!? %s! Ura!");
+            addVoiceLines(adder, "momonga", VoiceMoment.MISSING, "Cadê %s?! Dá um jeito!");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.MISSING, "...Sem %s, é?");
+            addVoiceLines(adder, "rakko", VoiceMoment.MISSING, "Ei. Cadê %s?");
+            addVoiceLines(adder, "shisa", VoiceMoment.MISSING, "Hum... acabou %s...");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.MISSING, "...Preciso de %s.");
             addWhistleTranslations(adder, "Bala de Apito", "Bala de Apito (%s)", "Segure para soprar: os pets por perto seguem a ordem mostrada. Agache + clique com o botão direito para mudá-la.", "Bala de apito: %s", "%d pets vieram correndo", "%d pets se sentaram", "%d pets saíram para passear", "%d pets selvagens vieram dar uma olhada", "Nenhum pet ouviu o apito", "Indo dar uma olhada", "Nenhum apito ouvido");
             addSettingsTranslations(adder, "Configurações do Chiikawa", "Aparição de pets selvagens: %s", "Conversa: %s", "Balões de fala: %s", "Ligado", "Desligado",
                 "A aparição e a conversa pertencem ao mundo; mude-as de dentro de um mundo", "Só operadores podem mudar a aparição e a conversa",
@@ -748,7 +775,7 @@ public final class LanguageData {
             adder.add("manual.chiikawa.more", "더 자세한 내용은 웹사이트에서 →");
             addJobTranslations(adder, "직업", "없음", "농부", "검사", "궁수", "음악가", "알 수 없음");
             addEntityTranslations(adder, "우사기", "하치와레", "치이카와", "시사", "모몽가", "쿠리만쥬", "랏코", "후루혼야");
-            addItemTagTranslations(adder, "농부 도구", "검사 도구", "궁수 도구", "음악가 도구", "길들이기 음식", "심을 작물", "배달 아이템", "주울 수 있는 아이템", "펫 간식");
+            addItemTagTranslations(adder, "농부 도구", "검사 도구", "궁수 도구", "음악가 도구", "길들이기 음식", "씨앗", "배달 아이템", "주울 수 있는 아이템", "펫 간식", "화살");
             addItemTranslations(
                 adder,
                 "우사기 생성 알",
@@ -829,6 +856,7 @@ public final class LanguageData {
                     "옆에 있다가 공격받으면 나서",
                     "그 자리에 있어",
                     "집 근처에서 일하고 쇼핑해");
+            addPetOutlookTranslations(adder, "%s 필요", "다음에 하고 싶은 일", "일하지 않는 이유");
             addPetRulesTranslations(adder,
                     "쇼핑",
                     "선물",
@@ -955,6 +983,14 @@ public final class LanguageData {
             addVoiceLines(adder, "kurimanju", VoiceMoment.SCARED, "...하아.");
             addVoiceLines(adder, "shisa", VoiceMoment.SCARED, "히, 히익...!");
             addVoiceLines(adder, "furuhonya", VoiceMoment.SCARED, "헉...");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.MISSING, "흑... %s 없어어...");
+            addVoiceLines(adder, "hachiware", VoiceMoment.TROUBLE, "어떻게든 되겠지!");
+            addVoiceLines(adder, "usagi", VoiceMoment.MISSING, "야하!? %s! 우라!");
+            addVoiceLines(adder, "momonga", VoiceMoment.MISSING, "%s 없어! 어떻게 좀 해!");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.MISSING, "...%s, 없네.");
+            addVoiceLines(adder, "rakko", VoiceMoment.MISSING, "야. %s 떨어졌어.");
+            addVoiceLines(adder, "shisa", VoiceMoment.MISSING, "저기... %s 다 떨어졌어요...");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.MISSING, "...%s 필요해.");
             addWhistleTranslations(adder, "피리 사탕", "피리 사탕 (%s)", "길게 눌러 불어. 근처 펫이 표시된 지시를 따라. 웅크리고 우클릭하면 지시를 바꿔.", "피리 사탕: %s", "펫 %d마리가 달려왔어", "펫 %d마리가 앉았어", "펫 %d마리가 자유롭게 돌아다녀", "야생 펫 %d마리가 구경하러 왔어", "호루라기를 들은 펫이 없어", "구경하러 가는 중", "호루라기가 안 들려");
             addSettingsTranslations(adder, "치이카와 설정", "야생 펫 등장: %s", "수다 빈도: %s", "말풍선: %s", "켜짐", "꺼짐",
                 "등장과 수다는 월드 설정이야. 월드 안에서 바꿀 수 있어", "등장과 수다는 관리자만 바꿀 수 있어",
@@ -985,7 +1021,7 @@ public final class LanguageData {
             adder.add("manual.chiikawa.more", "More on the website →");
             addJobTranslations(adder, "Job", "None", "Farmer", "Fencer", "Archer", "Musician", "Unknown");
             addEntityTranslations(adder, "Usagi", "Hachiware", "Chiikawa", "Shisa", "Momonga", "Kurimanju", "Rakko", "Furuhonya");
-            addItemTagTranslations(adder, "Farmer Tools", "Fencer Tools", "Archer Tools", "Musician Tools", "Tame Foods", "Plant Crops", "Deliver Items", "Pickable Items", "Pet Treats");
+            addItemTagTranslations(adder, "Farmer Tools", "Fencer Tools", "Archer Tools", "Musician Tools", "Tame Foods", "Seeds", "Deliver Items", "Pickable Items", "Pet Treats", "Arrows");
             addItemTranslations(
                 adder,
                 "Usagi Spawn Egg",
@@ -1070,6 +1106,7 @@ public final class LanguageData {
                     "Stays close and fights",
                     "Stays right where it is",
                     "Works around home");
+            addPetOutlookTranslations(adder, "Needs %s", "What it feels like doing next", "Why it is not at work");
             addPetRulesTranslations(adder,
                     "Shopping",
                     "Giving presents",
@@ -1196,6 +1233,14 @@ public final class LanguageData {
             addVoiceLines(adder, "kurimanju", VoiceMoment.SCARED, "...Sigh.");
             addVoiceLines(adder, "shisa", VoiceMoment.SCARED, "E-eek...!");
             addVoiceLines(adder, "furuhonya", VoiceMoment.SCARED, "Eep...");
+            addVoiceLines(adder, "chiikawa", VoiceMoment.MISSING, "Waah... no more %s...");
+            addVoiceLines(adder, "hachiware", VoiceMoment.TROUBLE, "It'll work out somehow!");
+            addVoiceLines(adder, "usagi", VoiceMoment.MISSING, "Yaha!? %s! Ura!");
+            addVoiceLines(adder, "momonga", VoiceMoment.MISSING, "No %s! Fix it!");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.MISSING, "...Out of %s, huh.");
+            addVoiceLines(adder, "rakko", VoiceMoment.MISSING, "Hey. Out of %s.");
+            addVoiceLines(adder, "shisa", VoiceMoment.MISSING, "Um... we're out of %s...");
+            addVoiceLines(adder, "furuhonya", VoiceMoment.MISSING, "...I could use %s.");
             addWhistleTranslations(adder, "Whistle Candy", "Whistle Candy (%s)", "Hold to blow: nearby pets take the order shown. Sneak + right-click to change it.", "Whistle candy: %s", "%d pets came running", "%d pets sat down", "%d pets went off to roam", "%d wild pets came over to look", "No pet heard the whistle", "Coming over to look", "No whistle heard");
             addSettingsTranslations(adder, "Chiikawa Settings", "Wild pet spawning: %s", "Chatter: %s", "Speech bubbles: %s", "On", "Off",
                 "Spawning and chatter belong to the world; change them from inside a world", "Only operators can change spawning and chatter",
@@ -1637,6 +1682,13 @@ public final class LanguageData {
         adder.add("screen.chiikawa.pet.order.free.hint", freeHint);
     }
 
+    /** The status page's two cards: what the pet is short of, and the question each card answers under the cursor. */
+    private static void addPetOutlookTranslations(Adder adder, String lacks, String next, String why) {
+        adder.add("screen.chiikawa.pet.outlook.lacks", lacks);
+        adder.add("screen.chiikawa.pet.outlook.next", next);
+        adder.add("screen.chiikawa.pet.outlook.why", why);
+    }
+
     /**
      * What an owner may tell a pet from the orders page: the five kinds of errand it can be told off, each with a line
      * for how it stands, the three ways to take part in a fight with a line under each, and swapping to a weapon.
@@ -1727,7 +1779,8 @@ public final class LanguageData {
         String plantCrops,
         String deliverItems,
         String pickableItems,
-        String petTreats
+        String petTreats,
+        String arrows
     ) {
         adder.add("tag.item.chiikawa.entity_farmer_tools", farmerTools);
         adder.add("tag.item.chiikawa.entity_fencer_tools", fencerTools);
@@ -1738,6 +1791,8 @@ public final class LanguageData {
         adder.add("tag.item.chiikawa.entity_deliver_items", deliverItems);
         adder.add("tag.item.chiikawa.entity_pickable_items", pickableItems);
         adder.add("tag.item.chiikawa.pet_treats", petTreats);
+        // What an archer says it is short of: a tag of the game's own, which has no name of its own in 1.21.1.
+        adder.add("tag.item.minecraft.arrows", arrows);
     }
 
     private static void addItemTranslations(Adder adder, String usagiEgg, String hachiwareEgg, String chiikawaEgg,
