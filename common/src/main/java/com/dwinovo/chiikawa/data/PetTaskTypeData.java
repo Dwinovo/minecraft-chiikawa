@@ -42,7 +42,7 @@ public final class PetTaskTypeData {
             // Farmers are the most common job, so their slips come up the most. Picking
             // mushrooms is not among them: mushrooms are only there to pick at night, so a
             // slip for them left a farmer standing about all day waiting for the dark.
-            WEEDING, new PetTaskType(farmer, PetWorkCounters.WEED, vanilla("short_grass"),
+            WEEDING, new PetTaskType(farmer, WorkData.WEED_PULLED, vanilla("short_grass"),
                 UniformInt.of(8, 16), reward(WEEDING), 5, BoardLevels.FIRST_LEVEL, Optional.empty()),
             // Seconds of music.
             STREET_PERFORMANCE, new PetTaskType(musician, WorkData.PLAY_MUSIC_SECOND, vanilla("note_block"),
@@ -57,7 +57,7 @@ public final class PetTaskTypeData {
             // Twice the weeds for two and a half times the pay, for a farmer with grade 3 of
             // the weeding licence or better: what the licence is for, beyond a little more
             // for every slip. Goes up on a board paid up as far as hunting.
-            ADVANCED_WEEDING, new PetTaskType(farmer, PetWorkCounters.WEED, vanilla("tall_grass"),
+            ADVANCED_WEEDING, new PetTaskType(farmer, WorkData.WEED_PULLED, vanilla("tall_grass"),
                 UniformInt.of(16, 32), reward(ADVANCED_WEEDING), 2, HUNTING_LEVEL,
                 Optional.of(new LicenceRequirement(QualificationData.WEEDING, ADVANCED_WEEDING_RANK)))
         );

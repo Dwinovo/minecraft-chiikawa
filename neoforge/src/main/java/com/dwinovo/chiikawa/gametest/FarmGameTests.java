@@ -7,6 +7,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
@@ -160,7 +161,8 @@ public final class FarmGameTests {
             helper.assertTrue(!container.isEmpty(), Component.literal("the chest is still empty; the pet was "
                 + pet.getIntent().map(Object::toString).orElse("doing nothing")
                 + " and had been told about a container at "
-                + pet.getBrain().getMemory(InitMemory.CONTAINER_POS.get()).map(Object::toString).orElse("nowhere")));
+                + pet.getBrain().getMemory(InitMemory.WORK_SIGHTS.get()).map(sights -> sights.get(WorkData.DELIVER))
+                    .map(Object::toString).orElse("nowhere"));
         });
     }
 
@@ -184,17 +186,17 @@ public final class FarmGameTests {
         boolean[] setOffForTheChest = {false};
 
         helper.onEachTick(() -> {
-            if (!setOffForTheChest[0] && pet.getIntent().filter(ErrandIds.DELIVER::equals).isPresent()) {
+            if (!setOffForTheChest[0] && pet.getIntent().filter(WorkData.DELIVER::equals).isPresent()) {
                 setOffForTheChest[0] = true;
                 long ripe = field.stream().filter(crop -> helper.getBlockState(crop).getBlock() == Blocks.WHEAT
                     && helper.getBlockState(crop).getValue(CropBlock.AGE) == CropBlock.MAX_AGE).count();
-                helper.assertTrue(ripe == 0, "the pet set off for the chest with " + ripe + " ripe crops still in the field");
+                helper.assertTrue(ripe == 0, Component.literal("the pet set off for the chest with " + ripe + " ripe crops still in the field"));
             }
         });
         helper.succeedWhen(() -> {
-            helper.assertTrue(setOffForTheChest[0], "the pet never set off for the chest");
+            helper.assertTrue(setOffForTheChest[0], Component.literal("the pet never set off for the chest"));
             Container container = (Container) helper.getBlockEntity(chest);
-            helper.assertTrue(container.hasAnyMatching(stack -> stack.is(Items.WHEAT)), "the chest has no wheat in it");
+            helper.assertTrue(container.hasAnyMatching(stack -> stack.is(Items.WHEAT)), Component.literal("the chest has no wheat in it"));
         });
     }
 
@@ -302,27 +304,27 @@ public final class FarmGameTests {
                     return;
                 }
                 helper.assertTrue(ended.get().outcome() instanceof Outcome.GaveUp,
-                    "the pet ended its walk to the walled-in crop " + ended.get().outcome());
+                    Component.literal("the pet ended its walk to the walled-in crop " + ended.get().outcome()));
                 helper.assertTrue(ended.get().ranTicks() <= GIVE_UP_TICKS,
-                    "the pet took " + ended.get().ranTicks() + " ticks to give up on a crop it had no way to");
+                    Component.literal("the pet took " + ended.get().ranTicks() + " ticks to give up on a crop it had no way to"));
                 gaveUp[0] = true;
                 ripeWheat(helper, open);
                 return;
             }
-            if (setOff[0] < 0L && pet.getIntent().filter(ErrandIds.HARVEST::equals).isPresent()) {
+            if (setOff[0] < 0L && pet.getIntent().filter(WorkData.HARVEST::equals).isPresent()) {
                 setOff[0] = helper.getTick();
             }
             if (carries(pet, Items.WHEAT)) {
                 helper.succeed();
             }
             helper.assertTrue(setOff[0] < 0L || helper.getTick() - setOff[0] <= REAP_TICKS,
-                "the pet had not reaped the open crop " + REAP_TICKS + " ticks after it set off for it");
+                Component.literal("the pet had not reaped the open crop " + REAP_TICKS + " ticks after it set off for it"));
         });
     }
 
     private static Optional<DecisionLog.Ended> harvestEnded(AbstractPet pet) {
         return pet.getMind().log().entries().stream()
-            .filter(entry -> entry instanceof DecisionLog.Ended ended && ended.errand().equals(ErrandIds.HARVEST))
+            .filter(entry -> entry instanceof DecisionLog.Ended ended && ended.errand().equals(WorkData.HARVEST))
             .map(DecisionLog.Ended.class::cast).findFirst();
     }
 
