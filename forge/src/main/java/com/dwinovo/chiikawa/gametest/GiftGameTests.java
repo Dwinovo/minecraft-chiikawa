@@ -13,6 +13,7 @@ import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.camera.FilmRolls;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
+import com.dwinovo.chiikawa.entity.PetRules;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
@@ -481,6 +482,35 @@ public final class GiftGameTests {
             helper.assertTrue(count(pet, Items.COOKIE) == 2, "the pet has " + count(pet, Items.COOKIE) + " cookies, not the two");
             helper.assertFalse(owner.getInventory().contains(new ItemStack(Items.COOKIE)), "the owner was given the cookie");
             helper.assertFalse(pet.getBrain().hasMemoryValue(InitMemory.GIFT_COOLDOWN.get()), "a present never given tired the pet");
+        });
+    }
+
+    /**
+     * Told that presents are off while it is on its way with one, the pet puts it back in its bag, as it does when it is
+     * told to sit, and thinks of no other while the word stands: nobody was given it, and so the pet is not tired of giving.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WALK_TICKS)
+    public static void switching_gifts_off_puts_a_carried_present_back(GameTestHelper helper) {
+        ServerPlayer owner = ownerAcross(helper);
+        AbstractPet pet = ownedBy(helper, InitEntity.USAGI_PET.get(), owner);
+        pet.getBackpack().setItem(2, new ItemStack(Items.COOKIE, 2));
+        thinkOf(pet, GiftOccasion.WAS_TREATED);
+        boolean[] told = {false};
+        int[] settled = {0};
+
+        helper.succeedWhen(() -> {
+            if (!told[0] && !pet.getPendingGift().isEmpty()) {
+                told[0] = true;
+                pet.setRules(PetRules.DEFAULT.with(PetRules.Toggle.GIFT, false));
+                thinkOf(pet, GiftOccasion.WAS_TREATED);
+            }
+            helper.assertTrue(told[0], "the pet never set off with a present");
+            helper.assertTrue(pet.getPendingGift().isEmpty(), "the pet still carries the cookie");
+            helper.assertTrue(count(pet, Items.COOKIE) == 2, "the pet has " + count(pet, Items.COOKIE) + " cookies, not the two");
+            helper.assertFalse(owner.getInventory().contains(new ItemStack(Items.COOKIE)), "the owner was given the cookie");
+            helper.assertFalse(pet.getBrain().hasMemoryValue(InitMemory.GIFT_COOLDOWN.get()), "a present never given tired the pet");
+            helper.assertTrue(pet.giftIntentions().held().isEmpty(), "the pet thought of a present it was told not to give");
+            helper.assertTrue(++settled[0] > SETTLED_TICKS, "too soon to say it does not set off again");
         });
     }
 

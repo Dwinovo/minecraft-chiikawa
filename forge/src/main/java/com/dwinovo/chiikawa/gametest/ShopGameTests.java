@@ -10,6 +10,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.PetRules;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitItems;
@@ -183,6 +184,27 @@ public final class ShopGameTests {
         helper.runAtTickTime(LEAVE_IT_TICKS, () -> {
             helper.assertTrue(Wallet.count(pet.getBackpack()) == WAGES, "the pet went to a shop outside its area");
             helper.succeed();
+        });
+    }
+
+    /**
+     * Told not to shop, a pet leaves the counter alone however much it has to spend. Beside a pet with no such word, which
+     * does go, so the case shows it is the word that keeps the other at home and not a day it was not of a mind to.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = SHOP_TICKS)
+    public static void a_pet_told_not_to_shop_does_not(GameTestHelper helper) {
+        helper.setBlock(new BlockPos(9, STAND, 4), InitBlocks.SHOP.get());
+        AbstractPet told = holding(worker(helper, new BlockPos(4, STAND, 3)), Items.WOODEN_HOE);
+        AbstractPet free = holding(worker(helper, new BlockPos(4, STAND, 6)), Items.WOODEN_HOE);
+        told.getBackpack().addItem(new ItemStack(Items.EMERALD, WAGES));
+        free.getBackpack().addItem(new ItemStack(Items.EMERALD, WAGES));
+        told.setRules(PetRules.DEFAULT.with(PetRules.Toggle.SHOP, false));
+
+        helper.onEachTick(() -> helper.assertFalse(told.getIntent().filter(ErrandIds.SHOP::equals).isPresent(),
+            "the pet set off for a shop it was told to keep away from"));
+        helper.succeedWhen(() -> {
+            helper.assertTrue(Wallet.count(free.getBackpack()) < WAGES, "the pet that was not told anything never went shopping");
+            helper.assertTrue(Wallet.count(told.getBackpack()) == WAGES, "the pet told not to shop spent its wages");
         });
     }
 
