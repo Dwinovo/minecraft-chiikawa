@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.data;
 
 import com.dwinovo.chiikawa.init.InitBlocks;
+import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
 import net.minecraft.core.registries.Registries;
@@ -136,34 +137,36 @@ public final class TagData {
         // creeper starts swelling — but a pet has to be able to see one to keep away from
         // it, and an archer can answer one from outside the blast.
         tags.tag(InitTag.ENTITY_HOSTILE_ENTITY)
-            .add(key(EntityTypes.BLAZE))
-            .add(key(EntityTypes.BOGGED))
-            .add(key(EntityTypes.BREEZE))
-            .add(key(EntityTypes.CAVE_SPIDER))
-            .add(key(EntityTypes.CREEPER))
-            .add(key(EntityTypes.DROWNED))
-            .add(key(EntityTypes.ENDERMITE))
-            .add(key(EntityTypes.EVOKER))
-            .add(key(EntityTypes.GUARDIAN))
-            .add(key(EntityTypes.HOGLIN))
-            .add(key(EntityTypes.HUSK))
-            .add(key(EntityTypes.ILLUSIONER))
-            .add(key(EntityTypes.MAGMA_CUBE))
-            .add(key(EntityTypes.PHANTOM))
-            .add(key(EntityTypes.PIGLIN))
-            .add(key(EntityTypes.PIGLIN_BRUTE))
-            .add(key(EntityTypes.PILLAGER))
-            .add(key(EntityTypes.SILVERFISH))
-            .add(key(EntityTypes.SKELETON))
-            .add(key(EntityTypes.SLIME))
-            .add(key(EntityTypes.SPIDER))
-            .add(key(EntityTypes.STRAY))
-            .add(key(EntityTypes.VEX))
-            .add(key(EntityTypes.VINDICATOR))
-            .add(key(EntityTypes.WITCH))
-            .add(key(EntityTypes.WITHER_SKELETON))
-            .add(key(EntityTypes.ZOGLIN))
-            .add(key(EntityTypes.ZOMBIE))
-            .add(key(EntityTypes.ZOMBIE_VILLAGER));
+            .add(EntityType.BLAZE)
+            .add(EntityType.BOGGED)
+            .add(EntityType.BREEZE)
+            .add(EntityType.CAVE_SPIDER)
+            .add(EntityType.CREEPER)
+            .add(EntityType.DROWNED)
+            .add(EntityType.ENDERMITE)
+            .add(EntityType.EVOKER)
+            .add(EntityType.GUARDIAN)
+            .add(EntityType.HOGLIN)
+            .add(EntityType.HUSK)
+            .add(EntityType.ILLUSIONER)
+            .add(EntityType.MAGMA_CUBE)
+            .add(EntityType.PHANTOM)
+            .add(EntityType.PIGLIN)
+            .add(EntityType.PIGLIN_BRUTE)
+            .add(EntityType.PILLAGER)
+            .add(EntityType.SILVERFISH)
+            .add(EntityType.SKELETON)
+            .add(EntityType.SLIME)
+            .add(EntityType.SPIDER)
+            .add(EntityType.STRAY)
+            .add(EntityType.VEX)
+            .add(EntityType.VINDICATOR)
+            .add(EntityType.WITCH)
+            .add(EntityType.WITHER_SKELETON)
+            .add(EntityType.ZOGLIN)
+            .add(EntityType.ZOMBIE)
+            .add(EntityType.ZOMBIE_VILLAGER);
+        tags.tag(InitTag.CREEPERS_AVOID)
+            .add(InitEntity.HACHIWARE_PET.get());
     }
 }
