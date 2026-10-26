@@ -1,12 +1,12 @@
-# The Blockbench backlog: every animation the enums name (PetActivity, PetAction, PetReaction) that a character's
-# animation file does not have yet, as `<character> <animation>`. AnimationBacklogTest holds the list to the files both
-# ways: a line for an animation that exists, or that nothing names, fails it, and so does a missing one with no line.
-# Making an animation takes its line off; the list shrinks to empty.
+# The Blockbench backlog: every animation the enums mean (the first candidate of each PetActivity, PetAction and
+# PetReaction) that a character able to reach it does not have yet, as `<character> <animation>`. The guitar is asked of
+# Hachiware only, and the generic actions are only what the others fall back to. AnimationBacklogTest holds the list to
+# the files both ways: a line for an animation that exists, or that the character cannot reach, fails it, and so does a
+# missing one with no line. Making an animation takes its line off; the list shrinks to empty.
 
 chiikawa bow_draw
 chiikawa bow_release
 chiikawa deposit
-chiikawa guitar
 chiikawa harvest
 chiikawa photo
 chiikawa pickup
@@ -18,7 +18,6 @@ chiikawa sleep
 furuhonya bow_draw
 furuhonya bow_release
 furuhonya deposit
-furuhonya guitar
 furuhonya harvest
 furuhonya photo
 furuhonya pickup
@@ -30,18 +29,15 @@ furuhonya sleep
 
 hachiware bow_draw
 hachiware bow_release
-hachiware confused
 hachiware deposit
 hachiware harvest
 hachiware pickup
 hachiware plant
 hachiware slash
-hachiware sword_attack
 
 kurimanju bow_draw
 kurimanju bow_release
 kurimanju deposit
-kurimanju guitar
 kurimanju harvest
 kurimanju photo
 kurimanju pickup
@@ -54,7 +50,6 @@ kurimanju sleep
 momonga bow_draw
 momonga bow_release
 momonga deposit
-momonga guitar
 momonga harvest
 momonga photo
 momonga pickup
@@ -66,7 +61,6 @@ momonga sleep
 rakko bow_draw
 rakko bow_release
 rakko deposit
-rakko guitar
 rakko harvest
 rakko photo
 rakko pickup
@@ -79,7 +73,6 @@ rakko sleep
 shisa bow_draw
 shisa bow_release
 shisa deposit
-shisa guitar
 shisa harvest
 shisa photo
 shisa pickup
@@ -90,7 +83,6 @@ shisa slash
 usagi bow_draw
 usagi bow_release
 usagi deposit
-usagi guitar
 usagi harvest
 usagi photo
 usagi pickup
