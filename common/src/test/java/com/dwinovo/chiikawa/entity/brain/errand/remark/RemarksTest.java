@@ -4,11 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.data.PetRemarkData;
+import com.dwinovo.chiikawa.entity.PetCharacters;
 import com.dwinovo.chiikawa.data.PetVoiceData;
 import com.dwinovo.chiikawa.entity.brain.errand.LackKey;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.WhyNot;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Aside;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
+import com.dwinovo.chiikawa.entity.brain.errand.view.Weather;
 import com.dwinovo.chiikawa.voice.PetVoice;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.ArrayList;
@@ -179,12 +181,45 @@ class RemarksTest {
             new VoicedAside(mute, 1.0F, RandomSource.create(7L))));
     }
 
+    @Test
+    void hachiwareScratchesItsHeadAtTheRainAndSaysSomethingWillTurnUpAndNoOneElseSaysAnythingOfIt() {
+        Said hachiware = new Said(true);
+        Said others = new Said(true);
+
+        Optional<RemarkRests> rests = Remarks.remark(SHIPPED, HACHIWARE, raining(Weather.RAIN, 5.0), RemarkRests.NONE, hachiware);
+        for (ResourceLocation character : PetCharacters.all()) {
+            if (!character.equals(HACHIWARE)) {
+                assertEquals(Optional.empty(), Remarks.remark(SHIPPED, character, raining(Weather.RAIN, 5.0), RemarkRests.NONE, others),
+                    character.toString());
+            }
+        }
+
+        assertEquals(List.of(VoiceMoment.TROUBLE), hachiware.moments);
+        assertEquals(List.of("scratch_head"), hachiware.gestures);
+        assertTrue(rests.orElseThrow().resting(PetRemarkData.TROUBLE, SINCE));
+        assertEquals(List.of(), others.moments);
+    }
+
+    @Test
+    void notInFineWeatherOrWithNobodyNearToHearIt() {
+        Said said = new Said(true);
+
+        assertEquals(Optional.empty(), Remarks.remark(SHIPPED, HACHIWARE, raining(Weather.CLEAR, 5.0), RemarkRests.NONE, said));
+        assertEquals(Optional.empty(), Remarks.remark(SHIPPED, HACHIWARE, raining(Weather.RAIN, 9.0), RemarkRests.NONE, said));
+        assertEquals(List.of(), said.moments);
+        assertTrue(Remarks.remark(SHIPPED, HACHIWARE, raining(Weather.THUNDER, 5.0), RemarkRests.NONE, said).isPresent(), "a storm is rain");
+    }
+
+    private static RemarkCue.Situation raining(Weather weather, double ownerDistance) {
+        return new RemarkCue.Situation(Optional.empty(), SINCE, OptionalDouble.of(ownerDistance), DayPhase.DAY, weather);
+    }
+
     private static RemarkCue.Situation at(DayPhase phase, double ownerDistance) {
         return at(phase, ownerDistance, SINCE);
     }
 
     private static RemarkCue.Situation at(DayPhase phase, double ownerDistance, long now) {
-        return new RemarkCue.Situation(Optional.empty(), now, OptionalDouble.of(ownerDistance), phase);
+        return new RemarkCue.Situation(Optional.empty(), now, OptionalDouble.of(ownerDistance), phase, Weather.CLEAR);
     }
 
     private static WhyNot lack() {
@@ -196,7 +231,7 @@ class RemarksTest {
     }
 
     private static RemarkCue.Situation situation(Optional<WhyNot> whyNot, long now, OptionalDouble ownerDistance) {
-        return new RemarkCue.Situation(whyNot, now, ownerDistance, DayPhase.DAY);
+        return new RemarkCue.Situation(whyNot, now, ownerDistance, DayPhase.DAY, Weather.CLEAR);
     }
 
     /** An aside that says whatever it is asked, or nothing, and notes it. */

@@ -34,6 +34,8 @@ public final class InitTag {
     public static final TagKey<Item> NEVER_GIFTED = tag("never_gifted");
 
     public static final TagKey<EntityType<?>> ENTITY_HOSTILE_ENTITY = tagEntity("entity_hostile_entity");
+    /** The eight characters, as a pet's pastimes see them about. */
+    public static final TagKey<EntityType<?>> PETS = tagEntity("pets");
     /** The pets creepers keep away from, as they do from cats: see {@code CreeperMixin}. */
     public static final TagKey<EntityType<?>> CREEPERS_AVOID = tagEntity("creepers_avoid");
 

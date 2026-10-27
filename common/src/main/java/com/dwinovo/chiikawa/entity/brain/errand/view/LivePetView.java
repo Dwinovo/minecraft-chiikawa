@@ -21,6 +21,7 @@ import com.dwinovo.chiikawa.entity.brain.sensor.SurroundingsSettings;
 import com.dwinovo.chiikawa.gifting.GiftOutlook;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitMemory;
+import com.dwinovo.chiikawa.init.InitTag;
 import com.dwinovo.chiikawa.music.Playable;
 import com.dwinovo.chiikawa.music.PlaybackMode;
 import com.dwinovo.chiikawa.music.ServerMusicSystem;
@@ -47,8 +48,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.phys.AABB;
@@ -71,6 +70,8 @@ public final class LivePetView implements PetView {
     private final Lazy<Surroundings> surroundings;
     private final Lazy<Boolean> ownerWorking;
     private final Lazy<Boolean> ownerReturned;
+    private final Lazy<Boolean> ownerFinishedWork;
+    private final Lazy<Optional<String>> neighbourPerformance;
     private final Lazy<Optional<LackKey>> lack;
     private final Lazy<Optional<GlobalPos>> freeBed;
     private final Lazy<PetOwnership> ownership;
@@ -113,6 +114,8 @@ public final class LivePetView implements PetView {
         this.surroundings = new Lazy<>(() -> pet.getBrain().getMemory(InitMemory.SURROUNDINGS.get()).orElse(Surroundings.NONE));
         this.ownerWorking = new Lazy<>(this::findOwnerWorking);
         this.ownerReturned = new Lazy<>(this::findOwnerReturned);
+        this.ownerFinishedWork = new Lazy<>(this::findOwnerFinishedWork);
+        this.neighbourPerformance = new Lazy<>(this::findNeighbourPerformance);
         this.lack = new Lazy<>(() -> pet.getMind().whyNot().flatMap(WhyNot::lack));
         this.freeBed = new Lazy<>(this::findFreeBed);
         this.ownership = new Lazy<>(() -> PetOwnership.of(pet));
@@ -195,6 +198,16 @@ public final class LivePetView implements PetView {
     @Override
     public boolean ownerReturned() {
         return ownerReturned.get();
+    }
+
+    @Override
+    public boolean ownerFinishedWork() {
+        return ownerFinishedWork.get();
+    }
+
+    @Override
+    public Optional<String> neighbourPerformance() {
+        return neighbourPerformance.get();
     }
 
     @Override
@@ -386,8 +399,24 @@ public final class LivePetView implements PetView {
 
     /** As the owner is seen to be at work: swinging at it, a tool or a block in the hand. */
     private boolean findOwnerWorking() {
-        return pet.getOwner() instanceof Player owner && owner.isAlive() && owner.level() == pet.level() && owner.swinging
-            && (owner.getMainHandItem().getItem() instanceof DiggerItem || owner.getMainHandItem().getItem() instanceof BlockItem);
+        return pet.getOwner() instanceof Player owner && owner.level() == pet.level() && PetSurroundingsSensor.atWork(owner);
+    }
+
+    private boolean findOwnerFinishedWork() {
+        long now = pet.level().getGameTime();
+        return SurroundingsSettings.current().filter(settings -> pet.getBrain().getMemory(InitMemory.OWNER_SEEN.get())
+            .filter(seen -> seen.finishedWork(now, settings.settleTicks(), settings.spellTicks(), settings.finishedTicks()))
+            .isPresent()).isPresent();
+    }
+
+    /** The performance of the nearest pet the sensor saw, which the sensor lists nearest first. */
+    private Optional<String> findNeighbourPerformance() {
+        return surroundings().creatures().stream()
+            .filter(seen -> seen.kind().is(InitTag.PETS))
+            .map(seen -> pet.level() instanceof ServerLevel level ? level.getEntity(seen.id()) : null)
+            .filter(found -> found instanceof AbstractPet neighbour && neighbour.isAlive())
+            .map(found -> ((AbstractPet) found).getPerformance())
+            .findFirst().filter(performance -> !performance.isEmpty());
     }
 
     private boolean findOwnerReturned() {

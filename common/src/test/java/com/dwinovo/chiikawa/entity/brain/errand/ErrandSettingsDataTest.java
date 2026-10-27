@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.data.ErrandSettingsData;
+import com.dwinovo.chiikawa.data.CharacterPastimeData;
 import com.dwinovo.chiikawa.data.PastimeData;
 import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.brain.errand.overlay.Overlays;
@@ -55,7 +56,15 @@ class ErrandSettingsDataTest {
         Map.entry(ErrandIds.SLEEP, 10),
         Map.entry(PastimeData.RAIN_SHELTER, 10),
         Map.entry(PastimeData.RAIN_PLAY, 10),
-        Map.entry(PastimeData.WATCH_OWNER_WORK, 10));
+        Map.entry(PastimeData.WATCH_OWNER_WORK, 10),
+        Map.entry(CharacterPastimeData.COWER, 10),
+        Map.entry(CharacterPastimeData.FRENZY, 10),
+        Map.entry(CharacterPastimeData.ASK_PRAISE, 10),
+        Map.entry(CharacterPastimeData.EVENING_DRINK, 10),
+        Map.entry(CharacterPastimeData.COFFEE_FOR_A_WORKER, 10),
+        Map.entry(CharacterPastimeData.SWEETS_STARE, 10),
+        Map.entry(CharacterPastimeData.SWORD_PRACTICE, 10),
+        Map.entry(CharacterPastimeData.GREET_OWNER, 10));
 
     /** The scores the intents have today, which the scores here must not move. */
     private static final Map<ResourceLocation, Float> SCORES = Map.ofEntries(
@@ -88,7 +97,15 @@ class ErrandSettingsDataTest {
         Map.entry(ErrandIds.SLEEP, 0.6F),
         Map.entry(PastimeData.RAIN_SHELTER, 0.5F),
         Map.entry(PastimeData.RAIN_PLAY, 0.5F),
-        Map.entry(PastimeData.WATCH_OWNER_WORK, 0.3F));
+        Map.entry(PastimeData.WATCH_OWNER_WORK, 0.3F),
+        Map.entry(CharacterPastimeData.COWER, 0.9F),
+        Map.entry(CharacterPastimeData.FRENZY, 0.2F),
+        Map.entry(CharacterPastimeData.ASK_PRAISE, 0.4F),
+        Map.entry(CharacterPastimeData.EVENING_DRINK, 0.6F),
+        Map.entry(CharacterPastimeData.COFFEE_FOR_A_WORKER, 0.7F),
+        Map.entry(CharacterPastimeData.SWEETS_STARE, 0.6F),
+        Map.entry(CharacterPastimeData.SWORD_PRACTICE, 0.2F),
+        Map.entry(CharacterPastimeData.GREET_OWNER, 0.8F));
 
     @BeforeAll
     static void shippedSettings() {

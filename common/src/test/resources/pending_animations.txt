@@ -1,6 +1,7 @@
 # The Blockbench backlog: every animation the enums mean (the first candidate of each PetActivity, PetAction and
 # PetReaction), the first the flee errand's data names for a character to cower with and the sleep errand's to sleep with,
-# the pose and the moves of its part in each pastime and the gesture of the remarks it has a part in, that a character able
+# the pose and the moves of its part in each pastime, what it does for want of an animation to copy and the gesture of the
+# remarks it has a part in, that a character able
 # to reach it does not have yet, as `<character> <animation>`. The guitar is asked of Hachiware only, and the generic actions are
 # only what the others fall back to. AnimationBacklogTest holds the list to
 # the files both ways: a line for an animation that exists, or that the character cannot reach, fails it, and so does a
@@ -17,7 +18,6 @@ chiikawa pickup
 chiikawa plant
 chiikawa scratch_head
 chiikawa slash
-chiikawa sleep
 chiikawa sleep_hug
 chiikawa yawn
 
@@ -47,18 +47,22 @@ kurimanju bow_draw
 kurimanju bow_release
 kurimanju clap
 kurimanju deposit
+kurimanju drink
 kurimanju harvest
 kurimanju photo
 kurimanju pickup
 kurimanju plant
 kurimanju revive
 kurimanju scratch_head
+kurimanju sigh
 kurimanju slash
 kurimanju sleep
 kurimanju yawn
 
+momonga ask_praise
 momonga bow_draw
 momonga bow_release
+momonga cute
 momonga deposit
 momonga harvest
 momonga photo
@@ -67,6 +71,7 @@ momonga plant
 momonga scratch_head
 momonga slash
 momonga sleep
+momonga tantrum
 momonga yawn
 
 rakko bow_draw
@@ -77,12 +82,15 @@ rakko harvest
 rakko photo
 rakko pickup
 rakko plant
+rakko practice
 rakko revive
 rakko scratch_head
 rakko slash
 rakko sleep
+rakko stare
 rakko yawn
 
+shisa bow
 shisa bow_draw
 shisa bow_release
 shisa deposit
@@ -97,6 +105,7 @@ shisa yawn
 usagi bow_draw
 usagi bow_release
 usagi deposit
+usagi frenzy
 usagi harvest
 usagi photo
 usagi pickup

@@ -14,6 +14,7 @@ import java.util.Set;
  *   <tr><th>Icon</th><th>When</th></tr>
  *   <tr><td>{@link PetIcon#SCARED}</td><td>the step it is at is {@link StepTag#SCARED}</td></tr>
  *   <tr><td>{@link PetIcon#SLEEPY}</td><td>the step it is at is {@link StepTag#SLEEPING}: it is lying down asleep</td></tr>
+ *   <tr><td>{@link PetIcon#PRAISE}</td><td>the step it is at is {@link StepTag#ASKING}: it is waiting to be praised</td></tr>
  *   <tr><td>{@link PetIcon#GIFT}</td><td>it carries a present, or has one in mind that it may set off with</td></tr>
  *   <tr><td>{@link PetIcon#MISSING}</td><td>its work has nothing to offer for want of something, see {@link WhyNot}</td></tr>
  *   <tr><td>{@link PetIcon#SEEKING_WORK}</td><td>its work has nothing to offer, by day</td></tr>
@@ -48,6 +49,9 @@ public final class PetIcons {
         }
         if (tags.contains(StepTag.SLEEPING)) {
             return PetIcon.SLEEPY;
+        }
+        if (tags.contains(StepTag.ASKING)) {
+            return PetIcon.PRAISE;
         }
         if (signs.carryingPresent() || signs.presentReady()) {
             return PetIcon.GIFT;

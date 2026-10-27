@@ -98,6 +98,7 @@ public final class LanguageData {
                 "没有谁在攻击它", "手里已经有武器", "背包里没有可换的武器", "它会还手");
             addRhythmTranslations(adder, "睡觉", "躲雨", "玩雨", "看主人干活",
                 "主人没有在睡觉", "没有想做的事", "附近没有躲雨的地方", "附近没有可以去看的");
+            addPastimeTranslations(adder, "缩起来发抖", "撒欢乱叫", "求夸奖", "傍晚小酌", "递咖啡", "盯着甜食", "练剑", "迎接主人");
             addSocialTranslations(adder, "找伙伴玩", "陪伙伴玩", "附近没有想一起玩的伙伴", "没有伙伴过来找它");
             addTaskTypeTranslations(adder, "除草", "%s 株", "街头演奏", "%s 秒",
                 "近身讨伐", "远程讨伐", "%s 只", "高级除草");
@@ -259,6 +260,12 @@ public final class LanguageData {
             addVoiceLines(adder, "rakko", VoiceMoment.SLEEPY, "……困。");
             addVoiceLines(adder, "shisa", VoiceMoment.SLEEPY, "哈啊……好困……");
             addVoiceLines(adder, "furuhonya", VoiceMoment.SLEEPY, "哈……");
+            addVoiceLines(adder, "usagi", VoiceMoment.FRENZY, "呜啦！！", "呀哈——！", "呜啦呜啦呜啦！！");
+            addVoiceLines(adder, "momonga", VoiceMoment.PRAISE_ME, "夸我！快夸我嘛～", "我很可爱吧？快夸我！");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.SIGH, "哈——");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.OFFER_COFFEE, "……辛苦了。给。");
+            addVoiceLines(adder, "rakko", VoiceMoment.SWEETS, "……喂，那个看着挺甜。");
+            addVoiceLines(adder, "shisa", VoiceMoment.GREET, "欢迎回来！请多指教～");
             addWhistleTranslations(adder, "口哨糖", "口哨糖（%s）", "按住右键吹：附近的宠物听从当前指令。潜行右键切换指令。", "口哨糖：%s", "%d 只宠物跑过来了", "%d 只宠物坐下了", "%d 只宠物自由活动去了", "%d 只野生宠物好奇地凑了过来", "附近没有宠物听到口哨", "好奇地凑过去", "没听到口哨");
             addSettingsTranslations(adder, "Chiikawa 设置", "野生宠物生成：%s", "说话频率：%s", "闲暇活动：%s", "对话气泡：%s", "开", "关",
                 "野生生成、说话频率和闲暇活动属于世界，进入世界后才能修改", "野生生成、说话频率和闲暇活动只有管理员能修改",
@@ -353,6 +360,7 @@ public final class LanguageData {
                 "襲ってくる相手がいない", "もう武器を持っている", "持ち替えられる武器がない", "戦って身を守る");
             addRhythmTranslations(adder, "ねる", "あめやどり", "あめあそび", "オーナーのしごとを見る",
                 "オーナーは起きている", "することがない", "雨宿りできる所がない", "会いに行く相手がいない");
+            addPastimeTranslations(adder, "ふるえる", "はしゃぎまわる", "褒めてもらう", "夕べの一杯", "コーヒーを渡す", "あまいものを見る", "剣のけいこ", "おむかえ");
             addSocialTranslations(adder, "なかまのところへ", "なかまに付き合う", "近くに遊びたいなかまがいない", "誰も来ていない");
             addTaskTypeTranslations(adder, "草むしり", "%s本", "路上演奏", "%s秒",
                 "近接討伐", "遠距離討伐", "%s体", "上級草むしり");
@@ -514,6 +522,12 @@ public final class LanguageData {
             addVoiceLines(adder, "rakko", VoiceMoment.SLEEPY, "…ねみぃ");
             addVoiceLines(adder, "shisa", VoiceMoment.SLEEPY, "ふぁ…ねむいさー");
             addVoiceLines(adder, "furuhonya", VoiceMoment.SLEEPY, "ふあ…");
+            addVoiceLines(adder, "usagi", VoiceMoment.FRENZY, "ウラ!!", "ヤハー!!", "ウラウラウラー!!");
+            addVoiceLines(adder, "momonga", VoiceMoment.PRAISE_ME, "褒めろ〜！", "かわいいでしょ？ 褒めろ！");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.SIGH, "ハーッ…");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.OFFER_COFFEE, "…おつかれ。ほら");
+            addVoiceLines(adder, "rakko", VoiceMoment.SWEETS, "…おい、それ…甘そうだな");
+            addVoiceLines(adder, "shisa", VoiceMoment.GREET, "おかえりなさいさー！ よろしくお願いします〜");
             addWhistleTranslations(adder, "フエラムネ", "フエラムネ（%s）", "長押しで吹く：近くのペットに今の指示を出す。スニーク右クリックで指示を切り替え。", "フエラムネ：%s", "%d匹が駆け寄ってきた", "%d匹がおすわりした", "%d匹が自由行動に戻った", "野生の%d匹が気になって寄ってきた", "近くに聞こえたペットはいない", "気になって寄っていく", "笛は聞こえない");
             addSettingsTranslations(adder, "ちいかわの設定", "野生の子の出現：%s", "おしゃべりの頻度：%s", "ひまつぶし：%s", "ふきだし：%s", "オン", "オフ",
                 "出現とおしゃべりとひまつぶしはワールドの設定です。ワールドの中で変更できます", "出現とおしゃべりとひまつぶしの変更は管理者だけができます",
@@ -612,6 +626,7 @@ public final class LanguageData {
                 "Nada está atacando", "Já está com uma arma na mão", "Nenhuma arma de reserva na mochila", "Revida os ataques");
             addRhythmTranslations(adder, "Dormindo", "Se abrigando da chuva", "Brincando na chuva", "Vendo o dono trabalhar",
                 "O dono não está dormindo", "Nada a fazer agora", "Nenhum abrigo da chuva por perto", "Ninguém por perto para visitar");
+            addPastimeTranslations(adder, "Tremendo de medo", "Fazendo bagunça", "Pedindo elogio", "Bebida da tarde", "Levando café", "De olho nos doces", "Treino de espada", "Recebendo o dono");
             addSocialTranslations(adder, "Visitando um amigo", "Brincando junto", "Ninguém por perto com quem queira brincar",
                 "Ninguém está vindo");
             addTaskTypeTranslations(adder, "Capina", "%s ervas daninhas", "Apresentação de Rua", "%ss",
@@ -774,6 +789,12 @@ public final class LanguageData {
             addVoiceLines(adder, "rakko", VoiceMoment.SLEEPY, "...Sono.");
             addVoiceLines(adder, "shisa", VoiceMoment.SLEEPY, "Aah... que sono...");
             addVoiceLines(adder, "furuhonya", VoiceMoment.SLEEPY, "...Aah.");
+            addVoiceLines(adder, "usagi", VoiceMoment.FRENZY, "Ura!!", "Iaaa-ha!!", "Ura ura ura!!");
+            addVoiceLines(adder, "momonga", VoiceMoment.PRAISE_ME, "Me elogia! Me elogia!", "Que fofura, né? Me elogia!");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.SIGH, "Haaah...");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.OFFER_COFFEE, "...Bom trabalho. Toma.");
+            addVoiceLines(adder, "rakko", VoiceMoment.SWEETS, "...Ei, isso parece doce.");
+            addVoiceLines(adder, "shisa", VoiceMoment.GREET, "Que bom que voltou! Conte comigo~");
             addWhistleTranslations(adder, "Bala de Apito", "Bala de Apito (%s)", "Segure para soprar: os pets por perto seguem a ordem mostrada. Agache + clique com o botão direito para mudá-la.", "Bala de apito: %s", "%d pets vieram correndo", "%d pets se sentaram", "%d pets saíram para passear", "%d pets selvagens vieram dar uma olhada", "Nenhum pet ouviu o apito", "Indo dar uma olhada", "Nenhum apito ouvido");
             addSettingsTranslations(adder, "Configurações do Chiikawa", "Aparição de pets selvagens: %s", "Conversa: %s", "Passatempos: %s", "Balões de fala: %s", "Ligado", "Desligado",
                 "A aparição, a conversa e os passatempos pertencem ao mundo; mude-os de dentro de um mundo", "Só operadores podem mudar a aparição, a conversa e os passatempos",
@@ -869,6 +890,7 @@ public final class LanguageData {
                 "공격하는 상대가 없어", "이미 무기를 들고 있어", "바꿔 들 무기가 가방에 없어", "맞서 싸워");
             addRhythmTranslations(adder, "잠자기", "비 피하기", "빗속 놀이", "주인 일 구경",
                 "주인이 안 자고 있어", "딱히 할 게 없어", "비 피할 곳이 없어", "찾아갈 상대가 없어");
+            addPastimeTranslations(adder, "움츠리기", "날뛰기", "칭찬 받기", "저녁 한 잔", "커피 전하기", "단것 쳐다보기", "검 연습", "주인 마중");
             addSocialTranslations(adder, "친구 만나러", "같이 놀기", "같이 놀 친구가 근처에 없어",
                 "아무도 안 왔어");
             addTaskTypeTranslations(adder, "잡초 뽑기", "잡초 %s포기", "길거리 연주", "%s초",
@@ -1031,6 +1053,12 @@ public final class LanguageData {
             addVoiceLines(adder, "rakko", VoiceMoment.SLEEPY, "...졸려.");
             addVoiceLines(adder, "shisa", VoiceMoment.SLEEPY, "하아... 졸려요...");
             addVoiceLines(adder, "furuhonya", VoiceMoment.SLEEPY, "...하아.");
+            addVoiceLines(adder, "usagi", VoiceMoment.FRENZY, "우라!!", "야하—!!", "우라우라우라!!");
+            addVoiceLines(adder, "momonga", VoiceMoment.PRAISE_ME, "칭찬해줘! 칭찬해줘~", "나 귀엽지? 칭찬해!");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.SIGH, "하아—");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.OFFER_COFFEE, "...수고했어. 자.");
+            addVoiceLines(adder, "rakko", VoiceMoment.SWEETS, "...어이, 그거 달아 보이는데.");
+            addVoiceLines(adder, "shisa", VoiceMoment.GREET, "어서 오세요! 잘 부탁드려요~");
             addWhistleTranslations(adder, "피리 사탕", "피리 사탕 (%s)", "길게 눌러 불어. 근처 펫이 표시된 지시를 따라. 웅크리고 우클릭하면 지시를 바꿔.", "피리 사탕: %s", "펫 %d마리가 달려왔어", "펫 %d마리가 앉았어", "펫 %d마리가 자유롭게 돌아다녀", "야생 펫 %d마리가 구경하러 왔어", "호루라기를 들은 펫이 없어", "구경하러 가는 중", "호루라기가 안 들려");
             addSettingsTranslations(adder, "치이카와 설정", "야생 펫 등장: %s", "수다 빈도: %s", "소일거리: %s", "말풍선: %s", "켜짐", "꺼짐",
                 "등장과 수다와 소일거리는 월드 설정이야. 월드 안에서 바꿀 수 있어", "등장과 수다와 소일거리는 관리자만 바꿀 수 있어",
@@ -1129,6 +1157,7 @@ public final class LanguageData {
                 "Nothing is attacking it", "Already holding a weapon", "No spare weapon in the bag", "It fights back");
             addRhythmTranslations(adder, "Sleeping", "Sheltering from the rain", "Playing in the rain", "Watching its owner work",
                 "Its owner is awake", "Nothing to do it for", "No shelter from the rain nearby", "Nobody nearby to visit");
+            addPastimeTranslations(adder, "Cowering", "Running wild", "Wanting praise", "Evening drink", "Bringing coffee", "Eyeing sweets", "Sword practice", "Greeting its owner");
             addSocialTranslations(adder, "Visiting a friend", "Playing along", "Nobody nearby it feels like playing with",
                 "Nobody is coming over");
             addTaskTypeTranslations(adder, "Weeding", "%s weeds", "Street Performance", "%ss",
@@ -1291,6 +1320,12 @@ public final class LanguageData {
             addVoiceLines(adder, "rakko", VoiceMoment.SLEEPY, "...Sleepy.");
             addVoiceLines(adder, "shisa", VoiceMoment.SLEEPY, "Haa... I am sleepy...");
             addVoiceLines(adder, "furuhonya", VoiceMoment.SLEEPY, "...Haa.");
+            addVoiceLines(adder, "usagi", VoiceMoment.FRENZY, "Ura!!", "Yaha—!!", "Ura ura ura!!");
+            addVoiceLines(adder, "momonga", VoiceMoment.PRAISE_ME, "Praise me! Praise me~", "I'm cute, right? Praise me!");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.SIGH, "Haaah...");
+            addVoiceLines(adder, "kurimanju", VoiceMoment.OFFER_COFFEE, "...Good work. Here.");
+            addVoiceLines(adder, "rakko", VoiceMoment.SWEETS, "...Hey, that looks sweet.");
+            addVoiceLines(adder, "shisa", VoiceMoment.GREET, "Welcome back! Pleased to see you~");
             addWhistleTranslations(adder, "Whistle Candy", "Whistle Candy (%s)", "Hold to blow: nearby pets take the order shown. Sneak + right-click to change it.", "Whistle candy: %s", "%d pets came running", "%d pets sat down", "%d pets went off to roam", "%d wild pets came over to look", "No pet heard the whistle", "Coming over to look", "No whistle heard");
             addSettingsTranslations(adder, "Chiikawa Settings", "Wild pet spawning: %s", "Chatter: %s", "Pastimes: %s", "Speech bubbles: %s", "On", "Off",
                 "Spawning, chatter and pastimes belong to the world; change them from inside a world", "Only operators can change spawning, chatter and pastimes",
@@ -1616,6 +1651,19 @@ public final class LanguageData {
         adder.add("intent.chiikawa.fail.no_occasion", noOccasion);
         adder.add("intent.chiikawa.fail.no_shelter", noShelter);
         adder.add("intent.chiikawa.fail.no_creature", noCreature);
+    }
+
+    /** The pastimes of one character each: what a pet is doing, as the pets' status shows it. */
+    private static void addPastimeTranslations(Adder adder, String cower, String frenzy, String askPraise, String eveningDrink,
+            String coffeeForAWorker, String sweetsStare, String swordPractice, String greetOwner) {
+        adder.add("intent.chiikawa.cower", cower);
+        adder.add("intent.chiikawa.frenzy", frenzy);
+        adder.add("intent.chiikawa.ask_praise", askPraise);
+        adder.add("intent.chiikawa.evening_drink", eveningDrink);
+        adder.add("intent.chiikawa.coffee_for_a_worker", coffeeForAWorker);
+        adder.add("intent.chiikawa.sweets_stare", sweetsStare);
+        adder.add("intent.chiikawa.sword_practice", swordPractice);
+        adder.add("intent.chiikawa.greet_owner", greetOwner);
     }
 
     /** Names of what a pet may be doing, shown in its backpack; one per errand. */

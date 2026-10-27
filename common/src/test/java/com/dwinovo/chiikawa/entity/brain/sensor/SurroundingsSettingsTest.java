@@ -25,9 +25,9 @@ class SurroundingsSettingsTest {
 
     @Test
     void theFileIsReadWhenItIsThereAndNothingElseIsWhenItIsNot() {
-        JsonElement good = JsonParser.parseString("{ \"radius\": 6, \"away_ticks\": 100, \"returned_ticks\": 50 }");
+        JsonElement good = JsonParser.parseString("{ \"radius\": 6, \"away_ticks\": 100, \"returned_ticks\": 50, \"settle_ticks\": 20, \"spell_ticks\": 80, \"finished_ticks\": 30 }");
 
-        assertEquals(Optional.of(new SurroundingsSettings(6, 100, 50)),
+        assertEquals(Optional.of(new SurroundingsSettings(6, 100, 50, 20, 80, 30)),
             SurroundingsSettingsLoader.load(Map.of(SurroundingsSettingsLoader.FILE, good)));
         assertTrue(SurroundingsSettingsLoader.load(Map.of()).isEmpty());
         assertTrue(SurroundingsSettingsLoader.load(Map.of(ResourceLocation.fromNamespaceAndPath("chiikawa", "other"), good)).isEmpty());
@@ -35,8 +35,8 @@ class SurroundingsSettingsTest {
 
     @Test
     void aFileThatIsWrongIsNotGuessedAt() {
-        for (String broken : new String[] {"{ \"radius\": 0, \"away_ticks\": 100, \"returned_ticks\": 50 }",
-            "{ \"radius\": 6, \"away_ticks\": 100 }", "{ \"radius\": \"near\", \"away_ticks\": 1, \"returned_ticks\": 1 }"}) {
+        for (String broken : new String[] {"{ \"radius\": 0, \"away_ticks\": 100, \"returned_ticks\": 50, \"settle_ticks\": 20, \"spell_ticks\": 80, \"finished_ticks\": 30 }",
+            "{ \"radius\": 6, \"away_ticks\": 100, \"returned_ticks\": 50 }", "{ \"radius\": \"near\", \"away_ticks\": 1, \"returned_ticks\": 1 }"}) {
             assertTrue(SurroundingsSettingsLoader.load(Map.of(SurroundingsSettingsLoader.FILE, JsonParser.parseString(broken))).isEmpty(), broken);
         }
     }

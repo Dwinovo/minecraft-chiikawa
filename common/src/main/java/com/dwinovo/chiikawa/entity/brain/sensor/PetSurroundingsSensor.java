@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.view.Surroundings;
 import com.dwinovo.chiikawa.entity.brain.errand.view.Surroundings.Sighting;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.google.common.collect.ImmutableSet;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +14,8 @@ import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
@@ -21,15 +24,18 @@ import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
  * Looks at what is within a few blocks of the pet, as {@link SurroundingsSettings} says how far, and remembers it for the
- * pet's pastimes to go by: somewhere to get out of the rain, the creatures and the things lying about, a creeper about to go
- * off, and whether its owner has just come back after a while away. It only looks; what a pet makes of it is for its
- * errands to say, through the pet's view.
+ * pet's pastimes to go by: somewhere to get out of the rain, the creatures and the things lying about or held in a hand, a
+ * creeper about to go off, and whether its owner has just come back after a while away or has left off a long spell of work.
+ * It only looks; what a pet makes of it is for its errands to say, through the pet's view.
  *
  * <p>Shelter is looked for only while it rains, which is the only time anything asks for it. It is a place the pet could
  * stand where the rain does not fall, see {@link #exposed}: under a roof, a ledge or the leaves of a tree.
@@ -63,8 +69,18 @@ public class PetSurroundingsSensor extends Sensor<AbstractPet> {
         if (pet.getOwner() instanceof Player owner && owner.isAlive() && owner.level() == level
                 && owner.distanceToSqr(pet) <= (double) settings.get().radius() * settings.get().radius()) {
             brain.setMemory(InitMemory.OWNER_SEEN.get(), OwnerSeen.seen(
-                brain.getMemory(InitMemory.OWNER_SEEN.get()).orElse(null), level.getGameTime(), settings.get().awayTicks()));
+                brain.getMemory(InitMemory.OWNER_SEEN.get()).orElse(null), level.getGameTime(), settings.get().awayTicks(),
+                atWork(owner), settings.get().settleTicks()));
         }
+    }
+
+    /**
+     * @param owner a player
+     * @return whether they are at work, as an owner is seen to be: swinging at it, a tool or a block in the hand
+     */
+    public static boolean atWork(Player owner) {
+        return owner.isAlive() && owner.swinging
+            && (owner.getMainHandItem().getItem() instanceof DiggerItem || owner.getMainHandItem().getItem() instanceof BlockItem);
     }
 
     private static Surroundings look(ServerLevel level, AbstractPet pet, int radius) {
@@ -72,17 +88,32 @@ public class PetSurroundingsSensor extends Sensor<AbstractPet> {
         double reachSqr = (double) radius * radius;
         List<LivingEntity> creatures = level.getEntitiesOfClass(LivingEntity.class, around,
             seen -> seen != pet && seen.isAlive() && seen.distanceToSqr(pet) <= reachSqr);
-        List<ItemEntity> items = level.getEntitiesOfClass(ItemEntity.class, around,
+        List<ItemEntity> lying = level.getEntitiesOfClass(ItemEntity.class, around,
             seen -> seen.isAlive() && seen.distanceToSqr(pet) <= reachSqr);
+        // A thing is about, to a pet, whether it lies on the ground or is held up in somebody's hand: either is where it is.
+        List<Seen<Item>> items = new ArrayList<>();
+        lying.forEach(seen -> items.add(new Seen<>(seen, seen.getItem().getItem())));
+        for (LivingEntity holder : creatures) {
+            for (InteractionHand hand : InteractionHand.values()) {
+                ItemStack held = holder.getItemInHand(hand);
+                if (!held.isEmpty()) {
+                    items.add(new Seen<>(holder, held.getItem()));
+                }
+            }
+        }
         return new Surroundings(
             level.isRaining() ? shelterNear(level, pet.blockPosition(), radius) : Optional.empty(),
             creatures.stream().sorted(Comparator.comparingDouble(pet::distanceToSqr))
                 .<Sighting<EntityType<?>>>map(seen -> new Sighting<>(seen.getUUID(), seen.blockPosition(), seen.getType()))
                 .toList(),
-            items.stream().sorted(Comparator.comparingDouble(pet::distanceToSqr))
-                .<Sighting<Item>>map(seen -> new Sighting<>(seen.getUUID(), seen.blockPosition(), seen.getItem().getItem()))
+            items.stream().sorted(Comparator.comparingDouble(seen -> pet.distanceToSqr(seen.where())))
+                .<Sighting<Item>>map(seen -> new Sighting<>(seen.where().getUUID(), seen.where().blockPosition(), seen.kind()))
                 .toList(),
             creatures.stream().anyMatch(seen -> seen instanceof Creeper creeper && (creeper.isIgnited() || creeper.getSwellDir() > 0)));
+    }
+
+    /** A kind of thing, and the entity it is found at: lying there, or held by it. */
+    private record Seen<T>(Entity where, T kind) {
     }
 
     /** @return the nearest place within the radius where the pet could stand and the rain does not fall */

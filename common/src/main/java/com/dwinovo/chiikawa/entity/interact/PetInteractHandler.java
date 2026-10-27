@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.PetFriends;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
+import com.dwinovo.chiikawa.entity.brain.errand.run.PetIcon;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
 import com.dwinovo.chiikawa.gifting.GiftOccasion;
 import com.dwinovo.chiikawa.platform.Services;
@@ -68,6 +69,9 @@ public final class PetInteractHandler {
         }
         if (isTame && isOwner && !isSneaking && held.isEmpty() && !pet.getPendingGift().isEmpty()) {
             return handleClaimGift(level, pet, player);
+        }
+        if (mayCommand && !isSneaking && pet.getIcon() == PetIcon.PRAISE) {
+            return handlePraise(level, pet, player);
         }
         if (isTame && isOwner && !isSneaking && !isFood) {
             return handleOpenMenu(level, pet, player);
@@ -198,6 +202,17 @@ public final class PetInteractHandler {
     private static InteractionResult handleClaimGift(Level level, AbstractPet pet, Player player) {
         if (!level.isClientSide()) {
             PetMind.post(pet, new Message.GiftClaimed(player.getUUID()));
+        }
+        return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
+    }
+
+    /**
+     * The owner, or a friend of theirs, gives a pet the praise it is asking for: the icon over its head says it is, and the
+     * click is what it wants, instead of the opening of its bag.
+     */
+    private static InteractionResult handlePraise(Level level, AbstractPet pet, Player player) {
+        if (!level.isClientSide()) {
+            PetMind.post(pet, new Message.Praised(player.getUUID()));
         }
         return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
     }

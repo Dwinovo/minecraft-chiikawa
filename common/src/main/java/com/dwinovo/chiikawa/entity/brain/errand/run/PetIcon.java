@@ -16,7 +16,9 @@ public enum PetIcon {
     /** It is short of something its work needs. */
     MISSING,
     /** It is asleep. */
-    SLEEPY;
+    SLEEPY,
+    /** It is waiting to be praised, which a click from its owner does. */
+    PRAISE;
 
     /** @return the icon with this id on the wire, none for an id nobody has */
     public static PetIcon byId(int id) {

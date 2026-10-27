@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.errand.work;
 
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
+import com.dwinovo.chiikawa.entity.brain.errand.work.action.AskPraiseAction;
 import com.dwinovo.chiikawa.entity.brain.errand.work.action.BuskAction;
 import com.dwinovo.chiikawa.entity.brain.errand.work.action.DepositAction;
 import com.dwinovo.chiikawa.entity.brain.errand.work.action.HarvestBlockAction;
@@ -40,10 +41,13 @@ public final class WorkActions {
     public static final PerformAction PERFORM = new PerformAction();
     /** Going somewhere to pass the time, and passing it there. */
     public static final VisitAction VISIT = new VisitAction();
+    /** Asking the owner for praise, and taking it as it comes. */
+    public static final AskPraiseAction ASK_PRAISE = new AskPraiseAction();
 
     private static final Map<ResourceLocation, WorkAction<?, ?>> BY_ID = Map.of(
         BuskAction.ID, BUSK, StrikeAction.ID, STRIKE, ShootAction.ID, SHOOT, HarvestBlockAction.ID, HARVEST_BLOCK,
-        PlantBlockAction.ID, PLANT_BLOCK, DepositAction.ID, DEPOSIT, PerformAction.ID, PERFORM, VisitAction.ID, VISIT);
+        PlantBlockAction.ID, PLANT_BLOCK, DepositAction.ID, DEPOSIT, PerformAction.ID, PERFORM, VisitAction.ID, VISIT,
+        AskPraiseAction.ID, ASK_PRAISE);
 
     /** Reads and writes an action as its id; an id no action has does not read. */
     public static final Codec<WorkAction<?, ?>> CODEC = ResourceLocation.CODEC.comapFlatMap(id -> {

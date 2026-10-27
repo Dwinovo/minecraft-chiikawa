@@ -103,6 +103,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.SCARED, 1)
             .says(VoiceMoment.MISSING, 1)
             .says(VoiceMoment.SLEEPY, 1)
+            .says(VoiceMoment.FRENZY, 1, 1, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.002F));
@@ -128,19 +129,22 @@ public final class PetVoiceData {
             .says(VoiceMoment.SCARED, 1)
             .says(VoiceMoment.MISSING, 1)
             .says(VoiceMoment.SLEEPY, 1)
+            .says(VoiceMoment.PRAISE_ME, 1, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.002F)
             .chance(VoiceMoment.LISTEN, 0.5F)
             .cooldown(TALK));
-        // A grown-up of few words: a sigh over something good, a passed exam among them, or something
-        // frightening, and a mutter when it is short of something, and that is all.
+        // A grown-up of few words: a sigh over something good, a passed exam and an evening drink among them, or something
+        // frightening, and a mutter when it is short of something, and a kind word for someone done with their work.
         add(all, voice("kurimanju")
             .says(VoiceMoment.SHOP, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.SCARED, 1)
             .says(VoiceMoment.MISSING, 1)
             .says(VoiceMoment.SLEEPY, 1)
+            .says(VoiceMoment.SIGH, 1)
+            .says(VoiceMoment.OFFER_COFFEE, 1)
             .cooldown(2 * COOLDOWN));
         // Hardboiled, a word or two at most, softer only over something sweet, and not a sound when it is frightened.
         add(all, voice("rakko")
@@ -153,6 +157,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.TREAT, 1)
             .says(VoiceMoment.MISSING, 1)
             .says(VoiceMoment.SLEEPY, 1)
+            .says(VoiceMoment.SWEETS, 1)
             .says(VoiceMoment.GIVEN_COFFEE, 1)
             .says(VoiceMoment.WHISTLE, 1)
             .says(VoiceMoment.PHOTOGRAPHED, 1)
@@ -177,6 +182,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.SCARED, 1)
             .says(VoiceMoment.MISSING, 1)
             .says(VoiceMoment.SLEEPY, 1)
+            .says(VoiceMoment.GREET, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.0015F));

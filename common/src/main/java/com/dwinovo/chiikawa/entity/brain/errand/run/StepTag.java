@@ -11,5 +11,7 @@ public enum StepTag {
     /** Frightened, and running from what hurt it or cowering until it is safe. */
     SCARED,
     /** Lying down asleep: the pet does not stir for the little things, and shows it is asleep. */
-    SLEEPING
+    SLEEPING,
+    /** Waiting to be praised by its owner, and showing that it wants to be. */
+    ASKING
 }

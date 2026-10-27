@@ -1,7 +1,9 @@
 package com.dwinovo.chiikawa.gametest;
 
+import com.dwinovo.chiikawa.data.PastimeData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
+import com.dwinovo.chiikawa.entity.brain.errand.Errands;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.music.MusicTrackStatus;
@@ -24,6 +26,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
@@ -70,6 +73,8 @@ public final class GameTestKit {
     private static final double DROP_SEARCH = 6.0;
     /** Long enough for a batch to run under one sky. */
     private static final int CLEAR_WEATHER_TICKS = 24000;
+    /** How long a pastime that a case has no use for is put off for: longer than any case. */
+    private static final long PUT_OFF_TICKS = 240000L;
     /**
      * Chunks each way round the spawn's chunk kept loaded for a new player: the spawn radius
      * puts it up to a chunk from the spawn, and the game waits for the chunks one round it.
@@ -200,11 +205,31 @@ public final class GameTestKit {
                                    BlockPos rel, boolean owned) {
         AbstractPet pet = helper.spawn(type, rel);
         pet.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+        putOffPastimesWithoutAReason(pet);
         if (owned) {
             pet.tame(owner(helper));
         }
         pet.setPetDirective(PetDirective.FREE);
         return pet;
+    }
+
+    /**
+     * Puts off the pastimes that a pet does for no reason, such as Usagi's fits: it would start one the moment it was spawned,
+     * with nothing in the yard to do with it, in a case that is about something else. A case that is about one wakes it with
+     * {@link #wake}.
+     */
+    private static void putOffPastimesWithoutAReason(AbstractPet pet) {
+        long now = pet.level().getGameTime();
+        PastimeData.works().forEach((errand, work) -> {
+            if (work.pastime().filter(pastime -> pastime.when().isEmpty()).isPresent()) {
+                Errands.restsOf(pet.getBrain(), errand).restFor(null, PUT_OFF_TICKS, now);
+            }
+        });
+    }
+
+    /** Ends a pet's rest from a pastime that it was put off, for a case that is about it. */
+    static void wake(AbstractPet pet, ResourceLocation pastime) {
+        Errands.restsOf(pet.getBrain(), pastime).restFor(null, 0L, pet.level().getGameTime());
     }
 
     /** Somebody for a pet to belong to. Never spawned: a pet only needs the name on its tag. */

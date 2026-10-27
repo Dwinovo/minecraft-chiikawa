@@ -65,7 +65,19 @@ public enum VoiceMoment implements StringRepresentable {
     /** Short of something its work needs, Hachiware's way: it trusts that something will turn up. */
     TROUBLE,
     /** Drowsy at dusk or at night, with its owner by to hear it, as a remark: a yawn. */
-    SLEEPY;
+    SLEEPY,
+    /** Usagi in one of its fits, yelling its nonsense as it runs about. */
+    FRENZY,
+    /** Momonga asking its owner to say how cute it is. */
+    PRAISE_ME,
+    /** Kurimanju letting out the breath of a drink well drunk. */
+    SIGH,
+    /** Kurimanju handing someone who has just finished their work a coffee. */
+    OFFER_COFFEE,
+    /** Rakko caught looking at something sweet. */
+    SWEETS,
+    /** Shisa welcoming its owner back, politely. */
+    GREET;
 
     public static final Codec<VoiceMoment> CODEC = StringRepresentable.fromEnum(VoiceMoment::values);
 

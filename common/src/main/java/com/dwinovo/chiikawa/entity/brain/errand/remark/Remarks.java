@@ -4,7 +4,7 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.errand.LackKey;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.WhyNot;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Aside;
-import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
+import com.dwinovo.chiikawa.entity.brain.errand.view.LivePetView;
 import com.dwinovo.chiikawa.init.InitMemory;
 import java.util.Comparator;
 import java.util.Map;
@@ -40,8 +40,9 @@ public final class Remarks {
         if (!(pet.level() instanceof ServerLevel level)) {
             return;
         }
-        RemarkCue.Situation situation = new RemarkCue.Situation(whyNot, level.getGameTime(), ownerDistance(pet),
-            DayPhase.in(level));
+        LivePetView view = LivePetView.of(pet);
+        RemarkCue.Situation situation = new RemarkCue.Situation(whyNot, level.getGameTime(), ownerDistance(pet), view.phase(),
+            view.weather());
         RemarkRests rests = pet.getBrain().getMemory(InitMemory.REMARK_RESTS.get()).orElse(RemarkRests.NONE);
         remark(PetRemarks.all(), BuiltInRegistries.ENTITY_TYPE.getKey(pet.getType()), situation, rests, aside)
             .ifPresent(next -> pet.getBrain().setMemory(InitMemory.REMARK_RESTS.get(), next));

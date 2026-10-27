@@ -188,6 +188,15 @@ public sealed interface Message {
     }
 
     /**
+     * The owner, or a friend of theirs, praised the pet, who had been asking to be. What it makes of it is for the step that
+     * is asking, which a pet that is not asking does not have.
+     *
+     * @param by who did
+     */
+    record Praised(UUID by) implements Message {
+    }
+
+    /**
      * The song the pet was playing has run its course. The stream manager tells it of no stop the pet asked for
      * itself, which the pet knows of already.
      *
