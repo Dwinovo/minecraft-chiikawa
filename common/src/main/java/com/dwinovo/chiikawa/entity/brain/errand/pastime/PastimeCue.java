@@ -43,13 +43,8 @@ public sealed interface PastimeCue {
      */
     record WeatherIs(Weather is) implements PastimeCue {
         static final MapCodec<WeatherIs> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Weather.CODEC.flatXmap(WeatherIs::fallsOnAPet, WeatherIs::fallsOnAPet).fieldOf("is").forGetter(WeatherIs::is)
+            Weather.TO_WAIT_FOR.fieldOf("is").forGetter(WeatherIs::is)
         ).apply(instance, WeatherIs::new));
-
-        /** Clear weather is not weather to wait for: the cue would hold when no cue was named. */
-        private static DataResult<Weather> fallsOnAPet(Weather weather) {
-            return weather == Weather.CLEAR ? DataResult.error(() -> "weather to wait for is rain or thunder") : DataResult.success(weather);
-        }
 
         @Override
         public Kind kind() {
@@ -58,7 +53,7 @@ public sealed interface PastimeCue {
 
         @Override
         public boolean holds(PetView view) {
-            return is == Weather.RAIN ? view.weather().raining() : view.weather() == is;
+            return view.weather().satisfies(is);
         }
     }
 
@@ -121,14 +116,21 @@ public sealed interface PastimeCue {
     }
 
     /**
-     * The pet has a reason to be frightened.
+     * The pet has a reason to be frightened: any of these.
      *
      * @param by what of
      */
-    record ScaredBy(Fright by) implements PastimeCue {
+    record ScaredBy(Set<Fright> by) implements PastimeCue {
         static final MapCodec<ScaredBy> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Fright.CODEC.fieldOf("by").forGetter(ScaredBy::by)
+            Fright.CODEC.listOf().validate(frights -> frights.isEmpty()
+                    ? DataResult.error(() -> "a fright to be scared by") : DataResult.success(frights))
+                .xmap(Set::copyOf, List::copyOf).fieldOf("by").forGetter(ScaredBy::by)
         ).apply(instance, ScaredBy::new));
+
+        /** In the order they are named in, which is the order of the enum. */
+        public ScaredBy {
+            by = by.isEmpty() ? Set.of() : Collections.unmodifiableSet(EnumSet.copyOf(by));
+        }
 
         @Override
         public Kind kind() {
@@ -137,11 +139,11 @@ public sealed interface PastimeCue {
 
         @Override
         public boolean holds(PetView view) {
-            return switch (by) {
+            return by.stream().anyMatch(fright -> switch (fright) {
                 case THUNDER -> view.weather() == Weather.THUNDER;
                 case CREEPER -> view.surroundings().primedCreeper();
                 case HURT -> view.attacker().isPresent();
-            };
+            });
         }
     }
 
@@ -153,6 +155,8 @@ public sealed interface PastimeCue {
         WORKING,
         /** Has just come back after a while out of sight. */
         RETURNED,
+        /** Has just stopped a long spell of work. */
+        FINISHED,
         /** Asleep in a bed. */
         SLEEPING;
 
@@ -189,6 +193,7 @@ public sealed interface PastimeCue {
                 case NEAR -> true;
                 case WORKING -> view.ownerWorking();
                 case RETURNED -> view.ownerReturned();
+                case FINISHED -> view.ownerFinishedWork();
                 case SLEEPING -> view.ownerBedside().isPresent();
             };
         }

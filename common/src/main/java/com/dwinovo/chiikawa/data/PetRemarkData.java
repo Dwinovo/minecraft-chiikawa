@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.errand.remark.PetRemark;
 import com.dwinovo.chiikawa.entity.brain.errand.remark.RemarkCue;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
+import com.dwinovo.chiikawa.entity.brain.errand.view.Weather;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,8 @@ public final class PetRemarkData {
     public static final ResourceLocation MISSING = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "missing");
     /** Drowsy as the day ends. */
     public static final ResourceLocation YAWN = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "yawn");
+    /** Hachiware, when it rains: something will turn up. */
+    public static final ResourceLocation TROUBLE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "trouble");
 
     /** How long a pet has to have been short of something before it says so: half a minute, so a pet in between jobs is not nagging. */
     private static final int LACKED_TICKS = 600;
@@ -47,6 +50,13 @@ public final class PetRemarkData {
             YAWN, new PetRemark(
                 List.of(new RemarkCue.InPhase(Set.of(DayPhase.EVENING, DayPhase.NIGHT)), new RemarkCue.OwnerWithin(OWNER_BLOCKS)),
                 Map.of(PetRemark.EVERYONE, new PetRemark.Part(VoiceMoment.SLEEPY, Optional.of("yawn"))),
-                YAWN_COOLDOWN));
+                YAWN_COOLDOWN),
+            // Hachiware does not mind the rain: it scratches its head, says something will turn up and goes on. Nobody else says
+            // anything of it, and a hurt pet has its own line for it already, which this would only talk over.
+            TROUBLE, new PetRemark(
+                List.of(new RemarkCue.WeatherIs(Weather.RAIN), new RemarkCue.OwnerWithin(OWNER_BLOCKS)),
+                Map.of(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "hachiware").toString(),
+                    new PetRemark.Part(VoiceMoment.TROUBLE, Optional.of("scratch_head"))),
+                COOLDOWN));
     }
 }
