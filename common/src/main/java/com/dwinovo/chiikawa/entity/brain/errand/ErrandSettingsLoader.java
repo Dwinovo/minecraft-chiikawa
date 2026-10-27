@@ -66,7 +66,7 @@ public final class ErrandSettingsLoader extends SimpleJsonResourceReloadListener
      */
     public static Set<Identifier> blockWorkIds(ResourceManager manager) {
         Map<Identifier, JsonElement> files = new HashMap<>();
-        scanDirectory(manager, DIRECTORY, new Gson(), files);
+        scanDirectory(manager, FileToIdConverter.json(DIRECTORY), JsonOps.INSTANCE, ExtraCodecs.JSON, files);
         return files.entrySet().stream().filter(file -> targetsBlocks(file.getValue())).map(Map.Entry::getKey)
             .collect(Collectors.toSet());
     }

@@ -1,23 +1,24 @@
 package com.dwinovo.chiikawa.entity.brain.errand.remark;
 
 import com.dwinovo.chiikawa.Constants;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 /**
  * Server data reload listener for {@code data/<namespace>/pet_remark/<id>.json}. A file that fails to parse is skipped,
  * so that remark is not made until it is fixed.
  */
-public final class PetRemarkLoader extends SimpleJsonResourceReloadListener {
+public final class PetRemarkLoader extends SimpleJsonResourceReloadListener<JsonElement> {
     public static final String DIRECTORY = "pet_remark";
     /** Id for loaders that register reload listeners by id. */
     public static final Identifier ID = Identifier.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
@@ -25,7 +26,7 @@ public final class PetRemarkLoader extends SimpleJsonResourceReloadListener {
     private static final String LOG_PREFIX = "[chiikawa-remark] ";
 
     public PetRemarkLoader() {
-        super(new Gson(), DIRECTORY);
+        super(ExtraCodecs.JSON, FileToIdConverter.json(DIRECTORY));
     }
 
     @Override

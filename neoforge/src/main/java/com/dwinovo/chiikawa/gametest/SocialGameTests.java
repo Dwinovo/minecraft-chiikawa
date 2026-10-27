@@ -311,13 +311,13 @@ public final class SocialGameTests {
             .thenIdle(SETTLE_TICKS)
             // Momonga, who knows nothing of that, sets off to ask, if it has not already.
             .thenExecute(() -> thinkOf(momonga, PetInteractionData.CLING, chiikawa))
-            .thenWaitUntil(() -> helper.assertTrue(timesTurnedDown(momonga) == 1, "Momonga was never turned down"))
+            .thenWaitUntil(() -> helper.assertTrue(timesTurnedDown(momonga) == 1, Component.literal("Momonga was never turned down")))
             .thenExecute(() -> {
                 long left = restLeft(momonga, PetInteractionData.CLING, chiikawa, helper);
                 helper.assertTrue(left > 0 && left <= TURNED_DOWN_REST_TICKS,
-                    "Momonga is held back from Chiikawa for " + left + " ticks, not the few seconds of a refusal");
+                    Component.literal("Momonga is held back from Chiikawa for " + left + " ticks, not the few seconds of a refusal"));
                 helper.assertTrue(cling.cooldownTicks() > TURNED_DOWN_REST_TICKS * 10,
-                    "a day is not very different from a few seconds in this data pack");
+                    Component.literal("a day is not very different from a few seconds in this data pack"));
             })
             .thenIdle(TURNED_DOWN_REST_TICKS)
             .thenExecute(() -> {
@@ -330,10 +330,10 @@ public final class SocialGameTests {
                 thinkOf(momonga, PetInteractionData.CLING, chiikawa);
             })
             .thenWaitUntil(() -> helper.assertTrue(timesTurnedDown(momonga) == 2,
-                "Momonga did not ask Chiikawa again, " + restLeft(momonga, PetInteractionData.CLING, chiikawa, helper)
+                Component.literal("Momonga did not ask Chiikawa again, " + restLeft(momonga, PetInteractionData.CLING, chiikawa, helper)
                     + " ticks of rest left, " + momonga.distanceTo(chiikawa) + " blocks from it, which is "
                     + (SocialRules.accepts(PetInteractionData.CLING, cling, momonga, chiikawa, helper.getLevel().getGameTime())
-                        .isPresent() ? "" : "not ") + "a partner for it, doing " + doing(momonga) + " and " + doing(chiikawa)))
+                        .isPresent() ? "" : "not ") + "a partner for it, doing " + doing(momonga) + " and " + doing(chiikawa))))
             .thenSucceed();
     }
 
@@ -351,16 +351,16 @@ public final class SocialGameTests {
             .thenIdle(SETTLE_TICKS)
             .thenExecute(() -> thinkOf(momonga, PetInteractionData.CLING, chiikawa))
             .thenWaitUntil(() -> helper.assertTrue("cling".equals(momonga.getPerformance())
-                    && "clung_to".equals(chiikawa.getPerformance()), "the scene never began"))
+                    && "clung_to".equals(chiikawa.getPerformance()), Component.literal("the scene never began")))
             .thenExecute(() -> PetMind.post(momonga, new Message.Moved("test")))
-            .thenWaitUntil(() -> helper.assertTrue(sceneOver(momonga, chiikawa), "the scene was never ended"))
+            .thenWaitUntil(() -> helper.assertTrue(sceneOver(momonga, chiikawa), Component.literal("the scene was never ended")))
             .thenExecute(() -> {
                 helper.assertTrue(restLeft(momonga, PetInteractionData.CLING, chiikawa, helper) > cooldown - RUN_DOWN_TICKS,
-                    "Momonga, who was taken away, rests from Chiikawa for only "
-                        + restLeft(momonga, PetInteractionData.CLING, chiikawa, helper) + " of the " + cooldown + " ticks");
+                    Component.literal("Momonga, who was taken away, rests from Chiikawa for only "
+                        + restLeft(momonga, PetInteractionData.CLING, chiikawa, helper) + " of the " + cooldown + " ticks"));
                 helper.assertTrue(restLeft(chiikawa, PetInteractionData.CLING, momonga, helper) > cooldown - RUN_DOWN_TICKS,
-                    "Chiikawa, who was left, rests from Momonga for only "
-                        + restLeft(chiikawa, PetInteractionData.CLING, momonga, helper) + " of the " + cooldown + " ticks");
+                    Component.literal("Chiikawa, who was left, rests from Momonga for only "
+                        + restLeft(chiikawa, PetInteractionData.CLING, momonga, helper) + " of the " + cooldown + " ticks"));
             })
             .thenSucceed();
     }
