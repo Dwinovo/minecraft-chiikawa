@@ -15,14 +15,11 @@ import com.dwinovo.chiikawa.init.InitMemory;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Unit;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
 
 /**
  * The rests a pet keeps through a save, which the unit tests of the ledger cannot reach: they are
@@ -121,8 +118,6 @@ public final class RestGameTests {
 
     /** The pet as the game reads it from a save of the pet, not yet in the world. */
     private static AbstractPet readBack(GameTestHelper helper, AbstractPet pet) {
-        CompoundTag saved = new CompoundTag();
-        pet.save(saved);
-        return (AbstractPet) EntityType.create(saved, helper.getLevel(), EntitySpawnReason.LOAD).orElseThrow();
+        return GameTestKit.petFrom(helper, GameTestKit.saved(pet).orElseThrow());
     }
 }
