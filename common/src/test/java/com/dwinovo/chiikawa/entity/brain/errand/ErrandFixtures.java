@@ -1,18 +1,23 @@
 package com.dwinovo.chiikawa.entity.brain.errand;
 
 import com.dwinovo.chiikawa.camera.PhotoOutlook;
+import com.dwinovo.chiikawa.data.PastimeData;
 import com.dwinovo.chiikawa.data.WorkData;
+import com.dwinovo.chiikawa.entity.PetCharacters;
 import com.dwinovo.chiikawa.entity.brain.combat.Arms;
 import com.dwinovo.chiikawa.entity.brain.combat.Ground;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
+import com.dwinovo.chiikawa.entity.brain.errand.view.Surroundings;
+import com.dwinovo.chiikawa.entity.brain.errand.view.Weather;
 import com.dwinovo.chiikawa.photo.PhotoSubject;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import com.dwinovo.chiikawa.testing.TestPhotos;
 import com.dwinovo.chiikawa.testing.TestTargets;
 import com.dwinovo.chiikawa.testing.TestView;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -69,7 +74,12 @@ public final class ErrandFixtures {
         Map.entry(ErrandIds.TAKE_EXAM, free().examDesk(east(2))),
         Map.entry(ErrandIds.CHECK_RESULTS, free().resultsDesk(east(2))),
         Map.entry(ErrandIds.ANSWER_WHISTLE, free().ownership(PetOwnership.WILD).whistleHeard(east(2))),
-        Map.entry(ErrandIds.TAKE_PHOTO, free().creature(FRIEND, east(4)).photo(readyToShoot())));
+        Map.entry(ErrandIds.TAKE_PHOTO, free().creature(FRIEND, east(4)).photo(readyToShoot())),
+        Map.entry(ErrandIds.SLEEP, free().phase(DayPhase.NIGHT)),
+        Map.entry(PastimeData.RAIN_SHELTER, free().species(PetCharacters.HACHIWARE).weather(Weather.RAIN, true)
+            .surroundings(new Surroundings(Optional.of(east(3).pos()), List.of(), List.of(), false))),
+        Map.entry(PastimeData.RAIN_PLAY, free().species(PetCharacters.USAGI).weather(Weather.RAIN, true)),
+        Map.entry(PastimeData.WATCH_OWNER_WORK, free().ownerPos(east(5)).ownerAtWork()));
 
     private ErrandFixtures() {
     }
