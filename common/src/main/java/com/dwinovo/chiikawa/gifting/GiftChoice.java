@@ -93,7 +93,7 @@ public final class GiftChoice {
             && readiness.apply(stack).orElseGet(() -> !ShopBasket.isKept(personality, stack.getItem()));
         List<Pick> liked = candidates(bag, givable, stack -> personality.likes().stream()
             .filter(liking -> !liking.keep() && liking.item() == stack.getItem())
-            .mapToInt(liking -> liking.weight().asInt()).findFirst(), readiness, 2);
+            .mapToInt(liking -> liking.weight()).findFirst(), readiness, 2);
         if (!liked.isEmpty()) {
             return liked;
         }

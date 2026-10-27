@@ -46,7 +46,7 @@ public final class SlipWages {
         for (ItemStack stack : reward.getRandomItems(params)) {
             ItemStack remainder = pet.getBackpack().addItem(stack);
             if (!remainder.isEmpty()) {
-                pet.spawnAtLocation(remainder);
+                pet.spawnAtLocation(level, remainder);
             }
         }
         PetMind.post(pet, new Message.Occasion(GiftOccasion.GOT_PAID, Optional.empty()));

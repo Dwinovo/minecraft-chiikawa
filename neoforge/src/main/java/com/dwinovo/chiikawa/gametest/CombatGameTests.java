@@ -87,13 +87,13 @@ public final class CombatGameTests {
         }
 
         helper.succeedWhen(() -> {
-            helper.assertTrue(!first.isAlive() && !second.isAlive(), "the fencer left a zombie standing");
+            helper.assertTrue(!first.isAlive() && !second.isAlive(), Component.literal("the fencer left a zombie standing"));
             helper.assertTrue(pet.getMind().log().entries().stream().anyMatch(entry -> entry instanceof DecisionLog.Ended ended
                 && ended.errand().equals(WorkData.HUNT_MELEE) && ended.outcome() instanceof Outcome.Done),
-                "the fight with the first zombie did not end done");
+                Component.literal("the fight with the first zombie did not end done"));
             helper.assertFalse(pet.getMind().log().entries().stream().anyMatch(entry -> entry instanceof DecisionLog.Ended ended
                 && ended.errand().equals(WorkData.HUNT_MELEE) && ended.outcome() instanceof Outcome.GaveUp),
-                "the fencer gave up a fight on the way");
+                Component.literal("the fencer gave up a fight on the way"));
         });
     }
 
@@ -140,13 +140,13 @@ public final class CombatGameTests {
         zombie.setNoAi(true);
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(pet.isUsingItem(), "the archer never drew its bow"))
+            .thenWaitUntil(() -> helper.assertTrue(pet.isUsingItem(), Component.literal("the archer never drew its bow")))
             .thenExecute(() -> pet.setPetDirective(PetDirective.STAY))
-            .thenWaitUntil(() -> helper.assertFalse(pet.isUsingItem(), "the archer told to sit kept its bow raised"))
+            .thenWaitUntil(() -> helper.assertFalse(pet.isUsingItem(), Component.literal("the archer told to sit kept its bow raised")))
             .thenExecuteFor(DRAW_WATCH_TICKS, () -> {
-                helper.assertFalse(pet.isUsingItem(), "the archer told to sit raised its bow again");
-                helper.assertTrue(count(pet, Items.ARROW) == ARROWS, "the archer told to sit loosed an arrow");
-                helper.assertTrue(zombie.getHealth() == zombie.getMaxHealth(), "the archer told to sit hit the zombie");
+                helper.assertFalse(pet.isUsingItem(), Component.literal("the archer told to sit raised its bow again"));
+                helper.assertTrue(count(pet, Items.ARROW) == ARROWS, Component.literal("the archer told to sit loosed an arrow"));
+                helper.assertTrue(zombie.getHealth() == zombie.getMaxHealth(), Component.literal("the archer told to sit hit the zombie"));
             })
             .thenSucceed();
     }

@@ -16,29 +16,26 @@ import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * A pet with a hoe in its hand and a sword in its bag that is hit takes the sword up, fights, and takes the hoe back: a
  * swap that lasts for the fight and no longer, and is never saved.
  */
 @GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class DefendSelfGameTests {
     private static final String BATCH = "chiikawa_defend";
     private static final int STAND = 2;
@@ -69,17 +66,17 @@ public final class DefendSelfGameTests {
 
         helper.startSequence()
             .thenWaitUntil(() -> {
-                helper.assertTrue(pet.getMainHandItem().is(Items.IRON_SWORD), "the farmer never took the sword up, doing " + pet.getIntent());
-                helper.assertTrue(pet.getMind().errands().isOn(ErrandIds.DEFEND_SELF), "the farmer holds the sword and is doing " + pet.getIntent());
-                helper.assertTrue(pet.getPetJobId() == InitRegistry.FENCER_ID, "the sword did not make a fencer of the farmer");
+                helper.assertTrue(pet.getMainHandItem().is(Items.IRON_SWORD), Component.literal("the farmer never took the sword up, doing " + pet.getIntent()));
+                helper.assertTrue(pet.getMind().errands().isOn(ErrandIds.DEFEND_SELF), Component.literal("the farmer holds the sword and is doing " + pet.getIntent()));
+                helper.assertTrue(pet.getPetJobId() == InitRegistry.FENCER_ID, Component.literal("the sword did not make a fencer of the farmer"));
             })
-            .thenWaitUntil(() -> helper.assertFalse(zombie.isAlive(), "the farmer never put the zombie down"))
+            .thenWaitUntil(() -> helper.assertFalse(zombie.isAlive(), Component.literal("the farmer never put the zombie down")))
             .thenWaitUntil(() -> {
-                helper.assertTrue(pet.getMainHandItem().is(Items.WOODEN_HOE), "the farmer did not take its hoe back, holding " + pet.getMainHandItem());
-                helper.assertTrue(pet.getBackpack().getItem(POCKET).is(Items.IRON_SWORD), "the sword is not back in the bag");
-                helper.assertTrue(pet.getPetJobId() == InitRegistry.FARMER_ID, "the farmer is not a farmer again");
+                helper.assertTrue(pet.getMainHandItem().is(Items.WOODEN_HOE), Component.literal("the farmer did not take its hoe back, holding " + pet.getMainHandItem()));
+                helper.assertTrue(pet.getBackpack().getItem(POCKET).is(Items.IRON_SWORD), Component.literal("the sword is not back in the bag"));
+                helper.assertTrue(pet.getPetJobId() == InitRegistry.FARMER_ID, Component.literal("the farmer is not a farmer again"));
             })
-            .thenExecuteFor(WATCH_TICKS, () -> helper.assertTrue(pet.getMainHandItem().is(Items.WOODEN_HOE), "the farmer took the sword up again"))
+            .thenExecuteFor(WATCH_TICKS, () -> helper.assertTrue(pet.getMainHandItem().is(Items.WOODEN_HOE), Component.literal("the farmer took the sword up again")))
             .thenSucceed();
     }
 
@@ -98,19 +95,19 @@ public final class DefendSelfGameTests {
 
         helper.startSequence()
             .thenWaitUntil(() -> helper.assertTrue(pet.getMainHandItem().is(Items.IRON_SWORD) && pet.getMind().errands().isOn(ErrandIds.DEFEND_SELF),
-                "the farmer never took the sword up, doing " + pet.getIntent()))
+                Component.literal("the farmer never took the sword up, doing " + pet.getIntent())))
             .thenExecute(() -> {
                 CompoundTag saved = new CompoundTag();
                 pet.save(saved);
                 NonNullList<ItemStack> kept = NonNullList.withSize(AbstractPet.FULL_BACKPACK_SIZE, ItemStack.EMPTY);
-                ContainerHelper.loadAllItems(saved.getCompound("Backpack"), kept, helper.getLevel().registryAccess());
-                helper.assertTrue(kept.get(AbstractPet.MAINHAND_SLOT).is(Items.WOODEN_HOE), "the save has " + kept.get(AbstractPet.MAINHAND_SLOT) + " in the hand");
-                helper.assertTrue(kept.get(POCKET).is(Items.IRON_SWORD), "the save has " + kept.get(POCKET) + " where the sword is kept");
+                ContainerHelper.loadAllItems(saved.getCompoundOrEmpty("Backpack"), kept, helper.getLevel().registryAccess());
+                helper.assertTrue(kept.get(AbstractPet.MAINHAND_SLOT).is(Items.WOODEN_HOE), Component.literal("the save has " + kept.get(AbstractPet.MAINHAND_SLOT) + " in the hand"));
+                helper.assertTrue(kept.get(POCKET).is(Items.IRON_SWORD), Component.literal("the save has " + kept.get(POCKET) + " where the sword is kept"));
 
-                AbstractPet loaded = (AbstractPet) EntityType.create(saved, helper.getLevel()).orElseThrow();
-                helper.assertTrue(loaded.getMainHandItem().is(Items.WOODEN_HOE), "the pet read from the save holds " + loaded.getMainHandItem());
-                helper.assertTrue(loaded.getPetJobId() == InitRegistry.FARMER_ID, "the pet read from the save is not a farmer");
-                helper.assertTrue(pet.getMainHandItem().is(Items.IRON_SWORD), "saving took the sword out of the pet's hand");
+                AbstractPet loaded = (AbstractPet) EntityType.create(saved, helper.getLevel(), EntitySpawnReason.LOAD).orElseThrow();
+                helper.assertTrue(loaded.getMainHandItem().is(Items.WOODEN_HOE), Component.literal("the pet read from the save holds " + loaded.getMainHandItem()));
+                helper.assertTrue(loaded.getPetJobId() == InitRegistry.FARMER_ID, Component.literal("the pet read from the save is not a farmer"));
+                helper.assertTrue(pet.getMainHandItem().is(Items.IRON_SWORD), Component.literal("saving took the sword out of the pet's hand"));
             })
             .thenSucceed();
     }
@@ -140,18 +137,18 @@ public final class DefendSelfGameTests {
 
         helper.startSequence()
             .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(ErrandIds.DEFEND_SELF),
-                "the pet went for something else than the fight, doing " + pet.getIntent()))
+                Component.literal("the pet went for something else than the fight, doing " + pet.getIntent())))
             .thenExecuteFor(WATCH_TICKS, () -> {
-                helper.assertTrue(pet.getMind().errands().isOn(ErrandIds.DEFEND_SELF), "the present took the pet from the fight");
-                helper.assertFalse(pet.getPendingGift().isEmpty(), "the present was given in the middle of the fight");
+                helper.assertTrue(pet.getMind().errands().isOn(ErrandIds.DEFEND_SELF), Component.literal("the present took the pet from the fight"));
+                helper.assertFalse(pet.getPendingGift().isEmpty(), Component.literal("the present was given in the middle of the fight"));
             })
             .thenExecute(() -> {
                 zombie.setInvulnerable(false);
-                zombie.kill();
+                zombie.kill(helper.getLevel());
             })
             .thenWaitUntil(() -> {
-                helper.assertTrue(pet.getPendingGift().isEmpty(), "the present was not taken to the owner after the fight");
-                helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) > 0, "the owner was not given the present");
+                helper.assertTrue(pet.getPendingGift().isEmpty(), Component.literal("the present was not taken to the owner after the fight"));
+                helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) > 0, Component.literal("the owner was not given the present"));
             })
             .thenSucceed();
     }
@@ -169,10 +166,10 @@ public final class DefendSelfGameTests {
         pet.hurt(zombie.damageSources().mobAttack(zombie), 1.0F);
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(ErrandIds.FLEE), "the pet did not run, doing " + pet.getIntent()))
+            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(ErrandIds.FLEE), Component.literal("the pet did not run, doing " + pet.getIntent())))
             .thenExecuteFor(WATCH_TICKS, () -> {
-                helper.assertTrue(pet.getMainHandItem().is(Items.WOODEN_HOE), "the pet swapped though it was told not to");
-                helper.assertTrue(zombie.getHealth() == zombie.getMaxHealth(), "the pet fought with a hoe");
+                helper.assertTrue(pet.getMainHandItem().is(Items.WOODEN_HOE), Component.literal("the pet swapped though it was told not to"));
+                helper.assertTrue(zombie.getHealth() == zombie.getMaxHealth(), Component.literal("the pet fought with a hoe"));
             })
             .thenSucceed();
     }

@@ -96,6 +96,10 @@ public final class GameTestKit {
             .ifPresent(clock -> level.getServer().clockManager().setTotalTicks(clock, dayTime));
         level.getGameRules().set(GameRules.SPAWN_MOBS, false, level.getServer());
         level.getServer().setWeatherParameters(CLEAR_WEATHER_TICKS, 0, false, false);
+        // The rain a batch left falls off by a hundredth a tick, so for the first eighty ticks the world is still raining
+        // to a pet that looks up: the sky is cleared at once.
+        level.setRainLevel(0.0F);
+        level.setThunderLevel(0.0F);
     }
 
     /**

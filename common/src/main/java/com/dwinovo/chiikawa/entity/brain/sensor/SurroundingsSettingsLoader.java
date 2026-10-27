@@ -1,21 +1,22 @@
 package com.dwinovo.chiikawa.entity.brain.sensor;
 
 import com.dwinovo.chiikawa.Constants;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 /**
  * Server data reload listener for {@code data/chiikawa/pet_surroundings/surroundings.json}. A file that fails to parse is
  * reported and ignored, and with it no pet sees its surroundings.
  */
-public final class SurroundingsSettingsLoader extends SimpleJsonResourceReloadListener {
+public final class SurroundingsSettingsLoader extends SimpleJsonResourceReloadListener<JsonElement> {
     public static final String DIRECTORY = "pet_surroundings";
     /** Id for loaders that register reload listeners by id. */
     public static final Identifier ID = Identifier.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
@@ -25,7 +26,7 @@ public final class SurroundingsSettingsLoader extends SimpleJsonResourceReloadLi
     private static final String LOG_PREFIX = "[chiikawa-surroundings] ";
 
     public SurroundingsSettingsLoader() {
-        super(new Gson(), DIRECTORY);
+        super(ExtraCodecs.JSON, FileToIdConverter.json(DIRECTORY));
     }
 
     @Override

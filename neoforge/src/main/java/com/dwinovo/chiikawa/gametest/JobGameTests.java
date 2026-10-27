@@ -101,13 +101,13 @@ public final class JobGameTests {
     public static void a_job_offers_the_errands_its_file_names_in_order(GameTestHelper helper) {
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
 
-        helper.assertTrue(offeredBy(pet).equals(generic()), "a pet with no job was offered more than every pet is");
+        helper.assertTrue(offeredBy(pet).equals(generic()), Component.literal("a pet with no job was offered more than every pet is"));
         helper.assertTrue(offeredBy(holding(pet, Items.WOODEN_HOE)).equals(withWork(WorkData.HARVEST, WorkData.PLANT,
-            WorkData.DELIVER, WorkData.WEED, WorkData.PICK_MUSHROOM)), "a farmer was not offered the farmer's work in order");
+            WorkData.DELIVER, WorkData.WEED, WorkData.PICK_MUSHROOM)), Component.literal("a farmer was not offered the farmer's work in order"));
         helper.assertTrue(offeredBy(holding(pet, Items.IRON_SWORD)).equals(withWork(WorkData.MELEE, WorkData.HUNT_MELEE)),
-            "a fencer was not offered melee and then hunting");
+            Component.literal("a fencer was not offered melee and then hunting"));
         helper.assertTrue(offeredBy(holding(pet, Items.BOW)).equals(withWork(WorkData.RANGED, WorkData.HUNT_RANGED)),
-            "an archer was not offered ranged and then hunting");
+            Component.literal("an archer was not offered ranged and then hunting"));
         helper.succeed();
     }
 
@@ -121,7 +121,7 @@ public final class JobGameTests {
                 JobWorkData.all().get(JobIds.FARMER).sight())));
 
             helper.assertTrue(offeredBy(pet).equals(withWork(WorkData.HARVEST, WorkData.PLANT)),
-                "the missing errand was offered, or kept the others from it");
+                Component.literal("the missing errand was offered, or kept the others from it"));
         } finally {
             JobWork.replaceAll(JobWorkData.all());
         }

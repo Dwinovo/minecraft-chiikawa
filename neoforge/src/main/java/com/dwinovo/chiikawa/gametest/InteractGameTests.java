@@ -177,7 +177,7 @@ public final class InteractGameTests {
         asTeam(helper, () -> {
             pet.mobInteract(friend, InteractionHand.MAIN_HAND);
 
-            helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, "a teammate's crouching click did not sit the pet down");
+            helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, Component.literal("a teammate's crouching click did not sit the pet down"));
             helper.succeed();
         }, owner, friend);
     }
@@ -195,7 +195,7 @@ public final class InteractGameTests {
 
         pet.mobInteract(stranger, InteractionHand.MAIN_HAND);
 
-        helper.assertTrue(pet.getPetDirective() == PetDirective.FOLLOW, "a stranger's crouching click changed the pet's orders");
+        helper.assertTrue(pet.getPetDirective() == PetDirective.FOLLOW, Component.literal("a stranger's crouching click changed the pet's orders"));
         helper.succeed();
     }
 
@@ -212,7 +212,7 @@ public final class InteractGameTests {
         asTeam(helper, () -> {
             pet.mobInteract(friend, InteractionHand.MAIN_HAND);
 
-            helper.assertFalse(friend.containerMenu instanceof PetBackpackMenu, "a teammate got into the pet's backpack");
+            helper.assertFalse(friend.containerMenu instanceof PetBackpackMenu, Component.literal("a teammate got into the pet's backpack"));
             helper.succeed();
         }, owner, friend);
     }
@@ -231,12 +231,12 @@ public final class InteractGameTests {
         asTeam(helper, () -> {
             friend.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.COOKIE));
             pet.mobInteract(friend, InteractionHand.MAIN_HAND);
-            helper.assertTrue(pet.getHealth() > hurt, "a snack from a teammate was none the better for it");
+            helper.assertTrue(pet.getHealth() > hurt, Component.literal("a snack from a teammate was none the better for it"));
 
             int money = Wallet.count(pet.getBackpack());
             friend.setItemInHand(InteractionHand.MAIN_HAND, Wallet.coins(2));
             pet.mobInteract(friend, InteractionHand.MAIN_HAND);
-            helper.assertTrue(Wallet.count(pet.getBackpack()) == money + 2, "a teammate's money did not go into the pet's bag");
+            helper.assertTrue(Wallet.count(pet.getBackpack()) == money + 2, Component.literal("a teammate's money did not go into the pet's bag"));
             helper.succeed();
         }, owner, friend);
     }
@@ -251,8 +251,8 @@ public final class InteractGameTests {
         stranger.setPos(helper.absoluteVec(new BlockPos(3, STAND, 5).getCenter()));
         PetRules rules = PetRules.DEFAULT.with(PetRules.Toggle.SHOP, false).withStance(CombatStance.NONE);
 
-        helper.assertFalse(PetServerPacketHandler.rule(stranger, pet, rules), "a stranger's rules were heard");
-        helper.assertTrue(pet.getRules().equals(PetRules.DEFAULT), "the pet took rules from a stranger");
+        helper.assertFalse(PetServerPacketHandler.rule(stranger, pet, rules), Component.literal("a stranger's rules were heard"));
+        helper.assertTrue(pet.getRules().equals(PetRules.DEFAULT), Component.literal("the pet took rules from a stranger"));
         helper.succeed();
     }
 
@@ -265,8 +265,8 @@ public final class InteractGameTests {
         friend.setPos(helper.absoluteVec(new BlockPos(3, STAND, 5).getCenter()));
 
         asTeam(helper, () -> {
-            helper.assertFalse(PetServerPacketHandler.rule(friend, pet, PetRules.DEFAULT.withSwap(false)), "a teammate's rules were heard");
-            helper.assertTrue(pet.getRules().equals(PetRules.DEFAULT), "the pet took rules from a teammate");
+            helper.assertFalse(PetServerPacketHandler.rule(friend, pet, PetRules.DEFAULT.withSwap(false)), Component.literal("a teammate's rules were heard"));
+            helper.assertTrue(pet.getRules().equals(PetRules.DEFAULT), Component.literal("the pet took rules from a teammate"));
             helper.succeed();
         }, owner, friend);
     }
@@ -280,8 +280,8 @@ public final class InteractGameTests {
         owner.setPos(helper.absoluteVec(new BlockPos(3, STAND, 5).getCenter()));
         PetRules rules = PetRules.DEFAULT.with(PetRules.Toggle.PHOTO, false).withStance(CombatStance.RETALIATE).withSwap(false);
 
-        helper.assertTrue(PetServerPacketHandler.rule(owner, pet, rules), "the owner's rules were refused");
-        helper.assertTrue(pet.getRules().equals(rules), "the pet did not take its owner's rules");
+        helper.assertTrue(PetServerPacketHandler.rule(owner, pet, rules), Component.literal("the owner's rules were refused"));
+        helper.assertTrue(pet.getRules().equals(rules), Component.literal("the pet did not take its owner's rules"));
         helper.succeed();
     }
 }

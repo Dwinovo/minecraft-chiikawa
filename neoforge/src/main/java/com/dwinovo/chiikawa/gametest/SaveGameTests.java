@@ -23,15 +23,15 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Unit;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.item.ItemStack;
@@ -40,8 +40,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * What a pet keeps of its memories when its save holds one the build has no place for. Vanilla reads the saved
@@ -50,7 +48,6 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
  * saves that still hold it, and what an older build makes of the save of a newer one.
  */
 @GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class SaveGameTests {
     private static final String BATCH = "chiikawa_save";
     private static final int STAND = 2;
@@ -103,7 +100,7 @@ public final class SaveGameTests {
         AbstractPet loaded = readBack(helper, remembering(helper), saved -> {
         });
 
-        helper.assertTrue(forgotten(loaded).isEmpty(), "the pet lost " + forgotten(loaded) + " in a save and a load");
+        helper.assertTrue(forgotten(loaded).isEmpty(), Component.literal("the pet lost " + forgotten(loaded) + " in a save and a load"));
         helper.succeed();
     }
 
@@ -121,7 +118,7 @@ public final class SaveGameTests {
         });
 
         helper.assertTrue(forgotten(loaded).size() == MEMORIES.size(),
-            "the pet kept all but " + forgotten(loaded) + " of its memories; vanilla was found to drop every one");
+            Component.literal("the pet kept all but " + forgotten(loaded) + " of its memories; vanilla was found to drop every one"));
         helper.succeed();
     }
 
@@ -137,8 +134,8 @@ public final class SaveGameTests {
             memoriesOf(saved).put(UNLISTED, slept);
         });
 
-        helper.assertTrue(forgotten(loaded).isEmpty(), "the pet lost " + forgotten(loaded) + " for a memory it has no place for");
-        helper.assertFalse(memoriesOf(save(loaded)).contains(UNLISTED), "the memory it has no place for was saved again");
+        helper.assertTrue(forgotten(loaded).isEmpty(), Component.literal("the pet lost " + forgotten(loaded) + " for a memory it has no place for"));
+        helper.assertFalse(memoriesOf(save(loaded)).contains(UNLISTED), Component.literal("the memory it has no place for was saved again"));
         helper.succeed();
     }
 
@@ -151,21 +148,21 @@ public final class SaveGameTests {
         AbstractPet pet = ownedPet(helper, new BlockPos(3, STAND, 3));
         // A finished roll of film is the occasion that is certain, and the pet has the roll to give.
         PetMind.post(pet, new Message.Occasion(GiftOccasion.FILM_FULL, Optional.of(new ItemStack(Items.PAPER))));
-        helper.assertTrue(pet.giftIntentions().held().isPresent(), "the pet did not think of a present");
+        helper.assertTrue(pet.giftIntentions().held().isPresent(), Component.literal("the pet did not think of a present"));
         CompoundTag saved = save(pet);
-        helper.assertTrue(saved.contains("GiftIntention"), "the present in mind was not saved");
-        helper.assertFalse(memoriesOf(saved).getAllKeys().stream().anyMatch(key -> key.contains("gift_intention")),
-            "the present in mind was saved among the memories");
+        helper.assertTrue(saved.contains("GiftIntention"), Component.literal("the present in mind was not saved"));
+        helper.assertFalse(memoriesOf(saved).keySet().stream().anyMatch(key -> key.contains("gift_intention")),
+            Component.literal("the present in mind was saved among the memories"));
 
-        AbstractPet loaded = (AbstractPet) EntityType.create(saved, helper.getLevel()).orElseThrow();
+        AbstractPet loaded = (AbstractPet) EntityType.create(saved, helper.getLevel(), EntitySpawnReason.LOAD).orElseThrow();
         helper.assertTrue(loaded.giftIntentions().held().map(held -> held.occasion() == GiftOccasion.FILM_FULL
             && held.readyAt() == pet.giftIntentions().held().orElseThrow().readyAt()
             && held.keepsake().filter(keepsake -> keepsake.is(Items.PAPER)).isPresent()).orElse(false),
-            "the present in mind was not as it was after a save and a load: " + loaded.giftIntentions().held());
+            Component.literal("the present in mind was not as it was after a save and a load: " + loaded.giftIntentions().held()));
 
         saved.remove("GiftIntention");
-        helper.assertTrue(((AbstractPet) EntityType.create(saved, helper.getLevel()).orElseThrow()).giftIntentions().held().isEmpty(),
-            "a save from before presents were thought of loaded one");
+        helper.assertTrue(((AbstractPet) EntityType.create(saved, helper.getLevel(), EntitySpawnReason.LOAD).orElseThrow()).giftIntentions().held().isEmpty(),
+            Component.literal("a save from before presents were thought of loaded one"));
         helper.succeed();
     }
 
@@ -189,23 +186,23 @@ public final class SaveGameTests {
             memoriesOf(saved).put(retired, block);
         }
         farmer.discard();
-        AbstractPet loaded = (AbstractPet) EntityType.create(saved, helper.getLevel()).orElseThrow();
+        AbstractPet loaded = (AbstractPet) EntityType.create(saved, helper.getLevel(), EntitySpawnReason.LOAD).orElseThrow();
         // The one it was saved from is only removed at the end of the tick, and a level takes no second creature of one id.
         loaded.setUUID(UUID.randomUUID());
-        helper.assertTrue(helper.getLevel().addFreshEntity(loaded), "the loaded farmer was not added to the level");
+        helper.assertTrue(helper.getLevel().addFreshEntity(loaded), Component.literal("the loaded farmer was not added to the level"));
 
         helper.assertTrue(lostBesidesHome(loaded, home).isEmpty(),
-            "the farmer lost " + lostBesidesHome(loaded, home) + " for the farm blocks it had saved");
+            Component.literal("the farmer lost " + lostBesidesHome(loaded, home) + " for the farm blocks it had saved"));
         for (String retired : RETIRED_FARM_BLOCKS) {
-            helper.assertFalse(memoriesOf(save(loaded)).contains(retired), retired + " was saved again");
+            helper.assertFalse(memoriesOf(save(loaded)).contains(retired), Component.literal(retired + " was saved again"));
         }
         BlockPos crop = new BlockPos(7, STAND, 4);
         helper.setBlock(crop.below(), Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE));
         helper.setBlock(crop, Blocks.WHEAT.defaultBlockState().setValue(CropBlock.AGE, CropBlock.MAX_AGE));
 
         helper.succeedWhen(() -> {
-            helper.assertTrue(carries(loaded, Items.WHEAT), "the farmer had not reaped the crop");
-            helper.assertTrue(lostBesidesHome(loaded, home).isEmpty(), "the farmer lost " + lostBesidesHome(loaded, home) + " on the way");
+            helper.assertTrue(carries(loaded, Items.WHEAT), Component.literal("the farmer had not reaped the crop"));
+            helper.assertTrue(lostBesidesHome(loaded, home).isEmpty(), Component.literal("the farmer lost " + lostBesidesHome(loaded, home) + " on the way"));
         });
     }
 
@@ -233,7 +230,7 @@ public final class SaveGameTests {
     private static AbstractPet readBack(GameTestHelper helper, AbstractPet pet, Consumer<CompoundTag> change) {
         CompoundTag saved = save(pet);
         change.accept(saved);
-        return (AbstractPet) EntityType.create(saved, helper.getLevel()).orElseThrow();
+        return (AbstractPet) EntityType.create(saved, helper.getLevel(), EntitySpawnReason.LOAD).orElseThrow();
     }
 
     private static CompoundTag save(AbstractPet pet) {
@@ -243,6 +240,6 @@ public final class SaveGameTests {
     }
 
     private static CompoundTag memoriesOf(CompoundTag saved) {
-        return saved.getCompound("Brain").getCompound("memories");
+        return saved.getCompoundOrEmpty("Brain").getCompoundOrEmpty("memories");
     }
 }
