@@ -51,6 +51,7 @@ public final class VisitAction implements WorkAction<VisitAction.Visiting, Erran
                 case Goal.Owner owner -> view.ownerPos();
                 case Goal.Creature creature -> view.whereIs(creature.id());
                 case Goal.Place place -> Optional.of(GlobalPos.of(view.pos().dimension(), place.pos()));
+                case Goal.Spot spot -> Optional.of(GlobalPos.of(view.pos().dimension(), spot.pos()));
                 default -> Optional.empty();
             };
         }
@@ -120,7 +121,7 @@ public final class VisitAction implements WorkAction<VisitAction.Visiting, Erran
         Surroundings around = view.surroundings();
         return switch (to) {
             case Destination.ToOwner owner -> view.ownerPos().map(ignored -> new Goal.Owner());
-            case Destination.ToShelter shelter -> around.shelter().map(Goal.Place::new);
+            case Destination.ToShelter shelter -> around.shelter().map(Goal.Spot::new);
             case Destination.ToCreature creature -> around.creatures().stream().filter(seen -> seen.kind().is(creature.kinds()))
                 .findFirst().map(seen -> new Goal.Creature(seen.id()));
             case Destination.ToItem item -> around.items().stream()
@@ -144,7 +145,7 @@ public final class VisitAction implements WorkAction<VisitAction.Visiting, Erran
         ErrandTunings.Visit tuning = settings.tuning();
         // What it came to see is what it looks at when it gets there; a place has nothing to look at, and is walked to, to the
         // very block, where its owner or a creature is only come up to.
-        boolean toAPlace = plan.goal() instanceof Goal.Place;
+        boolean toAPlace = plan.goal() instanceof Goal.Place || plan.goal() instanceof Goal.Spot;
         Optional<Goal> gaze = toAPlace ? Optional.empty() : Optional.of(plan.goal());
         return Routine.of(
             Routine.step(() -> WalkTo.near(plan.goal(), tuning.speed(), toAPlace ? 0 : tuning.arriveDistance(),
