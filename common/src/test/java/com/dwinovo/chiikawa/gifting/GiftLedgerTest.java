@@ -5,8 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.UUID;
 import net.minecraft.SharedConstants;
-import net.minecraft.data.registries.VanillaRegistries;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.Bootstrap;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -79,7 +78,7 @@ class GiftLedgerTest {
         ledger.record(OWNER, 4);
         ledger.record(OTHER, 3);
 
-        GiftLedger loaded = GiftLedger.load(ledger.save(new CompoundTag(), VanillaRegistries.createLookup()), VanillaRegistries.createLookup());
+        GiftLedger loaded = reloaded(ledger);
 
         assertEquals(1, loaded.left(OWNER, 4, LIMIT));
         assertEquals(2, loaded.left(OTHER, 3, LIMIT));
@@ -88,6 +87,12 @@ class GiftLedgerTest {
 
     @Test
     void aWorldThatNeverHadOneStartsEmpty() {
-        assertTrue(GiftLedger.load(new CompoundTag(), VanillaRegistries.createLookup()).left(OWNER, 0, LIMIT) == LIMIT);
+        assertTrue(reloaded(new GiftLedger()).left(OWNER, 0, LIMIT) == LIMIT);
+    }
+
+    /** Through NBT and back, which is the only trip that counts. */
+    private static GiftLedger reloaded(GiftLedger ledger) {
+        return GiftLedger.CODEC.parse(NbtOps.INSTANCE, GiftLedger.CODEC.encodeStart(NbtOps.INSTANCE, ledger).getOrThrow())
+            .getOrThrow();
     }
 }

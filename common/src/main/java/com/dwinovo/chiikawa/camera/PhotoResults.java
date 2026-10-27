@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -58,7 +59,7 @@ public final class PhotoResults {
         PhotoData shot = PhotoData.taken(stored.photo(), stored.kind(), stored.name(), pet.level(),
             pet.getDisplayName().getString());
         Optional<ItemStack> roll = FilmRolls.record(pet.getBackpack(), PhotoScout.filmOf(camera.get()), camera.get().exposures(),
-            shot, pet::spawnAtLocation);
+            shot, left -> pet.spawnAtLocation((ServerLevel) pet.level(), left));
         if (roll.isEmpty()) {
             return false;
         }
