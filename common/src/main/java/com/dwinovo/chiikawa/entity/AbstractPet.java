@@ -246,7 +246,10 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitMemory.PHOTOGRAPHED_BIOMES.get(),
         InitMemory.ERRAND_RESTS.get(),
         InitMemory.SUBJECT_RESTS.get(),
-        InitMemory.REMARK_RESTS.get()
+        InitMemory.REMARK_RESTS.get(),
+        MemoryModuleType.NEAREST_BED,
+        InitMemory.SURROUNDINGS.get(),
+        InitMemory.OWNER_SEEN.get()
     );
     private static final java.util.List<net.minecraft.world.entity.ai.sensing.SensorType<? extends net.minecraft.world.entity.ai.sensing.Sensor<? super AbstractPet>>> SENSOR_TYPES = java.util.List.of(
         net.minecraft.world.entity.ai.sensing.SensorType.HURT_BY,
@@ -255,7 +258,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitSensor.PET_WORK_SENSOR.get(),
         InitSensor.PET_ITEM_ENTITY_SENSOR.get(),
         InitSensor.PET_PLACES_SENSOR.get(),
-        InitSensor.PET_SOCIAL_SENSOR.get()
+        InitSensor.PET_SOCIAL_SENSOR.get(),
+        InitSensor.PET_SURROUNDINGS_SENSOR.get()
     );
     /** Lazily allocated on first client-side read; server instances pay nothing. */
     private PetAnimator petAnimator;

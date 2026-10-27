@@ -24,6 +24,7 @@ public final class ErrandIds {
     public static final Identifier TAKE_PHOTO = id("take_photo");
     public static final Identifier DEFEND_SELF = id("defend_self");
     public static final Identifier FLEE = id("flee");
+    public static final Identifier SLEEP = id("sleep");
 
     private ErrandIds() {
     }
