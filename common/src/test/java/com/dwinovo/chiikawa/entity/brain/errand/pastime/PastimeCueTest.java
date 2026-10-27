@@ -30,6 +30,7 @@ import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -138,12 +139,12 @@ class PastimeCueTest {
 
     @Test
     void aPetSeesACreatureOrAThingOfAKindOnlyWithinTheRange() {
-        TestTags.bind(EntityType.SKELETON.builtInRegistryHolder(), BONES);
+        TestTags.bind(EntityTypes.SKELETON.builtInRegistryHolder(), BONES);
         TestTags.bind(Items.COOKIE.builtInRegistryHolder(), SWEETS);
         try {
             Surroundings around = new Surroundings(Optional.empty(),
-                List.of(new Sighting<EntityType<?>>(UUID.randomUUID(), east(6).pos(), EntityType.SKELETON),
-                    new Sighting<EntityType<?>>(UUID.randomUUID(), east(2).pos(), EntityType.PIG)),
+                List.of(new Sighting<EntityType<?>>(UUID.randomUUID(), east(6).pos(), EntityTypes.SKELETON),
+                    new Sighting<EntityType<?>>(UUID.randomUUID(), east(2).pos(), EntityTypes.PIG)),
                 List.of(new Sighting<Item>(UUID.randomUUID(), east(3).pos(), Items.COOKIE)), false);
             PastimeCue bones = new PastimeCue.Sees(Either.left(BONES), 8.0);
             PastimeCue bonesNear = new PastimeCue.Sees(Either.left(BONES), 4.0);
@@ -156,7 +157,7 @@ class PastimeCueTest {
             assertTrue(sweets.holds(pet().surroundings(around)));
             assertFalse(sweetsFar.holds(pet().surroundings(around)));
         } finally {
-            TestTags.bind(EntityType.SKELETON.builtInRegistryHolder(), null);
+            TestTags.bind(EntityTypes.SKELETON.builtInRegistryHolder(), null);
             TestTags.bind(Items.COOKIE.builtInRegistryHolder(), null);
         }
     }

@@ -22,12 +22,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * A pet with a hoe in its hand and a sword in its bag that is hit takes the sword up, fights, and takes the hoe back: a
@@ -58,7 +59,7 @@ public final class DefendSelfGameTests {
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = FIGHT_TICKS)
     public static void a_farmer_hit_draws_the_sword_from_its_bag_and_takes_its_hoe_back(GameTestHelper helper) {
         AbstractPet pet = farmerWithASword(helper);
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(8, STAND, 4));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(8, STAND, 4));
         zombie.setNoAi(true);
         zombie.setHealth(1.0F);
         pet.hurt(zombie.damageSources().mobAttack(zombie), 1.0F);
@@ -86,7 +87,7 @@ public final class DefendSelfGameTests {
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = FIGHT_TICKS)
     public static void a_farmer_saved_mid_fight_is_saved_holding_its_hoe(GameTestHelper helper) {
         AbstractPet pet = farmerWithASword(helper);
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(8, STAND, 4));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(8, STAND, 4));
         zombie.setNoAi(true);
         // The fight is what is saved, and a zombie that falls would end it.
         zombie.setInvulnerable(true);
@@ -118,13 +119,13 @@ public final class DefendSelfGameTests {
     public static void a_carried_present_waits_for_the_fight(GameTestHelper helper) {
         ServerPlayer owner = player(helper);
         owner.setGameMode(GameType.SURVIVAL);
-        owner.setPos(helper.absoluteVec(new BlockPos(12, STAND, 4).getCenter()));
+        owner.setPos(helper.absoluteVec(Vec3.atCenterOf(new BlockPos(12, STAND, 4))));
         AbstractPet pet = holding(wildPet(helper, HERE), Items.WOODEN_HOE);
         pet.tame(owner);
         pet.setPetDirective(PetDirective.FREE);
         pet.getBackpack().setItem(POCKET, new ItemStack(Items.IRON_SWORD));
         pet.setPendingGift(new ItemStack(Items.COOKIE));
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(7, STAND, 4));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(7, STAND, 4));
         zombie.setNoAi(true);
         zombie.setInvulnerable(true);
         // In the fight from the first tick, with the zombie on top of the pet and the present in its paws, what the sensor
@@ -159,7 +160,7 @@ public final class DefendSelfGameTests {
     public static void a_farmer_told_not_to_swap_keeps_its_hoe_and_its_sword_in_the_bag(GameTestHelper helper) {
         AbstractPet pet = farmerWithASword(helper);
         pet.setRules(PetRules.DEFAULT.withSwap(false));
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(8, STAND, 4));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(8, STAND, 4));
         zombie.setNoAi(true);
         pet.hurt(zombie.damageSources().mobAttack(zombie), 1.0F);
 

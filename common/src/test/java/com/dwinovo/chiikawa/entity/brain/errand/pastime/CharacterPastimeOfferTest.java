@@ -26,7 +26,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import org.junit.jupiter.api.BeforeAll;
@@ -47,7 +47,7 @@ class CharacterPastimeOfferTest {
     @BeforeAll
     static void load() {
         TestErrands.load();
-        TestTags.bind(EntityType.ALLAY.builtInRegistryHolder(), InitTag.PETS);
+        TestTags.bind(EntityTypes.ALLAY.builtInRegistryHolder(), InitTag.PETS);
         TestTags.bind(Items.CAKE.builtInRegistryHolder(), InitTag.SWEETS);
     }
 
@@ -60,7 +60,7 @@ class CharacterPastimeOfferTest {
     }
 
     private static Surroundings withAPetNear() {
-        return new Surroundings(Optional.empty(), List.of(new Sighting<>(SOMEONE, east(3).pos(), EntityType.ALLAY)), List.of(), false);
+        return new Surroundings(Optional.empty(), List.of(new Sighting<>(SOMEONE, east(3).pos(), EntityTypes.ALLAY)), List.of(), false);
     }
 
     private static Surroundings withACakeAbout() {

@@ -30,6 +30,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * The pastimes that are one character's own (0.1.4 design, the first batch of section 11): that Chiikawa cries at a storm until
@@ -439,7 +440,7 @@ public final class PastimeGameTests {
 
         helper.startSequence()
             .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(CharacterPastimeData.SWEETS_STARE)
-                    && pet.getPerformance().startsWith("stare") && pet.distanceToSqr(helper.absolutePos(cake).getCenter()) < 4.0,
+                    && pet.getPerformance().startsWith("stare") && pet.distanceToSqr(Vec3.atCenterOf(helper.absolutePos(cake))) < 4.0,
                 "the pet never came to stare at the cake: it is " + pet.getMind().errands().errand() + " " + pet.getPerformance()))
             .thenExecute(() -> assertSaid(helper, pet, VoiceMoment.SWEETS))
             .thenSucceed();

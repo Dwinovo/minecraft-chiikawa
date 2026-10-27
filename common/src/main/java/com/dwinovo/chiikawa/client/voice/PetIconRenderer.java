@@ -24,7 +24,7 @@ import net.minecraft.world.phys.Vec3;
 public final class PetIconRenderer {
     public void extract(AbstractPet pet, ChiikawaRenderState state, float partialTick) {
         PixelArt sprite = sprite(pet.getIcon());
-        if (sprite == null || Minecraft.getInstance().options.hideGui || pet.getSpeech().isPresent()) {
+        if (sprite == null || Minecraft.getInstance().gui.hud.isHidden() || pet.getSpeech().isPresent()) {
             return;
         }
         Vec3 nameTag = OverHead.spot(pet, partialTick);

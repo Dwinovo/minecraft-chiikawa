@@ -41,6 +41,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntitySpawnRequest;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -144,7 +145,7 @@ public final class GameTestKit {
 
     /** @return the pet the game reads from a save of it, not yet in the world */
     static AbstractPet petFrom(GameTestHelper helper, CompoundTag saved) {
-        return (AbstractPet) EntityType.create(read(helper, saved), helper.getLevel(), EntitySpawnReason.LOAD).orElseThrow();
+        return (AbstractPet) EntityType.create(read(helper, saved), helper.getLevel(), new EntitySpawnRequest(EntitySpawnReason.LOAD, false)).orElseThrow();
     }
 
     /**

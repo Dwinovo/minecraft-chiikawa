@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.errand.view;
 
 import com.dwinovo.chiikawa.entity.brain.personality.IdleHabits;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 
@@ -11,7 +11,7 @@ public enum Onlooker {
     PLAYER {
         @Override
         public boolean matches(LivingEntity entity) {
-            return entity.getType() == EntityType.PLAYER;
+            return entity.getType() == EntityTypes.PLAYER;
         }
 
         @Override

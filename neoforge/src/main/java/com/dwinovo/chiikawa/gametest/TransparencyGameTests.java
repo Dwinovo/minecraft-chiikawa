@@ -28,7 +28,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -165,7 +165,7 @@ public final class TransparencyGameTests {
     @GameTest(template = "floor8", batch = ICON_BATCH, timeoutTicks = 200)
     public static void a_pet_running_from_a_foe_shows_it_is_scared(GameTestHelper helper) {
         AbstractPet pet = pet(helper, InitEntity.KURIMANJU_PET.get(), new BlockPos(3, STAND, 3), false);
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(6, STAND, 6));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(6, STAND, 6));
         zombie.setNoAi(true);
 
         pet.hurt(zombie.damageSources().mobAttack(zombie), 1.0F);

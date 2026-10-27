@@ -31,7 +31,7 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
@@ -54,7 +54,7 @@ public final class ErrandFixtures {
         // is a pet to a pastime that looks for one, and a cake is something sweet.
         SharedConstants.tryDetectVersion();
         Bootstrap.bootStrap();
-        TestTags.bind(EntityType.ALLAY.builtInRegistryHolder(), InitTag.PETS);
+        TestTags.bind(EntityTypes.ALLAY.builtInRegistryHolder(), InitTag.PETS);
         TestTags.bind(Items.CAKE.builtInRegistryHolder(), InitTag.SWEETS);
     }
 
@@ -100,7 +100,7 @@ public final class ErrandFixtures {
         Map.entry(CharacterPastimeData.COWER, free().species(PetCharacters.CHIIKAWA).weather(Weather.THUNDER, true)),
         Map.entry(CharacterPastimeData.FRENZY, free().species(PetCharacters.USAGI)),
         Map.entry(CharacterPastimeData.ASK_PRAISE, free().species(PetCharacters.MOMONGA).ownerPos(east(5))
-            .surroundings(new Surroundings(Optional.empty(), List.of(new Sighting<>(FRIEND, east(3).pos(), EntityType.ALLAY)), List.of(),
+            .surroundings(new Surroundings(Optional.empty(), List.of(new Sighting<>(FRIEND, east(3).pos(), EntityTypes.ALLAY)), List.of(),
                 false))),
         Map.entry(CharacterPastimeData.EVENING_DRINK, free().species(PetCharacters.KURIMANJU).phase(DayPhase.EVENING)),
         Map.entry(CharacterPastimeData.COFFEE_FOR_A_WORKER,

@@ -18,12 +18,13 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Why a pet fights: the grounds a wolf's target goals give, and what the owner's orders make of them. A pet fights for
@@ -58,7 +59,7 @@ public final class FoeGroundsGameTests {
         ServerPlayer owner = owner(helper);
         AbstractPet pet = holding(ownedAndHeeling(helper, owner), Items.IRON_SWORD);
         pet.setRules(PetRules.DEFAULT.withStance(CombatStance.RETALIATE));
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(7, STAND, 4));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(7, STAND, 4));
         zombie.setNoAi(true);
 
         helper.startSequence()
@@ -82,7 +83,7 @@ public final class FoeGroundsGameTests {
         AbstractPet pet = holding(ownedPet(helper, HERE), Items.IRON_SWORD);
         pet.setRules(PetRules.DEFAULT.withStance(CombatStance.RETALIATE));
         pet.setTask(HuntGameTests.hunting());
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(9, STAND, 4));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(9, STAND, 4));
         zombie.setNoAi(true);
 
         helper.succeedWhen(() -> helper.assertTrue(hurt(zombie), "a free fencer with a slip for monsters left a zombie alone"));
@@ -93,7 +94,7 @@ public final class FoeGroundsGameTests {
     public static void a_free_fencer_that_only_retaliates_does_not_hunt_without_a_slip(GameTestHelper helper) {
         AbstractPet pet = holding(ownedPet(helper, HERE), Items.IRON_SWORD);
         pet.setRules(PetRules.DEFAULT.withStance(CombatStance.RETALIATE));
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(9, STAND, 4));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(9, STAND, 4));
         zombie.setNoAi(true);
 
         helper.runAtTickTime(WATCH_TICKS, () -> {
@@ -109,7 +110,7 @@ public final class FoeGroundsGameTests {
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = FIGHT_TICKS)
     public static void a_free_fencer_clearing_nearby_hostiles_does_so_below_work_priority(GameTestHelper helper) {
         AbstractPet pet = holding(ownedPet(helper, HERE), Items.IRON_SWORD);
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(11, STAND, 4));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(11, STAND, 4));
         zombie.setNoAi(true);
         // The fight is what is watched, and a zombie that falls mid-case would end it.
         zombie.setInvulnerable(true);
@@ -133,7 +134,7 @@ public final class FoeGroundsGameTests {
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = FIGHT_TICKS)
     public static void a_wild_fencer_guards_its_patch_against_what_comes_by(GameTestHelper helper) {
         AbstractPet pet = holding(wildPet(helper, HERE), Items.IRON_SWORD);
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(9, STAND, 4));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(9, STAND, 4));
         zombie.setNoAi(true);
         zombie.setInvulnerable(true);
 
@@ -147,7 +148,7 @@ public final class FoeGroundsGameTests {
     private static ServerPlayer owner(GameTestHelper helper) {
         ServerPlayer owner = player(helper);
         owner.setGameMode(GameType.SURVIVAL);
-        owner.setPos(helper.absoluteVec(HERE.getCenter()));
+        owner.setPos(helper.absoluteVec(Vec3.atCenterOf(HERE)));
         return owner;
     }
 
