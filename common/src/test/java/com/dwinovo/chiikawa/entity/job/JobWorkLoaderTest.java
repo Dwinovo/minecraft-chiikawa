@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import net.minecraft.SharedConstants;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
@@ -17,7 +18,7 @@ import org.junit.jupiter.api.Test;
 
 /** What the loader does with a job file that is wrong: it costs that job its work and nothing else. */
 class JobWorkLoaderTest {
-    private static final Set<ResourceLocation> JOBS = Set.of(JobIds.FARMER, JobIds.FENCER);
+    private static final Predicate<ResourceLocation> JOBS = Set.of(JobIds.FARMER, JobIds.FENCER)::contains;
     private static final Set<ResourceLocation> ERRANDS = Set.of(WorkData.HARVEST, WorkData.PLANT, WorkData.MELEE);
     private static final Set<ResourceLocation> BLOCK_WORKS = Set.of(WorkData.HARVEST, WorkData.PLANT);
     private static final Sight FIELD = new Sight(5, 1, 10.0, 30, 3);

@@ -14,6 +14,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.step.Harvest;
 import com.dwinovo.chiikawa.entity.brain.errand.step.LiveHandle;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkTarget;
 import com.dwinovo.chiikawa.init.InitRegistry;
+import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.task.PetTask;
 import java.util.List;
 import java.util.Map;
@@ -156,7 +157,7 @@ public final class HarvestGameTests {
     }
 
     private static ResourceLocation farmer() {
-        return InitRegistry.PET_JOB_REGISTRY.getKey(InitRegistry.FARMER.get());
+        return Services.REGISTRY.getKey(InitRegistry.PET_JOB_KEY, InitRegistry.FARMER.get());
     }
 
     /** Puts the block where it grows, on grass, a tall plant with both its halves. */
