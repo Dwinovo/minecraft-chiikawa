@@ -44,6 +44,7 @@ public final class PetIconRenderer {
             case SCARED -> PixelArt.ALERT;
             case MISSING -> PixelArt.QUESTION;
             case SLEEPY -> PixelArt.SLEEPY;
+            case PRAISE -> PixelArt.PRAISE;
         };
     }
 }
