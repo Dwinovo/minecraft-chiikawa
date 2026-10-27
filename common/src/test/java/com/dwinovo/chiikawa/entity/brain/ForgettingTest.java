@@ -38,7 +38,7 @@ class ForgettingTest {
     private static MemoryModuleType<Integer> OF_THE_ERRAND;
     private static final Permits ALL = category -> true;
     private static final Permits NO_WORK = category -> category != ErrandCategory.WORK;
-    private static final ResourceLocation ACTION = ResourceLocation.fromNamespaceAndPath("chiikawa", "stub");
+    private static final ResourceLocation ACTION = new ResourceLocation("chiikawa", "stub");
     private static final StubAction STUB = new StubAction();
     /** An errand of the stub action, under an id the shipped settings have. */
     private static final WorkErrand<Plan, String> WORKING = new WorkErrand<>(WorkData.PLAY_MUSIC,

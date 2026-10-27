@@ -30,7 +30,7 @@ import net.minecraft.resources.ResourceLocation;
  * its tuning, divided by the world's setting for how often pets pass the time, see {@link PastimeTuning}.
  */
 public final class PerformAction implements WorkAction<PerformAction.Performing, ErrandTunings.Perform> {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "perform");
+    public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, "perform");
 
     /**
      * What the pet has set out to do.

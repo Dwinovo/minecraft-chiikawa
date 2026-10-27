@@ -128,7 +128,7 @@ class TakePhotoRestsTest {
 
     @Test
     void theNumbersAreTheCamerasOfTheItemThePhotoWasTakenWith() {
-        ResourceLocation other = ResourceLocation.fromNamespaceAndPath("chiikawa", "better_camera");
+        ResourceLocation other = new ResourceLocation("chiikawa", "better_camera");
         CameraSettings better = new CameraSettings(CAMERA.film(), 64.0, 24000, 60, 320, 240, 70, CAMERA.subjects(), 40, 8, 0.5F);
         CameraSettings.replaceAll(Map.of(TestPhotos.CAMERA_ITEM, CAMERA, other, better));
 
@@ -140,7 +140,7 @@ class TakePhotoRestsTest {
 
     @Test
     void aCameraNoPackMakesAnyMoreRestsForNothingRatherThanForAGuess() {
-        ledger.afterReport(PHOTO, PhotoResults.STORED, RestContext.of(ResourceLocation.fromNamespaceAndPath("chiikawa", "gone")), NOW);
+        ledger.afterReport(PHOTO, PhotoResults.STORED, RestContext.of(new ResourceLocation("chiikawa", "gone")), NOW);
 
         assertEquals(0, ledger.remaining(PHOTO, NOW));
     }

@@ -368,6 +368,6 @@ class RestLedgerTest {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath("chiikawa", path);
+        return new ResourceLocation("chiikawa", path);
     }
 }

@@ -13,9 +13,9 @@ import net.minecraft.world.phys.Vec3;
 /** A camera and the moments for it, for a test of what a pet could take a photo of, without a world. */
 public final class TestPhotos {
     /** The camera item the plans are for. */
-    public static final ResourceLocation CAMERA_ITEM = ResourceLocation.fromNamespaceAndPath("chiikawa", "camera");
+    public static final ResourceLocation CAMERA_ITEM = new ResourceLocation("chiikawa", "camera");
     /** The owner three, a friend five and a view one, as the generated camera has them. */
-    public static final CameraSettings CAMERA = new CameraSettings(ResourceLocation.fromNamespaceAndPath("chiikawa", "film"),
+    public static final CameraSettings CAMERA = new CameraSettings(new ResourceLocation("chiikawa", "film"),
         64.0, 12000, 600, 320, 240, 70, new CameraSettings.Subjects(3, 5, 1), 40, 8, 0.5F);
 
     private TestPhotos() {

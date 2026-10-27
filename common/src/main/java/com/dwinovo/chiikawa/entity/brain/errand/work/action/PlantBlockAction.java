@@ -29,7 +29,7 @@ import net.minecraft.world.item.ItemStack;
  * was not as it seemed on arrival, leaves that soil alone for a while and not other soil.
  */
 public final class PlantBlockAction implements WorkAction<Site, ErrandTunings.PlantBlock> {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "plant_block");
+    public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, "plant_block");
     /** What a farmer is short of when it has nothing to plant. */
     private static final LackKey SEEDS = LackKey.tag(InitTag.ENTITY_PLANT_CROPS);
 

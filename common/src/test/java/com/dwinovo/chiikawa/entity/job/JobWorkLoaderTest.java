@@ -44,7 +44,7 @@ class JobWorkLoaderTest {
 
     @Test
     void aFileNamedForNoJobIsWarnedAboutAndSkipped() {
-        ResourceLocation stranger = ResourceLocation.fromNamespaceAndPath("chiikawa", "baker");
+        ResourceLocation stranger = new ResourceLocation("chiikawa", "baker");
         JobWorkLoader.Loaded loaded = JobWorkLoader.load(Map.of(
             JobIds.FENCER, JsonParser.parseString("{ \"work\": [\"chiikawa:melee\"] }"),
             stranger, JsonParser.parseString("{ \"work\": [\"chiikawa:harvest\"] }")), JOBS, ERRANDS, BLOCK_WORKS);
@@ -62,7 +62,7 @@ class JobWorkLoaderTest {
             JOBS, ERRANDS, BLOCK_WORKS);
 
         assertEquals(Map.of(JobIds.FARMER, new JobWork(List.of(WorkData.HARVEST,
-            ResourceLocation.fromNamespaceAndPath("chiikawa", "sulk")), Optional.of(FIELD))), loaded.work());
+            new ResourceLocation("chiikawa", "sulk")), Optional.of(FIELD))), loaded.work());
         assertTrue(loaded.errors().isEmpty(), loaded.errors()::toString);
         assertEquals(1, loaded.warnings().size(), loaded.warnings()::toString);
         assertTrue(loaded.warnings().get(0).contains("chiikawa:sulk") && loaded.warnings().get(0).contains("chiikawa:farmer"),

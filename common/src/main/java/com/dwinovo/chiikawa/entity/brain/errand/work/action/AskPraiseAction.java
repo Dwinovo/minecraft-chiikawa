@@ -36,7 +36,7 @@ import net.minecraft.resources.ResourceLocation;
  * time, see {@link PastimeTuning}.
  */
 public final class AskPraiseAction implements WorkAction<AskPraiseAction.Asking, ErrandTunings.AskPraise> {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "ask_praise");
+    public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, "ask_praise");
 
     /**
      * What the pet has set out to do.

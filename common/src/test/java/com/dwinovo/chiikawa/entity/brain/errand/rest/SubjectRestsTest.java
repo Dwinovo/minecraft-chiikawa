@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test;
 
 /** The memory of what a pet has lately given up on. */
 class SubjectRestsTest {
-    private static final ResourceLocation HARVEST = ResourceLocation.fromNamespaceAndPath("chiikawa", "harvest");
-    private static final ResourceLocation PLANT = ResourceLocation.fromNamespaceAndPath("chiikawa", "plant");
+    private static final ResourceLocation HARVEST = new ResourceLocation("chiikawa", "harvest");
+    private static final ResourceLocation PLANT = new ResourceLocation("chiikawa", "plant");
 
     @Test
     void aRestIsOnAnErrandAndASubjectAndRunsOut() {

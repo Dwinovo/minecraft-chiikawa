@@ -103,8 +103,8 @@ class PhotoOutlookTest {
 
     @Test
     void theErrandOffersEveryMomentWeightedByWhatThePetFancies() {
-        GlobalPos at = GlobalPos.of(ResourceKey.create(ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
-            ResourceLocation.withDefaultNamespace("overworld")), BlockPos.ZERO);
+        GlobalPos at = GlobalPos.of(ResourceKey.create(ResourceKey.createRegistryKey(new ResourceLocation("dimension")),
+            new ResourceLocation("overworld")), BlockPos.ZERO);
         TestView pet = TestView.at(at, new PetAnchor(at, 0.0, PetAnchor.UNLEASHED, false, true));
         TestErrands.load();
         PhotoOutlook all = TestPhotos.ready(TestPhotos.of(PhotoSubject.OWNER, OWNER), TestPhotos.of(PhotoSubject.FRIEND, FRIEND),

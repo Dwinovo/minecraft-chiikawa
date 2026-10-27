@@ -42,9 +42,9 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
  * leaves nothing to wait for.
  */
 public final class BuskAction implements WorkAction<BuskAction.Performance, ErrandTunings.PlayMusic> {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "busk");
+    public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, "busk");
     /** What a pet is short of when the box it holds has no song to play. */
-    private static final LackKey MUSIC_BOX = LackKey.item(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "music_box"));
+    private static final LackKey MUSIC_BOX = LackKey.item(new ResourceLocation(Constants.MOD_ID, "music_box"));
 
     /**
      * What the pet has set out to play.

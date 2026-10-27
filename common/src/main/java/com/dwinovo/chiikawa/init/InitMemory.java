@@ -38,35 +38,35 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<BlockPos>> HARVEST_POS =
         Services.REGISTRY.<MemoryModuleType<BlockPos>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "harvest_pos"),
+            new ResourceLocation(Constants.MOD_ID, "harvest_pos"),
             () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC))
         );
 
     public static final Supplier<MemoryModuleType<BlockPos>> PLANT_POS =
         Services.REGISTRY.<MemoryModuleType<BlockPos>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "plant_pos"),
+            new ResourceLocation(Constants.MOD_ID, "plant_pos"),
             () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC))
         );
 
     public static final Supplier<MemoryModuleType<BlockPos>> CONTAINER_POS =
         Services.REGISTRY.<MemoryModuleType<BlockPos>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "container_pos"),
+            new ResourceLocation(Constants.MOD_ID, "container_pos"),
             () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC))
         );
 
     public static final Supplier<MemoryModuleType<BlockPos>> WEED_POS =
         Services.REGISTRY.<MemoryModuleType<BlockPos>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "weed_pos"),
+            new ResourceLocation(Constants.MOD_ID, "weed_pos"),
             () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC))
         );
 
     public static final Supplier<MemoryModuleType<BlockPos>> MUSHROOM_POS =
         Services.REGISTRY.<MemoryModuleType<BlockPos>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "mushroom_pos"),
+            new ResourceLocation(Constants.MOD_ID, "mushroom_pos"),
             () -> new MemoryModuleType<>(Optional.of(BlockPos.CODEC))
         );
 
@@ -77,14 +77,14 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<Map<ResourceLocation, List<BlockPos>>>> WORK_SIGHTS =
         Services.REGISTRY.<MemoryModuleType<Map<ResourceLocation, List<BlockPos>>>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "work_sights"),
+            new ResourceLocation(Constants.MOD_ID, "work_sights"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
     public static final Supplier<MemoryModuleType<net.minecraft.world.entity.item.ItemEntity>> PICKABLE_ITEM =
         Services.REGISTRY.<MemoryModuleType<net.minecraft.world.entity.item.ItemEntity>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "pickable_item"),
+            new ResourceLocation(Constants.MOD_ID, "pickable_item"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -92,7 +92,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<String>> MUSICIAN_LAST_MUSIC_SIGNATURE =
         Services.REGISTRY.<MemoryModuleType<String>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "musician_last_music_signature"),
+            new ResourceLocation(Constants.MOD_ID, "musician_last_music_signature"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -103,7 +103,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<Unit>> MUSICIAN_RESTING =
         Services.REGISTRY.<MemoryModuleType<Unit>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "musician_resting"),
+            new ResourceLocation(Constants.MOD_ID, "musician_resting"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -111,7 +111,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<String>> MUSICIAN_NOW_PLAYING =
         Services.REGISTRY.<MemoryModuleType<String>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "musician_now_playing"),
+            new ResourceLocation(Constants.MOD_ID, "musician_now_playing"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -119,7 +119,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<BlockPos>> NEAREST_BOARD =
         Services.REGISTRY.<MemoryModuleType<BlockPos>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "nearest_board"),
+            new ResourceLocation(Constants.MOD_ID, "nearest_board"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -127,7 +127,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<BlockPos>> NEAREST_SHOP =
         Services.REGISTRY.<MemoryModuleType<BlockPos>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "nearest_shop"),
+            new ResourceLocation(Constants.MOD_ID, "nearest_shop"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -135,7 +135,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<Unit>> SHOP_COOLDOWN =
         Services.REGISTRY.<MemoryModuleType<Unit>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "shop_cooldown"),
+            new ResourceLocation(Constants.MOD_ID, "shop_cooldown"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -143,7 +143,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<Unit>> TAKE_TASK_COOLDOWN =
         Services.REGISTRY.<MemoryModuleType<Unit>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "take_task_cooldown"),
+            new ResourceLocation(Constants.MOD_ID, "take_task_cooldown"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -151,7 +151,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<FinishedSlip>> LAST_FINISHED_SLIP =
         Services.REGISTRY.<MemoryModuleType<FinishedSlip>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "last_finished_slip"),
+            new ResourceLocation(Constants.MOD_ID, "last_finished_slip"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -159,7 +159,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<InteractionPlan>> INTERACTION_PLAN =
         Services.REGISTRY.<MemoryModuleType<InteractionPlan>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "interaction_plan"),
+            new ResourceLocation(Constants.MOD_ID, "interaction_plan"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -167,7 +167,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<SocialCooldowns>> SOCIAL_COOLDOWNS =
         Services.REGISTRY.<MemoryModuleType<SocialCooldowns>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "social_cooldowns"),
+            new ResourceLocation(Constants.MOD_ID, "social_cooldowns"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -175,7 +175,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<PetSpeech.Said>> LAST_SAID =
         Services.REGISTRY.<MemoryModuleType<PetSpeech.Said>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "last_said"),
+            new ResourceLocation(Constants.MOD_ID, "last_said"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -183,7 +183,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<WhistleHeard>> WHISTLE_HEARD =
         Services.REGISTRY.<MemoryModuleType<WhistleHeard>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "whistle_heard"),
+            new ResourceLocation(Constants.MOD_ID, "whistle_heard"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -194,8 +194,8 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<Unit>> PHOTO_COOLDOWN =
         Services.REGISTRY.<MemoryModuleType<Unit>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "photo_cooldown"),
-            () -> new MemoryModuleType<>(Optional.of(Unit.CODEC))
+            new ResourceLocation(Constants.MOD_ID, "photo_cooldown"),
+            () -> new MemoryModuleType<>(Optional.of(Codec.unit(Unit.INSTANCE)))
         );
 
     /**
@@ -205,15 +205,15 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<Unit>> GIFT_COOLDOWN =
         Services.REGISTRY.<MemoryModuleType<Unit>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "gift_cooldown"),
-            () -> new MemoryModuleType<>(Optional.of(Unit.CODEC))
+            new ResourceLocation(Constants.MOD_ID, "gift_cooldown"),
+            () -> new MemoryModuleType<>(Optional.of(Codec.unit(Unit.INSTANCE)))
         );
 
     /** The biomes the pet has taken a photo in, so a new one is worth a photo of its own. */
     public static final Supplier<MemoryModuleType<List<ResourceLocation>>> PHOTOGRAPHED_BIOMES =
         Services.REGISTRY.<MemoryModuleType<List<ResourceLocation>>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "photographed_biomes"),
+            new ResourceLocation(Constants.MOD_ID, "photographed_biomes"),
             () -> new MemoryModuleType<>(Optional.of(ResourceLocation.CODEC.listOf()))
         );
 
@@ -224,7 +224,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<Map<ResourceLocation, Long>>> ERRAND_RESTS =
         Services.REGISTRY.<MemoryModuleType<Map<ResourceLocation, Long>>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "errand_rests"),
+            new ResourceLocation(Constants.MOD_ID, "errand_rests"),
             () -> new MemoryModuleType<>(Optional.of(Codec.unboundedMap(ResourceLocation.CODEC, Codec.LONG)))
         );
 
@@ -232,7 +232,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<SubjectRests>> SUBJECT_RESTS =
         Services.REGISTRY.<MemoryModuleType<SubjectRests>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "subject_rests"),
+            new ResourceLocation(Constants.MOD_ID, "subject_rests"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -240,7 +240,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<RemarkRests>> REMARK_RESTS =
         Services.REGISTRY.<MemoryModuleType<RemarkRests>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "remark_rests"),
+            new ResourceLocation(Constants.MOD_ID, "remark_rests"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -248,7 +248,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<Surroundings>> SURROUNDINGS =
         Services.REGISTRY.<MemoryModuleType<Surroundings>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "surroundings"),
+            new ResourceLocation(Constants.MOD_ID, "surroundings"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 
@@ -256,7 +256,7 @@ public final class InitMemory {
     public static final Supplier<MemoryModuleType<OwnerSeen>> OWNER_SEEN =
         Services.REGISTRY.<MemoryModuleType<OwnerSeen>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "owner_seen"),
+            new ResourceLocation(Constants.MOD_ID, "owner_seen"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 

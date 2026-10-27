@@ -25,8 +25,8 @@ import org.junit.jupiter.api.Test;
 /** When a pet takes a weapon out of its bag: it is attacked, has none in its hand, and may swap to one. */
 class DefendSelfOfferTest {
     private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
-        ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
-        ResourceLocation.withDefaultNamespace("overworld"));
+        ResourceKey.createRegistryKey(new ResourceLocation("dimension")),
+        new ResourceLocation("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     private static final UUID FOE = UUID.fromString("00000000-0000-0000-0000-0000000000f2");
     private static final Arms.Weapon SWORD = new Arms.Weapon(2, false);

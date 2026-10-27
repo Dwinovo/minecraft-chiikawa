@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 /** Playing the song on the music box: when the pet sets off on it, and what it holds the pet to. */
 class PlayMusicOfferTest {
     private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
-        ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
-        ResourceLocation.withDefaultNamespace("overworld"));
+        ResourceKey.createRegistryKey(new ResourceLocation("dimension")),
+        new ResourceLocation("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     private static final PetAnchor FREE = TestAnchors.free(HOME);
 
@@ -52,7 +52,7 @@ class PlayMusicOfferTest {
         Check noSong = TestErrands.whyNoOffer(WorkData.PLAY_MUSIC, TestView.at(HOME, FREE));
         Check played = TestErrands.whyNoOffer(WorkData.PLAY_MUSIC, TestView.at(HOME, FREE).withSongPlayed());
 
-        assertEquals(Optional.of(LackKey.item(ResourceLocation.fromNamespaceAndPath("chiikawa", "music_box"))), noSong.lack());
+        assertEquals(Optional.of(LackKey.item(new ResourceLocation("chiikawa", "music_box"))), noSong.lack());
         assertEquals("intent.chiikawa.fail.no_new_song", played.reasonKey());
         assertEquals(Optional.empty(), played.lack());
     }

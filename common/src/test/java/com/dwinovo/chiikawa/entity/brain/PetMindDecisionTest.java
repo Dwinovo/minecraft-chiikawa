@@ -65,8 +65,8 @@ import org.junit.jupiter.api.Test;
  */
 class PetMindDecisionTest {
     private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
-        ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
-        ResourceLocation.withDefaultNamespace("overworld"));
+        ResourceKey.createRegistryKey(new ResourceLocation("dimension")),
+        new ResourceLocation("overworld"));
     private static final GlobalPos PET = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     private static final RestLedger NO_RESTS = TestRests.noRests();
     private static final Permits ALL = category -> true;
@@ -248,7 +248,7 @@ class PetMindDecisionTest {
     @Test
     void anErrandGoesOnAfterAReloadMadeNewTypesOfEveryErrandAsTheTypeItStartedAs() {
         // The pet is on an errand that wants to go on. The reload has made a type of it that would not, and the mind offers that.
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath("chiikawa", "work");
+        ResourceLocation id = new ResourceLocation("chiikawa", "work");
         ErrandType<?, ?> started = new StubErrand(id);
         ErrandType<?, ?> reloaded = new StubErrand(id, Check.fail("gone"));
         Running running = new Running(started, new Plan() {
@@ -523,8 +523,8 @@ class PetMindDecisionTest {
     }
 
     private static PetTask weeding() {
-        return new PetTask(ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding"),
-            ResourceLocation.fromNamespaceAndPath("chiikawa", "farmer"), WorkData.WEED_PULLED, PetTask.NO_ICON, 8,
-            ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath("chiikawa", "pet_task/weeding")), 0);
+        return new PetTask(new ResourceLocation("chiikawa", "weeding"),
+            new ResourceLocation("chiikawa", "farmer"), WorkData.WEED_PULLED, PetTask.NO_ICON, 8,
+            ResourceKey.create(Registries.LOOT_TABLE, new ResourceLocation("chiikawa", "pet_task/weeding")), 0);
     }
 }

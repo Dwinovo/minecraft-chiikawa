@@ -43,10 +43,10 @@ import org.junit.jupiter.api.Test;
  */
 class PastimeCueTest {
     private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
-        ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")), ResourceLocation.withDefaultNamespace("overworld"));
+        ResourceKey.createRegistryKey(new ResourceLocation("dimension")), new ResourceLocation("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
-    private static final TagKey<EntityType<?>> BONES = TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath("chiikawa", "bones"));
-    private static final TagKey<Item> SWEETS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("chiikawa", "sweets"));
+    private static final TagKey<EntityType<?>> BONES = TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation("chiikawa", "bones"));
+    private static final TagKey<Item> SWEETS = TagKey.create(Registries.ITEM, new ResourceLocation("chiikawa", "sweets"));
 
     @BeforeAll
     static void bootstrap() {
@@ -130,8 +130,8 @@ class PastimeCueTest {
 
     @Test
     void theOwnerInAnotherWorldIsNotNear() {
-        GlobalPos nether = GlobalPos.of(ResourceKey.create(ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
-            ResourceLocation.withDefaultNamespace("the_nether")), HOME.pos());
+        GlobalPos nether = GlobalPos.of(ResourceKey.create(ResourceKey.createRegistryKey(new ResourceLocation("dimension")),
+            new ResourceLocation("the_nether")), HOME.pos());
 
         assertFalse(new PastimeCue.OwnerIs(PastimeCue.OwnerState.NEAR, 8.0).holds(pet().ownerPos(nether)));
     }

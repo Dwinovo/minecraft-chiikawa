@@ -38,7 +38,7 @@ class PetRemarkDataTest {
 
     @Test
     void hachiwareSaysItsOwnWayAndEveryoneElseSaysWhatIsShort() {
-        ResourceLocation hachiware = ResourceLocation.fromNamespaceAndPath("chiikawa", "hachiware");
+        ResourceLocation hachiware = new ResourceLocation("chiikawa", "hachiware");
 
         PetVoiceData.all().keySet().forEach(pet -> assertEquals(pet.equals(hachiware) ? VoiceMoment.TROUBLE : VoiceMoment.MISSING,
             MISSING.partOf(pet).orElseThrow().moment(), pet::toString));

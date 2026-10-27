@@ -29,8 +29,8 @@ import org.junit.jupiter.api.Test;
 /** What a work errand does with the work it is made from: its requirements first, then its action. */
 class WorkErrandTest {
     private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
-        ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
-        ResourceLocation.withDefaultNamespace("overworld"));
+        ResourceKey.createRegistryKey(new ResourceLocation("dimension")),
+        new ResourceLocation("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     private static final PetAnchor FREE = TestAnchors.free(HOME);
     private static final ErrandTunings.PlayMusic TUNING = new ErrandTunings.PlayMusic(50);
@@ -69,7 +69,7 @@ class WorkErrandTest {
 
         assertEquals("intent.chiikawa.fail.needs_slip", errand.offers(owned, TUNING).check().reasonKey());
         assertEquals("intent.chiikawa.fail.needs_slip",
-            errand.offers(owned.slip(slip(ResourceLocation.fromNamespaceAndPath("chiikawa", "weed"))), TUNING).check().reasonKey());
+            errand.offers(owned.slip(slip(new ResourceLocation("chiikawa", "weed"))), TUNING).check().reasonKey());
         assertFalse(errand.offers(owned.slip(slip(WorkData.PLAY_MUSIC_SECOND)), TUNING).isEmpty());
         assertFalse(errand.offers(TestView.at(HOME, TestAnchors.wild(HOME)).ownership(PetOwnership.WILD).withSong(), TUNING)
             .isEmpty());
@@ -92,8 +92,8 @@ class WorkErrandTest {
     }
 
     private static PetTask slip(ResourceLocation counter) {
-        return new PetTask(ResourceLocation.fromNamespaceAndPath("chiikawa", "test"),
-            ResourceLocation.fromNamespaceAndPath("chiikawa", "musician"), counter, PetTask.NO_ICON, 10,
-            ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath("chiikawa", "pet_task/test")), 0);
+        return new PetTask(new ResourceLocation("chiikawa", "test"),
+            new ResourceLocation("chiikawa", "musician"), counter, PetTask.NO_ICON, 10,
+            ResourceKey.create(Registries.LOOT_TABLE, new ResourceLocation("chiikawa", "pet_task/test")), 0);
     }
 }

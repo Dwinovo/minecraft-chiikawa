@@ -33,7 +33,7 @@ import net.minecraft.resources.ResourceLocation;
  * <p>Backing away from a creeper is a fight too, since the foe is what tells the pet to keep its distance.
  */
 public final class StrikeAction implements WorkAction<Duel, ErrandTunings.Footwork> {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "strike");
+    public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, "strike");
 
     @Override
     public ResourceLocation id() {

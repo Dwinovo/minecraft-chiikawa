@@ -40,7 +40,7 @@ import org.junit.jupiter.api.Test;
 
 /** How an errand is run and, above all, how it ends: once, between steps, leaving nothing behind. */
 class ExecutorTest {
-    private static final ResourceLocation ERRAND = ResourceLocation.fromNamespaceAndPath("chiikawa", "work");
+    private static final ResourceLocation ERRAND = new ResourceLocation("chiikawa", "work");
     private static final ErrandType<?, ?> TYPE = new StubErrand(ERRAND);
     private static final int DONE_REST = 100;
     private static final int GAVE_UP_REST = 200;

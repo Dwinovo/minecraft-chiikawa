@@ -29,8 +29,8 @@ import org.junit.jupiter.api.Test;
 /** Why a pet is not at work: what a decision finds when none of its job's work can start. */
 class WhyNotTest {
     private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
-        ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
-        ResourceLocation.withDefaultNamespace("overworld"));
+        ResourceKey.createRegistryKey(new ResourceLocation("dimension")),
+        new ResourceLocation("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     private static final PetAnchor FREE = TestAnchors.free(HOME);
     private static final Set<ResourceLocation> WORK = Set.of(WorkData.HARVEST, WorkData.PLANT, WorkData.DELIVER);
