@@ -46,6 +46,7 @@ import net.minecraft.world.level.Level;
  * saves that still hold it, and what an older build makes of the save of a newer one.
  */
 @GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class SaveGameTests {
     private static final String BATCH = "chiikawa_save";
     private static final int STAND = 2;

@@ -26,6 +26,7 @@ import net.minecraft.world.Difficulty;
  * kept in the brain's memories, and only a pet written out and read back shows what the memories keep.
  */
 @GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class RestGameTests {
     private static final String BATCH = "chiikawa_rest";
     private static final int STAND = 2;

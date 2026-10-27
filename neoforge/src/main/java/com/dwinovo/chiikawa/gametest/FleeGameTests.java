@@ -35,6 +35,7 @@ import net.minecraft.world.level.GameType;
  * waits a second for the pet to know.
  */
 @GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class FleeGameTests {
     private static final String BATCH = "chiikawa_flee";
     private static final int STAND = 2;
