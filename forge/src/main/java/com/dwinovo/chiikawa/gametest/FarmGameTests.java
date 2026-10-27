@@ -236,7 +236,7 @@ public final class FarmGameTests {
     public static void a_pet_with_a_full_bag_is_not_sent_for_what_is_lying_about(GameTestHelper helper) {
         AbstractPet pet = holding(worker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
         for (int slot = 0; slot < pet.getBackpack().getContainerSize(); slot++) {
-            pet.getBackpack().setItem(slot, new ItemStack(Items.COBBLESTONE, Items.COBBLESTONE.getDefaultMaxStackSize()));
+            pet.getBackpack().setItem(slot, new ItemStack(Items.COBBLESTONE, Items.COBBLESTONE.getMaxStackSize()));
         }
         ItemEntity wheat = helper.spawnItem(Items.WHEAT, new BlockPos(7, STAND, 4));
 

@@ -23,15 +23,15 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Unit;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestDontPrefix;
+import net.minecraftforge.gametest.GameTestHolder;
 
 /**
  * The rests a pet keeps through a save, which the unit tests of the ledger cannot reach: they are
  * kept in the brain's memories, and only a pet written out and read back shows what the memories keep.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class RestGameTests {
     private static final String BATCH = "chiikawa_rest";
     private static final int STAND = 2;

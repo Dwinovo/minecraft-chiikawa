@@ -44,8 +44,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestDontPrefix;
+import net.minecraftforge.gametest.GameTestHolder;
 
 /**
  * What every errand does, so that none can be added without it: the same three cases for
@@ -59,8 +59,8 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
  *
  * <p>The cases are made when the game registers them, one set for each scenario.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class ErrandContractGameTests {
     private static final String BATCH = "chiikawa_errand_contract";
     private static final String TEMPLATE = Constants.MOD_ID + ":floor16";
@@ -320,11 +320,14 @@ public final class ErrandContractGameTests {
             DecisionLog.Ended ended) {
         ResourceLocation id = ran.errand();
         ErrandSettings.Rests rests = ran.settings().rests();
-        RestSpec spec = switch (ended.outcome()) {
-            case Outcome.Done done -> rests.done();
-            case Outcome.GaveUp gaveUp -> rests.gaveUp();
-            case Outcome.Interrupted interrupted -> rests.interrupted();
-        };
+        RestSpec spec;
+        if (ended.outcome() instanceof Outcome.Done) {
+            spec = rests.done();
+        } else if (ended.outcome() instanceof Outcome.GaveUp) {
+            spec = rests.gaveUp();
+        } else {
+            spec = rests.interrupted();
+        }
         long ticks = ticksOf(spec, ran);
         helper.assertTrue(ticks > 0 || !(ended.outcome() instanceof Outcome.GaveUp), id + " gives no rest after giving up");
         long reported = scenario.reported().apply(ran).map(report -> ticksOf(rests.reports().get(report), ran)).orElse(0L);

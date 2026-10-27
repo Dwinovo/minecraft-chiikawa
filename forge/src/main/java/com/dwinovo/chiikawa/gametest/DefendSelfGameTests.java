@@ -30,15 +30,15 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestDontPrefix;
+import net.minecraftforge.gametest.GameTestHolder;
 
 /**
  * A pet with a hoe in its hand and a sword in its bag that is hit takes the sword up, fights, and takes the hoe back: a
  * swap that lasts for the fight and no longer, and is never saved.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class DefendSelfGameTests {
     private static final String BATCH = "chiikawa_defend";
     private static final int STAND = 2;
@@ -103,7 +103,7 @@ public final class DefendSelfGameTests {
                 CompoundTag saved = new CompoundTag();
                 pet.save(saved);
                 NonNullList<ItemStack> kept = NonNullList.withSize(AbstractPet.FULL_BACKPACK_SIZE, ItemStack.EMPTY);
-                ContainerHelper.loadAllItems(saved.getCompound("Backpack"), kept, helper.getLevel().registryAccess());
+                ContainerHelper.loadAllItems(saved.getCompound("Backpack"), kept);
                 helper.assertTrue(kept.get(AbstractPet.MAINHAND_SLOT).is(Items.WOODEN_HOE), "the save has " + kept.get(AbstractPet.MAINHAND_SLOT) + " in the hand");
                 helper.assertTrue(kept.get(POCKET).is(Items.IRON_SWORD), "the save has " + kept.get(POCKET) + " where the sword is kept");
 

@@ -35,8 +35,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestDontPrefix;
+import net.minecraftforge.gametest.GameTestHolder;
 
 /**
  * What a pet lets its owner see of what is on its mind: the picture over its head, a word in passing about what it is short
@@ -46,8 +46,8 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
  * it, because the stand-in players these cases make cannot be sent a mod's own packets. A pet that talks is in a batch of its
  * own: pets within earshot of each other take turns.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class TransparencyGameTests {
     private static final String MISSING_BATCH = "chiikawa_transparency_missing";
     private static final String SILENT_BATCH = "chiikawa_transparency_silent";

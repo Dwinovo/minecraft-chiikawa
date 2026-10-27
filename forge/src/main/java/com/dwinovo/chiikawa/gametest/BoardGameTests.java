@@ -14,7 +14,6 @@ import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
 import com.dwinovo.chiikawa.data.PetTaskTypeData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.job.JobIds;
-import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitItems;
@@ -267,9 +266,9 @@ public final class BoardGameTests {
             .thenWaitUntil(() -> helper.assertTrue(readySong(library, SONG).isPresent(), "the song was never imported"))
             .thenExecute(() -> {
                 ItemStack box = new ItemStack(InitItems.MUSIC_BOX.get());
-                box.set(InitDataComponents.MUSIC_BOX_SELECTION.get(),
+                MusicBoxSelection.set(box,
                     new MusicBoxSelection(readySong(library, SONG).orElseThrow().trackId(), SONG, 1));
-                box.set(InitDataComponents.MUSIC_BOX_MODE.get(), PlaybackMode.ONCE);
+                PlaybackMode.set(box, PlaybackMode.ONCE);
                 musician.set(owned(helper, InitEntity.HACHIWARE_PET.get(), new BlockPos(4, STAND, 4)));
                 musician.get().setItemSlot(EquipmentSlot.MAINHAND, box);
             })
