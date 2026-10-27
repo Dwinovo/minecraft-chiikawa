@@ -274,46 +274,46 @@ public final class PetMind {
      * something; whoever has been paid shows it.
      */
     private void apply(Cue cue) {
-        switch (cue) {
-            case Cue.Pose pose -> {
-                if (pet.level() instanceof ServerLevel level && level.getEntity(pose.photographer()) instanceof LivingEntity photographer) {
-                    executor.glance(photographer, pose.lookTicks());
-                }
-                handle.gesture(pose.gesture());
-                handle.say(pose.line());
+        if (cue instanceof Cue.Pose pose) {
+            if (pet.level() instanceof ServerLevel level && level.getEntity(pose.photographer()) instanceof LivingEntity photographer) {
+                executor.glance(photographer, pose.lookTicks());
             }
-            case Cue.Paid paid -> SlipWages.rejoice(pet);
+            handle.gesture(pose.gesture());
+            handle.say(pose.line());
+        } else {
+            SlipWages.rejoice(pet);
         }
     }
 
     private void handle(Message message, long now) {
-        switch (message) {
-            case Message.Nudge nudge -> decideNow = true;
-            case Message.DirectiveChanged changed -> decideNow = true;
-            case Message.RulesChanged changed -> decideNow = true;
-            case Message.CapabilityChanged changed -> decideNow = true;
-            case Message.Hurt hurt -> decideNow = true;
-            case Message.Moved moved -> {
-                // Where it was heading and what it was looking at are not where it is now, whatever it was doing.
-                handle.stopWalking();
-                handle.clearLook();
-                executor.requestEnd(Outcome.interrupted("moved"));
-                decideNow = true;
-            }
-            case Message.WhistleOrder whistled -> obey(whistled.order());
-            case Message.WhistleHeard heard -> listen(heard, now);
-            case Message.Invitation invitation -> answer(invitation, now);
-            case Message.Withdrawn withdrawn -> {
-                desk.withdrawn(withdrawn.from());
-                executor.deliver(withdrawn, now);
-            }
-            case Message.SceneStart start -> {
-                desk.arrived();
-                executor.deliver(start, now);
-            }
-            case Message.Settled settled -> settled(settled, now);
-            case Message.Durable durable -> throw new IllegalStateException(durable + " was queued without being kept");
-            default -> executor.deliver(message, now);
+        if (message instanceof Message.Nudge || message instanceof Message.DirectiveChanged
+                || message instanceof Message.RulesChanged || message instanceof Message.CapabilityChanged
+                || message instanceof Message.Hurt) {
+            decideNow = true;
+        } else if (message instanceof Message.Moved) {
+            // Where it was heading and what it was looking at are not where it is now, whatever it was doing.
+            handle.stopWalking();
+            handle.clearLook();
+            executor.requestEnd(Outcome.interrupted("moved"));
+            decideNow = true;
+        } else if (message instanceof Message.WhistleOrder whistled) {
+            obey(whistled.order());
+        } else if (message instanceof Message.WhistleHeard heard) {
+            listen(heard, now);
+        } else if (message instanceof Message.Invitation invitation) {
+            answer(invitation, now);
+        } else if (message instanceof Message.Withdrawn withdrawn) {
+            desk.withdrawn(withdrawn.from());
+            executor.deliver(withdrawn, now);
+        } else if (message instanceof Message.SceneStart start) {
+            desk.arrived();
+            executor.deliver(start, now);
+        } else if (message instanceof Message.Settled settled) {
+            settled(settled, now);
+        } else if (message instanceof Message.Durable durable) {
+            throw new IllegalStateException(durable + " was queued without being kept");
+        } else {
+            executor.deliver(message, now);
         }
     }
 
@@ -371,61 +371,57 @@ public final class PetMind {
             throw new IllegalStateException("Told " + message + " from another thread; hop onto the server's with execute first");
         }
         long now = pet.level().getGameTime();
-        Message.Durable kept = switch (message) {
-            case Message.PhotoResult result -> {
-                rests.afterReport(ErrandIds.TAKE_PHOTO, PhotoResults.received(pet, result), RestContext.of(result.camera()), now);
-                yield result;
-            }
-            case Message.ExamCalledOff calledOff -> {
-                PetExams.excuse(pet, calledOff.id());
-                yield calledOff;
-            }
+        Message.Durable kept;
+        if (message instanceof Message.PhotoResult result) {
+            rests.afterReport(ErrandIds.TAKE_PHOTO, PhotoResults.received(pet, result), RestContext.of(result.camera()), now);
+            kept = result;
+        } else if (message instanceof Message.ExamCalledOff calledOff) {
+            PetExams.excuse(pet, calledOff.id());
+            kept = calledOff;
+        } else if (message instanceof Message.ResultsDue due) {
             // A pet on its way to hear them at the desk hears them there, once it has read what is on it.
-            case Message.ResultsDue due -> new Message.ResultsDue(due.id(),
-                visitingResultsOf(due.id()) ? Optional.empty() : PetExams.grant(pet, due.id()));
-            case Message.SlipCompleted completed -> {
-                SlipWages.pay(pet, completed.task());
-                yield completed;
+            kept = new Message.ResultsDue(due.id(), visitingResultsOf(due.id()) ? Optional.empty() : PetExams.grant(pet, due.id()));
+        } else if (message instanceof Message.SlipCompleted completed) {
+            SlipWages.pay(pet, completed.task());
+            kept = completed;
+        } else if (message instanceof Message.Occasion occasion) {
+            thinkOfPresent(occasion, now);
+            kept = occasion;
+        } else {
+            Message.GiftClaimed claimed = (Message.GiftClaimed) message;
+            Player owner = pet.level().getPlayerByUUID(claimed.player());
+            if (owner != null && pet.isOwnedBy(owner)) {
+                Presents.give(pet, owner, Presents.How.HAND);
             }
-            case Message.Occasion occasion -> {
-                thinkOfPresent(occasion, now);
-                yield occasion;
-            }
-            case Message.GiftClaimed claimed -> {
-                if (pet.level().getPlayerByUUID(claimed.player()) instanceof Player owner && pet.isOwnedBy(owner)) {
-                    Presents.give(pet, owner, Presents.How.HAND);
-                }
-                yield claimed;
-            }
-        };
+            kept = claimed;
+        }
         return new Message.Settled(kept);
     }
 
     /** The second half of what a pet is told that has something to keep. */
     private void settled(Message.Settled settled, long now) {
-        switch (settled.message()) {
+        Message.Durable message = settled.message();
+        if (message instanceof Message.PhotoResult result) {
             // The photo errand may be holding the pose for it, and puts the camera away.
-            case Message.PhotoResult result -> executor.deliver(result, now);
-            case Message.ExamCalledOff calledOff -> {
-                PetExams.tellCalledOff(pet, calledOff.id(), calledOff.reason());
-                // A pet at the paper of an exam that is off gets up from it.
-                errands.running().map(Running::plan)
-                    .filter(plan -> plan instanceof TakeExamErrand.Sitting sitting && sitting.qualification().equals(calledOff.id()))
-                    .ifPresent(plan -> executor.requestEnd(Outcome.interrupted("called_off")));
-                decideNow = true;
-            }
-            case Message.ResultsDue due -> {
-                due.heard().ifPresent(result -> PetExams.show(pet, due.id(), result));
-                decideNow = true;
-            }
+            executor.deliver(result, now);
+        } else if (message instanceof Message.ExamCalledOff calledOff) {
+            PetExams.tellCalledOff(pet, calledOff.id(), calledOff.reason());
+            // A pet at the paper of an exam that is off gets up from it.
+            errands.running().map(Running::plan)
+                .filter(plan -> plan instanceof TakeExamErrand.Sitting sitting && sitting.qualification().equals(calledOff.id()))
+                .ifPresent(plan -> executor.requestEnd(Outcome.interrupted("called_off")));
+            decideNow = true;
+        } else if (message instanceof Message.ResultsDue due) {
+            due.heard().ifPresent(result -> PetExams.show(pet, due.id(), result));
+            decideNow = true;
+        } else if (message instanceof Message.SlipCompleted) {
             // Paid, it can go for another slip.
-            case Message.SlipCompleted completed -> decideNow = true;
-            // Whether it has a present in mind now is for its next decision to find out.
-            case Message.Occasion occasion -> {
-            }
+            decideNow = true;
+        } else if (message instanceof Message.GiftClaimed) {
             // Its paws are empty now, and the errand that was bringing the present finds so when it decides again.
-            case Message.GiftClaimed claimed -> decideNow = true;
+            decideNow = true;
         }
+        // Whether it has a present in mind now, after an occasion, is for its next decision to find out.
     }
 
     /**
@@ -535,10 +531,12 @@ public final class PetMind {
     }
 
     private static String describe(Outcome outcome) {
-        return switch (outcome) {
-            case Outcome.Done done -> "done";
-            case Outcome.GaveUp gaveUp -> gaveUp.reason();
-            case Outcome.Interrupted interrupted -> interrupted.cause();
-        };
+        if (outcome instanceof Outcome.Done) {
+            return "done";
+        }
+        if (outcome instanceof Outcome.GaveUp gaveUp) {
+            return gaveUp.reason();
+        }
+        return ((Outcome.Interrupted) outcome).cause();
     }
 }

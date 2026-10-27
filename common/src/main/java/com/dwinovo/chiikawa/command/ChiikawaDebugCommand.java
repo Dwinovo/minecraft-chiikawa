@@ -148,14 +148,17 @@ public final class ChiikawaDebugCommand {
         source.sendSuccess(() -> Component.literal("[chiikawa-intent] ").append(pet.getDisplayName())
             .append(" last " + entries.size() + " happenings:"), false);
         for (DecisionLog.Entry entry : entries) {
-            String text = switch (entry) {
-                case DecisionLog.Switched switched -> name(switched.from()) + " -> " + name(switched.to())
+            String text;
+            if (entry instanceof DecisionLog.Switched switched) {
+                text = name(switched.from()) + " -> " + name(switched.to())
                     + " [" + switched.cause() + "] " + switched.top().stream()
                         .map(scored -> String.format(Locale.ROOT, "%s p%d %.2f", scored.errand(), scored.priority(), scored.score()))
                         .collect(Collectors.joining(", "));
-                case DecisionLog.Ended ended -> name(ended.errand()) + " ended " + ended.outcome()
+            } else {
+                DecisionLog.Ended ended = (DecisionLog.Ended) entry;
+                text = name(ended.errand()) + " ended " + ended.outcome()
                     + " after " + ended.ranTicks() + "t";
-            };
+            }
             source.sendSuccess(() -> Component.literal(" " + entry.gameTime() + ": " + text), false);
         }
         return entries.size();

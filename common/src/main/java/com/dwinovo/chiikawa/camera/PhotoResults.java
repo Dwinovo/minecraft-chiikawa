@@ -40,10 +40,13 @@ public final class PhotoResults {
      * @return the report to rest by: a photo that came back but has no roll to go on is one that did not
      */
     public static String received(AbstractPet pet, Message.PhotoResult result) {
-        return switch (result) {
-            case Message.PhotoResult.Stored stored -> keep(pet, stored) ? STORED : FAILED;
-            case Message.PhotoResult.Failed failed -> FAILED;
-        };
+        if (result instanceof Message.PhotoResult.Stored stored) {
+            return keep(pet, stored) ? STORED : FAILED;
+        }
+        if (result instanceof Message.PhotoResult.Failed) {
+            return FAILED;
+        }
+        throw new IllegalArgumentException("a photo result nobody knows: " + result);
     }
 
     /**

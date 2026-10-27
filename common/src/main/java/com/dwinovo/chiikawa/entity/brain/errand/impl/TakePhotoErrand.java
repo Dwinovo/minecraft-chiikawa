@@ -133,11 +133,13 @@ public final class TakePhotoErrand implements ErrandType<TakePhotoErrand.Shot, E
      * one that was not is a try that failed and rests only for the retry.
      */
     private static StepStatus pictureBack(Message message) {
-        return switch (message) {
-            case Message.PhotoResult.Stored stored -> StepStatus.DONE;
-            case Message.PhotoResult.Failed failed -> StepStatus.gaveUp("not_coming");
-            default -> StepStatus.RUNNING;
-        };
+        if (message instanceof Message.PhotoResult.Stored) {
+            return StepStatus.DONE;
+        }
+        if (message instanceof Message.PhotoResult.Failed) {
+            return StepStatus.gaveUp("not_coming");
+        }
+        return StepStatus.RUNNING;
     }
 
     @Override
