@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.valueproviders.UniformInt;
 
@@ -30,8 +31,8 @@ import net.minecraft.util.valueproviders.UniformInt;
  * beside the works, see {@link WorkData}, and its settings are written beside theirs, see {@link ErrandSettingsData}: both
  * from here, so that what a pastime is and how it goes are said in one place.
  *
- * <p>These are the pastimes every character has a part in. Those of one character are its own, and written with it.
- * Priority 10, where a pet's idle time is: a pet does one when the reason is there and nothing that matters more is, and
+ * <p>These are the pastimes every character has a part in. Those of one character, or of a few, are written beside them in
+ * {@link CharacterPastimeData}, and all of them are here to everything that asks for the pastimes there are. Priority 10, where a pet's idle time is: a pet does one when the reason is there and nothing that matters more is, and
  * it takes the place of wandering. Each rests for its cooldown from when it was done, which the world's setting for how
  * often pets pass the time scales.
  */
@@ -43,8 +44,9 @@ public final class PastimeData {
     /** Coming to see the owner at work, and cheering. */
     public static final ResourceLocation WATCH_OWNER_WORK = id("watch_owner_work");
 
-    /** The pastimes, in the order a pet weighs them. */
-    private static final List<ResourceLocation> ALL = List.of(RAIN_SHELTER, RAIN_PLAY, WATCH_OWNER_WORK);
+    /** The pastimes, in the order a pet weighs them: those of every character, and then those of one. */
+    private static final List<ResourceLocation> ALL = Stream.concat(Stream.of(RAIN_SHELTER, RAIN_PLAY, WATCH_OWNER_WORK),
+        CharacterPastimeData.ids().stream()).toList();
 
     /** A pet sits out of the rain for half a minute, and plays in it for a quarter; it watches its owner at work for ten seconds. */
     private static final int SHELTERING_TICKS = 600;
@@ -75,7 +77,7 @@ public final class PastimeData {
 
     /** @return the pastimes, as works, by the id of the errand each is */
     public static Map<ResourceLocation, Work<?, ?>> works() {
-        Map<ResourceLocation, Work<?, ?>> works = new HashMap<>();
+        Map<ResourceLocation, Work<?, ?>> works = new HashMap<>(CharacterPastimeData.works());
 
         // It rains on the pet where it stands. Chiikawa goes to the owner and huddles by them, as it does when it is afraid; the
         // rest go and sit where it does not rain. Usagi does not, and plays in it instead, see RAIN_PLAY.
@@ -86,7 +88,8 @@ public final class PastimeData {
             }
             boolean huddles = character.equals(PetCharacters.CHIIKAWA);
             sheltering.put(character, new Stage(Optional.of(huddles ? new Destination.ToOwner() : new Destination.ToShelter()),
-                Optional.of(huddles ? "huddle,sit" : "sit"), Optional.empty(), Optional.empty(), Optional.empty(), SHELTERING_TICKS));
+                Optional.of(huddles ? "huddle,sit" : "sit"), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+                SHELTERING_TICKS));
         }
         works.put(RAIN_SHELTER, new Work<>(WorkActions.VISIT, ErrandCategory.PASTIME, Optional.empty(), List.of(), Optional.empty(),
             Optional.of(new Pastime(List.of(new PastimeCue.WeatherIs(Weather.RAIN), new PastimeCue.UnderSky()), sheltering))));
@@ -97,14 +100,14 @@ public final class PastimeData {
             Optional.of(new Pastime(List.of(new PastimeCue.WeatherIs(Weather.RAIN), new PastimeCue.UnderSky()),
                 Map.of(PetCharacters.USAGI, new Stage(Optional.empty(), Optional.empty(),
                     Optional.of(new Beat(Optional.empty(), Optional.of(PetReaction.HAPPY), Optional.empty())),
-                    Optional.of(new Beat.Recurring(UniformInt.of(20, 50), jump)), Optional.empty(), PLAYING_TICKS))))));
+                    Optional.of(new Beat.Recurring(UniformInt.of(20, 50), jump)), Optional.empty(), Optional.empty(), PLAYING_TICKS))))));
 
         // Everyone comes over to the owner at work and claps, as often as the owner swings.
         Map<ResourceLocation, Stage> watching = new HashMap<>();
         Beat clap = new Beat(Optional.of("clap"), Optional.empty(), Optional.empty());
         for (ResourceLocation character : PetCharacters.all()) {
             watching.put(character, new Stage(Optional.of(new Destination.ToOwner()), Optional.empty(), Optional.of(clap),
-                Optional.of(new Beat.Recurring(UniformInt.of(40, 80), clap)), Optional.empty(), WATCHING_TICKS));
+                Optional.of(new Beat.Recurring(UniformInt.of(40, 80), clap)), Optional.empty(), Optional.empty(), WATCHING_TICKS));
         }
         works.put(WATCH_OWNER_WORK, new Work<>(WorkActions.VISIT, ErrandCategory.PASTIME, Optional.empty(), List.of(),
             Optional.empty(), Optional.of(new Pastime(
@@ -114,17 +117,26 @@ public final class PastimeData {
 
     /** @return the settings of the pastimes, by the id of the errand each is */
     public static Map<ResourceLocation, ErrandSettings<?>> settings() {
-        // Done, it rests for its cooldown, which the file of the pastime holds and the world's setting scales; given up, for
-        // ten seconds, so that a place that cannot be reached is not tried again in the same breath.
-        Rests rests = Rests.of(RestSpec.from(RestSources.PASTIME_COOLDOWN), RestSpec.ticks(GAVE_UP_REST), RestSpec.NONE);
-        return Map.of(
-            RAIN_SHELTER, settings(0.5F, SHELTERING_LIMIT, rests, new ErrandTunings.Visit(RAIN_COOLDOWN, WALK_SPEED, 1, 1.5, PLACE_REACH)),
-            RAIN_PLAY, settings(0.5F, PLAYING_LIMIT, rests, new ErrandTunings.Perform(RAIN_COOLDOWN)),
-            WATCH_OWNER_WORK, settings(0.3F, WATCHING_LIMIT, rests,
-                new ErrandTunings.Visit(WATCHING_COOLDOWN, WALK_SPEED, 2, 3.0, PLACE_REACH)));
+        Rests rests = rests();
+        Map<ResourceLocation, ErrandSettings<?>> settings = new HashMap<>(CharacterPastimeData.settings());
+        settings.put(RAIN_SHELTER, settings(0.5F, SHELTERING_LIMIT, rests,
+            new ErrandTunings.Visit(RAIN_COOLDOWN, WALK_SPEED, 1, 1.5, PLACE_REACH)));
+        settings.put(RAIN_PLAY, settings(0.5F, PLAYING_LIMIT, rests, new ErrandTunings.Perform(RAIN_COOLDOWN)));
+        settings.put(WATCH_OWNER_WORK, settings(0.3F, WATCHING_LIMIT, rests,
+            new ErrandTunings.Visit(WATCHING_COOLDOWN, WALK_SPEED, 2, 3.0, PLACE_REACH)));
+        return settings;
     }
 
-    private static <T> ErrandSettings<T> settings(float score, int maxTicks, Rests rests, T tuning) {
+    /**
+     * @return how a pastime rests: done, for its cooldown, which the file of the pastime holds and the world's setting scales;
+     *         given up, for ten seconds, so that a place that cannot be reached is not tried again in the same breath
+     */
+    static Rests rests() {
+        return Rests.of(RestSpec.from(RestSources.PASTIME_COOLDOWN), RestSpec.ticks(GAVE_UP_REST), RestSpec.NONE);
+    }
+
+    /** @return the settings of a pastime, at the priority where a pet's idle time is */
+    static <T> ErrandSettings<T> settings(float score, int maxTicks, Rests rests, T tuning) {
         return new ErrandSettings<>(10, score, maxTicks, rests, List.of(), List.of(), Optional.empty(), tuning);
     }
 
