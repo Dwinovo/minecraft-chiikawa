@@ -54,10 +54,10 @@ public final class SettingsGameTests {
         WorldSettingsStore store = WorldSettingsStore.of(helper.getLevel());
         WorldSettings before = store.get();
         try {
-            store.set(new WorldSettings(before.wildSpawn(), 0.0F));
+            store.set(before.withChatter(0.0F));
             helper.assertFalse(PetSpeech.say(pet, VoiceMoment.HURT).isPresent(), "Chiikawa spoke in a world with no chatter");
 
-            store.set(new WorldSettings(before.wildSpawn(), 1.0F));
+            store.set(before.withChatter(1.0F));
             helper.assertTrue(PetSpeech.say(pet, VoiceMoment.HURT).isPresent(),
                 "Chiikawa stayed quiet once the chatter was turned back up");
         } finally {
@@ -82,11 +82,11 @@ public final class SettingsGameTests {
         WorldSettingsStore store = WorldSettingsStore.of(level);
         WorldSettings before = store.get();
         try {
-            store.set(new WorldSettings(1.0F, before.chatter()));
+            store.set(before.withWildSpawn(1.0F));
             helper.assertTrue(WildSpawning.canSpawn(type, level, MobSpawnType.NATURAL, at, level.getRandom()),
                 "the spot is not one an animal may spawn on, so this case proves nothing");
 
-            store.set(new WorldSettings(0.0F, before.chatter()));
+            store.set(before.withWildSpawn(0.0F));
             helper.assertFalse(WildSpawning.canSpawn(type, level, MobSpawnType.NATURAL, at, level.getRandom()),
                 "a natural spawn went through with wild spawning at nothing");
             helper.assertFalse(WildSpawning.canSpawn(type, level, MobSpawnType.CHUNK_GENERATION, at, level.getRandom()),
@@ -108,7 +108,7 @@ public final class SettingsGameTests {
         ServerPlayer stranger = player(helper);
         WorldSettingsStore store = WorldSettingsStore.of(helper.getLevel());
         WorldSettings before = store.get();
-        WorldSettings asked = new WorldSettings(0.25F, 0.75F);
+        WorldSettings asked = new WorldSettings(0.25F, 0.75F, 1.5F);
         try {
             helper.assertFalse(SettingsServerPacketHandler.canChange(stranger), "a stranger may change the world");
             SettingsServerPacketHandler.handleChange(new ChangeWorldSettingsPayload(asked), stranger);

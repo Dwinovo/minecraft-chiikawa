@@ -27,10 +27,19 @@ import net.minecraft.world.level.ItemLike;
  *
  * <p>Values keep a pet's idle wandering well below following its owner and picking up
  * items, so a wandering pet still reacts to those whatever its randomness.
+ *
+ * <p>The evening is the same for everyone (0.1.4 design, section 11, the day's rhythm): a pet looks for work a little less
+ * and potters and passes the time a little more, as the day winds down. What a character weighs differently at that time of
+ * day, as Hachiware its music, it says in its own entry and that stands.
  */
 public final class PersonalityData {
     private static final List<ResourceLocation> FARMING = workOf(JobIds.FARMER);
     private static final List<ResourceLocation> FIGHTING = workOf(JobIds.FENCER, JobIds.ARCHER);
+    /** All the work there is, whoever does it. */
+    private static final List<ResourceLocation> WORK = workOf(JobIds.FARMER, JobIds.FENCER, JobIds.ARCHER, JobIds.MUSICIAN);
+    /** As the day winds down a pet looks for work a little less, and for something else to do a little more. */
+    private static final float EVENING_WORK = 0.8F;
+    private static final float EVENING_LEISURE = 1.2F;
 
     private PersonalityData() {
     }
@@ -297,7 +306,13 @@ public final class PersonalityData {
         }
 
         Personality build() {
-            return new Personality(multipliers, routine, randomness, wildTools, likes, idle, licences);
+            Map<DayPhase, Map<ResourceLocation, Float>> days = new EnumMap<>(DayPhase.class);
+            routine.forEach((phase, factors) -> days.put(phase, new HashMap<>(factors)));
+            Map<ResourceLocation, Float> evening = days.computeIfAbsent(DayPhase.EVENING, ignored -> new HashMap<>());
+            WORK.forEach(errand -> evening.putIfAbsent(errand, EVENING_WORK));
+            evening.putIfAbsent(ErrandIds.WANDER, EVENING_LEISURE);
+            PastimeData.ids().forEach(errand -> evening.putIfAbsent(errand, EVENING_LEISURE));
+            return new Personality(multipliers, days, randomness, wildTools, likes, idle, licences);
         }
     }
 

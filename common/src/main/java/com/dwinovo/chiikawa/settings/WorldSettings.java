@@ -15,26 +15,47 @@ import net.minecraft.util.Mth;
  *                  (all of it). Only ever down: more spawns means a bigger weight in the pack
  * @param chatter how much more or less a pet speaks up than its voice data says, from 0
  *                (silent) to {@link #MAX_CHATTER}
+ * @param pastimes how much more or less often a pet passes the time with the little things its data names, from 0
+ *                 (never) to {@link #MAX_PASTIMES}: the rest a pet takes between two of them is divided by it
  */
-public record WorldSettings(float wildSpawn, float chatter) {
+public record WorldSettings(float wildSpawn, float chatter, float pastimes) {
     /** The most the chatter may be turned up: twice as often as the data says. */
     public static final float MAX_CHATTER = 2.0F;
+    /** The most the pastimes may be turned up: twice as often as the data says. */
+    public static final float MAX_PASTIMES = 2.0F;
 
     /** How a world is until somebody changes it: nothing scaled. */
-    public static final WorldSettings DEFAULT = new WorldSettings(1.0F, 1.0F);
+    public static final WorldSettings DEFAULT = new WorldSettings(1.0F, 1.0F, 1.0F);
 
     public static WorldSettings read(FriendlyByteBuf buffer) {
-        return new WorldSettings(buffer.readFloat(), buffer.readFloat());
+        return new WorldSettings(buffer.readFloat(), buffer.readFloat(), buffer.readFloat());
     }
 
     public void write(FriendlyByteBuf buffer) {
         buffer.writeFloat(wildSpawn);
         buffer.writeFloat(chatter);
+        buffer.writeFloat(pastimes);
     }
 
     public WorldSettings {
         wildSpawn = within(wildSpawn, 1.0F, 1.0F);
         chatter = within(chatter, MAX_CHATTER, 1.0F);
+        pastimes = within(pastimes, MAX_PASTIMES, 1.0F);
+    }
+
+    /** @return these settings with the wild spawning this much */
+    public WorldSettings withWildSpawn(float wildSpawn) {
+        return new WorldSettings(wildSpawn, chatter, pastimes);
+    }
+
+    /** @return these settings with the chatter this much */
+    public WorldSettings withChatter(float chatter) {
+        return new WorldSettings(wildSpawn, chatter, pastimes);
+    }
+
+    /** @return these settings with the pastimes this much */
+    public WorldSettings withPastimes(float pastimes) {
+        return new WorldSettings(wildSpawn, chatter, pastimes);
     }
 
     /** In range, or {@code fallback} for a number that is not one. */
