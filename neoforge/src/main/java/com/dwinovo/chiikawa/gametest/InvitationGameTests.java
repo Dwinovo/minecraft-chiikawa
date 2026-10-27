@@ -33,6 +33,7 @@ import net.minecraft.world.level.block.FarmBlock;
  * it says it has said yes to.
  */
 @GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class InvitationGameTests {
     private static final String BATCH = "chiikawa_invitation";
     private static final int STAND = 2;

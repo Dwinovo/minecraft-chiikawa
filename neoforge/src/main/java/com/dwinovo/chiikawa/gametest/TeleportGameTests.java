@@ -29,6 +29,7 @@ import net.minecraft.world.level.GameType;
  * checked is what the pet makes of it.
  */
 @GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class TeleportGameTests {
     private static final String BATCH = "chiikawa_teleport";
     private static final int STAND = 2;

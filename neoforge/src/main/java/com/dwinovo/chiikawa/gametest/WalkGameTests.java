@@ -19,6 +19,7 @@ import net.minecraft.world.level.pathfinder.Path;
  * not for the errand that follows it.
  */
 @GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class WalkGameTests {
     private static final String BATCH = "chiikawa_walk";
     private static final int STAND = 2;

@@ -202,7 +202,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * What the owner has told the pet it may and may not do, as {@link PetRules#CODEC} writes it; empty is the default.
      * Synced for the owner's screen, which shows it.
      */
-    private static final EntityDataAccessor<CompoundTag> RULES = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.COMPOUND_TAG);
+    private static final EntityDataAccessor<CompoundTag> RULES = SynchedEntityData.defineId(AbstractPet.class, InitDataSerializers.COMPOUND_TAG);
 
     /** Legacy animation-id namespace for {@link #ANIM_TRIGGER}'s low byte. */
     public static final int TRIGGER_NONE         = 0;
