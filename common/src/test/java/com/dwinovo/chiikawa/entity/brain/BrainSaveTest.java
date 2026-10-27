@@ -106,7 +106,7 @@ class BrainSaveTest {
     }
 
     private static CompoundTag memoriesOf(Tag brain) {
-        return ((CompoundTag) brain).getCompound("memories");
+        return ((CompoundTag) brain).getCompoundOrEmpty("memories");
     }
 
     private static CompoundTag wrapped(CompoundTag memories) {

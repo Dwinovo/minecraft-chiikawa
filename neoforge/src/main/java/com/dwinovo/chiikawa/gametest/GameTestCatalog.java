@@ -9,6 +9,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -37,9 +38,10 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
  * packs are read. A batch is a test environment, whose setup is the batch's
  * {@link BeforeBatch} methods.
  *
- * <p>The cases are the {@link GameTest} methods of the {@link GameTestHolder} classes,
- * found through NeoForge's scan of the mod's classes as NeoForge found them itself before
- * the game took its tests over. Nothing is registered unless the game is running tests.
+ * <p>The cases are the {@link GameTest} methods of the {@link GameTestHolder} classes and
+ * the {@link GeneratedGameTest}s their {@link GameTestGenerator} methods make, found
+ * through NeoForge's scan of the mod's classes as NeoForge found them itself before the
+ * game took its tests over. Nothing is registered unless the game is running tests.
  */
 public final class GameTestCatalog {
     private static final DeferredRegister<Consumer<GameTestHelper>> FUNCTIONS =
@@ -53,6 +55,7 @@ public final class GameTestCatalog {
 
     private static final List<Case> CASES = new ArrayList<>();
     private static final Map<String, List<MethodHandle>> BEFORE_BATCH = new HashMap<>();
+    private static final Map<String, List<MethodHandle>> AFTER_BATCH = new HashMap<>();
 
     private GameTestCatalog() {
     }
@@ -67,21 +70,36 @@ public final class GameTestCatalog {
             for (Method method : holder.getDeclaredMethods()) {
                 GameTest test = method.getAnnotation(GameTest.class);
                 if (test != null) {
-                    ResourceLocation id = ResourceLocation.fromNamespaceAndPath(namespace,
-                        holder.getSimpleName().toLowerCase(Locale.ROOT) + "." + method.getName());
                     MethodHandle handle = handle(method);
-                    FUNCTIONS.register(id.getPath(), () -> helper -> run(handle, helper));
-                    CASES.add(new Case(id, namespace, test));
+                    file(holder, namespace, method.getName(), test.template(), test.batch(), test.timeoutTicks(),
+                        helper -> run(handle, helper));
+                }
+                if (method.isAnnotationPresent(GameTestGenerator.class)) {
+                    generated(handle(method)).forEach(each ->
+                        file(holder, namespace, each.name(), each.template(), each.batch(), each.timeoutTicks(), each.body()));
                 }
                 BeforeBatch before = method.getAnnotation(BeforeBatch.class);
                 if (before != null) {
                     BEFORE_BATCH.computeIfAbsent(before.batch(), batch -> new ArrayList<>()).add(handle(method));
+                }
+                AfterBatch after = method.getAnnotation(AfterBatch.class);
+                if (after != null) {
+                    AFTER_BATCH.computeIfAbsent(after.batch(), batch -> new ArrayList<>()).add(handle(method));
                 }
             }
         }
         FUNCTIONS.register(modEventBus);
         ENVIRONMENTS.register(modEventBus);
         modEventBus.addListener(GameTestCatalog::registerTests);
+    }
+
+    /** Files one case: its code as a test function now, its instance when the game takes the event. */
+    private static void file(Class<?> holder, String namespace, String name, String template, String batch,
+            int timeoutTicks, Consumer<GameTestHelper> body) {
+        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(namespace,
+            holder.getSimpleName().toLowerCase(Locale.ROOT) + "." + name);
+        FUNCTIONS.register(id.getPath(), () -> body);
+        CASES.add(new Case(id, namespace, template, batch, timeoutTicks));
     }
 
     private static void registerTests(RegisterGameTestsEvent event) {
@@ -93,10 +111,10 @@ public final class GameTestCatalog {
         }
         Map<String, Holder<TestEnvironmentDefinition>> batches = new HashMap<>();
         for (Case each : CASES) {
-            Holder<TestEnvironmentDefinition> batch = batches.computeIfAbsent(each.test().batch(),
+            Holder<TestEnvironmentDefinition> batch = batches.computeIfAbsent(each.batch(),
                 name -> event.registerEnvironment(ResourceLocation.fromNamespaceAndPath(each.namespace(), name), new Batch(name)));
             TestData<Holder<TestEnvironmentDefinition>> data = new TestData<>(batch,
-                ResourceLocation.fromNamespaceAndPath(each.namespace(), each.test().template()), each.test().timeoutTicks(),
+                ResourceLocation.fromNamespaceAndPath(each.namespace(), each.template()), each.timeoutTicks(),
                 0, true);
             event.registerTest(each.id(), new FunctionGameTestInstance(ResourceKey.create(Registries.TEST_FUNCTION, each.id()), data));
         }
@@ -127,6 +145,17 @@ public final class GameTestCatalog {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private static Collection<GeneratedGameTest> generated(MethodHandle handle) {
+        try {
+            return (Collection<GeneratedGameTest>) handle.invoke();
+        } catch (RuntimeException | Error e) {
+            throw e;
+        } catch (Throwable e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     /** Runs a case or a batch's setup, letting what it throws — a failed assertion above all — go as it was thrown. */
     private static void run(MethodHandle handle, Object argument) {
         try {
@@ -138,17 +167,25 @@ public final class GameTestCatalog {
         }
     }
 
-    /** One case, as its annotation files it. */
-    private record Case(ResourceLocation id, String namespace, GameTest test) {
+    /** One case, as its annotation or its generator files it. */
+    private record Case(ResourceLocation id, String namespace, String template, String batch, int timeoutTicks) {
     }
 
-    /** A batch: the world settled by the batch's {@link BeforeBatch} methods before its cases run. */
+    /**
+     * A batch: the world settled by the batch's {@link BeforeBatch} methods before its cases run, and put back by its
+     * {@link AfterBatch} methods once they have.
+     */
     private record Batch(String name) implements TestEnvironmentDefinition {
         static final MapCodec<Batch> CODEC = Codec.STRING.fieldOf("batch").xmap(Batch::new, Batch::name);
 
         @Override
         public void setup(ServerLevel level) {
             BEFORE_BATCH.getOrDefault(name, List.of()).forEach(handle -> run(handle, level));
+        }
+
+        @Override
+        public void teardown(ServerLevel level) {
+            AFTER_BATCH.getOrDefault(name, List.of()).forEach(handle -> run(handle, level));
         }
 
         @Override

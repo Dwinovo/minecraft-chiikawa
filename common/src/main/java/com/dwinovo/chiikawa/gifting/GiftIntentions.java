@@ -4,7 +4,6 @@ import com.dwinovo.chiikawa.Constants;
 import java.util.Optional;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 
@@ -81,17 +80,19 @@ public final class GiftIntentions {
 
     public void load(CompoundTag tag, HolderLookup.Provider registries) {
         held = Optional.empty();
-        if (!tag.contains(TAG, Tag.TAG_COMPOUND)) {
+        Optional<CompoundTag> found = tag.getCompound(TAG);
+        if (found.isEmpty()) {
             return;
         }
-        CompoundTag saved = tag.getCompound(TAG);
-        GiftOccasion occasion = GiftOccasion.CODEC.byName(saved.getString(OCCASION));
+        CompoundTag saved = found.get();
+        String name = saved.getStringOr(OCCASION, "");
+        GiftOccasion occasion = GiftOccasion.CODEC.byName(name);
         if (occasion == null) {
-            Constants.LOG.warn("[chiikawa-gifting] a pet's present in mind is for an occasion nobody knows: {}", saved.getString(OCCASION));
+            Constants.LOG.warn("[chiikawa-gifting] a pet's present in mind is for an occasion nobody knows: {}", name);
             return;
         }
         held = Optional.of(new GiftIntention(occasion,
-            saved.contains(KEEPSAKE, Tag.TAG_COMPOUND) ? ItemStack.parse(registries, saved.getCompound(KEEPSAKE)) : Optional.empty(),
-            saved.getLong(READY_AT), saved.getLong(FADES_AT)));
+            saved.getCompound(KEEPSAKE).flatMap(keepsake -> ItemStack.parse(registries, keepsake)),
+            saved.getLongOr(READY_AT, 0L), saved.getLongOr(FADES_AT, 0L)));
     }
 }

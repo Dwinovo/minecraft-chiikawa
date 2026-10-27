@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.run.Handle;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Step;
 import com.dwinovo.chiikawa.entity.brain.errand.run.StepStatus;
 import com.dwinovo.chiikawa.gifting.GiftChoice;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -51,7 +52,7 @@ public final class TakePresent implements Step {
         }
         ItemStack left = pet.getBackpack().addItem(pet.getPendingGift());
         if (!left.isEmpty()) {
-            pet.spawnAtLocation(left);
+            pet.spawnAtLocation((ServerLevel) pet.level(), left);
         }
         pet.setPendingGift(ItemStack.EMPTY);
     }

@@ -731,8 +731,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     /** Being hurt is something the pet's mind is told, since it may be time to fight or to flee. */
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        boolean hurt = super.hurt(source, amount);
+    public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+        boolean hurt = super.hurtServer(level, source, amount);
         if (hurt) {
             PetMind.post(this, new Message.Hurt(Optional.ofNullable(source.getEntity()).map(Entity::getUUID)));
         }
@@ -1178,7 +1178,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         refreshJobFromMainhand();
         licences.load(tag);
         giftIntentions.load(tag, level().registryAccess());
-        this.entityData.set(RULES, tag.contains("Rules", Tag.TAG_COMPOUND) ? tag.getCompound("Rules") : new CompoundTag());
+        this.entityData.set(RULES, tag.getCompoundOrEmpty("Rules"));
     }
 
     /** @return the present this pet has in mind for its owner, if it has one */

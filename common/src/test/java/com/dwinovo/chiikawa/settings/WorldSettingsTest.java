@@ -81,7 +81,7 @@ class WorldSettingsTest {
         tag.putFloat("WildSpawn", 0.25F);
         tag.putFloat("Chatter", 0.5F);
 
-        WorldSettingsStore loaded = WorldSettingsStore.load(tag, null);
+        WorldSettingsStore loaded = WorldSettingsStore.CODEC.parse(NbtOps.INSTANCE, tag).getOrThrow();
 
         assertEquals(new WorldSettings(0.25F, 0.5F, 1.0F), loaded.get());
     }
@@ -91,7 +91,9 @@ class WorldSettingsTest {
         WorldSettingsStore store = new WorldSettingsStore();
         store.set(WorldSettings.DEFAULT.withPastimes(1.5F));
 
-        assertEquals(1.5F, store.save(new CompoundTag(), null).getFloat("Pastimes"));
+        CompoundTag saved = (CompoundTag) WorldSettingsStore.CODEC.encodeStart(NbtOps.INSTANCE, store).getOrThrow();
+
+        assertEquals(1.5F, saved.getFloatOr("Pastimes", 0.0F));
     }
 
     @Test
