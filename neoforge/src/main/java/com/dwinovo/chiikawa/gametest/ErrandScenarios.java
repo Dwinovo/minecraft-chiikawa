@@ -14,6 +14,7 @@ import com.dwinovo.chiikawa.block.ExamDeskBlockEntity;
 import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
 import com.dwinovo.chiikawa.camera.PhotoResults;
 import com.dwinovo.chiikawa.camera.PhotoScout;
+import com.dwinovo.chiikawa.data.CharacterPastimeData;
 import com.dwinovo.chiikawa.data.PastimeData;
 import com.dwinovo.chiikawa.data.PetInteractionData;
 import com.dwinovo.chiikawa.data.QualificationData;
@@ -26,6 +27,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.entity.brain.errand.step.Meeting;
+import com.dwinovo.chiikawa.entity.brain.errand.view.OwnerSeen;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.gifting.GiftOccasion;
 import com.dwinovo.chiikawa.gifting.Presents;
@@ -58,6 +60,7 @@ import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -70,6 +73,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -221,7 +225,15 @@ final class ErrandScenarios {
         Map.entry(ErrandIds.SLEEP, ErrandScenarios::sleep),
         Map.entry(PastimeData.RAIN_SHELTER, ErrandScenarios::rainShelter),
         Map.entry(PastimeData.RAIN_PLAY, ErrandScenarios::rainPlay),
-        Map.entry(PastimeData.WATCH_OWNER_WORK, ErrandScenarios::watchOwnerWork));
+        Map.entry(PastimeData.WATCH_OWNER_WORK, ErrandScenarios::watchOwnerWork),
+        Map.entry(CharacterPastimeData.COWER, ErrandScenarios::cower),
+        Map.entry(CharacterPastimeData.FRENZY, ErrandScenarios::frenzy),
+        Map.entry(CharacterPastimeData.ASK_PRAISE, ErrandScenarios::askPraise),
+        Map.entry(CharacterPastimeData.EVENING_DRINK, ErrandScenarios::eveningDrink),
+        Map.entry(CharacterPastimeData.COFFEE_FOR_A_WORKER, ErrandScenarios::coffeeForAWorker),
+        Map.entry(CharacterPastimeData.SWEETS_STARE, ErrandScenarios::sweetsStare),
+        Map.entry(CharacterPastimeData.SWORD_PRACTICE, ErrandScenarios::swordPractice),
+        Map.entry(CharacterPastimeData.GREET_OWNER, ErrandScenarios::greetOwner));
 
     /** The errands that are done in the tick they begin. */
     private static final Set<ResourceLocation> INSTANT = Set.of(ErrandIds.OFFER_GIFT);
@@ -356,6 +368,105 @@ final class ErrandScenarios {
         AbstractPet pet = GameTestKit.wild(helper, InitEntity.USAGI_PET.get(), new BlockPos(4, STAND, 4));
         pet.tame(owner);
         pet.setPetDirective(PetDirective.FREE);
+        return new Scenario(pet, 2, ran -> Optional.empty());
+    }
+
+    /**
+     * Chiikawa with a creeper about to go off six blocks from it, which it cowers at, crying, for as long as its time is: its
+     * owner across the yard is too far to comfort it. The creeper's fuse is as long as the case, so it never goes off.
+     */
+    private static Scenario cower(GameTestHelper helper) {
+        GameTestKit.openSky(helper);
+        Creeper creeper = helper.spawn(EntityType.CREEPER, new BlockPos(10, STAND, 4));
+        creeper.setNoAi(true);
+        CompoundTag tag = new CompoundTag();
+        creeper.saveWithoutId(tag);
+        tag.putShort("Fuse", Short.MAX_VALUE);
+        tag.putBoolean("ignited", true);
+        creeper.load(tag);
+        ServerPlayer owner = ownerAcross(helper);
+        AbstractPet pet = GameTestKit.wild(helper, InitEntity.CHIIKAWA_PET.get(), new BlockPos(4, STAND, 4));
+        pet.tame(owner);
+        pet.setPetDirective(PetDirective.FREE);
+        return new Scenario(pet, 1, ran -> Optional.empty());
+    }
+
+    /** Usagi, free in an empty yard, which has its fit for no reason at all. */
+    private static Scenario frenzy(GameTestHelper helper) {
+        AbstractPet pet = GameTestKit.owned(helper, InitEntity.USAGI_PET.get(), new BlockPos(4, STAND, 4));
+        pet.setPetDirective(PetDirective.FREE);
+        GameTestKit.wake(pet, CharacterPastimeData.FRENZY);
+        return new Scenario(pet, 1, ran -> Optional.empty());
+    }
+
+    /**
+     * Momonga with another pet sitting a few blocks off and its owner across the yard: it copies the other for a moment, walks
+     * over to its owner and asks to be praised, for as long as its time is. Cut short at any step it leaves no icon behind.
+     */
+    private static Scenario askPraise(GameTestHelper helper) {
+        ServerPlayer owner = ownerAcross(helper);
+        AbstractPet neighbour = GameTestKit.owned(helper, InitEntity.CHIIKAWA_PET.get(), new BlockPos(6, STAND, 6));
+        neighbour.setPetDirective(PetDirective.STAY);
+        AbstractPet pet = GameTestKit.wild(helper, InitEntity.MOMONGA_PET.get(), new BlockPos(4, STAND, 4));
+        pet.tame(owner);
+        pet.setPetDirective(PetDirective.FREE);
+        return new Scenario(pet, 3, ran -> Optional.empty());
+    }
+
+    /** Kurimanju as the day ends, which is held at that hour for as long as the case lasts: it sits down with a drink. */
+    private static Scenario eveningDrink(GameTestHelper helper) {
+        settleWorld(helper.getLevel(), Difficulty.NORMAL, DUSK);
+        helper.onEachTick(() -> helper.getLevel().setDayTime(DUSK));
+        AbstractPet pet = GameTestKit.owned(helper, InitEntity.KURIMANJU_PET.get(), new BlockPos(4, STAND, 4));
+        pet.setPetDirective(PetDirective.FREE);
+        return new Scenario(pet, 1, ran -> Optional.empty());
+    }
+
+    /**
+     * Kurimanju and an owner across the yard who has just left off a long spell of work, which the pet is told of afresh every
+     * tick, since the sensor that would see it looks only at an owner within its sight: it walks over and hands them a coffee.
+     */
+    private static Scenario coffeeForAWorker(GameTestHelper helper) {
+        ServerPlayer owner = ownerAcross(helper);
+        AbstractPet pet = GameTestKit.wild(helper, InitEntity.KURIMANJU_PET.get(), new BlockPos(4, STAND, 4));
+        pet.tame(owner);
+        pet.setPetDirective(PetDirective.FREE);
+        helper.onEachTick(() -> {
+            long now = helper.getLevel().getGameTime();
+            pet.getBrain().setMemory(InitMemory.OWNER_SEEN.get(), new OwnerSeen(now, OwnerSeen.NEVER, now - 1000, now - 200));
+        });
+        return new Scenario(pet, 2, ran -> Optional.empty());
+    }
+
+    /** Rakko and a cake lying a few blocks off: it goes over and stares at it. */
+    private static Scenario sweetsStare(GameTestHelper helper) {
+        AbstractPet pet = GameTestKit.owned(helper, InitEntity.RAKKO_PET.get(), new BlockPos(4, STAND, 4));
+        pet.setPetDirective(PetDirective.FREE);
+        helper.spawnItem(Items.CAKE, new BlockPos(9, STAND, 8));
+        return new Scenario(pet, 2, ran -> Optional.empty());
+    }
+
+    /** Rakko, free in an empty yard, which practises with its sword. */
+    private static Scenario swordPractice(GameTestHelper helper) {
+        AbstractPet pet = GameTestKit.owned(helper, InitEntity.RAKKO_PET.get(), new BlockPos(4, STAND, 4));
+        pet.setPetDirective(PetDirective.FREE);
+        GameTestKit.wake(pet, CharacterPastimeData.SWORD_PRACTICE);
+        return new Scenario(pet, 1, ran -> Optional.empty());
+    }
+
+    /**
+     * Shisa and an owner across the yard who has just come back from a long way off, which the pet is told of afresh every
+     * tick: it walks over and bows.
+     */
+    private static Scenario greetOwner(GameTestHelper helper) {
+        ServerPlayer owner = ownerAcross(helper);
+        AbstractPet pet = GameTestKit.wild(helper, InitEntity.SHISA_PET.get(), new BlockPos(4, STAND, 4));
+        pet.tame(owner);
+        pet.setPetDirective(PetDirective.FREE);
+        helper.onEachTick(() -> {
+            long now = helper.getLevel().getGameTime();
+            pet.getBrain().setMemory(InitMemory.OWNER_SEEN.get(), new OwnerSeen(now, now - 10, OwnerSeen.NEVER, OwnerSeen.NEVER));
+        });
         return new Scenario(pet, 2, ran -> Optional.empty());
     }
 

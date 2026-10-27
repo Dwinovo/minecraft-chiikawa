@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.data.ErrandFiles;
+import com.dwinovo.chiikawa.data.CharacterPastimeData;
 import com.dwinovo.chiikawa.data.PastimeData;
 import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.PetCharacters;
@@ -23,6 +24,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
@@ -70,7 +72,7 @@ class PastimeFileTest {
 
     @Test
     void thePastimesTheModShipsAreWorksOfThePastimeCategoryThatReadBackAsTheyWereWritten() {
-        assertEquals(List.of(PastimeData.RAIN_PLAY, PastimeData.RAIN_SHELTER, PastimeData.WATCH_OWNER_WORK),
+        assertEquals(PastimeData.ids().stream().sorted(Comparator.comparing(ResourceLocation::toString)).toList(),
             Errands.pastimes().stream().map(ErrandType::id).toList(), "in the order of their ids");
         for (ResourceLocation id : PastimeData.ids()) {
             var work = PastimeData.works().get(id);
@@ -138,6 +140,28 @@ class PastimeFileTest {
         stageOf(file, PetCharacters.USAGI).add("to", to);
 
         assertSwitchedOff(PastimeData.RAIN_PLAY, file, "perform stays where it is");
+    }
+
+    @Test
+    void aPastimeThatAsksForPraiseGoesToItsOwnerAndNamesNowhereElse() {
+        JsonObject file = file(CharacterPastimeData.ASK_PRAISE);
+        JsonObject to = new JsonObject();
+        to.addProperty("type", "shelter");
+        stageOf(file, PetCharacters.MOMONGA).add("to", to);
+
+        assertSwitchedOff(CharacterPastimeData.ASK_PRAISE, file, "ask_praise goes to its owner");
+    }
+
+    @Test
+    void aStageThatEndsEarlyEndsOnACueThatIsOneAndAfterAWhile() {
+        JsonObject file = file(CharacterPastimeData.COWER);
+        JsonObject until = stageOf(file, PetCharacters.CHIIKAWA).getAsJsonObject("until");
+
+        assertEquals("owner", until.getAsJsonObject("cue").get("type").getAsString());
+        assertTrue(until.get("after_ticks").getAsInt() > 0);
+
+        until.getAsJsonObject("cue").addProperty("type", "full_moon");
+        assertSwitchedOff(CharacterPastimeData.COWER, file, "failed to parse");
     }
 
     @Test
