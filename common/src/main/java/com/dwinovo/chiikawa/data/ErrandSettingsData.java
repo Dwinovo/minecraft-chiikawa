@@ -62,11 +62,11 @@ public final class ErrandSettingsData {
         ErrandTunings.Ranged bow = new ErrandTunings.Ranged(footwork, 15.0, 15, 20);
         // Chiikawa cries and Usagi yells, and never cries; the rest only flinch, and sit with it.
         ErrandTunings.Performances cowers = new ErrandTunings.Performances(Map.of(
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "chiikawa"), List.of("cry", "hurt"),
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "usagi"), List.of("yell", "hurt")), List.of("hurt", "sit"));
+            new ResourceLocation(Constants.MOD_ID, "chiikawa"), List.of("cry", "hurt"),
+            new ResourceLocation(Constants.MOD_ID, "usagi"), List.of("yell", "hurt")), List.of("hurt", "sit"));
         // Chiikawa sleeps hugging its bear doll, as the series draws it; the rest lie down as they sit.
         ErrandTunings.Performances sleeps = new ErrandTunings.Performances(Map.of(
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "chiikawa"), List.of("sleep_hug", "sleep", "sit")),
+            new ResourceLocation(Constants.MOD_ID, "chiikawa"), List.of("sleep_hug", "sleep", "sit")),
             List.of("sleep", "sit"));
         // The scene beginning is a report, and the pair rest the scene's cooldown from then on however it ends, so that
         // finishing and being cut short need rest nothing of their own. An invitation that is declined or not answered, or

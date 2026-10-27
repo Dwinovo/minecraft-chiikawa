@@ -24,7 +24,7 @@ import net.minecraft.resources.ResourceLocation;
  * leaves that block alone for a while and not other blocks.
  */
 public final class HarvestBlockAction implements WorkAction<Site, ErrandTunings.HarvestBlock> {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "harvest_block");
+    public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, "harvest_block");
 
     @Override
     public ResourceLocation id() {

@@ -31,8 +31,8 @@ import org.junit.jupiter.api.Test;
 
 /** What the rest of the game is told of a pet's errand. */
 class ErrandViewTest {
-    private static final ResourceLocation EXAM = ResourceLocation.fromNamespaceAndPath("chiikawa", "take_exam");
-    private static final ResourceLocation SCENE = ResourceLocation.fromNamespaceAndPath("chiikawa", "share_a_snack");
+    private static final ResourceLocation EXAM = new ResourceLocation("chiikawa", "take_exam");
+    private static final ResourceLocation SCENE = new ResourceLocation("chiikawa", "share_a_snack");
     private static final UUID FRIEND = UUID.fromString("00000000-0000-0000-0000-0000000000f1");
 
     private final InvitationDesk desk = new InvitationDesk();

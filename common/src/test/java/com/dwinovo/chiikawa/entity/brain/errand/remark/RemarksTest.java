@@ -26,10 +26,10 @@ import org.junit.jupiter.api.Test;
 
 /** The remarks a pet makes in passing: when they are due, who makes them, and that they are made once. */
 class RemarksTest {
-    private static final ResourceLocation HARVEST = ResourceLocation.fromNamespaceAndPath("chiikawa", "harvest_block");
-    private static final ResourceLocation CHIIKAWA = ResourceLocation.fromNamespaceAndPath("chiikawa", "chiikawa");
-    private static final ResourceLocation USAGI = ResourceLocation.fromNamespaceAndPath("chiikawa", "usagi");
-    private static final ResourceLocation HACHIWARE = ResourceLocation.fromNamespaceAndPath("chiikawa", "hachiware");
+    private static final ResourceLocation HARVEST = new ResourceLocation("chiikawa", "harvest_block");
+    private static final ResourceLocation CHIIKAWA = new ResourceLocation("chiikawa", "chiikawa");
+    private static final ResourceLocation USAGI = new ResourceLocation("chiikawa", "usagi");
+    private static final ResourceLocation HACHIWARE = new ResourceLocation("chiikawa", "hachiware");
     private static final String ARROWS = "tag.item.minecraft.arrows";
     private static final Map<ResourceLocation, PetRemark> SHIPPED = PetRemarkData.all();
     private static final long SINCE = 1000L;

@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
  */
 class SleepOfferTest {
     private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
-        ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")), ResourceLocation.withDefaultNamespace("overworld"));
+        ResourceKey.createRegistryKey(new ResourceLocation("dimension")), new ResourceLocation("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     private static final GlobalPos NEAR_BED = GlobalPos.of(OVERWORLD, new BlockPos(6, 64, 0));
     private static final GlobalPos FAR_BED = GlobalPos.of(OVERWORLD, new BlockPos(40, 64, 0));

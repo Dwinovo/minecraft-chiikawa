@@ -27,8 +27,8 @@ import org.junit.jupiter.api.Test;
 /** When a pet runs: hurt, and not to answer it. */
 class FleeOfferTest {
     private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
-        ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
-        ResourceLocation.withDefaultNamespace("overworld"));
+        ResourceKey.createRegistryKey(new ResourceLocation("dimension")),
+        new ResourceLocation("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     private static final UUID ATTACKER = UUID.fromString("00000000-0000-0000-0000-0000000000a4");
     private static final Arms WIELDING = new Arms(true, Optional.empty());

@@ -34,7 +34,7 @@ import net.minecraft.world.item.ProjectileWeaponItem;
  * held by, see {@link StrikeAction}.
  */
 public final class ShootAction implements WorkAction<Duel, ErrandTunings.Ranged> {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "shoot");
+    public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, "shoot");
     /** What an archer is short of when it has nothing to loose. */
     private static final LackKey ARROWS = LackKey.tag(ItemTags.ARROWS);
 

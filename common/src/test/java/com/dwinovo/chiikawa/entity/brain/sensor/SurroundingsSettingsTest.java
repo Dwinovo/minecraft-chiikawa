@@ -30,7 +30,7 @@ class SurroundingsSettingsTest {
         assertEquals(Optional.of(new SurroundingsSettings(6, 100, 50, 20, 80, 30)),
             SurroundingsSettingsLoader.load(Map.of(SurroundingsSettingsLoader.FILE, good)));
         assertTrue(SurroundingsSettingsLoader.load(Map.of()).isEmpty());
-        assertTrue(SurroundingsSettingsLoader.load(Map.of(ResourceLocation.fromNamespaceAndPath("chiikawa", "other"), good)).isEmpty());
+        assertTrue(SurroundingsSettingsLoader.load(Map.of(new ResourceLocation("chiikawa", "other"), good)).isEmpty());
     }
 
     @Test

@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 /** What the pet screen says of why a pet is not at work. */
 class PetStatusTextTest {
-    private static final ResourceLocation WANDER = ResourceLocation.fromNamespaceAndPath("chiikawa", "wander");
+    private static final ResourceLocation WANDER = new ResourceLocation("chiikawa", "wander");
 
     @Test
     void whatThePetIsShortOfIsSaidInPlaceOfTheReasonItGaveWhichMayBeAboutSomethingElse() {

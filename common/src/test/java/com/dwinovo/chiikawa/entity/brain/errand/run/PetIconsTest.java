@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 /** The picture over a pet's head, as a table of what it is and what it found. */
 class PetIconsTest {
-    private static final ResourceLocation HARVEST = ResourceLocation.fromNamespaceAndPath("chiikawa", "harvest_block");
+    private static final ResourceLocation HARVEST = new ResourceLocation("chiikawa", "harvest_block");
     private static final WhyNot SEEKING = new WhyNot(HARVEST, "intent.chiikawa.fail.no_crop", Optional.empty(), 0L);
     private static final WhyNot MISSING = new WhyNot(HARVEST, "intent.chiikawa.fail.no_arrows",
         Optional.of(LackKey.tag(ItemTags.ARROWS)), 0L);

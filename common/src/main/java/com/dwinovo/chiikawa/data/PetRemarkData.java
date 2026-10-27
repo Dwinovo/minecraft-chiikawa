@@ -18,11 +18,11 @@ import net.minecraft.resources.ResourceLocation;
  */
 public final class PetRemarkData {
     /** Short of something its work needs. */
-    public static final ResourceLocation MISSING = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "missing");
+    public static final ResourceLocation MISSING = new ResourceLocation(Constants.MOD_ID, "missing");
     /** Drowsy as the day ends. */
-    public static final ResourceLocation YAWN = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "yawn");
+    public static final ResourceLocation YAWN = new ResourceLocation(Constants.MOD_ID, "yawn");
     /** Hachiware, when it rains: something will turn up. */
-    public static final ResourceLocation TROUBLE = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "trouble");
+    public static final ResourceLocation TROUBLE = new ResourceLocation(Constants.MOD_ID, "trouble");
 
     /** How long a pet has to have been short of something before it says so: half a minute, so a pet in between jobs is not nagging. */
     private static final int LACKED_TICKS = 600;
@@ -43,7 +43,7 @@ public final class PetRemarkData {
                 List.of(new RemarkCue.LackedFor(LACKED_TICKS), new RemarkCue.OwnerWithin(OWNER_BLOCKS)),
                 // Hachiware does not say what it needs: it scratches its head and trusts that something will turn up.
                 Map.of(PetRemark.EVERYONE, new PetRemark.Part(VoiceMoment.MISSING, Optional.empty()),
-                    ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "hachiware").toString(),
+                    new ResourceLocation(Constants.MOD_ID, "hachiware").toString(),
                     new PetRemark.Part(VoiceMoment.TROUBLE, Optional.of("scratch_head"))),
                 COOLDOWN),
             // Everyone yawns as the day ends, with somebody by to see it; those who have a word for it say it.
@@ -55,7 +55,7 @@ public final class PetRemarkData {
             // anything of it, and a hurt pet has its own line for it already, which this would only talk over.
             TROUBLE, new PetRemark(
                 List.of(new RemarkCue.WeatherIs(Weather.RAIN), new RemarkCue.OwnerWithin(OWNER_BLOCKS)),
-                Map.of(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "hachiware").toString(),
+                Map.of(new ResourceLocation(Constants.MOD_ID, "hachiware").toString(),
                     new PetRemark.Part(VoiceMoment.TROUBLE, Optional.of("scratch_head"))),
                 COOLDOWN));
     }

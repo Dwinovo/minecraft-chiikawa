@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 class InvitationDeskTest {
     private static final UUID ASKER = UUID.fromString("00000000-0000-0000-0000-0000000000a1");
     private static final UUID OTHER = UUID.fromString("00000000-0000-0000-0000-0000000000a2");
-    private static final ResourceLocation SCENE = ResourceLocation.fromNamespaceAndPath("chiikawa", "share_a_snack");
+    private static final ResourceLocation SCENE = new ResourceLocation("chiikawa", "share_a_snack");
     private static final int ASK_PRIORITY = 30;
     private static final long NOW = 100L;
 
