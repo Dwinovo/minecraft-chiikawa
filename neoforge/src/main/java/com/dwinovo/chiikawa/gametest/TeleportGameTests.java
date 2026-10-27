@@ -17,7 +17,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -67,7 +67,7 @@ public final class TeleportGameTests {
         AbstractPet pet = holding(helper.spawn(InitEntity.CHIIKAWA_PET.get(), new BlockPos(4, STAND, 4)), Items.IRON_SWORD);
         pet.tame(owner);
         pet.setPetDirective(PetDirective.FREE);
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(7, STAND, 4));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(7, STAND, 4));
         zombie.setNoAi(true);
         long[] brought = {-1};
 

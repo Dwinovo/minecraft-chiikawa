@@ -773,7 +773,7 @@ public final class GiftGameTests {
 
     /** An owner asleep in a bed whose head is here, and the bed. */
     private static ServerPlayer sleeper(GameTestHelper helper, BlockPos head) {
-        BlockState bed = Blocks.RED_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.EAST);
+        BlockState bed = Blocks.BED.red().defaultBlockState().setValue(BedBlock.FACING, Direction.EAST);
         helper.setBlock(head.west(), bed.setValue(BedBlock.PART, BedPart.FOOT));
         helper.setBlock(head, bed.setValue(BedBlock.PART, BedPart.HEAD));
         ServerPlayer owner = player(helper);

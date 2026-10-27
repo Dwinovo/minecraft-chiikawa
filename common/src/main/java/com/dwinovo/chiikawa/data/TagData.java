@@ -9,7 +9,6 @@ import net.minecraft.data.tags.TagAppender;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
@@ -28,6 +27,10 @@ public final class TagData {
     // nothing populates it.
     private static final TagKey<Item> C_SEEDS =
         TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "seeds"));
+
+    // 26.2 no longer names the small flowers in ItemTags; the tag itself is still vanilla's.
+    private static final TagKey<Item> SMALL_FLOWERS =
+        TagKey.create(Registries.ITEM, Identifier.withDefaultNamespace("small_flowers"));
 
     public interface TagAppenderProvider<T> {
         TagAppender<T> tag(TagKey<T> key);
@@ -117,28 +120,28 @@ public final class TagData {
         // Something to share, starting with the hamburg steak Rakko treats the others to in
         // the series; the sweets it buys for itself are among them.
         tags.tag(InitTag.PET_TREATS)
-            .add(Items.COOKED_BEEF)
-            .add(Items.PUMPKIN_PIE)
-            .add(Items.SWEET_BERRIES)
-            .add(Items.COOKIE)
-            .add(Items.BREAD)
-            .add(Items.BAKED_POTATO);
+            .add(key(Items.COOKED_BEEF))
+            .add(key(Items.PUMPKIN_PIE))
+            .add(key(Items.SWEET_BERRIES))
+            .add(key(Items.COOKIE))
+            .add(key(Items.BREAD))
+            .add(key(Items.BAKED_POTATO));
         // Flowers are the little things a pet is glad to find, and picks up for it.
         tags.tag(InitTag.GIFT_FLOWERS)
-            .addOptionalTag(ItemTags.SMALL_FLOWERS);
+            .addOptionalTag(SMALL_FLOWERS);
         tags.tag(InitTag.GIFT_FINDS)
             .addOptionalTag(InitTag.GIFT_FLOWERS);
         // Sweets, which Rakko gives its owner out of its bag; a pack can add to them.
         tags.tag(InitTag.SWEETS)
-            .add(Items.CAKE, Items.COOKIE, Items.PUMPKIN_PIE, Items.HONEY_BOTTLE, Items.SWEET_BERRIES);
+            .add(key(Items.CAKE), key(Items.COOKIE), key(Items.PUMPKIN_PIE), key(Items.HONEY_BOTTLE), key(Items.SWEET_BERRIES));
         tags.tag(InitTag.NEVER_GIFTED);
         tags.tag(InitTag.ENTITY_PICKABLE_ITEMS)
-            .add(Items.WHEAT, Items.WHEAT_SEEDS)
-            .add(Items.POTATO)
-            .add(Items.CARROT)
-            .add(Items.BEETROOT)
-            .add(Items.MELON_SLICE)
-            .add(Items.PUMPKIN)
+            .add(key(Items.WHEAT), key(Items.WHEAT_SEEDS))
+            .add(key(Items.POTATO))
+            .add(key(Items.CARROT))
+            .add(key(Items.BEETROOT))
+            .add(key(Items.MELON_SLICE))
+            .add(key(Items.PUMPKIN))
             .addOptionalTag(InitTag.GIFT_FINDS);
     }
 
@@ -148,40 +151,40 @@ public final class TagData {
         // creeper starts swelling — but a pet has to be able to see one to keep away from
         // it, and an archer can answer one from outside the blast.
         tags.tag(InitTag.ENTITY_HOSTILE_ENTITY)
-            .add(EntityType.BLAZE)
-            .add(EntityType.BOGGED)
-            .add(EntityType.BREEZE)
-            .add(EntityType.CAVE_SPIDER)
-            .add(EntityType.CREEPER)
-            .add(EntityType.DROWNED)
-            .add(EntityType.ENDERMITE)
-            .add(EntityType.EVOKER)
-            .add(EntityType.GUARDIAN)
-            .add(EntityType.HOGLIN)
-            .add(EntityType.HUSK)
-            .add(EntityType.ILLUSIONER)
-            .add(EntityType.MAGMA_CUBE)
-            .add(EntityType.PHANTOM)
-            .add(EntityType.PIGLIN)
-            .add(EntityType.PIGLIN_BRUTE)
-            .add(EntityType.PILLAGER)
-            .add(EntityType.SILVERFISH)
-            .add(EntityType.SKELETON)
-            .add(EntityType.SLIME)
-            .add(EntityType.SPIDER)
-            .add(EntityType.STRAY)
-            .add(EntityType.VEX)
-            .add(EntityType.VINDICATOR)
-            .add(EntityType.WITCH)
-            .add(EntityType.WITHER_SKELETON)
-            .add(EntityType.ZOGLIN)
-            .add(EntityType.ZOMBIE)
-            .add(EntityType.ZOMBIE_VILLAGER);
+            .add(key(EntityTypes.BLAZE))
+            .add(key(EntityTypes.BOGGED))
+            .add(key(EntityTypes.BREEZE))
+            .add(key(EntityTypes.CAVE_SPIDER))
+            .add(key(EntityTypes.CREEPER))
+            .add(key(EntityTypes.DROWNED))
+            .add(key(EntityTypes.ENDERMITE))
+            .add(key(EntityTypes.EVOKER))
+            .add(key(EntityTypes.GUARDIAN))
+            .add(key(EntityTypes.HOGLIN))
+            .add(key(EntityTypes.HUSK))
+            .add(key(EntityTypes.ILLUSIONER))
+            .add(key(EntityTypes.MAGMA_CUBE))
+            .add(key(EntityTypes.PHANTOM))
+            .add(key(EntityTypes.PIGLIN))
+            .add(key(EntityTypes.PIGLIN_BRUTE))
+            .add(key(EntityTypes.PILLAGER))
+            .add(key(EntityTypes.SILVERFISH))
+            .add(key(EntityTypes.SKELETON))
+            .add(key(EntityTypes.SLIME))
+            .add(key(EntityTypes.SPIDER))
+            .add(key(EntityTypes.STRAY))
+            .add(key(EntityTypes.VEX))
+            .add(key(EntityTypes.VINDICATOR))
+            .add(key(EntityTypes.WITCH))
+            .add(key(EntityTypes.WITHER_SKELETON))
+            .add(key(EntityTypes.ZOGLIN))
+            .add(key(EntityTypes.ZOMBIE))
+            .add(key(EntityTypes.ZOMBIE_VILLAGER));
         tags.tag(InitTag.PETS)
-            .add(InitEntity.USAGI_PET.get(), InitEntity.HACHIWARE_PET.get(), InitEntity.CHIIKAWA_PET.get(),
-                InitEntity.SHISA_PET.get(), InitEntity.MOMONGA_PET.get(), InitEntity.KURIMANJU_PET.get(), InitEntity.RAKKO_PET.get(),
-                InitEntity.FURUHONYA_PET.get());
+            .add(key(InitEntity.USAGI_PET.get()), key(InitEntity.HACHIWARE_PET.get()), key(InitEntity.CHIIKAWA_PET.get()),
+                key(InitEntity.SHISA_PET.get()), key(InitEntity.MOMONGA_PET.get()), key(InitEntity.KURIMANJU_PET.get()),
+                key(InitEntity.RAKKO_PET.get()), key(InitEntity.FURUHONYA_PET.get()));
         tags.tag(InitTag.CREEPERS_AVOID)
-            .add(InitEntity.HACHIWARE_PET.get());
+            .add(key(InitEntity.HACHIWARE_PET.get()));
     }
 }

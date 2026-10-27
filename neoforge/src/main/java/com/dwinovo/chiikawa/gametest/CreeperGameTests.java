@@ -12,6 +12,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
@@ -40,7 +41,7 @@ public final class CreeperGameTests {
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WATCH_TICKS)
     public static void a_creeper_keeps_away_from_hachiware(GameTestHelper helper) {
         AbstractPet hachiware = standing(helper, InitEntity.HACHIWARE_PET.get());
-        Creeper creeper = helper.spawn(EntityType.CREEPER, new BlockPos(8 + START_GAP, STAND, 8));
+        Creeper creeper = helper.spawn(EntityTypes.CREEPER, new BlockPos(8 + START_GAP, STAND, 8));
 
         helper.succeedWhen(() -> helper.assertTrue(creeper.distanceTo(hachiware) > AVOID_DISTANCE,
             "the creeper stayed within " + AVOID_DISTANCE + " blocks of Hachiware: " + creeper.distanceTo(hachiware)));
@@ -53,7 +54,7 @@ public final class CreeperGameTests {
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WATCH_TICKS + 20)
     public static void a_creeper_does_not_keep_away_from_chiikawa(GameTestHelper helper) {
         standing(helper, InitEntity.CHIIKAWA_PET.get());
-        Creeper creeper = helper.spawn(EntityType.CREEPER, new BlockPos(8 + START_GAP, STAND, 8));
+        Creeper creeper = helper.spawn(EntityTypes.CREEPER, new BlockPos(8 + START_GAP, STAND, 8));
 
         helper.startSequence()
             .thenExecuteFor(WATCH_TICKS, () -> helper.assertFalse(avoiding(creeper), "the creeper kept away from Chiikawa"))

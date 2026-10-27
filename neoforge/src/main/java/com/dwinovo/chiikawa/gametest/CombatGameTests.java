@@ -79,8 +79,8 @@ public final class CombatGameTests {
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = FIGHT_TICKS)
     public static void a_fencer_goes_on_to_the_next_foe_when_one_falls(GameTestHelper helper) {
         AbstractPet pet = holding(ownedPet(helper, new BlockPos(4, STAND, 4)), Items.IRON_SWORD);
-        Zombie first = helper.spawn(EntityType.ZOMBIE, new BlockPos(8, STAND, 4));
-        Zombie second = helper.spawn(EntityType.ZOMBIE, new BlockPos(8, STAND, 8));
+        Zombie first = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(8, STAND, 4));
+        Zombie second = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(8, STAND, 8));
         for (Zombie zombie : new Zombie[] {first, second}) {
             zombie.setNoAi(true);
             zombie.setHealth(1.0F);
@@ -136,7 +136,7 @@ public final class CombatGameTests {
     public static void an_archer_told_to_sit_mid_draw_does_not_shoot(GameTestHelper helper) {
         AbstractPet pet = holding(ownedPet(helper, new BlockPos(3, STAND, 4)), Items.BOW);
         pet.getBackpack().addItem(new ItemStack(Items.ARROW, ARROWS));
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(10, STAND, 4));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(10, STAND, 4));
         zombie.setNoAi(true);
 
         helper.startSequence()

@@ -34,6 +34,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * The rhythm of a pet's day: that a free pet sleeps through the night near home, on a bed nobody is in or on the ground, and a
@@ -252,7 +253,7 @@ public final class RhythmGameTests {
             .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(ErrandIds.SLEEP) && pet.getPerformance().startsWith("sleep"),
                 "the pet never lay down with its owner: it is " + pet.getMind().errands().errand() + " at " + pet.position()))
             .thenExecute(() -> {
-                helper.assertTrue(pet.distanceToSqr(helper.absoluteVec(head.getCenter())) < 36.0,
+                helper.assertTrue(pet.distanceToSqr(helper.absoluteVec(Vec3.atCenterOf(head))) < 36.0,
                     "the pet is not near its sleeping owner: " + pet.position());
                 helper.assertFalse(onTheBed(helper, pet, head), "the pet got into its owner's bed");
                 owner.stopSleepInBed(false, true);
@@ -401,7 +402,7 @@ public final class RhythmGameTests {
 
     /** A bed whose head is here, facing east, and its foot. */
     private static void putBed(GameTestHelper helper, BlockPos head) {
-        BlockState bed = Blocks.RED_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.EAST);
+        BlockState bed = Blocks.BED.red().defaultBlockState().setValue(BedBlock.FACING, Direction.EAST);
         helper.setBlock(head.west(), bed.setValue(BedBlock.PART, BedPart.FOOT));
         helper.setBlock(head, bed.setValue(BedBlock.PART, BedPart.HEAD));
     }

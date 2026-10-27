@@ -20,11 +20,12 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * A pet that is hurt and will not fight back runs: to hide behind its owner, or at home, whatever it has been told, a pet
@@ -148,7 +149,7 @@ public final class FleeGameTests {
     private static ServerPlayer owner(GameTestHelper helper, BlockPos where) {
         ServerPlayer owner = player(helper);
         owner.setGameMode(GameType.SURVIVAL);
-        owner.setPos(helper.absoluteVec(where.getCenter()));
+        owner.setPos(helper.absoluteVec(Vec3.atCenterOf(where)));
         return owner;
     }
 
@@ -162,7 +163,7 @@ public final class FleeGameTests {
 
     /** A zombie that stands where it is, for the pet to be hurt by. */
     private static Zombie zombie(GameTestHelper helper, BlockPos where) {
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, where);
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, where);
         zombie.setNoAi(true);
         return zombie;
     }

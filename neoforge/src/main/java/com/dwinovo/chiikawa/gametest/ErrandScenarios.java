@@ -71,7 +71,7 @@ import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.Container;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -313,7 +313,7 @@ final class ErrandScenarios {
         // has seen the bed lies down on the floor.
         settleWorld(helper.getLevel(), Difficulty.NORMAL, DUSK);
         BlockPos head = new BlockPos(10, STAND, 10);
-        BlockState bed = Blocks.RED_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.EAST);
+        BlockState bed = Blocks.BED.red().defaultBlockState().setValue(BedBlock.FACING, Direction.EAST);
         helper.setBlock(head.west(), bed.setValue(BedBlock.PART, BedPart.FOOT));
         helper.setBlock(head, bed.setValue(BedBlock.PART, BedPart.HEAD));
         AbstractPet pet = GameTestKit.owned(helper, InitEntity.USAGI_PET.get(), new BlockPos(4, STAND, 4));
@@ -382,7 +382,7 @@ final class ErrandScenarios {
      */
     private static Scenario cower(GameTestHelper helper) {
         GameTestKit.openSky(helper);
-        Creeper creeper = helper.spawn(EntityType.CREEPER, new BlockPos(10, STAND, 4));
+        Creeper creeper = helper.spawn(EntityTypes.CREEPER, new BlockPos(10, STAND, 4));
         creeper.setNoAi(true);
         TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, helper.getLevel().registryAccess());
         creeper.saveWithoutId(output);
@@ -590,7 +590,7 @@ final class ErrandScenarios {
     private static Scenario giftOwnerBedside(GameTestHelper helper) {
         settleWorld(helper.getLevel(), Difficulty.NORMAL, MIDNIGHT);
         BlockPos head = new BlockPos(10, STAND, 10);
-        BlockState bed = Blocks.RED_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.EAST);
+        BlockState bed = Blocks.BED.red().defaultBlockState().setValue(BedBlock.FACING, Direction.EAST);
         helper.setBlock(head.west(), bed.setValue(BedBlock.PART, BedPart.FOOT));
         helper.setBlock(head, bed.setValue(BedBlock.PART, BedPart.HEAD));
         ServerPlayer owner = player(helper);
@@ -964,7 +964,7 @@ final class ErrandScenarios {
         AbstractPet pet = GameTestKit.wild(helper, InitEntity.USAGI_PET.get(), new BlockPos(5, STAND, 8));
         pet.tame(owner);
         pet.setPetDirective(PetDirective.FOLLOW);
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(2, STAND, 8));
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(2, STAND, 8));
         zombie.setNoAi(true);
         long[] hitAt = {-FORGETTING_TICKS};
         helper.onEachTick(() -> {
@@ -1094,7 +1094,7 @@ final class ErrandScenarios {
 
     /** A zombie that stands still and has one hit left in it. */
     private static Zombie foe(GameTestHelper helper, BlockPos at) {
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, at);
+        Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, at);
         zombie.setNoAi(true);
         zombie.setHealth(1.0F);
         return zombie;
