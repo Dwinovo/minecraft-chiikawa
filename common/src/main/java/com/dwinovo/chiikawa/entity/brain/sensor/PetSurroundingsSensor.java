@@ -83,7 +83,7 @@ public class PetSurroundingsSensor extends Sensor<AbstractPet> {
         return owner.isAlive() && owner.swinging && (isDigger(held) || held.getItem() instanceof BlockItem);
     }
 
-    /** A pickaxe, an axe, a shovel or a hoe: what {@code DiggerItem} was before tools became data. */
+    /** A pickaxe, an axe, a shovel or a hoe, as the vanilla tool tags name them: tools are data on later versions. */
     private static boolean isDigger(ItemStack stack) {
         return stack.is(ItemTags.PICKAXES) || stack.is(ItemTags.AXES) || stack.is(ItemTags.SHOVELS) || stack.is(ItemTags.HOES);
     }
