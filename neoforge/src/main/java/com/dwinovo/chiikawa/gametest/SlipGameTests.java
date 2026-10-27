@@ -18,6 +18,7 @@ import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.item.PetDollData;
 import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.task.TaskTracker;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
@@ -25,8 +26,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -126,11 +125,11 @@ public final class SlipGameTests {
 
         TaskTracker.advance(pet, WorkData.WEED_PULLED, WEEDS);
         // A chunk saves its entities as it unloads them, and removing a living entity clears its memories.
-        CompoundTag saved = new CompoundTag();
-        helper.assertTrue(pet.save(saved), Component.literal("the unloaded pet was not saved"));
+        Optional<CompoundTag> saved = GameTestKit.saved(pet);
+        helper.assertTrue(saved.isPresent(), Component.literal("the unloaded pet was not saved"));
         pet.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
 
-        AbstractPet loaded = (AbstractPet) EntityType.create(saved, helper.getLevel(), EntitySpawnReason.LOAD).orElseThrow();
+        AbstractPet loaded = GameTestKit.petFrom(helper, saved.get());
         helper.assertTrue(loaded.getTask().isEmpty(), Component.literal("the pet loaded again still has the slip"));
         int emeralds = GameTestKit.count(loaded, Items.EMERALD);
         helper.assertTrue(emeralds >= 1 && emeralds <= 2, Component.literal("the pet loaded again has " + emeralds + " emeralds, not the one or two a weeding slip pays"));
