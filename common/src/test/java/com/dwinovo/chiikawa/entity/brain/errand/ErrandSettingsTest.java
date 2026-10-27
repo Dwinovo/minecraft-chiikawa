@@ -206,7 +206,7 @@ class ErrandSettingsTest {
         for (Identifier name : RestSources.names()) {
             assertEquals(RestSpec.from(name), rest("{ \"from\": \"" + name + "\" }"));
         }
-        assertEquals(6, RestSources.names().size());
+        assertEquals(7, RestSources.names().size());
     }
 
     @Test

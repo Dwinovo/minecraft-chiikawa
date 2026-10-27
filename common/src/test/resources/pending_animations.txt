@@ -1,6 +1,7 @@
 # The Blockbench backlog: every animation the enums mean (the first candidate of each PetActivity, PetAction and
-# PetReaction), and the first the flee errand's data names for a character to cower with, that a character able to reach
-# it does not have yet, as `<character> <animation>`. The guitar is asked of Hachiware only, and the generic actions are
+# PetReaction), the first the flee errand's data names for a character to cower with and the sleep errand's to sleep with,
+# the pose and the moves of its part in each pastime and the gesture of the remarks it has a part in, that a character able
+# to reach it does not have yet, as `<character> <animation>`. The guitar is asked of Hachiware only, and the generic actions are
 # only what the others fall back to. AnimationBacklogTest holds the list to
 # the files both ways: a line for an animation that exists, or that the character cannot reach, fails it, and so does a
 # missing one with no line. Making an animation takes its line off; the list shrinks to empty.
@@ -10,12 +11,15 @@ chiikawa bow_release
 chiikawa cry
 chiikawa deposit
 chiikawa harvest
+chiikawa huddle
 chiikawa photo
 chiikawa pickup
 chiikawa plant
 chiikawa scratch_head
 chiikawa slash
 chiikawa sleep
+chiikawa sleep_hug
+chiikawa yawn
 
 furuhonya bow_draw
 furuhonya bow_release
@@ -28,6 +32,7 @@ furuhonya revive
 furuhonya scratch_head
 furuhonya slash
 furuhonya sleep
+furuhonya yawn
 
 hachiware bow_draw
 hachiware bow_release
@@ -36,9 +41,11 @@ hachiware harvest
 hachiware pickup
 hachiware plant
 hachiware slash
+hachiware yawn
 
 kurimanju bow_draw
 kurimanju bow_release
+kurimanju clap
 kurimanju deposit
 kurimanju harvest
 kurimanju photo
@@ -48,6 +55,7 @@ kurimanju revive
 kurimanju scratch_head
 kurimanju slash
 kurimanju sleep
+kurimanju yawn
 
 momonga bow_draw
 momonga bow_release
@@ -59,9 +67,11 @@ momonga plant
 momonga scratch_head
 momonga slash
 momonga sleep
+momonga yawn
 
 rakko bow_draw
 rakko bow_release
+rakko clap
 rakko deposit
 rakko harvest
 rakko photo
@@ -71,6 +81,7 @@ rakko revive
 rakko scratch_head
 rakko slash
 rakko sleep
+rakko yawn
 
 shisa bow_draw
 shisa bow_release
@@ -81,6 +92,7 @@ shisa pickup
 shisa plant
 shisa scratch_head
 shisa slash
+shisa yawn
 
 usagi bow_draw
 usagi bow_release
@@ -93,4 +105,5 @@ usagi revive
 usagi scratch_head
 usagi slash
 usagi sleep
+usagi yawn
 usagi yell
