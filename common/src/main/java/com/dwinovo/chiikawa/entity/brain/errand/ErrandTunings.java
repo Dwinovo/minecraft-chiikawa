@@ -195,6 +195,11 @@ public final class ErrandTunings {
         public List<String> of(Identifier character) {
             return byCharacter.getOrDefault(character, otherwise);
         }
+
+        /** @return those animations as the pose a step shows, which is how the player's game takes several: separated by commas */
+        public String performanceOf(Identifier character) {
+            return String.join(",", of(character));
+        }
     }
 
     /**
