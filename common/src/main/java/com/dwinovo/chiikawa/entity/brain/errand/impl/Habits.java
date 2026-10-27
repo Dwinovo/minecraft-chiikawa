@@ -102,20 +102,24 @@ final class Habits {
      * @return the routine of a habit of a wandering pet: one step
      */
     static Routine wandering(Plan plan, ErrandTunings.Wander wander, int maxTicks) {
-        Step step = switch (plan) {
-            case Strolling strolling -> Amble.stroll(wander.strollSpeed(), wander.strollRadius(), wander.strollAttempts(),
-                wander.strollTicks());
-            case Returning returning -> Amble.homeward(returning.center().pos(), wander.returnSpeed(), maxTicks);
-            default -> stillStep(plan);
-        };
+        Step step;
+        if (plan instanceof Strolling) {
+            step = Amble.stroll(wander.strollSpeed(), wander.strollRadius(), wander.strollAttempts(), wander.strollTicks());
+        } else if (plan instanceof Returning returning) {
+            step = Amble.homeward(returning.center().pos(), wander.returnSpeed(), maxTicks);
+        } else {
+            step = stillStep(plan);
+        }
         return Routine.single(step);
     }
 
     private static Step stillStep(Plan plan) {
-        return switch (plan) {
-            case Looking looking -> new Glance(looking.kind(), looking.target());
-            case Resting resting -> new Pause();
-            default -> throw new IllegalArgumentException(plan + " is not a habit of a pet that stays where it is");
-        };
+        if (plan instanceof Looking looking) {
+            return new Glance(looking.kind(), looking.target());
+        }
+        if (plan instanceof Resting) {
+            return new Pause();
+        }
+        throw new IllegalArgumentException(plan + " is not a habit of a pet that stays where it is");
     }
 }

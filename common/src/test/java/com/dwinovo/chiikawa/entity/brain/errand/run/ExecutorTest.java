@@ -247,10 +247,12 @@ class ExecutorTest {
             ScriptedStep step = ScriptedStep.running();
             each.start(TYPE, PLAN, settings, Routine.single(step), 0);
 
-            switch (ending.outcome()) {
-                case Outcome.Done done -> step.then(StepStatus.DONE);
-                case Outcome.GaveUp gaveUp -> step.then(StepStatus.gaveUp(gaveUp.reason()));
-                case Outcome.Interrupted interrupted -> each.requestEnd(interrupted);
+            if (ending.outcome() instanceof Outcome.Done) {
+                step.then(StepStatus.DONE);
+            } else if (ending.outcome() instanceof Outcome.GaveUp gaveUp) {
+                step.then(StepStatus.gaveUp(gaveUp.reason()));
+            } else {
+                each.requestEnd((Outcome.Interrupted) ending.outcome());
             }
             each.tick(1);
             each.tick(2);
@@ -271,10 +273,12 @@ class ExecutorTest {
             Executor each = executorOver(new TestRests.Store(), new DecisionLog());
             each.start(TYPE, PLAN, settings, Routine.single(step).releasing(h -> stepsReleased.add(step.released)), 0);
 
-            switch (outcome) {
-                case Outcome.Done done -> step.then(StepStatus.DONE);
-                case Outcome.GaveUp gaveUp -> step.then(StepStatus.gaveUp(gaveUp.reason()));
-                case Outcome.Interrupted interrupted -> each.requestEnd(interrupted);
+            if (outcome instanceof Outcome.Done) {
+                step.then(StepStatus.DONE);
+            } else if (outcome instanceof Outcome.GaveUp gaveUp) {
+                step.then(StepStatus.gaveUp(gaveUp.reason()));
+            } else {
+                each.requestEnd((Outcome.Interrupted) outcome);
             }
             each.tick(1);
             each.tick(2);
