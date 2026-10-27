@@ -74,6 +74,13 @@ public final class ForgeModNetworking {
                     PetServerPacketHandler.handleDirective(payload, player);
                 }
             });
+        serverbound(PetPayloads.PetRulesPayload.class, PetPayloads.PetRulesPayload::read,
+            (payload, context) -> {
+                ServerPlayer player = context.getSender();
+                if (player != null) {
+                    PetServerPacketHandler.handleRules(payload, player);
+                }
+            });
         clientbound(ShopPayloads.ShopPricesPayload.class, ShopPayloads.ShopPricesPayload::read,
             (payload, context) -> ClientShopPacketHandler.handlePrices(payload));
         clientbound(ManualPayloads.OpenHandbookPayload.class, ManualPayloads.OpenHandbookPayload::read,
@@ -118,6 +125,8 @@ public final class ForgeModNetworking {
             (payload, context) -> ClientVoicePacketHandler.handleSpeech(payload));
         clientbound(PetPayloads.PetGesturePayload.class, PetPayloads.PetGesturePayload::read,
             (payload, context) -> ClientPetPacketHandler.handleGesture(payload));
+        clientbound(PetPayloads.PetOutlookPayload.class, PetPayloads.PetOutlookPayload::read,
+            (payload, context) -> ClientPetPacketHandler.handleOutlook(payload));
         clientbound(SettingsPayloads.WorldSettingsPayload.class, SettingsPayloads.WorldSettingsPayload::read,
             (payload, context) -> ClientSettingsPacketHandler.handleWorld(payload));
         serverbound(SettingsPayloads.ChangeWorldSettingsPayload.class, SettingsPayloads.ChangeWorldSettingsPayload::read,

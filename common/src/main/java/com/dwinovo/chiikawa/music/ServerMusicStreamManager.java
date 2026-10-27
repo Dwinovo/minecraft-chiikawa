@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.music;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
+import com.dwinovo.chiikawa.network.MusicPayloads;
 import com.dwinovo.chiikawa.network.MusicPayloads.MusicStreamChunkPayload;
 import com.dwinovo.chiikawa.network.MusicPayloads.MusicStreamStartPayload;
 import com.dwinovo.chiikawa.network.MusicPayloads.MusicStreamStopPayload;

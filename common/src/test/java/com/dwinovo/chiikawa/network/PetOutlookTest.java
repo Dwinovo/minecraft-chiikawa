@@ -29,8 +29,7 @@ import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -113,11 +112,11 @@ class PetOutlookTest {
     void whatTheScreenIsToldComesBackAsItWasSent() {
         PetOutlookPayload outlook = new PetOutlookPayload(PET, Optional.of(WorkData.HARVEST), Optional.of("intent.chiikawa.fail.no_crop"),
             Optional.of("tag.item.minecraft.arrows"));
-        RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), RegistryAccess.EMPTY);
+        FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
 
-        PetOutlookPayload.STREAM_CODEC.encode(buffer, outlook);
+        outlook.write(buffer);
 
-        assertEquals(outlook, PetOutlookPayload.STREAM_CODEC.decode(buffer));
+        assertEquals(outlook, PetOutlookPayload.read(buffer));
     }
 
     private static Optional<WhyNot> whyNot(PetMind.Look look) {

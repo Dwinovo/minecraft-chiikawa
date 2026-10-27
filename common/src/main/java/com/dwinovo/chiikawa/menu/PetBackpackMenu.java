@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.menu;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitMenu;
 import com.dwinovo.chiikawa.item.BagItem;
+import com.dwinovo.chiikawa.network.PetPayloads;
 import com.dwinovo.chiikawa.network.PetPayloads.PetOutlookPayload;
 import com.dwinovo.chiikawa.platform.Services;
 
@@ -168,7 +169,7 @@ public class PetBackpackMenu extends AbstractContainerMenu {
         super.broadcastChanges();
         if (viewer != null && pet != null && --untilOutlook <= 0) {
             untilOutlook = OUTLOOK_INTERVAL;
-            if (pet.level() instanceof ServerLevel level && Services.NETWORK.canReceive(viewer, PetOutlookPayload.TYPE)) {
+            if (pet.level() instanceof ServerLevel level && Services.NETWORK.canReceive(viewer, PetPayloads.PET_OUTLOOK)) {
                 Services.NETWORK.sendToClient(viewer, PetOutlookPayload.of(pet.getId(), pet.getMind().look(level),
                     pet.getMind().whyNot()));
             }
