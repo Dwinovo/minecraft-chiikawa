@@ -31,12 +31,52 @@ public sealed interface Goal {
     boolean lookAt(LiveHandle live);
 
     /**
+     * @param where where it is now
+     * @param arriveDistanceSqr how near, squared, a walk to it counts as being there
+     * @return whether the pet has got there: near enough, unless the goal says it is somewhere to be in and not near
+     */
+    default boolean reached(LiveHandle live, Vec3 where, double arriveDistanceSqr) {
+        return live.pet().distanceToSqr(where) <= arriveDistanceSqr;
+    }
+
+    /**
      * @param pos the block
      */
     record Place(BlockPos pos) implements Goal {
         @Override
         public Optional<Vec3> where(LiveHandle live) {
             return Optional.of(Vec3.atCenterOf(pos));
+        }
+
+        @Override
+        public boolean walkTo(LiveHandle live, float speed, int closeEnough) {
+            live.walkTo(pos, speed, closeEnough);
+            return true;
+        }
+
+        @Override
+        public boolean lookAt(LiveHandle live) {
+            live.lookAt(pos);
+            return true;
+        }
+    }
+
+    /**
+     * A block the pet is to stand in, such as the place out of the rain that a roof makes: reached once the pet is in the
+     * block and not before, however near it is. Near is not enough there: a pet that stops half a block short of the roof
+     * stands in the rain.
+     *
+     * @param pos the block
+     */
+    record Spot(BlockPos pos) implements Goal {
+        @Override
+        public Optional<Vec3> where(LiveHandle live) {
+            return Optional.of(Vec3.atCenterOf(pos));
+        }
+
+        @Override
+        public boolean reached(LiveHandle live, Vec3 where, double arriveDistanceSqr) {
+            return live.pet().blockPosition().equals(pos);
         }
 
         @Override
