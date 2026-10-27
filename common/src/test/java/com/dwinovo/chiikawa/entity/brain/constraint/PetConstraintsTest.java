@@ -8,6 +8,7 @@ import com.dwinovo.chiikawa.entity.CombatStance;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.PetRules;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
+import com.dwinovo.chiikawa.settings.WorldSettings;
 import com.dwinovo.chiikawa.testing.TestAnchors;
 import java.util.EnumSet;
 import java.util.List;
@@ -23,6 +24,9 @@ import net.minecraft.world.level.Level;
 import org.junit.jupiter.api.Test;
 
 class PetConstraintsTest {
+    /** The world's pastimes setting as it is until somebody changes it. */
+    private static final float PASTIMES = WorldSettings.DEFAULT.pastimes();
+
     private static final ResourceKey<Registry<Level>> DIMENSION_REGISTRY =
         ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension"));
     private static final ResourceKey<Level> OVERWORLD =
@@ -130,8 +134,8 @@ class PetConstraintsTest {
                 PetRules rules = PetRules.DEFAULT.with(toggle, false);
                 for (ErrandCategory category : ErrandCategory.values()) {
                     boolean expected = category != toggle.category()
-                        && PetConstraints.allows(directive, OWNED, PetRules.DEFAULT, category);
-                    assertEquals(expected, PetConstraints.allows(directive, OWNED, rules, category),
+                        && PetConstraints.allows(directive, OWNED, PetRules.DEFAULT, PASTIMES, category);
+                    assertEquals(expected, PetConstraints.allows(directive, OWNED, rules, PASTIMES, category),
                         () -> directive + " / " + toggle + " off / " + category);
                 }
             }
@@ -140,11 +144,11 @@ class PetConstraintsTest {
 
     @Test
     void aSwitchOffForbidsItsCategoryEvenInTheDirectiveThatPermitsItMost() {
-        assertFalse(PetConstraints.allows(PetDirective.FREE, OWNED, PetRules.DEFAULT.with(PetRules.Toggle.SHOP, false), ErrandCategory.SHOP));
-        assertFalse(PetConstraints.allows(PetDirective.FOLLOW, OWNED, PetRules.DEFAULT.with(PetRules.Toggle.GIFT, false), ErrandCategory.GIFT));
-        assertFalse(PetConstraints.allows(PetDirective.FOLLOW, OWNED, PetRules.DEFAULT.with(PetRules.Toggle.SOCIAL, false), ErrandCategory.SOCIAL));
-        assertFalse(PetConstraints.allows(PetDirective.FOLLOW, OWNED, PetRules.DEFAULT.with(PetRules.Toggle.PHOTO, false), ErrandCategory.PHOTO));
-        assertFalse(PetConstraints.allows(PetDirective.FREE, OWNED, PetRules.DEFAULT.with(PetRules.Toggle.PICK_UP, false), ErrandCategory.PICK_UP));
+        assertFalse(PetConstraints.allows(PetDirective.FREE, OWNED, PetRules.DEFAULT.with(PetRules.Toggle.SHOP, false), PASTIMES, ErrandCategory.SHOP));
+        assertFalse(PetConstraints.allows(PetDirective.FOLLOW, OWNED, PetRules.DEFAULT.with(PetRules.Toggle.GIFT, false), PASTIMES, ErrandCategory.GIFT));
+        assertFalse(PetConstraints.allows(PetDirective.FOLLOW, OWNED, PetRules.DEFAULT.with(PetRules.Toggle.SOCIAL, false), PASTIMES, ErrandCategory.SOCIAL));
+        assertFalse(PetConstraints.allows(PetDirective.FOLLOW, OWNED, PetRules.DEFAULT.with(PetRules.Toggle.PHOTO, false), PASTIMES, ErrandCategory.PHOTO));
+        assertFalse(PetConstraints.allows(PetDirective.FREE, OWNED, PetRules.DEFAULT.with(PetRules.Toggle.PICK_UP, false), PASTIMES, ErrandCategory.PICK_UP));
     }
 
     @Test
@@ -152,8 +156,8 @@ class PetConstraintsTest {
         PetRules rules = PetRules.DEFAULT.withStance(CombatStance.NONE).withSwap(false);
         for (PetDirective directive : PetDirective.values()) {
             for (ErrandCategory category : ErrandCategory.values()) {
-                assertEquals(PetConstraints.allows(directive, OWNED, PetRules.DEFAULT, category),
-                    PetConstraints.allows(directive, OWNED, rules, category), directive + " / " + category);
+                assertEquals(PetConstraints.allows(directive, OWNED, PetRules.DEFAULT, PASTIMES, category),
+                    PetConstraints.allows(directive, OWNED, rules, PASTIMES, category), directive + " / " + category);
             }
         }
     }
@@ -166,7 +170,7 @@ class PetConstraintsTest {
         }
         for (PetDirective directive : PetDirective.values()) {
             for (PetOwnership ownership : List.of(OWNED, PetOwnership.WILD)) {
-                assertTrue(PetConstraints.allows(directive, ownership, everythingOff, ErrandCategory.SAFETY),
+                assertTrue(PetConstraints.allows(directive, ownership, everythingOff, PASTIMES, ErrandCategory.SAFETY),
                     directive + " / " + ownership);
             }
         }
@@ -179,19 +183,19 @@ class PetConstraintsTest {
             rules = rules.with(toggle, false);
         }
 
-        assertTrue(PetConstraints.allows(PetDirective.FOLLOW, OWNED, rules, ErrandCategory.FOLLOW_OWNER));
-        assertTrue(PetConstraints.allows(PetDirective.FOLLOW, OWNED, rules, ErrandCategory.WANDER));
-        assertTrue(PetConstraints.allows(PetDirective.FOLLOW, OWNED, rules, ErrandCategory.COMBAT));
-        assertTrue(PetConstraints.allows(PetDirective.STAY, OWNED, rules, ErrandCategory.STAY));
-        assertTrue(PetConstraints.allows(PetDirective.FREE, OWNED, rules, ErrandCategory.WORK));
+        assertTrue(PetConstraints.allows(PetDirective.FOLLOW, OWNED, rules, PASTIMES, ErrandCategory.FOLLOW_OWNER));
+        assertTrue(PetConstraints.allows(PetDirective.FOLLOW, OWNED, rules, PASTIMES, ErrandCategory.WANDER));
+        assertTrue(PetConstraints.allows(PetDirective.FOLLOW, OWNED, rules, PASTIMES, ErrandCategory.COMBAT));
+        assertTrue(PetConstraints.allows(PetDirective.STAY, OWNED, rules, PASTIMES, ErrandCategory.STAY));
+        assertTrue(PetConstraints.allows(PetDirective.FREE, OWNED, rules, PASTIMES, ErrandCategory.WORK));
     }
 
     @Test
-    void followPermitsFollowingWanderingTakingSlipsGivingMeetingPetsExamsPhotosAndDefendingTheOwner() {
+    void followPermitsFollowingWanderingTakingSlipsGivingMeetingPetsExamsPhotosPastimesSleepingAndDefendingTheOwner() {
         assertPermits(PetDirective.FOLLOW, OWNED,
             EnumSet.of(ErrandCategory.FOLLOW_OWNER, ErrandCategory.WANDER, ErrandCategory.TAKE_TASK,
                 ErrandCategory.GIFT, ErrandCategory.COMBAT, ErrandCategory.SOCIAL, ErrandCategory.EXAM, ErrandCategory.PHOTO,
-                ErrandCategory.SAFETY));
+                ErrandCategory.PASTIME, ErrandCategory.SLEEP, ErrandCategory.SAFETY));
     }
 
     @Test
@@ -203,7 +207,8 @@ class PetConstraintsTest {
     void freePermitsEverythingAPetDoesOnItsOwnTime() {
         assertPermits(PetDirective.FREE, OWNED, EnumSet.of(ErrandCategory.WANDER, ErrandCategory.WORK, ErrandCategory.FORAGE,
             ErrandCategory.COMBAT, ErrandCategory.PICK_UP, ErrandCategory.TAKE_TASK, ErrandCategory.SHOP,
-            ErrandCategory.GIFT, ErrandCategory.SOCIAL, ErrandCategory.EXAM, ErrandCategory.PHOTO, ErrandCategory.SAFETY));
+            ErrandCategory.GIFT, ErrandCategory.SOCIAL, ErrandCategory.EXAM, ErrandCategory.PHOTO, ErrandCategory.PASTIME,
+            ErrandCategory.SLEEP, ErrandCategory.SAFETY));
     }
 
     @Test
@@ -211,7 +216,33 @@ class PetConstraintsTest {
         for (PetDirective directive : PetDirective.values()) {
             assertPermits(directive, PetOwnership.WILD,
                 EnumSet.of(ErrandCategory.WANDER, ErrandCategory.FORAGE, ErrandCategory.COMBAT, ErrandCategory.TAKE_TASK,
-                    ErrandCategory.SOCIAL, ErrandCategory.CURIOUS, ErrandCategory.SAFETY));
+                    ErrandCategory.SOCIAL, ErrandCategory.CURIOUS, ErrandCategory.PASTIME, ErrandCategory.SLEEP,
+                    ErrandCategory.SAFETY));
+        }
+    }
+
+    @Test
+    void aWorldWithPastimesTurnedOffForbidsThemAndNothingElse() {
+        for (PetDirective directive : PetDirective.values()) {
+            for (PetOwnership ownership : List.of(OWNED, PetOwnership.WILD)) {
+                for (ErrandCategory category : ErrandCategory.values()) {
+                    boolean expected = category != ErrandCategory.PASTIME
+                        && PetConstraints.allows(directive, ownership, PetRules.DEFAULT, PASTIMES, category);
+                    assertEquals(expected, PetConstraints.allows(directive, ownership, PetRules.DEFAULT, 0.0F, category),
+                        () -> directive + " / " + ownership + " / " + category);
+                }
+            }
+        }
+    }
+
+    @Test
+    void aWorldWithPastimesTurnedUpPermitsThemWhereWanderingIs() {
+        for (PetDirective directive : PetDirective.values()) {
+            for (PetOwnership ownership : List.of(OWNED, PetOwnership.WILD)) {
+                assertEquals(PetConstraints.allows(directive, ownership, PetRules.DEFAULT, PASTIMES, ErrandCategory.WANDER),
+                    PetConstraints.allows(directive, ownership, PetRules.DEFAULT, WorldSettings.MAX_PASTIMES, ErrandCategory.PASTIME),
+                    directive + " / " + ownership);
+            }
         }
     }
 
@@ -265,7 +296,7 @@ class PetConstraintsTest {
 
     private static void assertPermits(PetDirective directive, PetOwnership ownership, Set<ErrandCategory> permitted) {
         for (ErrandCategory category : ErrandCategory.values()) {
-            assertEquals(permitted.contains(category), PetConstraints.allows(directive, ownership, PetRules.DEFAULT, category),
+            assertEquals(permitted.contains(category), PetConstraints.allows(directive, ownership, PetRules.DEFAULT, PASTIMES, category),
                 () -> directive + " / " + ownership + " / " + category);
         }
     }

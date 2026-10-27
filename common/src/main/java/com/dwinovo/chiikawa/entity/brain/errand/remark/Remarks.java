@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.errand.LackKey;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.WhyNot;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Aside;
+import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.init.InitMemory;
 import java.util.Comparator;
 import java.util.Map;
@@ -22,20 +23,25 @@ import net.minecraft.world.entity.player.Player;
  * rested, and is tried again.
  */
 public final class Remarks {
+    /** How often a pet looks over its remarks: they are asides, and a couple of seconds late is not late. */
+    public static final int INTERVAL = 20;
+
     private Remarks() {
     }
 
     /**
-     * Makes the remark that is due, if one is. A pet that is at work, or has none to do, has nothing to remark on.
+     * Makes the remark that is due, if one is. What a remark is about is for its cues to say: one about being short of
+     * something is not made by a pet that is at work, or has none to do.
      *
      * @param aside what the pet may do beside its errand
      * @param whyNot why the pet is not at work, if it is not
      */
     public static void tick(AbstractPet pet, Aside aside, Optional<WhyNot> whyNot) {
-        if (whyNot.isEmpty() || !(pet.level() instanceof ServerLevel level)) {
+        if (!(pet.level() instanceof ServerLevel level)) {
             return;
         }
-        RemarkCue.Situation situation = new RemarkCue.Situation(whyNot, level.getGameTime(), ownerDistance(pet));
+        RemarkCue.Situation situation = new RemarkCue.Situation(whyNot, level.getGameTime(), ownerDistance(pet),
+            DayPhase.in(level));
         RemarkRests rests = pet.getBrain().getMemory(InitMemory.REMARK_RESTS.get()).orElse(RemarkRests.NONE);
         remark(PetRemarks.all(), BuiltInRegistries.ENTITY_TYPE.getKey(pet.getType()), situation, rests, aside)
             .ifPresent(next -> pet.getBrain().setMemory(InitMemory.REMARK_RESTS.get(), next));

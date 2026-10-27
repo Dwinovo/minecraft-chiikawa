@@ -103,6 +103,11 @@ class StateOwnershipTest {
         new Rule("the blocks of work the sensor sees",
             Pattern.compile(WRITE + "InitMemory\\.WORK_SIGHTS\\b"),
             Set.of(SENSORS + "PetWorkSensor.java")),
+        new Rule("what a pet sees round it, and when it last saw its owner",
+            Pattern.compile(WRITE + "InitMemory\\.(?:SURROUNDINGS|OWNER_SEEN)\\b"),
+            Set.of(SENSORS + "PetSurroundingsSensor.java")),
+        new Rule("the nearest bed", Pattern.compile(WRITE + "MemoryModuleType\\.NEAREST_BED\\b"),
+            Set.of(SENSORS + "PetPlacesSensor.java")),
         // Retired in 0.1.4 and kept registered only so that the saves that hold them still load: nobody writes them.
         new Rule("the blocks of work the farmer saw before the work sensor",
             Pattern.compile(WRITE + "InitMemory\\.(?:HARVEST_POS|PLANT_POS|CONTAINER_POS|WEED_POS|MUSHROOM_POS)\\b"),

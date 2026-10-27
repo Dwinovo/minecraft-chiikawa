@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.errand.work;
 
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.entity.brain.errand.Plan;
+import com.dwinovo.chiikawa.entity.brain.errand.pastime.Pastime;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.dwinovo.chiikawa.task.PetTask;
 import java.util.List;
@@ -18,12 +19,13 @@ import net.minecraft.resources.ResourceLocation;
  * @param counter the work counter its steps report, which a slip that counts it prefers the errand for
  * @param requires further conditions, checked in order before the action's own
  * @param target what the action is done to, for an action that takes one
+ * @param pastime when a pet passes the time with it and who does, for a work that is a pastime and for no other
  * @param <P> the shape of the action's plans
  * @param <T> the shape of the action's tuning
  */
 public record Work<P extends Plan, T>(WorkAction<P, T> action, ErrandCategory category,
                                       Optional<ResourceLocation> counter, List<WorkRequirement> requires,
-                                      Optional<WorkTarget> target) {
+                                      Optional<WorkTarget> target, Optional<Pastime> pastime) {
     public Work {
         requires = List.copyOf(requires);
     }
@@ -40,9 +42,15 @@ public record Work<P extends Plan, T>(WorkAction<P, T> action, ErrandCategory ca
 
     /** @return what is wrong with this work that a file cannot be read for, or nothing */
     Optional<String> problem() {
-        Optional<String> refused = action.refuses(target);
+        Optional<String> refused = action.refuses(target).or(() -> action.refusesPastime(pastime));
         if (refused.isPresent()) {
             return refused;
+        }
+        if ((category == ErrandCategory.PASTIME) != pastime.isPresent()) {
+            return Optional.of(category == ErrandCategory.PASTIME ? "a pastime needs a cast" : "only a pastime has a cast");
+        }
+        if (pastime.filter(found -> found.cast().isEmpty()).isPresent()) {
+            return Optional.of("a pastime with nobody in it is never done");
         }
         return requires.stream().flatMap(requirement -> requirement.problemWith(this).stream()).findFirst();
     }
