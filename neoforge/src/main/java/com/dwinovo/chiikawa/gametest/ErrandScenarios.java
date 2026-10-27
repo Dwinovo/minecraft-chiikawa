@@ -438,11 +438,18 @@ final class ErrandScenarios {
         return new Scenario(pet, 2, ran -> Optional.empty());
     }
 
-    /** Rakko and a cake lying a few blocks off: it goes over and stares at it. */
+    /**
+     * Rakko and a cake in each quarter of the yard: it goes over to one and stares at it. One cake would do in a game, but a pet
+     * that strolls off first can end up past its sight of a single cake before it thinks of one; with four, wherever it strolls
+     * a cake is in sight.
+     */
     private static Scenario sweetsStare(GameTestHelper helper) {
         AbstractPet pet = GameTestKit.owned(helper, InitEntity.RAKKO_PET.get(), new BlockPos(4, STAND, 4));
         pet.setPetDirective(PetDirective.FREE);
-        helper.spawnItem(Items.CAKE, new BlockPos(9, STAND, 8));
+        for (BlockPos cake : List.of(new BlockPos(3, STAND, 3), new BlockPos(3, STAND, 12), new BlockPos(12, STAND, 3),
+                new BlockPos(12, STAND, 12))) {
+            helper.spawnItem(Items.CAKE, cake);
+        }
         return new Scenario(pet, 2, ran -> Optional.empty());
     }
 
