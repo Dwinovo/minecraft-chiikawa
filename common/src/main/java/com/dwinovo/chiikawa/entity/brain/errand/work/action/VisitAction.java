@@ -47,13 +47,19 @@ public final class VisitAction implements WorkAction<VisitAction.Visiting, Erran
     public record Visiting(ResourceLocation errand, Stage stage, Goal goal) implements Plan {
         @Override
         public Optional<GlobalPos> destination(PetView view) {
-            return switch (goal) {
-                case Goal.Owner owner -> view.ownerPos();
-                case Goal.Creature creature -> view.whereIs(creature.id());
-                case Goal.Place place -> Optional.of(GlobalPos.of(view.pos().dimension(), place.pos()));
-                case Goal.Spot spot -> Optional.of(GlobalPos.of(view.pos().dimension(), spot.pos()));
-                default -> Optional.empty();
-            };
+            if (goal instanceof Goal.Owner) {
+                return view.ownerPos();
+            }
+            if (goal instanceof Goal.Creature creature) {
+                return view.whereIs(creature.id());
+            }
+            if (goal instanceof Goal.Place place) {
+                return Optional.of(GlobalPos.of(view.pos().dimension(), place.pos()));
+            }
+            if (goal instanceof Goal.Spot spot) {
+                return Optional.of(GlobalPos.of(view.pos().dimension(), spot.pos()));
+            }
+            return Optional.empty();
         }
 
         @Override
@@ -105,11 +111,13 @@ public final class VisitAction implements WorkAction<VisitAction.Visiting, Erran
     @Override
     public Check stillWanted(Work<Visiting, ErrandTunings.Visit> work, ResourceLocation errand, Visiting plan, PetView view,
             ErrandTunings.Visit tuning) {
-        return switch (plan.goal()) {
-            case Goal.Owner owner -> view.ownerPos().isPresent() ? Check.OK : Check.fail("owner_unavailable");
-            case Goal.Creature creature -> view.whereIs(creature.id()).isPresent() ? Check.OK : Check.fail("no_creature");
-            default -> Check.OK;
-        };
+        if (plan.goal() instanceof Goal.Owner) {
+            return view.ownerPos().isPresent() ? Check.OK : Check.fail("owner_unavailable");
+        }
+        if (plan.goal() instanceof Goal.Creature creature) {
+            return view.whereIs(creature.id()).isPresent() ? Check.OK : Check.fail("no_creature");
+        }
+        return Check.OK;
     }
 
     /**
@@ -119,25 +127,34 @@ public final class VisitAction implements WorkAction<VisitAction.Visiting, Erran
      */
     private static Optional<Goal> aim(Destination to, PetView view) {
         Surroundings around = view.surroundings();
-        return switch (to) {
-            case Destination.ToOwner owner -> view.ownerPos().map(ignored -> new Goal.Owner());
-            case Destination.ToShelter shelter -> around.shelter().map(Goal.Spot::new);
-            case Destination.ToCreature creature -> around.creatures().stream().filter(seen -> seen.kind().is(creature.kinds()))
+        if (to instanceof Destination.ToOwner) {
+            return view.ownerPos().map(ignored -> new Goal.Owner());
+        }
+        if (to instanceof Destination.ToShelter) {
+            return around.shelter().map(Goal.Spot::new);
+        }
+        if (to instanceof Destination.ToCreature creature) {
+            return around.creatures().stream().filter(seen -> seen.kind().is(creature.kinds()))
                 .findFirst().map(seen -> new Goal.Creature(seen.id()));
-            case Destination.ToItem item -> around.items().stream()
-                .filter(seen -> seen.kind().builtInRegistryHolder().is(item.kinds())).findFirst()
-                .map(seen -> new Goal.Place(seen.where()));
-        };
+        }
+        Destination.ToItem item = (Destination.ToItem) to;
+        return around.items().stream()
+            .filter(seen -> seen.kind().builtInRegistryHolder().is(item.kinds())).findFirst()
+            .map(seen -> new Goal.Place(seen.where()));
     }
 
     /** @return why there is nowhere to go, as the pet's reasons are worded */
     private static String missing(Destination to) {
-        return switch (to) {
-            case Destination.ToOwner owner -> "owner_unavailable";
-            case Destination.ToShelter shelter -> "no_shelter";
-            case Destination.ToCreature creature -> "no_creature";
-            case Destination.ToItem item -> "no_item";
-        };
+        if (to instanceof Destination.ToOwner) {
+            return "owner_unavailable";
+        }
+        if (to instanceof Destination.ToShelter) {
+            return "no_shelter";
+        }
+        if (to instanceof Destination.ToCreature) {
+            return "no_creature";
+        }
+        return "no_item";
     }
 
     @Override

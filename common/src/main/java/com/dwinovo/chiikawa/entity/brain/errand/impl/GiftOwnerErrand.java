@@ -107,18 +107,19 @@ public final class GiftOwnerErrand implements ErrandType<GiftOwnerErrand.Present
     @Override
     public Routine routine(Presenting plan, ErrandSettings<ErrandTunings.GiftOwner> settings) {
         ErrandTunings.GiftOwner tuning = settings.tuning();
-        return switch (plan) {
-            case Delivery delivery -> Routine.of(
+        if (plan instanceof Delivery) {
+            return Routine.of(
                 Routine.step(() -> new WalkTo(new Goal.Owner(), tuning.speed(), tuning.arriveDistance(), tuning.reach(),
                     settings.maxTicks(), settings.maxTicks())),
                 Routine.step(HandOver::new)).releasing(TakePresent::putBack);
-            case Bedside bedside -> Routine.of(
-                Routine.step(() -> WalkTo.near(new Goal.Place(bedside.where().pos()), tuning.speed(), tuning.arriveDistance(),
-                    tuning.reach(), settings.maxTicks())),
-                Routine.step(() -> new WaitForWaking(SleepErrand.sleeps())),
-                Routine.step(() -> new PlaceByBed(tuning.morningFrom(), tuning.morningTo(), tuning.sleptTicks())))
-                .releasing(TakePresent::putBack);
-        };
+        }
+        Bedside bedside = (Bedside) plan;
+        return Routine.of(
+            Routine.step(() -> WalkTo.near(new Goal.Place(bedside.where().pos()), tuning.speed(), tuning.arriveDistance(),
+                tuning.reach(), settings.maxTicks())),
+            Routine.step(() -> new WaitForWaking(SleepErrand.sleeps())),
+            Routine.step(() -> new PlaceByBed(tuning.morningFrom(), tuning.morningTo(), tuning.sleptTicks())))
+            .releasing(TakePresent::putBack);
     }
 
     @Override

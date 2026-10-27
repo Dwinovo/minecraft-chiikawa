@@ -121,10 +121,7 @@ public final class SleepErrand implements ErrandType<SleepErrand.Resting, Errand
     @Override
     public Routine routine(Resting plan, ErrandSettings<ErrandTunings.Sleep> settings) {
         ErrandTunings.Sleep tuning = settings.tuning();
-        GlobalPos where = switch (plan) {
-            case OnBed onBed -> onBed.bed();
-            case OnGround onGround -> onGround.spot();
-        };
+        GlobalPos where = plan instanceof OnBed onBed ? onBed.bed() : ((OnGround) plan).spot();
         return Routine.of(
             Routine.step(() -> WalkTo.near(new Goal.Place(where.pos()), tuning.speed(), tuning.arriveDistance(), tuning.reach(),
                 settings.maxTicks())),

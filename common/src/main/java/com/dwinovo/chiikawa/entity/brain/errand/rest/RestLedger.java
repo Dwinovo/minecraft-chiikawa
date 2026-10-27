@@ -100,11 +100,14 @@ public final class RestLedger {
      */
     public void afterOutcome(Running running, Outcome outcome, long now) {
         ErrandSettings.Rests rests = running.settings().rests();
-        RestSpec spec = switch (outcome) {
-            case Outcome.Done done -> rests.done();
-            case Outcome.GaveUp gaveUp -> rests.gaveUp();
-            case Outcome.Interrupted interrupted -> rests.interrupted();
-        };
+        RestSpec spec;
+        if (outcome instanceof Outcome.Done) {
+            spec = rests.done();
+        } else if (outcome instanceof Outcome.GaveUp) {
+            spec = rests.gaveUp();
+        } else {
+            spec = rests.interrupted();
+        }
         RestContext context = RestContext.of(running.plan());
         long ticks = ticks(running.errand(), spec, context);
         if (ticks <= 0) {
