@@ -20,8 +20,8 @@ import org.junit.jupiter.api.Test;
 /** Going over to see who whistled: when the pet sets off, and where the errand takes it. */
 class AnswerWhistleOfferTest {
     private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
-        ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
-        ResourceLocation.withDefaultNamespace("overworld"));
+        ResourceKey.createRegistryKey(new ResourceLocation("dimension")),
+        new ResourceLocation("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     private static final GlobalPos BLOWN = GlobalPos.of(OVERWORLD, new BlockPos(6, 64, 0));
     private static final PetAnchor FREE = TestAnchors.free(HOME);

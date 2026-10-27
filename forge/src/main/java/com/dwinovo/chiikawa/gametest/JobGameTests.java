@@ -120,7 +120,7 @@ public final class JobGameTests {
         AbstractPet pet = holding(wildPet(helper, new BlockPos(3, STAND, 3)), Items.WOODEN_HOE);
         try {
             JobWork.replaceAll(Map.of(JobIds.FARMER, new JobWork(List.of(WorkData.HARVEST,
-                ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "sulk"), WorkData.PLANT),
+                new ResourceLocation(Constants.MOD_ID, "sulk"), WorkData.PLANT),
                 JobWorkData.all().get(JobIds.FARMER).sight())));
 
             helper.assertTrue(offeredBy(pet).equals(withWork(WorkData.HARVEST, WorkData.PLANT)),

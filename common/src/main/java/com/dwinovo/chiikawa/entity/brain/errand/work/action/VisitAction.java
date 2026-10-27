@@ -35,7 +35,7 @@ import net.minecraft.resources.ResourceLocation;
  * from what the pet sees, and the pet gives the pastime up if it is gone before the pet is there or while it is there.
  */
 public final class VisitAction implements WorkAction<VisitAction.Visiting, ErrandTunings.Visit> {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "visit");
+    public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, "visit");
 
     /**
      * What the pet has set out to do.

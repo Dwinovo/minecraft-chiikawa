@@ -62,7 +62,7 @@ class AnimationBacklogTest {
     /** @return the animation the character sleeps with, which is the first its data names for it */
     private static String sleeping(String character) {
         ErrandTunings.Sleep sleep = (ErrandTunings.Sleep) ErrandSettingsData.all().get(ErrandIds.SLEEP).tuning();
-        return sleep.sleeps().of(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, character)).get(0);
+        return sleep.sleeps().of(new ResourceLocation(Constants.MOD_ID, character)).get(0);
     }
 
     /**
@@ -70,7 +70,7 @@ class AnimationBacklogTest {
      *         each pastime, the moves of its beats, and the gesture of the remarks it has a part in
      */
     private static Set<String> passingTheTime(String character) {
-        ResourceLocation who = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, character);
+        ResourceLocation who = new ResourceLocation(Constants.MOD_ID, character);
         Set<String> names = new TreeSet<>();
         PastimeData.works().values().forEach(work -> work.pastime().map(pastime -> pastime.cast().get(who)).ifPresent(stage -> {
             stage.pose().ifPresent(pose -> names.add(pose.split(",")[0]));
@@ -89,7 +89,7 @@ class AnimationBacklogTest {
     /** @return the animation the character cowers with when it is frightened, which is the first its data names for it */
     private static String cowering(String character) {
         ErrandTunings.Flee flee = (ErrandTunings.Flee) ErrandSettingsData.all().get(ErrandIds.FLEE).tuning();
-        return flee.cowers().of(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, character)).get(0);
+        return flee.cowers().of(new ResourceLocation(Constants.MOD_ID, character)).get(0);
     }
 
     /** @return whether the character is the one the musician job is open to, by the name of its class */

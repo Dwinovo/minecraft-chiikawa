@@ -90,6 +90,6 @@ public final class WorkData {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path);
+        return new ResourceLocation(Constants.MOD_ID, path);
     }
 }

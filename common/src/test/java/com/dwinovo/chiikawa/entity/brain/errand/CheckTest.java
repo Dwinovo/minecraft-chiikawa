@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 /** What an errand answers when it cannot start, and what a pet that lacks something says it lacks. */
 class CheckTest {
-    private static final ResourceLocation MUSIC_BOX = ResourceLocation.fromNamespaceAndPath("chiikawa", "music_box");
+    private static final ResourceLocation MUSIC_BOX = new ResourceLocation("chiikawa", "music_box");
 
     @BeforeAll
     static void bootstrap() {
@@ -51,7 +51,7 @@ class CheckTest {
     void whatIsShortIsNamedByTheKeyOfItsNameInTheGamesWords() {
         assertEquals("tag.item.minecraft.arrows", LackKey.tag(ItemTags.ARROWS).translationKey());
         assertEquals("tag.item.chiikawa.entity_plant_crops", new LackKey.OfTag(
-            ResourceLocation.fromNamespaceAndPath("chiikawa", "entity_plant_crops")).translationKey());
+            new ResourceLocation("chiikawa", "entity_plant_crops")).translationKey());
         // An item the registry does not know yet is named the way the game names an item.
         assertEquals("item.chiikawa.music_box", LackKey.item(MUSIC_BOX).translationKey());
     }

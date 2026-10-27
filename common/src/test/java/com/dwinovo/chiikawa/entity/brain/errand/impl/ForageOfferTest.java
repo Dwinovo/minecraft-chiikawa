@@ -28,8 +28,8 @@ import org.junit.jupiter.api.Test;
 
 class ForageOfferTest {
     private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
-        ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
-        ResourceLocation.withDefaultNamespace("overworld"));
+        ResourceKey.createRegistryKey(new ResourceLocation("dimension")),
+        new ResourceLocation("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     private static final PetAnchor WILD_ANCHOR = TestAnchors.wild(HOME);
 
@@ -96,7 +96,7 @@ class ForageOfferTest {
     }
 
     private static PetTask slip(ResourceLocation counter) {
-        return new PetTask(ResourceLocation.fromNamespaceAndPath("chiikawa", "test"), ResourceLocation.fromNamespaceAndPath("chiikawa", "farmer"),
-            counter, PetTask.NO_ICON, 10, ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath("chiikawa", "pet_task/test")), 0);
+        return new PetTask(new ResourceLocation("chiikawa", "test"), new ResourceLocation("chiikawa", "farmer"),
+            counter, PetTask.NO_ICON, 10, ResourceKey.create(Registries.LOOT_TABLE, new ResourceLocation("chiikawa", "pet_task/test")), 0);
     }
 }

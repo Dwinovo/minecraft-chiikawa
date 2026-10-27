@@ -38,7 +38,7 @@ import org.junit.jupiter.api.Test;
  */
 class CharacterPastimeOfferTest {
     private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
-        ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")), ResourceLocation.withDefaultNamespace("overworld"));
+        ResourceKey.createRegistryKey(new ResourceLocation("dimension")), new ResourceLocation("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     private static final UUID SOMEONE = UUID.fromString("00000000-0000-0000-0000-0000000000b1");
     private static final UUID A_CAKE = UUID.fromString("00000000-0000-0000-0000-0000000000b2");

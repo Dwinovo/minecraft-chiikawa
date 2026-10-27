@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test;
 
 /** What the debug command is shown of a pet's last errands. */
 class DecisionLogTest {
-    private static final ResourceLocation WORK = ResourceLocation.fromNamespaceAndPath("chiikawa", "work");
-    private static final ResourceLocation PLAY = ResourceLocation.fromNamespaceAndPath("chiikawa", "play");
+    private static final ResourceLocation WORK = new ResourceLocation("chiikawa", "work");
+    private static final ResourceLocation PLAY = new ResourceLocation("chiikawa", "play");
 
     @Test
     void switchesAndEndingsAreKeptInTheOrderTheyHappened() {

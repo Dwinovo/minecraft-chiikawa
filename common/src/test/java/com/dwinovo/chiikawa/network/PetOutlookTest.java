@@ -40,8 +40,8 @@ import org.junit.jupiter.api.Test;
 /** What the pet screen is told: what the pet would do next, and why it is not at work. */
 class PetOutlookTest {
     private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
-        ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
-        ResourceLocation.withDefaultNamespace("overworld"));
+        ResourceKey.createRegistryKey(new ResourceLocation("dimension")),
+        new ResourceLocation("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     private static final PetAnchor FREE = TestAnchors.free(HOME);
     private static final List<ResourceLocation> FARM = List.of(ErrandIds.WANDER, WorkData.HARVEST, WorkData.PLANT, WorkData.DELIVER);

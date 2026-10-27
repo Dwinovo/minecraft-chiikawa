@@ -112,7 +112,7 @@ class ErrandSettingsTest {
 
         try (MultiPackResourceManager manager = new MultiPackResourceManager(PackType.SERVER_DATA, List.of(new PathPackResources(
             new PackLocationInfo("test", Component.literal("test"), PackSource.BUILT_IN, Optional.empty()), root)))) {
-            assertEquals(Set.of(WorkData.HARVEST, ErrandIds.TAKE_PHOTO, ResourceLocation.fromNamespaceAndPath("other", "sulk")),
+            assertEquals(Set.of(WorkData.HARVEST, ErrandIds.TAKE_PHOTO, new ResourceLocation("other", "sulk")),
                 ErrandSettingsLoader.errandIds(manager));
         }
     }
@@ -310,7 +310,7 @@ class ErrandSettingsTest {
 
     @Test
     void aFileNamedForNoErrandIsWarnedAboutAndSkipped() {
-        ResourceLocation stranger = ResourceLocation.fromNamespaceAndPath("chiikawa", "sulk");
+        ResourceLocation stranger = new ResourceLocation("chiikawa", "sulk");
         Map<ResourceLocation, JsonElement> files = files(Map.of(ErrandIds.STAY, HARVEST));
         files.put(stranger, JsonParser.parseString(HARVEST));
 

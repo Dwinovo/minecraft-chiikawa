@@ -36,7 +36,7 @@ import net.minecraft.resources.ResourceLocation;
  * to the container, or found nothing to put in it, leaves that container alone for a while.
  */
 public final class DepositAction implements WorkAction<Site, ErrandTunings.Deliver> {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "deposit");
+    public static final ResourceLocation ID = new ResourceLocation(Constants.MOD_ID, "deposit");
 
     @Override
     public ResourceLocation id() {
