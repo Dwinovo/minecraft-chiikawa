@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.entity.brain.sensor.PetPlacesSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetWorkSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetSocialSensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetSurroundingsSensor;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import java.util.function.Supplier;
 import net.minecraft.world.entity.ai.sensing.SensorType;
@@ -23,6 +24,9 @@ public interface IPlatformRegistryAccess {
 
     /** Notices the other pets a pet could play a scene with. */
     Supplier<SensorType<PetSocialSensor>> petSocialSensor();
+
+    /** Looks at what is within a few blocks of a pet: shelter, creatures, things lying about and its owner coming back. */
+    Supplier<SensorType<PetSurroundingsSensor>> petSurroundingsSensor();
 
     Supplier<MenuType<PetBackpackMenu>> petBackpackMenu();
 

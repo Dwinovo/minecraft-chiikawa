@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.data.ErrandSettingsData;
+import com.dwinovo.chiikawa.data.PastimeData;
 import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.brain.errand.overlay.Overlays;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
@@ -50,7 +51,11 @@ class ErrandSettingsDataTest {
         Map.entry(ErrandIds.OFFER_GIFT, 30),
         Map.entry(ErrandIds.SOCIALIZE, 30),
         Map.entry(ErrandIds.WANDER, 10),
-        Map.entry(ErrandIds.STAY, 10));
+        Map.entry(ErrandIds.STAY, 10),
+        Map.entry(ErrandIds.SLEEP, 10),
+        Map.entry(PastimeData.RAIN_SHELTER, 10),
+        Map.entry(PastimeData.RAIN_PLAY, 10),
+        Map.entry(PastimeData.WATCH_OWNER_WORK, 10));
 
     /** The scores the intents have today, which the scores here must not move. */
     private static final Map<ResourceLocation, Float> SCORES = Map.ofEntries(
@@ -79,7 +84,11 @@ class ErrandSettingsDataTest {
         Map.entry(ErrandIds.OFFER_GIFT, 0.4F),
         Map.entry(ErrandIds.SOCIALIZE, 0.35F),
         Map.entry(ErrandIds.WANDER, 0.05F),
-        Map.entry(ErrandIds.STAY, 1.0F));
+        Map.entry(ErrandIds.STAY, 1.0F),
+        Map.entry(ErrandIds.SLEEP, 0.6F),
+        Map.entry(PastimeData.RAIN_SHELTER, 0.5F),
+        Map.entry(PastimeData.RAIN_PLAY, 0.5F),
+        Map.entry(PastimeData.WATCH_OWNER_WORK, 0.3F));
 
     @BeforeAll
     static void shippedSettings() {
@@ -150,7 +159,7 @@ class ErrandSettingsDataTest {
 
     @Test
     void aFrightenedPetCowersAsItsCharacterDoesAndUsagiNeverCries() {
-        ErrandTunings.Cowers cowers = ((ErrandTunings.Flee) ErrandSettingsData.all().get(ErrandIds.FLEE).tuning()).cowers();
+        ErrandTunings.Performances cowers = ((ErrandTunings.Flee) ErrandSettingsData.all().get(ErrandIds.FLEE).tuning()).cowers();
         ResourceLocation chiikawa = ResourceLocation.fromNamespaceAndPath("chiikawa", "chiikawa");
         ResourceLocation usagi = ResourceLocation.fromNamespaceAndPath("chiikawa", "usagi");
         ResourceLocation rakko = ResourceLocation.fromNamespaceAndPath("chiikawa", "rakko");
