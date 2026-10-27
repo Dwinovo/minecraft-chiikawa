@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.run.Handle;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Step;
 import com.dwinovo.chiikawa.entity.brain.errand.run.StepStatus;
 import com.dwinovo.chiikawa.gifting.Presents;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.entity.player.Player;
 
 /**
@@ -39,10 +40,15 @@ public final class PlaceByBed implements Step {
         if (owner == null) {
             return StepStatus.gaveUp("gone");
         }
-        float timeOfDay = owner.level().getTimeOfDay(1.0F);
+        float timeOfDay = timeOfDay(owner);
         if (owner.getSleepTimer() < sleptTicks || timeOfDay <= morningFrom || timeOfDay >= morningTo) {
             return StepStatus.gaveUp("not_morning");
         }
         return Presents.give(live.pet(), owner, Presents.How.BY_THE_BED) ? StepStatus.DONE : StepStatus.gaveUp("no_gift");
+    }
+
+    /** The time of day as the level's clock reads it, 0 at noon: where the sun is in its turn, as the game draws it. */
+    private static float timeOfDay(Player owner) {
+        return owner.level().environmentAttributes().getValue(EnvironmentAttributes.SUN_ANGLE, owner.position()) / 360.0F;
     }
 }
