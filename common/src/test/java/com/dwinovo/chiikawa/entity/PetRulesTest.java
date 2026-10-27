@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.entity.PetRules.Toggle;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -16,16 +15,17 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.FriendlyByteBuf;
 import org.junit.jupiter.api.Test;
 
 /** What a pet is told it may do: how it is saved and sent, and that a save from before it is today's behaviour. */
 class PetRulesTest {
     private static PetRules read(CompoundTag tag) {
-        return PetRules.CODEC.parse(NbtOps.INSTANCE, tag).getOrThrow();
+        return PetRules.CODEC.parse(NbtOps.INSTANCE, tag).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
     }
 
     private static CompoundTag write(PetRules rules) {
-        return (CompoundTag) PetRules.CODEC.encodeStart(NbtOps.INSTANCE, rules).getOrThrow();
+        return (CompoundTag) PetRules.CODEC.encodeStart(NbtOps.INSTANCE, rules).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
     }
 
     @Test
@@ -99,11 +99,11 @@ class PetRulesTest {
     @Test
     void whatIsSentArrivesAsItWas() {
         PetRules rules = new PetRules(EnumSet.of(Toggle.PICK_UP), CombatStance.NONE, false);
-        ByteBuf buffer = Unpooled.buffer();
+        FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
 
-        PetRules.STREAM_CODEC.encode(buffer, rules);
+        rules.write(buffer);
 
-        assertEquals(rules, PetRules.STREAM_CODEC.decode(buffer));
+        assertEquals(rules, PetRules.read(buffer));
     }
 
     @Test

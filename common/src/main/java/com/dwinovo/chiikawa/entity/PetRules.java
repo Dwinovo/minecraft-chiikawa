@@ -3,12 +3,13 @@ package com.dwinovo.chiikawa.entity;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.netty.buffer.ByteBuf;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
 
 /**
@@ -59,17 +60,27 @@ public record PetRules(EnumSet<Toggle> off, CombatStance stance, boolean swapWea
 
     /** As saved, and as sent: a key that is missing is the default's. */
     public static final Codec<PetRules> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        Toggle.CODEC.listOf().optionalFieldOf("Off", List.of()).forGetter(rules -> List.copyOf(rules.off)),
-        CombatStance.CODEC.optionalFieldOf("Stance", DEFAULT.stance).forGetter(PetRules::stance),
-        Codec.BOOL.optionalFieldOf("SwapWeapons", DEFAULT.swapWeapons).forGetter(PetRules::swapWeapons)
+        ExtraCodecs.strictOptionalField(Toggle.CODEC.listOf(), "Off", List.of()).forGetter(rules -> List.copyOf(rules.off)),
+        ExtraCodecs.strictOptionalField(CombatStance.CODEC, "Stance", DEFAULT.stance).forGetter(PetRules::stance),
+        ExtraCodecs.strictOptionalField(Codec.BOOL, "SwapWeapons", DEFAULT.swapWeapons).forGetter(PetRules::swapWeapons)
     ).apply(instance, (off, stance, swap) -> {
         EnumSet<Toggle> switched = EnumSet.noneOf(Toggle.class);
         switched.addAll(off);
         return new PetRules(switched, stance, swap);
     }));
 
-    /** As sent from the screen to the server. */
-    public static final StreamCodec<ByteBuf, PetRules> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
+    /** The most the server reads of what the screen sends, in bytes. */
+    private static final long MOST_SENT = 2097152L;
+
+    /** @return the rules as the screen sent them to the server, as the codec reads them */
+    public static PetRules read(FriendlyByteBuf buffer) {
+        return buffer.readWithCodec(NbtOps.INSTANCE, CODEC, NbtAccounter.create(MOST_SENT));
+    }
+
+    /** Sends these rules from the screen to the server. */
+    public void write(FriendlyByteBuf buffer) {
+        buffer.writeWithCodec(NbtOps.INSTANCE, CODEC, this);
+    }
 
     public PetRules {
         off = EnumSet.copyOf(off);

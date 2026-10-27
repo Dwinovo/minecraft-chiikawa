@@ -3,7 +3,6 @@ package com.dwinovo.chiikawa.network;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.PetRules;
-import net.minecraft.network.FriendlyByteBuf;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.LackKey;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionTrace;
@@ -11,16 +10,15 @@ import com.dwinovo.chiikawa.entity.brain.errand.decide.WhyNot;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import java.util.Comparator;
 import java.util.Optional;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 
 /** What an owner asks of a pet from its screen, and what the players who can see a pet are told it does. */
 public final class PetPayloads {
     public static final ResourceLocation PET_DIRECTIVE = new ResourceLocation(Constants.MOD_ID, "pet_directive");
+    public static final ResourceLocation PET_RULES = new ResourceLocation(Constants.MOD_ID, "pet_rules");
     public static final ResourceLocation PET_GESTURE = new ResourceLocation(Constants.MOD_ID, "pet_gesture");
+    public static final ResourceLocation PET_OUTLOOK = new ResourceLocation(Constants.MOD_ID, "pet_outlook");
 
     private PetPayloads() {
     }
@@ -54,17 +52,20 @@ public final class PetPayloads {
      * @param pet the pet's entity id; the server checks it is the sender's and within reach
      * @param rules all of them, as the screen now shows them
      */
-    public record PetRulesPayload(int pet, PetRules rules) implements CustomPacketPayload {
-        public static final Type<PetRulesPayload> TYPE = new Type<>(
-            new ResourceLocation(Constants.MOD_ID, "pet_rules"));
-        public static final StreamCodec<RegistryFriendlyByteBuf, PetRulesPayload> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.VAR_INT, PetRulesPayload::pet,
-            PetRules.STREAM_CODEC, PetRulesPayload::rules,
-            PetRulesPayload::new);
+    public record PetRulesPayload(int pet, PetRules rules) implements MusicPayloads.Payload {
+        public static PetRulesPayload read(FriendlyByteBuf buffer) {
+            return new PetRulesPayload(buffer.readVarInt(), PetRules.read(buffer));
+        }
 
         @Override
-        public Type<? extends CustomPacketPayload> type() {
-            return TYPE;
+        public ResourceLocation id() {
+            return PET_RULES;
+        }
+
+        @Override
+        public void write(FriendlyByteBuf buffer) {
+            buffer.writeVarInt(pet);
+            rules.write(buffer);
         }
     }
 
@@ -104,15 +105,11 @@ public final class PetPayloads {
      * @param lackKey the translation key of what it is short of, when that is why
      */
     public record PetOutlookPayload(int pet, Optional<ResourceLocation> next, Optional<String> whyNotKey,
-                                    Optional<String> lackKey) implements CustomPacketPayload {
-        public static final Type<PetOutlookPayload> TYPE = new Type<>(
-            new ResourceLocation(Constants.MOD_ID, "pet_outlook"));
-        public static final StreamCodec<RegistryFriendlyByteBuf, PetOutlookPayload> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.VAR_INT, PetOutlookPayload::pet,
-            ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC), PetOutlookPayload::next,
-            ByteBufCodecs.optional(ByteBufCodecs.STRING_UTF8), PetOutlookPayload::whyNotKey,
-            ByteBufCodecs.optional(ByteBufCodecs.STRING_UTF8), PetOutlookPayload::lackKey,
-            PetOutlookPayload::new);
+                                    Optional<String> lackKey) implements MusicPayloads.Payload {
+        public static PetOutlookPayload read(FriendlyByteBuf buffer) {
+            return new PetOutlookPayload(buffer.readVarInt(), buffer.readOptional(FriendlyByteBuf::readResourceLocation),
+                buffer.readOptional(FriendlyByteBuf::readUtf), buffer.readOptional(FriendlyByteBuf::readUtf));
+        }
 
         /**
          * @param pet the pet's entity id
@@ -132,8 +129,16 @@ public final class PetPayloads {
         }
 
         @Override
-        public Type<? extends CustomPacketPayload> type() {
-            return TYPE;
+        public ResourceLocation id() {
+            return PET_OUTLOOK;
+        }
+
+        @Override
+        public void write(FriendlyByteBuf buffer) {
+            buffer.writeVarInt(pet);
+            buffer.writeOptional(next, FriendlyByteBuf::writeResourceLocation);
+            buffer.writeOptional(whyNotKey, FriendlyByteBuf::writeUtf);
+            buffer.writeOptional(lackKey, FriendlyByteBuf::writeUtf);
         }
     }
 }
