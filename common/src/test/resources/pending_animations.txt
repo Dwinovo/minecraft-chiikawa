@@ -9,17 +9,14 @@
 
 chiikawa bow_draw
 chiikawa bow_release
-chiikawa cry
 chiikawa deposit
 chiikawa harvest
-chiikawa huddle
 chiikawa photo
 chiikawa pickup
 chiikawa plant
 chiikawa scratch_head
 chiikawa slash
 chiikawa sleep_hug
-chiikawa yawn
 
 furuhonya bow_draw
 furuhonya bow_release
@@ -31,8 +28,6 @@ furuhonya plant
 furuhonya revive
 furuhonya scratch_head
 furuhonya slash
-furuhonya sleep
-furuhonya yawn
 
 hachiware bow_draw
 hachiware bow_release
@@ -41,28 +36,20 @@ hachiware harvest
 hachiware pickup
 hachiware plant
 hachiware slash
-hachiware yawn
 
 kurimanju bow_draw
 kurimanju bow_release
-kurimanju clap
 kurimanju deposit
-kurimanju drink
 kurimanju harvest
 kurimanju photo
 kurimanju pickup
 kurimanju plant
 kurimanju revive
 kurimanju scratch_head
-kurimanju sigh
 kurimanju slash
-kurimanju sleep
-kurimanju yawn
 
-momonga ask_praise
 momonga bow_draw
 momonga bow_release
-momonga cute
 momonga deposit
 momonga harvest
 momonga photo
@@ -70,27 +57,18 @@ momonga pickup
 momonga plant
 momonga scratch_head
 momonga slash
-momonga sleep
-momonga tantrum
-momonga yawn
 
 rakko bow_draw
 rakko bow_release
-rakko clap
 rakko deposit
 rakko harvest
 rakko photo
 rakko pickup
 rakko plant
-rakko practice
 rakko revive
 rakko scratch_head
 rakko slash
-rakko sleep
-rakko stare
-rakko yawn
 
-shisa bow
 shisa bow_draw
 shisa bow_release
 shisa deposit
@@ -100,12 +78,10 @@ shisa pickup
 shisa plant
 shisa scratch_head
 shisa slash
-shisa yawn
 
 usagi bow_draw
 usagi bow_release
 usagi deposit
-usagi frenzy
 usagi harvest
 usagi photo
 usagi pickup
@@ -113,6 +89,3 @@ usagi plant
 usagi revive
 usagi scratch_head
 usagi slash
-usagi sleep
-usagi yawn
-usagi yell
