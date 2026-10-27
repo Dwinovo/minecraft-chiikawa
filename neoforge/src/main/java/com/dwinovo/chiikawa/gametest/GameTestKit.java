@@ -36,6 +36,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
@@ -62,6 +63,9 @@ public final class GameTestKit {
     static final long NOON = 6000L;
     /** The dead of night: when mushrooms are picked and a bed is worth having. */
     static final long MIDNIGHT = 18000L;
+    /** How wide the yard of the rain cases is, and how high above its floor the game's ceiling of barriers is. */
+    private static final int YARD = 16;
+    private static final int CEILING = 9;
     /** How far from where a pet fell a case looks for what it dropped. */
     private static final double DROP_SEARCH = 6.0;
     /** Long enough for a batch to run under one sky. */
@@ -86,6 +90,18 @@ public final class GameTestKit {
         level.setDayTime(dayTime);
         level.getGameRules().getRule(GameRules.RULE_DOMOBSPAWNING).set(false, level.getServer());
         level.setWeatherParameters(CLEAR_WEATHER_TICKS, 0, false, false);
+    }
+
+    /**
+     * Takes away the ceiling the game puts over a case's yard, a layer of barriers a block over the top of its structure, so
+     * that the rain falls on the floor: for a case about a pet out in the open, which without it is under a roof.
+     */
+    static void openSky(GameTestHelper helper) {
+        for (int x = 0; x < YARD; x++) {
+            for (int z = 0; z < YARD; z++) {
+                helper.setBlock(new BlockPos(x, CEILING, z), Blocks.AIR);
+            }
+        }
     }
 
     /**

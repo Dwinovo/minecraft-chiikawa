@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.entity.brain.combat.Ground;
 import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
+import com.dwinovo.chiikawa.entity.brain.errand.LackKey;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.InvitationDesk;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.gifting.GiftOutlook;
@@ -16,6 +17,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * What an errand may know of a pet when it is only being considered: read-only questions with
@@ -33,6 +35,36 @@ public interface PetView {
 
     /** @return the part of the day in the pet's level */
     DayPhase phase();
+
+    /** @return whether the pet's level has a night worth sleeping through, which is where a bed works: not the Nether, where it is always dark */
+    boolean bedsWork();
+
+    /** @return which character the pet is, by the id of its entity type */
+    ResourceLocation species();
+
+    /** @return what falls on the pet: the weather of its level, as its biome lets it fall */
+    Weather weather();
+
+    /** @return whether the rain, if there is any, falls on the pet: nothing above it that stops motion */
+    boolean underSky();
+
+    /** @return what the pet sees within a few blocks of itself, as its sensor last looked */
+    Surroundings surroundings();
+
+    /** @return whether its owner, who is near, is at work with a tool in hand or a block to place: swinging at it */
+    boolean ownerWorking();
+
+    /** @return whether its owner, who is near, has lately come back after a while out of its sight */
+    boolean ownerReturned();
+
+    /** @return what the pet is short of, if its work has had nothing to offer for want of something */
+    Optional<LackKey> lack();
+
+    /**
+     * @return the bed nearest the pet, while no one is in it and no pet is on it, as the pet lies on a bed that it may and
+     *         the owner's stays the owner's
+     */
+    Optional<GlobalPos> freeBed();
 
     /** @return who the pet belongs to */
     PetOwnership ownership();
