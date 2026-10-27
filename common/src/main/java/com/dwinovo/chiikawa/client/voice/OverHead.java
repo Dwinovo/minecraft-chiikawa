@@ -32,7 +32,7 @@ final class OverHead {
      */
     static void draw(AbstractPet pet, PoseStack poseStack, MultiBufferSource bufferSource, Font font,
                      Quaternionf cameraOrientation, float alpha, Consumer<DrawSurface> drawing) {
-        // 1.20.4 puts a name tag at a height of its own rather than at an attachment point.
+        // 1.20.2 puts a name tag at a height of its own rather than at an attachment point.
         poseStack.pushPose();
         poseStack.translate(0.0F, pet.getNameTagOffsetY() + ABOVE_NAME, 0.0F);
         poseStack.mulPose(cameraOrientation);

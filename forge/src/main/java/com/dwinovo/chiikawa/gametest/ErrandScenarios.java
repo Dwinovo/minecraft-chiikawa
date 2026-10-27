@@ -29,6 +29,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.entity.brain.errand.step.Meeting;
 import com.dwinovo.chiikawa.entity.brain.errand.view.OwnerSeen;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
+import com.dwinovo.chiikawa.gametest.mixin.GameTestHelperAccessor;
 import com.dwinovo.chiikawa.gifting.GiftOccasion;
 import com.dwinovo.chiikawa.gifting.Presents;
 import com.dwinovo.chiikawa.init.InitBlocks;
@@ -614,7 +615,7 @@ final class ErrandScenarios {
                 if (GameTestKit.count(pet, Items.COOKIE) != 1) {
                     return Optional.of("the bag has " + GameTestKit.count(pet, Items.COOKIE) + " cookies, not the one it was carrying");
                 }
-                if (!helper.getLevel().getEntitiesOfClass(ItemEntity.class, helper.getBounds(), item -> item.getItem().is(Items.COOKIE)).isEmpty()) {
+                if (!helper.getLevel().getEntitiesOfClass(ItemEntity.class, ((GameTestHelperAccessor) helper).chiikawa$getBounds(), item -> item.getItem().is(Items.COOKIE)).isEmpty()) {
                     return Optional.of("a cookie was left on the floor, though the owner never woke to it");
                 }
                 return Optional.empty();
@@ -841,11 +842,11 @@ final class ErrandScenarios {
     /** Grass across the yard, and a farmer with a hoe and no owner to pay it, which is who pulls weeds unasked. */
     private static Scenario weed(GameTestHelper helper) {
         helper.setBlock(WORK.below(), Blocks.GRASS_BLOCK);
-        helper.setBlock(WORK, Blocks.SHORT_GRASS);
+        helper.setBlock(WORK, Blocks.GRASS);
         AbstractPet pet = GameTestKit.holding(GameTestKit.wildWorker(helper, FARMER), Items.WOODEN_HOE);
         return new Scenario(pet, 2, ran -> {
             BlockState there = helper.getBlockState(WORK);
-            return there.is(Blocks.SHORT_GRASS) || there.isAir() ? Optional.empty()
+            return there.is(Blocks.GRASS) || there.isAir() ? Optional.empty()
                 : Optional.of("the weed was left as " + there.getBlock() + ", neither standing nor pulled");
         });
     }
