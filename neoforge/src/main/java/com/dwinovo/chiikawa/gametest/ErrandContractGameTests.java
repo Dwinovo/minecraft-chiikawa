@@ -55,6 +55,7 @@ import net.minecraft.world.phys.Vec3;
  * <p>The cases are made when the game registers them, one set for each scenario.
  */
 @GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class ErrandContractGameTests {
     private static final String BATCH = "chiikawa_errand_contract";
     private static final String TEMPLATE = "floor16";

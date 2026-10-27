@@ -43,6 +43,7 @@ import net.minecraft.world.item.Items;
  * own: pets within earshot of each other take turns.
  */
 @GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class TransparencyGameTests {
     private static final String MISSING_BATCH = "chiikawa_transparency_missing";
     private static final String SILENT_BATCH = "chiikawa_transparency_silent";

@@ -32,6 +32,7 @@ import net.minecraft.world.level.GameType;
  * hunt once it is let loose, where it matters no more than its work does.
  */
 @GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class FoeGroundsGameTests {
     private static final String BATCH = "chiikawa_grounds";
     private static final int STAND = 2;

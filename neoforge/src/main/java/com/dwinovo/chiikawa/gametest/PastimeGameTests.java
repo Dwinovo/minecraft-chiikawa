@@ -40,6 +40,7 @@ import net.minecraft.world.item.Items;
  * the next yard along is one it would find.
  */
 @GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class PastimeGameTests {
     private static final String STORM_BATCH = "chiikawa_pastime_storm";
     private static final String SHOWER_BATCH = "chiikawa_pastime_shower";
