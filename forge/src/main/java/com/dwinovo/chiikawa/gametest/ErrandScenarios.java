@@ -338,13 +338,15 @@ final class ErrandScenarios {
 
     /**
      * A pet out in the rain with a roof a few steps off: it walks under it and sits there for a while. It sits where the
-     * rain does not fall and nothing is left of it in the world.
+     * rain does not fall and nothing is left of it in the world. It does not potter about first, since the shelter it saw
+     * can be out of its sight by the time a stroll is over.
      */
     private static Scenario rainShelter(GameTestHelper helper) {
         rain(helper);
         roof(helper, 8, 8);
         AbstractPet pet = GameTestKit.owned(helper, InitEntity.HACHIWARE_PET.get(), new BlockPos(5, STAND, 5));
         pet.setPetDirective(PetDirective.FREE);
+        GameTestKit.putOff(pet, ErrandIds.WANDER);
         return new Scenario(pet, 2, ran -> Optional.empty());
     }
 
