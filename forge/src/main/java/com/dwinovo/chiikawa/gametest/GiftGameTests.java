@@ -9,13 +9,13 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.camera.FilmRolls;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.PetRules;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.SleepErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.gifting.GiftLedger;
 import com.dwinovo.chiikawa.gifting.GiftOccasion;
@@ -710,9 +710,12 @@ public final class GiftGameTests {
         ServerLevel level = helper.getLevel();
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(pet.getActivity() == PetActivity.SLEEP && !pet.getPendingGift().isEmpty(),
+            .thenWaitUntil(() -> helper.assertTrue(pet.getPerformance().startsWith("sleep") && !pet.getPendingGift().isEmpty(),
                 "the pet never lay down by the bed with the present"))
             .thenExecute(() -> {
+                // As the sleep errand lies it down, from the same data: there is one account of how a character looks asleep.
+                helper.assertTrue(pet.getPerformance().equals(SleepErrand.sleeps().orElseThrow()
+                    .performanceOf(BuiltInRegistries.ENTITY_TYPE.getKey(pet.getType()))), "waiting by the bed, the pet lies otherwise than it sleeps: " + pet.getPerformance());
                 helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 0 && cookiesNear(helper, head).isEmpty(),
                     "the present was given before the owner woke");
                 level.setDayTime(DAWN);
@@ -726,7 +729,7 @@ public final class GiftGameTests {
                     "the pet is not resting from having given a present");
                 helper.assertTrue(GiftLedger.of(level).leftToday(level, owner.getUUID()) == DAILY_LIMIT - 1,
                     "the present was not counted against the owner's day");
-                helper.assertTrue(pet.getActivity() == PetActivity.NONE, "the pet is still lying by the bed");
+                helper.assertTrue(pet.getPerformance().isEmpty(), "the pet is still lying by the bed");
             })
             .thenSucceed();
     }
@@ -744,10 +747,10 @@ public final class GiftGameTests {
         thinkOf(pet, GiftOccasion.WAS_TREATED);
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(pet.getActivity() == PetActivity.SLEEP && !pet.getPendingGift().isEmpty(),
+            .thenWaitUntil(() -> helper.assertTrue(pet.getPerformance().startsWith("sleep") && !pet.getPendingGift().isEmpty(),
                 "the pet never lay down by the bed with the present"))
             .thenExecute(() -> owner.stopSleepInBed(false, true))
-            .thenWaitUntil(() -> helper.assertTrue(pet.getPendingGift().isEmpty() && pet.getActivity() == PetActivity.NONE,
+            .thenWaitUntil(() -> helper.assertTrue(pet.getPendingGift().isEmpty() && pet.getPerformance().isEmpty(),
                 "the pet is still waiting by the bed"))
             .thenExecuteAfter(SETTLED_TICKS, () -> {
                 helper.assertTrue(cookiesNear(helper, head).isEmpty() && owner.getInventory().countItem(Items.COOKIE) == 0,
