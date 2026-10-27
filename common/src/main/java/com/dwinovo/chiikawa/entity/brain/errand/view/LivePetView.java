@@ -394,7 +394,7 @@ public final class LivePetView implements PetView {
     private Weather findWeather() {
         Level level = pet.level();
         return Weather.of(level.isRaining(), level.isThundering(),
-            level.getBiome(pet.blockPosition()).value().getPrecipitationAt(pet.blockPosition()) == Biome.Precipitation.RAIN);
+            level.getBiome(pet.blockPosition()).value().getPrecipitationAt(pet.blockPosition(), level.getSeaLevel()) == Biome.Precipitation.RAIN);
     }
 
     /** As the owner is seen to be at work: swinging at it, a tool or a block in the hand. */

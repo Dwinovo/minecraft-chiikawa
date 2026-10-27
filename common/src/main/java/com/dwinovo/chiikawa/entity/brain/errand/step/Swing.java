@@ -9,6 +9,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.run.Step;
 import com.dwinovo.chiikawa.entity.brain.errand.run.StepStatus;
 import com.dwinovo.chiikawa.utils.Utils;
 import java.util.UUID;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -61,7 +62,7 @@ public final class Swing implements Step {
             handle.lookAt(target);
             handle.action(PetAction.SLASH);
             handle.swing();
-            pet.doHurtTarget(target);
+            pet.doHurtTarget((ServerLevel) pet.level(), target);
             pet.playAttackSound();
             handle.cooldownAttack(PetCombat.swingCooldown(attackSpeedOf(pet)));
         });
