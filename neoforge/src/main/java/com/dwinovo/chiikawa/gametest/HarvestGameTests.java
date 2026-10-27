@@ -20,9 +20,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
@@ -34,15 +33,12 @@ import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The one step that breaks a block into the pet's bag, whether the block is a ripe crop, a weed or a mushroom. The step
  * is ticked by hand on a pet that does not think, so that what it did is all there is to see.
  */
 @GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class HarvestGameTests {
     private static final String BATCH = "chiikawa_harvest";
     private static final int STAND = 2;
@@ -103,20 +99,20 @@ public final class HarvestGameTests {
                 PetTaskTypeData.reward(PetTaskTypeData.WEEDING), 0));
             StepStatus status = new Harvest(harvested, forage.holds(), Optional.of(forage.counter()), 0).tick(handle);
 
-            helper.assertTrue(status.equals(StepStatus.DONE), name + ": the step ended " + status);
-            helper.assertFalse(pickedBag.isEmpty(), name + ": picking it put nothing in the bag");
-            helper.assertTrue(bag(pet).equals(pickedBag), name + ": the bag has " + bag(pet) + ", picked it had " + pickedBag);
+            helper.assertTrue(status.equals(StepStatus.DONE), Component.literal(name + ": the step ended " + status));
+            helper.assertFalse(pickedBag.isEmpty(), Component.literal(name + ": picking it put nothing in the bag"));
+            helper.assertTrue(bag(pet).equals(pickedBag), Component.literal(name + ": the bag has " + bag(pet) + ", picked it had " + pickedBag));
             helper.assertTrue(level.getBlockState(harvested).isAir() && level.getBlockState(picked).isAir(),
-                name + ": the block is not gone");
+                Component.literal(name + ": the block is not gone"));
             helper.assertTrue(level.getBlockState(harvested.above()).isAir() && level.getBlockState(picked.above()).isAir(),
-                name + ": the upper half is not gone");
-            helper.assertTrue(pet.getTask().orElseThrow().progress() == 1, name + ": the work was not counted once");
-            helper.assertTrue(pet.getMainHandItem().getDamageValue() == 0, name + ": the shears wore");
+                Component.literal(name + ": the upper half is not gone"));
+            helper.assertTrue(pet.getTask().orElseThrow().progress() == 1, Component.literal(name + ": the work was not counted once"));
+            helper.assertTrue(pet.getMainHandItem().getDamageValue() == 0, Component.literal(name + ": the shears wore"));
         }
 
         BlockPos nothing = helper.absolutePos(new BlockPos(14, STAND, 2));
         helper.assertTrue(new Harvest(nothing, WEEDS, Optional.of(WorkData.WEED_PULLED), 0).tick(handle)
-            .equals(StepStatus.gaveUp("gone")), "a step on a place with no weed did not give up");
+            .equals(StepStatus.gaveUp("gone")), Component.literal("a step on a place with no weed did not give up"));
         helper.succeed();
     }
 
@@ -137,15 +133,15 @@ public final class HarvestGameTests {
         }
 
         helper.assertTrue(new Harvest(worn, RIPE_CROP, Optional.empty(), 1).tick(handle).equals(StepStatus.DONE),
-            "the crop was not reaped");
-        helper.assertTrue(pet.getMainHandItem().getDamageValue() == 1, "the hoe wore " + pet.getMainHandItem().getDamageValue());
+            Component.literal("the crop was not reaped"));
+        helper.assertTrue(pet.getMainHandItem().getDamageValue() == 1, Component.literal("the hoe wore " + pet.getMainHandItem().getDamageValue()));
         helper.assertTrue(level.getBlockState(worn).is(Blocks.WHEAT) && !((CropBlock) Blocks.WHEAT).isMaxAge(level.getBlockState(worn)),
-            "the crop was not put back young");
-        helper.assertTrue(bag(pet).getOrDefault(Items.WHEAT.getDescriptionId(), 0) == 1, "the bag has " + bag(pet));
+            Component.literal("the crop was not put back young"));
+        helper.assertTrue(bag(pet).getOrDefault(Items.WHEAT.getDescriptionId(), 0) == 1, Component.literal("the bag has " + bag(pet)));
 
         helper.assertTrue(new Harvest(spared, RIPE_CROP, Optional.empty(), 0).tick(handle).equals(StepStatus.DONE),
-            "the second crop was not reaped");
-        helper.assertTrue(pet.getMainHandItem().getDamageValue() == 1, "a work with no wear wore the hoe");
+            Component.literal("the second crop was not reaped"));
+        helper.assertTrue(pet.getMainHandItem().getDamageValue() == 1, Component.literal("a work with no wear wore the hoe"));
         helper.succeed();
     }
 
@@ -182,7 +178,7 @@ public final class HarvestGameTests {
         for (int slot = AbstractPet.MAINHAND_SLOT + 1; slot < pet.getBackpack().getContainerSize(); slot++) {
             ItemStack stack = pet.getBackpack().getItem(slot);
             if (!stack.isEmpty()) {
-                held.merge(stack.getDescriptionId(), stack.getCount(), Integer::sum);
+                held.merge(stack.getItem().getDescriptionId(), stack.getCount(), Integer::sum);
             }
         }
         return held;

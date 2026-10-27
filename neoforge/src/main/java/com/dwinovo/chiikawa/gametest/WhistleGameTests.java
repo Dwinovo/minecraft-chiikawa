@@ -199,10 +199,10 @@ public final class WhistleGameTests {
         asTeam(helper, () -> {
             PetWhistle.Heard heard = PetWhistle.blow(friend, PetDirective.FOLLOW, SHORT);
 
-            helper.assertTrue(heard.owned() == 1 && heard.wild() == 0, "heard by " + heard);
+            helper.assertTrue(heard.owned() == 1 && heard.wild() == 0, Component.literal("heard by " + heard));
         }, owner, friend);
         helper.succeedWhen(() ->
-            helper.assertTrue(pet.getPetDirective() == PetDirective.FOLLOW, "the pet did not come to a teammate's whistle"));
+            helper.assertTrue(pet.getPetDirective() == PetDirective.FOLLOW, Component.literal("the pet did not come to a teammate's whistle")));
     }
 
     /** Somebody who is nobody's friend whistles for somebody else's pet in vain. */
@@ -214,9 +214,9 @@ public final class WhistleGameTests {
 
         PetWhistle.Heard heard = PetWhistle.blow(stranger, PetDirective.FOLLOW, SHORT);
 
-        helper.assertTrue(heard.nobody(), "heard by " + heard);
+        helper.assertTrue(heard.nobody(), Component.literal("heard by " + heard));
         helper.runAfterDelay(ANSWER_TICKS, () -> {
-            helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, "the pet came to a stranger's whistle");
+            helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, Component.literal("the pet came to a stranger's whistle"));
             helper.succeed();
         });
     }
