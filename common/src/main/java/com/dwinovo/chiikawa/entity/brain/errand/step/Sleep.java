@@ -55,7 +55,7 @@ public final class Sleep implements Step {
     @Override
     public void begin(Handle handle) {
         AbstractPet pet = LiveHandle.of(handle).pet();
-        performance = String.join(",", sleeps.of(BuiltInRegistries.ENTITY_TYPE.getKey(pet.getType())));
+        performance = sleeps.performanceOf(BuiltInRegistries.ENTITY_TYPE.getKey(pet.getType()));
         handle.stopWalking();
         handle.clearLook();
         bed.ifPresent(head -> lieOn(handle, pet.level(), head));
