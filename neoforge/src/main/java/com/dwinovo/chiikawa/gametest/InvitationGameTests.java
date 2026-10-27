@@ -58,7 +58,9 @@ public final class InvitationGameTests {
     public static void a_pet_at_work_is_not_called_away_to_play(GameTestHelper helper) {
         AbstractPet farmer = holding(worker(helper, new BlockPos(3, STAND, 4)), Items.WOODEN_HOE);
         farmer.getBackpack().addItem(new ItemStack(Items.WHEAT_SEEDS, 8));
-        helper.setBlock(new BlockPos(12, STAND - 1, 4),
+        // Within the farmer's sight, which is five blocks, from where it stands: farther off it only sets off for the field if
+        // its stroll takes it within sight, and in 1 of 150 copies it had not in an hour.
+        helper.setBlock(new BlockPos(7, STAND - 1, 4),
             Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE));
 
         helper.startSequence()
