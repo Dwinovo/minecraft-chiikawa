@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.entity.job;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettingsLoader;
 import com.dwinovo.chiikawa.init.InitRegistry;
+import com.dwinovo.chiikawa.platform.Services;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.DataResult;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -36,7 +38,7 @@ public final class JobWorkLoader extends SimpleJsonResourceReloadListener {
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
-        Loaded loaded = load(files, InitRegistry.PET_JOB_REGISTRY.keySet(), ErrandSettingsLoader.errandIds(manager),
+        Loaded loaded = load(files, id -> Services.REGISTRY.containsKey(InitRegistry.PET_JOB_KEY, id), ErrandSettingsLoader.errandIds(manager),
             ErrandSettingsLoader.blockWorkIds(manager));
         loaded.errors().forEach(Constants.LOG::error);
         loaded.warnings().forEach(Constants.LOG::warn);
@@ -46,18 +48,18 @@ public final class JobWorkLoader extends SimpleJsonResourceReloadListener {
 
     /**
      * @param files parsed JSON by file id, which is the id of the job
-     * @param jobs the ids of the jobs there are
+     * @param jobs whether an id is a job there is
      * @param errands the ids of the errands the packs have files for, see {@link ErrandSettingsLoader#errandIds}
      * @param blockWorks those of them that are done to blocks, see {@link ErrandSettingsLoader#blockWorkIds}
      * @return the work that decoded, and what went wrong with the rest
      */
-    static Loaded load(Map<ResourceLocation, JsonElement> files, Set<ResourceLocation> jobs, Set<ResourceLocation> errands,
+    static Loaded load(Map<ResourceLocation, JsonElement> files, Predicate<ResourceLocation> jobs, Set<ResourceLocation> errands,
             Set<ResourceLocation> blockWorks) {
         Map<ResourceLocation, JobWork> work = new HashMap<>();
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
         files.forEach((id, json) -> {
-            if (!jobs.contains(id)) {
+            if (!jobs.test(id)) {
                 warnings.add(LOG_PREFIX + id + " is skipped, there is no such job");
                 return;
             }
