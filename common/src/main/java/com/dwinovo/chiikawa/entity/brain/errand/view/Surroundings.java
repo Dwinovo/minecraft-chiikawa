@@ -9,12 +9,14 @@ import net.minecraft.world.item.Item;
 
 /**
  * What a pet can see of its surroundings within a few blocks, as its sensor last looked: somewhere to get out of the rain,
- * the creatures and the things lying about, and whether one of the creatures is a creeper about to go off. A few seconds
+ * the creatures and the things lying about or held in somebody's hand, and whether one of the creatures is a creeper about to go
+ * off. A few seconds
  * old at most, and not saved: the sensor looks again when the pet is back.
  *
  * @param shelter the nearest place the pet could stand out of the rain; looked for only while it rains
  * @param creatures the living things near, nearest first
- * @param items the things lying about, nearest first
+ * @param items the things lying about, nearest first, and those held in somebody's hand, which are sighted where the holder is
+ *              and by the holder's id
  * @param primedCreeper whether one of the creatures is a creeper that has begun to swell
  */
 public record Surroundings(Optional<BlockPos> shelter, List<Sighting<EntityType<?>>> creatures, List<Sighting<Item>> items,

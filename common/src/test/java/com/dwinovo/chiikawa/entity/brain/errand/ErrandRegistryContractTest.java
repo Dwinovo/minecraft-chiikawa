@@ -28,7 +28,7 @@ class ErrandRegistryContractTest {
 
     @Test
     void thereAreTheThirtyErrandsOfThisVersion() {
-        assertEquals(30, Errands.all().size());
+        assertEquals(38, Errands.all().size());
         assertEquals(Errands.all().size(), new HashSet<>(Errands.all().stream().map(ErrandType::id).toList()).size(), "each id once");
         assertTrue(Errands.all().containsAll(Errands.generic()));
     }
