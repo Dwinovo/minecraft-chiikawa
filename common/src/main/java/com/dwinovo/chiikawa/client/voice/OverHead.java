@@ -7,8 +7,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.function.Consumer;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.world.entity.EntityAttachment;
-import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 
 /**
@@ -33,13 +31,10 @@ final class OverHead {
      * @param drawing draws on the surface, whose origin is the spot and whose y runs down; what is drawn hangs above it
      */
     static void draw(AbstractPet pet, PoseStack poseStack, MultiBufferSource bufferSource, Font font,
-                     Quaternionf cameraOrientation, float partialTick, float alpha, Consumer<DrawSurface> drawing) {
-        Vec3 nameTag = pet.getAttachments().getNullable(EntityAttachment.NAME_TAG, 0, pet.getViewYRot(partialTick));
-        if (nameTag == null) {
-            return;
-        }
+                     Quaternionf cameraOrientation, float alpha, Consumer<DrawSurface> drawing) {
+        // 1.20.4 puts a name tag at a height of its own rather than at an attachment point.
         poseStack.pushPose();
-        poseStack.translate(nameTag.x, nameTag.y + 0.5 + ABOVE_NAME, nameTag.z);
+        poseStack.translate(0.0F, pet.getNameTagOffsetY() + ABOVE_NAME, 0.0F);
         poseStack.mulPose(cameraOrientation);
         // Text pixels from here on, with y running down as on a screen and z towards the
         // camera. Before 1.21 the camera's rotation is a half turn about y short of the later
