@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.gametest;
 
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.brain.errand.run.PetIcon;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,9 @@ final class Residue {
         }
         if (!pet.getPerformance().isEmpty()) {
             left.add("the scene " + pet.getPerformance());
+        }
+        if (pet.getIcon() == PetIcon.PRAISE) {
+            left.add("the icon of a pet that wants praising");
         }
         if (pet.isUsingItem()) {
             left.add("an item in use");

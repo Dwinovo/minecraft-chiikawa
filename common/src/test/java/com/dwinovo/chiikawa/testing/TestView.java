@@ -56,6 +56,8 @@ public final class TestView implements PetView {
     private Surroundings surroundings = Surroundings.NONE;
     private boolean ownerWorking;
     private boolean ownerReturned;
+    private boolean ownerFinishedWork;
+    private Optional<String> neighbourPerformance = Optional.empty();
     private Optional<LackKey> lack = Optional.empty();
     private Optional<GlobalPos> freeBed = Optional.empty();
     private PetOwnership ownership = OWNED;
@@ -135,6 +137,18 @@ public final class TestView implements PetView {
     /** The owner has just come back. */
     public TestView ownerBackAgain() {
         this.ownerReturned = true;
+        return this;
+    }
+
+    /** The owner has just left off a long spell of work. */
+    public TestView ownerDoneWithWork() {
+        this.ownerFinishedWork = true;
+        return this;
+    }
+
+    /** The pet nearest this one is in the middle of this scene animation. */
+    public TestView neighbourDoing(String performance) {
+        this.neighbourPerformance = Optional.of(performance);
         return this;
     }
 
@@ -362,6 +376,16 @@ public final class TestView implements PetView {
     @Override
     public boolean ownerReturned() {
         return ownerReturned;
+    }
+
+    @Override
+    public boolean ownerFinishedWork() {
+        return ownerFinishedWork;
+    }
+
+    @Override
+    public Optional<String> neighbourPerformance() {
+        return neighbourPerformance;
     }
 
     @Override

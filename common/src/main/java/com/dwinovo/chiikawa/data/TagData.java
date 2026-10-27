@@ -140,6 +140,10 @@ public final class TagData {
             EntityType.PILLAGER, EntityType.SILVERFISH, EntityType.SKELETON, EntityType.SLIME, EntityType.SPIDER, EntityType.STRAY,
             EntityType.VEX, EntityType.VINDICATOR, EntityType.WITCH, EntityType.WITHER_SKELETON, EntityType.ZOGLIN,
             EntityType.ZOMBIE, EntityType.ZOMBIE_VILLAGER);
+        tags.tag(InitTag.PETS)
+            .add(InitEntity.USAGI_PET.get(), InitEntity.HACHIWARE_PET.get(), InitEntity.CHIIKAWA_PET.get(),
+                InitEntity.SHISA_PET.get(), InitEntity.MOMONGA_PET.get(), InitEntity.KURIMANJU_PET.get(), InitEntity.RAKKO_PET.get(),
+                InitEntity.FURUHONYA_PET.get());
         tags.tag(InitTag.CREEPERS_AVOID)
             .add(InitEntity.HACHIWARE_PET.get());
     }
