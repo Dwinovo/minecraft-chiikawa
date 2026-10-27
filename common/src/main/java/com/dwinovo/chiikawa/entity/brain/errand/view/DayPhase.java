@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.errand.view;
 import com.mojang.serialization.Codec;
 import net.minecraft.SharedConstants;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.Level;
 
 /**
  * Part of the Minecraft day, from the time of day in ticks (0 is sunrise). Serialized
@@ -25,9 +26,12 @@ public enum DayPhase implements StringRepresentable {
     private static final int NIGHT_START = 13000;
     private static final int MORNING_START = 23000;
 
-    /** @return the part of the day in this level: the clock it keeps, or the one hour a level with a fixed time stands at */
+    /**
+     * @return the part of the day in this level: the clock it keeps; a level without a day cycle has no
+     *         time of day of its own, so a day's routine goes by the world's clock there, as villagers' schedules do
+     */
     public static DayPhase in(Level level) {
-        return of(level.dimensionType().fixedTime().orElse(level.getDayTime()));
+        return of(level.getDayTime());
     }
 
     /**

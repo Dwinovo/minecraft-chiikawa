@@ -78,7 +78,7 @@ public final class Swing implements Step {
     private static boolean isHoldingUsableProjectileWeapon(AbstractPet pet) {
         return pet.isHolding(stack -> {
             Item item = stack.getItem();
-            return item instanceof ProjectileWeaponItem weapon && pet.canFireProjectileWeapon(weapon);
+            return item instanceof ProjectileWeaponItem && pet.canUseNonMeleeWeapon(stack);
         });
     }
 }

@@ -16,6 +16,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.inbox.InvitationDesk;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetPlacesSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetSurroundingsSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.SurroundingsSettings;
 import com.dwinovo.chiikawa.gifting.GiftOutlook;
@@ -105,9 +106,9 @@ public final class LivePetView implements PetView {
         this.pet = pet;
         Level level = pet.level();
         this.pos = new Lazy<>(() -> GlobalPos.of(level.dimension(), pet.blockPosition()));
-        // A level without a day cycle, like the Nether, stays at its fixed time of day.
+        // A level without a day cycle, like the Nether, has no time of day of its own: it goes by the world's clock.
         this.phase = new Lazy<>(() -> DayPhase.in(level));
-        this.bedsWork = new Lazy<>(() -> level.dimensionType().bedWorks());
+        this.bedsWork = new Lazy<>(() -> PetPlacesSensor.bedsWork(level, pet.blockPosition()));
         this.species = new Lazy<>(() -> BuiltInRegistries.ENTITY_TYPE.getKey(pet.getType()));
         this.weather = new Lazy<>(this::findWeather);
         this.underSky = new Lazy<>(() -> PetSurroundingsSensor.exposed(level, pet.blockPosition()));
