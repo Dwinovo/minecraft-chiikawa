@@ -9,6 +9,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.work.WorkRequirement;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkTarget;
 import com.dwinovo.chiikawa.init.InitTag;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -58,29 +59,34 @@ public final class WorkData {
         Optional<WorkTarget> guard = Optional.of(new WorkTarget.Foe("no_attack_target",
             Set.of(Ground.SELF, Ground.OWNER, Ground.NEARBY)));
         Optional<WorkTarget> hunt = Optional.of(new WorkTarget.Foe("no_attack_target", Set.of(Ground.HUNT)));
-        return Map.ofEntries(
+        Map<ResourceLocation, Work<?, ?>> works = new HashMap<>(Map.ofEntries(
             Map.entry(HARVEST, new Work<>(WorkActions.HARVEST_BLOCK, ErrandCategory.WORK, Optional.empty(), List.of(),
-                Optional.of(new WorkTarget.RipeCrop("no_crop")))),
+                Optional.of(new WorkTarget.RipeCrop("no_crop")), Optional.empty())),
             Map.entry(PLANT, new Work<>(WorkActions.PLANT_BLOCK, ErrandCategory.WORK, Optional.empty(), List.of(),
-                Optional.of(new WorkTarget.PlantableSoil("no_farmland")))),
+                Optional.of(new WorkTarget.PlantableSoil("no_farmland")), Optional.empty())),
             Map.entry(DELIVER, new Work<>(WorkActions.DEPOSIT, ErrandCategory.WORK, Optional.empty(), List.of(),
                 Optional.of(new WorkTarget.Container(InitTag.ENTITY_DELEVER_CONTAINER, InitTag.ENTITY_DELIVER_ITEMS,
-                    "no_container")))),
+                    "no_container")), Optional.empty())),
             // A wild pet forages on its own; an owned one only on a slip that counts it, since on its own it would
             // strip the grass and mushrooms its owner keeps around the base.
             Map.entry(WEED, new Work<>(WorkActions.HARVEST_BLOCK, ErrandCategory.FORAGE, Optional.of(WEED_PULLED),
-                List.of(WorkRequirement.WILD_OR_SLIP), Optional.of(new WorkTarget.Blocks(InitTag.ENTITY_WEEDS, "no_weed")))),
+                List.of(WorkRequirement.WILD_OR_SLIP), Optional.of(new WorkTarget.Blocks(InitTag.ENTITY_WEEDS, "no_weed")),
+                Optional.empty())),
             Map.entry(PICK_MUSHROOM, new Work<>(WorkActions.HARVEST_BLOCK, ErrandCategory.FORAGE, Optional.of(MUSHROOM_PICKED),
                 List.of(WorkRequirement.WILD_OR_SLIP, WorkRequirement.AT_NIGHT),
-                Optional.of(new WorkTarget.Blocks(InitTag.ENTITY_MUSHROOMS, "no_mushroom")))),
-            Map.entry(MELEE, new Work<>(WorkActions.STRIKE, ErrandCategory.COMBAT, Optional.empty(), List.of(), guard)),
-            Map.entry(RANGED, new Work<>(WorkActions.SHOOT, ErrandCategory.COMBAT, Optional.empty(), List.of(), guard)),
+                Optional.of(new WorkTarget.Blocks(InitTag.ENTITY_MUSHROOMS, "no_mushroom")), Optional.empty())),
+            Map.entry(MELEE, new Work<>(WorkActions.STRIKE, ErrandCategory.COMBAT, Optional.empty(), List.of(), guard,
+                Optional.empty())),
+            Map.entry(RANGED, new Work<>(WorkActions.SHOOT, ErrandCategory.COMBAT, Optional.empty(), List.of(), guard,
+                Optional.empty())),
             Map.entry(HUNT_MELEE, new Work<>(WorkActions.STRIKE, ErrandCategory.COMBAT, Optional.of(PetWorkCounters.SLAY),
-                List.of(), hunt)),
+                List.of(), hunt, Optional.empty())),
             Map.entry(HUNT_RANGED, new Work<>(WorkActions.SHOOT, ErrandCategory.COMBAT, Optional.of(PetWorkCounters.SLAY),
-                List.of(), hunt)),
+                List.of(), hunt, Optional.empty())),
             Map.entry(PLAY_MUSIC, new Work<>(WorkActions.BUSK, ErrandCategory.WORK, Optional.of(PLAY_MUSIC_SECOND), List.of(),
-                Optional.empty())));
+                Optional.empty(), Optional.empty()))));
+        works.putAll(PastimeData.works());
+        return works;
     }
 
     private static ResourceLocation id(String path) {

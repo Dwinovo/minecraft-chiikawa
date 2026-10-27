@@ -1,12 +1,17 @@
 package com.dwinovo.chiikawa.entity.brain.errand.remark;
 
 import com.dwinovo.chiikawa.entity.brain.errand.decide.WhyNot;
+import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalDouble;
+import java.util.Set;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
 
@@ -29,8 +34,9 @@ public sealed interface RemarkCue {
      * @param whyNot why the pet is not at work, if it is not
      * @param now the current game time
      * @param ownerDistance how far off its owner is, while the owner is a player in the pet's level
+     * @param phase the part of the day
      */
-    record Situation(Optional<WhyNot> whyNot, long now, OptionalDouble ownerDistance) {
+    record Situation(Optional<WhyNot> whyNot, long now, OptionalDouble ownerDistance, DayPhase phase) {
     }
 
     /**
@@ -75,10 +81,37 @@ public sealed interface RemarkCue {
         }
     }
 
+    /**
+     * It is one of these parts of the day.
+     *
+     * @param in the parts
+     */
+    record InPhase(Set<DayPhase> in) implements RemarkCue {
+        static final MapCodec<InPhase> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            DayPhase.CODEC.listOf().xmap(Set::copyOf, List::copyOf).fieldOf("in").forGetter(InPhase::in)
+        ).apply(instance, InPhase::new));
+
+        /** In the order of the day, which is the order they are written in. */
+        public InPhase {
+            in = in.isEmpty() ? Set.of() : Collections.unmodifiableSet(EnumSet.copyOf(in));
+        }
+
+        @Override
+        public Kind kind() {
+            return Kind.PHASE;
+        }
+
+        @Override
+        public boolean holds(Situation situation) {
+            return in.contains(situation.phase());
+        }
+    }
+
     /** The kinds of cue a file can name, by their {@code type}. */
     enum Kind implements StringRepresentable {
         LACKED_FOR(LackedFor.CODEC),
-        OWNER_WITHIN(OwnerWithin.CODEC);
+        OWNER_WITHIN(OwnerWithin.CODEC),
+        PHASE(InPhase.CODEC);
 
         static final Codec<Kind> CODEC = StringRepresentable.fromEnum(Kind::values);
 
