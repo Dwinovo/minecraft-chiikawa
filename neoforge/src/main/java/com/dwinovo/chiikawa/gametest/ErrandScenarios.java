@@ -671,7 +671,7 @@ final class ErrandScenarios {
     private static Scenario takeTask(GameTestHelper helper) {
         BlockPos at = BoardGameTests.weedingBoard(helper);
         helper.setBlock(at, InitBlocks.LABOR_BOARD.get());
-        LaborBoardBlockEntity board = (LaborBoardBlockEntity) helper.getBlockEntity(at);
+        LaborBoardBlockEntity board = helper.getBlockEntity(at, LaborBoardBlockEntity.class);
         BlockPos from = new BlockPos(at.getX() >= BOARD_AWAY + 1 ? at.getX() - BOARD_AWAY : at.getX() + BOARD_AWAY, STAND, at.getZ());
         AbstractPet pet = GameTestKit.holding(GameTestKit.worker(helper, from), Items.WOODEN_HOE);
         return new Scenario(pet, 3, ran -> {
@@ -816,7 +816,7 @@ final class ErrandScenarios {
         AbstractPet pet = GameTestKit.holding(GameTestKit.worker(helper, FARMER), Items.WOODEN_HOE);
         pet.getBackpack().addItem(new ItemStack(Items.WHEAT, CROP));
         return new Scenario(pet, 3 + CROP, ran -> {
-            ChestBlockEntity chest = (ChestBlockEntity) helper.getBlockEntity(WORK);
+            ChestBlockEntity chest = helper.getBlockEntity(WORK, ChestBlockEntity.class);
             int stored = 0;
             for (int slot = 0; slot < ((Container) chest).getContainerSize(); slot++) {
                 ItemStack there = ((Container) chest).getItem(slot);

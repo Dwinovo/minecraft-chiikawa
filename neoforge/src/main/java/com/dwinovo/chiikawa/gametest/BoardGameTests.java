@@ -239,17 +239,17 @@ public final class BoardGameTests {
     public static void a_musician_with_an_empty_box_leaves_the_music_slip(GameTestHelper helper) {
         BlockPos at = boardWithAMusicianSlip(helper);
         helper.setBlock(at, InitBlocks.LABOR_BOARD.get());
-        LaborBoardBlockEntity board = (LaborBoardBlockEntity) helper.getBlockEntity(at);
+        LaborBoardBlockEntity board = helper.getBlockEntity(at, LaborBoardBlockEntity.class);
         AbstractPet musician = owned(helper, InitEntity.HACHIWARE_PET.get(), new BlockPos(4, STAND, 4));
         musician.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(InitItems.MUSIC_BOX.get()));
 
         helper.startSequence()
             .thenExecuteFor(WATCH_TICKS, () -> {
-                helper.assertTrue(musician.getTask().isEmpty(), "the musician took a slip it could not play for");
-                helper.assertFalse(board.isReservedBy(musician), "the musician held a slip it could not play for");
+                helper.assertTrue(musician.getTask().isEmpty(), Component.literal("the musician took a slip it could not play for"));
+                helper.assertFalse(board.isReservedBy(musician), Component.literal("the musician held a slip it could not play for"));
             })
             .thenExecute(() -> helper.assertTrue(board.today().stream().noneMatch(BoardSlot::claimed),
-                "the board gave away a slip to a musician with no song"))
+                Component.literal("the board gave away a slip to a musician with no song")))
             .thenSucceed();
     }
 
@@ -262,7 +262,7 @@ public final class BoardGameTests {
         AtomicReference<AbstractPet> musician = new AtomicReference<>();
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(readySong(library, SONG).isPresent(), "the song was never imported"))
+            .thenWaitUntil(() -> helper.assertTrue(readySong(library, SONG).isPresent(), Component.literal("the song was never imported")))
             .thenExecute(() -> {
                 ItemStack box = new ItemStack(InitItems.MUSIC_BOX.get());
                 box.set(InitDataComponents.MUSIC_BOX_SELECTION.get(),
@@ -272,7 +272,7 @@ public final class BoardGameTests {
                 musician.get().setItemSlot(EquipmentSlot.MAINHAND, box);
             })
             .thenWaitUntil(() -> helper.assertTrue(musician.get().getTask().isPresent(),
-                "the musician never took the music slip"))
+                Component.literal("the musician never took the music slip")))
             .thenSucceed();
     }
 
