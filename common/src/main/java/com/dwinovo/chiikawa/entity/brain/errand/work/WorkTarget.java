@@ -38,7 +38,7 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
  * {@link WorkAction#refuses}.
  */
 public sealed interface WorkTarget {
-    Codec<WorkTarget> CODEC = Kind.CODEC.dispatch("type", WorkTarget::kind, Kind::codec);
+    Codec<WorkTarget> CODEC = Kind.CODEC.dispatch("type", WorkTarget::kind, kind -> kind.codec().codec());
 
     /** @return which kind of target this is */
     Kind kind();

@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.data;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.Plan;
 import com.dwinovo.chiikawa.entity.brain.errand.work.Work;
@@ -26,8 +27,8 @@ public final class ErrandFiles {
         ErrandSettingsData.all().forEach((id, settings) -> {
             Work<?, ?> work = works.get(id);
             files.put(id, work == null
-                ? ErrandSettings.codecOf(id).encodeStart(JsonOps.INSTANCE, settings).getOrThrow()
-                : WorkFile.CODEC.encodeStart(JsonOps.INSTANCE, fileOf(work, settings)).getOrThrow());
+                ? ErrandSettings.codecOf(id).encodeStart(JsonOps.INSTANCE, settings).getOrThrow(false, Constants.LOG::error)
+                : WorkFile.CODEC.encodeStart(JsonOps.INSTANCE, fileOf(work, settings)).getOrThrow(false, Constants.LOG::error));
         });
         works.keySet().forEach(id -> {
             if (!files.containsKey(id)) {

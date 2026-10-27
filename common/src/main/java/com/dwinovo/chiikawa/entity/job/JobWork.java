@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ExtraCodecs;
 
 /**
  * The work of a job, loaded from {@code data/<namespace>/pet_job/<job>.json} by {@link JobWorkLoader}: one file per
@@ -31,7 +32,7 @@ import net.minecraft.resources.ResourceLocation;
 public record JobWork(List<ResourceLocation> work, Optional<Sight> sight) {
     public static final Codec<JobWork> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         ResourceLocation.CODEC.listOf().fieldOf("work").forGetter(JobWork::work),
-        Sight.CODEC.optionalFieldOf("sight").forGetter(JobWork::sight)
+        ExtraCodecs.strictOptionalField(Sight.CODEC, "sight").forGetter(JobWork::sight)
     ).apply(instance, JobWork::new));
 
     private static final String LOG_PREFIX = "[chiikawa-job] ";

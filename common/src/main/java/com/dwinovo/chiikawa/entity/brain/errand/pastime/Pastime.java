@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ExtraCodecs;
 
 /**
  * What makes a work a pastime, the two fields of its errand file that only a pastime has: {@code when}, everything that
@@ -19,10 +20,10 @@ import net.minecraft.resources.ResourceLocation;
  */
 public record Pastime(List<PastimeCue> when, Map<ResourceLocation, Stage> cast) {
     /** A character, by the id of its entity type; an id that is nobody's is no part. */
-    private static final Codec<ResourceLocation> CHARACTER = ResourceLocation.CODEC.validate(id -> PetCharacters.is(id)
+    private static final Codec<ResourceLocation> CHARACTER = ExtraCodecs.validate(ResourceLocation.CODEC, id -> PetCharacters.is(id)
         ? DataResult.success(id) : DataResult.error(() -> id + " is not a character"));
     /** The cast of a pastime: somebody, or it would never be done. */
-    public static final Codec<Map<ResourceLocation, Stage>> CAST = Codec.unboundedMap(CHARACTER, Stage.CODEC).validate(cast ->
+    public static final Codec<Map<ResourceLocation, Stage>> CAST = ExtraCodecs.validate(Codec.unboundedMap(CHARACTER, Stage.CODEC), cast ->
         cast.isEmpty() ? DataResult.error(() -> "a pastime with nobody in it is never done") : DataResult.success(cast));
 
     public Pastime {

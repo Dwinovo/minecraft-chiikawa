@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.sensor;
 import com.dwinovo.chiikawa.Constants;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import java.util.Map;
 import java.util.Optional;
@@ -45,8 +46,8 @@ public final class SurroundingsSettingsLoader extends SimpleJsonResourceReloadLi
         if (json == null) {
             return Optional.empty();
         }
-        return SurroundingsSettings.CODEC.parse(JsonOps.INSTANCE, json)
-            .ifError(error -> Constants.LOG.error(LOG_PREFIX + FILE + " is skipped, failed to parse: " + error.message()))
-            .result();
+        DataResult<SurroundingsSettings> read = SurroundingsSettings.CODEC.parse(JsonOps.INSTANCE, json);
+        read.error().ifPresent(error -> Constants.LOG.error(LOG_PREFIX + FILE + " is skipped, failed to parse: " + error.message()));
+        return read.result();
     }
 }

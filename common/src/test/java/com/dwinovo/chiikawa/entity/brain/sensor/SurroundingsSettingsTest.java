@@ -17,9 +17,9 @@ class SurroundingsSettingsTest {
     @Test
     void theSettingsTheModShipsReadBackAsTheyWereWrittenAndLookEightBlocksRound() {
         SurroundingsSettings shipped = SurroundingsSettingsData.all().get(SurroundingsSettingsLoader.FILE);
-        JsonElement json = SurroundingsSettings.CODEC.encodeStart(JsonOps.INSTANCE, shipped).getOrThrow();
+        JsonElement json = SurroundingsSettings.CODEC.encodeStart(JsonOps.INSTANCE, shipped).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
-        assertEquals(shipped, SurroundingsSettings.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
+        assertEquals(shipped, SurroundingsSettings.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow(false, org.junit.jupiter.api.Assertions::fail));
         assertEquals(8, shipped.radius());
     }
 

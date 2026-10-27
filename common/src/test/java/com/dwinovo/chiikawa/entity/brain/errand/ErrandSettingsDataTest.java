@@ -135,9 +135,9 @@ class ErrandSettingsDataTest {
     @Test
     void everyFileIsOneThatLoads() {
         ErrandSettingsData.all().forEach((errand, settings) -> {
-            var json = ErrandSettings.codecOf(errand).encodeStart(JsonOps.INSTANCE, settings).getOrThrow();
+            var json = ErrandSettings.codecOf(errand).encodeStart(JsonOps.INSTANCE, settings).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
-            assertEquals(settings, ErrandSettings.codecOf(errand).parse(JsonOps.INSTANCE, json).getOrThrow(), errand.toString());
+            assertEquals(settings, ErrandSettings.codecOf(errand).parse(JsonOps.INSTANCE, json).getOrThrow(false, org.junit.jupiter.api.Assertions::fail), errand.toString());
             assertEquals(Optional.empty(), settings.problemAmong(errand, ErrandSettingsData.all()), errand.toString());
             assertEquals(Optional.empty(), settings.problemFor(Errands.get(errand)), errand.toString());
             assertTrue(settings.maxTicks() > 0, errand.toString());

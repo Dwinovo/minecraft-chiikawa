@@ -51,11 +51,11 @@ class ErrandFileTest {
         assertEquals(Set.of("action", "category", "counter", "requires", "priority", "score", "max_ticks", "rests",
             "yields_to", "overlays", "tuning"), file.keySet());
 
-        WorkFile<?, ?> read = WorkFile.CODEC.parse(JsonOps.INSTANCE, file).getOrThrow();
+        WorkFile<?, ?> read = WorkFile.CODEC.parse(JsonOps.INSTANCE, file).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
         assertEquals(WorkData.all().get(WorkData.PLAY_MUSIC), read.work());
         assertEquals(ErrandSettingsData.all().get(WorkData.PLAY_MUSIC), read.settings());
-        assertEquals(file, WorkFile.CODEC.encodeStart(JsonOps.INSTANCE, read).getOrThrow());
+        assertEquals(file, WorkFile.CODEC.encodeStart(JsonOps.INSTANCE, read).getOrThrow(false, org.junit.jupiter.api.Assertions::fail));
     }
 
     @Test
@@ -114,12 +114,12 @@ class ErrandFileTest {
             assertFalse(file.has("counter"), errand::toString);
             assertEquals(80, file.get("priority").getAsInt(), errand::toString);
 
-            WorkFile<?, ?> read = WorkFile.CODEC.parse(JsonOps.INSTANCE, file).getOrThrow();
+            WorkFile<?, ?> read = WorkFile.CODEC.parse(JsonOps.INSTANCE, file).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
             assertEquals(WorkData.all().get(errand), read.work(), errand::toString);
             assertEquals(new WorkTarget.Foe("no_attack_target", Set.of(Ground.SELF, Ground.OWNER, Ground.NEARBY)),
                 read.work().target().orElseThrow(), errand::toString);
-            assertEquals(file, WorkFile.CODEC.encodeStart(JsonOps.INSTANCE, read).getOrThrow(), errand::toString);
+            assertEquals(file, WorkFile.CODEC.encodeStart(JsonOps.INSTANCE, read).getOrThrow(false, org.junit.jupiter.api.Assertions::fail), errand::toString);
         }
     }
 
@@ -134,12 +134,12 @@ class ErrandFileTest {
             assertEquals("chiikawa:slay", file.get("counter").getAsString(), errand::toString);
             assertEquals(50, file.get("priority").getAsInt(), errand::toString);
 
-            WorkFile<?, ?> read = WorkFile.CODEC.parse(JsonOps.INSTANCE, file).getOrThrow();
+            WorkFile<?, ?> read = WorkFile.CODEC.parse(JsonOps.INSTANCE, file).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
             assertEquals(WorkData.all().get(errand), read.work(), errand::toString);
             assertEquals(new WorkTarget.Foe("no_attack_target", Set.of(Ground.HUNT)), read.work().target().orElseThrow(),
                 errand::toString);
-            assertEquals(file, WorkFile.CODEC.encodeStart(JsonOps.INSTANCE, read).getOrThrow(), errand::toString);
+            assertEquals(file, WorkFile.CODEC.encodeStart(JsonOps.INSTANCE, read).getOrThrow(false, org.junit.jupiter.api.Assertions::fail), errand::toString);
         }
 
     }
@@ -157,10 +157,10 @@ class ErrandFileTest {
             JsonObject file = ErrandFiles.all().get(errand).deepCopy().getAsJsonObject();
 
             assertEquals(target, file.get("target"), errand::toString);
-            WorkFile<?, ?> read = WorkFile.CODEC.parse(JsonOps.INSTANCE, file).getOrThrow();
+            WorkFile<?, ?> read = WorkFile.CODEC.parse(JsonOps.INSTANCE, file).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
             assertEquals(WorkData.all().get(errand), read.work(), errand::toString);
-            assertEquals(file, WorkFile.CODEC.encodeStart(JsonOps.INSTANCE, read).getOrThrow(), errand::toString);
+            assertEquals(file, WorkFile.CODEC.encodeStart(JsonOps.INSTANCE, read).getOrThrow(false, org.junit.jupiter.api.Assertions::fail), errand::toString);
         });
     }
 

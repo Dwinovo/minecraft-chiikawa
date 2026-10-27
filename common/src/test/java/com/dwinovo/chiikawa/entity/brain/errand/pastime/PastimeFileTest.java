@@ -76,11 +76,11 @@ class PastimeFileTest {
             Errands.pastimes().stream().map(ErrandType::id).toList(), "in the order of their ids");
         for (ResourceLocation id : PastimeData.ids()) {
             var work = PastimeData.works().get(id);
-            WorkFile<?, ?> read = WorkFile.CODEC.parse(JsonOps.INSTANCE, ErrandFiles.all().get(id)).getOrThrow();
+            WorkFile<?, ?> read = WorkFile.CODEC.parse(JsonOps.INSTANCE, ErrandFiles.all().get(id)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
             assertEquals(ErrandCategory.PASTIME, work.category(), id.toString());
             // A number provider is not compared by what it holds, so what was read is compared by what it is written as.
-            assertEquals(ErrandFiles.all().get(id), WorkFile.CODEC.encodeStart(JsonOps.INSTANCE, read).getOrThrow(), id.toString());
+            assertEquals(ErrandFiles.all().get(id), WorkFile.CODEC.encodeStart(JsonOps.INSTANCE, read).getOrThrow(false, org.junit.jupiter.api.Assertions::fail), id.toString());
             assertEquals(Errands.get(id).category(), ErrandCategory.PASTIME);
             assertInstanceOf(WorkErrand.class, Errands.get(id));
         }

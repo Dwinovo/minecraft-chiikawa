@@ -15,7 +15,7 @@ import net.minecraft.world.item.Item;
  * is said here; where that is, now, is for the pet to see, see {@code VisitAction}.
  */
 public sealed interface Destination {
-    Codec<Destination> CODEC = Kind.CODEC.dispatch("type", Destination::kind, Kind::codec);
+    Codec<Destination> CODEC = Kind.CODEC.dispatch("type", Destination::kind, kind -> kind.codec().codec());
 
     /** @return which kind of place this is */
     Kind kind();
