@@ -41,7 +41,8 @@ public class WorldSettingsStore extends SavedData {
         // A file written before a field existed keeps that field as it was by default.
         store.settings = new WorldSettings(
             tag.contains("WildSpawn") ? tag.getFloat("WildSpawn") : WorldSettings.DEFAULT.wildSpawn(),
-            tag.contains("Chatter") ? tag.getFloat("Chatter") : WorldSettings.DEFAULT.chatter());
+            tag.contains("Chatter") ? tag.getFloat("Chatter") : WorldSettings.DEFAULT.chatter(),
+            tag.contains("Pastimes") ? tag.getFloat("Pastimes") : WorldSettings.DEFAULT.pastimes());
         return store;
     }
 
@@ -49,6 +50,7 @@ public class WorldSettingsStore extends SavedData {
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         tag.putFloat("WildSpawn", settings.wildSpawn());
         tag.putFloat("Chatter", settings.chatter());
+        tag.putFloat("Pastimes", settings.pastimes());
         return tag;
     }
 }

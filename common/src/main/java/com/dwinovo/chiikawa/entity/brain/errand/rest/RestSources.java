@@ -30,9 +30,11 @@ public final class RestSources {
     public static final ResourceLocation MUSIC_RETRY = id("music_retry");
     /** How long the same two pets leave a scene alone, from {@code pet_interaction}. */
     public static final ResourceLocation SCENE_COOLDOWN = id("scene_cooldown");
+    /** How long a pet leaves a pastime alone once it has done it, from the file of the pastime and the world's setting. */
+    public static final ResourceLocation PASTIME_COOLDOWN = id("pastime_cooldown");
 
     private static final Set<ResourceLocation> NAMES = Set.of(CAMERA_COOLDOWN, CAMERA_RETRY, PHOTO_UPLOAD_WAIT,
-        GIFTING_COOLDOWN, MUSIC_RETRY, SCENE_COOLDOWN);
+        GIFTING_COOLDOWN, MUSIC_RETRY, SCENE_COOLDOWN, PASTIME_COOLDOWN);
     private static final Map<ResourceLocation, Resolver> RESOLVERS = new ConcurrentHashMap<>();
 
     private RestSources() {
@@ -62,7 +64,7 @@ public final class RestSources {
      * Says what a name resolves to. Public so the errand that needs it can, and an in-game case can
      * try another.
      *
-     * @throws IllegalArgumentException for a name that is not one of the six
+     * @throws IllegalArgumentException for a name that is not one of the seven
      */
     public static void register(ResourceLocation name, Resolver resolver) {
         if (!isKnown(name)) {

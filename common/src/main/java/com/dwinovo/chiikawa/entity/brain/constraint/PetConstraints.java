@@ -7,10 +7,13 @@ import com.dwinovo.chiikawa.entity.brain.combat.Ground;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.entity.brain.sensor.FoeCandidates;
 import com.dwinovo.chiikawa.task.PetTask;
+import com.dwinovo.chiikawa.settings.WorldSettings;
+import com.dwinovo.chiikawa.settings.WorldSettingsStore;
 import com.dwinovo.chiikawa.task.PetWorkCounters;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
@@ -98,14 +101,31 @@ public final class PetConstraints {
      * @return whether the pet's directive permits errands of {@code category}
      */
     public static boolean allows(AbstractPet pet, PetOwnership ownership, ErrandCategory category) {
-        return allows(pet.getPetDirective(), ownership, pet.getRules(), category);
+        return allows(pet, ownership, pastimesOf(pet), category);
+    }
+
+    /**
+     * @param pastimes what {@link #pastimesOf} says, for a caller that asks about many categories and would not look it up
+     *                 for each
+     * @see #allows(AbstractPet, PetOwnership, ErrandCategory)
+     */
+    public static boolean allows(AbstractPet pet, PetOwnership ownership, float pastimes, ErrandCategory category) {
+        return allows(pet.getPetDirective(), ownership, pet.getRules(), pastimes, category);
+    }
+
+    /** @return how much the world's players have the pets pass the time with little things, see {@code WorldSettings} */
+    public static float pastimesOf(AbstractPet pet) {
+        return pet.level() instanceof ServerLevel level ? WorldSettingsStore.of(level).get().pastimes()
+            : WorldSettings.DEFAULT.pastimes();
     }
 
     /**
      * Pure permission table. Wild pets ignore the directive. A kind of errand the owner has switched off is not
-     * permitted whatever the directive says.
+     * permitted whatever the directive says, and nor are pastimes in a world that has turned them off.
+     *
+     * @param pastimes the world's setting for how often pets pass the time; none at all forbids the pastimes
      */
-    static boolean allows(PetDirective directive, PetOwnership ownership, PetRules rules, ErrandCategory category) {
+    static boolean allows(PetDirective directive, PetOwnership ownership, PetRules rules, float pastimes, ErrandCategory category) {
         if (!rules.permits(category)) {
             return false;
         }
@@ -116,6 +136,11 @@ public final class PetConstraints {
             // Meeting other pets goes wherever wandering does: at heel it happens around the
             // owner's feet, since the follow anchor calls the pet back before it gets far.
             case WANDER, TAKE_TASK, SOCIAL -> wild || directive != PetDirective.STAY;
+            // A pastime is what a pet does with its time where wandering would, and only while the world has them on.
+            case PASTIME -> pastimes > 0.0F && (wild || directive != PetDirective.STAY);
+            // A pet sleeps where it may walk to a place to do it: told to sit, it sits. Whether it is the time for it is the
+            // errand's to say, which knows the hour and whether the owner is asleep.
+            case SLEEP -> wild || directive != PetDirective.STAY;
             // Giving goes wherever the pet may walk: a pet at heel hands its present over
             // on the way, one left to itself brings it back. A pet told to sit sits, and
             // gives it to whoever comes to collect it.

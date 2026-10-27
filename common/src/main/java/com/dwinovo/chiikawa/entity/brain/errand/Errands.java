@@ -10,6 +10,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.impl.GiftOwnerErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.OfferGiftErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.PickUpItemErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.ShopErrand;
+import com.dwinovo.chiikawa.entity.brain.errand.impl.SleepErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.SocializeErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.StayErrand;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.TakeExamErrand;
@@ -21,6 +22,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.rest.RestStore;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkErrand;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +33,8 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Registry of every errand a pet can be on, by its id: the code errands, which are fixed, and the work errands the
  * loaded errand files make, see {@link WorkErrand}, which are installed together with the settings of every errand
- * and replaced with them by a reload. Generic errands are open to every pet; the others are offered by a job through
- * its work, see {@link com.dwinovo.chiikawa.entity.job.JobWork}.
+ * and replaced with them by a reload. Generic errands are open to every pet, and so are the pastimes, which are works
+ * whose cast says which pets do them; the other works are offered by a job, see {@link com.dwinovo.chiikawa.entity.job.JobWork}.
  *
  * <p>How much each matters is not decided here but by the errand's {@link ErrandSettings}: its
  * priority, which a pet gives way to only for a higher one, its score among the errands of its
@@ -60,10 +62,12 @@ public final class Errands {
         register(new AnswerWhistleErrand()),
         register(new TakePhotoErrand()),
         register(new DefendSelfErrand()),
-        register(new FleeErrand())
+        register(new FleeErrand()),
+        register(new SleepErrand())
     );
 
     private static volatile Map<ResourceLocation, WorkErrand<?, ?>> works = Map.of();
+    private static volatile List<ErrandType<?, ?>> pastimes = List.of();
     private static volatile List<ErrandType<?, ?>> all = List.copyOf(CODE.values());
 
     private Errands() {
@@ -92,6 +96,9 @@ public final class Errands {
         everyErrand.addAll(works.values());
         all = List.copyOf(everyErrand);
         Errands.works = Map.copyOf(works);
+        // In the order of their ids, since a map keeps none and the order settles a tie between errands that are otherwise equal.
+        Errands.pastimes = works.values().stream().filter(work -> work.category() == ErrandCategory.PASTIME)
+            .sorted(Comparator.comparing(work -> work.id().toString())).<ErrandType<?, ?>>map(work -> work).toList();
         ErrandSettings.replaceAll(settings);
     }
 
@@ -112,6 +119,14 @@ public final class Errands {
     /** @return the errands every pet considers */
     public static List<ErrandType<?, ?>> generic() {
         return GENERIC;
+    }
+
+    /**
+     * @return the works the loaded errand files make that are pastimes, which every pet considers whatever its job: it is
+     *         for the cast of each to say which pets do it, see {@link com.dwinovo.chiikawa.entity.brain.errand.pastime.Pastime}
+     */
+    public static List<ErrandType<?, ?>> pastimes() {
+        return pastimes;
     }
 
     private static <E extends ErrandType<?, ?>> E register(E errand) {
