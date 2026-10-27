@@ -115,7 +115,7 @@ public final class GiftOwnerErrand implements ErrandType<GiftOwnerErrand.Present
             case Bedside bedside -> Routine.of(
                 Routine.step(() -> WalkTo.near(new Goal.Place(bedside.where().pos()), tuning.speed(), tuning.arriveDistance(),
                     tuning.reach(), settings.maxTicks())),
-                Routine.step(WaitForWaking::new),
+                Routine.step(() -> new WaitForWaking(SleepErrand.sleeps())),
                 Routine.step(() -> new PlaceByBed(tuning.morningFrom(), tuning.morningTo(), tuning.sleptTicks())))
                 .releasing(TakePresent::putBack);
         };

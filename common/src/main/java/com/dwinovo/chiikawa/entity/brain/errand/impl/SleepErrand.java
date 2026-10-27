@@ -65,6 +65,15 @@ public final class SleepErrand implements ErrandType<SleepErrand.Resting, Errand
         }
     }
 
+    /**
+     * @return how each character sleeps, as the settings of this errand have it: the one account of how a pet looks asleep, for
+     *         whatever else has a pet lie quiet, such as waiting by a bed; nothing if the errand has no settings
+     */
+    public static Optional<ErrandTunings.Performances> sleeps() {
+        return ErrandSettings.of(ErrandIds.SLEEP).map(ErrandSettings::tuning).filter(ErrandTunings.Sleep.class::isInstance)
+            .map(tuning -> ((ErrandTunings.Sleep) tuning).sleeps());
+    }
+
     @Override
     public ResourceLocation id() {
         return ErrandIds.SLEEP;

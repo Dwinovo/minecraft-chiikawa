@@ -7,7 +7,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.run.Step;
 import com.dwinovo.chiikawa.entity.brain.errand.run.StepStatus;
 import com.dwinovo.chiikawa.entity.brain.errand.run.StepTag;
 import com.dwinovo.chiikawa.entity.brain.errand.view.Attacker;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -32,8 +31,7 @@ public final class Cower implements Step {
     @Override
     public void begin(Handle handle) {
         AbstractPet pet = LiveHandle.of(handle).pet();
-        List<String> animations = tuning.cowers().of(BuiltInRegistries.ENTITY_TYPE.getKey(pet.getType()));
-        performance = String.join(",", animations);
+        performance = tuning.cowers().performanceOf(BuiltInRegistries.ENTITY_TYPE.getKey(pet.getType()));
         quietSince = handle.now();
         attacker = Attacker.of(pet).map(Attacker::id).orElse(null);
         handle.stopWalking();
