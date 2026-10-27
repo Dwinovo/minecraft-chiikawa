@@ -25,7 +25,7 @@ public final class PetIconRenderer {
         if (sprite == null || Minecraft.getInstance().options.hideGui || pet.getSpeech().isPresent()) {
             return;
         }
-        OverHead.draw(pet, poseStack, bufferSource, font, cameraOrientation, partialTick, 1.0F, surface -> {
+        OverHead.draw(pet, poseStack, bufferSource, font, cameraOrientation, 1.0F, surface -> {
             int width = sprite.width() + 2 * UiStyle.GAP;
             int height = sprite.height() + 2 * UiStyle.TIGHT;
             int x = -width / 2;
