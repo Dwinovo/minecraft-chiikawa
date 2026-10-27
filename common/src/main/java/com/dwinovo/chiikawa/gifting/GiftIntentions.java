@@ -2,7 +2,6 @@ package com.dwinovo.chiikawa.gifting;
 
 import com.dwinovo.chiikawa.Constants;
 import java.util.Optional;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.util.RandomSource;
@@ -68,18 +67,18 @@ public final class GiftIntentions {
         held = Optional.empty();
     }
 
-    public void save(CompoundTag tag, HolderLookup.Provider registries) {
+    public void save(CompoundTag tag) {
         held.ifPresent(intention -> {
             CompoundTag saved = new CompoundTag();
             saved.putString(OCCASION, intention.occasion().getSerializedName());
-            intention.keepsake().ifPresent(keepsake -> saved.put(KEEPSAKE, keepsake.save(registries)));
+            intention.keepsake().ifPresent(keepsake -> saved.put(KEEPSAKE, keepsake.save(new CompoundTag())));
             saved.putLong(READY_AT, intention.readyAt());
             saved.putLong(FADES_AT, intention.fadesAt());
             tag.put(TAG, saved);
         });
     }
 
-    public void load(CompoundTag tag, HolderLookup.Provider registries) {
+    public void load(CompoundTag tag) {
         held = Optional.empty();
         if (!tag.contains(TAG, Tag.TAG_COMPOUND)) {
             return;
@@ -91,7 +90,7 @@ public final class GiftIntentions {
             return;
         }
         held = Optional.of(new GiftIntention(occasion,
-            saved.contains(KEEPSAKE, Tag.TAG_COMPOUND) ? ItemStack.parse(registries, saved.getCompound(KEEPSAKE)) : Optional.empty(),
+            saved.contains(KEEPSAKE, Tag.TAG_COMPOUND) ? Optional.of(ItemStack.of(saved.getCompound(KEEPSAKE))).filter(stack -> !stack.isEmpty()) : Optional.empty(),
             saved.getLong(READY_AT), saved.getLong(FADES_AT)));
     }
 }

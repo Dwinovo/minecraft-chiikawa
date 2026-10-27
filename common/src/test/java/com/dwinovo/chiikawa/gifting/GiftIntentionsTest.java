@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import net.minecraft.SharedConstants;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.item.ItemStack;
@@ -133,30 +131,29 @@ class GiftIntentionsTest {
 
     @Test
     void aPresentInMindIsSavedWithThePetAndReadBack() {
-        HolderLookup.Provider registries = VanillaRegistries.createLookup();
         intentions.note(GiftOccasion.FILM_FULL, Optional.of(new ItemStack(Items.PAPER)), NOW, 0, FixedRandom.floats(0.0F), SETTINGS);
         CompoundTag tag = new CompoundTag();
-        intentions.save(tag, registries);
+        intentions.save(tag);
 
         GiftIntentions loaded = new GiftIntentions();
-        loaded.load(tag, registries);
+        loaded.load(tag);
 
         GiftIntention was = intentions.held().orElseThrow();
         GiftIntention is = loaded.held().orElseThrow();
         assertEquals(was.occasion(), is.occasion());
         assertEquals(was.readyAt(), is.readyAt());
         assertEquals(was.fadesAt(), is.fadesAt());
-        assertTrue(ItemStack.isSameItemSameComponents(was.keepsake().orElseThrow(), is.keepsake().orElseThrow()));
+        assertTrue(ItemStack.isSameItemSameTags(was.keepsake().orElseThrow(), is.keepsake().orElseThrow()));
     }
 
     @Test
     void aPetWithNoPresentInMindSavesNothingAndASaveWithNoneLoadsNone() {
         CompoundTag tag = new CompoundTag();
-        intentions.save(tag, VanillaRegistries.createLookup());
+        intentions.save(tag);
         assertTrue(tag.isEmpty(), "a pet that never thought of one is saved as it was in 0.1.3");
 
         note(GiftOccasion.FILM_FULL, NOW, 0, 0.0F);
-        intentions.load(tag, VanillaRegistries.createLookup());
+        intentions.load(tag);
         assertTrue(intentions.held().isEmpty());
     }
 
@@ -167,7 +164,7 @@ class GiftIntentionsTest {
         CompoundTag tag = new CompoundTag();
         tag.put("GiftIntention", saved);
 
-        intentions.load(tag, VanillaRegistries.createLookup());
+        intentions.load(tag);
 
         assertTrue(intentions.held().isEmpty());
     }

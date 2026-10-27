@@ -61,7 +61,7 @@ public record PickableItem(UUID id, GlobalPos where) {
                     container.setItem(slot, stack.copyWithCount(moved));
                 }
                 left -= moved;
-            } else if (ItemStack.isSameItemSameComponents(held, stack)) {
+            } else if (ItemStack.isSameItemSameTags(held, stack)) {
                 int moved = Math.min(left, held.getMaxStackSize() - held.getCount());
                 if (moved > 0 && !simulate) {
                     held.grow(moved);

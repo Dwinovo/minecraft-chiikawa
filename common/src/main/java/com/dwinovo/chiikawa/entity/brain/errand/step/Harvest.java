@@ -54,7 +54,8 @@ public final class Harvest implements Step {
         handle.action(PetAction.HARVEST);
         Utils.harvestCrop(level, pet, target);
         if (toolWear > 0) {
-            pet.getMainHandItem().hurtAndBreak(toolWear, pet, EquipmentSlot.MAINHAND);
+            // 1.20.4 uses the old Consumer-callback hurtAndBreak signature.
+            pet.getMainHandItem().hurtAndBreak(toolWear, pet, worn -> worn.broadcastBreakEvent(EquipmentSlot.MAINHAND));
         }
         workCounter.ifPresent(counter -> handle.reportWork(counter, 1));
         return StepStatus.DONE;

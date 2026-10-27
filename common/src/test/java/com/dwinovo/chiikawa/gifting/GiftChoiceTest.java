@@ -15,7 +15,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import net.minecraft.SharedConstants;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
@@ -93,7 +92,7 @@ class GiftChoiceTest {
     void aKeepsakeIsTheThingItselfAndNotAThingLikeIt() {
         SimpleContainer bag = bag();
         ItemStack named = new ItemStack(Items.APPLE);
-        named.set(DataComponents.CUSTOM_NAME, Component.literal("the one it kept"));
+        named.setHoverName(Component.literal("the one it kept"));
         bag.setItem(2, new ItemStack(Items.APPLE));
         bag.setItem(3, new ItemStack(Items.COOKIE, 2));
 
