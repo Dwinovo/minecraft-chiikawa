@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.errand.view;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import java.util.Locale;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
 
 /**
@@ -16,7 +17,7 @@ public enum Weather implements StringRepresentable {
 
     public static final Codec<Weather> CODEC = StringRepresentable.fromEnum(Weather::values);
     /** The weather a cue waits for. Clear weather is not weather to wait for: the cue would hold when no cue was named. */
-    public static final Codec<Weather> TO_WAIT_FOR = CODEC.validate(weather -> weather == CLEAR
+    public static final Codec<Weather> TO_WAIT_FOR = ExtraCodecs.validate(CODEC, weather -> weather == CLEAR
         ? DataResult.error(() -> "weather to wait for is rain or thunder") : DataResult.success(weather));
 
     /**

@@ -35,11 +35,11 @@ public record PetRemark(List<RemarkCue> when, Map<String, Part> cast, int cooldo
     public record Part(VoiceMoment moment, Optional<String> gesture) {
         public static final Codec<Part> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             VoiceMoment.CODEC.fieldOf("moment").forGetter(Part::moment),
-            Codec.STRING.optionalFieldOf("gesture").forGetter(Part::gesture)
+            ExtraCodecs.strictOptionalField(Codec.STRING, "gesture").forGetter(Part::gesture)
         ).apply(instance, Part::new));
     }
 
-    private static final Codec<String> WHO = Codec.STRING.validate(who -> who.equals(EVERYONE) || ResourceLocation.tryParse(who) != null
+    private static final Codec<String> WHO = ExtraCodecs.validate(Codec.STRING, who -> who.equals(EVERYONE) || ResourceLocation.tryParse(who) != null
         ? DataResult.success(who) : DataResult.error(() -> who + " is not a character: an entity type id, or " + EVERYONE));
 
     public static final Codec<PetRemark> CODEC = RecordCodecBuilder.create(instance -> instance.group(

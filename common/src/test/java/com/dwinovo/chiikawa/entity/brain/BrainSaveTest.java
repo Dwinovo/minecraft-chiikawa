@@ -102,7 +102,7 @@ class BrainSaveTest {
     }
 
     private static Tag serialized(Brain<LivingEntity> brain) {
-        return brain.serializeStart(NbtOps.INSTANCE).getOrThrow();
+        return brain.serializeStart(NbtOps.INSTANCE).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
     }
 
     private static CompoundTag memoriesOf(Tag brain) {

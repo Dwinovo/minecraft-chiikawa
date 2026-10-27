@@ -7,6 +7,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.work.WorkFile;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkTarget;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -93,26 +94,26 @@ public final class ErrandSettingsLoader extends SimpleJsonResourceReloadListener
                     errors.add(LOG_PREFIX + id + " is switched off, it is an errand written in code and cannot be a work");
                     return;
                 }
-                WorkFile.CODEC.parse(JsonOps.INSTANCE, json)
-                    .ifSuccess(parsed -> {
-                        WorkErrand<?, ?> errand = new WorkErrand<>(id, parsed.work());
-                        works.put(id, errand);
-                        types.put(id, errand);
-                        decoded.put(id, parsed.settings());
-                    })
-                    .ifError(error -> errors.add(LOG_PREFIX + id + " is switched off, failed to parse: " + error.message()));
+                DataResult<WorkFile<?, ?>> read = WorkFile.CODEC.parse(JsonOps.INSTANCE, json);
+                read.result().ifPresent(parsed -> {
+                    WorkErrand<?, ?> errand = new WorkErrand<>(id, parsed.work());
+                    works.put(id, errand);
+                    types.put(id, errand);
+                    decoded.put(id, parsed.settings());
+                });
+                read.error().ifPresent(error -> errors.add(LOG_PREFIX + id + " is switched off, failed to parse: " + error.message()));
                 return;
             }
             if (!Errands.isCode(id)) {
                 warnings.add(LOG_PREFIX + id + " is skipped, there is no such errand");
                 return;
             }
-            ErrandSettings.codecOf(id).parse(JsonOps.INSTANCE, json)
-                .ifSuccess(parsed -> {
-                    types.put(id, Errands.get(id));
-                    decoded.put(id, parsed);
-                })
-                .ifError(error -> errors.add(LOG_PREFIX + id + " is switched off, failed to parse: " + error.message()));
+            DataResult<ErrandSettings<?>> read = ErrandSettings.codecOf(id).parse(JsonOps.INSTANCE, json);
+            read.result().ifPresent(parsed -> {
+                types.put(id, Errands.get(id));
+                decoded.put(id, parsed);
+            });
+            read.error().ifPresent(error -> errors.add(LOG_PREFIX + id + " is switched off, failed to parse: " + error.message()));
         });
         // What one file says about the others can only be checked with all of them read, and what only the
         // errand knows to ask of its own, with the errand.

@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ExtraCodecs;
 
 /**
  * A {@code pet_errand/<errand>.json} that has an {@code "action"}: the work and, beside it, the errand's
@@ -28,7 +29,7 @@ import net.minecraft.resources.ResourceLocation;
  */
 public record WorkFile<P extends Plan, T>(Work<P, T> work, ErrandSettings<T> settings) {
     public static final Codec<WorkFile<?, ?>> CODEC = WorkActions.CODEC.<WorkFile<?, ?>>dispatch("action",
-        file -> file.work().action(), WorkFile::fieldsOf);
+        file -> file.work().action(), action -> fieldsOf(action).codec());
 
     private static <P extends Plan, T> MapCodec<WorkFile<P, T>> fieldsOf(WorkAction<P, T> action) {
         Function<WorkFile<P, T>, DataResult<WorkFile<P, T>>> sound = file -> file.work().problem()
@@ -36,13 +37,13 @@ public record WorkFile<P extends Plan, T>(Work<P, T> work, ErrandSettings<T> set
             .orElseGet(() -> DataResult.success(file));
         return RecordCodecBuilder.<WorkFile<P, T>>mapCodec(instance -> instance.group(
             ErrandCategory.CODEC.fieldOf("category").forGetter(file -> file.work().category()),
-            ResourceLocation.CODEC.optionalFieldOf("counter").forGetter(file -> file.work().counter()),
+            ExtraCodecs.strictOptionalField(ResourceLocation.CODEC, "counter").forGetter(file -> file.work().counter()),
             // Always written, though a file without it reads as none: it is a list to change.
-            WorkRequirement.CODEC.listOf().optionalFieldOf("requires")
+            ExtraCodecs.strictOptionalField(WorkRequirement.CODEC.listOf(), "requires")
                 .forGetter(file -> Optional.of(file.work().requires())),
-            WorkTarget.CODEC.optionalFieldOf("target").forGetter(file -> file.work().target()),
-            PastimeCue.CODEC.listOf().optionalFieldOf("when").forGetter(file -> file.work().pastime().map(Pastime::when)),
-            Pastime.CAST.optionalFieldOf("cast").forGetter(file -> file.work().pastime().map(Pastime::cast)),
+            ExtraCodecs.strictOptionalField(WorkTarget.CODEC, "target").forGetter(file -> file.work().target()),
+            ExtraCodecs.strictOptionalField(PastimeCue.CODEC.listOf(), "when").forGetter(file -> file.work().pastime().map(Pastime::when)),
+            ExtraCodecs.strictOptionalField(Pastime.CAST, "cast").forGetter(file -> file.work().pastime().map(Pastime::cast)),
             ErrandSettings.mapCodec(action.tuningCodec()).forGetter(WorkFile::settings)
         ).apply(instance, (category, counter, requires, target, when, cast, settings) -> new WorkFile<>(
             new Work<>(action, category, counter, requires.orElse(List.of()), target,

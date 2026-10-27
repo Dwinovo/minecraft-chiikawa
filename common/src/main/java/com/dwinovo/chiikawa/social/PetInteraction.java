@@ -64,7 +64,7 @@ public record PetInteraction(
     int cooldownTicks,
     float chance
 ) {
-    public static final Codec<PetInteraction> CODEC = RecordCodecBuilder.<PetInteraction>create(instance -> instance.group(
+    public static final Codec<PetInteraction> CODEC = ExtraCodecs.validate(RecordCodecBuilder.<PetInteraction>create(instance -> instance.group(
         ExtraCodecs.nonEmptyList(Side.CODEC.listOf()).fieldOf("initiators").forGetter(PetInteraction::initiators),
         ExtraCodecs.nonEmptyList(Side.CODEC.listOf()).fieldOf("partners").forGetter(PetInteraction::partners),
         ModCodecs.strictOptionalField(PartnerState.CODEC, "partner_state", PartnerState.IDLE).forGetter(PetInteraction::partnerState),
@@ -77,7 +77,7 @@ public record PetInteraction(
         ExtraCodecs.POSITIVE_INT.fieldOf("duration_ticks").forGetter(PetInteraction::durationTicks),
         ExtraCodecs.NON_NEGATIVE_INT.fieldOf("cooldown_ticks").forGetter(PetInteraction::cooldownTicks),
         Codec.floatRange(0.0F, 1.0F).fieldOf("chance").forGetter(PetInteraction::chance)
-    ).apply(instance, PetInteraction::new)).validate(PetInteraction::checked);
+    ).apply(instance, PetInteraction::new)), PetInteraction::checked);
 
     public PetInteraction {
         initiators = List.copyOf(initiators);

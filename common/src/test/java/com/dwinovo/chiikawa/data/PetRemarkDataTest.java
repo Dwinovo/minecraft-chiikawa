@@ -24,7 +24,7 @@ class PetRemarkDataTest {
     @Test
     void theShippedRemarksSurviveTheTripThroughTheirFiles() {
         PetRemarkData.all().forEach((id, remark) -> assertEquals(remark,
-            PetRemark.CODEC.parse(JsonOps.INSTANCE, PetRemark.CODEC.encodeStart(JsonOps.INSTANCE, remark).getOrThrow()).getOrThrow(),
+            PetRemark.CODEC.parse(JsonOps.INSTANCE, PetRemark.CODEC.encodeStart(JsonOps.INSTANCE, remark).getOrThrow(false, org.junit.jupiter.api.Assertions::fail)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail),
             id::toString));
     }
 
