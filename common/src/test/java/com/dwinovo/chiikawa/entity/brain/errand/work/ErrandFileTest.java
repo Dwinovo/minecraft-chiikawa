@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.data.ErrandFiles;
 import com.dwinovo.chiikawa.data.ErrandSettingsData;
+import com.dwinovo.chiikawa.data.PastimeData;
 import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.brain.combat.Ground;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
@@ -61,7 +62,8 @@ class ErrandFileTest {
         Loaded loaded = ErrandSettingsLoader.load(ErrandFiles.all());
 
         assertEquals(Set.of(WorkData.HARVEST, WorkData.PLANT, WorkData.DELIVER, WorkData.WEED, WorkData.PICK_MUSHROOM, WorkData.MELEE,
-            WorkData.RANGED, WorkData.HUNT_MELEE, WorkData.HUNT_RANGED, WorkData.PLAY_MUSIC), loaded.works().keySet());
+            WorkData.RANGED, WorkData.HUNT_MELEE, WorkData.HUNT_RANGED, WorkData.PLAY_MUSIC, PastimeData.RAIN_SHELTER,
+            PastimeData.RAIN_PLAY, PastimeData.WATCH_OWNER_WORK), loaded.works().keySet());
         assertEquals(ErrandSettingsData.all(), loaded.settings());
         assertTrue(loaded.errors().isEmpty() && loaded.warnings().isEmpty());
         assertInstanceOf(WorkErrand.class, Errands.get(WorkData.PLAY_MUSIC));
@@ -74,7 +76,7 @@ class ErrandFileTest {
 
             assertNull(Errands.get(WorkData.PLAY_MUSIC));
             assertEquals(Optional.empty(), ErrandSettings.of(WorkData.PLAY_MUSIC));
-            assertEquals(16, Errands.all().size(), "the code errands stay");
+            assertEquals(17, Errands.all().size(), "the code errands stay");
         } finally {
             TestErrands.load();
         }

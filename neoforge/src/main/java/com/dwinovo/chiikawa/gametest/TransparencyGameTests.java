@@ -75,7 +75,7 @@ public final class TransparencyGameTests {
         settleWorld(level, Difficulty.NORMAL, NOON);
         WorldSettingsStore store = WorldSettingsStore.of(level);
         before = store.get();
-        store.set(new WorldSettings(before.wildSpawn(), 0.0F));
+        store.set(before.withChatter(0.0F));
     }
 
     @AfterBatch(batch = SILENT_BATCH)
