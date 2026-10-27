@@ -13,16 +13,17 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
  * an {@code open_mouth} animation plays. Its big tail would fill a rucksack, so under one
  * it is tucked away, as Shisa's is.
  *
- * <p>Its faces: pleased with itself, eyes shut in arcs; hurt, a loud cry, eyes screwed up
- * and tears running — not always a real one; brought back, all sweetness.
+ * <p>Its faces: pleased with itself, eyes shut in arcs, and the same arcs asleep or when it
+ * plays cute; hurt, a loud cry, eyes screwed up and tears running — not always a real one;
+ * yawning, eyes screwed up; brought back, all sweetness.
  */
 public class MomongaRenderer extends ChiikawaEntityRenderer<MomongaPet> {
     public MomongaRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, "momonga");
         addBoneVisibilityRule("Mouth3", (state, animCtx) -> isTalking(state));
         addBoneVisibilityRule("tail", (state, animCtx) -> BagLayer.wearOf(state) != BagItem.Wear.ON_BACK);
-        addBoneVisibilityRule("HappyEyes", ShownDuring.any("happy", "revive"));
-        addBoneVisibilityRule("CryEyes", ShownDuring.any("hurt"));
+        addBoneVisibilityRule("HappyEyes", ShownDuring.any("happy", "sleep", "cute", "revive"));
+        addBoneVisibilityRule("CryEyes", ShownDuring.any("hurt", "yawn"));
         addBoneVisibilityRule("Tears", ShownDuring.any("hurt"));
     }
 }
