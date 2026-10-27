@@ -91,7 +91,7 @@ public final class WalkTo implements Step {
         if (where.isEmpty()) {
             return StepStatus.gaveUp("gone");
         }
-        if (live.pet().distanceToSqr(where.get()) <= arriveDistanceSqr) {
+        if (goal.reached(live, where.get(), arriveDistanceSqr)) {
             return StepStatus.DONE;
         }
         // What the mover said about a turn it took in the air is that it could not look, not that there is no way.
