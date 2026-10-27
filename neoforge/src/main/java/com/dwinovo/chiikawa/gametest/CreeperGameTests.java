@@ -23,6 +23,7 @@ import net.minecraft.world.entity.monster.Creeper;
  * others. The pets stand still (no AI), so the distance is the creeper's own doing.
  */
 @GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class CreeperGameTests {
     private static final String BATCH = "chiikawa_creeper";
     private static final int STAND = 2;

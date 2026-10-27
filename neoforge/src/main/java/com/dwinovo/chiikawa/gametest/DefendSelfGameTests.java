@@ -35,6 +35,7 @@ import net.minecraft.world.level.GameType;
  * swap that lasts for the fight and no longer, and is never saved.
  */
 @GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class DefendSelfGameTests {
     private static final String BATCH = "chiikawa_defend";
     private static final int STAND = 2;
