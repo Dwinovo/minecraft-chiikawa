@@ -35,15 +35,15 @@ import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The one step that breaks a block into the pet's bag, whether the block is a ripe crop, a weed or a mushroom. The step
  * is ticked by hand on a pet that does not think, so that what it did is all there is to see.
  */
-@GameTestHolder(namespace = Constants.MOD_ID)
-@GameTestDontPrefix
+@GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class HarvestGameTests {
     private static final String BATCH = "chiikawa_harvest";
     private static final int STAND = 2;

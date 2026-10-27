@@ -32,8 +32,8 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The pastimes that are one character's own (0.1.4 design, the first batch of section 11): that Chiikawa cries at a storm until
@@ -44,8 +44,8 @@ import net.minecraftforge.gametest.GameTestHolder;
  * <p>Each case has a batch of its own: they are about a pet that looks for a sweet, an owner or another pet, and the one in
  * the next yard along is one it would find.
  */
-@GameTestHolder(namespace = Constants.MOD_ID)
-@GameTestDontPrefix
+@GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class PastimeGameTests {
     private static final String STORM_BATCH = "chiikawa_pastime_storm";
     private static final String SHOWER_BATCH = "chiikawa_pastime_shower";

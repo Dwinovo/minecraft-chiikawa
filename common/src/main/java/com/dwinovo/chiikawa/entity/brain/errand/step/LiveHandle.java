@@ -132,7 +132,8 @@ public final class LiveHandle implements Handle {
     /** The same conditions as the ground navigation of the pet: it plans no path in the air. */
     @Override
     public boolean canFindWay() {
-        return pet.onGround() || pet.isInLiquid() || pet.isPassenger();
+        // 1.20.1 has no Entity.isInLiquid.
+        return pet.onGround() || pet.isInWater() || pet.isInLava() || pet.isPassenger();
     }
 
     @Override

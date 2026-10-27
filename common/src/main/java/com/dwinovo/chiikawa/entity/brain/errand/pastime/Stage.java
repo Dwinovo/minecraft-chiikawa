@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.errand.pastime;
 
 import com.dwinovo.chiikawa.social.Beat;
 import com.dwinovo.chiikawa.social.PartPlayer;
+import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
@@ -24,12 +25,12 @@ import net.minecraft.util.ExtraCodecs;
 public record Stage(Optional<Destination> to, Optional<String> pose, Optional<Beat> begin, Optional<Beat.Recurring> nowAndThen,
                     Optional<Beat> end, Optional<Until> until, int ticks) implements PartPlayer.Script {
     public static final Codec<Stage> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        ExtraCodecs.strictOptionalField(Destination.CODEC, "to").forGetter(Stage::to),
-        ExtraCodecs.strictOptionalField(Codec.STRING, "pose").forGetter(Stage::pose),
-        ExtraCodecs.strictOptionalField(Beat.CODEC, "begin").forGetter(Stage::begin),
-        ExtraCodecs.strictOptionalField(Beat.Recurring.CODEC, "now_and_then").forGetter(Stage::nowAndThen),
-        ExtraCodecs.strictOptionalField(Beat.CODEC, "end").forGetter(Stage::end),
-        ExtraCodecs.strictOptionalField(Until.CODEC, "until").forGetter(Stage::until),
+        ModCodecs.strictOptionalField(Destination.CODEC, "to").forGetter(Stage::to),
+        ModCodecs.strictOptionalField(Codec.STRING, "pose").forGetter(Stage::pose),
+        ModCodecs.strictOptionalField(Beat.CODEC, "begin").forGetter(Stage::begin),
+        ModCodecs.strictOptionalField(Beat.Recurring.CODEC, "now_and_then").forGetter(Stage::nowAndThen),
+        ModCodecs.strictOptionalField(Beat.CODEC, "end").forGetter(Stage::end),
+        ModCodecs.strictOptionalField(Until.CODEC, "until").forGetter(Stage::until),
         ExtraCodecs.POSITIVE_INT.fieldOf("ticks").forGetter(Stage::ticks)
     ).apply(instance, Stage::new));
 

@@ -27,16 +27,16 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FarmBlock;
-import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * What a pet answers when another asks it to play a scene, without the other pet there to ask: the invitations are
  * told to the pet as the asking pet would tell them, and what the pet makes of them is read from what it does and what
  * it says it has said yes to.
  */
-@GameTestHolder(namespace = Constants.MOD_ID)
-@GameTestDontPrefix
+@GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class InvitationGameTests {
     private static final String BATCH = "chiikawa_invitation";
     private static final int STAND = 2;

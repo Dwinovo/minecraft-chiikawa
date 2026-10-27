@@ -36,8 +36,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * The rhythm of a pet's day: that a free pet sleeps through the night near home, on a bed nobody is in or on the ground, and a
@@ -48,8 +48,8 @@ import net.minecraftforge.gametest.GameTestHolder;
  * <p>Each case has a batch of its own: the cases are about a pet looking for a bed, a roof or an owner, and the one in the
  * next yard along is a bed, a roof and an owner it would find.
  */
-@GameTestHolder(namespace = Constants.MOD_ID)
-@GameTestDontPrefix
+@GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class RhythmGameTests {
     private static final String BED_BATCH = "chiikawa_rhythm_bed";
     private static final String OWNERS_BED_BATCH = "chiikawa_rhythm_owners_bed";

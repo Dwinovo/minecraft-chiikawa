@@ -27,8 +27,8 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
-import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * A pet that is hurt and will not fight back runs: to hide behind its owner, or at home, whatever it has been told, a pet
@@ -37,8 +37,8 @@ import net.minecraftforge.gametest.GameTestHolder;
  * <p>The game's own hurt-by memory is what tells the pet it was hurt, and its sensor looks only every second, so a case
  * waits a second for the pet to know.
  */
-@GameTestHolder(namespace = Constants.MOD_ID)
-@GameTestDontPrefix
+@GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class FleeGameTests {
     private static final String BATCH = "chiikawa_flee";
     private static final int STAND = 2;

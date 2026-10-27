@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.errand;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.errand.overlay.Overlays;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSpec;
+import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -57,7 +58,7 @@ public record ErrandSettings<T>(int priority, float score, int maxTicks, Rests r
             RestSpec.CODEC.fieldOf("done").forGetter(Rests::done),
             RestSpec.LASTING.fieldOf("gave_up").forGetter(Rests::gaveUp),
             RestSpec.CODEC.fieldOf("interrupted").forGetter(Rests::interrupted),
-            ExtraCodecs.strictOptionalField(Codec.unboundedMap(Codec.STRING, RestSpec.CODEC), "reports", Map.of())
+            ModCodecs.strictOptionalField(Codec.unboundedMap(Codec.STRING, RestSpec.CODEC), "reports", Map.of())
                 .forGetter(Rests::reports)
         ).apply(instance, Rests::new));
 
@@ -79,11 +80,11 @@ public record ErrandSettings<T>(int priority, float score, int maxTicks, Rests r
             ExtraCodecs.POSITIVE_INT.fieldOf("max_ticks").forGetter(ErrandSettings::maxTicks),
             Rests.CODEC.fieldOf("rests").forGetter(ErrandSettings::rests),
             // Always written, though a file without them reads as none: they are lists to change.
-            ExtraCodecs.strictOptionalField(ResourceLocation.CODEC.listOf(), "yields_to")
+            ModCodecs.strictOptionalField(ResourceLocation.CODEC.listOf(), "yields_to")
                 .forGetter(settings -> Optional.of(settings.yieldsTo())),
-            ExtraCodecs.strictOptionalField(OVERLAY.listOf(), "overlays")
+            ModCodecs.strictOptionalField(OVERLAY.listOf(), "overlays")
                 .forGetter(settings -> Optional.of(settings.overlays())),
-            ExtraCodecs.strictOptionalField(VoiceMoment.CODEC, "start_voice").forGetter(ErrandSettings::startVoice),
+            ModCodecs.strictOptionalField(VoiceMoment.CODEC, "start_voice").forGetter(ErrandSettings::startVoice),
             tuning.fieldOf("tuning").forGetter(ErrandSettings::tuning)
         ).apply(instance, (priority, score, maxTicks, rests, yieldsTo, overlays, startVoice, tuningValue) ->
             new ErrandSettings<>(priority, score, maxTicks, rests, yieldsTo.orElse(List.of()),

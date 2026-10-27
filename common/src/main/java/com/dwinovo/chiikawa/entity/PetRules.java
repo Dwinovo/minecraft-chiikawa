@@ -1,15 +1,17 @@
 package com.dwinovo.chiikawa.entity;
 
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
+import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.netty.handler.codec.DecoderException;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
-import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.Util;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
 
 /**
@@ -60,21 +62,19 @@ public record PetRules(EnumSet<Toggle> off, CombatStance stance, boolean swapWea
 
     /** As saved, and as sent: a key that is missing is the default's. */
     public static final Codec<PetRules> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        ExtraCodecs.strictOptionalField(Toggle.CODEC.listOf(), "Off", List.of()).forGetter(rules -> List.copyOf(rules.off)),
-        ExtraCodecs.strictOptionalField(CombatStance.CODEC, "Stance", DEFAULT.stance).forGetter(PetRules::stance),
-        ExtraCodecs.strictOptionalField(Codec.BOOL, "SwapWeapons", DEFAULT.swapWeapons).forGetter(PetRules::swapWeapons)
+        ModCodecs.strictOptionalField(Toggle.CODEC.listOf(), "Off", List.of()).forGetter(rules -> List.copyOf(rules.off)),
+        ModCodecs.strictOptionalField(CombatStance.CODEC, "Stance", DEFAULT.stance).forGetter(PetRules::stance),
+        ModCodecs.strictOptionalField(Codec.BOOL, "SwapWeapons", DEFAULT.swapWeapons).forGetter(PetRules::swapWeapons)
     ).apply(instance, (off, stance, swap) -> {
         EnumSet<Toggle> switched = EnumSet.noneOf(Toggle.class);
         switched.addAll(off);
         return new PetRules(switched, stance, swap);
     }));
 
-    /** The most the server reads of what the screen sends, in bytes. */
-    private static final long MOST_SENT = 2097152L;
-
-    /** @return the rules as the screen sent them to the server, as the codec reads them */
+    /** @return the rules as the screen sent them to the server, as the codec reads them; vanilla's tag read stops at 2 MiB */
     public static PetRules read(FriendlyByteBuf buffer) {
-        return buffer.readWithCodec(NbtOps.INSTANCE, CODEC, NbtAccounter.create(MOST_SENT));
+        CompoundTag tag = buffer.readNbt();
+        return Util.getOrThrow(CODEC.parse(NbtOps.INSTANCE, tag), message -> new DecoderException("Failed to decode " + tag + ": " + message));
     }
 
     /** Sends these rules from the screen to the server. */

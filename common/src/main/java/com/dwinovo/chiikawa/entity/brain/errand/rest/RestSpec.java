@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain.errand.rest;
 
+import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -48,7 +49,7 @@ public record RestSpec(Either<Integer, ResourceLocation> amount, Per per) {
     private static final Codec<RestSpec> OBJECT = RecordCodecBuilder.create(instance -> instance.group(
         Codec.mapEither(ExtraCodecs.NON_NEGATIVE_INT.fieldOf("ticks"), SOURCE.fieldOf("from"))
             .forGetter(RestSpec::amount),
-        ExtraCodecs.strictOptionalField(Per.CODEC, "per", Per.ERRAND).forGetter(RestSpec::per)
+        ModCodecs.strictOptionalField(Per.CODEC, "per", Per.ERRAND).forGetter(RestSpec::per)
     ).apply(instance, RestSpec::new));
 
     public static final Codec<RestSpec> CODEC = Codec.either(ExtraCodecs.NON_NEGATIVE_INT, OBJECT).xmap(

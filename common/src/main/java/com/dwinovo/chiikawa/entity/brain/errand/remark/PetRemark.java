@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain.errand.remark;
 
+import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -35,7 +36,7 @@ public record PetRemark(List<RemarkCue> when, Map<String, Part> cast, int cooldo
     public record Part(VoiceMoment moment, Optional<String> gesture) {
         public static final Codec<Part> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             VoiceMoment.CODEC.fieldOf("moment").forGetter(Part::moment),
-            ExtraCodecs.strictOptionalField(Codec.STRING, "gesture").forGetter(Part::gesture)
+            ModCodecs.strictOptionalField(Codec.STRING, "gesture").forGetter(Part::gesture)
         ).apply(instance, Part::new));
     }
 

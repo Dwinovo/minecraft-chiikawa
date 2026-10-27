@@ -18,15 +18,15 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.monster.Creeper;
-import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Creepers keep away from the pets the {@code chiikawa:creepers_avoid} tag names, as they do from cats, and from no
  * others. The pets stand still (no AI), so the distance is the creeper's own doing.
  */
-@GameTestHolder(namespace = Constants.MOD_ID)
-@GameTestDontPrefix
+@GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class CreeperGameTests {
     private static final String BATCH = "chiikawa_creeper";
     private static final int STAND = 2;

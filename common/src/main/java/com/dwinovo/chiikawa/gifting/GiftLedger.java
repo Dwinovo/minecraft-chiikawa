@@ -28,7 +28,7 @@ public class GiftLedger extends SavedData {
     public static GiftLedger of(ServerLevel level) {
         // The overworld's storage, so one ledger covers a server rather than one per level.
         return level.getServer().overworld().getDataStorage()
-            .computeIfAbsent(new SavedData.Factory<>(GiftLedger::new, GiftLedger::load, null), FILE);
+            .computeIfAbsent(GiftLedger::load, GiftLedger::new, FILE);
     }
 
     /** @return the game day it is: the overworld's clock over the length of a day */

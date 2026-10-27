@@ -40,7 +40,7 @@ public record GiftingSettings(int cooldownTicks, int ownerDailyLimit, int fadeTi
     public record OccasionSettings(float chance, int delayTicks) {
         public static final Codec<OccasionSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.floatRange(0.0F, 1.0F).fieldOf("chance").forGetter(OccasionSettings::chance),
-            ExtraCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "delay_ticks", 0).forGetter(OccasionSettings::delayTicks)
+            ModCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "delay_ticks", 0).forGetter(OccasionSettings::delayTicks)
         ).apply(instance, OccasionSettings::new));
     }
 
@@ -57,7 +57,7 @@ public record GiftingSettings(int cooldownTicks, int ownerDailyLimit, int fadeTi
             Codec.mapEither(ModCodecs.ITEM.fieldOf("item"),
                 TagKey.hashedCodec(Registries.ITEM).fieldOf("items")).forGetter(Gift::match),
             ExtraCodecs.POSITIVE_INT.fieldOf("weight").forGetter(Gift::weight),
-            ExtraCodecs.strictOptionalField(ResourceLocation.CODEC.listOf(), "characters", List.of()).forGetter(Gift::characters)
+            ModCodecs.strictOptionalField(ResourceLocation.CODEC.listOf(), "characters", List.of()).forGetter(Gift::characters)
         ).apply(instance, Gift::new)));
 
         public Gift {

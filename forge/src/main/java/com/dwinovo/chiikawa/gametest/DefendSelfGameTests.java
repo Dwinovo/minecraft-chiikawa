@@ -30,15 +30,15 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
-import net.minecraftforge.gametest.GameTestDontPrefix;
 import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /**
  * A pet with a hoe in its hand and a sword in its bag that is hit takes the sword up, fights, and takes the hoe back: a
  * swap that lasts for the fight and no longer, and is never saved.
  */
-@GameTestHolder(namespace = Constants.MOD_ID)
-@GameTestDontPrefix
+@GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class DefendSelfGameTests {
     private static final String BATCH = "chiikawa_defend";
     private static final int STAND = 2;
