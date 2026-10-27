@@ -65,8 +65,13 @@ public final class ErrandContractGameTests {
     private static final String BATCH = "chiikawa_errand_contract";
     private static final String TEMPLATE = Constants.MOD_ID + ":floor16";
     private static final long SEED = 42L;
-    /** How long a pet is given to notice what it is to do and set off, before its time limit runs. */
-    private static final int SETTLING = 120;
+    /**
+     * How long a pet is given to notice what it is to do and set off, before its time limit runs. A pastime's reason is seen by a
+     * sensor that looks every two seconds, in rain that takes a second to come, and a pet that has begun to potter about
+     * finishes that before it considers anything else of its priority, and may draw it again: with 120 ticks the pastimes set off
+     * late in two of seven runs of the suite.
+     */
+    private static final int SETTLING = 240;
     /** How far past its time limit an errand may be found to have ended. */
     private static final int GRACE = 20;
     /** How long an interrupt is allowed to take: the tick it is told, and the one after. */
