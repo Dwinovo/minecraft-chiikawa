@@ -57,6 +57,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
+import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
@@ -75,12 +76,11 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
@@ -725,7 +725,7 @@ final class ErrandScenarios {
      * are heard whole or not at all: the licence has gone up a grade and the paper is gone, or neither has happened.
      */
     private static Scenario checkResults(GameTestHelper helper) {
-        settleWorld(helper.getLevel(), Difficulty.NORMAL, (ExamGameTests.EXAM_DAY_NUMBER + 1) * Level.TICKS_PER_DAY + ExamGameTests.MORNING);
+        settleWorld(helper.getLevel(), Difficulty.NORMAL, (ExamGameTests.EXAM_DAY_NUMBER + 1) * SharedConstants.TICKS_PER_GAME_DAY + ExamGameTests.MORNING);
         ExamDeskBlockEntity desk = ExamGameTests.placeDesk(helper);
         AbstractPet pet = GameTestKit.worker(helper, new BlockPos(4, STAND, 8));
         pet.licences().set(QualificationData.WEEDING, new Licence(0, 0, 0, false,

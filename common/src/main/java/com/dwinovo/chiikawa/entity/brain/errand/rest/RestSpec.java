@@ -4,7 +4,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
 
@@ -19,7 +19,7 @@ import net.minecraft.util.StringRepresentable;
  * @param amount the ticks, or the name of the source to ask
  * @param per what the rest is on
  */
-public record RestSpec(Either<Integer, ResourceLocation> amount, Per per) {
+public record RestSpec(Either<Integer, Identifier> amount, Per per) {
     /** What a rest is on. */
     public enum Per implements StringRepresentable {
         ERRAND("errand"),
@@ -42,7 +42,7 @@ public record RestSpec(Either<Integer, ResourceLocation> amount, Per per) {
     /** No rest. */
     public static final RestSpec NONE = ticks(0);
 
-    private static final Codec<ResourceLocation> SOURCE = ResourceLocation.CODEC.validate(name ->
+    private static final Codec<Identifier> SOURCE = Identifier.CODEC.validate(name ->
         RestSources.isKnown(name) ? DataResult.success(name) : DataResult.error(() -> "Unknown rest source " + name));
 
     private static final Codec<RestSpec> OBJECT = RecordCodecBuilder.create(instance -> instance.group(
@@ -71,12 +71,12 @@ public record RestSpec(Either<Integer, ResourceLocation> amount, Per per) {
     }
 
     /** @return a rest as long as the named source says, on the errand */
-    public static RestSpec from(ResourceLocation source) {
+    public static RestSpec from(Identifier source) {
         return new RestSpec(Either.right(source), Per.ERRAND);
     }
 
     /** @return a rest as long as the named source says, on one subject */
-    public static RestSpec fromPerSubject(ResourceLocation source) {
+    public static RestSpec fromPerSubject(Identifier source) {
         return new RestSpec(Either.right(source), Per.SUBJECT);
     }
 

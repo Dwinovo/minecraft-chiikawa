@@ -9,17 +9,17 @@ import com.dwinovo.chiikawa.testing.FixedRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import org.junit.jupiter.api.Test;
 
 /** The rules a pet picks its next errand by: priority first, then score and noise, then the offer. */
 class DecisionCoreTest {
-    private static final ResourceLocation WORK = id("work");
-    private static final ResourceLocation PLANT = id("plant");
-    private static final ResourceLocation FIGHT = id("fight");
-    private static final ResourceLocation PLAY = id("play");
-    private static final ResourceLocation WANDER = id("wander");
+    private static final Identifier WORK = id("work");
+    private static final Identifier PLANT = id("plant");
+    private static final Identifier FIGHT = id("fight");
+    private static final Identifier PLAY = id("play");
+    private static final Identifier WANDER = id("wander");
     /** Nothing may be drawn: a random with nothing in it throws if anything is. */
     private static final RandomSource NO_DRAWS = FixedRandom.floats();
 
@@ -165,11 +165,11 @@ class DecisionCoreTest {
         assertThrows(IllegalArgumentException.class, () -> Decision.pickWithinTier(List.of(), 0.0F, NO_DRAWS));
     }
 
-    private static Scored scored(ResourceLocation errand, int priority, float score) {
+    private static Scored scored(Identifier errand, int priority, float score) {
         return new Scored(errand, priority, score, List.of(1));
     }
 
-    private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath("chiikawa", path);
+    private static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath("chiikawa", path);
     }
 }
