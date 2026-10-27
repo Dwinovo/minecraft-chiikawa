@@ -34,6 +34,7 @@ import net.minecraft.world.item.Items;
  * looking at it changes nothing, and an errand that runs out of time shows nothing for it.
  */
 @GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class SelectorGameTests {
     private static final String BATCH = "chiikawa_selector";
     private static final int STAND = 2;

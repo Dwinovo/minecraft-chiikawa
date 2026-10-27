@@ -39,6 +39,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * is ticked by hand on a pet that does not think, so that what it did is all there is to see.
  */
 @GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class HarvestGameTests {
     private static final String BATCH = "chiikawa_harvest";
     private static final int STAND = 2;

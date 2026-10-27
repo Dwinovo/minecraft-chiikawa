@@ -45,6 +45,7 @@ import net.minecraft.world.phys.AABB;
  * next yard along is a bed, a roof and an owner it would find.
  */
 @GameTestHolder(Constants.MOD_ID)
+@PrefixGameTestTemplate(false)
 public final class RhythmGameTests {
     private static final String BED_BATCH = "chiikawa_rhythm_bed";
     private static final String OWNERS_BED_BATCH = "chiikawa_rhythm_owners_bed";
