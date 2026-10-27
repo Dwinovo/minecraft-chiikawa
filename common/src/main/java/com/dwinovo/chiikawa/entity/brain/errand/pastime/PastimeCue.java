@@ -223,7 +223,7 @@ public sealed interface PastimeCue {
             Surroundings around = view.surroundings();
             BlockPos here = view.pos().pos();
             return what.map(
-                creatures -> around.creatures().stream().anyMatch(seen -> seen.kind().is(creatures) && near(here, seen.where())),
+                creatures -> around.creatures().stream().anyMatch(seen -> seen.kind().builtInRegistryHolder().is(creatures) && near(here, seen.where())),
                 items -> around.items().stream().anyMatch(seen -> seen.kind().builtInRegistryHolder().is(items) && near(here, seen.where())));
         }
 

@@ -31,7 +31,8 @@ public enum DayPhase implements StringRepresentable {
      *         time of day of its own, so a day's routine goes by the world's clock there, as villagers' schedules do
      */
     public static DayPhase in(Level level) {
-        return of(level.getDayTime());
+        boolean keepsOwnClock = level.dimensionType().defaultClock().isPresent();
+        return of(keepsOwnClock ? level.getDefaultClockTime() : level.getOverworldClockTime());
     }
 
     /**

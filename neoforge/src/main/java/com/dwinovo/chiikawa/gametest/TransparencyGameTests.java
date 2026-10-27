@@ -25,7 +25,6 @@ import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
@@ -102,17 +101,17 @@ public final class TransparencyGameTests {
         keepNear(helper, owner, pet);
 
         helper.runAfterDelay(LACKED_TICKS - SAY_TICKS, () -> {
-            helper.assertFalse(said(pet).isPresent(), Component.literal("the pet spoke up before it had been short of anything for long"));
-            helper.assertTrue(pet.getIcon() == PetIcon.MISSING, Component.literal("the pet short of seeds wears " + pet.getIcon()));
+            helper.assertFalse(said(pet).isPresent(), "the pet spoke up before it had been short of anything for long");
+            helper.assertTrue(pet.getIcon() == PetIcon.MISSING, "the pet short of seeds wears " + pet.getIcon());
         });
         helper.runAfterDelay(LACKED_TICKS + SAY_TICKS, () -> {
             assertSaid(helper, pet, VoiceMoment.MISSING);
             WhyNot why = pet.getMind().whyNot().orElseThrow(() -> new AssertionError("the pet found nothing wrong"));
             helper.assertTrue(why.lack().filter(lack -> lack.translationKey().equals("tag.item.chiikawa.entity_plant_crops")).isPresent(),
-                Component.literal("the pet is short of " + why.lack()));
+                "the pet is short of " + why.lack());
             PetSpeech.Said first = lastSaid(pet).orElseThrow();
             helper.runAfterDelay(QUIET_TICKS, () -> {
-                helper.assertTrue(lastSaid(pet).orElseThrow().equals(first), Component.literal("the pet said it again: " + lastSaid(pet)));
+                helper.assertTrue(lastSaid(pet).orElseThrow().equals(first), "the pet said it again: " + lastSaid(pet));
                 helper.succeed();
             });
         });
@@ -127,8 +126,8 @@ public final class TransparencyGameTests {
         keepNear(helper, owner, pet);
 
         helper.runAfterDelay(LACKED_TICKS + SAY_TICKS, () -> {
-            helper.assertFalse(said(pet).isPresent(), Component.literal("the pet spoke in a world with no chatter: " + said(pet)));
-            helper.assertTrue(pet.getIcon() == PetIcon.MISSING, Component.literal("the pet short of seeds wears " + pet.getIcon()));
+            helper.assertFalse(said(pet).isPresent(), "the pet spoke in a world with no chatter: " + said(pet));
+            helper.assertTrue(pet.getIcon() == PetIcon.MISSING, "the pet short of seeds wears " + pet.getIcon());
             helper.succeed();
         });
     }
@@ -147,9 +146,9 @@ public final class TransparencyGameTests {
 
         helper.onEachTick(() -> shown[0] |= pet.getIcon() == PetIcon.GIFT && !pet.getPendingGift().isEmpty());
         helper.succeedWhen(() -> {
-            helper.assertTrue(shown[0], Component.literal("the pet carried its present without showing it"));
-            helper.assertTrue(owner.getInventory().contains(new ItemStack(Items.CAKE)), Component.literal("the owner never got the cake"));
-            helper.assertTrue(pet.getIcon() == PetIcon.NONE, Component.literal("the pet still wears " + pet.getIcon() + " with its paws empty"));
+            helper.assertTrue(shown[0], "the pet carried its present without showing it");
+            helper.assertTrue(owner.getInventory().contains(new ItemStack(Items.CAKE)), "the owner never got the cake");
+            helper.assertTrue(pet.getIcon() == PetIcon.NONE, "the pet still wears " + pet.getIcon() + " with its paws empty");
         });
     }
 
@@ -159,7 +158,7 @@ public final class TransparencyGameTests {
         AbstractPet pet = holding(pet(helper, InitEntity.RAKKO_PET.get(), new BlockPos(8, STAND, 8), false), Items.WOODEN_HOE);
         pet.getBackpack().addItem(new ItemStack(Items.WHEAT_SEEDS, 8));
 
-        helper.succeedWhen(() -> helper.assertTrue(pet.getIcon() == PetIcon.SEEKING_WORK, Component.literal("the pet wears " + pet.getIcon())));
+        helper.succeedWhen(() -> helper.assertTrue(pet.getIcon() == PetIcon.SEEKING_WORK, "the pet wears " + pet.getIcon()));
     }
 
     /** A pet that runs from what hurt it wears the picture of a frightened one. */
@@ -171,7 +170,7 @@ public final class TransparencyGameTests {
 
         pet.hurt(zombie.damageSources().mobAttack(zombie), 1.0F);
 
-        helper.succeedWhen(() -> helper.assertTrue(pet.getIcon() == PetIcon.SCARED, Component.literal("the pet wears " + pet.getIcon())));
+        helper.succeedWhen(() -> helper.assertTrue(pet.getIcon() == PetIcon.SCARED, "the pet wears " + pet.getIcon()));
     }
 
     /**
@@ -185,22 +184,22 @@ public final class TransparencyGameTests {
         AbstractPet pet = farmerOf(helper, owner, new BlockPos(8, STAND, 8));
         PetBackpackMenu clientsMenu = new PetBackpackMenu(1, owner.getInventory(), pet.getId());
 
-        helper.assertFalse(clientsMenu.outlook().isPresent(), Component.literal("the menu knew something before it was told"));
+        helper.assertFalse(clientsMenu.outlook().isPresent(), "the menu knew something before it was told");
         helper.runAfterDelay(40, () -> {
             new PetBackpackMenu(2, owner.getInventory(), pet).broadcastChanges();
             clientsMenu.receive(outlookOf(helper, pet));
             PetOutlookPayload shortOfSeeds = clientsMenu.outlook().orElseThrow(() -> new AssertionError("the menu was told nothing"));
             // Strolling is all there is to do, and a pet that is strolling is not told it will stroll next.
-            helper.assertTrue(shortOfSeeds.next().isEmpty() || !shortOfSeeds.next().equals(pet.getIntent()), Component.literal("the pet said " + shortOfSeeds));
-            helper.assertTrue(shortOfSeeds.whyNotKey().equals(Optional.of("intent.chiikawa.fail.no_farmland")), Component.literal("the pet said " + shortOfSeeds));
-            helper.assertTrue(shortOfSeeds.lackKey().equals(Optional.of("tag.item.chiikawa.entity_plant_crops")), Component.literal("the pet said " + shortOfSeeds));
+            helper.assertTrue(shortOfSeeds.next().isEmpty() || !shortOfSeeds.next().equals(pet.getIntent()), "the pet said " + shortOfSeeds);
+            helper.assertTrue(shortOfSeeds.whyNotKey().equals(Optional.of("intent.chiikawa.fail.no_farmland")), "the pet said " + shortOfSeeds);
+            helper.assertTrue(shortOfSeeds.lackKey().equals(Optional.of("tag.item.chiikawa.entity_plant_crops")), "the pet said " + shortOfSeeds);
 
             pet.getBackpack().addItem(new ItemStack(Items.WHEAT_SEEDS, 8));
             helper.runAfterDelay(40, () -> {
                 clientsMenu.receive(outlookOf(helper, pet));
                 PetOutlookPayload withSeeds = clientsMenu.outlook().orElseThrow();
-                helper.assertTrue(withSeeds.whyNotKey().equals(Optional.of("intent.chiikawa.fail.no_crop")), Component.literal("the pet said " + withSeeds));
-                helper.assertTrue(withSeeds.lackKey().isEmpty(), Component.literal("the pet with seeds is short of " + withSeeds.lackKey()));
+                helper.assertTrue(withSeeds.whyNotKey().equals(Optional.of("intent.chiikawa.fail.no_crop")), "the pet said " + withSeeds);
+                helper.assertTrue(withSeeds.lackKey().isEmpty(), "the pet with seeds is short of " + withSeeds.lackKey());
                 helper.succeed();
             });
         });

@@ -117,10 +117,10 @@ public final class FollowGameTests {
 
         helper.startSequence()
             .thenWaitUntil(() -> helper.assertTrue(arrivals(pet).anyMatch(ended -> ended.outcome() instanceof Outcome.Done),
-                Component.literal("the pet never arrived at its owner's side")))
+                "the pet never arrived at its owner's side"))
             .thenExecute(() -> {
                 helper.assertTrue(arrivals(pet).noneMatch(ended -> !(ended.outcome() instanceof Outcome.Done)),
-                    Component.literal("the pet gave up on following when it arrived"));
+                    "the pet gave up on following when it arrived");
                 BlockPos off = helper.absolutePos(new BlockPos(HERE.getX() + CATCHING_UP, STAND, HERE.getZ()));
                 owner.teleportTo(off.getX() + 0.5, off.getY(), off.getZ() + 0.5);
                 movedOff[0] = helper.getLevel().getGameTime();
@@ -128,7 +128,7 @@ public final class FollowGameTests {
             .thenWaitUntil(() -> helper.assertTrue(pet.getMind().log().entries().stream().anyMatch(entry ->
                     entry instanceof DecisionLog.Switched switched && ErrandIds.FOLLOW_OWNER.equals(switched.to())
                         && switched.gameTime() > movedOff[0]),
-                Component.literal("the pet did not follow on")))
+                "the pet did not follow on"))
             .thenSucceed();
     }
 

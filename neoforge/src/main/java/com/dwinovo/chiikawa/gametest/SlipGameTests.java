@@ -22,7 +22,6 @@ import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -127,15 +126,15 @@ public final class SlipGameTests {
         TaskTracker.advance(pet, WorkData.WEED_PULLED, WEEDS);
         // A chunk saves its entities as it unloads them, and removing a living entity clears its memories.
         Optional<CompoundTag> saved = GameTestKit.saved(pet);
-        helper.assertTrue(saved.isPresent(), Component.literal("the unloaded pet was not saved"));
+        helper.assertTrue(saved.isPresent(), "the unloaded pet was not saved");
         pet.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
 
         AbstractPet loaded = GameTestKit.petFrom(helper, saved.get());
-        helper.assertTrue(loaded.getTask().isEmpty(), Component.literal("the pet loaded again still has the slip"));
+        helper.assertTrue(loaded.getTask().isEmpty(), "the pet loaded again still has the slip");
         int emeralds = GameTestKit.count(loaded, Items.EMERALD);
-        helper.assertTrue(emeralds >= 1 && emeralds <= 2, Component.literal("the pet loaded again has " + emeralds + " emeralds, not the one or two a weeding slip pays"));
+        helper.assertTrue(emeralds >= 1 && emeralds <= 2, "the pet loaded again has " + emeralds + " emeralds, not the one or two a weeding slip pays");
         int practised = loaded.licences().get(QualificationData.WEEDING).practice();
-        helper.assertTrue(practised == practice + 1, Component.literal("the pet loaded again has practised " + practised + " slips, not " + (practice + 1)));
+        helper.assertTrue(practised == practice + 1, "the pet loaded again has practised " + practised + " slips, not " + (practice + 1));
         helper.succeed();
     }
 

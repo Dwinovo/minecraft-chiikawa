@@ -7,6 +7,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.carries;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.ownedPet;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.readySong;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.setDayTime;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 
 import com.dwinovo.chiikawa.block.DeskBooking;
@@ -84,7 +85,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
-import net.minecraft.world.level.block.FarmBlock;
+import net.minecraft.world.level.block.FarmlandBlock;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
@@ -321,13 +322,13 @@ final class ErrandScenarios {
         helper.onEachTick(() -> {
             long now = helper.getLevel().getGameTime();
             if (DayPhase.in(helper.getLevel()) == DayPhase.EVENING && pet.getBrain().hasMemoryValue(MemoryModuleType.NEAREST_BED)) {
-                helper.getLevel().setDayTime(MIDNIGHT);
+                setDayTime(helper.getLevel(), MIDNIGHT);
             }
             boolean lying = pet.getMind().errands().running().filter(running -> running.errand().equals(ErrandIds.SLEEP)
                 && running.stepIndex() == SLEEP_STEP).isPresent();
             lyingSince[0] = lying ? (lyingSince[0] < 0 ? now : lyingSince[0]) : -1;
             if (lying && now - lyingSince[0] >= LYING_TICKS) {
-                helper.getLevel().setDayTime(DAWN);
+                setDayTime(helper.getLevel(), DAWN);
             }
         });
         return new Scenario(pet, 2, ran -> Optional.empty(), ran -> {
@@ -419,7 +420,7 @@ final class ErrandScenarios {
     /** Kurimanju as the day ends, which is held at that hour for as long as the case lasts: it sits down with a drink. */
     private static Scenario eveningDrink(GameTestHelper helper) {
         settleWorld(helper.getLevel(), Difficulty.NORMAL, DUSK);
-        helper.onEachTick(() -> helper.getLevel().setDayTime(DUSK));
+        helper.onEachTick(() -> setDayTime(helper.getLevel(), DUSK));
         AbstractPet pet = GameTestKit.owned(helper, InitEntity.KURIMANJU_PET.get(), new BlockPos(4, STAND, 4));
         pet.setPetDirective(PetDirective.FREE);
         return new Scenario(pet, 1, ran -> Optional.empty());
@@ -480,7 +481,7 @@ final class ErrandScenarios {
     /** It rains for as long as the case lasts, by day. */
     private static void rain(GameTestHelper helper) {
         settleWorld(helper.getLevel(), Difficulty.NORMAL, NOON);
-        helper.getLevel().setWeatherParameters(0, RAIN_TICKS, true, false);
+        helper.getLevel().getServer().setWeatherParameters(0, RAIN_TICKS, true, false);
     }
 
     /** A roof of a few planks over the floor, whose corner is here, which keeps the rain off the floor under it. */
@@ -605,7 +606,7 @@ final class ErrandScenarios {
                 && running.stepIndex() == BED_WAIT_STEP).isPresent();
             lyingSince[0] = waiting ? (lyingSince[0] < 0 ? now : lyingSince[0]) : -1;
             if (waiting && owner.isSleeping() && now - lyingSince[0] >= BED_WAIT_TICKS) {
-                helper.getLevel().setDayTime(DAWN);
+                setDayTime(helper.getLevel(), DAWN);
                 owner.stopSleepInBed(false, true);
             }
         });
@@ -1104,7 +1105,7 @@ final class ErrandScenarios {
 
     /** Watered, or the farmland dries out and turns back to dirt mid-case. */
     private static BlockState moistFarmland() {
-        return Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE);
+        return Blocks.FARMLAND.defaultBlockState().setValue(FarmlandBlock.MOISTURE, FarmlandBlock.MAX_MOISTURE);
     }
 
     /**

@@ -176,7 +176,7 @@ public final class ShopGameTests {
         pet.getBackpack().addItem(new ItemStack(Items.EMERALD, WAGES));
 
         helper.onEachTick(() -> helper.assertFalse(pet.getIntent().filter(ErrandIds.SHOP::equals).isPresent(),
-            Component.literal("the pet set off for a shop outside its area")));
+            "the pet set off for a shop outside its area"));
         helper.runAtTickTime(LEAVE_IT_TICKS, () -> {
             helper.assertTrue(Wallet.count(pet.getBackpack()) == WAGES, "the pet went to a shop outside its area");
             helper.succeed();
@@ -197,10 +197,10 @@ public final class ShopGameTests {
         told.setRules(PetRules.DEFAULT.with(PetRules.Toggle.SHOP, false));
 
         helper.onEachTick(() -> helper.assertFalse(told.getIntent().filter(ErrandIds.SHOP::equals).isPresent(),
-            Component.literal("the pet set off for a shop it was told to keep away from")));
+            "the pet set off for a shop it was told to keep away from"));
         helper.succeedWhen(() -> {
-            helper.assertTrue(Wallet.count(free.getBackpack()) < WAGES, Component.literal("the pet that was not told anything never went shopping"));
-            helper.assertTrue(Wallet.count(told.getBackpack()) == WAGES, Component.literal("the pet told not to shop spent its wages"));
+            helper.assertTrue(Wallet.count(free.getBackpack()) < WAGES, "the pet that was not told anything never went shopping");
+            helper.assertTrue(Wallet.count(told.getBackpack()) == WAGES, "the pet told not to shop spent its wages");
         });
     }
 

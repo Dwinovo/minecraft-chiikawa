@@ -122,7 +122,7 @@ public final class VisitAction implements WorkAction<VisitAction.Visiting, Erran
         return switch (to) {
             case Destination.ToOwner owner -> view.ownerPos().map(ignored -> new Goal.Owner());
             case Destination.ToShelter shelter -> around.shelter().map(Goal.Spot::new);
-            case Destination.ToCreature creature -> around.creatures().stream().filter(seen -> seen.kind().is(creature.kinds()))
+            case Destination.ToCreature creature -> around.creatures().stream().filter(seen -> seen.kind().builtInRegistryHolder().is(creature.kinds()))
                 .findFirst().map(seen -> new Goal.Creature(seen.id()));
             case Destination.ToItem item -> around.items().stream()
                 .filter(seen -> seen.kind().builtInRegistryHolder().is(item.kinds())).findFirst()

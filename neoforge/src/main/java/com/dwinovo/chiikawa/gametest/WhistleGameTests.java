@@ -172,18 +172,18 @@ public final class WhistleGameTests {
         AbstractPet pet = ExamGameTests.signedUp(helper, owner, desk, new BlockPos(4, STAND, 6));
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().seated(), Component.literal("the pet never sat down to its paper")))
+            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().seated(), "the pet never sat down to its paper"))
             .thenExecute(() -> {
                 PetWhistle.Heard heard = PetWhistle.blow(owner, PetDirective.FOLLOW, SHORT);
 
-                helper.assertTrue(heard.nobody(), Component.literal("heard by " + heard));
+                helper.assertTrue(heard.nobody(), "heard by " + heard);
                 // The blow counts an owned pet where it tells it the order, so none counted is no order queued for it.
-                helper.assertTrue(heard.owned() == 0, Component.literal("an order was left for it"));
+                helper.assertTrue(heard.owned() == 0, "an order was left for it");
             })
             .thenIdle(ANSWER_TICKS)
             .thenExecute(() -> {
-                helper.assertTrue(pet.getPetDirective() == PetDirective.FREE, Component.literal("the pet at its desk was called away"));
-                helper.assertTrue(pet.getMind().errands().seated(), Component.literal("the pet at its desk was got up"));
+                helper.assertTrue(pet.getPetDirective() == PetDirective.FREE, "the pet at its desk was called away");
+                helper.assertTrue(pet.getMind().errands().seated(), "the pet at its desk was got up");
             })
             .thenSucceed();
     }
@@ -198,10 +198,10 @@ public final class WhistleGameTests {
         asTeam(helper, () -> {
             PetWhistle.Heard heard = PetWhistle.blow(friend, PetDirective.FOLLOW, SHORT);
 
-            helper.assertTrue(heard.owned() == 1 && heard.wild() == 0, Component.literal("heard by " + heard));
+            helper.assertTrue(heard.owned() == 1 && heard.wild() == 0, "heard by " + heard);
         }, owner, friend);
         helper.succeedWhen(() ->
-            helper.assertTrue(pet.getPetDirective() == PetDirective.FOLLOW, Component.literal("the pet did not come to a teammate's whistle")));
+            helper.assertTrue(pet.getPetDirective() == PetDirective.FOLLOW, "the pet did not come to a teammate's whistle"));
     }
 
     /** Somebody who is nobody's friend whistles for somebody else's pet in vain. */
@@ -213,9 +213,9 @@ public final class WhistleGameTests {
 
         PetWhistle.Heard heard = PetWhistle.blow(stranger, PetDirective.FOLLOW, SHORT);
 
-        helper.assertTrue(heard.nobody(), Component.literal("heard by " + heard));
+        helper.assertTrue(heard.nobody(), "heard by " + heard);
         helper.runAfterDelay(ANSWER_TICKS, () -> {
-            helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, Component.literal("the pet came to a stranger's whistle"));
+            helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, "the pet came to a stranger's whistle");
             helper.succeed();
         });
     }

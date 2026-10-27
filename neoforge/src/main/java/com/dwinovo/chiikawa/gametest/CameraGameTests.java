@@ -243,10 +243,10 @@ public final class CameraGameTests {
                     send(photos, owner, asked, validPicture());
                 }
             }
-            helper.assertFalse(answered.isEmpty(), Component.literal("Hachiware never asked for a photo"));
-            helper.assertTrue(storedWhileHolding[0], Component.literal("the picture was not stored while the camera was up"));
-            helper.assertFalse(shotRolls(pet).isEmpty(), Component.literal("the picture was not kept"));
-            helper.assertFalse(pet.getIntent().filter(ErrandIds.TAKE_PHOTO::equals).isPresent(), Component.literal("Hachiware was still taking the photo"));
+            helper.assertFalse(answered.isEmpty(), "Hachiware never asked for a photo");
+            helper.assertTrue(storedWhileHolding[0], "the picture was not stored while the camera was up");
+            helper.assertFalse(shotRolls(pet).isEmpty(), "the picture was not kept");
+            helper.assertFalse(pet.getIntent().filter(ErrandIds.TAKE_PHOTO::equals).isPresent(), "Hachiware was still taking the photo");
             long rest = pet.getBrain().getTimeUntilExpiry(InitMemory.PHOTO_COOLDOWN.get());
             helper.assertTrue(rest > camera().cooldownTicks() - SETTLED_TICKS && rest <= camera().cooldownTicks(),
                 "Hachiware rests " + rest + " ticks from photos after it, not the camera's " + camera().cooldownTicks());
@@ -277,15 +277,15 @@ public final class CameraGameTests {
                 // Rested for the wait from the shutter, which has run down by the ticks since.
                 long rest = pet.getBrain().getTimeUntilExpiry(InitMemory.PHOTO_COOLDOWN.get());
                 helper.assertTrue(rest > PhotoUploads.WAIT_TICKS - (now - cutAt[0]) - RESTING_AFTER,
-                    Component.literal("Hachiware rests " + rest + " ticks from photos " + (now - cutAt[0]) + " ticks after the shutter"));
+                    "Hachiware rests " + rest + " ticks from photos " + (now - cutAt[0]) + " ticks after the shutter");
                 helper.assertFalse(pet.getIntent().filter(ErrandIds.TAKE_PHOTO::equals).isPresent(),
-                    Component.literal("Hachiware set off on another photo with the first still on its way"));
+                    "Hachiware set off on another photo with the first still on its way");
             }
         });
         helper.succeedWhen(() -> {
-            helper.assertTrue(cutAt[0] >= 0, Component.literal("Hachiware never pressed the shutter"));
-            helper.assertTrue(helper.getLevel().getGameTime() - cutAt[0] >= WAIT_TICKS, Component.literal("still too soon to say"));
-            helper.assertTrue(asked.size() == 1, Component.literal("Hachiware asked for " + asked.size() + " photos"));
+            helper.assertTrue(cutAt[0] >= 0, "Hachiware never pressed the shutter");
+            helper.assertTrue(helper.getLevel().getGameTime() - cutAt[0] >= WAIT_TICKS, "still too soon to say");
+            helper.assertTrue(asked.size() == 1, "Hachiware asked for " + asked.size() + " photos");
         });
     }
 
@@ -309,21 +309,21 @@ public final class CameraGameTests {
             }
             unloaded[0] = true;
             send(photos, owner, photos.waiting().iterator().next(), validPicture());
-            helper.assertTrue(shotRolls(pet).size() == 1, Component.literal("the shot was not on the roll as the pet was told of it"));
+            helper.assertTrue(shotRolls(pet).size() == 1, "the shot was not on the roll as the pet was told of it");
             // A chunk saves its entities as it unloads them, and removing a living entity clears its memories.
             Optional<CompoundTag> saved = GameTestKit.saved(pet);
-            helper.assertTrue(saved.isPresent(), Component.literal("the unloaded pet was not saved"));
+            helper.assertTrue(saved.isPresent(), "the unloaded pet was not saved");
             pet.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
 
             AbstractPet loaded = GameTestKit.petFrom(helper, saved.get());
             List<ItemStack> rolls = shotRolls(loaded);
             helper.assertTrue(rolls.size() == 1 && FilmItem.rollOf(rolls.get(0)).shots().size() == 1,
-                Component.literal("the pet loaded again has " + rolls.size() + " rolls with shots on"));
-            helper.assertTrue(count(loaded, InitItems.FILM.get()) == ROLLS, Component.literal("the roll was not made of one of the fresh ones"));
+                "the pet loaded again has " + rolls.size() + " rolls with shots on");
+            helper.assertTrue(count(loaded, InitItems.FILM.get()) == ROLLS, "the roll was not made of one of the fresh ones");
             // The rest for the kept photo, not the short one for waiting for it that the shutter began.
             long rest = loaded.getBrain().getTimeUntilExpiry(InitMemory.PHOTO_COOLDOWN.get());
             helper.assertTrue(rest > PhotoUploads.WAIT_TICKS && rest <= camera().cooldownTicks(),
-                Component.literal("the pet loaded again rests " + rest + " ticks from photos, not the camera's " + camera().cooldownTicks()));
+                "the pet loaded again rests " + rest + " ticks from photos, not the camera's " + camera().cooldownTicks());
             helper.succeed();
         });
     }
@@ -509,10 +509,10 @@ public final class CameraGameTests {
             }
             if (lostAt[0] >= 0 && now - lostAt[0] >= RESTING_AFTER) {
                 helper.assertTrue(pet.getBrain().hasMemoryValue(InitMemory.PHOTO_COOLDOWN.get()),
-                    Component.literal("the pet is not resting " + (now - lostAt[0]) + " ticks after it lost its subject"));
+                    "the pet is not resting " + (now - lostAt[0]) + " ticks after it lost its subject");
                 helper.assertFalse(pet.getIntent().filter(ErrandIds.TAKE_PHOTO::equals).isPresent(),
-                    Component.literal("the pet set off again " + (now - lostAt[0]) + " ticks after it lost its subject"));
-                helper.assertTrue(photos.waiting().isEmpty(), Component.literal("the pet asked for a photo of nobody"));
+                    "the pet set off again " + (now - lostAt[0]) + " ticks after it lost its subject");
+                helper.assertTrue(photos.waiting().isEmpty(), "the pet asked for a photo of nobody");
             }
         });
         helper.succeedWhen(() -> {
