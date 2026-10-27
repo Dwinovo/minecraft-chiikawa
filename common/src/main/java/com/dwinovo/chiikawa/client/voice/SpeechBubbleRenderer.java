@@ -30,7 +30,7 @@ public final class SpeechBubbleRenderer {
         }
         pet.getSpeech().ifPresent(speech -> {
             float left = speech.left(pet.tickCount, partialTick);
-            OverHead.draw(pet, poseStack, bufferSource, font, cameraOrientation, partialTick,
+            OverHead.draw(pet, poseStack, bufferSource, font, cameraOrientation,
                 Mth.clamp(left / FADE_TICKS, 0.0F, 1.0F), surface -> {
                     Bubble bubble = new Bubble(Component.translatable(speech.line(),
                         speech.subject().map(Component::translatable).orElse(Component.empty())).getString());
