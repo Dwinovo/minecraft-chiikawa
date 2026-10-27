@@ -42,7 +42,7 @@ class ForgettingTest {
     private static final StubAction STUB = new StubAction();
     /** An errand of the stub action, under an id the shipped settings have. */
     private static final WorkErrand<Plan, String> WORKING = new WorkErrand<>(WorkData.PLAY_MUSIC,
-        new Work<>(STUB, ErrandCategory.WORK, Optional.empty(), List.of(), Optional.empty()));
+        new Work<>(STUB, ErrandCategory.WORK, Optional.empty(), List.of(), Optional.empty(), Optional.empty()));
     private static StubErrand CODE;
 
     /** The memory types need the game's registries, which the shipped settings' load brings up. */

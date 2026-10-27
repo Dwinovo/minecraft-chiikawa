@@ -37,6 +37,13 @@ public enum ErrandCategory implements StringRepresentable {
     CURIOUS,
     /** Taking a photo of the owner, a friend or the view, where the pet may walk. */
     PHOTO,
+    /**
+     * Passing the time with something small and a pet's own, between two things that matter: where wandering is permitted,
+     * and only while the world has pastimes on.
+     */
+    PASTIME,
+    /** Lying down to sleep at night, near home, or while the owner sleeps. Where a pet may walk, not told to sit. */
+    SLEEP,
     /** Getting out of harm's way: the one thing a pet does whatever it is told, a pet told to sit included. */
     SAFETY;
 

@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.LackKey;
 import com.dwinovo.chiikawa.entity.brain.errand.Offers;
 import com.dwinovo.chiikawa.entity.brain.errand.Plan;
+import com.dwinovo.chiikawa.entity.brain.errand.pastime.Pastime;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestStore;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Routine;
@@ -39,6 +40,15 @@ public interface WorkAction<P extends Plan, T> {
      *         fails it is switched off
      */
     Optional<String> refuses(Optional<WorkTarget> target);
+
+    /**
+     * @param pastime what a file says makes the work a pastime, if it says
+     * @return why this action cannot do the work as that, or nothing; checked when the file is read, and a file that fails
+     *         it is switched off. An action that is not a pastime's takes no cast
+     */
+    default Optional<String> refusesPastime(Optional<Pastime> pastime) {
+        return pastime.map(ignored -> id().getPath() + " takes no cast");
+    }
 
     /**
      * What the pet can say it is short of when this action has nothing to offer, as the {@link LackKey}s its
