@@ -6,7 +6,9 @@ import com.dwinovo.chiikawa.entity.brain.errand.run.Handle;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Step;
 import com.dwinovo.chiikawa.entity.brain.errand.run.StepStatus;
 import com.dwinovo.chiikawa.entity.interact.PetInteractHandler;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.Consumables;
 
 /**
  * Stands where it is and turns to the pet that is coming over, until it arrives. When it does, what it hands over is
@@ -55,7 +57,7 @@ public final class WaitForGuest implements Step {
         ItemStack treat = start.treat();
         if (!treat.isEmpty()) {
             pet.heal(PetInteractHandler.FEED_HEAL);
-            pet.playSound(pet.getEatingSound(treat), 1.0F, 1.0F);
+            pet.playSound(treat.getOrDefault(DataComponents.CONSUMABLE, Consumables.DEFAULT_FOOD).sound().value(), 1.0F, 1.0F);
         }
         if (start.eagerTicks() > 0) {
             pet.feedDish(start.eagerTicks());

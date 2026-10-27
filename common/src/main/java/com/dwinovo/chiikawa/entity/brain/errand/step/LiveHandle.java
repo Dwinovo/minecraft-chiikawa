@@ -162,7 +162,7 @@ public final class LiveHandle implements Handle {
 
     @Override
     public void snapTo(Vec3 position, float yaw) {
-        pet.moveTo(position.x, position.y, position.z, yaw, 0.0F);
+        pet.snapTo(position.x, position.y, position.z, yaw, 0.0F);
         faceYaw(yaw);
     }
 
