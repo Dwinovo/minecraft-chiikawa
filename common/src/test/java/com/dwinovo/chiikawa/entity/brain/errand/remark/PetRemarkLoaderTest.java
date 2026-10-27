@@ -21,8 +21,8 @@ import org.junit.jupiter.api.Test;
 
 /** A remark's file: what it says, and that a broken one leaves that remark unmade and the rest as they were. */
 class PetRemarkLoaderTest {
-    private static final ResourceLocation MISSING = ResourceLocation.fromNamespaceAndPath("chiikawa", "missing");
-    private static final ResourceLocation BROKEN = ResourceLocation.fromNamespaceAndPath("chiikawa", "broken");
+    private static final ResourceLocation MISSING = new ResourceLocation("chiikawa", "missing");
+    private static final ResourceLocation BROKEN = new ResourceLocation("chiikawa", "broken");
 
     private static final String FILE = """
         { "when": [ { "type": "lacked_for", "ticks": 600 }, { "type": "owner_within", "blocks": 8.0 } ],
@@ -37,9 +37,9 @@ class PetRemarkLoaderTest {
         assertEquals(List.of(new RemarkCue.LackedFor(600), new RemarkCue.OwnerWithin(8.0)), remark.when());
         assertEquals(12000, remark.cooldownTicks());
         assertEquals(Optional.of(new PetRemark.Part(VoiceMoment.TROUBLE, Optional.of("scratch_head"))),
-            remark.partOf(ResourceLocation.fromNamespaceAndPath("chiikawa", "hachiware")));
+            remark.partOf(new ResourceLocation("chiikawa", "hachiware")));
         assertEquals(Optional.of(new PetRemark.Part(VoiceMoment.MISSING, Optional.empty())),
-            remark.partOf(ResourceLocation.fromNamespaceAndPath("chiikawa", "usagi")));
+            remark.partOf(new ResourceLocation("chiikawa", "usagi")));
     }
 
     @Test

@@ -217,6 +217,6 @@ public final class CharacterPastimeData {
     }
 
     private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path);
+        return new ResourceLocation(Constants.MOD_ID, path);
     }
 }

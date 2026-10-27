@@ -27,8 +27,8 @@ import org.junit.jupiter.api.Test;
 /** What a pet with nothing to do offers to do with itself, wandering or sitting: its habits, by the weights its personality gives them. */
 class HabitsOfferTest {
     private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
-        ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
-        ResourceLocation.withDefaultNamespace("overworld"));
+        ResourceKey.createRegistryKey(new ResourceLocation("dimension")),
+        new ResourceLocation("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     private static final UUID PLAYER = UUID.fromString("00000000-0000-0000-0000-0000000000b1");
     private static final UUID SHEEP = UUID.fromString("00000000-0000-0000-0000-0000000000b2");

@@ -57,7 +57,7 @@ public final class SaveGameTests {
     private static final int PHOTO_REST = 9000;
     private static final int GIFT_REST = 4000;
     private static final long SHOP_REST_UNTIL = 80_000L;
-    private static final ResourceLocation PLAINS = ResourceLocation.withDefaultNamespace("plains");
+    private static final ResourceLocation PLAINS = new ResourceLocation("plains");
     private static final GlobalPos HOME = GlobalPos.of(Level.OVERWORLD, new BlockPos(1, 64, 1));
     /** Registered by nobody: what a memory the build has retired, or never had, is to the build. */
     private static final String UNREGISTERED = "chiikawa:retired_memory";

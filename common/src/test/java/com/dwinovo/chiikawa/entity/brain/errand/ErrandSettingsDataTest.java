@@ -177,9 +177,9 @@ class ErrandSettingsDataTest {
     @Test
     void aFrightenedPetCowersAsItsCharacterDoesAndUsagiNeverCries() {
         ErrandTunings.Performances cowers = ((ErrandTunings.Flee) ErrandSettingsData.all().get(ErrandIds.FLEE).tuning()).cowers();
-        ResourceLocation chiikawa = ResourceLocation.fromNamespaceAndPath("chiikawa", "chiikawa");
-        ResourceLocation usagi = ResourceLocation.fromNamespaceAndPath("chiikawa", "usagi");
-        ResourceLocation rakko = ResourceLocation.fromNamespaceAndPath("chiikawa", "rakko");
+        ResourceLocation chiikawa = new ResourceLocation("chiikawa", "chiikawa");
+        ResourceLocation usagi = new ResourceLocation("chiikawa", "usagi");
+        ResourceLocation rakko = new ResourceLocation("chiikawa", "rakko");
 
         assertEquals(List.of("cry", "hurt"), cowers.of(chiikawa));
         assertEquals(List.of("yell", "hurt"), cowers.of(usagi));

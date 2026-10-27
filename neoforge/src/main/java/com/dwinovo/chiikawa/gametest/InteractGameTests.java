@@ -14,6 +14,7 @@ import com.dwinovo.chiikawa.entity.PetRules;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.network.PetServerPacketHandler;
 import com.dwinovo.chiikawa.shop.Wallet;
+import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;

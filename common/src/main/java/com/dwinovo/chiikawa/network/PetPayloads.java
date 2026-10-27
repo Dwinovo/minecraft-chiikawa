@@ -52,7 +52,7 @@ public final class PetPayloads {
      */
     public record PetRulesPayload(int pet, PetRules rules) implements CustomPacketPayload {
         public static final Type<PetRulesPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "pet_rules"));
+            new ResourceLocation(Constants.MOD_ID, "pet_rules"));
         public static final StreamCodec<RegistryFriendlyByteBuf, PetRulesPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT, PetRulesPayload::pet,
             PetRules.STREAM_CODEC, PetRulesPayload::rules,
@@ -99,7 +99,7 @@ public final class PetPayloads {
     public record PetOutlookPayload(int pet, Optional<ResourceLocation> next, Optional<String> whyNotKey,
                                     Optional<String> lackKey) implements CustomPacketPayload {
         public static final Type<PetOutlookPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "pet_outlook"));
+            new ResourceLocation(Constants.MOD_ID, "pet_outlook"));
         public static final StreamCodec<RegistryFriendlyByteBuf, PetOutlookPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT, PetOutlookPayload::pet,
             ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC), PetOutlookPayload::next,

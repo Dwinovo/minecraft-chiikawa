@@ -44,15 +44,15 @@ import org.junit.jupiter.api.Test;
  */
 class AdmissionTest {
     private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
-        ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
-        ResourceLocation.withDefaultNamespace("overworld"));
+        ResourceKey.createRegistryKey(new ResourceLocation("dimension")),
+        new ResourceLocation("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     /** Reach 13, leash 20, round its home. */
     private static final PetAnchor FREE =
         TestAnchors.free(HOME);
-    private static final PetTask SLIP = new PetTask(ResourceLocation.fromNamespaceAndPath("chiikawa", "weeding"),
-        ResourceLocation.fromNamespaceAndPath("chiikawa", "farmer"), WorkData.WEED_PULLED, PetTask.NO_ICON, 8,
-        ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath("chiikawa", "pet_task/weeding")), 0);
+    private static final PetTask SLIP = new PetTask(new ResourceLocation("chiikawa", "weeding"),
+        new ResourceLocation("chiikawa", "farmer"), WorkData.WEED_PULLED, PetTask.NO_ICON, 8,
+        ResourceKey.create(Registries.LOOT_TABLE, new ResourceLocation("chiikawa", "pet_task/weeding")), 0);
     private static final RestLedger NO_RESTS = TestRests.noRests();
 
     @BeforeAll

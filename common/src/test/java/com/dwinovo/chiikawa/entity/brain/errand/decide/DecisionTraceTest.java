@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 
 /** The account of one decision the debug command gives. */
 class DecisionTraceTest {
-    private static final ResourceLocation WORK = ResourceLocation.fromNamespaceAndPath("chiikawa", "work");
-    private static final ResourceLocation PLAY = ResourceLocation.fromNamespaceAndPath("chiikawa", "play");
+    private static final ResourceLocation WORK = new ResourceLocation("chiikawa", "work");
+    private static final ResourceLocation PLAY = new ResourceLocation("chiikawa", "play");
 
     @Test
     void itHasEveryErrandInTheOrderTheDecisionLookedAtThemAndWhatWasPicked() {

@@ -28,8 +28,8 @@ import org.junit.jupiter.api.Test;
 
 /** What a pet may give out of its bag for the present it has in mind: where it looks first, and what it never gives. */
 class GiftChoiceTest {
-    private static final ResourceLocation CHIIKAWA = ResourceLocation.fromNamespaceAndPath("chiikawa", "chiikawa");
-    private static final ResourceLocation FURUHONYA = ResourceLocation.fromNamespaceAndPath("chiikawa", "furuhonya");
+    private static final ResourceLocation CHIIKAWA = new ResourceLocation("chiikawa", "chiikawa");
+    private static final ResourceLocation FURUHONYA = new ResourceLocation("chiikawa", "furuhonya");
     /** What items say of themselves, as stand-ins for ones that do: gold is ready, iron is not, whatever the stack. */
     private static final Item READY = Items.GOLD_NUGGET;
     private static final Item UNREADY = Items.IRON_NUGGET;

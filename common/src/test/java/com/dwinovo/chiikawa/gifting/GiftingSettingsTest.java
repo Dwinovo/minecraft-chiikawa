@@ -18,8 +18,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class GiftingSettingsTest {
-    private static final ResourceLocation CHIIKAWA = ResourceLocation.fromNamespaceAndPath("chiikawa", "chiikawa");
-    private static final ResourceLocation RAKKO = ResourceLocation.fromNamespaceAndPath("chiikawa", "rakko");
+    private static final ResourceLocation CHIIKAWA = new ResourceLocation("chiikawa", "chiikawa");
+    private static final ResourceLocation RAKKO = new ResourceLocation("chiikawa", "rakko");
     private static final String GOOD = """
         { "cooldown_ticks": 24000, "owner_daily_limit": 3, "fade_ticks": 12000,
           "occasions": { "was_treated": { "chance": 0.3, "delay_ticks": 1200 }, "film_full": { "chance": 1.0 } },
@@ -91,7 +91,7 @@ class GiftingSettingsTest {
 
         assertTrue(settings.giftOf(new ItemStack(Items.POPPY), CHIIKAWA).isEmpty(), "poppies are no gift of this file");
         assertEquals(Optional.empty(), settings.giftOf(new ItemStack(Items.BOOK), RAKKO), "a book is Furuhonya's to give");
-        assertEquals(4, settings.giftOf(new ItemStack(Items.BOOK), ResourceLocation.fromNamespaceAndPath("chiikawa", "furuhonya"))
+        assertEquals(4, settings.giftOf(new ItemStack(Items.BOOK), new ResourceLocation("chiikawa", "furuhonya"))
             .orElseThrow().weight());
         assertTrue(settings.gifts().get(1).isFor(RAKKO), "flowers are everyone's to give");
         assertFalse(settings.gifts().get(0).isFor(RAKKO));

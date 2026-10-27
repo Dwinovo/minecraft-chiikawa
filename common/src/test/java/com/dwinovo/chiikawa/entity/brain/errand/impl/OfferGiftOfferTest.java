@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
  */
 class OfferGiftOfferTest {
     private static final GlobalPos AT = GlobalPos.of(ResourceKey.create(ResourceKey.createRegistryKey(
-        ResourceLocation.withDefaultNamespace("dimension")), ResourceLocation.withDefaultNamespace("overworld")), BlockPos.ZERO);
+        new ResourceLocation("dimension")), new ResourceLocation("overworld")), BlockPos.ZERO);
     private static final GiftChoice.Pick COOKIE = new GiftChoice.Pick(2, Items.COOKIE, 1);
     private static final GiftChoice.Pick CAKE = new GiftChoice.Pick(4, Items.CAKE, 3);
 

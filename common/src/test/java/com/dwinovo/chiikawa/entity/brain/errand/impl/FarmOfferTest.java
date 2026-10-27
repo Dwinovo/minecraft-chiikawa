@@ -28,8 +28,8 @@ import org.junit.jupiter.api.Test;
 /** The farmer's errands that work a block the sensor remembers: reaping, planting, and putting the crop away. */
 class FarmOfferTest {
     private static final ResourceKey<Level> OVERWORLD = ResourceKey.create(
-        ResourceKey.createRegistryKey(ResourceLocation.withDefaultNamespace("dimension")),
-        ResourceLocation.withDefaultNamespace("overworld"));
+        ResourceKey.createRegistryKey(new ResourceLocation("dimension")),
+        new ResourceLocation("overworld"));
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(0, 64, 0));
     private static final PetAnchor FREE = TestAnchors.free(HOME);
 

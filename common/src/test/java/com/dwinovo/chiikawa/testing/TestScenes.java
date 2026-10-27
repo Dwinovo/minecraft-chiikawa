@@ -14,7 +14,7 @@ public final class TestScenes {
     /** The pet the scene is played with. */
     public static final UUID PARTNER = UUID.fromString("00000000-0000-0000-0000-0000000000b1");
     /** The scene's id. */
-    public static final ResourceLocation SCENE = ResourceLocation.fromNamespaceAndPath("chiikawa", "test_scene");
+    public static final ResourceLocation SCENE = new ResourceLocation("chiikawa", "test_scene");
 
     private static final PetInteraction.Side SIDE = new PetInteraction.Side(List.of(), Optional.of("pose"), Optional.empty(),
         Optional.empty(), Optional.empty());
