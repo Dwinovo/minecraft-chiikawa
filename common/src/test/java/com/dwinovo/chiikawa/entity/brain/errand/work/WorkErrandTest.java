@@ -88,7 +88,7 @@ class WorkErrandTest {
 
     private static WorkErrand<BuskAction.Performance, ErrandTunings.PlayMusic> errand(WorkRequirement... requires) {
         return new WorkErrand<>(WorkData.PLAY_MUSIC, new Work<>(WorkActions.BUSK, ErrandCategory.WORK,
-            Optional.of(WorkData.PLAY_MUSIC_SECOND), List.of(requires), Optional.empty()));
+            Optional.of(WorkData.PLAY_MUSIC_SECOND), List.of(requires), Optional.empty(), Optional.empty()));
     }
 
     private static PetTask slip(ResourceLocation counter) {

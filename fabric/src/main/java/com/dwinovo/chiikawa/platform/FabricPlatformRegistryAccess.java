@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.entity.brain.sensor.PetPlacesSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetWorkSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetSocialSensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetSurroundingsSensor;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.platform.services.IPlatformRegistryAccess;
 import com.dwinovo.chiikawa.qualification.QualificationCondition;
@@ -24,6 +25,7 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     private final Supplier<SensorType<PetPickableItemSensor>> petItemEntitySensor;
     private final Supplier<SensorType<PetPlacesSensor>> petPlacesSensor;
     private final Supplier<SensorType<PetSocialSensor>> petSocialSensor;
+    private final Supplier<SensorType<PetSurroundingsSensor>> petSurroundingsSensor;
     private final Supplier<MenuType<PetBackpackMenu>> petBackpackMenu;
     private final Supplier<LootItemConditionType> qualificationCondition;
 
@@ -36,6 +38,7 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
         petItemEntitySensor = registerSensor("pet_item_entity_sensor", new SensorType<>(PetPickableItemSensor::new));
         petPlacesSensor = registerSensor("pet_places_sensor", new SensorType<>(PetPlacesSensor::new));
         petSocialSensor = registerSensor("pet_social_sensor", new SensorType<>(PetSocialSensor::new));
+        petSurroundingsSensor = registerSensor("pet_surroundings_sensor", new SensorType<>(PetSurroundingsSensor::new));
 
         petBackpackMenu = registerMenu("pet_backpack", new ExtendedScreenHandlerType<>(PetBackpackMenu::new, PetBackpackMenu.OPENING_DATA));
     }
@@ -77,6 +80,11 @@ public final class FabricPlatformRegistryAccess implements IPlatformRegistryAcce
     @Override
     public Supplier<SensorType<PetSocialSensor>> petSocialSensor() {
         return petSocialSensor;
+    }
+
+    @Override
+    public Supplier<SensorType<PetSurroundingsSensor>> petSurroundingsSensor() {
+        return petSurroundingsSensor;
     }
 
     @Override

@@ -3,6 +3,8 @@ package com.dwinovo.chiikawa.init;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.errand.remark.RemarkRests;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.SubjectRests;
+import com.dwinovo.chiikawa.entity.brain.errand.view.OwnerSeen;
+import com.dwinovo.chiikawa.entity.brain.errand.view.Surroundings;
 import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.social.InteractionPlan;
 import com.dwinovo.chiikawa.social.SocialCooldowns;
@@ -239,6 +241,22 @@ public final class InitMemory {
         Services.REGISTRY.<MemoryModuleType<RemarkRests>>register(
             BuiltInRegistries.MEMORY_MODULE_TYPE,
             ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "remark_rests"),
+            () -> new MemoryModuleType<>(Optional.empty())
+        );
+
+    /** What the pet sees within a few blocks of itself, as its sensor last looked; not saved. */
+    public static final Supplier<MemoryModuleType<Surroundings>> SURROUNDINGS =
+        Services.REGISTRY.<MemoryModuleType<Surroundings>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "surroundings"),
+            () -> new MemoryModuleType<>(Optional.empty())
+        );
+
+    /** When the pet last had its owner near and last saw them come back from an absence; not saved. */
+    public static final Supplier<MemoryModuleType<OwnerSeen>> OWNER_SEEN =
+        Services.REGISTRY.<MemoryModuleType<OwnerSeen>>register(
+            BuiltInRegistries.MEMORY_MODULE_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "owner_seen"),
             () -> new MemoryModuleType<>(Optional.empty())
         );
 

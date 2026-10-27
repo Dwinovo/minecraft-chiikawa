@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.gametest;
 
 import static com.dwinovo.chiikawa.gametest.GameTestKit.MIDNIGHT;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.NOON;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.addSong;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.carries;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.ownedPet;
@@ -13,6 +14,7 @@ import com.dwinovo.chiikawa.block.ExamDeskBlockEntity;
 import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
 import com.dwinovo.chiikawa.camera.PhotoResults;
 import com.dwinovo.chiikawa.camera.PhotoScout;
+import com.dwinovo.chiikawa.data.PastimeData;
 import com.dwinovo.chiikawa.data.PetInteractionData;
 import com.dwinovo.chiikawa.data.QualificationData;
 import com.dwinovo.chiikawa.data.WorkData;
@@ -24,6 +26,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.entity.brain.errand.step.Meeting;
+import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.gifting.GiftOccasion;
 import com.dwinovo.chiikawa.gifting.Presents;
 import com.dwinovo.chiikawa.init.InitBlocks;
@@ -61,6 +64,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -95,6 +99,14 @@ final class ErrandScenarios {
     /** The step of a present left by the owner's bed at which the pet waits for the owner to wake, and for how long before they do. */
     private static final int BED_WAIT_STEP = 1;
     private static final int BED_WAIT_TICKS = 100;
+    /** The step of a night's sleep at which the pet lies down, and how long it lies before the morning comes. */
+    private static final int SLEEP_STEP = 1;
+    private static final int LYING_TICKS = 100;
+    /** When the day is ending and the night has not come. */
+    private static final long DUSK = 12500L;
+    /** How long the rain lasts, longer than a case, and how high above the floor a roof is. */
+    private static final int RAIN_TICKS = 24000;
+    private static final int ROOF = 3;
     /** When an owner who sleeps through the night wakes, as the level's clock reads it: a day's start. */
     private static final long DAWN = 24000L;
     private static final int COOKIES = 3;
@@ -205,7 +217,11 @@ final class ErrandScenarios {
         Map.entry(ErrandIds.STAY, ErrandScenarios::stay),
         Map.entry(ErrandIds.SOCIALIZE, ErrandScenarios::socialize),
         Map.entry(ErrandIds.COOPERATE, ErrandScenarios::cooperate),
-        Map.entry(ErrandIds.ANSWER_WHISTLE, ErrandScenarios::answerWhistle));
+        Map.entry(ErrandIds.ANSWER_WHISTLE, ErrandScenarios::answerWhistle),
+        Map.entry(ErrandIds.SLEEP, ErrandScenarios::sleep),
+        Map.entry(PastimeData.RAIN_SHELTER, ErrandScenarios::rainShelter),
+        Map.entry(PastimeData.RAIN_PLAY, ErrandScenarios::rainPlay),
+        Map.entry(PastimeData.WATCH_OWNER_WORK, ErrandScenarios::watchOwnerWork));
 
     /** The errands that are done in the tick they begin. */
     private static final Set<ResourceLocation> INSTANT = Set.of(ErrandIds.OFFER_GIFT);
@@ -270,6 +286,93 @@ final class ErrandScenarios {
             }
         });
         return new Scenario(pet, 2, ran -> Optional.empty());
+    }
+
+    /**
+     * A pet left to itself in a yard with a bed in it, in the night: it walks to the bed and lies on it. It is the morning
+     * that lets it go on, and the morning comes when the pet has lain a while, so that the case can cut it short at the walk
+     * and then at the last step. Whatever is cut short, the bed is no one's but the yard's: nobody was put to sleep in it.
+     */
+    private static Scenario sleep(GameTestHelper helper) {
+        // It is dusk until the pet knows where the bed is, as a day ends before its night: a pet that lies down before it
+        // has seen the bed lies down on the floor.
+        settleWorld(helper.getLevel(), Difficulty.NORMAL, DUSK);
+        BlockPos head = new BlockPos(10, STAND, 10);
+        BlockState bed = Blocks.RED_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.EAST);
+        helper.setBlock(head.west(), bed.setValue(BedBlock.PART, BedPart.FOOT));
+        helper.setBlock(head, bed.setValue(BedBlock.PART, BedPart.HEAD));
+        AbstractPet pet = GameTestKit.owned(helper, InitEntity.USAGI_PET.get(), new BlockPos(4, STAND, 4));
+        pet.setPetDirective(PetDirective.FREE);
+        long[] lyingSince = {-1};
+        helper.onEachTick(() -> {
+            long now = helper.getLevel().getGameTime();
+            if (DayPhase.in(helper.getLevel()) == DayPhase.EVENING && pet.getBrain().hasMemoryValue(MemoryModuleType.NEAREST_BED)) {
+                helper.getLevel().setDayTime(MIDNIGHT);
+            }
+            boolean lying = pet.getMind().errands().running().filter(running -> running.errand().equals(ErrandIds.SLEEP)
+                && running.stepIndex() == SLEEP_STEP).isPresent();
+            lyingSince[0] = lying ? (lyingSince[0] < 0 ? now : lyingSince[0]) : -1;
+            if (lying && now - lyingSince[0] >= LYING_TICKS) {
+                helper.getLevel().setDayTime(DAWN);
+            }
+        });
+        return new Scenario(pet, 2, ran -> Optional.empty(), ran -> {
+            if (pet.isSleeping() || helper.getBlockState(head).getValue(BedBlock.OCCUPIED)) {
+                return Optional.of("the pet was put to sleep in the bed");
+            }
+            return Optional.empty();
+        }, () -> settleWorld(helper.getLevel(), Difficulty.NORMAL, MIDNIGHT));
+    }
+
+    /**
+     * A pet out in the rain with a roof a few steps off: it walks under it and sits there for a while. It sits where the
+     * rain does not fall and nothing is left of it in the world.
+     */
+    private static Scenario rainShelter(GameTestHelper helper) {
+        rain(helper);
+        roof(helper, 8, 8);
+        AbstractPet pet = GameTestKit.owned(helper, InitEntity.HACHIWARE_PET.get(), new BlockPos(5, STAND, 5));
+        pet.setPetDirective(PetDirective.FREE);
+        return new Scenario(pet, 2, ran -> Optional.empty());
+    }
+
+    /** Usagi out in the rain, which it plays in where it stands. */
+    private static Scenario rainPlay(GameTestHelper helper) {
+        rain(helper);
+        GameTestKit.openSky(helper);
+        AbstractPet pet = GameTestKit.owned(helper, InitEntity.USAGI_PET.get(), new BlockPos(4, STAND, 4));
+        pet.setPetDirective(PetDirective.FREE);
+        return new Scenario(pet, 1, ran -> Optional.empty());
+    }
+
+    /**
+     * An owner across the yard swinging a pickaxe, and a pet with nothing to do, which comes over to watch and claps. The
+     * owner is a stand-in that is never ticked, so its swing is made again every few ticks for as long as it is looked at.
+     */
+    private static Scenario watchOwnerWork(GameTestHelper helper) {
+        ServerPlayer owner = ownerAcross(helper);
+        owner.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_PICKAXE));
+        helper.onEachTick(() -> owner.swing(InteractionHand.MAIN_HAND));
+        AbstractPet pet = GameTestKit.wild(helper, InitEntity.USAGI_PET.get(), new BlockPos(4, STAND, 4));
+        pet.tame(owner);
+        pet.setPetDirective(PetDirective.FREE);
+        return new Scenario(pet, 2, ran -> Optional.empty());
+    }
+
+    /** It rains for as long as the case lasts, by day. */
+    private static void rain(GameTestHelper helper) {
+        settleWorld(helper.getLevel(), Difficulty.NORMAL, NOON);
+        helper.getLevel().setWeatherParameters(0, RAIN_TICKS, true, false);
+    }
+
+    /** A roof of a few planks over the floor, whose corner is here, which keeps the rain off the floor under it. */
+    private static void roof(GameTestHelper helper, int x, int z) {
+        GameTestKit.openSky(helper);
+        for (int dx = 0; dx < 3; dx++) {
+            for (int dz = 0; dz < 3; dz++) {
+                helper.setBlock(new BlockPos(x + dx, STAND + ROOF, z + dz), Blocks.OAK_PLANKS);
+            }
+        }
     }
 
     /**

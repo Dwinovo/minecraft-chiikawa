@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.entity.brain.errand.LackKey;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.WhyNot;
+import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
@@ -80,8 +81,8 @@ class PetRemarkLoaderTest {
         PetRemark remark = PetRemark.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(FILE)).getOrThrow();
         WhyNot lacking = new WhyNot(MISSING, "intent.chiikawa.fail.no_arrows", Optional.of(LackKey.item(MISSING)), 0L);
 
-        assertTrue(remark.holds(new RemarkCue.Situation(Optional.of(lacking), 600, OptionalDouble.of(3.0))));
-        assertFalse(remark.holds(new RemarkCue.Situation(Optional.of(lacking), 599, OptionalDouble.of(3.0))));
-        assertFalse(remark.holds(new RemarkCue.Situation(Optional.of(lacking), 600, OptionalDouble.of(9.0))));
+        assertTrue(remark.holds(new RemarkCue.Situation(Optional.of(lacking), 600, OptionalDouble.of(3.0), DayPhase.DAY)));
+        assertFalse(remark.holds(new RemarkCue.Situation(Optional.of(lacking), 599, OptionalDouble.of(3.0), DayPhase.DAY)));
+        assertFalse(remark.holds(new RemarkCue.Situation(Optional.of(lacking), 600, OptionalDouble.of(9.0), DayPhase.DAY)));
     }
 }

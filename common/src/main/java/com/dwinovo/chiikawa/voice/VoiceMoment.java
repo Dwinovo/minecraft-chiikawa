@@ -63,7 +63,9 @@ public enum VoiceMoment implements StringRepresentable {
      */
     MISSING,
     /** Short of something its work needs, Hachiware's way: it trusts that something will turn up. */
-    TROUBLE;
+    TROUBLE,
+    /** Drowsy at dusk or at night, with its owner by to hear it, as a remark: a yawn. */
+    SLEEPY;
 
     public static final Codec<VoiceMoment> CODEC = StringRepresentable.fromEnum(VoiceMoment::values);
 

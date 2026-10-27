@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.camera.PhotoResults;
 import com.dwinovo.chiikawa.entity.AbstractPet;
@@ -32,6 +33,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.run.Executor;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Handle;
 import com.dwinovo.chiikawa.entity.brain.errand.run.PetIcons;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
+import com.dwinovo.chiikawa.entity.brain.errand.run.StepTag;
 import com.dwinovo.chiikawa.entity.brain.errand.step.LiveHandle;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.entity.brain.errand.view.LivePetView;
@@ -132,7 +134,9 @@ public final class PetMind {
         this.pet = pet;
         this.rests = new RestLedger(
             errand -> Errands.restsOf(pet.getBrain(), errand),
-            errand -> Optional.ofNullable(ErrandSettings.all().get(errand)));
+            errand -> Optional.ofNullable(ErrandSettings.all().get(errand)),
+            Constants.LOG::error,
+            () -> PetConstraints.pastimesOf(pet));
         this.handle = new LiveHandle(pet);
         this.executor = new Executor(handle, pet, rests, log, this::iconSigns);
         this.errands = ErrandView.of(executor, desk);
@@ -232,7 +236,9 @@ public final class PetMind {
             decide(now, trigger);
         }
         executor.tick(now);
-        Remarks.tick(pet, executor.aside(), whyNot);
+        if ((now + pet.getId()) % Remarks.INTERVAL == 0 && !asleep()) {
+            Remarks.tick(pet, executor.aside(), whyNot);
+        }
         if (hosting && !errands.isOn(ErrandIds.COOPERATE)) {
             // Whatever ended it, the pet is no longer waited for, nor waiting.
             hosting = false;
@@ -244,6 +250,11 @@ public final class PetMind {
             // is told what it is doing, and the checks that ask are answered, in every tick.
             decide(now, "done");
         }
+    }
+
+    /** @return whether the pet is lying asleep, in which it makes no remarks */
+    private boolean asleep() {
+        return executor.running().filter(running -> running.tags().contains(StepTag.SLEEPING)).isPresent();
     }
 
     private boolean endedDoneIn(long now) {
@@ -461,8 +472,9 @@ public final class PetMind {
 
         DecisionTrace trace = new DecisionTrace();
         Optional<Decision.Started> started = Decision.decide(offered, view, permits, rests, floor, pet.getRandom(), now, trace);
-        Set<ResourceLocation> work = offered.stream().filter(WorkErrand.class::isInstance).map(ErrandType::id)
-            .collect(Collectors.toSet());
+        // A pastime is a work, but not the pet's work: what it has no occasion for is no reason for the pet not to be at work.
+        Set<ResourceLocation> work = offered.stream().filter(WorkErrand.class::isInstance)
+            .filter(type -> type.category() != ErrandCategory.PASTIME).map(ErrandType::id).collect(Collectors.toSet());
         whyNot = WhyNot.of(trace, work::contains, now).map(found -> found.lastingFrom(whyNot));
         if (started.isPresent()) {
             if (executor.running().isPresent()) {
@@ -513,7 +525,8 @@ public final class PetMind {
     }
 
     private Permits permits(LivePetView view) {
-        return category -> PetConstraints.allows(pet, view.ownership(), category);
+        float pastimes = PetConstraints.pastimesOf(pet);
+        return category -> PetConstraints.allows(pet, view.ownership(), pastimes, category);
     }
 
     /** Erases the progress memories of errands the pet can currently not pursue. */

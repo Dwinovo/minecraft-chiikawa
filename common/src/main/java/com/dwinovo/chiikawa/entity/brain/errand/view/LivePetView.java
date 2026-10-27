@@ -10,10 +10,14 @@ import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
+import com.dwinovo.chiikawa.entity.brain.errand.LackKey;
+import com.dwinovo.chiikawa.entity.brain.errand.decide.WhyNot;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.InvitationDesk;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetSurroundingsSensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.SurroundingsSettings;
 import com.dwinovo.chiikawa.gifting.GiftOutlook;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
 import com.dwinovo.chiikawa.init.InitMemory;
@@ -32,7 +36,10 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
@@ -40,7 +47,11 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.DiggerItem;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.phys.AABB;
 
 /**
  * A view of a live pet, for one evaluation. Each fact is worked out the first time an errand asks
@@ -53,6 +64,15 @@ public final class LivePetView implements PetView {
     private final AbstractPet pet;
     private final Lazy<GlobalPos> pos;
     private final Lazy<DayPhase> phase;
+    private final Lazy<Boolean> bedsWork;
+    private final Lazy<ResourceLocation> species;
+    private final Lazy<Weather> weather;
+    private final Lazy<Boolean> underSky;
+    private final Lazy<Surroundings> surroundings;
+    private final Lazy<Boolean> ownerWorking;
+    private final Lazy<Boolean> ownerReturned;
+    private final Lazy<Optional<LackKey>> lack;
+    private final Lazy<Optional<GlobalPos>> freeBed;
     private final Lazy<PetOwnership> ownership;
     private final Lazy<Personality> personality;
     private final Lazy<PetAnchor> anchor;
@@ -86,6 +106,15 @@ public final class LivePetView implements PetView {
         this.pos = new Lazy<>(() -> GlobalPos.of(level.dimension(), pet.blockPosition()));
         // A level without a day cycle, like the Nether, stays at its fixed time of day.
         this.phase = new Lazy<>(() -> DayPhase.in(level));
+        this.bedsWork = new Lazy<>(() -> level.dimensionType().bedWorks());
+        this.species = new Lazy<>(() -> BuiltInRegistries.ENTITY_TYPE.getKey(pet.getType()));
+        this.weather = new Lazy<>(this::findWeather);
+        this.underSky = new Lazy<>(() -> PetSurroundingsSensor.exposed(level, pet.blockPosition()));
+        this.surroundings = new Lazy<>(() -> pet.getBrain().getMemory(InitMemory.SURROUNDINGS.get()).orElse(Surroundings.NONE));
+        this.ownerWorking = new Lazy<>(this::findOwnerWorking);
+        this.ownerReturned = new Lazy<>(this::findOwnerReturned);
+        this.lack = new Lazy<>(() -> pet.getMind().whyNot().flatMap(WhyNot::lack));
+        this.freeBed = new Lazy<>(this::findFreeBed);
         this.ownership = new Lazy<>(() -> PetOwnership.of(pet));
         this.personality = new Lazy<>(() -> PetPersonalities.of(pet.getType()));
         this.anchor = new Lazy<>(() -> PetConstraints.anchorOf(pet, ownership()));
@@ -131,6 +160,51 @@ public final class LivePetView implements PetView {
     @Override
     public DayPhase phase() {
         return phase.get();
+    }
+
+    @Override
+    public boolean bedsWork() {
+        return bedsWork.get();
+    }
+
+    @Override
+    public ResourceLocation species() {
+        return species.get();
+    }
+
+    @Override
+    public Weather weather() {
+        return weather.get();
+    }
+
+    @Override
+    public boolean underSky() {
+        return underSky.get();
+    }
+
+    @Override
+    public Surroundings surroundings() {
+        return surroundings.get();
+    }
+
+    @Override
+    public boolean ownerWorking() {
+        return ownerWorking.get();
+    }
+
+    @Override
+    public boolean ownerReturned() {
+        return ownerReturned.get();
+    }
+
+    @Override
+    public Optional<LackKey> lack() {
+        return lack.get();
+    }
+
+    @Override
+    public Optional<GlobalPos> freeBed() {
+        return freeBed.get();
     }
 
     @Override
@@ -301,6 +375,44 @@ public final class LivePetView implements PetView {
         }
         return owner.getSleepingPos().filter(bed -> level.getBlockState(bed).is(BlockTags.BEDS)).map(bed -> GlobalPos.of(level.dimension(),
             level.getBlockState(bed).getOptionalValue(BedBlock.FACING).map(facing -> bed.relative(facing.getOpposite())).orElse(bed)));
+    }
+
+    /** What falls on the pet: the level's weather, where its biome lets rain fall as rain. */
+    private Weather findWeather() {
+        Level level = pet.level();
+        return Weather.of(level.isRaining(), level.isThundering(),
+            level.getBiome(pet.blockPosition()).value().getPrecipitationAt(pet.blockPosition()) == Biome.Precipitation.RAIN);
+    }
+
+    /** As the owner is seen to be at work: swinging at it, a tool or a block in the hand. */
+    private boolean findOwnerWorking() {
+        return pet.getOwner() instanceof Player owner && owner.isAlive() && owner.level() == pet.level() && owner.swinging
+            && (owner.getMainHandItem().getItem() instanceof DiggerItem || owner.getMainHandItem().getItem() instanceof BlockItem);
+    }
+
+    private boolean findOwnerReturned() {
+        long now = pet.level().getGameTime();
+        return SurroundingsSettings.current().filter(settings -> pet.getBrain().getMemory(InitMemory.OWNER_SEEN.get())
+            .filter(seen -> seen.returned(now, settings.returnedTicks())).isPresent()).isPresent();
+    }
+
+    /**
+     * As a cat finds a bed to lie on, only the one the sensor remembers: no one in it, as the game keeps count with
+     * {@code OCCUPIED} for a player, and no pet on either half of it.
+     */
+    private Optional<GlobalPos> findFreeBed() {
+        Level level = pet.level();
+        return pet.getBrain().getMemory(MemoryModuleType.NEAREST_BED)
+            .filter(level::isLoaded)
+            .filter(head -> level.getBlockState(head).is(BlockTags.BEDS)
+                && !level.getBlockState(head).getOptionalValue(BedBlock.OCCUPIED).orElse(false))
+            .filter(head -> {
+                BlockPos foot = level.getBlockState(head).getOptionalValue(BedBlock.FACING)
+                    .map(facing -> head.relative(facing.getOpposite())).orElse(head);
+                AABB bed = new AABB(head).minmax(new AABB(foot));
+                return level.getEntitiesOfClass(AbstractPet.class, bed, other -> other != pet).isEmpty();
+            })
+            .map(head -> GlobalPos.of(level.dimension(), head));
     }
 
     private Optional<GlobalPos> findOfferingBoard() {

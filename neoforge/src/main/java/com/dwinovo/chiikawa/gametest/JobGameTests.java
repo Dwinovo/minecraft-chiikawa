@@ -22,6 +22,7 @@ import com.dwinovo.chiikawa.init.InitRegistry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.BeforeBatch;
 import net.minecraft.gametest.framework.GameTest;
@@ -95,7 +96,9 @@ public final class JobGameTests {
 
     /**
      * What each job adds to what every pet does is what the pack's job files say, in their order: the fighters guard
-     * first and then hunt.
+     * first and then hunt. What every pet does is the errands everyone has and then the pastimes (0.1.4, the pastime
+     * framework: they are loaded works that every pet considers, and it is their cast that says who does them), so
+     * the work of a job comes after those.
      */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void a_job_offers_the_errands_its_file_names_in_order(GameTestHelper helper) {
@@ -177,8 +180,9 @@ public final class JobGameTests {
         return JobWork.errandsOf(pet).stream().map(ErrandType::id).toList();
     }
 
+    /** What every pet considers: the errands everyone does, and then the pastimes everyone may pass the time with. */
     private static List<ResourceLocation> generic() {
-        return Errands.generic().stream().map(ErrandType::id).toList();
+        return Stream.concat(Errands.generic().stream(), Errands.pastimes().stream()).map(ErrandType::id).toList();
     }
 
     private static List<ResourceLocation> withWork(ResourceLocation... work) {

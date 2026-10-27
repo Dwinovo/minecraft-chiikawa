@@ -4,9 +4,11 @@ import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
 import com.dwinovo.chiikawa.entity.brain.errand.work.action.BuskAction;
 import com.dwinovo.chiikawa.entity.brain.errand.work.action.DepositAction;
 import com.dwinovo.chiikawa.entity.brain.errand.work.action.HarvestBlockAction;
+import com.dwinovo.chiikawa.entity.brain.errand.work.action.PerformAction;
 import com.dwinovo.chiikawa.entity.brain.errand.work.action.PlantBlockAction;
 import com.dwinovo.chiikawa.entity.brain.errand.work.action.ShootAction;
 import com.dwinovo.chiikawa.entity.brain.errand.work.action.StrikeAction;
+import com.dwinovo.chiikawa.entity.brain.errand.work.action.VisitAction;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import java.util.Collection;
@@ -34,9 +36,14 @@ public final class WorkActions {
     /** Putting what the pet has to deliver in a container. */
     public static final DepositAction DEPOSIT = new DepositAction();
 
+    /** Passing the time where the pet stands, as its character does. */
+    public static final PerformAction PERFORM = new PerformAction();
+    /** Going somewhere to pass the time, and passing it there. */
+    public static final VisitAction VISIT = new VisitAction();
+
     private static final Map<ResourceLocation, WorkAction<?, ?>> BY_ID = Map.of(
         BuskAction.ID, BUSK, StrikeAction.ID, STRIKE, ShootAction.ID, SHOOT, HarvestBlockAction.ID, HARVEST_BLOCK,
-        PlantBlockAction.ID, PLANT_BLOCK, DepositAction.ID, DEPOSIT);
+        PlantBlockAction.ID, PLANT_BLOCK, DepositAction.ID, DEPOSIT, PerformAction.ID, PERFORM, VisitAction.ID, VISIT);
 
     /** Reads and writes an action as its id; an id no action has does not read. */
     public static final Codec<WorkAction<?, ?>> CODEC = ResourceLocation.CODEC.comapFlatMap(id -> {

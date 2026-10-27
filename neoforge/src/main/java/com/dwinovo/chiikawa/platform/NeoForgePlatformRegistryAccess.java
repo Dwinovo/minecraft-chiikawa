@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.entity.brain.sensor.PetPlacesSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetWorkSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetSocialSensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetSurroundingsSensor;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.platform.services.IPlatformRegistryAccess;
 import com.dwinovo.chiikawa.qualification.QualificationCondition;
@@ -41,6 +42,9 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
     private static final DeferredHolder<SensorType<?>, SensorType<PetSocialSensor>> PET_SOCIAL_SENSOR =
         SENSOR_TYPES.register("pet_social_sensor", () -> new SensorType<>(PetSocialSensor::new));
 
+    private static final DeferredHolder<SensorType<?>, SensorType<PetSurroundingsSensor>> PET_SURROUNDINGS_SENSOR =
+        SENSOR_TYPES.register("pet_surroundings_sensor", () -> new SensorType<>(PetSurroundingsSensor::new));
+
     private static final DeferredHolder<MenuType<?>, MenuType<PetBackpackMenu>> PET_BACKPACK =
         MENUS.register("pet_backpack", () -> IMenuTypeExtension.create((containerId, inventory, buf) ->
             new PetBackpackMenu(containerId, inventory, PetBackpackMenu.OPENING_DATA.decode(buf))
@@ -75,6 +79,11 @@ public final class NeoForgePlatformRegistryAccess implements IPlatformRegistryAc
     @Override
     public Supplier<SensorType<PetSocialSensor>> petSocialSensor() {
         return PET_SOCIAL_SENSOR;
+    }
+
+    @Override
+    public Supplier<SensorType<PetSurroundingsSensor>> petSurroundingsSensor() {
+        return PET_SURROUNDINGS_SENSOR;
     }
 
     @Override

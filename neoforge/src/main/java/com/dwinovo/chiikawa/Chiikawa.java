@@ -32,6 +32,7 @@ import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettingsLoader;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettingsLoader;
 import com.dwinovo.chiikawa.entity.brain.errand.remark.PetRemarkLoader;
 import com.dwinovo.chiikawa.entity.job.JobWorkLoader;
+import com.dwinovo.chiikawa.entity.brain.sensor.SurroundingsSettingsLoader;
 import com.dwinovo.chiikawa.gifting.GiftingSettingsLoader;
 import com.dwinovo.chiikawa.photo.PhotoSystem;
 import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
@@ -106,6 +107,7 @@ public class Chiikawa {
             event.addListener(new WhistleSettingsLoader());
             event.addListener(new CameraSettingsLoader());
             event.addListener(new GiftingSettingsLoader());
+            event.addListener(new SurroundingsSettingsLoader());
             event.addListener(new AnchorSettingsLoader());
             event.addListener(new PetSpawnLoader());
             event.addListener(new PetVoiceLoader());

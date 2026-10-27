@@ -15,7 +15,7 @@ import org.joml.Quaternionf;
 
 /**
  * What is on a pet's mind, as a small picture on a card over its head, for everyone who looks at it: a present for its
- * owner, no work to do, short of something, frightened. F1 hides it with the rest of the HUD, and it gives way to a line
+ * owner, no work to do, short of something, frightened, asleep. F1 hides it with the rest of the HUD, and it gives way to a line
  * the pet is saying, which is drawn at the same spot.
  */
 public final class PetIconRenderer {
@@ -43,6 +43,7 @@ public final class PetIconRenderer {
             case SEEKING_WORK -> PixelArt.SLIP;
             case SCARED -> PixelArt.ALERT;
             case MISSING -> PixelArt.QUESTION;
+            case SLEEPY -> PixelArt.SLEEPY;
         };
     }
 }

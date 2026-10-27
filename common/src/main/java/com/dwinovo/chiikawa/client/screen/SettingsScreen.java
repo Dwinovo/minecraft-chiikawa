@@ -13,6 +13,7 @@ import com.dwinovo.chiikawa.ui.DrawSurface;
 import com.dwinovo.chiikawa.ui.TextWrap;
 import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.UiTheme;
+import com.dwinovo.chiikawa.ui.widget.Slider;
 import com.dwinovo.chiikawa.ui.widget.TitledPanel;
 import java.util.List;
 import net.minecraft.client.gui.GuiGraphics;
@@ -21,18 +22,20 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 
 /**
- * The settings: how many wild pets spawn and how much pets talk, which belong to the world
- * and are the server's to hold, and whether their words are drawn over their heads, which is
+ * The settings: how many wild pets spawn, how much pets talk and how often they pass the time
+ * with little things, which belong to the world and are the server's to hold, and whether their words are drawn over their heads, which is
  * the player's own. Drawn from the {@code chiikawa-ui} library like every screen of the mod's.
  *
- * <p>The world's two are only editable by a player the server will take a change from, in a
+ * <p>The world's three are only editable by a player the server will take a change from, in a
  * world; to anyone else they are shown as they are, with a line saying why they cannot be
  * moved. A change is sent when the player lets go of a slider, and what the screen shows
  * follows what the server last said, so a change someone else makes shows up here too.
  */
 public class SettingsScreen extends Screen {
     private static final int PANEL_W = 248;
-    private static final int CONTENT_W = PANEL_W - 2 * UiStyle.PAD;
+    static final int CONTENT_W = PANEL_W - 2 * UiStyle.PAD;
+    /** The room the words across a slider have: the groove less the knob at either end, which the words must not run under. */
+    static final int SLIDER_TEXT_W = CONTENT_W - 2 * Slider.KNOB_W;
     private static final int DONE_W = 100;
     /** Whole percent, the finest a setting is shown or set in. */
     private static final int STEPS = 100;
@@ -55,7 +58,7 @@ public class SettingsScreen extends Screen {
         return this.minecraft != null && this.minecraft.level != null;
     }
 
-    /** Whether the two world settings can be moved: in a world, by somebody the server will listen to. */
+    /** Whether the world settings can be moved: in a world, by somebody the server will listen to. */
     private boolean editable() {
         return inWorld() && shown.canChange();
     }
@@ -67,7 +70,7 @@ public class SettingsScreen extends Screen {
         this.hintLines = Math.max(wrap(worldOnlyHint()).size(), wrap(readOnlyHint()).size());
         int volumeLines = wrap(volumeHint()).size();
 
-        int contentHeight = 2 * UiStyle.CONTROL_H + UiStyle.GAP
+        int contentHeight = 3 * UiStyle.CONTROL_H + 2 * UiStyle.GAP
             + UiStyle.GAP + hintLines * UiStyle.LINE
             + UiStyle.GAP_SECTION + UiStyle.CONTROL_H
             + UiStyle.GAP + volumeLines * UiStyle.LINE
@@ -82,7 +85,7 @@ public class SettingsScreen extends Screen {
 
         UiSlider wild = new UiSlider(x, y, CONTENT_W, UiStyle.CONTROL_H, editing.wildSpawn(),
             value -> Component.translatable("screen.chiikawa.settings.wild_spawn", percent(value)),
-            value -> move(new WorldSettings(snap(value), editing.chatter())));
+            value -> move(editing.withWildSpawn(snap(value))));
         wild.active = editable();
         addRenderableWidget(wild);
         y += UiStyle.CONTROL_H + UiStyle.GAP;
@@ -91,9 +94,18 @@ public class SettingsScreen extends Screen {
             editing.chatter() / WorldSettings.MAX_CHATTER,
             value -> Component.translatable("screen.chiikawa.settings.chatter",
                 percent(value * WorldSettings.MAX_CHATTER)),
-            value -> move(new WorldSettings(editing.wildSpawn(), snap(value * WorldSettings.MAX_CHATTER))));
+            value -> move(editing.withChatter(snap(value * WorldSettings.MAX_CHATTER))));
         chatter.active = editable();
         addRenderableWidget(chatter);
+        y += UiStyle.CONTROL_H + UiStyle.GAP;
+
+        UiSlider pastimes = new UiSlider(x, y, CONTENT_W, UiStyle.CONTROL_H,
+            editing.pastimes() / WorldSettings.MAX_PASTIMES,
+            value -> Component.translatable("screen.chiikawa.settings.pastimes",
+                percent(value * WorldSettings.MAX_PASTIMES)),
+            value -> move(editing.withPastimes(snap(value * WorldSettings.MAX_PASTIMES))));
+        pastimes.active = editable();
+        addRenderableWidget(pastimes);
         y += UiStyle.CONTROL_H + UiStyle.GAP;
 
         this.hintY = y;

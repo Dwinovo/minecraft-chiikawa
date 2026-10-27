@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain.errand;
 
+import com.dwinovo.chiikawa.entity.brain.errand.pastime.PastimeTuning;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
@@ -176,20 +177,21 @@ public final class ErrandTunings {
     }
 
     /**
-     * What a pet does with its fear: the animations it tries, in order of preference, the first it has being shown.
-     * Each character has its own, as the series draws it, and the rest the default.
+     * What a pet does in a way of its own, such as hide from what it fears or lie down to sleep: the animations it tries, in
+     * order of preference, the first it has being shown. Each character has its own, as the series draws it, and the rest the
+     * default.
      *
      * @param byCharacter the animations of the characters that have their own, by the id of their entity
      * @param otherwise the animations of the rest
      */
-    public record Cowers(Map<ResourceLocation, List<String>> byCharacter, List<String> otherwise) {
-        public static final Codec<Cowers> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public record Performances(Map<ResourceLocation, List<String>> byCharacter, List<String> otherwise) {
+        public static final Codec<Performances> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.unboundedMap(ResourceLocation.CODEC, ExtraCodecs.nonEmptyList(Codec.STRING.listOf()))
-                .fieldOf("by_character").forGetter(Cowers::byCharacter),
-            ExtraCodecs.nonEmptyList(Codec.STRING.listOf()).fieldOf("otherwise").forGetter(Cowers::otherwise)
-        ).apply(instance, Cowers::new));
+                .fieldOf("by_character").forGetter(Performances::byCharacter),
+            ExtraCodecs.nonEmptyList(Codec.STRING.listOf()).fieldOf("otherwise").forGetter(Performances::otherwise)
+        ).apply(instance, Performances::new));
 
-        /** @return the animations the character cowers with, the one it prefers first */
+        /** @return the animations the character does it with, the one it prefers first */
         public List<String> of(ResourceLocation character) {
             return byCharacter.getOrDefault(character, otherwise);
         }
@@ -206,7 +208,7 @@ public final class ErrandTunings {
      * @param cowers how it cowers until then
      */
     public record Flee(float speed, double ownerRange, double behindOwner, double awayStep, double arriveDistance,
-                       int safeTicks, double safeDistance, Cowers cowers) {
+                       int safeTicks, double safeDistance, Performances cowers) {
         public static final Codec<Flee> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Fields.SPEED.fieldOf("speed").forGetter(Flee::speed),
             Fields.DISTANCE.fieldOf("owner_range").forGetter(Flee::ownerRange),
@@ -215,8 +217,57 @@ public final class ErrandTunings {
             Fields.DISTANCE.fieldOf("arrive_distance").forGetter(Flee::arriveDistance),
             Fields.TICKS.fieldOf("safe_ticks").forGetter(Flee::safeTicks),
             Fields.DISTANCE.fieldOf("safe_distance").forGetter(Flee::safeDistance),
-            Cowers.CODEC.fieldOf("cowers").forGetter(Flee::cowers)
+            Performances.CODEC.fieldOf("cowers").forGetter(Flee::cowers)
         ).apply(instance, Flee::new));
+    }
+
+    /**
+     * @param speed how fast it walks to the bed, or the place it sleeps at
+     * @param arriveDistance how near the mover takes it
+     * @param reach how near it has to be to lie down, in blocks; on a bed, near enough to be set down on it
+     * @param sleeps how each character sleeps, the animation it prefers first
+     */
+    public record Sleep(float speed, int arriveDistance, double reach, Performances sleeps) {
+        public static final Codec<Sleep> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Fields.SPEED.fieldOf("speed").forGetter(Sleep::speed),
+            Fields.BLOCKS.fieldOf("arrive_distance").forGetter(Sleep::arriveDistance),
+            Fields.DISTANCE.fieldOf("reach").forGetter(Sleep::reach),
+            Performances.CODEC.fieldOf("sleeps").forGetter(Sleep::sleeps)
+        ).apply(instance, Sleep::new));
+    }
+
+    /**
+     * A pastime that is done where the pet stands.
+     *
+     * @param cooldownTicks how long the pet leaves it alone once it has done it, in a world where the pastimes are as
+     *                      often as the data says
+     */
+    public record Perform(int cooldownTicks) implements PastimeTuning {
+        public static final Codec<Perform> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Fields.TICKS.fieldOf("cooldown_ticks").forGetter(Perform::cooldownTicks)
+        ).apply(instance, Perform::new));
+    }
+
+    /**
+     * A pastime that is done somewhere else.
+     *
+     * @param cooldownTicks how long the pet leaves it alone once it has done it, in a world where the pastimes are as
+     *                      often as the data says
+     * @param speed how fast it walks there
+     * @param arriveDistance how near the mover takes it to its owner or a creature
+     * @param reach how near it has to be to them to begin
+     * @param placeReach how near it has to be to begin at a place, such as the shelter or something lying about: the mover
+     *                   takes it to the very block, since a pet that stops short of a roof stops in the rain
+     */
+    public record Visit(int cooldownTicks, float speed, int arriveDistance, double reach, double placeReach)
+            implements PastimeTuning {
+        public static final Codec<Visit> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Fields.TICKS.fieldOf("cooldown_ticks").forGetter(Visit::cooldownTicks),
+            Fields.SPEED.fieldOf("speed").forGetter(Visit::speed),
+            Fields.BLOCKS.fieldOf("arrive_distance").forGetter(Visit::arriveDistance),
+            Fields.DISTANCE.fieldOf("reach").forGetter(Visit::reach),
+            Fields.DISTANCE.fieldOf("place_reach").forGetter(Visit::placeReach)
+        ).apply(instance, Visit::new));
     }
 
     /** @param noteParticleIntervalTicks how often a note rises from the pet while it plays */

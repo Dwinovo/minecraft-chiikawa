@@ -96,7 +96,7 @@ class CombatOfferTest {
     @Test
     void theReasonThereIsNoFoeIsTheOneTheWorkNames() {
         Work<Duel, ErrandTunings.Footwork> work = new Work<>(WorkActions.STRIKE, ErrandCategory.COMBAT, Optional.empty(),
-            List.of(), Optional.of(new WorkTarget.Foe("no_prey", Set.of(Ground.SELF))));
+            List.of(), Optional.of(new WorkTarget.Foe("no_prey", Set.of(Ground.SELF))), Optional.empty());
         ErrandTunings.Footwork tuning = (ErrandTunings.Footwork) ErrandSettings.of(WorkData.MELEE).orElseThrow().tuning();
 
         assertEquals("intent.chiikawa.fail.no_prey",

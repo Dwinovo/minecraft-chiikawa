@@ -4,11 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.data.PastimeData;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandTunings;
 import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
 import com.dwinovo.chiikawa.entity.brain.errand.Plan;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.testing.StubErrand;
+import com.dwinovo.chiikawa.testing.TestErrands;
 import com.dwinovo.chiikawa.testing.TestRests;
 import java.util.ArrayList;
 import java.util.List;
@@ -212,6 +215,46 @@ class RestLedgerTest {
 
         sourced.afterReport(PHOTO, "failed", RestContext.of(id("other_camera")), NOW);
         assertEquals(5, sourced.remaining(PHOTO, NOW), "a report says what it is about itself");
+    }
+
+    @Test
+    void aPastimeRestsForItsOwnCooldownDividedByHowOftenTheWorldHasPastimes() {
+        TestErrands.load();
+        ErrandSettings<?> settings = ErrandSettings.of(PastimeData.RAIN_SHELTER).orElseThrow();
+        int cooldown = ((ErrandTunings.Visit) settings.tuning()).cooldownTicks();
+        Plan plan = new Plan() {
+            @Override
+            public Optional<ResourceLocation> restKey() {
+                return Optional.of(PastimeData.RAIN_SHELTER);
+            }
+        };
+
+        assertEquals(cooldown, restedByPastime(settings, plan, 1.0F), "as often as the data says is the cooldown there");
+        assertEquals(cooldown / 2, restedByPastime(settings, plan, 2.0F), "twice as often is half the rest");
+        assertEquals(cooldown * 2, restedByPastime(settings, plan, 0.5F), "half as often is twice the rest");
+        assertEquals(cooldown, restedByPastime(settings, plan, 0.0F), "pastimes turned off rest nothing shorter than the data says");
+    }
+
+    @Test
+    void aPastimeThatIsNotLoadedRestsForNothing() {
+        TestErrands.load();
+        ErrandSettings<?> settings = ErrandSettings.of(PastimeData.RAIN_SHELTER).orElseThrow();
+        Plan elsewhere = new Plan() {
+            @Override
+            public Optional<ResourceLocation> restKey() {
+                return Optional.of(id("no_such_pastime"));
+            }
+        };
+
+        assertEquals(0, restedByPastime(settings, elsewhere, 1.0F));
+    }
+
+    /** How long a pastime that was done rests the errand, in a world that has them this much as the data says. */
+    private long restedByPastime(ErrandSettings<?> settings, Plan plan, float pastimes) {
+        TestRests.Store fresh = new TestRests.Store();
+        RestLedger scaled = new RestLedger(errand -> fresh, errand -> Optional.of(settings), errors::add, () -> pastimes);
+        scaled.afterOutcome(running(PHOTO, settings, plan), Outcome.done(), NOW);
+        return scaled.remaining(PHOTO, NOW);
     }
 
     @Test

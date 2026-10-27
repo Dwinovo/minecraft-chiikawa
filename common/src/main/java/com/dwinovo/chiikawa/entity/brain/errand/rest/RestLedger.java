@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.DoubleSupplier;
 import java.util.function.Function;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -30,6 +31,7 @@ public final class RestLedger {
     private final Function<ResourceLocation, RestStore> stores;
     private final Function<ResourceLocation, Optional<ErrandSettings<?>>> settings;
     private final Consumer<String> errors;
+    private final DoubleSupplier pastimes;
 
     /**
      * @param stores where each errand's rests are kept
@@ -47,9 +49,19 @@ public final class RestLedger {
      */
     public RestLedger(Function<ResourceLocation, RestStore> stores,
             Function<ResourceLocation, Optional<ErrandSettings<?>>> settings, Consumer<String> errors) {
+        this(stores, settings, errors, () -> 1.0);
+    }
+
+    /**
+     * @param pastimes how much more or less often than the data says the world has pets pass the time, asked each time
+     *                 a rest is worked out
+     */
+    public RestLedger(Function<ResourceLocation, RestStore> stores,
+            Function<ResourceLocation, Optional<ErrandSettings<?>>> settings, Consumer<String> errors, DoubleSupplier pastimes) {
         this.stores = stores;
         this.settings = settings;
         this.errors = errors;
+        this.pastimes = pastimes;
     }
 
     /** Forgets which sources have been said to be missing, as a reload of the data does. */
@@ -130,7 +142,7 @@ public final class RestLedger {
 
     private long ticks(ResourceLocation errand, RestSpec spec, RestContext context) {
         return spec.amount().map(ticks -> (long) ticks, source -> RestSources.resolver(source)
-            .map(resolver -> resolver.ticks(context))
+            .map(resolver -> resolver.ticks(context.inWorldOf((float) pastimes.getAsDouble())))
             .orElseGet(() -> missing(errand, source)));
     }
 

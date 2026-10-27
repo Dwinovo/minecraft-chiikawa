@@ -32,6 +32,22 @@ class PetIconsTest {
     }
 
     @Test
+    void aPetLyingAsleepShowsItBeforeAnythingElseButFright() {
+        PetIcons.Signs full = new PetIcons.Signs(true, true, Optional.of(MISSING), DayPhase.NIGHT);
+
+        assertEquals(PetIcon.SLEEPY, PetIcons.of(Set.of(StepTag.SLEEPING), full));
+        assertEquals(PetIcon.SLEEPY, PetIcons.of(Set.of(StepTag.SLEEPING), PetIcons.Signs.NONE));
+        assertEquals(PetIcon.SCARED, PetIcons.of(Set.of(StepTag.SLEEPING, StepTag.SCARED), full));
+    }
+
+    @Test
+    void aPetThatIsDrowsyButAwakeShowsNoSleepOnlyTheStepItIsAtIsAsleep() {
+        for (DayPhase phase : DayPhase.values()) {
+            assertEquals(PetIcon.NONE, PetIcons.of(Set.of(), new PetIcons.Signs(false, false, Optional.empty(), phase)), phase::name);
+        }
+    }
+
+    @Test
     void aPresentInThePawsOrInMindAndReadyShowsAGiftBeforeAnythingAboutWork() {
         assertEquals(PetIcon.GIFT, PetIcons.of(Set.of(), new PetIcons.Signs(true, false, Optional.of(MISSING), DayPhase.DAY)));
         assertEquals(PetIcon.GIFT, PetIcons.of(Set.of(), new PetIcons.Signs(false, true, Optional.of(SEEKING), DayPhase.DAY)));

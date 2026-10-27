@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.social;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import java.util.Optional;
 
 /**
  * One pet playing its part in a scene, from the moment the two meet until the scene is
@@ -10,11 +11,26 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
  * not its to hold: the step claims it, and the executor shows it.
  */
 public final class PartPlayer {
-    private final PetInteraction.Side side;
+    /**
+     * What a part is made of: the beats it plays. A pet's part in a scene with another pet is one, and so is the way a pet
+     * carries on at a pastime of its own.
+     */
+    public interface Script {
+        /** @return what it does as it begins */
+        Optional<Beat> begin();
+
+        /** @return what it does over and over while it lasts */
+        Optional<Beat.Recurring> nowAndThen();
+
+        /** @return what it does as it is over */
+        Optional<Beat> end();
+    }
+
+    private final Script side;
     /** When the recurring beat comes round next, in game time. */
     private long nextBeat;
 
-    private PartPlayer(PetInteraction.Side side, long nextBeat) {
+    private PartPlayer(Script side, long nextBeat) {
         this.side = side;
         this.nextBeat = nextBeat;
     }
@@ -25,7 +41,7 @@ public final class PartPlayer {
      * @param gameTime the current game time
      * @return the part under way, to be ticked while it lasts and ended when it is over
      */
-    public static PartPlayer begin(AbstractPet pet, PetInteraction.Side side, long gameTime) {
+    public static PartPlayer begin(AbstractPet pet, Script side, long gameTime) {
         side.begin().ifPresent(beat -> beat.play(pet));
         return new PartPlayer(side, side.nowAndThen()
             .map(recurring -> gameTime + recurring.nextWait(pet.getRandom()))

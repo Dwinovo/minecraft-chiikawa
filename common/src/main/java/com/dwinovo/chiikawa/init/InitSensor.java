@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.entity.brain.sensor.PetAttackbleEntitySensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPlacesSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetSocialSensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetSurroundingsSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetWorkSensor;
 import com.dwinovo.chiikawa.platform.Services;
 import java.util.function.Supplier;
@@ -20,6 +21,9 @@ public final class InitSensor {
         Services.PLATFORM_REGISTRY.petPlacesSensor();
     public static final Supplier<SensorType<PetSocialSensor>> PET_SOCIAL_SENSOR =
         Services.PLATFORM_REGISTRY.petSocialSensor();
+
+    public static final Supplier<SensorType<PetSurroundingsSensor>> PET_SURROUNDINGS_SENSOR =
+        Services.PLATFORM_REGISTRY.petSurroundingsSensor();
 
     private InitSensor() {
     }

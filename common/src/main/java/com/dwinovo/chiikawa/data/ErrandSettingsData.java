@@ -12,6 +12,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.step.Meeting;
 import com.dwinovo.chiikawa.entity.brain.personality.IdleHabits;
 import com.dwinovo.chiikawa.gifting.Presents;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,8 +24,8 @@ import net.minecraft.resources.ResourceLocation;
  *
  * <p>Running from harm is priority 100. Fights in defence, the present in a pet's paws, the exam and the invitation of a
  * friend are priority 80; the slip, work, hunting and playing music 50; a photo 40; picking things up, taking a present out of
- * the bag and calling on a friend 30; pottering about and staying put 10. Within a priority the score settles which comes
- * first.
+ * the bag and calling on a friend 30; pottering about, staying put, sleeping and the pastimes 10. Within a priority the score
+ * settles which comes first.
  *
  * <p>An errand with no limit of its own (following and fighting end when they stop being wanted) is given a
  * day; one that walks to something and does one thing to it, half a minute; one that is a habit at a time, a little
@@ -39,6 +40,8 @@ public final class ErrandSettingsData {
      * in less.
      */
     private static final int LONGEST_HABIT = IdleHabits.LONGEST_TICKS + 300;
+    /** A night and a little over, from dusk to dawn: an errand that ends when the pet wakes. */
+    private static final int A_NIGHT = 12000;
     /** Half a minute: to walk to something and do one thing to it. */
     private static final int HALF_A_MINUTE = 600;
 
@@ -58,16 +61,20 @@ public final class ErrandSettingsData {
         ErrandTunings.Footwork footwork = new ErrandTunings.Footwork(1.0F, 1.2F, 10.0, 3.0, 2);
         ErrandTunings.Ranged bow = new ErrandTunings.Ranged(footwork, 15.0, 15, 20);
         // Chiikawa cries and Usagi yells, and never cries; the rest only flinch, and sit with it.
-        ErrandTunings.Cowers cowers = new ErrandTunings.Cowers(Map.of(
+        ErrandTunings.Performances cowers = new ErrandTunings.Performances(Map.of(
             ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "chiikawa"), List.of("cry", "hurt"),
             ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "usagi"), List.of("yell", "hurt")), List.of("hurt", "sit"));
+        // Chiikawa sleeps hugging its bear doll, as the series draws it; the rest lie down as they sit.
+        ErrandTunings.Performances sleeps = new ErrandTunings.Performances(Map.of(
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "chiikawa"), List.of("sleep_hug", "sleep", "sit")),
+            List.of("sleep", "sit"));
         // The scene beginning is a report, and the pair rest the scene's cooldown from then on however it ends, so that
         // finishing and being cut short need rest nothing of their own. An invitation that is declined or not answered, or
         // a walk that never gets there, never began it: those rest the pair only a few seconds, so that they are not asked
         // again in the very next breath.
         Rests scene = new Rests(NONE, RestSpec.ticksPerSubject(100), NONE,
             Map.of(Meeting.PLAYED, RestSpec.fromPerSubject(RestSources.SCENE_COOLDOWN)));
-        return Map.ofEntries(
+        Map<ResourceLocation, ErrandSettings<?>> settings = new HashMap<>(Map.ofEntries(
             // Following is worth more the further the owner is, up to max_score; the score here is the least.
             entry(ErrandIds.FOLLOW_OWNER, errand(50, 0.5F, A_DAY, giveUp(20), new ErrandTunings.FollowOwner(1.0F, 1.0F))),
             // A habit of a pet with nothing to do is one short step, so the pet picks again between habits.
@@ -128,7 +135,14 @@ public final class ErrandSettingsData {
                     Map.of("taken", RestSpec.from(RestSources.PHOTO_UPLOAD_WAIT),
                         "stored", RestSpec.from(RestSources.CAMERA_COOLDOWN),
                         "failed", RestSpec.from(RestSources.CAMERA_RETRY))),
-                new ErrandTunings.TakePhoto(0.7F, 4, 20, 60, 16.0, 400, 100))));
+                new ErrandTunings.TakePhoto(0.7F, 4, 20, 60, 16.0, 400, 100))),
+            // Lying down for the night is something a pet does with its idle time, and it is worth more than the rest of it
+            // then; what matters more wakes it. The night is longer than the sleep: it is over when the pet wakes, with the
+            // morning or with its owner.
+            entry(ErrandIds.SLEEP, errand(10, 0.6F, A_NIGHT, Rests.of(NONE, RestSpec.ticks(600), NONE),
+                new ErrandTunings.Sleep(0.6F, 1, 2.0, sleeps)))));
+        settings.putAll(PastimeData.settings());
+        return settings;
     }
 
     private static <T> ErrandSettings<T> errand(int priority, float score, int maxTicks, Rests rests, T tuning) {

@@ -14,7 +14,9 @@ public enum PetIcon {
     /** Frightened, and running from or hiding from what hurt it. */
     SCARED,
     /** It is short of something its work needs. */
-    MISSING;
+    MISSING,
+    /** It is asleep. */
+    SLEEPY;
 
     /** @return the icon with this id on the wire, none for an id nobody has */
     public static PetIcon byId(int id) {

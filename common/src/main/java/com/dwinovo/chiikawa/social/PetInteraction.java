@@ -139,7 +139,7 @@ public record PetInteraction(
         Optional<Beat> begin,
         Optional<Beat.Recurring> nowAndThen,
         Optional<Beat> end
-    ) {
+    ) implements PartPlayer.Script {
         public static final Codec<Side> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ExtraCodecs.nonEmptyList(ExtraCodecs.TAG_OR_ELEMENT_ID.listOf()).fieldOf("pets").forGetter(Side::pets),
             Codec.STRING.optionalFieldOf("pose").forGetter(Side::pose),

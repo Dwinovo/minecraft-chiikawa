@@ -170,6 +170,20 @@ public record PixelArt(String... rows) {
         "..XXwwwwwXX..",
         "....XXXXX....");
 
+    /** A big Z and a small one on a paper disc: asleep. */
+    public static final PixelArt SLEEPY = new PixelArt(
+        "....XXXXX....",
+        "..XXwwwwwXX..",
+        ".XwwwwwXXXwX.",
+        ".XwwwwwwXwwX.",
+        ".XwwwwwXXXwX.",
+        ".XwXXXXXwwwX.",
+        ".XwwwwXwwwwX.",
+        ".XwwXwwwwwwX.",
+        ".XwXXXXXwwwX.",
+        "..XXwwwwwXX..",
+        "....XXXXX....");
+
     /** An arrow pointing on: what comes next. */
     public static final PixelArt NEXT = new PixelArt(
         "......X...",

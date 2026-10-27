@@ -33,6 +33,7 @@ import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettingsLoader;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettingsLoader;
 import com.dwinovo.chiikawa.entity.brain.errand.remark.PetRemarkLoader;
 import com.dwinovo.chiikawa.entity.job.JobWorkLoader;
+import com.dwinovo.chiikawa.entity.brain.sensor.SurroundingsSettingsLoader;
 import com.dwinovo.chiikawa.gifting.GiftingSettingsLoader;
 import com.dwinovo.chiikawa.photo.PhotoSystem;
 import com.dwinovo.chiikawa.task.PetTaskTypeLoader;
@@ -94,6 +95,7 @@ public class ChiikawaFabricMod implements ModInitializer {
         FabricReloadListeners.register(PackType.SERVER_DATA, WhistleSettingsLoader.ID, new WhistleSettingsLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, CameraSettingsLoader.ID, new CameraSettingsLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, GiftingSettingsLoader.ID, new GiftingSettingsLoader());
+        FabricReloadListeners.register(PackType.SERVER_DATA, SurroundingsSettingsLoader.ID, new SurroundingsSettingsLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, AnchorSettingsLoader.ID, new AnchorSettingsLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, PetSpawnLoader.ID, new PetSpawnLoader());
         FabricReloadListeners.register(PackType.SERVER_DATA, PetVoiceLoader.ID, new PetVoiceLoader());

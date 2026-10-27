@@ -40,11 +40,12 @@ public record JobWork(List<ResourceLocation> work, Optional<Sight> sight) {
 
     /**
      * @param pet a pet
-     * @return the errands the pet considers: those every pet does, then those of its job's work; an errand the work
-     *         names that nothing registers is left out, and said so once
+     * @return the errands the pet considers: those every pet does, then the pastimes every pet does, then those of its
+     *         job's work; an errand the work names that nothing registers is left out, and said so once
      */
     public static List<ErrandType<?, ?>> errandsOf(AbstractPet pet) {
         List<ErrandType<?, ?>> errands = new ArrayList<>(Errands.generic());
+        errands.addAll(Errands.pastimes());
         JobWork work = byJob.get(pet.getCapabilityId());
         if (work != null) {
             for (ResourceLocation id : work.work) {

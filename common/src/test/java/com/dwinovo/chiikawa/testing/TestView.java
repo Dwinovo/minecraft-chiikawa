@@ -4,9 +4,11 @@ import com.dwinovo.chiikawa.camera.PhotoOutlook;
 import com.dwinovo.chiikawa.data.QualificationData;
 import com.dwinovo.chiikawa.entity.brain.combat.Arms;
 import com.dwinovo.chiikawa.entity.brain.combat.Ground;
+import com.dwinovo.chiikawa.entity.PetCharacters;
 import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetAnchor;
 import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
+import com.dwinovo.chiikawa.entity.brain.errand.LackKey;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.InvitationDesk;
 import com.dwinovo.chiikawa.entity.brain.errand.view.AttackTarget;
 import com.dwinovo.chiikawa.entity.brain.errand.view.Attacker;
@@ -16,6 +18,8 @@ import com.dwinovo.chiikawa.entity.brain.errand.view.PerceivedTargets;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PetView;
 import com.dwinovo.chiikawa.entity.brain.errand.view.PickableItem;
 import com.dwinovo.chiikawa.entity.brain.errand.view.SocialIdea;
+import com.dwinovo.chiikawa.entity.brain.errand.view.Surroundings;
+import com.dwinovo.chiikawa.entity.brain.errand.view.Weather;
 import com.dwinovo.chiikawa.entity.brain.personality.Personality;
 import com.dwinovo.chiikawa.gifting.GiftChoice;
 import com.dwinovo.chiikawa.gifting.GiftOutlook;
@@ -32,6 +36,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 
 /**
@@ -44,6 +49,15 @@ public final class TestView implements PetView {
     private final GlobalPos pos;
     private final PetAnchor anchor;
     private DayPhase phase = DayPhase.DAY;
+    private boolean bedsWork = true;
+    private ResourceLocation species = PetCharacters.CHIIKAWA;
+    private Weather weather = Weather.CLEAR;
+    private boolean underSky;
+    private Surroundings surroundings = Surroundings.NONE;
+    private boolean ownerWorking;
+    private boolean ownerReturned;
+    private Optional<LackKey> lack = Optional.empty();
+    private Optional<GlobalPos> freeBed = Optional.empty();
     private PetOwnership ownership = OWNED;
     private Personality personality = Personality.DEFAULT;
     private PerceivedTargets targets = PerceivedTargets.NONE;
@@ -84,6 +98,55 @@ public final class TestView implements PetView {
 
     public TestView phase(DayPhase phase) {
         this.phase = phase;
+        return this;
+    }
+
+    /** The pet is in a level where a bed is no use, such as the Nether. */
+    public TestView whereBedsAreNoUse() {
+        this.bedsWork = false;
+        return this;
+    }
+
+    /** Which character the pet is; Chiikawa until a test says otherwise. */
+    public TestView species(ResourceLocation species) {
+        this.species = species;
+        return this;
+    }
+
+    /** What falls on the pet; and whether it falls on the pet where it stands, out in the open. */
+    public TestView weather(Weather weather, boolean underSky) {
+        this.weather = weather;
+        this.underSky = underSky;
+        return this;
+    }
+
+    /** What the pet sees round it. */
+    public TestView surroundings(Surroundings surroundings) {
+        this.surroundings = surroundings;
+        return this;
+    }
+
+    /** The owner is at work. */
+    public TestView ownerAtWork() {
+        this.ownerWorking = true;
+        return this;
+    }
+
+    /** The owner has just come back. */
+    public TestView ownerBackAgain() {
+        this.ownerReturned = true;
+        return this;
+    }
+
+    /** The pet is short of this. */
+    public TestView lacking(LackKey lack) {
+        this.lack = Optional.of(lack);
+        return this;
+    }
+
+    /** A bed that no one is in and no pet is on, within sight. */
+    public TestView freeBed(GlobalPos bed) {
+        this.freeBed = Optional.of(bed);
         return this;
     }
 
@@ -264,6 +327,51 @@ public final class TestView implements PetView {
     @Override
     public DayPhase phase() {
         return phase;
+    }
+
+    @Override
+    public boolean bedsWork() {
+        return bedsWork;
+    }
+
+    @Override
+    public ResourceLocation species() {
+        return species;
+    }
+
+    @Override
+    public Weather weather() {
+        return weather;
+    }
+
+    @Override
+    public boolean underSky() {
+        return underSky;
+    }
+
+    @Override
+    public Surroundings surroundings() {
+        return surroundings;
+    }
+
+    @Override
+    public boolean ownerWorking() {
+        return ownerWorking;
+    }
+
+    @Override
+    public boolean ownerReturned() {
+        return ownerReturned;
+    }
+
+    @Override
+    public Optional<LackKey> lack() {
+        return lack;
+    }
+
+    @Override
+    public Optional<GlobalPos> freeBed() {
+        return freeBed;
     }
 
     @Override
