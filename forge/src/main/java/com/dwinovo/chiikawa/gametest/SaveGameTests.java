@@ -40,8 +40,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.FarmBlock;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestDontPrefix;
+import net.minecraftforge.gametest.GameTestHolder;
 
 /**
  * What a pet keeps of its memories when its save holds one the build has no place for. Vanilla reads the saved
@@ -49,8 +49,8 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
  * decides whether a memory may be retired by taking it out of the pet's list, or has to stay registered for the
  * saves that still hold it, and what an older build makes of the save of a newer one.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class SaveGameTests {
     private static final String BATCH = "chiikawa_save";
     private static final int STAND = 2;

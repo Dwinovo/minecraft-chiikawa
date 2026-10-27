@@ -32,7 +32,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.gifting.GiftOccasion;
 import com.dwinovo.chiikawa.gifting.Presents;
 import com.dwinovo.chiikawa.init.InitBlocks;
-import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitMemory;
@@ -987,8 +986,8 @@ final class ErrandScenarios {
         helper.onEachTick(() -> readySong(library, SONG).filter(track -> !given[0]).ifPresent(track -> {
             given[0] = true;
             ItemStack box = new ItemStack(InitItems.MUSIC_BOX.get());
-            box.set(InitDataComponents.MUSIC_BOX_SELECTION.get(), new MusicBoxSelection(track.trackId(), SONG, 1));
-            box.set(InitDataComponents.MUSIC_BOX_MODE.get(), PlaybackMode.REPEAT_ONE);
+            MusicBoxSelection.set(box, new MusicBoxSelection(track.trackId(), SONG, 1));
+            PlaybackMode.set(box, PlaybackMode.REPEAT_ONE);
             pet.setItemSlot(EquipmentSlot.MAINHAND, box);
         }));
         return new Scenario(pet, 1, ran -> readySong(library, SONG).map(MusicTrackView::trackId)
