@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.gametest;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.MIDNIGHT;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.NOON;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.setDayTime;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 
 import com.dwinovo.chiikawa.Constants;
@@ -19,7 +20,6 @@ import com.dwinovo.chiikawa.voice.VoiceMoment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -177,7 +177,7 @@ public final class RhythmGameTests {
     /** It rains for as long as a case lasts, by day. */
     private static void rain(ServerLevel level) {
         settleWorld(level, Difficulty.NORMAL, NOON);
-        level.setWeatherParameters(0, RAIN_TICKS, true, false);
+        level.getServer().setWeatherParameters(0, RAIN_TICKS, true, false);
     }
 
     /**
@@ -193,18 +193,18 @@ public final class RhythmGameTests {
         helper.startSequence()
             // The day is ending, and the pet has found the bed by the time the night comes.
             .thenWaitUntil(() -> helper.assertTrue(pet.getBrain().hasMemoryValue(MemoryModuleType.NEAREST_BED),
-                Component.literal("the pet never found the bed as the day ended")))
-            .thenExecute(() -> helper.getLevel().setDayTime(MIDNIGHT))
+                "the pet never found the bed as the day ended"))
+            .thenExecute(() -> setDayTime(helper.getLevel(), MIDNIGHT))
             .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(ErrandIds.SLEEP) && onTheBed(helper, pet, head),
-                Component.literal("the pet never lay down on the bed: it is " + pet.getMind().errands().errand() + " at " + pet.position()
-                    + ", the bed it knows of is " + pet.getBrain().getMemory(MemoryModuleType.NEAREST_BED))))
+                "the pet never lay down on the bed: it is " + pet.getMind().errands().errand() + " at " + pet.position()
+                    + ", the bed it knows of is " + pet.getBrain().getMemory(MemoryModuleType.NEAREST_BED)))
             .thenExecuteAfter(LYING_TICKS, () -> {
                 helper.assertTrue(onTheBed(helper, pet, head) && pet.getMind().errands().isOn(ErrandIds.SLEEP),
-                    Component.literal("the pet left the bed it was sleeping on"));
-                helper.assertTrue(pet.getPerformance().startsWith("sleep"), Component.literal("the pet is not shown asleep: " + pet.getPerformance()));
-                helper.assertTrue(pet.getIcon() == PetIcon.SLEEPY, Component.literal("a sleeping pet wears " + pet.getIcon()));
-                helper.assertFalse(pet.isSleeping(), Component.literal("the pet was put to sleep in the bed, as a player is"));
-                helper.assertFalse(helper.getBlockState(head).getValue(BedBlock.OCCUPIED), Component.literal("the bed was taken by the pet"));
+                    "the pet left the bed it was sleeping on");
+                helper.assertTrue(pet.getPerformance().startsWith("sleep"), "the pet is not shown asleep: " + pet.getPerformance());
+                helper.assertTrue(pet.getIcon() == PetIcon.SLEEPY, "a sleeping pet wears " + pet.getIcon());
+                helper.assertFalse(pet.isSleeping(), "the pet was put to sleep in the bed, as a player is");
+                helper.assertFalse(helper.getBlockState(head).getValue(BedBlock.OCCUPIED), "the bed was taken by the pet");
             })
             .thenSucceed();
     }
@@ -222,19 +222,19 @@ public final class RhythmGameTests {
 
         helper.startSequence()
             .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(ErrandIds.SLEEP) && pet.getPerformance().startsWith("sleep"),
-                Component.literal("the pet never lay down: it is " + pet.getMind().errands().errand() + " at " + pet.position())))
+                "the pet never lay down: it is " + pet.getMind().errands().errand() + " at " + pet.position()))
             .thenExecuteFor(LYING_TICKS, () -> {
-                helper.assertFalse(onTheBed(helper, pet, head), Component.literal("the pet got into its owner's bed at " + pet.position()));
+                helper.assertFalse(onTheBed(helper, pet, head), "the pet got into its owner's bed at " + pet.position());
                 helper.assertTrue(owner.isSleeping() && helper.getBlockState(head).getValue(BedBlock.OCCUPIED),
-                    Component.literal("the owner's bed is not the owner's any more"));
-                helper.assertFalse(pet.isSleeping(), Component.literal("the pet was put to sleep in the owner's bed"));
+                    "the owner's bed is not the owner's any more");
+                helper.assertFalse(pet.isSleeping(), "the pet was put to sleep in the owner's bed");
             })
             .thenExecute(() -> {
                 owner.stopSleepInBed(false, true);
-                helper.assertFalse(helper.getBlockState(head).getValue(BedBlock.OCCUPIED), Component.literal("the bed is still taken after the owner got out of it"));
+                helper.assertFalse(helper.getBlockState(head).getValue(BedBlock.OCCUPIED), "the bed is still taken after the owner got out of it");
                 owner.startSleeping(helper.absolutePos(head));
                 helper.assertTrue(owner.isSleeping() && helper.getBlockState(head).getValue(BedBlock.OCCUPIED),
-                    Component.literal("the owner cannot get back into the bed"));
+                    "the owner cannot get back into the bed");
             })
             .thenSucceed();
     }
@@ -250,15 +250,15 @@ public final class RhythmGameTests {
 
         helper.startSequence()
             .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(ErrandIds.SLEEP) && pet.getPerformance().startsWith("sleep"),
-                Component.literal("the pet never lay down with its owner: it is " + pet.getMind().errands().errand() + " at " + pet.position())))
+                "the pet never lay down with its owner: it is " + pet.getMind().errands().errand() + " at " + pet.position()))
             .thenExecute(() -> {
                 helper.assertTrue(pet.distanceToSqr(helper.absoluteVec(head.getCenter())) < 36.0,
-                    Component.literal("the pet is not near its sleeping owner: " + pet.position()));
-                helper.assertFalse(onTheBed(helper, pet, head), Component.literal("the pet got into its owner's bed"));
+                    "the pet is not near its sleeping owner: " + pet.position());
+                helper.assertFalse(onTheBed(helper, pet, head), "the pet got into its owner's bed");
                 owner.stopSleepInBed(false, true);
             })
             .thenWaitUntil(() -> helper.assertTrue(!pet.getMind().errands().isOn(ErrandIds.SLEEP) && pet.getPerformance().isEmpty(),
-                Component.literal("the pet is still asleep after its owner got up")))
+                "the pet is still asleep after its owner got up"))
             .thenSucceed();
     }
 
@@ -269,11 +269,11 @@ public final class RhythmGameTests {
 
         helper.startSequence()
             .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(ErrandIds.SLEEP) && pet.getPerformance().startsWith("sleep"),
-                Component.literal("the pet never lay down: it is " + pet.getMind().errands().errand())))
-            .thenExecute(() -> helper.getLevel().setDayTime(MORNING))
+                "the pet never lay down: it is " + pet.getMind().errands().errand()))
+            .thenExecute(() -> setDayTime(helper.getLevel(), MORNING))
             .thenWaitUntil(() -> helper.assertTrue(!pet.getMind().errands().isOn(ErrandIds.SLEEP) && pet.getPerformance().isEmpty()
                     && pet.getIcon() != PetIcon.SLEEPY,
-                Component.literal("the pet is still asleep in the morning: " + pet.getMind().errands().errand())))
+                "the pet is still asleep in the morning: " + pet.getMind().errands().errand()))
             .thenSucceed();
     }
 
@@ -288,11 +288,11 @@ public final class RhythmGameTests {
 
         helper.startSequence()
             .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(PastimeData.RAIN_SHELTER),
-                Component.literal("the pet never set off for the roof: it is " + pet.getMind().errands().errand() + " at " + pet.position()
-                    + weatherOf(helper, pet))))
+                "the pet never set off for the roof: it is " + pet.getMind().errands().errand() + " at " + pet.position()
+                    + weatherOf(helper, pet)))
             .thenWaitUntil(() -> helper.assertTrue(underTheRoof(helper, pet, 8, 8) && pet.getPerformance().startsWith("sit"),
-                Component.literal("the pet is not sitting under the roof: " + pet.position() + " " + pet.getPerformance() + weatherOf(helper, pet)
-                    + " it is " + pet.getMind().errands().errand())))
+                "the pet is not sitting under the roof: " + pet.position() + " " + pet.getPerformance() + weatherOf(helper, pet)
+                    + " it is " + pet.getMind().errands().errand()))
             .thenSucceed();
     }
 
@@ -310,7 +310,7 @@ public final class RhythmGameTests {
         helper.startSequence()
             .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(PastimeData.RAIN_SHELTER)
                     && pet.distanceTo(owner) < 4.0 && pet.getPerformance().startsWith("huddle"),
-                Component.literal("the pet never came to huddle by its owner: it is " + pet.getMind().errands().errand() + " at " + pet.position())))
+                "the pet never came to huddle by its owner: it is " + pet.getMind().errands().errand() + " at " + pet.position()))
             .thenSucceed();
     }
 
@@ -322,9 +322,9 @@ public final class RhythmGameTests {
 
         helper.startSequence()
             .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(PastimeData.RAIN_PLAY),
-                Component.literal("the pet never played in the rain: it is " + pet.getMind().errands().errand())))
+                "the pet never played in the rain: it is " + pet.getMind().errands().errand()))
             .thenExecuteFor(LYING_TICKS, () -> helper.assertFalse(underTheRoof(helper, pet, 9, 9) || pet.getMind().errands().isOn(PastimeData.RAIN_SHELTER),
-                Component.literal("Usagi went in out of the rain")))
+                "Usagi went in out of the rain"))
             .thenSucceed();
     }
 
@@ -344,14 +344,14 @@ public final class RhythmGameTests {
             .thenExecuteFor(LYING_TICKS * 2, () -> {
                 for (AbstractPet pet : new AbstractPet[] {usagi, hachiware}) {
                     for (Identifier pastime : PastimeData.ids()) {
-                        helper.assertFalse(pet.getMind().errands().isOn(pastime), Component.literal(pet.getType().toShortString() + " passed the time with "
-                            + pastime + " in a world that has no pastimes"));
+                        helper.assertFalse(pet.getMind().errands().isOn(pastime), pet.getType().toShortString() + " passed the time with "
+                            + pastime + " in a world that has no pastimes");
                     }
                 }
             })
             .thenExecute(() -> store.set(store.get().withPastimes(1.0F)))
             .thenWaitUntil(() -> helper.assertTrue(usagi.getMind().errands().isOn(PastimeData.RAIN_PLAY),
-                Component.literal("the pet passed no time once the world had pastimes again: it is " + usagi.getMind().errands().errand())))
+                "the pet passed no time once the world had pastimes again: it is " + usagi.getMind().errands().errand()))
             .thenSucceed();
     }
 
@@ -370,11 +370,11 @@ public final class RhythmGameTests {
 
         helper.startSequence()
             .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(PastimeData.WATCH_OWNER_WORK) && pet.distanceTo(owner) < 4.5,
-                Component.literal("the pet never came to watch its owner work: it is " + pet.getMind().errands().errand() + " at " + pet.position())))
+                "the pet never came to watch its owner work: it is " + pet.getMind().errands().errand() + " at " + pet.position()))
             .thenWaitUntil(() -> helper.assertTrue(!pet.getMind().errands().isOn(PastimeData.WATCH_OWNER_WORK),
-                Component.literal("the pet never had its fill of watching")))
+                "the pet never had its fill of watching"))
             .thenExecuteAfter(LYING_TICKS, () -> helper.assertFalse(pet.getMind().errands().isOn(PastimeData.WATCH_OWNER_WORK),
-                Component.literal("the pet came back to watch again at once")))
+                "the pet came back to watch again at once"))
             .thenSucceed();
     }
 

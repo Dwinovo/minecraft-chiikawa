@@ -13,7 +13,6 @@ import com.dwinovo.chiikawa.entity.brain.combat.PetCombat;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;

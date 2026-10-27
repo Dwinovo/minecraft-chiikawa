@@ -187,10 +187,10 @@ public final class ExamGameTests {
         AbstractPet pet = signedUp(helper, desk, new BlockPos(4, STAND, 6));
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().seated(), Component.literal("the pet never sat down to the paper")))
+            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().seated(), "the pet never sat down to the paper"))
             .thenExecute(() -> helper.destroyBlock(DESK))
             .thenWaitUntil(() -> helper.assertTrue(!pet.getMind().errands().seated() && pet.getActivity() == PetActivity.NONE,
-                Component.literal("the pet is still in its chair at a desk that is gone")))
+                "the pet is still in its chair at a desk that is gone"))
             .thenSucceed();
     }
 
@@ -203,7 +203,7 @@ public final class ExamGameTests {
         PetMind.post(pet, new Message.ExamCalledOff(QualificationData.WEEDING, PetExams.MISSED));
 
         helper.assertTrue(pet.licences().get(QualificationData.WEEDING).exam() instanceof ExamStage.None,
-            Component.literal("the pet is still signed up for an exam it was told is off"));
+            "the pet is still signed up for an exam it was told is off");
         helper.succeed();
     }
 
@@ -286,15 +286,15 @@ public final class ExamGameTests {
         desk.book(new DeskBooking(pet.getUUID(), "Shisa", QualificationData.WEEDING, 5, EXAM_DAY_NUMBER, Optional.of(true)));
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(pet.getActivity() == PetActivity.READ_RESULTS, Component.literal("the pet never began to read")))
+            .thenWaitUntil(() -> helper.assertTrue(pet.getActivity() == PetActivity.READ_RESULTS, "the pet never began to read"))
             .thenExecute(() -> {
                 PetMind.post(pet, new Message.ResultsDue(QualificationData.WEEDING));
 
                 helper.assertTrue(pet.licences().get(QualificationData.WEEDING).held() == 0,
-                    Component.literal("the results were given to a pet that was still reading them"));
+                    "the results were given to a pet that was still reading them");
             })
             .thenWaitUntil(() -> helper.assertTrue(pet.licences().get(QualificationData.WEEDING).held() == 1,
-                Component.literal("the pet has not heard it passed after reading")))
+                "the pet has not heard it passed after reading"))
             .thenSucceed();
     }
 
@@ -309,7 +309,7 @@ public final class ExamGameTests {
         PetMind.post(pet, new Message.ResultsDue(QualificationData.WEEDING));
 
         helper.assertTrue(pet.licences().get(QualificationData.WEEDING).held() == 1,
-            Component.literal("the pet was told its results were due and has not been granted the grade"));
+            "the pet was told its results were due and has not been granted the grade");
         helper.succeed();
     }
 

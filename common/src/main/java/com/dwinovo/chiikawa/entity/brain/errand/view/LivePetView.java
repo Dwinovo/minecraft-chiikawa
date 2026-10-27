@@ -413,7 +413,7 @@ public final class LivePetView implements PetView {
     /** The performance of the nearest pet the sensor saw, which the sensor lists nearest first. */
     private Optional<String> findNeighbourPerformance() {
         return surroundings().creatures().stream()
-            .filter(seen -> seen.kind().is(InitTag.PETS))
+            .filter(seen -> seen.kind().builtInRegistryHolder().is(InitTag.PETS))
             .map(seen -> pet.level() instanceof ServerLevel level ? level.getEntity(seen.id()) : null)
             .filter(found -> found instanceof AbstractPet neighbour && neighbour.isAlive())
             .map(found -> ((AbstractPet) found).getPerformance())

@@ -157,12 +157,12 @@ public final class FarmGameTests {
         helper.setBlock(chest, Blocks.CHEST);
 
         helper.succeedWhen(() -> {
-            Container container = (Container) helper.getBlockEntity(chest, BlockEntity.class);
+            Container container = helper.getBlockEntity(chest, ChestBlockEntity.class);
             helper.assertTrue(!container.isEmpty(), "the chest is still empty; the pet was "
                 + pet.getIntent().map(Object::toString).orElse("doing nothing")
                 + " and had been told about a container at "
                 + pet.getBrain().getMemory(InitMemory.WORK_SIGHTS.get()).map(sights -> sights.get(WorkData.DELIVER))
-                    .map(Object::toString).orElse("nowhere")));
+                    .map(Object::toString).orElse("nowhere"));
         });
     }
 
@@ -190,13 +190,13 @@ public final class FarmGameTests {
                 setOffForTheChest[0] = true;
                 long ripe = field.stream().filter(crop -> helper.getBlockState(crop).getBlock() == Blocks.WHEAT
                     && helper.getBlockState(crop).getValue(CropBlock.AGE) == CropBlock.MAX_AGE).count();
-                helper.assertTrue(ripe == 0, Component.literal("the pet set off for the chest with " + ripe + " ripe crops still in the field"));
+                helper.assertTrue(ripe == 0, "the pet set off for the chest with " + ripe + " ripe crops still in the field");
             }
         });
         helper.succeedWhen(() -> {
-            helper.assertTrue(setOffForTheChest[0], Component.literal("the pet never set off for the chest"));
+            helper.assertTrue(setOffForTheChest[0], "the pet never set off for the chest");
             Container container = helper.getBlockEntity(chest, ChestBlockEntity.class);
-            helper.assertTrue(container.hasAnyMatching(stack -> stack.is(Items.WHEAT)), Component.literal("the chest has no wheat in it"));
+            helper.assertTrue(container.hasAnyMatching(stack -> stack.is(Items.WHEAT)), "the chest has no wheat in it");
         });
     }
 
@@ -238,9 +238,9 @@ public final class FarmGameTests {
         ItemEntity wheat = helper.spawnItem(Items.WHEAT, new BlockPos(7, STAND, 4));
 
         helper.onEachTick(() -> helper.assertFalse(pet.getIntent().filter(ErrandIds.PICK_UP_ITEM::equals).isPresent(),
-            Component.literal("the pet set off for the wheat with no room for it")));
+            "the pet set off for the wheat with no room for it"));
         helper.runAtTickTime(LEAVE_IT_TICKS, () -> {
-            helper.assertTrue(wheat.isAlive(), Component.literal("the wheat was taken"));
+            helper.assertTrue(wheat.isAlive(), "the wheat was taken");
             helper.succeed();
         });
     }
@@ -267,9 +267,9 @@ public final class FarmGameTests {
         ripeWheat(helper, open);
 
         helper.succeedWhen(() -> {
-            helper.assertTrue(carries(pet, Items.WHEAT), Component.literal("the pet never came away with the wheat that was open to it"));
-            helper.assertTrue(helper.getBlockState(open).getValue(CropBlock.AGE) < CropBlock.MAX_AGE, Component.literal("the open crop was not reaped"));
-            helper.assertTrue(helper.getBlockState(walled).getValue(CropBlock.AGE) == CropBlock.MAX_AGE, Component.literal("the walled-in crop was reaped"));
+            helper.assertTrue(carries(pet, Items.WHEAT), "the pet never came away with the wheat that was open to it");
+            helper.assertTrue(helper.getBlockState(open).getValue(CropBlock.AGE) < CropBlock.MAX_AGE, "the open crop was not reaped");
+            helper.assertTrue(helper.getBlockState(walled).getValue(CropBlock.AGE) == CropBlock.MAX_AGE, "the walled-in crop was reaped");
         });
     }
 
@@ -304,9 +304,9 @@ public final class FarmGameTests {
                     return;
                 }
                 helper.assertTrue(ended.get().outcome() instanceof Outcome.GaveUp,
-                    Component.literal("the pet ended its walk to the walled-in crop " + ended.get().outcome()));
+                    "the pet ended its walk to the walled-in crop " + ended.get().outcome());
                 helper.assertTrue(ended.get().ranTicks() <= GIVE_UP_TICKS,
-                    Component.literal("the pet took " + ended.get().ranTicks() + " ticks to give up on a crop it had no way to"));
+                    "the pet took " + ended.get().ranTicks() + " ticks to give up on a crop it had no way to");
                 gaveUp[0] = true;
                 ripeWheat(helper, open);
                 return;
@@ -318,7 +318,7 @@ public final class FarmGameTests {
                 helper.succeed();
             }
             helper.assertTrue(setOff[0] < 0L || helper.getTick() - setOff[0] <= REAP_TICKS,
-                Component.literal("the pet had not reaped the open crop " + REAP_TICKS + " ticks after it set off for it"));
+                "the pet had not reaped the open crop " + REAP_TICKS + " ticks after it set off for it");
         });
     }
 

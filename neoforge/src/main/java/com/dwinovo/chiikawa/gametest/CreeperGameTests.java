@@ -9,7 +9,6 @@ import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
@@ -44,7 +43,7 @@ public final class CreeperGameTests {
         Creeper creeper = helper.spawn(EntityType.CREEPER, new BlockPos(8 + START_GAP, STAND, 8));
 
         helper.succeedWhen(() -> helper.assertTrue(creeper.distanceTo(hachiware) > AVOID_DISTANCE,
-            Component.literal("the creeper stayed within " + AVOID_DISTANCE + " blocks of Hachiware: " + creeper.distanceTo(hachiware))));
+            "the creeper stayed within " + AVOID_DISTANCE + " blocks of Hachiware: " + creeper.distanceTo(hachiware)));
     }
 
     /**
@@ -57,7 +56,7 @@ public final class CreeperGameTests {
         Creeper creeper = helper.spawn(EntityType.CREEPER, new BlockPos(8 + START_GAP, STAND, 8));
 
         helper.startSequence()
-            .thenExecuteFor(WATCH_TICKS, () -> helper.assertFalse(avoiding(creeper), Component.literal("the creeper kept away from Chiikawa")))
+            .thenExecuteFor(WATCH_TICKS, () -> helper.assertFalse(avoiding(creeper), "the creeper kept away from Chiikawa"))
             .thenSucceed();
     }
 

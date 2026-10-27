@@ -27,7 +27,6 @@ import javax.sound.sampled.AudioSystem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -91,6 +90,12 @@ public final class GameTestKit {
     private GameTestKit() {
     }
 
+    /** Sets the time of day on the clock the level keeps; a level without a day cycle has none to set. */
+    static void setDayTime(ServerLevel level, long dayTime) {
+        level.dimensionType().defaultClock()
+            .ifPresent(clock -> level.getServer().clockManager().setTotalTicks(clock, dayTime));
+    }
+
     /**
      * Settles the world a batch runs in. Every batch does this for itself rather than
      * trusting what the last one left: batches run in an order nobody chose, and a peaceful
@@ -99,8 +104,7 @@ public final class GameTestKit {
      */
     static void settleWorld(ServerLevel level, Difficulty difficulty, long dayTime) {
         level.getServer().setDifficulty(difficulty, true);
-        level.dimensionType().defaultClock()
-            .ifPresent(clock -> level.getServer().clockManager().setTotalTicks(clock, dayTime));
+        setDayTime(level, dayTime);
         level.getGameRules().set(GameRules.SPAWN_MOBS, false, level.getServer());
         level.getServer().setWeatherParameters(CLEAR_WEATHER_TICKS, 0, false, false);
         // The rain a batch left falls off by a hundredth a tick, so for the first eighty ticks the world is still raining

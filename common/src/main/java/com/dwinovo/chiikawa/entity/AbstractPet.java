@@ -197,10 +197,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     private static final EntityDataAccessor<Byte> ICON = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.BYTE);
 
     /**
-     * What the owner has told the pet it may and may not do, as {@link PetRules#CODEC} writes it; empty is the default.
-     * Synced for the owner's screen, which shows it.
+     * What the owner has told the pet it may and may not do. Synced for the owner's screen, which shows it.
      */
-    private static final EntityDataAccessor<CompoundTag> RULES = SynchedEntityData.defineId(AbstractPet.class, InitDataSerializers.COMPOUND_TAG);
+    private static final EntityDataAccessor<PetRules> RULES = SynchedEntityData.defineId(AbstractPet.class, InitEntityDataSerializers.PET_RULES);
 
     /** Legacy animation-id namespace for {@link #ANIM_TRIGGER}'s low byte. */
     public static final int TRIGGER_NONE         = 0;
@@ -474,7 +473,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     /** @return what the owner has told the pet it may and may not do; on either side */
     public PetRules getRules() {
-        return PetRules.CODEC.parse(NbtOps.INSTANCE, this.entityData.get(RULES)).result().orElse(PetRules.DEFAULT);
+        return this.entityData.get(RULES);
     }
 
     /**
@@ -483,7 +482,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * @param rules what the owner wants
      */
     public void setRules(PetRules rules) {
-        this.entityData.set(RULES, (CompoundTag) PetRules.CODEC.encodeStart(NbtOps.INSTANCE, rules).getOrThrow());
+        this.entityData.set(RULES, rules);
         PetMind.post(this, new Message.RulesChanged());
     }
 
@@ -649,7 +648,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         brain.addActivity(Activity.CORE, ImmutableList.of(
             Pair.of(0, new FloatBehavior<>()),
             Pair.of(0, new LookAtTargetSink(45, 45)),
-            Pair.of(1, new MoveToTargetSink())));
+            Pair.of(1, new MoveToTargetSink())), java.util.Set.of(), java.util.Set.of());
         brain.setCoreActivities(java.util.Set.of(Activity.CORE));
         brain.setDefaultActivity(Activity.IDLE);
         // A brain starts with no activity active, not even its core: the pet would stand still, whatever the mind
@@ -962,7 +961,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         builder.define(LICENCES, List.of());
         builder.define(PERFORMANCE, "");
         builder.define(ICON, PetIcon.NONE.id());
-        builder.define(RULES, new CompoundTag());
+        builder.define(RULES, PetRules.DEFAULT);
     }
 
     /**
@@ -1124,9 +1123,9 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         }
         licences.save(output);
         giftIntentions.save(output);
-        CompoundTag rules = this.entityData.get(RULES);
-        if (!rules.isEmpty()) {
-            output.store("Rules", CompoundTag.CODEC, rules);
+        PetRules rules = this.entityData.get(RULES);
+        if (!rules.equals(PetRules.DEFAULT)) {
+            output.store("Rules", PetRules.CODEC, rules);
         }
     }
 
@@ -1146,7 +1145,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         refreshJobFromMainhand();
         licences.load(input);
         giftIntentions.load(input);
-        this.entityData.set(RULES, input.read("Rules", CompoundTag.CODEC).orElseGet(CompoundTag::new));
+        this.entityData.set(RULES, input.read("Rules", PetRules.CODEC).orElse(PetRules.DEFAULT));
     }
 
     /** @return the present this pet has in mind for its owner, if it has one */

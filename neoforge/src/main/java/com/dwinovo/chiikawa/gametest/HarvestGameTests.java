@@ -21,7 +21,6 @@ import java.util.Optional;
 import java.util.TreeMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
@@ -100,20 +99,20 @@ public final class HarvestGameTests {
                 PetTaskTypeData.reward(PetTaskTypeData.WEEDING), 0));
             StepStatus status = new Harvest(harvested, forage.holds(), Optional.of(forage.counter()), 0).tick(handle);
 
-            helper.assertTrue(status.equals(StepStatus.DONE), Component.literal(name + ": the step ended " + status));
-            helper.assertFalse(pickedBag.isEmpty(), Component.literal(name + ": picking it put nothing in the bag"));
-            helper.assertTrue(bag(pet).equals(pickedBag), Component.literal(name + ": the bag has " + bag(pet) + ", picked it had " + pickedBag));
+            helper.assertTrue(status.equals(StepStatus.DONE), name + ": the step ended " + status);
+            helper.assertFalse(pickedBag.isEmpty(), name + ": picking it put nothing in the bag");
+            helper.assertTrue(bag(pet).equals(pickedBag), name + ": the bag has " + bag(pet) + ", picked it had " + pickedBag);
             helper.assertTrue(level.getBlockState(harvested).isAir() && level.getBlockState(picked).isAir(),
-                Component.literal(name + ": the block is not gone"));
+                name + ": the block is not gone");
             helper.assertTrue(level.getBlockState(harvested.above()).isAir() && level.getBlockState(picked.above()).isAir(),
-                Component.literal(name + ": the upper half is not gone"));
-            helper.assertTrue(pet.getTask().orElseThrow().progress() == 1, Component.literal(name + ": the work was not counted once"));
-            helper.assertTrue(pet.getMainHandItem().getDamageValue() == 0, Component.literal(name + ": the shears wore"));
+                name + ": the upper half is not gone");
+            helper.assertTrue(pet.getTask().orElseThrow().progress() == 1, name + ": the work was not counted once");
+            helper.assertTrue(pet.getMainHandItem().getDamageValue() == 0, name + ": the shears wore");
         }
 
         BlockPos nothing = helper.absolutePos(new BlockPos(14, STAND, 2));
         helper.assertTrue(new Harvest(nothing, WEEDS, Optional.of(WorkData.WEED_PULLED), 0).tick(handle)
-            .equals(StepStatus.gaveUp("gone")), Component.literal("a step on a place with no weed did not give up"));
+            .equals(StepStatus.gaveUp("gone")), "a step on a place with no weed did not give up");
         helper.succeed();
     }
 
@@ -134,15 +133,15 @@ public final class HarvestGameTests {
         }
 
         helper.assertTrue(new Harvest(worn, RIPE_CROP, Optional.empty(), 1).tick(handle).equals(StepStatus.DONE),
-            Component.literal("the crop was not reaped"));
-        helper.assertTrue(pet.getMainHandItem().getDamageValue() == 1, Component.literal("the hoe wore " + pet.getMainHandItem().getDamageValue()));
+            "the crop was not reaped");
+        helper.assertTrue(pet.getMainHandItem().getDamageValue() == 1, "the hoe wore " + pet.getMainHandItem().getDamageValue());
         helper.assertTrue(level.getBlockState(worn).is(Blocks.WHEAT) && !((CropBlock) Blocks.WHEAT).isMaxAge(level.getBlockState(worn)),
-            Component.literal("the crop was not put back young"));
-        helper.assertTrue(bag(pet).getOrDefault(Items.WHEAT.getDescriptionId(), 0) == 1, Component.literal("the bag has " + bag(pet)));
+            "the crop was not put back young");
+        helper.assertTrue(bag(pet).getOrDefault(Items.WHEAT.getDescriptionId(), 0) == 1, "the bag has " + bag(pet));
 
         helper.assertTrue(new Harvest(spared, RIPE_CROP, Optional.empty(), 0).tick(handle).equals(StepStatus.DONE),
-            Component.literal("the second crop was not reaped"));
-        helper.assertTrue(pet.getMainHandItem().getDamageValue() == 1, Component.literal("a work with no wear wore the hoe"));
+            "the second crop was not reaped");
+        helper.assertTrue(pet.getMainHandItem().getDamageValue() == 1, "a work with no wear wore the hoe");
         helper.succeed();
     }
 

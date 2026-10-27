@@ -19,13 +19,12 @@ import com.dwinovo.chiikawa.init.InitEntity;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.FarmBlock;
+import net.minecraft.world.level.block.FarmlandBlock;
 
 /**
  * What a pet answers when another asks it to play a scene, without the other pet there to ask: the invitations are
@@ -58,16 +57,16 @@ public final class InvitationGameTests {
         // Within the farmer's sight, which is five blocks, from where it stands: farther off it only sets off for the field if
         // its stroll takes it within sight, and in 1 of 150 copies it had not in an hour.
         helper.setBlock(new BlockPos(7, STAND - 1, 4),
-            Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, FarmBlock.MAX_MOISTURE));
+            Blocks.FARMLAND.defaultBlockState().setValue(FarmlandBlock.MOISTURE, FarmlandBlock.MAX_MOISTURE));
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(farmer.getMind().errands().isOn(WorkData.PLANT), Component.literal("the farmer never set off to sow")))
+            .thenWaitUntil(() -> helper.assertTrue(farmer.getMind().errands().isOn(WorkData.PLANT), "the farmer never set off to sow"))
             .thenExecute(() -> ask(helper, farmer, UUID.randomUUID()))
             .thenIdle(ANSWER_TICKS)
             .thenExecuteFor(ANSWER_TICKS, () -> {
-                helper.assertTrue(farmer.getMind().errands().engagedWith(now(helper)).isEmpty(), Component.literal("the farmer said yes to a visit"));
-                helper.assertFalse(farmer.getMind().errands().isOn(ErrandIds.COOPERATE), Component.literal("the farmer stopped to play along"));
-                helper.assertTrue(farmer.getMind().errands().isOn(WorkData.PLANT), Component.literal("the farmer was called away from its sowing"));
+                helper.assertTrue(farmer.getMind().errands().engagedWith(now(helper)).isEmpty(), "the farmer said yes to a visit");
+                helper.assertFalse(farmer.getMind().errands().isOn(ErrandIds.COOPERATE), "the farmer stopped to play along");
+                helper.assertTrue(farmer.getMind().errands().isOn(WorkData.PLANT), "the farmer was called away from its sowing");
             })
             .thenSucceed();
     }
@@ -91,8 +90,8 @@ public final class InvitationGameTests {
             .thenIdle(ANSWER_TICKS)
             .thenExecuteFor(ANSWER_TICKS, () -> {
                 helper.assertTrue(chiikawa.getMind().errands().engagedWith(now(helper)).filter(first::equals).isPresent(),
-                    Component.literal("Chiikawa did not wait for the pet that asked first"));
-                helper.assertTrue(chiikawa.getMind().errands().isOn(ErrandIds.COOPERATE), Component.literal("Chiikawa did not stop to play along"));
+                    "Chiikawa did not wait for the pet that asked first");
+                helper.assertTrue(chiikawa.getMind().errands().isOn(ErrandIds.COOPERATE), "Chiikawa did not stop to play along");
             })
             .thenSucceed();
     }
@@ -111,8 +110,8 @@ public final class InvitationGameTests {
         told.setRules(PetRules.DEFAULT.with(PetRules.Toggle.SOCIAL, false));
 
         helper.onEachTick(() -> {
-            helper.assertTrue(told.getMind().errands().engagedWith(now(helper)).isEmpty(), Component.literal("the pet told not to socialise said yes"));
-            helper.assertFalse(told.getMind().errands().isOn(ErrandIds.COOPERATE), Component.literal("the pet told not to socialise played along"));
+            helper.assertTrue(told.getMind().errands().engagedWith(now(helper)).isEmpty(), "the pet told not to socialise said yes");
+            helper.assertFalse(told.getMind().errands().isOn(ErrandIds.COOPERATE), "the pet told not to socialise played along");
         });
         helper.startSequence()
             .thenIdle(ANSWER_TICKS)
@@ -121,7 +120,7 @@ public final class InvitationGameTests {
                 ask(helper, open, asker.getUUID());
             })
             .thenWaitUntil(() -> helper.assertTrue(open.getMind().errands().isOn(ErrandIds.COOPERATE),
-                Component.literal("the pet that was not told anything did not play along")))
+                "the pet that was not told anything did not play along"))
             .thenSucceed();
     }
 

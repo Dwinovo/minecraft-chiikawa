@@ -15,7 +15,6 @@ import com.dwinovo.chiikawa.init.InitMemory;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Unit;
@@ -66,13 +65,13 @@ public final class RestGameTests {
         RestLedger after = ledgerOf(loaded);
 
         helper.assertTrue(before.remaining(ErrandIds.TAKE_PHOTO, now) == PHOTO_REST,
-            Component.literal("the ledger said " + before.remaining(ErrandIds.TAKE_PHOTO, now) + " ticks of photo rest, not " + PHOTO_REST));
+            "the ledger said " + before.remaining(ErrandIds.TAKE_PHOTO, now) + " ticks of photo rest, not " + PHOTO_REST);
         helper.assertTrue(after.remaining(ErrandIds.TAKE_PHOTO, now) == PHOTO_REST,
-            Component.literal("after a save the photo rest was " + after.remaining(ErrandIds.TAKE_PHOTO, now) + " ticks, not " + PHOTO_REST));
+            "after a save the photo rest was " + after.remaining(ErrandIds.TAKE_PHOTO, now) + " ticks, not " + PHOTO_REST);
         helper.assertTrue(after.remaining(ErrandIds.GIFT_OWNER, now) == GIFT_REST,
-            Component.literal("after a save the gift rest was " + after.remaining(ErrandIds.GIFT_OWNER, now) + " ticks, not " + GIFT_REST));
+            "after a save the gift rest was " + after.remaining(ErrandIds.GIFT_OWNER, now) + " ticks, not " + GIFT_REST);
         helper.assertTrue(after.resting(ErrandIds.TAKE_PHOTO, now) && after.resting(ErrandIds.GIFT_OWNER, now),
-            Component.literal("a pet that was resting is not after a save"));
+            "a pet that was resting is not after a save");
         helper.succeed();
     }
 
@@ -84,13 +83,13 @@ public final class RestGameTests {
 
         KINDS.get(ErrandIds.TAKE_PHOTO).of(pet.getBrain(), ErrandIds.TAKE_PHOTO).restFor(null, PHOTO_REST, now);
 
-        helper.assertTrue(pet.getBrain().hasMemoryValue(InitMemory.PHOTO_COOLDOWN.get()), Component.literal("the photo cooldown was not set"));
+        helper.assertTrue(pet.getBrain().hasMemoryValue(InitMemory.PHOTO_COOLDOWN.get()), "the photo cooldown was not set");
         helper.assertTrue(pet.getBrain().getTimeUntilExpiry(InitMemory.PHOTO_COOLDOWN.get()) == PHOTO_REST,
-            Component.literal("the memory expires in " + pet.getBrain().getTimeUntilExpiry(InitMemory.PHOTO_COOLDOWN.get())));
+            "the memory expires in " + pet.getBrain().getTimeUntilExpiry(InitMemory.PHOTO_COOLDOWN.get()));
 
         KINDS.get(ErrandIds.TAKE_PHOTO).of(pet.getBrain(), ErrandIds.TAKE_PHOTO).restFor(null, 0, now);
 
-        helper.assertFalse(pet.getBrain().hasMemoryValue(InitMemory.PHOTO_COOLDOWN.get()), Component.literal("an ended rest was left in the memory"));
+        helper.assertFalse(pet.getBrain().hasMemoryValue(InitMemory.PHOTO_COOLDOWN.get()), "an ended rest was left in the memory");
         helper.succeed();
     }
 
@@ -102,14 +101,14 @@ public final class RestGameTests {
         RestLedger ledger = ledgerOf(pet);
         KINDS.get(ErrandIds.SHOP).of(pet.getBrain(), ErrandIds.SHOP).restFor(null, SHOP_REST, now);
         KINDS.get(WorkData.HARVEST).of(pet.getBrain(), WorkData.HARVEST).restFor(CROP, CROP_REST, now);
-        helper.assertTrue(ledger.remaining(ErrandIds.SHOP, now) == SHOP_REST, Component.literal("the shop rest was not written"));
-        helper.assertTrue(ledger.resting(WorkData.HARVEST, CROP, now), Component.literal("the rest on the crop was not written"));
+        helper.assertTrue(ledger.remaining(ErrandIds.SHOP, now) == SHOP_REST, "the shop rest was not written");
+        helper.assertTrue(ledger.resting(WorkData.HARVEST, CROP, now), "the rest on the crop was not written");
 
         RestLedger after = ledgerOf(readBack(helper, pet));
 
         helper.assertTrue(after.remaining(ErrandIds.SHOP, now) == SHOP_REST,
-            Component.literal("after a save the shop rest was " + after.remaining(ErrandIds.SHOP, now) + " ticks, not " + SHOP_REST));
-        helper.assertFalse(after.resting(WorkData.HARVEST, CROP, now), Component.literal("a rest on a subject survived a save"));
+            "after a save the shop rest was " + after.remaining(ErrandIds.SHOP, now) + " ticks, not " + SHOP_REST);
+        helper.assertFalse(after.resting(WorkData.HARVEST, CROP, now), "a rest on a subject survived a save");
         helper.succeed();
     }
 
