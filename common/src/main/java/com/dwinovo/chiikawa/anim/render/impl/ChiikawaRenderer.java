@@ -12,17 +12,17 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
  * of it — there only while an {@code open_mouth} animation plays.
  *
  * <p>Its faces are the ones the series gives it: pleased, its eyes shut in two arcs; hurt,
- * it cries, eyes screwed up and tears running, as it does whenever something goes wrong;
- * puzzled, a drop of sweat; brought back, laughing and crying at once. At an exam it sweats
- * when it gets stuck.
+ * it cries, eyes screwed up and tears running, as it does whenever something goes wrong, and
+ * frightened it cries the same way; yawning, its eyes screwed shut; puzzled, a drop of sweat;
+ * brought back, laughing and crying at once. At an exam it sweats when it gets stuck.
  */
 public class ChiikawaRenderer extends ChiikawaEntityRenderer<ChiikawaPet> {
     public ChiikawaRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, "chiikawa");
         addBoneVisibilityRule("Mouth3", (state, animCtx) -> isTalking(state));
         addBoneVisibilityRule("HappyEyes", ShownDuring.any("happy", "revive"));
-        addBoneVisibilityRule("CryEyes", ShownDuring.any("hurt"));
-        addBoneVisibilityRule("Tears", ShownDuring.any("hurt", "revive"));
+        addBoneVisibilityRule("CryEyes", ShownDuring.any("hurt", "yawn", "cry"));
+        addBoneVisibilityRule("Tears", ShownDuring.any("hurt", "cry", "revive"));
         addBoneVisibilityRule("Sweat", ShownDuring.any("confused", "exam"));
     }
 }

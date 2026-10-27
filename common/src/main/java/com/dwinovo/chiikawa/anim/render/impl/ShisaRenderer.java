@@ -14,15 +14,15 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
  * rather than poking through the pack, as Momonga's is. Every other pet's tail is short
  * enough to be covered by the pack itself.
  *
- * <p>Its faces: pleased, eyes crinkled under its brows; hurt or puzzled, no tears, a
- * fluster and a drop of sweat; brought back, so glad it cries.
+ * <p>Its faces: pleased, eyes crinkled under its brows, and the same when it yawns; hurt or
+ * puzzled, no tears, a fluster and a drop of sweat; brought back, so glad it cries.
  */
 public class ShisaRenderer extends ChiikawaEntityRenderer<ShisaPet> {
     public ShisaRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, "shisa");
         addBoneVisibilityRule("Mouth3", (state, animCtx) -> isTalking(state));
         addBoneVisibilityRule("tail", (state, animCtx) -> BagLayer.wearOf(state) != BagItem.Wear.ON_BACK);
-        addBoneVisibilityRule("HappyEyes", ShownDuring.any("happy", "revive"));
+        addBoneVisibilityRule("HappyEyes", ShownDuring.any("happy", "yawn", "revive"));
         addBoneVisibilityRule("Tears", ShownDuring.any("revive"));
         addBoneVisibilityRule("Sweat", ShownDuring.any("hurt", "confused"));
     }
