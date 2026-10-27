@@ -184,6 +184,20 @@ public record PixelArt(String... rows) {
         "..XXwwwwwXX..",
         "....XXXXX....");
 
+    /** A pink heart on a paper disc: it wants to be praised. */
+    public static final PixelArt PRAISE = new PixelArt(
+        "....XXXXX....",
+        "..XXwwwwwXX..",
+        ".XwXXXwXXXwX.",
+        ".XXpppXpppXX.",
+        ".XXpppppppXX.",
+        ".XwXpppppXwX.",
+        ".XwwXpppXwwX.",
+        ".XwwwXpXwwwX.",
+        ".XwwwwXwwwwX.",
+        "..XXwwwwwXX..",
+        "....XXXXX....");
+
     /** An arrow pointing on: what comes next. */
     public static final PixelArt NEXT = new PixelArt(
         "......X...",

@@ -14,18 +14,10 @@ import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandTunings;
 import com.dwinovo.chiikawa.entity.brain.errand.remark.PetRemark;
 import com.dwinovo.chiikawa.entity.job.impl.MusicianJob;
-import com.google.gson.JsonParser;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import com.dwinovo.chiikawa.testing.AnimationFiles;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.SharedConstants;
 import net.minecraft.server.Bootstrap;
@@ -50,9 +42,6 @@ import org.junit.jupiter.api.Test;
  * and when it makes a remark, are data that needs no registry, and are asked.
  */
 class AnimationBacklogTest {
-    private static final Path ANIMATIONS = Path.of("src", "main", "resources", "assets", "chiikawa", "animations");
-    private static final Path PENDING = Path.of("src", "test", "resources", "pending_animations.txt");
-
     /** @return the animation meant by each value of the enums, the first of its candidates, that the character can reach */
     private static Set<String> asked(String character) {
         Set<String> names = new TreeSet<>();
@@ -90,6 +79,10 @@ class AnimationBacklogTest {
             stage.end().ifPresent(beat -> beat.animation().ifPresent(names::add));
         }));
         PetRemarkData.all().values().forEach(remark -> remark.partOf(who).flatMap(PetRemark.Part::gesture).ifPresent(names::add));
+        // Momonga copies a pet, and does what it has for want of one that it can.
+        PastimeData.works().forEach((errand, work) -> work.pastime().filter(pastime -> pastime.cast().containsKey(who))
+            .map(pastime -> PastimeData.settings().get(errand).tuning()).filter(ErrandTunings.AskPraise.class::isInstance)
+            .ifPresent(tuning -> names.add(((ErrandTunings.AskPraise) tuning).imitates().split(",")[0])));
         return names;
     }
 
@@ -104,32 +97,6 @@ class AnimationBacklogTest {
         return MusicianJob.PLAYER.getSimpleName().equalsIgnoreCase(character + "Pet");
     }
 
-    /** @return the animations each character has, by the name of its file */
-    private static Map<String, Set<String>> made() {
-        assertTrue(Files.isDirectory(ANIMATIONS), "the scan runs from the common module, not from " + Path.of("").toAbsolutePath());
-        try (Stream<Path> files = Files.list(ANIMATIONS)) {
-            Map<String, Set<String>> made = new TreeMap<>();
-            for (Path file : files.filter(path -> path.toString().endsWith(".json")).toList()) {
-                String character = file.getFileName().toString().replaceAll("\\.json$", "");
-                made.put(character, JsonParser.parseString(Files.readString(file)).getAsJsonObject().getAsJsonObject("animations")
-                    .keySet().stream().collect(Collectors.toCollection(TreeSet::new)));
-            }
-            return made;
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    /** @return the backlog, as {@code character animation} for each line */
-    private static Set<String> pending() {
-        try {
-            return Files.readAllLines(PENDING).stream().map(String::strip)
-                .filter(line -> !line.isEmpty() && !line.startsWith("#")).collect(Collectors.toCollection(TreeSet::new));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
     @BeforeAll
     static void bootstrap() {
         SharedConstants.tryDetectVersion();
@@ -139,9 +106,9 @@ class AnimationBacklogTest {
     @Test
     void whatTheEnumsNameAndACharacterLacksIsOnTheBacklogAndNothingElseIs() {
         Set<String> lacking = new TreeSet<>();
-        made().forEach((character, animations) -> asked(character).stream().filter(name -> !animations.contains(name))
+        AnimationFiles.made().forEach((character, animations) -> asked(character).stream().filter(name -> !animations.contains(name))
             .forEach(name -> lacking.add(character + " " + name)));
-        Set<String> pending = pending();
+        Set<String> pending = AnimationFiles.pending();
 
         Set<String> unlisted = new TreeSet<>(lacking);
         unlisted.removeAll(pending);
@@ -154,8 +121,8 @@ class AnimationBacklogTest {
 
     @Test
     void theBacklogNamesCharactersWeHave() {
-        Set<String> characters = made().keySet();
+        Set<String> characters = AnimationFiles.made().keySet();
 
-        pending().forEach(line -> assertTrue(characters.contains(line.split(" ")[0]), line + " is no character"));
+        AnimationFiles.pending().forEach(line -> assertTrue(characters.contains(line.split(" ")[0]), line + " is no character"));
     }
 }

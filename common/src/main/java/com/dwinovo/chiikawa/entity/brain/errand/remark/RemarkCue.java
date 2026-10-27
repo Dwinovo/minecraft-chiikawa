@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.errand.remark;
 
 import com.dwinovo.chiikawa.entity.brain.errand.decide.WhyNot;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
+import com.dwinovo.chiikawa.entity.brain.errand.view.Weather;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -35,8 +36,9 @@ public sealed interface RemarkCue {
      * @param now the current game time
      * @param ownerDistance how far off its owner is, while the owner is a player in the pet's level
      * @param phase the part of the day
+     * @param weather what falls on the pet
      */
-    record Situation(Optional<WhyNot> whyNot, long now, OptionalDouble ownerDistance, DayPhase phase) {
+    record Situation(Optional<WhyNot> whyNot, long now, OptionalDouble ownerDistance, DayPhase phase, Weather weather) {
     }
 
     /**
@@ -107,11 +109,33 @@ public sealed interface RemarkCue {
         }
     }
 
+    /**
+     * It rains on the pet, or it thunders.
+     *
+     * @param is {@link Weather#RAIN} for any rain, a storm included, or {@link Weather#THUNDER} for a storm only
+     */
+    record WeatherIs(Weather is) implements RemarkCue {
+        static final MapCodec<WeatherIs> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            Weather.TO_WAIT_FOR.fieldOf("is").forGetter(WeatherIs::is)
+        ).apply(instance, WeatherIs::new));
+
+        @Override
+        public Kind kind() {
+            return Kind.WEATHER;
+        }
+
+        @Override
+        public boolean holds(Situation situation) {
+            return situation.weather().satisfies(is);
+        }
+    }
+
     /** The kinds of cue a file can name, by their {@code type}. */
     enum Kind implements StringRepresentable {
         LACKED_FOR(LackedFor.CODEC),
         OWNER_WITHIN(OwnerWithin.CODEC),
-        PHASE(InPhase.CODEC);
+        PHASE(InPhase.CODEC),
+        WEATHER(WeatherIs.CODEC);
 
         static final Codec<Kind> CODEC = StringRepresentable.fromEnum(Kind::values);
 
