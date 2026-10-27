@@ -30,6 +30,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -199,6 +200,7 @@ public final class PastimeGameTests {
      */
     @GameTest(template = "floor16", batch = STORM_BATCH, timeoutTicks = WALK_TICKS)
     public static void chiikawa_cowers_at_thunder_until_its_owner_comes(GameTestHelper helper) {
+        GameTestKit.rainsHere(helper);
         GameTestKit.openSky(helper);
         ServerPlayer owner = ownerAt(helper, new BlockPos(14, STAND, 14));
         AbstractPet pet = ownedBy(helper, InitEntity.CHIIKAWA_PET.get(), owner, new BlockPos(4, STAND, 4));
@@ -229,6 +231,7 @@ public final class PastimeGameTests {
     /** A shower is not a storm: Chiikawa does not cry at it. */
     @GameTest(template = "floor16", batch = SHOWER_BATCH, timeoutTicks = WATCH_TICKS + 20)
     public static void chiikawa_does_not_cower_in_a_shower(GameTestHelper helper) {
+        GameTestKit.rainsHere(helper);
         GameTestKit.openSky(helper);
         ServerPlayer owner = ownerAt(helper, new BlockPos(14, STAND, 14));
         AbstractPet pet = ownedBy(helper, InitEntity.CHIIKAWA_PET.get(), owner, new BlockPos(4, STAND, 4));
@@ -245,6 +248,7 @@ public final class PastimeGameTests {
      */
     @GameTest(template = "floor16", batch = TROUBLE_BATCH, timeoutTicks = WALK_TICKS)
     public static void hachiware_says_something_will_turn_up_when_it_rains(GameTestHelper helper) {
+        GameTestKit.rainsHere(helper);
         GameTestKit.quietYard(helper, NOON);
         helper.getLevel().getServer().setWeatherParameters(0, RAIN_TICKS, true, false);
         ServerPlayer owner = ownerAt(helper, new BlockPos(6, STAND, 5));
@@ -395,10 +399,12 @@ public final class PastimeGameTests {
         AbstractPet pet = ownedBy(helper, InitEntity.KURIMANJU_PET.get(), owner, new BlockPos(4, STAND, 4));
 
         helper.startSequence()
-            .thenExecuteFor(WORK_TICKS, () -> owner.swing(InteractionHand.MAIN_HAND))
+            .thenExecuteFor(WORK_TICKS, () -> owner.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false))
             .thenExecute(() -> {
-                // The owner is a stand-in that is never ticked, so it does not stop swinging by itself.
-                owner.swinging = false;
+                // The owner is a stand-in that is never ticked, so it does not stop swinging by itself: let the swing run out.
+                while (owner.isSwinging()) {
+                    owner.baseTick();
+                }
                 owner.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
             })
             .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(CharacterPastimeData.COFFEE_FOR_A_WORKER)

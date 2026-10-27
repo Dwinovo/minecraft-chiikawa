@@ -49,7 +49,7 @@ final class OverHead {
                      CameraRenderState camera, float alpha, Consumer<DrawSurface> drawing) {
         poseStack.pushPose();
         poseStack.translate(nameTag.x, nameTag.y + 0.5 + ABOVE_NAME, nameTag.z);
-        poseStack.mulPose(camera.orientation);
+        poseStack.rotate(camera.orientation);
         poseStack.scale(SCALE, -SCALE, SCALE);
         drawing.accept(new WorldSurface(poseStack, collector, font, alpha));
         poseStack.popPose();

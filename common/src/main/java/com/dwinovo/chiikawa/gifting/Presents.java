@@ -9,6 +9,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -54,7 +55,7 @@ public final class Presents {
         switch (how) {
             case HAND -> {
                 if (!owner.getInventory().add(handed)) {
-                    owner.drop(handed, false);
+                    owner.drop(handed, false, Prediction.SERVER_ONLY);
                 }
             }
             case BY_THE_BED -> {

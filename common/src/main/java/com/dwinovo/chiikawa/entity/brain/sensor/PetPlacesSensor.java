@@ -77,7 +77,7 @@ public class PetPlacesSensor extends Sensor<AbstractPet> {
      *         through in a bed, and the bed does not blow up. Not in the Nether, where it is always dark
      */
     public static boolean bedsWork(Level level, BlockPos pos) {
-        return !level.environmentAttributes().getValue(EnvironmentAttributes.BED_RULE, pos).explodes();
+        return !level.environmentAttributes().getValue(EnvironmentAttributes.BED_RULE, pos).destroyOnUse();
     }
 
     private static boolean reachable(AbstractPet pet, BlockPos bed) {

@@ -90,7 +90,7 @@ public final class DefendSelfGameTests {
         Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(8, STAND, 4));
         zombie.setNoAi(true);
         // The fight is what is saved, and a zombie that falls would end it.
-        zombie.setInvulnerable(true);
+        zombie.setPermanentlyInvulnerable(true);
         pet.hurt(zombie.damageSources().mobAttack(zombie), 1.0F);
 
         helper.startSequence()
@@ -127,7 +127,7 @@ public final class DefendSelfGameTests {
         pet.setPendingGift(new ItemStack(Items.COOKIE));
         Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(7, STAND, 4));
         zombie.setNoAi(true);
-        zombie.setInvulnerable(true);
+        zombie.setPermanentlyInvulnerable(true);
         // In the fight from the first tick, with the zombie on top of the pet and the present in its paws, what the sensor
         // and the game's own hurt-by memory do a moment later anyway.
         pet.getBrain().setMemory(MemoryModuleType.HURT_BY_ENTITY, zombie);
@@ -142,7 +142,7 @@ public final class DefendSelfGameTests {
                 helper.assertFalse(pet.getPendingGift().isEmpty(), "the present was given in the middle of the fight");
             })
             .thenExecute(() -> {
-                zombie.setInvulnerable(false);
+                zombie.setPermanentlyInvulnerable(false);
                 zombie.kill(helper.getLevel());
             })
             .thenWaitUntil(() -> {

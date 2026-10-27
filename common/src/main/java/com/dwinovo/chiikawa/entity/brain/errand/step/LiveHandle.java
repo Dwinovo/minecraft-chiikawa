@@ -210,7 +210,7 @@ public final class LiveHandle implements Handle {
 
     @Override
     public void swing() {
-        pet.swing(InteractionHand.MAIN_HAND);
+        pet.swingForAttack(InteractionHand.MAIN_HAND);
     }
 
     @Override

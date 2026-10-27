@@ -80,6 +80,7 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.block.BedBlock;
@@ -369,7 +370,7 @@ final class ErrandScenarios {
     private static Scenario watchOwnerWork(GameTestHelper helper) {
         ServerPlayer owner = ownerAcross(helper);
         owner.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_PICKAXE));
-        helper.onEachTick(() -> owner.swing(InteractionHand.MAIN_HAND));
+        helper.onEachTick(() -> owner.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false));
         AbstractPet pet = GameTestKit.wild(helper, InitEntity.USAGI_PET.get(), new BlockPos(4, STAND, 4));
         pet.tame(owner);
         pet.setPetDirective(PetDirective.FREE);
@@ -484,6 +485,7 @@ final class ErrandScenarios {
     private static void rain(GameTestHelper helper) {
         settleWorld(helper.getLevel(), Difficulty.NORMAL, NOON);
         helper.getLevel().getServer().setWeatherParameters(0, RAIN_TICKS, true, false);
+        GameTestKit.rainsHere(helper);
     }
 
     /** A roof of a few planks over the floor, whose corner is here, which keeps the rain off the floor under it. */

@@ -6,7 +6,10 @@ import com.dwinovo.chiikawa.entity.brain.errand.work.WorkFile;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkTarget;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.mojang.serialization.JsonOps;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,9 +18,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.StrictJsonParser;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 /**
@@ -65,14 +70,20 @@ public final class ErrandSettingsLoader extends SimpleJsonResourceReloadListener
      *         list them can be checked without another loader's state, as {@link #errandIds} does for what exists
      */
     public static Set<Identifier> blockWorkIds(ResourceManager manager) {
-        Map<Identifier, JsonElement> files = new HashMap<>();
-        scanDirectory(manager, FileToIdConverter.json(DIRECTORY), JsonOps.INSTANCE, ExtraCodecs.JSON, files);
-        return files.entrySet().stream().filter(file -> targetsBlocks(file.getValue())).map(Map.Entry::getKey)
+        FileToIdConverter files = FileToIdConverter.json(DIRECTORY);
+        return files.listMatchingResources(manager).entrySet().stream()
+            .filter(file -> targetsBlocks(file.getValue())).map(file -> files.fileToId(file.getKey()))
             .collect(Collectors.toSet());
     }
 
     /** @return whether a file names a target that is blocks the work sensor finds; a file that does not parse names none */
-    private static boolean targetsBlocks(JsonElement json) {
+    private static boolean targetsBlocks(Resource resource) {
+        JsonElement json;
+        try (BufferedReader reader = resource.openAsReader()) {
+            json = StrictJsonParser.parse(reader);
+        } catch (IOException | JsonParseException | IllegalArgumentException e) {
+            return false;
+        }
         return json instanceof JsonObject file && file.has("target") && WorkTarget.CODEC.parse(JsonOps.INSTANCE, file.get("target"))
             .result().filter(WorkTarget.BlockTarget.class::isInstance).isPresent();
     }

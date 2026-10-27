@@ -136,7 +136,7 @@ class GiftIntentionsTest {
 
     @Test
     void aPresentInMindIsSavedWithThePetAndReadBack() {
-        HolderLookup.Provider registries = VanillaRegistries.createLookup();
+        HolderLookup.Provider registries = registries();
         intentions.note(GiftOccasion.FILM_FULL, Optional.of(new ItemStack(Items.PAPER)), NOW, 0, FixedRandom.floats(0.0F), SETTINGS);
         TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, registries);
         intentions.save(output);
@@ -154,7 +154,7 @@ class GiftIntentionsTest {
 
     @Test
     void aPetWithNoPresentInMindSavesNothingAndASaveWithNoneLoadsNone() {
-        HolderLookup.Provider registries = VanillaRegistries.createLookup();
+        HolderLookup.Provider registries = registries();
         TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, registries);
         intentions.save(output);
         assertTrue(output.isEmpty(), "a pet that never thought of one is saved as it was in 0.1.3");
@@ -171,8 +171,13 @@ class GiftIntentionsTest {
         CompoundTag tag = new CompoundTag();
         tag.put("GiftIntention", saved);
 
-        intentions.load(TagValueInput.create(ProblemReporter.DISCARDING, VanillaRegistries.createLookup(), tag));
+        intentions.load(TagValueInput.create(ProblemReporter.DISCARDING, registries(), tag));
 
         assertTrue(intentions.held().isEmpty());
+    }
+
+    /** The registries a world loads, which is what a pet's save is written and read with. */
+    private static HolderLookup.Provider registries() {
+        return VanillaRegistries.createReloadableLookup(VanillaRegistries.createWorldLookup());
     }
 }

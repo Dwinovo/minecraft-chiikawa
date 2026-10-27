@@ -29,6 +29,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -284,6 +285,7 @@ public final class RhythmGameTests {
      */
     @GameTest(template = "floor16", batch = SHELTER_BATCH, timeoutTicks = WALK_TICKS)
     public static void a_pet_shelters_from_the_rain(GameTestHelper helper) {
+        GameTestKit.rainsHere(helper);
         roof(helper, 8, 8);
         AbstractPet pet = GameTestKit.owned(helper, InitEntity.HACHIWARE_PET.get(), new BlockPos(5, STAND, 5));
 
@@ -302,6 +304,7 @@ public final class RhythmGameTests {
      */
     @GameTest(template = "floor16", batch = HUDDLE_BATCH, timeoutTicks = WALK_TICKS)
     public static void chiikawa_huddles_by_its_owner_in_the_rain(GameTestHelper helper) {
+        GameTestKit.rainsHere(helper);
         roof(helper, 4, 4);
         ServerPlayer owner = player(helper);
         BlockPos across = helper.absolutePos(new BlockPos(12, STAND, 12));
@@ -318,6 +321,7 @@ public final class RhythmGameTests {
     /** Usagi stays out in the rain and plays in it, and goes under no roof. */
     @GameTest(template = "floor16", batch = PLAY_BATCH, timeoutTicks = WALK_TICKS)
     public static void usagi_plays_in_the_rain(GameTestHelper helper) {
+        GameTestKit.rainsHere(helper);
         roof(helper, 9, 9);
         AbstractPet pet = GameTestKit.owned(helper, InitEntity.USAGI_PET.get(), new BlockPos(4, STAND, 4));
 
@@ -335,6 +339,7 @@ public final class RhythmGameTests {
      */
     @GameTest(template = "floor16", batch = NOTHING_BATCH, timeoutTicks = WALK_TICKS)
     public static void pastimes_at_zero_never_happen(GameTestHelper helper) {
+        GameTestKit.rainsHere(helper);
         roof(helper, 9, 9);
         WorldSettingsStore store = WorldSettingsStore.of(helper.getLevel());
         store.set(store.get().withPastimes(0.0F));
@@ -367,7 +372,7 @@ public final class RhythmGameTests {
         BlockPos across = helper.absolutePos(new BlockPos(12, STAND, 12));
         owner.teleportTo(across.getX() + 0.5, across.getY(), across.getZ() + 0.5);
         AbstractPet pet = ownedBy(helper, InitEntity.USAGI_PET.get(), owner, PetDirective.FREE, new BlockPos(4, STAND, 4));
-        helper.onEachTick(() -> owner.swing(InteractionHand.MAIN_HAND));
+        helper.onEachTick(() -> owner.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, false));
 
         helper.startSequence()
             .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(PastimeData.WATCH_OWNER_WORK) && pet.distanceTo(owner) < 4.5,

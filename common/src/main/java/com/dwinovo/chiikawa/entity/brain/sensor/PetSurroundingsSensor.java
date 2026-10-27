@@ -80,7 +80,7 @@ public class PetSurroundingsSensor extends Sensor<AbstractPet> {
      */
     public static boolean atWork(Player owner) {
         ItemStack held = owner.getMainHandItem();
-        return owner.isAlive() && owner.swinging && (isDigger(held) || held.getItem() instanceof BlockItem);
+        return owner.isAlive() && owner.isSwinging() && (isDigger(held) || held.getItem() instanceof BlockItem);
     }
 
     /** A pickaxe, an axe, a shovel or a hoe, as the vanilla tool tags name them: tools are data on later versions. */

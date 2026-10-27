@@ -113,7 +113,7 @@ public final class FoeGroundsGameTests {
         Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(11, STAND, 4));
         zombie.setNoAi(true);
         // The fight is what is watched, and a zombie that falls mid-case would end it.
-        zombie.setInvulnerable(true);
+        zombie.setPermanentlyInvulnerable(true);
 
         helper.startSequence()
             .thenWaitUntil(() -> {
@@ -136,7 +136,7 @@ public final class FoeGroundsGameTests {
         AbstractPet pet = holding(wildPet(helper, HERE), Items.IRON_SWORD);
         Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(9, STAND, 4));
         zombie.setNoAi(true);
-        zombie.setInvulnerable(true);
+        zombie.setPermanentlyInvulnerable(true);
 
         helper.succeedWhen(() -> {
             helper.assertTrue(pet.getMind().errands().isOn(WorkData.MELEE), "the wild fencer did not set off to guard its patch");

@@ -28,11 +28,14 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.commands.FillBiomeCommand;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
@@ -48,6 +51,8 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.GameType;
@@ -130,6 +135,21 @@ public final class GameTestKit {
                 helper.setBlock(new BlockPos(x, CEILING, z), Blocks.AIR);
             }
         }
+    }
+
+    /**
+     * Makes the ground a case stands on plains, and the land about it. The flat world the cases run in is a desert, where the
+     * level may rain and nothing falls on a pet, since the biome is what its sense of the weather asks: a case about the
+     * rain wants a place the rain falls in.
+     */
+    static void rainsHere(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        Holder<Biome> plains = level.registryAccess().lookupOrThrow(Registries.BIOME).getOrThrow(Biomes.PLAINS);
+        AABB land = helper.getBounds().inflate(YARD, 0.0, YARD);
+        FillBiomeCommand.fill(level, BlockPos.containing(land.minX, land.minY, land.minZ), BlockPos.containing(land.maxX, land.maxY, land.maxZ),
+            plains).ifRight(error -> {
+                throw new IllegalStateException("the land about the case could not be made plains: " + error.getMessage(), error);
+            });
     }
 
     /** @return what the game writes of an entity when it saves it, as a chunk does as it unloads it; empty if it would not */
