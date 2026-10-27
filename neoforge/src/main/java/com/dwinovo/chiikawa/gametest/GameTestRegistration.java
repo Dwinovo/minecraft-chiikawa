@@ -8,6 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -33,7 +34,10 @@ import org.objectweb.asm.Type;
  * Hands the game the cases in the {@link GameTestHolder} classes the way it has taken them
  * since 1.21.5: each case a test function and a test instance named after its class and
  * method, as the game named them before, and each batch a test environment that settles
- * the world by the batch's {@link BeforeBatch}. Cases of one environment run as one batch.
+ * the world by the batch's {@link BeforeBatch} methods and puts it back by its
+ * {@link AfterBatch} methods. Cases of one environment run as one batch. The cases are the
+ * {@link GameTest} methods of the holders and the {@link GeneratedGameTest}s their
+ * {@link GameTestGenerator} methods make.
  *
  * <p>Only while the game runs its cases, as NeoForge only collected holders then.
  */
@@ -47,7 +51,9 @@ public final class GameTestRegistration {
     /** Every case found, in the order the holders were scanned. */
     private static final List<Case> CASES = new ArrayList<>();
     /** How each batch settles its world, by batch name. */
-    private static final Map<String, Method> SETTLERS = new HashMap<>();
+    private static final Map<String, List<Method>> SETTLERS = new HashMap<>();
+    /** How each batch puts its world back, by batch name. */
+    private static final Map<String, List<Method>> RESTORERS = new HashMap<>();
 
     static {
         ENVIRONMENT_TYPES.register("batch", () -> Batch.CODEC);
@@ -84,17 +90,45 @@ public final class GameTestRegistration {
             GameTest test = method.getAnnotation(GameTest.class);
             if (test != null) {
                 requireStatic(method);
-                String name = className + "." + method.getName().toLowerCase(Locale.ROOT);
-                String template = prefix == null || prefix.value() ? className + "." + test.template() : test.template();
-                FUNCTIONS.register(name, () -> helper -> invoke(method, helper));
-                CASES.add(new Case(Identifier.fromNamespaceAndPath(namespace, name),
-                    Identifier.fromNamespaceAndPath(namespace, template), test.batch(), test.timeoutTicks()));
+                file(namespace, className, prefix, method.getName(), test.template(), test.batch(), test.timeoutTicks(),
+                    helper -> invoke(method, helper));
+            }
+            if (method.isAnnotationPresent(GameTestGenerator.class)) {
+                requireStatic(method);
+                generated(method).forEach(each -> file(namespace, className, prefix, each.name(), each.template(),
+                    each.batch(), each.timeoutTicks(), each.body()));
             }
             BeforeBatch before = method.getAnnotation(BeforeBatch.class);
             if (before != null) {
                 requireStatic(method);
-                SETTLERS.put(before.batch(), method);
+                SETTLERS.computeIfAbsent(before.batch(), batch -> new ArrayList<>()).add(method);
             }
+            AfterBatch after = method.getAnnotation(AfterBatch.class);
+            if (after != null) {
+                requireStatic(method);
+                RESTORERS.computeIfAbsent(after.batch(), batch -> new ArrayList<>()).add(method);
+            }
+        }
+    }
+
+    /** Files one case: its code as a test function now, its instance when the game takes the event. */
+    private static void file(String namespace, String className, PrefixGameTestTemplate prefix, String method,
+            String template, String batch, int timeoutTicks, Consumer<GameTestHelper> body) {
+        String name = className + "." + method.toLowerCase(Locale.ROOT);
+        String structure = prefix == null || prefix.value() ? className + "." + template : template;
+        FUNCTIONS.register(name, () -> body);
+        CASES.add(new Case(Identifier.fromNamespaceAndPath(namespace, name),
+            Identifier.fromNamespaceAndPath(namespace, structure), batch, timeoutTicks));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Collection<GeneratedGameTest> generated(Method method) {
+        try {
+            return (Collection<GeneratedGameTest>) method.invoke(null);
+        } catch (InvocationTargetException e) {
+            throw thrown(e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
         }
     }
 
@@ -121,16 +155,20 @@ public final class GameTestRegistration {
         try {
             method.invoke(null, argument);
         } catch (InvocationTargetException e) {
-            if (e.getCause() instanceof RuntimeException runtime) {
-                throw runtime;
-            }
-            if (e.getCause() instanceof Error error) {
-                throw error;
-            }
-            throw new IllegalStateException(e.getCause());
+            throw thrown(e);
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    private static RuntimeException thrown(InvocationTargetException e) {
+        if (e.getCause() instanceof RuntimeException runtime) {
+            return runtime;
+        }
+        if (e.getCause() instanceof Error error) {
+            throw error;
+        }
+        return new IllegalStateException(e.getCause());
     }
 
     /**
@@ -140,7 +178,10 @@ public final class GameTestRegistration {
     private record Case(Identifier id, Identifier template, String batch, int timeoutTicks) {
     }
 
-    /** A batch's world, settled by its {@link BeforeBatch} when the batch starts. */
+    /**
+     * A batch's world, settled by its {@link BeforeBatch} methods when the batch starts and put back by its
+     * {@link AfterBatch} methods once it has run.
+     */
     private record Batch(String name) implements TestEnvironmentDefinition {
         static final MapCodec<Batch> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.STRING.fieldOf("name").forGetter(Batch::name)
@@ -148,10 +189,12 @@ public final class GameTestRegistration {
 
         @Override
         public void setup(ServerLevel level) {
-            Method settler = SETTLERS.get(name);
-            if (settler != null) {
-                invoke(settler, level);
-            }
+            SETTLERS.getOrDefault(name, List.of()).forEach(settler -> invoke(settler, level));
+        }
+
+        @Override
+        public void teardown(ServerLevel level) {
+            RESTORERS.getOrDefault(name, List.of()).forEach(restorer -> invoke(restorer, level));
         }
 
         @Override

@@ -15,7 +15,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
 import org.junit.jupiter.api.Test;
 
 /** What a pet is told it may do: how it is saved and sent, and that a save from before it is today's behaviour. */
@@ -78,9 +77,9 @@ class PetRulesTest {
     void theKeysAreTheNamedOnes() {
         CompoundTag tag = write(PetRules.DEFAULT.with(Toggle.PHOTO, false).withStance(CombatStance.RETALIATE).withSwap(false));
 
-        assertEquals(Set.of("Off", "Stance", "SwapWeapons"), tag.getAllKeys());
-        assertEquals("retaliate", tag.getString("Stance"));
-        assertEquals("photo", tag.getList("Off", Tag.TAG_STRING).getString(0));
+        assertEquals(Set.of("Off", "Stance", "SwapWeapons"), tag.keySet());
+        assertEquals("retaliate", tag.getStringOr("Stance", ""));
+        assertEquals("photo", tag.getListOrEmpty("Off").getStringOr(0, ""));
     }
 
     @Test

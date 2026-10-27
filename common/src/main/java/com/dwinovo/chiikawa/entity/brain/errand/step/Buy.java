@@ -91,7 +91,7 @@ public final class Buy implements Step {
         }
         ItemStack remainder = pet.getBackpack().addItem(goods);
         if (!remainder.isEmpty()) {
-            pet.spawnAtLocation(remainder);
+            pet.spawnAtLocation((ServerLevel) pet.level(), remainder);
         }
     }
 }

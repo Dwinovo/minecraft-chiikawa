@@ -198,10 +198,10 @@ public final class ShopGameTests {
         told.setRules(PetRules.DEFAULT.with(PetRules.Toggle.SHOP, false));
 
         helper.onEachTick(() -> helper.assertFalse(told.getIntent().filter(ErrandIds.SHOP::equals).isPresent(),
-            "the pet set off for a shop it was told to keep away from"));
+            Component.literal("the pet set off for a shop it was told to keep away from")));
         helper.succeedWhen(() -> {
-            helper.assertTrue(Wallet.count(free.getBackpack()) < WAGES, "the pet that was not told anything never went shopping");
-            helper.assertTrue(Wallet.count(told.getBackpack()) == WAGES, "the pet told not to shop spent its wages");
+            helper.assertTrue(Wallet.count(free.getBackpack()) < WAGES, Component.literal("the pet that was not told anything never went shopping"));
+            helper.assertTrue(Wallet.count(told.getBackpack()) == WAGES, Component.literal("the pet told not to shop spent its wages"));
         });
     }
 

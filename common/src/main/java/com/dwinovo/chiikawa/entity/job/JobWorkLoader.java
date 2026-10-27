@@ -3,7 +3,6 @@ package com.dwinovo.chiikawa.entity.job;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettingsLoader;
 import com.dwinovo.chiikawa.init.InitRegistry;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
@@ -11,9 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 /**
@@ -22,7 +23,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
  * should do nothing, not take the world down with it. Errand ids that no pack has a file for are only warned about. A
  * job that lists work done to blocks must say how its pet looks for them, see {@link Sight}, or it offers no work.
  */
-public final class JobWorkLoader extends SimpleJsonResourceReloadListener {
+public final class JobWorkLoader extends SimpleJsonResourceReloadListener<JsonElement> {
     public static final String DIRECTORY = "pet_job";
     /** Id for loaders that register reload listeners by id. */
     public static final Identifier ID = Identifier.fromNamespaceAndPath(Constants.MOD_ID, DIRECTORY);
@@ -30,7 +31,7 @@ public final class JobWorkLoader extends SimpleJsonResourceReloadListener {
     private static final String LOG_PREFIX = "[chiikawa-job] ";
 
     public JobWorkLoader() {
-        super(new Gson(), DIRECTORY);
+        super(ExtraCodecs.JSON, FileToIdConverter.json(DIRECTORY));
     }
 
     @Override

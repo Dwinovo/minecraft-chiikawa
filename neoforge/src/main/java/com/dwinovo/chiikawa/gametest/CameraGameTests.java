@@ -54,6 +54,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -312,7 +313,7 @@ public final class CameraGameTests {
             helper.assertTrue(pet.save(saved), Component.literal("the unloaded pet was not saved"));
             pet.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
 
-            AbstractPet loaded = (AbstractPet) EntityType.create(saved, helper.getLevel()).orElseThrow();
+            AbstractPet loaded = (AbstractPet) EntityType.create(saved, helper.getLevel(), EntitySpawnReason.LOAD).orElseThrow();
             List<ItemStack> rolls = shotRolls(loaded);
             helper.assertTrue(rolls.size() == 1 && FilmItem.rollOf(rolls.get(0)).shots().size() == 1,
                 Component.literal("the pet loaded again has " + rolls.size() + " rolls with shots on"));

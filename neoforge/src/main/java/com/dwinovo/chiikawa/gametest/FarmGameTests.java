@@ -29,6 +29,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.FarmBlock;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
@@ -162,7 +163,7 @@ public final class FarmGameTests {
                 + pet.getIntent().map(Object::toString).orElse("doing nothing")
                 + " and had been told about a container at "
                 + pet.getBrain().getMemory(InitMemory.WORK_SIGHTS.get()).map(sights -> sights.get(WorkData.DELIVER))
-                    .map(Object::toString).orElse("nowhere"));
+                    .map(Object::toString).orElse("nowhere")));
         });
     }
 
@@ -195,7 +196,7 @@ public final class FarmGameTests {
         });
         helper.succeedWhen(() -> {
             helper.assertTrue(setOffForTheChest[0], Component.literal("the pet never set off for the chest"));
-            Container container = (Container) helper.getBlockEntity(chest);
+            Container container = helper.getBlockEntity(chest, ChestBlockEntity.class);
             helper.assertTrue(container.hasAnyMatching(stack -> stack.is(Items.WHEAT)), Component.literal("the chest has no wheat in it"));
         });
     }

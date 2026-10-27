@@ -34,18 +34,13 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.gametest.framework.BeforeBatch;
-import net.minecraft.gametest.framework.GameTest;
-import net.minecraft.gametest.framework.GameTestGenerator;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.gametest.framework.TestFunction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * What every errand does, so that none can be added without it: the same three cases for
@@ -60,10 +55,9 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
  * <p>The cases are made when the game registers them, one set for each scenario.
  */
 @GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class ErrandContractGameTests {
     private static final String BATCH = "chiikawa_errand_contract";
-    private static final String TEMPLATE = Constants.MOD_ID + ":floor16";
+    private static final String TEMPLATE = "floor16";
     private static final long SEED = 42L;
     /**
      * How long a pet is given to notice what it is to do and set off, before its time limit runs. A pastime's reason is seen by a
@@ -134,8 +128,8 @@ public final class ErrandContractGameTests {
 
     /** Three cases for each errand that has a scenario. */
     @GameTestGenerator
-    public static Collection<TestFunction> contract_cases() {
-        List<TestFunction> cases = new ArrayList<>();
+    public static Collection<GeneratedGameTest> contract_cases() {
+        List<GeneratedGameTest> cases = new ArrayList<>();
         for (ErrandScenarios.Case scenario : ErrandScenarios.cases().stream().sorted(Comparator.comparing(ErrandScenarios.Case::name)).toList()) {
             int limit = ErrandSettingsData.all().get(scenario.errand()).maxTicks();
             cases.add(testOf("offer_is_pure", scenario, PURITY_CASE_TICKS, helper -> offerIsPure(helper, scenario)));
@@ -158,7 +152,7 @@ public final class ErrandContractGameTests {
             all.add(errand.id());
         }
         helper.assertTrue(all.equals(new TreeSet<>(ErrandScenarios.ids())),
-            "the errands are " + all + " and the ones with a scenario " + ErrandScenarios.ids());
+            Component.literal("the errands are " + all + " and the ones with a scenario " + ErrandScenarios.ids()));
         helper.succeed();
     }
 
@@ -166,11 +160,10 @@ public final class ErrandContractGameTests {
      * A case of its own batch, so that it runs alone: a pet in the yard next to it, such as another case's, is a friend
      * for a photographer to take a photo of and a rival for a pet to pick up an item from.
      */
-    private static TestFunction testOf(String what, ErrandScenarios.Case scenario, int timeoutTicks,
+    private static GeneratedGameTest testOf(String what, ErrandScenarios.Case scenario, int timeoutTicks,
             Consumer<GameTestHelper> body) {
-        return new TestFunction(BATCH + "_" + what + "_" + scenario.name(),
-            ErrandContractGameTests.class.getSimpleName().toLowerCase() + "." + what + "_" + scenario.name(), TEMPLATE,
-            timeoutTicks, 0L, true, helper -> {
+        return new GeneratedGameTest(what + "_" + scenario.name(), BATCH + "_" + what + "_" + scenario.name(), TEMPLATE,
+            timeoutTicks, helper -> {
                 settleWorld(helper.getLevel(), Difficulty.NORMAL, NOON);
                 body.accept(helper);
             });
@@ -202,9 +195,9 @@ public final class ErrandContractGameTests {
             pet.getRandom().setSeed(SEED);
             long untouched = pet.getRandom().nextLong();
 
-            helper.assertTrue(first.equals(second), id + " answered " + first + " and then " + second);
-            helper.assertTrue(before.equals(Snapshot.of(pet)), id + " changed the pet it was asked about");
-            helper.assertTrue(drawn == untouched, id + " drew from the pet's random");
+            helper.assertTrue(first.equals(second), Component.literal(id + " answered " + first + " and then " + second));
+            helper.assertTrue(before.equals(Snapshot.of(pet)), Component.literal(id + " changed the pet it was asked about"));
+            helper.assertTrue(drawn == untouched, Component.literal(id + " drew from the pet's random"));
             helper.succeed();
         });
     }
@@ -220,7 +213,7 @@ public final class ErrandContractGameTests {
         Watch watch = new Watch();
         boolean[] done = {false};
         helper.runAtTickTime(SETTLING, () -> helper.assertTrue(watch.seen != null || done[0],
-            "the pet never set off on " + id + ": " + whereItStands(pet, id)));
+            Component.literal("the pet never set off on " + id + ": " + whereItStands(pet, id))));
         helper.onEachTick(() -> {
             if (done[0]) {
                 return;
@@ -232,9 +225,9 @@ public final class ErrandContractGameTests {
             }
             done[0] = true;
             Running ran = watch.seen;
-            helper.assertTrue(ran != null, id + " ended without having been seen to run");
+            helper.assertTrue(ran != null, Component.literal(id + " ended without having been seen to run"));
             helper.assertTrue(ended.get().ranTicks() <= ran.settings().maxTicks() + GRACE,
-                id + " ran " + ended.get().ranTicks() + " ticks, past its limit of " + ran.settings().maxTicks());
+                Component.literal(id + " ran " + ended.get().ranTicks() + " ticks, past its limit of " + ran.settings().maxTicks()));
             assertRested(helper, pet, scenario, ran, ended.get());
             helper.succeed();
         });
@@ -254,7 +247,7 @@ public final class ErrandContractGameTests {
         int[] next = {0};
         long[] told = {-1};
         helper.runAtTickTime(INTERRUPT_CASE_TICKS - 1, () -> helper.assertTrue(next[0] == points.length,
-            id + " was cut short only " + next[0] + " times: " + whereItStands(pet, id)));
+            Component.literal(id + " was cut short only " + next[0] + " times: " + whereItStands(pet, id))));
         helper.onEachTick(() -> {
             if (next[0] == points.length) {
                 return;
@@ -271,12 +264,12 @@ public final class ErrandContractGameTests {
             }
             Optional<DecisionLog.Ended> ended = endedSince(pet, id, told[0]);
             if (ended.isEmpty()) {
-                helper.assertTrue(now - told[0] < INTERRUPT_TICKS, id + " was not ended " + INTERRUPT_TICKS
-                    + " ticks after it was cut short at " + points[next[0]]);
+                helper.assertTrue(now - told[0] < INTERRUPT_TICKS, Component.literal(id + " was not ended " + INTERRUPT_TICKS
+                    + " ticks after it was cut short at " + points[next[0]]));
                 return;
             }
             String at = " (cut short at " + points[next[0]] + ")";
-            helper.assertTrue(ended.get().outcome() instanceof Outcome.Interrupted, id + " ended " + ended.get().outcome() + at);
+            helper.assertTrue(ended.get().outcome() instanceof Outcome.Interrupted, Component.literal(id + " ended " + ended.get().outcome() + at));
             assertRested(helper, pet, scenario, watch.seen, ended.get());
             Residue.none(helper, pet, scenario, watch.seen);
             scenario.again().run();
@@ -296,14 +289,14 @@ public final class ErrandContractGameTests {
         ErrandScenarios.Scenario scenario = setUp.setUp().apply(helper);
         AbstractPet pet = scenario.pet();
         helper.runAtTickTime(SETTLING, () -> helper.assertTrue(endedSince(pet, id, -1).isPresent(),
-            "the pet never did " + id + ": " + whereItStands(pet, id)));
+            Component.literal("the pet never did " + id + ": " + whereItStands(pet, id))));
         helper.onEachTick(() -> {
             Optional<DecisionLog.Ended> ended = endedSince(pet, id, -1);
             if (ended.isEmpty()) {
                 return;
             }
-            helper.assertTrue(ended.get().outcome() instanceof Outcome.Done, id + " ended " + ended.get().outcome());
-            helper.assertTrue(ended.get().ranTicks() <= 1, id + " took " + ended.get().ranTicks() + " ticks, which is not at once");
+            helper.assertTrue(ended.get().outcome() instanceof Outcome.Done, Component.literal(id + " ended " + ended.get().outcome()));
+            helper.assertTrue(ended.get().ranTicks() <= 1, Component.literal(id + " took " + ended.get().ranTicks() + " ticks, which is not at once"));
             Running ran = new Running(Errands.get(id), new Plan() {
             }, ErrandSettings.of(id).orElseThrow(), 0, ended.get().gameTime() - ended.get().ranTicks(), Set.of());
             assertRested(helper, pet, scenario, ran, ended.get());
@@ -326,7 +319,7 @@ public final class ErrandContractGameTests {
             case Outcome.Interrupted interrupted -> rests.interrupted();
         };
         long ticks = ticksOf(spec, ran);
-        helper.assertTrue(ticks > 0 || !(ended.outcome() instanceof Outcome.GaveUp), id + " gives no rest after giving up");
+        helper.assertTrue(ticks > 0 || !(ended.outcome() instanceof Outcome.GaveUp), Component.literal(id + " gives no rest after giving up"));
         long reported = scenario.reported().apply(ran).map(report -> ticksOf(rests.reports().get(report), ran)).orElse(0L);
 
         long now = helper.getLevel().getGameTime();
@@ -336,13 +329,13 @@ public final class ErrandContractGameTests {
         if (reported > ticks) {
             long latest = reported - (now - ended.gameTime());
             helper.assertTrue(left <= latest && left >= latest - ended.ranTicks() - 1,
-                id + " " + ended.outcome() + " leaves " + left + " ticks of rest, not the " + reported + " it reported less up to "
-                    + ended.ranTicks() + " ticks");
+                Component.literal(id + " " + ended.outcome() + " leaves " + left + " ticks of rest, not the " + reported + " it reported less up to "
+                    + ended.ranTicks() + " ticks"));
             return;
         }
         long expected = Math.max(0L, ticks - (now - ended.gameTime()));
         helper.assertTrue(left == expected || left == expected - 1,
-            id + " " + ended.outcome() + " leaves " + left + " ticks of rest, not " + expected);
+            Component.literal(id + " " + ended.outcome() + " leaves " + left + " ticks of rest, not " + expected));
     }
 
     private static long ticksOf(RestSpec spec, Running ran) {
