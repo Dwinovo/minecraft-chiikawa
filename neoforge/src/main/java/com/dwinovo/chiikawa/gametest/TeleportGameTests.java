@@ -42,6 +42,11 @@ public final class TeleportGameTests {
     private static final int WATCH_TICKS = 40;
     /** Farther than the attack sensor looks. */
     private static final double BEYOND_THE_SENSOR = 16.0;
+    /**
+     * Where the owner stands in the yard, far from the zombie and well inside the yard: a pet brought to its owner lands up to
+     * three blocks from them, and a yard is 32 blocks across, so an owner nearer its edge than that has the pet land outside it.
+     */
+    private static final int OWNER_AT = 24;
 
     @BeforeBatch(batch = BATCH)
     public static void settle(ServerLevel level) {
@@ -53,13 +58,15 @@ public final class TeleportGameTests {
      * because the pet was moved, and the pet does not set off for the zombie it was fighting, which is where it was
      * and no longer where it is. The pet is let loose, so what it fights is a hunt, {@code hunt_melee}, and was
      * {@code melee} before the foes had grounds. The pet is watched from the moment it has read that it was moved, not from the moment it
-     * was: the owner's end of the yard may not be ticking yet while the chunks are new, and a pet there reads nothing.
+     * was: a pet that is moved reads nothing until it is ticked again. The owner stands well inside the yard: the pet lands a few
+     * blocks from them, and one that lands beyond the edge of the yard is in a chunk nothing keeps ticking, where it reads nothing
+     * for good (an owner two blocks from the edge did that in 7 of 200 copies run together).
      */
     @GameTest(template = "floor32", batch = BATCH, timeoutTicks = FIGHT_TICKS + WATCH_TICKS + 20)
     public static void a_pet_brought_to_its_owner_does_not_go_back_for_the_foe_it_was_fighting(GameTestHelper helper) {
         ServerPlayer owner = player(helper);
         owner.setGameMode(GameType.SURVIVAL);
-        BlockPos far = helper.absolutePos(new BlockPos(29, STAND, 29));
+        BlockPos far = helper.absolutePos(new BlockPos(OWNER_AT, STAND, OWNER_AT));
         owner.setPos(far.getX() + 0.5, far.getY(), far.getZ() + 0.5);
         AbstractPet pet = holding(helper.spawn(InitEntity.CHIIKAWA_PET.get(), new BlockPos(4, STAND, 4)), Items.IRON_SWORD);
         pet.tame(owner);
