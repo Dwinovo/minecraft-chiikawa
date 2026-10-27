@@ -14,6 +14,7 @@ import com.dwinovo.chiikawa.camera.FilmRolls;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.PetRules;
+import com.dwinovo.chiikawa.entity.brain.MemoryTime;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.impl.SleepErrand;
@@ -274,7 +275,7 @@ public final class GiftGameTests {
                 "the owner has " + owner.getInventory().countItem(Items.COOKIE) + " cookies, not the one");
             helper.assertTrue(count(pet, Items.COOKIE) == 2, "the pet has " + count(pet, Items.COOKIE) + " cookies left");
             helper.assertTrue(pet.getPendingGift().isEmpty(), "the pet handed the cookie over and kept hold of it too");
-            long resting = pet.getBrain().getTimeUntilExpiry(InitMemory.GIFT_COOLDOWN.get());
+            long resting = MemoryTime.left(pet.getBrain(), InitMemory.GIFT_COOLDOWN.get());
             helper.assertTrue(resting > RESTING, "the pet rests from giving for " + resting + " ticks, not a day");
             helper.assertTrue(pet.giftIntentions().held().isEmpty(), "the pet still has the present in mind");
         });
@@ -652,7 +653,7 @@ public final class GiftGameTests {
                 ServerLevel level = helper.getLevel();
                 helper.assertTrue(GiftLedger.of(level).leftToday(level, owner.getUUID()) == DAILY_LIMIT - 1,
                     "the present was not counted against the owner's day");
-                helper.assertTrue(pet.getBrain().getTimeUntilExpiry(InitMemory.GIFT_COOLDOWN.get()) > RESTING,
+                helper.assertTrue(MemoryTime.left(pet.getBrain(), InitMemory.GIFT_COOLDOWN.get()) > RESTING,
                     "the pet is not resting from having given a present");
             })
             .thenExecuteAfter(SETTLED_TICKS, () -> {
@@ -721,7 +722,7 @@ public final class GiftGameTests {
             .thenExecute(() -> {
                 helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 0, "the present was put into the owner's hands");
                 helper.assertTrue(pet.getPendingGift().isEmpty() && count(pet, Items.COOKIE) == 2, "the pet is still holding the present");
-                helper.assertTrue(pet.getBrain().getTimeUntilExpiry(InitMemory.GIFT_COOLDOWN.get()) > RESTING,
+                helper.assertTrue(MemoryTime.left(pet.getBrain(), InitMemory.GIFT_COOLDOWN.get()) > RESTING,
                     "the pet is not resting from having given a present");
                 helper.assertTrue(GiftLedger.of(level).leftToday(level, owner.getUUID()) == DAILY_LIMIT - 1,
                     "the present was not counted against the owner's day");
@@ -753,7 +754,7 @@ public final class GiftGameTests {
                 helper.assertTrue(cookiesNear(helper, head).isEmpty() && owner.getInventory().countItem(Items.COOKIE) == 0,
                     "a present was given to an owner woken in the night");
                 helper.assertTrue(count(pet, Items.COOKIE) == 3, "the present was not put back: " + count(pet, Items.COOKIE) + " cookies");
-                helper.assertTrue(pet.getBrain().getTimeUntilExpiry(InitMemory.GIFT_COOLDOWN.get()) < RESTING,
+                helper.assertTrue(MemoryTime.left(pet.getBrain(), InitMemory.GIFT_COOLDOWN.get()) < RESTING,
                     "a present never given tired the pet for a day");
             })
             .thenSucceed();

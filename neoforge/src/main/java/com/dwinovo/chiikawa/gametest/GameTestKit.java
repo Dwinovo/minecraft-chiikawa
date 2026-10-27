@@ -13,6 +13,8 @@ import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.voice.PetVoice;
 import com.dwinovo.chiikawa.voice.PetVoices;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
+import com.mojang.authlib.GameProfile;
+import io.netty.channel.embedded.EmbeddedChannel;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -20,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -27,9 +30,12 @@ import javax.sound.sampled.AudioSystem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.Difficulty;
@@ -178,18 +184,25 @@ public final class GameTestKit {
 
     /**
      * A player in the case's level, as the server sees one: an owner, a customer, a
-     * stranger. Vanilla marks the only way to make one for removal and gives this version
-     * nothing to use instead, so every case gets its player here and the day it goes, this
-     * is the one line that changes.
+     * stranger. Vanilla's own stand-in for one answers creative whatever game mode it is
+     * given, and a mob does not take a creative player for a target, so it is made here as
+     * vanilla makes it, only without that; the day vanilla has a stand-in that is not
+     * hard-wired, this is the one line that changes.
      *
      * <p>The player starts in creative mode, and the server cannot send it a mod's own
      * packets: a case about eating or paying sets survival, and a case about a screen calls
      * the handler's logic rather than the handler.
      */
-    @SuppressWarnings("removal")
     static ServerPlayer player(GameTestHelper helper) {
-        keepSpawnLoaded(helper.getLevel());
-        return helper.makeMockServerPlayerInLevel();
+        ServerLevel level = helper.getLevel();
+        keepSpawnLoaded(level);
+        CommonListenerCookie cookie = CommonListenerCookie.createInitial(new GameProfile(UUID.randomUUID(), "test-mock-player"), false);
+        ServerPlayer player = new ServerPlayer(level.getServer(), level, cookie.gameProfile(), cookie.clientInformation());
+        Connection connection = new Connection(PacketFlow.SERVERBOUND);
+        new EmbeddedChannel(connection);
+        level.getServer().getPlayerList().placeNewPlayer(connection, player, cookie);
+        player.setGameMode(GameType.CREATIVE);
+        return player;
     }
 
     /**

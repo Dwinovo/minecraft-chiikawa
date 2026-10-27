@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain.errand.rest;
 
+import com.dwinovo.chiikawa.entity.brain.MemoryTime;
 import com.dwinovo.chiikawa.init.InitMemory;
 import com.dwinovo.chiikawa.social.SocialCooldowns;
 import java.util.HashMap;
@@ -65,7 +66,7 @@ public interface RestStore {
         return (brain, errand) -> new RestStore() {
             @Override
             public long remaining(@Nullable String subject, long now) {
-                return brain.getTimeUntilExpiry(memory.get());
+                return MemoryTime.left(brain, memory.get());
             }
 
             @Override

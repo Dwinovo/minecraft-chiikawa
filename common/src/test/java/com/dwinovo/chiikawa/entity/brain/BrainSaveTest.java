@@ -24,9 +24,10 @@ import org.junit.jupiter.api.Test;
 
 /**
  * What vanilla's brain makes of a saved brain it does not entirely know, which is what an old save is to a newer
- * build and a new save to an older one. Memories are saved by id in one map; the map is read entry by entry, but
- * the entries are put together as one result, and that decides whether a stranger in the map costs the pet that
- * entry or all of its memories.
+ * build and a new save to an older one. Memories are saved by id in one map; the map is read entry by entry, and
+ * that decides whether a stranger in the map costs the pet that entry or all of its memories. Before 26.1 the
+ * entries were put together as one result and a stranger cost all of them, which the names of these cases still
+ * say; since 26.1 the game keeps what it could read of a map it could not read whole, as the pet's save is read here.
  */
 class BrainSaveTest {
     private static final ResourceKey<Level> OVERWORLD = Level.OVERWORLD;
@@ -57,8 +58,8 @@ class BrainSaveTest {
 
         Brain<LivingEntity> back = loaded(KNOWN, wrapped(memories));
 
-        assertEquals(Optional.empty(), back.getMemory(MemoryModuleType.HOME), "the stranger takes the rest down with it");
-        assertEquals(Optional.empty(), back.getMemory(MemoryModuleType.LAST_SLEPT));
+        assertEquals(Optional.of(HOME), back.getMemory(MemoryModuleType.HOME), "the stranger takes nothing down with it");
+        assertEquals(Optional.of(SLEPT), back.getMemory(MemoryModuleType.LAST_SLEPT));
     }
 
     @Test
@@ -88,8 +89,8 @@ class BrainSaveTest {
 
         Brain<LivingEntity> back = loaded(KNOWN, wrapped(memories));
 
-        assertEquals(Optional.empty(), back.getMemory(MemoryModuleType.HOME));
-        assertEquals(Optional.empty(), back.getMemory(MemoryModuleType.LAST_SLEPT));
+        assertEquals(Optional.of(HOME), back.getMemory(MemoryModuleType.HOME));
+        assertEquals(Optional.empty(), back.getMemory(MemoryModuleType.LAST_SLEPT), "only the memory that no longer reads is lost");
     }
 
     private static Tag saved(List<MemoryModuleType<?>> memories) {
@@ -103,9 +104,13 @@ class BrainSaveTest {
         return Brain.Packed.CODEC.encodeStart(NbtOps.INSTANCE, brain.pack()).getOrThrow();
     }
 
-    /** A brain over the given memories, made from a save the way the game makes a mob's: a save it cannot read is no memories. */
+    /**
+     * A brain over the given memories, made from a save the way the game makes a mob's: what could be read of the
+     * save is kept, and a save of which nothing could is no memories.
+     */
     private static Brain<LivingEntity> loaded(List<MemoryModuleType<?>> memories, Tag saved) {
-        Brain.Packed packed = Brain.Packed.CODEC.parse(NbtOps.INSTANCE, saved).result().orElse(Brain.Packed.EMPTY);
+        Brain.Packed packed = Brain.Packed.CODEC.parse(NbtOps.INSTANCE, saved).resultOrPartial(error -> { })
+            .orElse(Brain.Packed.EMPTY);
         return new Brain<LivingEntity>(memories, List.of(), List.of(), packed.memories(), RandomSource.create()) { };
     }
 
