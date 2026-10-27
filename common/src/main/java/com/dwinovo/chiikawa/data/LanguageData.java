@@ -25,7 +25,7 @@ public final class LanguageData {
             addHandbookChapter(adder, "work", "去打工",
                 "放一块劳动公告板，每天日出会贴出几张工作牌。小伙伴按手里的工具领牌：拿锄头的除草，拿剑或弓的讨伐，小八拿着八音盒就去街头演奏。做完的报酬直接放进它的背包。在公告板界面花绿宝石升级，每天贴的牌会更多，2级起还有讨伐牌。");
             addHandbookChapter(adder, "shop", "商店和礼物",
-                "放一个商店，小伙伴会用自己背包里的绿宝石去买喜欢的东西。手持绿宝石右键它，就是给它零花钱。它隔一阵会从背包里挑一样东西送给你。你也可以在商店里买卖东西。");
+                "放一个商店，小伙伴会用自己背包里的绿宝石去买喜欢的东西。手持绿宝石右键它，就是给它零花钱。你对它好、它领到报酬时，它会想送你一份礼物，拿着礼物过来时空手右键就能领。你也可以在商店里买卖东西。");
             addHandbookChapter(adder, "care", "照顾它们",
                 "给它装上双肩包或挎包，背包能多 10格；喂它简单料理，它会更有干劲。倒下的小伙伴会变成玩偶，手持玩偶右键放好的蛋糕，它就会回来。走丢了，就摇一摇宠物铃铛。");
             addHandbookChapter(adder, "camera", "小八的相机",
@@ -260,7 +260,7 @@ public final class LanguageData {
             addVoiceLines(adder, "rakko", VoiceMoment.SLEEPY, "……困。");
             addVoiceLines(adder, "shisa", VoiceMoment.SLEEPY, "哈啊……好困……");
             addVoiceLines(adder, "furuhonya", VoiceMoment.SLEEPY, "哈……");
-            addVoiceLines(adder, "usagi", VoiceMoment.FRENZY, "呜啦！！", "呀哈——！", "呜啦呜啦呜啦！！");
+            addVoiceLines(adder, "usagi", VoiceMoment.FRENZY, "乌拉！！", "呀哈——！", "乌拉乌拉乌拉！！");
             addVoiceLines(adder, "momonga", VoiceMoment.PRAISE_ME, "夸我！快夸我嘛～", "我很可爱吧？快夸我！");
             addVoiceLines(adder, "kurimanju", VoiceMoment.SIGH, "哈——");
             addVoiceLines(adder, "kurimanju", VoiceMoment.OFFER_COFFEE, "……辛苦了。给。");
@@ -286,7 +286,7 @@ public final class LanguageData {
             addHandbookChapter(adder, "work", "お仕事",
                 "労働掲示板を置くと、毎朝何枚かのお仕事カードが貼り出されます。なかまは手に持った道具でカードを選びます。クワなら草むしり、剣や弓なら討伐、オルゴールを持ったハチワレなら路上演奏です。報酬はそのまま持ち物に入ります。エメラルドで掲示板をレベルアップすると、毎日のカードが増え、レベル2からは討伐カードも出ます。");
             addHandbookChapter(adder, "shop", "お店とプレゼント",
-                "お店を置くと、なかまは自分の持ち物のエメラルドで好きなものを買いに行きます。エメラルドを持って右クリックすると、おこづかいをあげられます。ときどき、持ち物の中からひとつ選んでプレゼントしてくれます。お店ではあなたも売り買いできます。");
+                "お店を置くと、なかまは自分の持ち物のエメラルドで好きなものを買いに行きます。エメラルドを持って右クリックすると、おこづかいをあげられます。やさしくしたり、お給料をもらったりすると、プレゼントをくれることがあります。持ってきてくれたら、素手で右クリックして受け取りましょう。お店ではあなたも売り買いできます。");
             addHandbookChapter(adder, "care", "お世話",
                 "リュックやポーチを持たせると、持ち物が10マス増えます。かんたんごはんを食べさせると、お仕事にやる気が出ます。倒れたなかまはぬいぐるみになります。ぬいぐるみを持って、置いたケーキを右クリックすると戻ってきます。迷子になったら、ペットベルを鳴らしましょう。");
             addHandbookChapter(adder, "camera", "ハチワレのカメラ",
@@ -548,7 +548,7 @@ public final class LanguageData {
             addHandbookChapter(adder, "work", "Ao Trabalho",
                 "Coloque um Quadro de Trabalho e ele afixa algumas fichas a cada nascer do sol. Os pets pegam fichas de acordo com a ferramenta na mão: enxada para capina, espada ou arco para caça e, com a Caixa de Música, o Hachiware faz apresentações de rua. O pagamento vai direto para a mochila do pet. Gaste esmeraldas no quadro para melhorá-lo: mais fichas por dia e fichas de caça a partir do nível 2.");
             addHandbookChapter(adder, "shop", "A Loja e os Presentes",
-                "Coloque uma Loja e seus pets gastam em coisas de que gostam as esmeraldas que levam na mochila. Clique com o botão direito em um pet com uma esmeralda para dar uma mesada. De vez em quando, um pet escolhe algo da mochila e traz para você de presente. Você também pode comprar e vender na Loja.");
+                "Coloque uma Loja e seus pets gastam em coisas de que gostam as esmeraldas que levam na mochila. Clique com o botão direito em um pet com uma esmeralda para dar uma mesada. Um carinho seu ou um pagamento recebido pode dar a um pet vontade de te dar um presente; quando vier trazê-lo, clique com o botão direito com a mão vazia para pegar. Você também pode comprar e vender na Loja.");
             addHandbookChapter(adder, "care", "Cuidando dos Pets",
                 "Uma Mochila de Costas ou uma bolsa dá ao pet mais 10 espaços, e um Prato Simples deixa o pet com mais vontade de trabalhar. Um pet que cai vira uma pelúcia: clique com o botão direito em um bolo colocado, com a pelúcia na mão, e o pet volta. Se algum se perder, toque o Sino do Pet.");
             addHandbookChapter(adder, "camera", "A Câmera do Hachiware",
@@ -816,7 +816,7 @@ public final class LanguageData {
             addHandbookChapter(adder, "work", "일하러 가기",
                 "알바 게시판을 놓으면 해가 뜰 때마다 전표가 몇 장 붙어. 펫은 손에 든 도구에 맞는 전표를 받아 가. 괭이를 들면 잡초 뽑기, 검이나 활을 들면 토벌, 오르골을 든 하치와레는 길거리 연주야. 보상은 곧바로 펫의 가방에 들어가. 게시판에 에메랄드를 쓰면 레벨이 올라서 하루에 붙는 전표가 늘고, 2레벨부터는 토벌 전표도 나와.");
             addHandbookChapter(adder, "shop", "상점과 선물",
-                "상점을 놓으면 펫이 자기 가방에 든 에메랄드로 마음에 드는 물건을 사러 가. 에메랄드를 들고 우클릭하면 용돈을 줄 수 있어. 가끔은 가방에서 하나를 골라 선물로 가져다주기도 해. 상점에서는 너도 사고팔 수 있어.");
+                "상점을 놓으면 펫이 자기 가방에 든 에메랄드로 마음에 드는 물건을 사러 가. 에메랄드를 들고 우클릭하면 용돈을 줄 수 있어. 잘해 주거나 보수를 받으면 선물을 주고 싶어 하기도 해. 선물을 들고 오면 빈손으로 우클릭해서 받아. 상점에서는 너도 사고팔 수 있어.");
             addHandbookChapter(adder, "care", "돌보기",
                 "배낭이나 가방을 메게 하면 가방이 10칸 늘어나고, 간단한 요리를 먹이면 일할 의욕이 올라. 쓰러진 펫은 인형이 돼. 인형을 들고 놓아 둔 케이크를 우클릭하면 돌아와. 펫이 길을 잃었다면 펫 방울을 울려 봐.");
             addHandbookChapter(adder, "camera", "하치와레의 카메라",
@@ -1079,7 +1079,7 @@ public final class LanguageData {
             addHandbookChapter(adder, "work", "Off to Work",
                 "Place a Labor Board and it puts up a few slips every sunrise. Pets take slips by the tool in their hand: a hoe for weeding, a sword or bow for hunting, and Hachiware with the Music Box for street performances. The pay goes straight into the pet's backpack. Spend emeralds on the board to upgrade it: more slips a day, and hunting slips from level 2.");
             addHandbookChapter(adder, "shop", "The Shop and Presents",
-                "Place a Shop and your pets spend the emeralds in their backpacks on things they like. Right-click a pet with an emerald to give it pocket money. Now and then it picks something from its backpack and brings it to you as a present. You can buy and sell at the Shop too.");
+                "Place a Shop and your pets spend the emeralds in their backpacks on things they like. Right-click a pet with an emerald to give it pocket money. Treat it well or let it earn its wages and it may want to give you a present; when it comes over with one, right-click it with an empty hand to take it. You can buy and sell at the Shop too.");
             addHandbookChapter(adder, "care", "Looking After Them",
                 "A Rucksack or a pouch gives a pet 10 more slots, and a Simple Dish makes it keener to work. A pet that falls becomes a doll: right-click a placed cake with the doll and it comes back. If one wanders off, ring the Pet Bell.");
             addHandbookChapter(adder, "camera", "Hachiware's Camera",
