@@ -14,9 +14,10 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
  * the guitar so the music box item disappears during the performance instead
  * of clipping through the authored guitar prop.
  *
- * <p>Its faces: pleased, a big open-mouthed laugh with its eyes shut in arcs; hurt, no
- * tears — it grits its teeth and shouts, mouth open; brought back, moved to tears, the one
- * time it cries. Stuck at an exam, two beads of sweat, as in the series.
+ * <p>Its faces: pleased, a big open-mouthed laugh with its eyes shut in arcs; yawning, its
+ * eyes shut in the same arcs; hurt, no tears — it grits its teeth and shouts, mouth open;
+ * brought back, moved to tears, the one time it cries. Stuck at an exam, two beads of sweat,
+ * as in the series.
  *
  * <p>The animator originally shipped a companion {@code noguitar} animation
  * whose only keyframe is {@code guitar.scale = 0} — a hand-rolled "hide
@@ -38,7 +39,7 @@ public class HachiwareRenderer extends ChiikawaEntityRenderer<HachiwarePet> {
         addBoneVisibilityRule("Mouth3",
                 (state, animCtx) -> PropBone.GUITAR.shownDuring().isVisible(state, animCtx) || isTalking(state));
         addBoneVisibilityRule("Mouth3", ShownDuring.any("happy", "hurt"));
-        addBoneVisibilityRule("HappyEyes", ShownDuring.any("happy", "revive"));
+        addBoneVisibilityRule("HappyEyes", ShownDuring.any("happy", "yawn", "revive"));
         addBoneVisibilityRule("Tears", ShownDuring.any("revive"));
         addBoneVisibilityRule("Sweat", ShownDuring.any("exam"));
         addBoneVisibilityRule("RightHandLocator",
