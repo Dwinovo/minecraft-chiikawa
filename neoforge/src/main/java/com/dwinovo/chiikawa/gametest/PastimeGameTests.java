@@ -10,6 +10,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.data.CharacterPastimeData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.Outcome;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
 import com.dwinovo.chiikawa.entity.brain.errand.run.PetIcon;
@@ -414,6 +415,8 @@ public final class PastimeGameTests {
     @GameTest(template = "floor16", batch = FRENZY_BATCH, timeoutTicks = WALK_TICKS)
     public static void usagi_runs_wild_and_never_cries(GameTestHelper helper) {
         AbstractPet pet = GameTestKit.owned(helper, InitEntity.USAGI_PET.get(), new BlockPos(4, STAND, 4));
+        // A stroll first would have it chatter as it goes, and a pet that has just spoken lets its next line pass unheard.
+        GameTestKit.putOff(pet, ErrandIds.WANDER);
         GameTestKit.wake(pet, CharacterPastimeData.FRENZY);
         boolean[] cried = {false};
         helper.onEachTick(() -> cried[0] |= pet.getPerformance().startsWith("cry") || pet.getIcon() == PetIcon.SCARED);
