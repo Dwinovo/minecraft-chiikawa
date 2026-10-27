@@ -58,7 +58,7 @@ public final class HarvestGameTests {
     }
 
     private static final List<Forage> FORAGE = List.of(
-        new Forage(Blocks.SHORT_GRASS, WorkData.WEED_PULLED, WEEDS),
+        new Forage(Blocks.GRASS, WorkData.WEED_PULLED, WEEDS),
         new Forage(Blocks.TALL_GRASS, WorkData.WEED_PULLED, WEEDS),
         new Forage(Blocks.FERN, WorkData.WEED_PULLED, WEEDS),
         new Forage(Blocks.LARGE_FERN, WorkData.WEED_PULLED, WEEDS),
