@@ -56,6 +56,7 @@ public class ForgeDataGenerators {
         generator.addProvider(event.includeServer(), new WhistleSettingsProvider(output));
         generator.addProvider(event.includeServer(), new CameraSettingsProvider(output));
         generator.addProvider(event.includeServer(), new GiftingSettingsProvider(output));
+        generator.addProvider(event.includeServer(), new SurroundingsSettingsProvider(output));
         generator.addProvider(event.includeServer(), new AnchorSettingsProvider(output));
         generator.addProvider(event.includeServer(), new ModAdvancementProvider(output, lookupProvider));
         generator.addProvider(event.includeServer(), new ModLootTableProvider(output));

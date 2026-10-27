@@ -8,8 +8,11 @@ import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.anim.state.PetReaction;
 import com.dwinovo.chiikawa.data.ErrandSettingsData;
+import com.dwinovo.chiikawa.data.PastimeData;
+import com.dwinovo.chiikawa.data.PetRemarkData;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandTunings;
+import com.dwinovo.chiikawa.entity.brain.errand.remark.PetRemark;
 import com.dwinovo.chiikawa.entity.job.impl.MusicianJob;
 import com.google.gson.JsonParser;
 import java.io.IOException;
@@ -24,6 +27,9 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.SharedConstants;
+import net.minecraft.server.Bootstrap;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -40,7 +46,8 @@ import org.junit.jupiter.api.Test;
  * character can assume ({@link MusicianJob#PLAYER}, who plays the guitar), and the two generic actions, which only
  * the deprecated {@link com.dwinovo.chiikawa.entity.AbstractPet#triggerAnim} names and nothing calls: they are what
  * the other actions fall back to. The moves the scenes between pets name are data that needs the entity registry to
- * read, which a test outside a game has not. How a character cowers is data that needs no registry, and is asked.
+ * read, which a test outside a game has not. How a character cowers and sleeps, and what it does at the pastimes it has a part in
+ * and when it makes a remark, are data that needs no registry, and are asked.
  */
 class AnimationBacklogTest {
     private static final Path ANIMATIONS = Path.of("src", "main", "resources", "assets", "chiikawa", "animations");
@@ -58,6 +65,31 @@ class AnimationBacklogTest {
         Arrays.stream(PetReaction.values()).filter(reaction -> reaction != PetReaction.NONE)
             .forEach(reaction -> names.add(reaction.animationCandidates().get(0)));
         names.add(cowering(character));
+        names.add(sleeping(character));
+        names.addAll(passingTheTime(character));
+        return names;
+    }
+
+    /** @return the animation the character sleeps with, which is the first its data names for it */
+    private static String sleeping(String character) {
+        ErrandTunings.Sleep sleep = (ErrandTunings.Sleep) ErrandSettingsData.all().get(ErrandIds.SLEEP).tuning();
+        return sleep.sleeps().of(ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, character)).get(0);
+    }
+
+    /**
+     * @return the animations the character passes the time with and makes a remark with: the first of the pose of its part in
+     *         each pastime, the moves of its beats, and the gesture of the remarks it has a part in
+     */
+    private static Set<String> passingTheTime(String character) {
+        ResourceLocation who = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, character);
+        Set<String> names = new TreeSet<>();
+        PastimeData.works().values().forEach(work -> work.pastime().map(pastime -> pastime.cast().get(who)).ifPresent(stage -> {
+            stage.pose().ifPresent(pose -> names.add(pose.split(",")[0]));
+            stage.begin().ifPresent(beat -> beat.animation().ifPresent(names::add));
+            stage.nowAndThen().ifPresent(recurring -> recurring.beat().animation().ifPresent(names::add));
+            stage.end().ifPresent(beat -> beat.animation().ifPresent(names::add));
+        }));
+        PetRemarkData.all().values().forEach(remark -> remark.partOf(who).flatMap(PetRemark.Part::gesture).ifPresent(names::add));
         return names;
     }
 
@@ -96,6 +128,12 @@ class AnimationBacklogTest {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    @BeforeAll
+    static void bootstrap() {
+        SharedConstants.tryDetectVersion();
+        Bootstrap.bootStrap();
     }
 
     @Test

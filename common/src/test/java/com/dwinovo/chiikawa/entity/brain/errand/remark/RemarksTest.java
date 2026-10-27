@@ -8,6 +8,7 @@ import com.dwinovo.chiikawa.data.PetVoiceData;
 import com.dwinovo.chiikawa.entity.brain.errand.LackKey;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.WhyNot;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Aside;
+import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.dwinovo.chiikawa.voice.PetVoice;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Test;
 class RemarksTest {
     private static final ResourceLocation HARVEST = ResourceLocation.fromNamespaceAndPath("chiikawa", "harvest_block");
     private static final ResourceLocation CHIIKAWA = ResourceLocation.fromNamespaceAndPath("chiikawa", "chiikawa");
+    private static final ResourceLocation USAGI = ResourceLocation.fromNamespaceAndPath("chiikawa", "usagi");
     private static final ResourceLocation HACHIWARE = ResourceLocation.fromNamespaceAndPath("chiikawa", "hachiware");
     private static final String ARROWS = "tag.item.minecraft.arrows";
     private static final Map<ResourceLocation, PetRemark> SHIPPED = PetRemarkData.all();
@@ -134,6 +136,57 @@ class RemarksTest {
             new VoicedAside(mute, 1.0F, RandomSource.create(7L))));
     }
 
+    @Test
+    void everyoneYawnsAsTheDayEndsWithSomebodyByToSeeIt() {
+        for (DayPhase phase : new DayPhase[] {DayPhase.EVENING, DayPhase.NIGHT}) {
+            Said said = new Said(true);
+
+            Optional<RemarkRests> rests = Remarks.remark(SHIPPED, USAGI, at(phase, 5.0), RemarkRests.NONE, said);
+
+            assertEquals(List.of(VoiceMoment.SLEEPY), said.moments, phase::name);
+            assertEquals(List.of("yawn"), said.gestures, phase::name);
+            assertTrue(rests.orElseThrow().resting(PetRemarkData.YAWN, SINCE), phase::name);
+        }
+    }
+
+    @Test
+    void nobodyYawnsInTheMorningOrByDayOrWithNobodyNearToSeeIt() {
+        Said said = new Said(true);
+
+        for (DayPhase phase : new DayPhase[] {DayPhase.MORNING, DayPhase.DAY}) {
+            assertEquals(Optional.empty(), Remarks.remark(SHIPPED, CHIIKAWA, at(phase, 5.0), RemarkRests.NONE, said), phase::name);
+        }
+        assertEquals(Optional.empty(), Remarks.remark(SHIPPED, CHIIKAWA, at(DayPhase.NIGHT, 9.0), RemarkRests.NONE, said));
+        assertEquals(List.of(), said.moments);
+    }
+
+    @Test
+    void aYawnIsLeftAloneForAWhileSoThatAnEveningHasAFewAndNotOneEveryHalfSecond() {
+        Said said = new Said(true);
+        int cooldown = SHIPPED.get(PetRemarkData.YAWN).cooldownTicks();
+        RemarkRests rests = Remarks.remark(SHIPPED, CHIIKAWA, at(DayPhase.EVENING, 5.0), RemarkRests.NONE, said).orElseThrow();
+
+        assertEquals(Optional.empty(), Remarks.remark(SHIPPED, CHIIKAWA, at(DayPhase.EVENING, 5.0, SINCE + cooldown - 1), rests, said));
+        assertTrue(Remarks.remark(SHIPPED, CHIIKAWA, at(DayPhase.EVENING, 5.0, SINCE + cooldown), rests, said).isPresent());
+    }
+
+    @Test
+    void aCharacterThatSaysNothingWhenItIsSleepyStillYawnsIfItHasTheMoveButNoWords() {
+        // The yawn is the remark's gesture, made when the pet says its line: a voice with none says nothing and so makes none.
+        PetVoice mute = new PetVoice(Map.of(), Map.of(), 0, 1, 1, 0.0);
+
+        assertEquals(Optional.empty(), Remarks.remark(SHIPPED, CHIIKAWA, at(DayPhase.NIGHT, 5.0), RemarkRests.NONE,
+            new VoicedAside(mute, 1.0F, RandomSource.create(7L))));
+    }
+
+    private static RemarkCue.Situation at(DayPhase phase, double ownerDistance) {
+        return at(phase, ownerDistance, SINCE);
+    }
+
+    private static RemarkCue.Situation at(DayPhase phase, double ownerDistance, long now) {
+        return new RemarkCue.Situation(Optional.empty(), now, OptionalDouble.of(ownerDistance), phase);
+    }
+
     private static WhyNot lack() {
         return new WhyNot(HARVEST, "intent.chiikawa.fail.no_arrows", Optional.of(LackKey.tag(ItemTags.ARROWS)), SINCE);
     }
@@ -143,7 +196,7 @@ class RemarksTest {
     }
 
     private static RemarkCue.Situation situation(Optional<WhyNot> whyNot, long now, OptionalDouble ownerDistance) {
-        return new RemarkCue.Situation(whyNot, now, ownerDistance);
+        return new RemarkCue.Situation(whyNot, now, ownerDistance, DayPhase.DAY);
     }
 
     /** An aside that says whatever it is asked, or nothing, and notes it. */

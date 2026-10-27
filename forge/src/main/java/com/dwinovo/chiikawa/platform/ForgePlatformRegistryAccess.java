@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.entity.brain.sensor.PetPlacesSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetWorkSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetPickableItemSensor;
 import com.dwinovo.chiikawa.entity.brain.sensor.PetSocialSensor;
+import com.dwinovo.chiikawa.entity.brain.sensor.PetSurroundingsSensor;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.platform.services.IPlatformRegistryAccess;
 import com.dwinovo.chiikawa.qualification.QualificationCondition;
@@ -45,6 +46,9 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
         SENSOR_TYPES.register("pet_places_sensor", () -> new SensorType<>(PetPlacesSensor::new));
     private static final RegistryObject<SensorType<PetSocialSensor>> PET_SOCIAL_SENSOR =
         SENSOR_TYPES.register("pet_social_sensor", () -> new SensorType<>(PetSocialSensor::new));
+
+    private static final RegistryObject<SensorType<PetSurroundingsSensor>> PET_SURROUNDINGS_SENSOR =
+        SENSOR_TYPES.register("pet_surroundings_sensor", () -> new SensorType<>(PetSurroundingsSensor::new));
 
     // Menu registrations
     private static final RegistryObject<MenuType<PetBackpackMenu>> PET_BACKPACK =
@@ -90,6 +94,11 @@ public final class ForgePlatformRegistryAccess implements IPlatformRegistryAcces
     @Override
     public Supplier<SensorType<PetSocialSensor>> petSocialSensor() {
         return PET_SOCIAL_SENSOR;
+    }
+
+    @Override
+    public Supplier<SensorType<PetSurroundingsSensor>> petSurroundingsSensor() {
+        return PET_SURROUNDINGS_SENSOR;
     }
 
     @Override

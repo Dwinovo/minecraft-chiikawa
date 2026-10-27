@@ -58,6 +58,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.PHOTOGRAPHED, 1)
             .says(VoiceMoment.SCARED, 1)
             .says(VoiceMoment.MISSING, 1)
+            .says(VoiceMoment.SLEEPY, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.001F));
@@ -80,6 +81,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.PHOTO, 1)
             .says(VoiceMoment.SCARED, 1)
             .says(VoiceMoment.TROUBLE, 1)
+            .says(VoiceMoment.SLEEPY, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.002F));
@@ -100,6 +102,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.PHOTOGRAPHED, 1)
             .says(VoiceMoment.SCARED, 1)
             .says(VoiceMoment.MISSING, 1)
+            .says(VoiceMoment.SLEEPY, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.002F));
@@ -124,6 +127,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.PHOTOGRAPHED, 1)
             .says(VoiceMoment.SCARED, 1)
             .says(VoiceMoment.MISSING, 1)
+            .says(VoiceMoment.SLEEPY, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.002F)
@@ -136,6 +140,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.SCARED, 1)
             .says(VoiceMoment.MISSING, 1)
+            .says(VoiceMoment.SLEEPY, 1)
             .cooldown(2 * COOLDOWN));
         // Hardboiled, a word or two at most, softer only over something sweet, and not a sound when it is frightened.
         add(all, voice("rakko")
@@ -147,6 +152,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.REVIVE, 1)
             .says(VoiceMoment.TREAT, 1)
             .says(VoiceMoment.MISSING, 1)
+            .says(VoiceMoment.SLEEPY, 1)
             .says(VoiceMoment.GIVEN_COFFEE, 1)
             .says(VoiceMoment.WHISTLE, 1)
             .says(VoiceMoment.PHOTOGRAPHED, 1)
@@ -170,6 +176,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.PHOTOGRAPHED, 1)
             .says(VoiceMoment.SCARED, 1)
             .says(VoiceMoment.MISSING, 1)
+            .says(VoiceMoment.SLEEPY, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.0015F));
@@ -184,6 +191,7 @@ public final class PetVoiceData {
             .says(VoiceMoment.PHOTOGRAPHED, 1)
             .says(VoiceMoment.SCARED, 1)
             .says(VoiceMoment.MISSING, 1)
+            .says(VoiceMoment.SLEEPY, 1)
             .says(VoiceMoment.EXAM_PASS, 1)
             .says(VoiceMoment.EXAM_FAIL, 1)
             .chance(VoiceMoment.IDLE, 0.0005F)
