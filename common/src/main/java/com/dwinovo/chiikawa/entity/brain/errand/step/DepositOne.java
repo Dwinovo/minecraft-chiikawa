@@ -83,7 +83,7 @@ public final class DepositOne implements Step {
             if (slotStack.isEmpty()) {
                 int maxSize = Math.min(remaining.getCount(), remaining.getMaxStackSize());
                 target.setItem(slot, remaining.split(maxSize));
-            } else if (ItemStack.isSameItemSameComponents(slotStack, remaining)) {
+            } else if (ItemStack.isSameItemSameTags(slotStack, remaining)) {
                 int space = slotStack.getMaxStackSize() - slotStack.getCount();
                 int transfer = Math.min(remaining.getCount(), space);
                 slotStack.grow(transfer);

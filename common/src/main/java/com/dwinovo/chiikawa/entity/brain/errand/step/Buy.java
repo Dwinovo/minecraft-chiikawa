@@ -15,7 +15,6 @@ import com.dwinovo.chiikawa.shop.Wallet;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
@@ -85,7 +84,7 @@ public final class Buy implements Step {
      * is a pet that has misunderstood what money is for.
      */
     private static void keep(AbstractPet pet, ItemStack goods) {
-        if (pet.getHealth() < pet.getMaxHealth() && goods.has(DataComponents.FOOD)) {
+        if (pet.getHealth() < pet.getMaxHealth() && goods.isEdible()) {
             pet.heal(PetInteractHandler.FEED_HEAL);
             return;
         }

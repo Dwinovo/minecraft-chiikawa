@@ -496,7 +496,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * @param rules what the owner wants
      */
     public void setRules(PetRules rules) {
-        this.entityData.set(RULES, (CompoundTag) PetRules.CODEC.encodeStart(NbtOps.INSTANCE, rules).getOrThrow());
+        this.entityData.set(RULES, (CompoundTag) PetRules.CODEC.encodeStart(NbtOps.INSTANCE, rules).getOrThrow(false, Constants.LOG::error));
         PetMind.post(this, new Message.RulesChanged());
     }
 
@@ -1176,7 +1176,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
             tag.putLong("EagerUntil", this.entityData.get(EAGER_UNTIL));
         }
         licences.save(tag);
-        giftIntentions.save(tag, level().registryAccess());
+        giftIntentions.save(tag);
         CompoundTag rules = this.entityData.get(RULES);
         if (!rules.isEmpty()) {
             tag.put("Rules", rules);
@@ -1206,7 +1206,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         applyEagerness();
         refreshJobFromMainhand();
         licences.load(tag);
-        giftIntentions.load(tag, level().registryAccess());
+        giftIntentions.load(tag);
         this.entityData.set(RULES, tag.contains("Rules", Tag.TAG_COMPOUND) ? tag.getCompound("Rules") : new CompoundTag());
     }
 
