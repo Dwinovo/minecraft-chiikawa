@@ -275,6 +275,31 @@ public final class ErrandTunings {
         ).apply(instance, Visit::new));
     }
 
+    /**
+     * A pastime that is asking the owner for praise: a pet copies what the pet nearest it is doing for a moment, and goes to
+     * its owner and asks.
+     *
+     * @param cooldownTicks how long the pet leaves it alone once it has done it, in a world where the pastimes are as often
+     *                      as the data says
+     * @param speed how fast it walks to its owner
+     * @param arriveDistance how near the mover takes it to its owner
+     * @param reach how near it has to be to its owner to ask
+     * @param imitateTicks how long it copies the pet nearest it before it sets off
+     * @param imitates the animations it does for that when it has none to copy, or the pet it copies does something it cannot,
+     *                 several separated by commas, the first it has being shown
+     */
+    public record AskPraise(int cooldownTicks, float speed, int arriveDistance, double reach, int imitateTicks, String imitates)
+            implements PastimeTuning {
+        public static final Codec<AskPraise> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Fields.TICKS.fieldOf("cooldown_ticks").forGetter(AskPraise::cooldownTicks),
+            Fields.SPEED.fieldOf("speed").forGetter(AskPraise::speed),
+            Fields.BLOCKS.fieldOf("arrive_distance").forGetter(AskPraise::arriveDistance),
+            Fields.DISTANCE.fieldOf("reach").forGetter(AskPraise::reach),
+            Fields.TICKS.fieldOf("imitate_ticks").forGetter(AskPraise::imitateTicks),
+            Codec.STRING.fieldOf("imitates").forGetter(AskPraise::imitates)
+        ).apply(instance, AskPraise::new));
+    }
+
     /** @param noteParticleIntervalTicks how often a note rises from the pet while it plays */
     public record PlayMusic(int noteParticleIntervalTicks) {
         public static final Codec<PlayMusic> CODEC = RecordCodecBuilder.create(instance -> instance.group(

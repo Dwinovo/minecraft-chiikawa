@@ -729,7 +729,8 @@ public final class GiftGameTests {
                     "the pet is not resting from having given a present");
                 helper.assertTrue(GiftLedger.of(level).leftToday(level, owner.getUUID()) == DAILY_LIMIT - 1,
                     "the present was not counted against the owner's day");
-                helper.assertTrue(pet.getPerformance().isEmpty(), "the pet is still lying by the bed");
+                helper.assertTrue(pet.getPerformance().isEmpty(), "the pet is still lying by the bed: " + pet.getPerformance() + " on "
+                    + pet.getMind().errands().errand() + " " + pet.getMind().log().entries());
             })
             .thenSucceed();
     }
