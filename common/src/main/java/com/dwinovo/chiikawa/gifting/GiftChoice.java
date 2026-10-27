@@ -108,7 +108,7 @@ public final class GiftChoice {
         }
         for (int slot = AbstractPet.BAG_SLOT + 1; slot < bag.getContainerSize(); slot++) {
             ItemStack stack = bag.getItem(slot);
-            if (!stack.isEmpty() && ItemStack.isSameItemSameComponents(stack, intention.keepsake().get())) {
+            if (!stack.isEmpty() && ItemStack.isSameItemSameTags(stack, intention.keepsake().get())) {
                 return List.of(new Pick(slot, stack.getItem(), 1));
             }
         }

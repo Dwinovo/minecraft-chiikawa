@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -94,6 +93,6 @@ class WorkErrandTest {
     private static PetTask slip(ResourceLocation counter) {
         return new PetTask(new ResourceLocation("chiikawa", "test"),
             new ResourceLocation("chiikawa", "musician"), counter, PetTask.NO_ICON, 10,
-            ResourceKey.create(Registries.LOOT_TABLE, new ResourceLocation("chiikawa", "pet_task/test")), 0);
+            new ResourceLocation("chiikawa", "pet_task/test"), 0);
     }
 }

@@ -31,7 +31,6 @@ import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -52,7 +51,7 @@ class AdmissionTest {
         TestAnchors.free(HOME);
     private static final PetTask SLIP = new PetTask(new ResourceLocation("chiikawa", "weeding"),
         new ResourceLocation("chiikawa", "farmer"), WorkData.WEED_PULLED, PetTask.NO_ICON, 8,
-        ResourceKey.create(Registries.LOOT_TABLE, new ResourceLocation("chiikawa", "pet_task/weeding")), 0);
+        new ResourceLocation("chiikawa", "pet_task/weeding"), 0);
     private static final RestLedger NO_RESTS = TestRests.noRests();
 
     @BeforeAll

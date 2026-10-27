@@ -3,7 +3,6 @@ package com.dwinovo.chiikawa.gifting;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -64,7 +63,7 @@ public class GiftLedger extends SavedData {
         setDirty();
     }
 
-    static GiftLedger load(CompoundTag tag, HolderLookup.Provider registries) {
+    static GiftLedger load(CompoundTag tag) {
         GiftLedger ledger = new GiftLedger();
         ListTag owners = tag.getList("Owners", Tag.TAG_COMPOUND);
         for (int i = 0; i < owners.size(); i++) {
@@ -75,7 +74,7 @@ public class GiftLedger extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+    public CompoundTag save(CompoundTag tag) {
         ListTag owners = new ListTag();
         byOwner.forEach((owner, count) -> {
             CompoundTag saved = new CompoundTag();

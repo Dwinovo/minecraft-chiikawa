@@ -74,7 +74,7 @@ public record Deliveries(TagKey<Block> containers, TagKey<Item> items) {
                 if (slotStack.isEmpty()) {
                     return true;
                 }
-                if (ItemStack.isSameItemSameComponents(slotStack, stack)
+                if (ItemStack.isSameItemSameTags(slotStack, stack)
                     && slotStack.getCount() < slotStack.getMaxStackSize()) {
                     return true;
                 }
