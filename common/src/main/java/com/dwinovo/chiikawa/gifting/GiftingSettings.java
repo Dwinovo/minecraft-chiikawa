@@ -40,7 +40,7 @@ public record GiftingSettings(int cooldownTicks, int ownerDailyLimit, int fadeTi
     public record OccasionSettings(float chance, int delayTicks) {
         public static final Codec<OccasionSettings> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.floatRange(0.0F, 1.0F).fieldOf("chance").forGetter(OccasionSettings::chance),
-            ExtraCodecs.NON_NEGATIVE_INT.optionalFieldOf("delay_ticks", 0).forGetter(OccasionSettings::delayTicks)
+            ExtraCodecs.strictOptionalField(ExtraCodecs.NON_NEGATIVE_INT, "delay_ticks", 0).forGetter(OccasionSettings::delayTicks)
         ).apply(instance, OccasionSettings::new));
     }
 

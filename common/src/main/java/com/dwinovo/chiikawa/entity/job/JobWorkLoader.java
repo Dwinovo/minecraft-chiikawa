@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettingsLoader;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,18 +61,18 @@ public final class JobWorkLoader extends SimpleJsonResourceReloadListener {
                 warnings.add(LOG_PREFIX + id + " is skipped, there is no such job");
                 return;
             }
-            JobWork.CODEC.parse(JsonOps.INSTANCE, json)
-                .ifSuccess(parsed -> {
-                    if (parsed.sight().isEmpty() && parsed.work().stream().anyMatch(blockWorks::contains)) {
-                        errors.add(LOG_PREFIX + id + " offers no work, it lists work done to blocks and has no sight");
-                        return;
-                    }
-                    work.put(id, parsed);
-                    parsed.work().stream()
-                        .filter(errand -> !errands.contains(errand))
-                        .forEach(errand -> warnings.add(LOG_PREFIX + id + " names unknown errand " + errand));
-                })
-                .ifError(error -> errors.add(LOG_PREFIX + id + " offers no work, failed to parse: " + error.message()));
+            DataResult<JobWork> read = JobWork.CODEC.parse(JsonOps.INSTANCE, json);
+            read.result().ifPresent(parsed -> {
+                if (parsed.sight().isEmpty() && parsed.work().stream().anyMatch(blockWorks::contains)) {
+                    errors.add(LOG_PREFIX + id + " offers no work, it lists work done to blocks and has no sight");
+                    return;
+                }
+                work.put(id, parsed);
+                parsed.work().stream()
+                    .filter(errand -> !errands.contains(errand))
+                    .forEach(errand -> warnings.add(LOG_PREFIX + id + " names unknown errand " + errand));
+            });
+            read.error().ifPresent(error -> errors.add(LOG_PREFIX + id + " offers no work, failed to parse: " + error.message()));
         });
         return new Loaded(work, errors, warnings);
     }

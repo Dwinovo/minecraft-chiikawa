@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.data;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.errand.remark.PetRemark;
 import com.dwinovo.chiikawa.entity.brain.errand.remark.PetRemarkLoader;
 import com.mojang.serialization.JsonOps;
@@ -23,7 +24,7 @@ public final class PetRemarkProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cache) {
         return CompletableFuture.allOf(PetRemarkData.all().entrySet().stream()
             .map(entry -> DataProvider.saveStable(cache,
-                PetRemark.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(),
+                PetRemark.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(false, Constants.LOG::error),
                 pathProvider.json(entry.getKey())))
             .toArray(CompletableFuture[]::new));
     }

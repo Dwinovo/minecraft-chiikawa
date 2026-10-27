@@ -59,8 +59,8 @@ class WorkDataTest {
     @Test
     void everyJobsWorkIsWorkErrandsInTheOrderTheJobIsShippedWith() {
         JobWorkData.all().forEach((job, shipped) -> {
-            JobWork read = JobWork.CODEC.parse(JsonOps.INSTANCE, JobWork.CODEC.encodeStart(JsonOps.INSTANCE, shipped).getOrThrow())
-                .getOrThrow();
+            JobWork read = JobWork.CODEC.parse(JsonOps.INSTANCE, JobWork.CODEC.encodeStart(JsonOps.INSTANCE, shipped).getOrThrow(false, org.junit.jupiter.api.Assertions::fail))
+                .getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
             assertEquals(shipped.work(), read.work(), job + " keeps its order");
             assertEquals(read.work().size(), new HashSet<>(read.work()).size(), job + " names an errand twice");

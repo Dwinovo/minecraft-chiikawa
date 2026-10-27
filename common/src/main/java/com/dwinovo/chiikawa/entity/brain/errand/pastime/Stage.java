@@ -24,12 +24,12 @@ import net.minecraft.util.ExtraCodecs;
 public record Stage(Optional<Destination> to, Optional<String> pose, Optional<Beat> begin, Optional<Beat.Recurring> nowAndThen,
                     Optional<Beat> end, Optional<Until> until, int ticks) implements PartPlayer.Script {
     public static final Codec<Stage> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        Destination.CODEC.optionalFieldOf("to").forGetter(Stage::to),
-        Codec.STRING.optionalFieldOf("pose").forGetter(Stage::pose),
-        Beat.CODEC.optionalFieldOf("begin").forGetter(Stage::begin),
-        Beat.Recurring.CODEC.optionalFieldOf("now_and_then").forGetter(Stage::nowAndThen),
-        Beat.CODEC.optionalFieldOf("end").forGetter(Stage::end),
-        Until.CODEC.optionalFieldOf("until").forGetter(Stage::until),
+        ExtraCodecs.strictOptionalField(Destination.CODEC, "to").forGetter(Stage::to),
+        ExtraCodecs.strictOptionalField(Codec.STRING, "pose").forGetter(Stage::pose),
+        ExtraCodecs.strictOptionalField(Beat.CODEC, "begin").forGetter(Stage::begin),
+        ExtraCodecs.strictOptionalField(Beat.Recurring.CODEC, "now_and_then").forGetter(Stage::nowAndThen),
+        ExtraCodecs.strictOptionalField(Beat.CODEC, "end").forGetter(Stage::end),
+        ExtraCodecs.strictOptionalField(Until.CODEC, "until").forGetter(Stage::until),
         ExtraCodecs.POSITIVE_INT.fieldOf("ticks").forGetter(Stage::ticks)
     ).apply(instance, Stage::new));
 

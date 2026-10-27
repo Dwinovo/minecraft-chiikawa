@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.entity.brain.errand.remark;
 import com.dwinovo.chiikawa.Constants;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,9 +44,11 @@ public final class PetRemarkLoader extends SimpleJsonResourceReloadListener {
     static Loaded load(Map<ResourceLocation, JsonElement> files) {
         Map<ResourceLocation, PetRemark> remarks = new HashMap<>();
         List<String> errors = new ArrayList<>();
-        files.forEach((id, json) -> PetRemark.CODEC.parse(JsonOps.INSTANCE, json)
-            .ifSuccess(remark -> remarks.put(id, remark))
-            .ifError(error -> errors.add(LOG_PREFIX + id + " is skipped, failed to parse: " + error.message())));
+        files.forEach((id, json) -> {
+            DataResult<PetRemark> read = PetRemark.CODEC.parse(JsonOps.INSTANCE, json);
+            read.result().ifPresent(remark -> remarks.put(id, remark));
+            read.error().ifPresent(error -> errors.add(LOG_PREFIX + id + " is skipped, failed to parse: " + error.message()));
+        });
         return new Loaded(remarks, errors);
     }
 

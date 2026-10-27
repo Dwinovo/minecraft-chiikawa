@@ -34,7 +34,7 @@ class GiftingSettingsTest {
     }
 
     private static GiftingSettings good() {
-        return GiftingSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(GOOD)).getOrThrow();
+        return GiftingSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(GOOD)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
     }
 
     @Test
@@ -60,7 +60,7 @@ class GiftingSettingsTest {
 
         JsonElement json = GiftingSettings.CODEC.encodeStart(JsonOps.INSTANCE, settings).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
-        assertEquals(settings, GiftingSettings.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
+        assertEquals(settings, GiftingSettings.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow(false, org.junit.jupiter.api.Assertions::fail));
         assertEquals("#chiikawa:gift_flowers", json.getAsJsonObject().getAsJsonArray("gifts").get(1)
             .getAsJsonObject().get("items").getAsString());
         assertEquals("minecraft:book", json.getAsJsonObject().getAsJsonArray("gifts").get(0)
@@ -72,17 +72,17 @@ class GiftingSettingsTest {
         assertTrue(GiftingSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
             GOOD.replace("24000", "-1"))).result().isEmpty(), "a cooldown before the beginning of time");
         assertTrue(GiftingSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            GOOD.replace("\"weight\": 4", "\"weight\": 0"))).isError(), "a present weighing nothing");
+            GOOD.replace("\"weight\": 4", "\"weight\": 0"))).result().isEmpty(), "a present weighing nothing");
         assertTrue(GiftingSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            GOOD.replace("minecraft:book", "minecraft:no_such_thing"))).isError());
+            GOOD.replace("minecraft:book", "minecraft:no_such_thing"))).result().isEmpty());
         assertTrue(GiftingSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            GOOD.replace("\"chance\": 0.3", "\"chance\": 1.5"))).isError(), "a chance of more than certain");
+            GOOD.replace("\"chance\": 0.3", "\"chance\": 1.5"))).result().isEmpty(), "a chance of more than certain");
         assertTrue(GiftingSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            GOOD.replace("\"fade_ticks\": 12000", "\"fade_ticks\": 0"))).isError(), "a present forgotten as it is thought of");
+            GOOD.replace("\"fade_ticks\": 12000", "\"fade_ticks\": 0"))).result().isEmpty(), "a present forgotten as it is thought of");
         assertTrue(GiftingSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            GOOD.replace("\"occasions\"", "\"times\""))).isError(), "no occasions at all");
+            GOOD.replace("\"occasions\"", "\"times\""))).result().isEmpty(), "no occasions at all");
         assertTrue(GiftingSettings.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            GOOD.replace("\"film_full\"", "\"boredom\""))).isError(), "an occasion nothing tells a pet of");
+            GOOD.replace("\"film_full\"", "\"boredom\""))).result().isEmpty(), "an occasion nothing tells a pet of");
     }
 
     @Test

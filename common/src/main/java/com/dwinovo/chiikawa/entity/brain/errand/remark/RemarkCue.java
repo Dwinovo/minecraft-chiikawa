@@ -21,7 +21,7 @@ import net.minecraft.util.StringRepresentable;
  * "ticks": 600}}. A remark is made when every cue of its {@code when} holds.
  */
 public sealed interface RemarkCue {
-    Codec<RemarkCue> CODEC = Kind.CODEC.dispatch("type", RemarkCue::kind, Kind::codec);
+    Codec<RemarkCue> CODEC = Kind.CODEC.dispatch("type", RemarkCue::kind, kind -> kind.codec().codec());
 
     /** @return which kind of cue this is */
     Kind kind();

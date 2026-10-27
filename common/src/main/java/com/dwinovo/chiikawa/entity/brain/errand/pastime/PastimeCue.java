@@ -17,6 +17,7 @@ import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -28,7 +29,7 @@ import net.minecraft.world.item.Item;
  * asked twice, and changes nothing.
  */
 public sealed interface PastimeCue {
-    Codec<PastimeCue> CODEC = Kind.CODEC.dispatch("type", PastimeCue::kind, Kind::codec);
+    Codec<PastimeCue> CODEC = Kind.CODEC.dispatch("type", PastimeCue::kind, kind -> kind.codec().codec());
 
     /** @return which kind of cue this is */
     Kind kind();
@@ -122,7 +123,7 @@ public sealed interface PastimeCue {
      */
     record ScaredBy(Set<Fright> by) implements PastimeCue {
         static final MapCodec<ScaredBy> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Fright.CODEC.listOf().validate(frights -> frights.isEmpty()
+            ExtraCodecs.validate(Fright.CODEC.listOf(), frights -> frights.isEmpty()
                     ? DataResult.error(() -> "a fright to be scared by") : DataResult.success(frights))
                 .xmap(Set::copyOf, List::copyOf).fieldOf("by").forGetter(ScaredBy::by)
         ).apply(instance, ScaredBy::new));

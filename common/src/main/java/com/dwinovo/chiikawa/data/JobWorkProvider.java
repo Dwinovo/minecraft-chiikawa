@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.data;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.job.JobWork;
 import com.dwinovo.chiikawa.entity.job.JobWorkLoader;
 import com.mojang.serialization.JsonOps;
@@ -23,7 +24,7 @@ public final class JobWorkProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cache) {
         return CompletableFuture.allOf(JobWorkData.all().entrySet().stream()
             .map(entry -> DataProvider.saveStable(cache,
-                JobWork.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(),
+                JobWork.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(false, Constants.LOG::error),
                 pathProvider.json(entry.getKey())))
             .toArray(CompletableFuture[]::new));
     }

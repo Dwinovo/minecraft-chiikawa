@@ -42,13 +42,13 @@ public record RestSpec(Either<Integer, ResourceLocation> amount, Per per) {
     /** No rest. */
     public static final RestSpec NONE = ticks(0);
 
-    private static final Codec<ResourceLocation> SOURCE = ResourceLocation.CODEC.validate(name ->
+    private static final Codec<ResourceLocation> SOURCE = ExtraCodecs.validate(ResourceLocation.CODEC, name ->
         RestSources.isKnown(name) ? DataResult.success(name) : DataResult.error(() -> "Unknown rest source " + name));
 
     private static final Codec<RestSpec> OBJECT = RecordCodecBuilder.create(instance -> instance.group(
         Codec.mapEither(ExtraCodecs.NON_NEGATIVE_INT.fieldOf("ticks"), SOURCE.fieldOf("from"))
             .forGetter(RestSpec::amount),
-        Per.CODEC.optionalFieldOf("per", Per.ERRAND).forGetter(RestSpec::per)
+        ExtraCodecs.strictOptionalField(Per.CODEC, "per", Per.ERRAND).forGetter(RestSpec::per)
     ).apply(instance, RestSpec::new));
 
     public static final Codec<RestSpec> CODEC = Codec.either(ExtraCodecs.NON_NEGATIVE_INT, OBJECT).xmap(
@@ -56,7 +56,7 @@ public record RestSpec(Either<Integer, ResourceLocation> amount, Per per) {
         spec -> spec.amount.left().isPresent() && spec.per == Per.ERRAND ? Either.left(spec.amount.left().get()) : Either.right(spec));
 
     /** A rest that must not be nothing: what a gave-up errand rests, or it would be started again in the same breath. */
-    public static final Codec<RestSpec> LASTING = CODEC.validate(spec -> spec.lasts()
+    public static final Codec<RestSpec> LASTING = ExtraCodecs.validate(CODEC, spec -> spec.lasts()
         ? DataResult.success(spec)
         : DataResult.error(() -> "A rest after giving up must last more than 0 ticks"));
 

@@ -41,7 +41,7 @@ public record ErrandSettings<T>(int priority, float score, int maxTicks, Rests r
                                 List<ResourceLocation> overlays, Optional<VoiceMoment> startVoice, T tuning) {
     private static final String LOG_PREFIX = "[chiikawa-errand] ";
     /** An id that names an overlay: one that does not turns the errand off. */
-    private static final Codec<ResourceLocation> OVERLAY = ResourceLocation.CODEC.validate(id ->
+    private static final Codec<ResourceLocation> OVERLAY = ExtraCodecs.validate(ResourceLocation.CODEC, id ->
         Overlays.get(id).isPresent() ? DataResult.success(id) : DataResult.error(() -> id + " is no overlay"));
 
     /**
@@ -57,7 +57,7 @@ public record ErrandSettings<T>(int priority, float score, int maxTicks, Rests r
             RestSpec.CODEC.fieldOf("done").forGetter(Rests::done),
             RestSpec.LASTING.fieldOf("gave_up").forGetter(Rests::gaveUp),
             RestSpec.CODEC.fieldOf("interrupted").forGetter(Rests::interrupted),
-            Codec.unboundedMap(Codec.STRING, RestSpec.CODEC).optionalFieldOf("reports", Map.of())
+            ExtraCodecs.strictOptionalField(Codec.unboundedMap(Codec.STRING, RestSpec.CODEC), "reports", Map.of())
                 .forGetter(Rests::reports)
         ).apply(instance, Rests::new));
 
@@ -79,11 +79,11 @@ public record ErrandSettings<T>(int priority, float score, int maxTicks, Rests r
             ExtraCodecs.POSITIVE_INT.fieldOf("max_ticks").forGetter(ErrandSettings::maxTicks),
             Rests.CODEC.fieldOf("rests").forGetter(ErrandSettings::rests),
             // Always written, though a file without them reads as none: they are lists to change.
-            ResourceLocation.CODEC.listOf().optionalFieldOf("yields_to")
+            ExtraCodecs.strictOptionalField(ResourceLocation.CODEC.listOf(), "yields_to")
                 .forGetter(settings -> Optional.of(settings.yieldsTo())),
-            OVERLAY.listOf().optionalFieldOf("overlays")
+            ExtraCodecs.strictOptionalField(OVERLAY.listOf(), "overlays")
                 .forGetter(settings -> Optional.of(settings.overlays())),
-            VoiceMoment.CODEC.optionalFieldOf("start_voice").forGetter(ErrandSettings::startVoice),
+            ExtraCodecs.strictOptionalField(VoiceMoment.CODEC, "start_voice").forGetter(ErrandSettings::startVoice),
             tuning.fieldOf("tuning").forGetter(ErrandSettings::tuning)
         ).apply(instance, (priority, score, maxTicks, rests, yieldsTo, overlays, startVoice, tuningValue) ->
             new ErrandSettings<>(priority, score, maxTicks, rests, yieldsTo.orElse(List.of()),

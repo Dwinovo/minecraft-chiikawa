@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.data;
 
+import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.brain.sensor.SurroundingsSettings;
 import com.dwinovo.chiikawa.entity.brain.sensor.SurroundingsSettingsLoader;
 import com.mojang.serialization.JsonOps;
@@ -23,7 +24,7 @@ public final class SurroundingsSettingsProvider implements DataProvider {
     public CompletableFuture<?> run(CachedOutput cache) {
         return CompletableFuture.allOf(SurroundingsSettingsData.all().entrySet().stream()
             .map(entry -> DataProvider.saveStable(cache,
-                SurroundingsSettings.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(),
+                SurroundingsSettings.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue()).getOrThrow(false, Constants.LOG::error),
                 pathProvider.json(entry.getKey())))
             .toArray(CompletableFuture[]::new));
     }

@@ -76,7 +76,7 @@ class PastimeCueTest {
 
     @Test
     void clearWeatherIsNoWeatherToWaitFor() {
-        assertTrue(PastimeCue.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{ \"type\": \"weather\", \"is\": \"clear\" }")).isError());
+        assertTrue(PastimeCue.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{ \"type\": \"weather\", \"is\": \"clear\" }")).result().isEmpty());
     }
 
     @Test
@@ -176,9 +176,9 @@ class PastimeCueTest {
 
     @Test
     void aFrightMustBeNamed() {
-        assertTrue(PastimeCue.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{ \"type\": \"scared\", \"by\": [] }")).isError());
+        assertTrue(PastimeCue.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{ \"type\": \"scared\", \"by\": [] }")).result().isEmpty());
         assertTrue(PastimeCue.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{ \"type\": \"scared\", \"by\": [\"thunder\", \"creeper\"] }"))
-            .isSuccess());
+            .result().isPresent());
     }
 
     @Test
@@ -207,24 +207,24 @@ class PastimeCueTest {
             new PastimeCue.Sees(Either.right(ItemTags.FISHES), 6.0), new PastimeCue.Lacking());
 
         for (PastimeCue cue : cues) {
-            var json = PastimeCue.CODEC.encodeStart(JsonOps.INSTANCE, cue).getOrThrow();
+            var json = PastimeCue.CODEC.encodeStart(JsonOps.INSTANCE, cue).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
-            assertEquals(cue, PastimeCue.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow(), json::toString);
+            assertEquals(cue, PastimeCue.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow(false, org.junit.jupiter.api.Assertions::fail), json::toString);
         }
     }
 
     @Test
     void aCueWithATypeNobodyHasIsRefused() {
-        assertTrue(PastimeCue.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{ \"type\": \"full_moon\" }")).isError());
-        assertTrue(PastimeCue.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{ \"is\": \"rain\" }")).isError(), "and one with none");
+        assertTrue(PastimeCue.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{ \"type\": \"full_moon\" }")).result().isEmpty());
+        assertTrue(PastimeCue.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{ \"is\": \"rain\" }")).result().isEmpty(), "and one with none");
     }
 
     @Test
     void aCueWithoutWhatItNeedsIsRefused() {
-        assertTrue(PastimeCue.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{ \"type\": \"owner\", \"is\": \"working\" }")).isError(),
+        assertTrue(PastimeCue.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{ \"type\": \"owner\", \"is\": \"working\" }")).result().isEmpty(),
             "an owner cue says how near");
-        assertTrue(PastimeCue.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{ \"type\": \"scared\", \"by\": \"mondays\" }")).isError());
-        assertTrue(PastimeCue.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{ \"type\": \"sees\", \"range\": 8 }")).isError(),
+        assertTrue(PastimeCue.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{ \"type\": \"scared\", \"by\": \"mondays\" }")).result().isEmpty());
+        assertTrue(PastimeCue.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{ \"type\": \"sees\", \"range\": 8 }")).result().isEmpty(),
             "seeing is of something");
     }
 }

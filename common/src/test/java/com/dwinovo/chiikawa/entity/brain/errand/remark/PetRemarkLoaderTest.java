@@ -32,7 +32,7 @@ class PetRemarkLoaderTest {
 
     @Test
     void aFileSaysWhenAndWhatEachCharacterDoes() {
-        PetRemark remark = PetRemark.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(FILE)).getOrThrow();
+        PetRemark remark = PetRemark.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(FILE)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
         assertEquals(List.of(new RemarkCue.LackedFor(600), new RemarkCue.OwnerWithin(8.0)), remark.when());
         assertEquals(12000, remark.cooldownTicks());
@@ -44,10 +44,10 @@ class PetRemarkLoaderTest {
 
     @Test
     void aRemarkSurvivesTheTripThroughItsFile() {
-        PetRemark remark = PetRemark.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(FILE)).getOrThrow();
+        PetRemark remark = PetRemark.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(FILE)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
         assertEquals(remark, PetRemark.CODEC.parse(JsonOps.INSTANCE,
-            PetRemark.CODEC.encodeStart(JsonOps.INSTANCE, remark).getOrThrow()).getOrThrow());
+            PetRemark.CODEC.encodeStart(JsonOps.INSTANCE, remark).getOrThrow(false, org.junit.jupiter.api.Assertions::fail)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail));
     }
 
     @Test
@@ -79,7 +79,7 @@ class PetRemarkLoaderTest {
 
     @Test
     void aRemarkIsMadeOnlyWhenEveryCueOfItsWhenHolds() {
-        PetRemark remark = PetRemark.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(FILE)).getOrThrow();
+        PetRemark remark = PetRemark.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(FILE)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
         WhyNot lacking = new WhyNot(MISSING, "intent.chiikawa.fail.no_arrows", Optional.of(LackKey.item(MISSING)), 0L);
 
         assertTrue(remark.holds(new RemarkCue.Situation(Optional.of(lacking), 600, OptionalDouble.of(3.0), DayPhase.DAY, Weather.CLEAR)));

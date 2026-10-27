@@ -27,12 +27,9 @@ import java.util.Optional;
 import java.util.Set;
 import net.minecraft.SharedConstants;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.Bootstrap;
-import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.PathPackResources;
-import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.util.StringRepresentable;
 import org.junit.jupiter.api.BeforeAll;
@@ -71,7 +68,7 @@ class ErrandSettingsTest {
 
     @Test
     void settingsParseFromTheGeneratedShape() {
-        ErrandSettings<?> settings = parse(ErrandIds.TAKE_PHOTO, PHOTO).getOrThrow();
+        ErrandSettings<?> settings = parse(ErrandIds.TAKE_PHOTO, PHOTO).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
         assertEquals(40, settings.priority());
         assertEquals(0.45F, settings.score());
@@ -89,7 +86,7 @@ class ErrandSettingsTest {
         Codec<Pair<String, ErrandSettings<ErrandTunings.TakeTask>>> beside = Codec.mapPair(
             Codec.STRING.fieldOf("action"), ErrandSettings.mapCodec(ErrandTunings.TakeTask.CODEC)).codec();
         Pair<String, ErrandSettings<ErrandTunings.TakeTask>> parsed = beside.parse(JsonOps.INSTANCE,
-            JsonParser.parseString(TAKE_TASK.replace("{ \"priority\"", "{ \"action\": \"busk\", \"priority\""))).getOrThrow();
+            JsonParser.parseString(TAKE_TASK.replace("{ \"priority\"", "{ \"action\": \"busk\", \"priority\""))).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
         assertEquals("busk", parsed.getFirst());
         assertEquals(50, parsed.getSecond().priority());
@@ -110,8 +107,7 @@ class ErrandSettingsTest {
         write(root.resolve("data/chiikawa/pet_errand/notes.txt"));
         write(root.resolve("data/chiikawa/pet_job/farmer.json"));
 
-        try (MultiPackResourceManager manager = new MultiPackResourceManager(PackType.SERVER_DATA, List.of(new PathPackResources(
-            new PackLocationInfo("test", Component.literal("test"), PackSource.BUILT_IN, Optional.empty()), root)))) {
+        try (MultiPackResourceManager manager = new MultiPackResourceManager(PackType.SERVER_DATA, List.of(new PathPackResources("test", root, false)))) {
             assertEquals(Set.of(WorkData.HARVEST, ErrandIds.TAKE_PHOTO, new ResourceLocation("other", "sulk")),
                 ErrandSettingsLoader.errandIds(manager));
         }
@@ -126,8 +122,7 @@ class ErrandSettingsTest {
         Files.writeString(errands.resolve("play_music.json"), "{ \"action\": \"chiikawa:busk\" }");
         Files.writeString(errands.resolve("take_photo.json"), "{ \"target\": 5 }");
 
-        try (MultiPackResourceManager manager = new MultiPackResourceManager(PackType.SERVER_DATA, List.of(new PathPackResources(
-            new PackLocationInfo("test", Component.literal("test"), PackSource.BUILT_IN, Optional.empty()), root)))) {
+        try (MultiPackResourceManager manager = new MultiPackResourceManager(PackType.SERVER_DATA, List.of(new PathPackResources("test", root, false)))) {
             assertEquals(Set.of(WorkData.HARVEST), ErrandSettingsLoader.blockWorkIds(manager));
         }
     }
@@ -135,17 +130,17 @@ class ErrandSettingsTest {
     @Test
     void settingsEncodeToWhatTheyParseFrom() {
         decoded(Map.of(ErrandIds.TAKE_PHOTO, PHOTO, ErrandIds.PICK_UP_ITEM, PLANT)).forEach((errand, settings) -> {
-            JsonElement encoded = ErrandSettings.codecOf(errand).encodeStart(JsonOps.INSTANCE, settings).getOrThrow();
+            JsonElement encoded = ErrandSettings.codecOf(errand).encodeStart(JsonOps.INSTANCE, settings).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
-            assertEquals(settings, ErrandSettings.codecOf(errand).parse(JsonOps.INSTANCE, encoded).getOrThrow());
+            assertEquals(settings, ErrandSettings.codecOf(errand).parse(JsonOps.INSTANCE, encoded).getOrThrow(false, org.junit.jupiter.api.Assertions::fail));
         });
     }
 
     @Test
     void theListsAndTheVoiceAreWrittenWhenTheyAreNone() {
-        ErrandSettings<?> settings = parse(ErrandIds.TAKE_PHOTO, PHOTO.replace("\"yields_to\": [], \"overlays\": [],", "")).getOrThrow();
+        ErrandSettings<?> settings = parse(ErrandIds.TAKE_PHOTO, PHOTO.replace("\"yields_to\": [], \"overlays\": [],", "")).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
-        var written = ErrandSettings.codecOf(ErrandIds.TAKE_PHOTO).encodeStart(JsonOps.INSTANCE, settings).getOrThrow().getAsJsonObject();
+        var written = ErrandSettings.codecOf(ErrandIds.TAKE_PHOTO).encodeStart(JsonOps.INSTANCE, settings).getOrThrow(false, org.junit.jupiter.api.Assertions::fail).getAsJsonObject();
 
         assertEquals(0, written.getAsJsonArray("yields_to").size(), "a file without them reads as none, and they are written anyway");
         assertEquals(0, written.getAsJsonArray("overlays").size());
@@ -154,17 +149,17 @@ class ErrandSettingsTest {
 
     @Test
     void theVoiceOnSettingOffIsRead() {
-        ErrandSettings<?> settings = parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"overlays\": [],", "\"overlays\": [], \"start_voice\": \"hunt\",")).getOrThrow();
+        ErrandSettings<?> settings = parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"overlays\": [],", "\"overlays\": [], \"start_voice\": \"hunt\",")).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
         assertEquals(Optional.of(VoiceMoment.HUNT), settings.startVoice());
     }
 
     @Test
     void anOverlayIsOneOfTheOnesTheModHasAndAnyOtherSwitchesTheErrandOff() {
-        ErrandSettings<?> chatting = parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"overlays\": []", "\"overlays\": [\"chiikawa:idle_chatter\"]")).getOrThrow();
+        ErrandSettings<?> chatting = parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"overlays\": []", "\"overlays\": [\"chiikawa:idle_chatter\"]")).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
         assertEquals(List.of(Overlays.IDLE_CHATTER), chatting.overlays());
-        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"overlays\": []", "\"overlays\": [\"chiikawa:idle_chater\"]")).isError());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"overlays\": []", "\"overlays\": [\"chiikawa:idle_chater\"]")).result().isEmpty());
     }
 
     @Test
@@ -186,19 +181,19 @@ class ErrandSettingsTest {
 
     @Test
     void aRestThatIsNotARestIsRejected() {
-        assertTrue(RestSpec.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("-1")).isError(), "negative");
-        assertTrue(RestSpec.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{ \"per\": \"subject\" }")).isError(), "no amount");
+        assertTrue(RestSpec.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("-1")).result().isEmpty(), "negative");
+        assertTrue(RestSpec.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{ \"per\": \"subject\" }")).result().isEmpty(), "no amount");
         assertTrue(RestSpec.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            "{ \"ticks\": 4, \"per\": \"world\" }")).isError(), "per something else");
+            "{ \"ticks\": 4, \"per\": \"world\" }")).result().isEmpty(), "per something else");
     }
 
     @Test
     void aNumberFromASourceThatDoesNotExistIsRejected() {
         assertTrue(RestSpec.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(
-            "{ \"from\": \"chiikawa:camera_retyr\" }")).isError());
-        assertTrue(parse(ErrandIds.TAKE_PHOTO, PHOTO.replace("photo_upload_wait", "photo_upload_weight")).isError());
+            "{ \"from\": \"chiikawa:camera_retyr\" }")).result().isEmpty());
+        assertTrue(parse(ErrandIds.TAKE_PHOTO, PHOTO.replace("photo_upload_wait", "photo_upload_weight")).result().isEmpty());
         assertTrue(parse(ErrandIds.TAKE_PHOTO, PHOTO.replace("\"stored\": { \"from\": \"chiikawa:camera_cooldown\" }",
-            "\"stored\": { \"from\": \"chiikawa:nowhere\" }")).isError(), "in the reports as well");
+            "\"stored\": { \"from\": \"chiikawa:nowhere\" }")).result().isEmpty(), "in the reports as well");
     }
 
     @Test
@@ -211,42 +206,42 @@ class ErrandSettingsTest {
 
     @Test
     void anErrandThatGivesUpMustRestAfterwards() {
-        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("{ \"ticks\": 200, \"per\": \"subject\" }", "0")).isError());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("{ \"ticks\": 200, \"per\": \"subject\" }", "0")).result().isEmpty());
         assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("{ \"ticks\": 200, \"per\": \"subject\" }",
-            "{ \"ticks\": 0, \"per\": \"subject\" }")).isError());
-        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"gave_up\": { \"ticks\": 200, \"per\": \"subject\" }, ", "")).isError(),
+            "{ \"ticks\": 0, \"per\": \"subject\" }")).result().isEmpty());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"gave_up\": { \"ticks\": 200, \"per\": \"subject\" }, ", "")).result().isEmpty(),
             "and say how long");
         assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("{ \"ticks\": 200, \"per\": \"subject\" }",
-            "{ \"from\": \"chiikawa:camera_retry\" }")).isSuccess(), "a source is taken to give something");
+            "{ \"from\": \"chiikawa:camera_retry\" }")).result().isPresent(), "a source is taken to give something");
     }
 
     @Test
     void theOtherRestsMayBeNothing() {
-        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT).isSuccess());
-        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"done\": 0", "\"done\": 600")).isSuccess());
-        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"interrupted\": 0", "\"interrupted\": 600")).isSuccess());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT).result().isPresent());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"done\": 0", "\"done\": 600")).result().isPresent());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"interrupted\": 0", "\"interrupted\": 600")).result().isPresent());
     }
 
     @Test
     void anErrandThatNeverEndsOrHasNoPriorityIsRejected() {
-        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"max_ticks\": 600", "\"max_ticks\": 0")).isError());
-        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"max_ticks\": 600", "\"max_ticks\": -5")).isError());
-        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"priority\": 50", "\"priority\": -1")).isError());
-        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"score\": 0.6", "\"score\": 1.5")).isError());
-        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"max_ticks\": 600, ", "")).isError());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"max_ticks\": 600", "\"max_ticks\": 0")).result().isEmpty());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"max_ticks\": 600", "\"max_ticks\": -5")).result().isEmpty());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"priority\": 50", "\"priority\": -1")).result().isEmpty());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"score\": 0.6", "\"score\": 1.5")).result().isEmpty());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"max_ticks\": 600, ", "")).result().isEmpty());
     }
 
     @Test
     void aPetMayBeToldToGiveUpTheFirstTimeThereIsNoWay() {
-        assertEquals(0, ((ErrandTunings.PickUp) parse(ErrandIds.PICK_UP_ITEM, PLANT).getOrThrow().tuning()).noWayTicks());
-        assertEquals(100, ((ErrandTunings.TakePhoto) parse(ErrandIds.TAKE_PHOTO, PHOTO).getOrThrow().tuning()).noWayTicks());
+        assertEquals(0, ((ErrandTunings.PickUp) parse(ErrandIds.PICK_UP_ITEM, PLANT).getOrThrow(false, org.junit.jupiter.api.Assertions::fail).tuning()).noWayTicks());
+        assertEquals(100, ((ErrandTunings.TakePhoto) parse(ErrandIds.TAKE_PHOTO, PHOTO).getOrThrow(false, org.junit.jupiter.api.Assertions::fail).tuning()).noWayTicks());
     }
 
     @Test
     void aTuningOfTheWrongShapeIsRejected() {
-        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"pickup_distance\": 3.0", "\"stand_back\": 3")).isError());
-        assertTrue(parse(ErrandIds.TAKE_PHOTO, PHOTO.replace("\"no_way_ticks\": 100", "\"no_way_ticks\": -1")).isError());
-        assertTrue(parse(ErrandIds.STAY, PLANT.replace("\"tuning\": { \"speed\": 0.8, \"pickup_distance\": 3.0, \"max_walk_ticks\": 600, \"no_way_ticks\": 0 }", "\"tuning\": {}")).isSuccess());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"pickup_distance\": 3.0", "\"stand_back\": 3")).result().isEmpty());
+        assertTrue(parse(ErrandIds.TAKE_PHOTO, PHOTO.replace("\"no_way_ticks\": 100", "\"no_way_ticks\": -1")).result().isEmpty());
+        assertTrue(parse(ErrandIds.STAY, PLANT.replace("\"tuning\": { \"speed\": 0.8, \"pickup_distance\": 3.0, \"max_walk_ticks\": 600, \"no_way_ticks\": 0 }", "\"tuning\": {}")).result().isPresent());
     }
 
     @Test
@@ -343,11 +338,11 @@ class ErrandSettingsTest {
     }
 
     private static RestSpec rest(String json) {
-        return RestSpec.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(json)).getOrThrow();
+        return RestSpec.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(json)).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
     }
 
     private static String write(RestSpec spec) {
-        return RestSpec.CODEC.encodeStart(JsonOps.INSTANCE, spec).getOrThrow().toString();
+        return RestSpec.CODEC.encodeStart(JsonOps.INSTANCE, spec).getOrThrow(false, org.junit.jupiter.api.Assertions::fail).toString();
     }
 
     private static com.mojang.serialization.DataResult<? extends ErrandSettings<?>> parse(ResourceLocation errand, String json) {
@@ -357,7 +352,7 @@ class ErrandSettingsTest {
 
     private static Map<ResourceLocation, ErrandSettings<?>> decoded(Map<ResourceLocation, String> json) {
         Map<ResourceLocation, ErrandSettings<?>> all = new HashMap<>();
-        json.forEach((errand, text) -> all.put(errand, parse(errand, text).getOrThrow()));
+        json.forEach((errand, text) -> all.put(errand, parse(errand, text).getOrThrow(false, org.junit.jupiter.api.Assertions::fail)));
         return all;
     }
 

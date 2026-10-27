@@ -33,10 +33,10 @@ class JobWorkDataTest {
     @Test
     void workIsWrittenAsAListInOrderAndReadBackTheSame() {
         JobWorkData.all().forEach((job, work) -> {
-            var written = JobWork.CODEC.encodeStart(JsonOps.INSTANCE, work).getOrThrow();
+            var written = JobWork.CODEC.encodeStart(JsonOps.INSTANCE, work).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
             assertEquals(work.work().size(), written.getAsJsonObject().getAsJsonArray("work").size(), job.toString());
-            assertEquals(work, JobWork.CODEC.parse(JsonOps.INSTANCE, written).getOrThrow(), job.toString());
+            assertEquals(work, JobWork.CODEC.parse(JsonOps.INSTANCE, written).getOrThrow(false, org.junit.jupiter.api.Assertions::fail), job.toString());
         });
     }
 }

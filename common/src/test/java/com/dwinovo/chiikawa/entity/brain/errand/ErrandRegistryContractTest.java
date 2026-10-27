@@ -40,9 +40,9 @@ class ErrandRegistryContractTest {
         assertEquals(Errands.all().stream().map(ErrandType::id).collect(Collectors.toSet()), data.keySet());
         Errands.all().forEach(errand -> {
             ErrandSettings<?> settings = data.get(errand.id());
-            var json = ErrandSettings.codecOf(errand.id()).encodeStart(JsonOps.INSTANCE, settings).getOrThrow();
+            var json = ErrandSettings.codecOf(errand.id()).encodeStart(JsonOps.INSTANCE, settings).getOrThrow(false, org.junit.jupiter.api.Assertions::fail);
 
-            assertEquals(settings, ErrandSettings.codecOf(errand.id()).parse(JsonOps.INSTANCE, json).getOrThrow(), errand.id().toString());
+            assertEquals(settings, ErrandSettings.codecOf(errand.id()).parse(JsonOps.INSTANCE, json).getOrThrow(false, org.junit.jupiter.api.Assertions::fail), errand.id().toString());
             assertTrue(settings.maxTicks() > 0, errand.id().toString());
             assertTrue(settings.rests().gaveUp().lasts(), errand.id() + " must rest after giving up");
         });
