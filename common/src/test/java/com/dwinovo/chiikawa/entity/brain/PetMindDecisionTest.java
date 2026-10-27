@@ -75,8 +75,8 @@ class PetMindDecisionTest {
     private static final int MIDDLE = 50;
     private static final int HIGH = 80;
     /** Pottering about is one way and nothing else, so that deciding to wander draws nothing among habits. */
-    private static final IdleHabits PAUSE_ONLY = new IdleHabits(new IdleHabits.Glance(0, 5.0F, new InclusiveRange<>(45)),
-        new IdleHabits.Glance(0, 5.0F, new InclusiveRange<>(45)), 0, new IdleHabits.Pause(1, new InclusiveRange<>(30, 60)));
+    private static final IdleHabits PAUSE_ONLY = new IdleHabits(new IdleHabits.Glance(0, 5.0F, new InclusiveRange<>(45, 45)),
+        new IdleHabits.Glance(0, 5.0F, new InclusiveRange<>(45, 45)), 0, new IdleHabits.Pause(1, new InclusiveRange<>(30, 60)));
 
     @BeforeAll
     static void shippedSettings() {
