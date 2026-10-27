@@ -231,6 +231,11 @@ public final class GameTestKit {
         });
     }
 
+    /** Puts off an errand for longer than any case, for a case that would be upset by it. */
+    static void putOff(AbstractPet pet, ResourceLocation errand) {
+        Errands.restsOf(pet.getBrain(), errand).restFor(null, PUT_OFF_TICKS, pet.level().getGameTime());
+    }
+
     /** Ends a pet's rest from a pastime that it was put off, for a case that is about it. */
     static void wake(AbstractPet pet, ResourceLocation pastime) {
         Errands.restsOf(pet.getBrain(), pastime).restFor(null, 0L, pet.level().getGameTime());
