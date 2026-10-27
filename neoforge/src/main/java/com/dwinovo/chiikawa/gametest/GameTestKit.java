@@ -26,12 +26,16 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -41,6 +45,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
@@ -112,6 +119,22 @@ public final class GameTestKit {
                 helper.setBlock(new BlockPos(x, CEILING, z), Blocks.AIR);
             }
         }
+    }
+
+    /** @return what the game writes of an entity when it saves it, as a chunk does as it unloads it; empty if it would not */
+    static Optional<CompoundTag> saved(Entity entity) {
+        TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, entity.level().registryAccess());
+        return entity.save(output) ? Optional.of(output.buildResult()) : Optional.empty();
+    }
+
+    /** @return a save as the game reads it */
+    static ValueInput read(GameTestHelper helper, CompoundTag saved) {
+        return TagValueInput.create(ProblemReporter.DISCARDING, helper.getLevel().registryAccess(), saved);
+    }
+
+    /** @return the pet the game reads from a save of it, not yet in the world */
+    static AbstractPet petFrom(GameTestHelper helper, CompoundTag saved) {
+        return (AbstractPet) EntityType.create(read(helper, saved), helper.getLevel(), EntitySpawnReason.LOAD).orElseThrow();
     }
 
     /**
