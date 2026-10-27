@@ -21,7 +21,8 @@ public class WorldSettingsStore extends SavedData {
      */
     static final Codec<WorldSettingsStore> CODEC = RecordCodecBuilder.<WorldSettings>create(instance -> instance.group(
         Codec.FLOAT.optionalFieldOf("WildSpawn", WorldSettings.DEFAULT.wildSpawn()).forGetter(WorldSettings::wildSpawn),
-        Codec.FLOAT.optionalFieldOf("Chatter", WorldSettings.DEFAULT.chatter()).forGetter(WorldSettings::chatter)
+        Codec.FLOAT.optionalFieldOf("Chatter", WorldSettings.DEFAULT.chatter()).forGetter(WorldSettings::chatter),
+        Codec.FLOAT.optionalFieldOf("Pastimes", WorldSettings.DEFAULT.pastimes()).forGetter(WorldSettings::pastimes)
     ).apply(instance, WorldSettings::new)).xmap(WorldSettingsStore::load, WorldSettingsStore::get);
     private static final SavedDataType<WorldSettingsStore> TYPE = new SavedDataType<>(FILE, WorldSettingsStore::new, CODEC, null);
 
