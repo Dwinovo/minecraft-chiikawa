@@ -954,11 +954,14 @@ final class ErrandScenarios {
     private static Scenario flee(GameTestHelper helper) {
         settleWorld(helper.getLevel(), Difficulty.NORMAL, GameTestKit.MIDNIGHT);
         ServerPlayer owner = player(helper);
-        BlockPos across = helper.absolutePos(new BlockPos(14, STAND, 8));
+        BlockPos across = helper.absolutePos(new BlockPos(10, STAND, 8));
         owner.teleportTo(across.getX() + 0.5, across.getY(), across.getZ() + 0.5);
         AbstractPet pet = GameTestKit.wild(helper, InitEntity.USAGI_PET.get(), new BlockPos(5, STAND, 8));
         pet.tame(owner);
         pet.setPetDirective(PetDirective.FOLLOW);
+        // Hit again and again for as long as the case lasts, the pet would be carried a little east with each blow; this
+        // version keeps nothing but the yard ticking, and a pet carried out of it does nothing until the case is over.
+        pet.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(1.0);
         Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(2, STAND, 8));
         zombie.setNoAi(true);
         long[] hitAt = {-FORGETTING_TICKS};
