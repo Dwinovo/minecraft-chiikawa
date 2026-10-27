@@ -12,10 +12,12 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 
 /**
@@ -60,7 +62,7 @@ public class PetPlacesSensor extends Sensor<AbstractPet> {
     private static void rememberBed(ServerLevel level, AbstractPet pet) {
         Brain<AbstractPet> brain = pet.getBrain();
         DayPhase phase = DayPhase.in(level);
-        boolean night = level.dimensionType().bedWorks()
+        boolean night = bedsWork(level, pet.blockPosition())
             && (phase == DayPhase.EVENING || phase == DayPhase.NIGHT || level.isThundering());
         Optional<BlockPos> bed = night
             ? level.getPoiManager().findClosest(type -> type.is(PoiTypes.HOME), pet.blockPosition(), BED_RADIUS,
@@ -68,6 +70,14 @@ public class PetPlacesSensor extends Sensor<AbstractPet> {
             : Optional.empty();
         bed.ifPresentOrElse(found -> brain.setMemory(MemoryModuleType.NEAREST_BED, found),
             () -> brain.eraseMemory(MemoryModuleType.NEAREST_BED));
+    }
+
+    /**
+     * @return whether a bed works at this place, as the game's bed asks it of the level's bed rule: a night can be slept
+     *         through in a bed, and the bed does not blow up. Not in the Nether, where it is always dark
+     */
+    public static boolean bedsWork(Level level, BlockPos pos) {
+        return !level.environmentAttributes().getValue(EnvironmentAttributes.BED_RULE, pos).explodes();
     }
 
     private static boolean reachable(AbstractPet pet, BlockPos bed) {

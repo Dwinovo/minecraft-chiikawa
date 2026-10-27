@@ -36,7 +36,7 @@ import net.minecraft.resources.Identifier;
  * to the container, or found nothing to put in it, leaves that container alone for a while.
  */
 public final class DepositAction implements WorkAction<Site, ErrandTunings.Deliver> {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "deposit");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(Constants.MOD_ID, "deposit");
 
     @Override
     public Identifier id() {
@@ -54,7 +54,7 @@ public final class DepositAction implements WorkAction<Site, ErrandTunings.Deliv
     }
 
     @Override
-    public Offers<Site> offers(Work<Site, ErrandTunings.Deliver> work, ResourceLocation errand, PetView view,
+    public Offers<Site> offers(Work<Site, ErrandTunings.Deliver> work, Identifier errand, PetView view,
             ErrandTunings.Deliver tuning) {
         return Site.offers(work, errand, view);
     }
