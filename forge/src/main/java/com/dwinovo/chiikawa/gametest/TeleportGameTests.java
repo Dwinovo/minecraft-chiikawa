@@ -23,16 +23,16 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestDontPrefix;
+import net.minecraftforge.gametest.GameTestHolder;
 
 /**
  * A pet that is taken to its owner without walking there: what it was doing is over, and it does not go back to
  * the place it was taken from for it. The way there is the pet's own, see {@code AbstractPet#teleportToOwner}; what is
  * checked is what the pet makes of it.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class TeleportGameTests {
     private static final String BATCH = "chiikawa_teleport";
     private static final int STAND = 2;

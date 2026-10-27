@@ -26,16 +26,16 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.gametest.GameTestDontPrefix;
+import net.minecraftforge.gametest.GameTestHolder;
 
 /**
  * Why a pet fights: the grounds a wolf's target goals give, and what the owner's orders make of them. A pet fights for
  * itself, for its owner and for what comes by, and the third, which it does as a guard at its owner's side, it does as a
  * hunt once it is let loose, where it matters no more than its work does.
  */
-@GameTestHolder(Constants.MOD_ID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(namespace = Constants.MOD_ID)
+@GameTestDontPrefix
 public final class FoeGroundsGameTests {
     private static final String BATCH = "chiikawa_grounds";
     private static final int STAND = 2;
