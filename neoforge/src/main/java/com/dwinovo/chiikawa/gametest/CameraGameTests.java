@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.Set;
 import java.util.UUID;
@@ -54,7 +55,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -308,11 +308,11 @@ public final class CameraGameTests {
             send(photos, owner, photos.waiting().iterator().next(), validPicture());
             helper.assertTrue(shotRolls(pet).size() == 1, Component.literal("the shot was not on the roll as the pet was told of it"));
             // A chunk saves its entities as it unloads them, and removing a living entity clears its memories.
-            CompoundTag saved = new CompoundTag();
-            helper.assertTrue(pet.save(saved), Component.literal("the unloaded pet was not saved"));
+            Optional<CompoundTag> saved = GameTestKit.saved(pet);
+            helper.assertTrue(saved.isPresent(), Component.literal("the unloaded pet was not saved"));
             pet.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
 
-            AbstractPet loaded = (AbstractPet) EntityType.create(saved, helper.getLevel(), EntitySpawnReason.LOAD).orElseThrow();
+            AbstractPet loaded = GameTestKit.petFrom(helper, saved.get());
             List<ItemStack> rolls = shotRolls(loaded);
             helper.assertTrue(rolls.size() == 1 && FilmItem.rollOf(rolls.get(0)).shots().size() == 1,
                 Component.literal("the pet loaded again has " + rolls.size() + " rolls with shots on"));

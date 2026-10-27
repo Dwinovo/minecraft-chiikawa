@@ -23,7 +23,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.Zombie;
@@ -97,14 +96,13 @@ public final class DefendSelfGameTests {
             .thenWaitUntil(() -> helper.assertTrue(pet.getMainHandItem().is(Items.IRON_SWORD) && pet.getMind().errands().isOn(ErrandIds.DEFEND_SELF),
                 Component.literal("the farmer never took the sword up, doing " + pet.getIntent())))
             .thenExecute(() -> {
-                CompoundTag saved = new CompoundTag();
-                pet.save(saved);
+                CompoundTag saved = GameTestKit.saved(pet).orElseThrow();
                 NonNullList<ItemStack> kept = NonNullList.withSize(AbstractPet.FULL_BACKPACK_SIZE, ItemStack.EMPTY);
-                ContainerHelper.loadAllItems(saved.getCompoundOrEmpty("Backpack"), kept, helper.getLevel().registryAccess());
+                ContainerHelper.loadAllItems(GameTestKit.read(helper, saved).childOrEmpty("Backpack"), kept);
                 helper.assertTrue(kept.get(AbstractPet.MAINHAND_SLOT).is(Items.WOODEN_HOE), Component.literal("the save has " + kept.get(AbstractPet.MAINHAND_SLOT) + " in the hand"));
                 helper.assertTrue(kept.get(POCKET).is(Items.IRON_SWORD), Component.literal("the save has " + kept.get(POCKET) + " where the sword is kept"));
 
-                AbstractPet loaded = (AbstractPet) EntityType.create(saved, helper.getLevel(), EntitySpawnReason.LOAD).orElseThrow();
+                AbstractPet loaded = GameTestKit.petFrom(helper, saved);
                 helper.assertTrue(loaded.getMainHandItem().is(Items.WOODEN_HOE), Component.literal("the pet read from the save holds " + loaded.getMainHandItem()));
                 helper.assertTrue(loaded.getPetJobId() == InitRegistry.FARMER_ID, Component.literal("the pet read from the save is not a farmer"));
                 helper.assertTrue(pet.getMainHandItem().is(Items.IRON_SWORD), Component.literal("saving took the sword out of the pet's hand"));
