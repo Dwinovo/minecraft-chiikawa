@@ -9,5 +9,7 @@ public enum StepTag {
     /** Playing music for whoever is near. */
     PLAYING_MUSIC,
     /** Frightened, and running from what hurt it or cowering until it is safe. */
-    SCARED
+    SCARED,
+    /** Lying down asleep: the pet does not stir for the little things, and shows it is asleep. */
+    SLEEPING
 }
