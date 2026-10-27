@@ -32,21 +32,20 @@ import net.minecraft.util.Mth;
  * panels are drawn with the background, under the buttons, as every panel of the mod's is.
  */
 public class HandbookScreen extends Screen {
-    private static final int INDEX_W = 142;
-    private static final int CONTENT_W = 190;
+    private static final int INDEX_W = HandbookLayout.INDEX_W;
+    private static final int CONTENT_W = HandbookLayout.CONTENT_W;
     private static final int WIDTH = UiStyle.PAD + INDEX_W + UiStyle.PAD + CONTENT_W + UiStyle.PAD;
-    private static final int MAX_HEIGHT = 256;
-    /** How tall the scene is when the window has the room, and how short it may get when not. */
-    private static final int SCENE_MAX = 84;
-    private static final int SCENE_MIN = 38;
+    private static final int MAX_HEIGHT = HandbookLayout.MAX_HEIGHT;
+    private static final int SCENE_MAX = HandbookLayout.SCENE_MAX;
+    private static final int SCENE_MIN = HandbookLayout.SCENE_MIN;
     /** Kept clear between the panel and the window's edges. */
     private static final int MARGIN = 4;
     private static final int ROW_H = 16;
-    private static final int TITLE_LINE = UiStyle.LINE + UiStyle.GAP;
-    private static final int LINK_H = 12;
+    private static final int TITLE_LINE = HandbookLayout.TITLE_LINE;
+    private static final int LINK_H = HandbookLayout.LINK_H;
     /** How far the wheel moves the text, in lines. */
     private static final int SCROLL_LINES = 2;
-    private static final int BAR_W = 3;
+    private static final int BAR_W = HandbookLayout.BAR_W;
     private static final int MARKER = 3;
 
     /** The chapter last read, kept for the session. */
@@ -69,7 +68,7 @@ public class HandbookScreen extends Screen {
         this.leftPos = (this.width - WIDTH) / 2;
         this.topPos = Math.max(TitledPanel.SIGN_RISE + MARGIN, (this.height - panelHeight) / 2);
         this.contentY = TitledPanel.contentY(topPos);
-        this.contentH = topPos + panelHeight - UiStyle.PAD - contentY;
+        this.contentH = HandbookLayout.contentHeight(panelHeight);
         clearWidgets();
         for (int i = 0; i < chapters.size(); i++) {
             addRenderableWidget(chapterRow(i));
@@ -136,9 +135,9 @@ public class HandbookScreen extends Screen {
         lastChapter = chapter;
         scroll = 0;
         scene = ManualScene.of(current().scene());
-        lines = TextWrap.wrap(Component.translatable(current().text()).getString(), CONTENT_W - BAR_W - UiStyle.GAP,
+        lines = TextWrap.wrap(Component.translatable(current().text()).getString(), HandbookLayout.TEXT_W,
             this.font::width);
-        int room = contentH - TITLE_LINE - 2 * UiStyle.GAP - LINK_H;
+        int room = HandbookLayout.sharedRoom(contentH);
         this.sceneH = Mth.clamp(room - lines.size() * UiStyle.LINE, SCENE_MIN, SCENE_MAX);
         this.textH = room - sceneH;
     }
