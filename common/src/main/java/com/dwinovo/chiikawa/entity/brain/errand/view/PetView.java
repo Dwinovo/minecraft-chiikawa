@@ -57,6 +57,15 @@ public interface PetView {
     /** @return whether its owner, who is near, has lately come back after a while out of its sight */
     boolean ownerReturned();
 
+    /** @return whether its owner, who is near, has lately left off a long spell of work */
+    boolean ownerFinishedWork();
+
+    /**
+     * @return what the nearest other pet in sight is showing: its performance, the scene animations it is in, if it is in
+     *         any; nothing when there is no pet or it is just standing about
+     */
+    Optional<String> neighbourPerformance();
+
     /** @return what the pet is short of, if its work has had nothing to offer for want of something */
     Optional<LackKey> lack();
 

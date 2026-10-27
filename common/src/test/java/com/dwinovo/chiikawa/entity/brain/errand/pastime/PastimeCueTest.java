@@ -10,12 +10,11 @@ import com.dwinovo.chiikawa.entity.brain.errand.view.Surroundings;
 import com.dwinovo.chiikawa.entity.brain.errand.view.Surroundings.Sighting;
 import com.dwinovo.chiikawa.entity.brain.errand.view.Weather;
 import com.dwinovo.chiikawa.testing.TestAnchors;
+import com.dwinovo.chiikawa.testing.TestTags;
 import com.dwinovo.chiikawa.testing.TestView;
 import com.google.gson.JsonParser;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.JsonOps;
-import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -23,7 +22,6 @@ import java.util.UUID;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -99,9 +97,9 @@ class PastimeCueTest {
 
     @Test
     void aPetIsScaredByAStormByACreeperAboutToGoOffAndByWhatHurtItAndByNothingElse() {
-        PastimeCue thunder = new PastimeCue.ScaredBy(PastimeCue.Fright.THUNDER);
-        PastimeCue creeper = new PastimeCue.ScaredBy(PastimeCue.Fright.CREEPER);
-        PastimeCue hurt = new PastimeCue.ScaredBy(PastimeCue.Fright.HURT);
+        PastimeCue thunder = new PastimeCue.ScaredBy(Set.of(PastimeCue.Fright.THUNDER));
+        PastimeCue creeper = new PastimeCue.ScaredBy(Set.of(PastimeCue.Fright.CREEPER));
+        PastimeCue hurt = new PastimeCue.ScaredBy(Set.of(PastimeCue.Fright.HURT));
         TestView calm = pet().weather(Weather.RAIN, true);
 
         assertFalse(thunder.holds(calm) || creeper.holds(calm) || hurt.holds(calm));
@@ -140,8 +138,8 @@ class PastimeCueTest {
 
     @Test
     void aPetSeesACreatureOrAThingOfAKindOnlyWithinTheRange() {
-        bind(EntityType.SKELETON.builtInRegistryHolder(), BONES);
-        bind(Items.COOKIE.builtInRegistryHolder(), SWEETS);
+        TestTags.bind(EntityType.SKELETON.builtInRegistryHolder(), BONES);
+        TestTags.bind(Items.COOKIE.builtInRegistryHolder(), SWEETS);
         try {
             Surroundings around = new Surroundings(Optional.empty(),
                 List.of(new Sighting<EntityType<?>>(UUID.randomUUID(), east(6).pos(), EntityType.SKELETON),
@@ -158,24 +156,39 @@ class PastimeCueTest {
             assertTrue(sweets.holds(pet().surroundings(around)));
             assertFalse(sweetsFar.holds(pet().surroundings(around)));
         } finally {
-            bind(EntityType.SKELETON.builtInRegistryHolder(), null);
-            bind(Items.COOKIE.builtInRegistryHolder(), null);
+            TestTags.bind(EntityType.SKELETON.builtInRegistryHolder(), null);
+            TestTags.bind(Items.COOKIE.builtInRegistryHolder(), null);
         }
     }
 
-    /**
-     * Makes a tag the game does not have outside a game one of the tags of a thing, or takes it away: the tags of the game's
-     * registries are bound when a world loads, and a case here has no world.
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static void bind(Holder.Reference holder, TagKey tag) {
-        try {
-            Method bindTags = Holder.Reference.class.getDeclaredMethod("bindTags", Collection.class);
-            bindTags.setAccessible(true);
-            bindTags.invoke(holder, tag == null ? Set.of() : Set.of(tag));
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException(e);
-        }
+    @Test
+    void scaredHoldsForAnyOfTheFrightsItNamesAndOnlyForThose() {
+        PastimeCue stormOrCreeper = new PastimeCue.ScaredBy(Set.of(PastimeCue.Fright.THUNDER, PastimeCue.Fright.CREEPER));
+        Surroundings creeper = new Surroundings(Optional.empty(), List.of(), List.of(), true);
+
+        assertFalse(stormOrCreeper.holds(pet()));
+        assertFalse(stormOrCreeper.holds(pet().weather(Weather.RAIN, true)), "a shower is no storm");
+        assertTrue(stormOrCreeper.holds(pet().weather(Weather.THUNDER, true)));
+        assertTrue(stormOrCreeper.holds(pet().surroundings(creeper)));
+        assertTrue(stormOrCreeper.holds(pet().weather(Weather.THUNDER, true).surroundings(creeper)));
+        assertFalse(stormOrCreeper.holds(pet().attackedBy(UUID.randomUUID(), east(2))), "hurt is not in its list");
+    }
+
+    @Test
+    void aFrightMustBeNamed() {
+        assertTrue(PastimeCue.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{ \"type\": \"scared\", \"by\": [] }")).isError());
+        assertTrue(PastimeCue.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString("{ \"type\": \"scared\", \"by\": [\"thunder\", \"creeper\"] }"))
+            .isSuccess());
+    }
+
+    @Test
+    void anOwnerWhoHasFinishedWorkHoldsOnlyWhileTheyAreNear() {
+        PastimeCue finished = new PastimeCue.OwnerIs(PastimeCue.OwnerState.FINISHED, 8.0);
+
+        assertFalse(finished.holds(pet().ownerPos(east(3))), "they have not worked");
+        assertTrue(finished.holds(pet().ownerPos(east(3)).ownerDoneWithWork()));
+        assertFalse(finished.holds(pet().ownerPos(east(30)).ownerDoneWithWork()), "they are too far to bring anything to");
+        assertFalse(finished.holds(pet().ownerDoneWithWork()), "no owner here at all");
     }
 
     @Test
@@ -189,7 +202,7 @@ class PastimeCueTest {
         List<PastimeCue> cues = List.of(
             new PastimeCue.WeatherIs(Weather.RAIN), new PastimeCue.WeatherIs(Weather.THUNDER), new PastimeCue.UnderSky(),
             new PastimeCue.InPhase(Set.of(DayPhase.EVENING, DayPhase.NIGHT)),
-            new PastimeCue.ScaredBy(PastimeCue.Fright.CREEPER), new PastimeCue.OwnerIs(PastimeCue.OwnerState.WORKING, 16.0),
+            new PastimeCue.ScaredBy(Set.of(PastimeCue.Fright.CREEPER, PastimeCue.Fright.THUNDER)), new PastimeCue.OwnerIs(PastimeCue.OwnerState.WORKING, 16.0), new PastimeCue.OwnerIs(PastimeCue.OwnerState.FINISHED, 8.0),
             new PastimeCue.Sees(Either.left(EntityTypeTags.SKELETONS), 8.0),
             new PastimeCue.Sees(Either.right(ItemTags.FISHES), 6.0), new PastimeCue.Lacking());
 

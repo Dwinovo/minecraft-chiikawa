@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.errand.view;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import java.util.Locale;
 import net.minecraft.util.StringRepresentable;
 
@@ -14,6 +15,9 @@ public enum Weather implements StringRepresentable {
     THUNDER;
 
     public static final Codec<Weather> CODEC = StringRepresentable.fromEnum(Weather::values);
+    /** The weather a cue waits for. Clear weather is not weather to wait for: the cue would hold when no cue was named. */
+    public static final Codec<Weather> TO_WAIT_FOR = CODEC.validate(weather -> weather == CLEAR
+        ? DataResult.error(() -> "weather to wait for is rain or thunder") : DataResult.success(weather));
 
     /**
      * @param raining whether it rains in the level
@@ -26,6 +30,14 @@ public enum Weather implements StringRepresentable {
             return CLEAR;
         }
         return thundering ? THUNDER : RAIN;
+    }
+
+    /**
+     * @param wanted the weather a cue waits for
+     * @return whether this is it: {@link #RAIN} for any rain, a storm included, or {@link #THUNDER} for a storm only
+     */
+    public boolean satisfies(Weather wanted) {
+        return wanted == RAIN ? raining() : this == wanted;
     }
 
     /** @return whether it rains on the pet, in a storm as in a shower */
