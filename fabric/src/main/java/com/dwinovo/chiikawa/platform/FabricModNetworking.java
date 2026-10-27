@@ -69,6 +69,11 @@ public final class FabricModNetworking {
                 PetPayloads.PetDirectivePayload payload = PetPayloads.PetDirectivePayload.read(buffer);
                 server.execute(() -> PetServerPacketHandler.handleDirective(payload, player));
             });
+        ServerPlayNetworking.registerGlobalReceiver(PetPayloads.PET_RULES,
+            (server, player, handler, buffer, responseSender) -> {
+                PetPayloads.PetRulesPayload payload = PetPayloads.PetRulesPayload.read(buffer);
+                server.execute(() -> PetServerPacketHandler.handleRules(payload, player));
+            });
         ServerPlayNetworking.registerGlobalReceiver(ShopPayloads.SHOP_TRADE,
             (server, player, handler, buffer, responseSender) -> {
                 ShopPayloads.ShopTradePayload payload = ShopPayloads.ShopTradePayload.read(buffer);
@@ -138,6 +143,11 @@ public final class FabricModNetworking {
             (client, handler, buffer, responseSender) -> {
                 PetPayloads.PetGesturePayload payload = PetPayloads.PetGesturePayload.read(buffer);
                 client.execute(() -> ClientPetPacketHandler.handleGesture(payload));
+            });
+        ClientPlayNetworking.registerGlobalReceiver(PetPayloads.PET_OUTLOOK,
+            (client, handler, buffer, responseSender) -> {
+                PetPayloads.PetOutlookPayload payload = PetPayloads.PetOutlookPayload.read(buffer);
+                client.execute(() -> ClientPetPacketHandler.handleOutlook(payload));
             });
         ClientPlayNetworking.registerGlobalReceiver(SettingsPayloads.WORLD_SETTINGS,
             (client, handler, buffer, responseSender) -> {
