@@ -14,6 +14,7 @@ import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -25,7 +26,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -79,8 +79,13 @@ public class PetSurroundingsSensor extends Sensor<AbstractPet> {
      * @return whether they are at work, as an owner is seen to be: swinging at it, a tool or a block in the hand
      */
     public static boolean atWork(Player owner) {
-        return owner.isAlive() && owner.swinging
-            && (owner.getMainHandItem().getItem() instanceof DiggerItem || owner.getMainHandItem().getItem() instanceof BlockItem);
+        ItemStack held = owner.getMainHandItem();
+        return owner.isAlive() && owner.swinging && (isDigger(held) || held.getItem() instanceof BlockItem);
+    }
+
+    /** A pickaxe, an axe, a shovel or a hoe, as the vanilla tool tags name them: tools are data on later versions. */
+    private static boolean isDigger(ItemStack stack) {
+        return stack.is(ItemTags.PICKAXES) || stack.is(ItemTags.AXES) || stack.is(ItemTags.SHOVELS) || stack.is(ItemTags.HOES);
     }
 
     private static Surroundings look(ServerLevel level, AbstractPet pet, int radius) {
