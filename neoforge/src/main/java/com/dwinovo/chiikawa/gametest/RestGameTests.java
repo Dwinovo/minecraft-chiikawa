@@ -22,6 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Unit;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
@@ -126,6 +127,6 @@ public final class RestGameTests {
     private static AbstractPet readBack(GameTestHelper helper, AbstractPet pet) {
         CompoundTag saved = new CompoundTag();
         pet.save(saved);
-        return (AbstractPet) EntityType.create(saved, helper.getLevel()).orElseThrow();
+        return (AbstractPet) EntityType.create(saved, helper.getLevel(), EntitySpawnReason.LOAD).orElseThrow();
     }
 }

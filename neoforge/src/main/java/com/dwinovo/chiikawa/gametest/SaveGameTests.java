@@ -32,6 +32,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Unit;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.item.ItemStack;
@@ -157,14 +158,14 @@ public final class SaveGameTests {
         helper.assertFalse(memoriesOf(saved).getAllKeys().stream().anyMatch(key -> key.contains("gift_intention")),
             "the present in mind was saved among the memories");
 
-        AbstractPet loaded = (AbstractPet) EntityType.create(saved, helper.getLevel()).orElseThrow();
+        AbstractPet loaded = (AbstractPet) EntityType.create(saved, helper.getLevel(), EntitySpawnReason.LOAD).orElseThrow();
         helper.assertTrue(loaded.giftIntentions().held().map(held -> held.occasion() == GiftOccasion.FILM_FULL
             && held.readyAt() == pet.giftIntentions().held().orElseThrow().readyAt()
             && held.keepsake().filter(keepsake -> keepsake.is(Items.PAPER)).isPresent()).orElse(false),
             "the present in mind was not as it was after a save and a load: " + loaded.giftIntentions().held());
 
         saved.remove("GiftIntention");
-        helper.assertTrue(((AbstractPet) EntityType.create(saved, helper.getLevel()).orElseThrow()).giftIntentions().held().isEmpty(),
+        helper.assertTrue(((AbstractPet) EntityType.create(saved, helper.getLevel(), EntitySpawnReason.LOAD).orElseThrow()).giftIntentions().held().isEmpty(),
             "a save from before presents were thought of loaded one");
         helper.succeed();
     }
@@ -189,7 +190,7 @@ public final class SaveGameTests {
             memoriesOf(saved).put(retired, block);
         }
         farmer.discard();
-        AbstractPet loaded = (AbstractPet) EntityType.create(saved, helper.getLevel()).orElseThrow();
+        AbstractPet loaded = (AbstractPet) EntityType.create(saved, helper.getLevel(), EntitySpawnReason.LOAD).orElseThrow();
         // The one it was saved from is only removed at the end of the tick, and a level takes no second creature of one id.
         loaded.setUUID(UUID.randomUUID());
         helper.assertTrue(helper.getLevel().addFreshEntity(loaded), "the loaded farmer was not added to the level");
@@ -233,7 +234,7 @@ public final class SaveGameTests {
     private static AbstractPet readBack(GameTestHelper helper, AbstractPet pet, Consumer<CompoundTag> change) {
         CompoundTag saved = save(pet);
         change.accept(saved);
-        return (AbstractPet) EntityType.create(saved, helper.getLevel()).orElseThrow();
+        return (AbstractPet) EntityType.create(saved, helper.getLevel(), EntitySpawnReason.LOAD).orElseThrow();
     }
 
     private static CompoundTag save(AbstractPet pet) {

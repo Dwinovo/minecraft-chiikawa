@@ -24,6 +24,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.Zombie;
@@ -107,7 +108,7 @@ public final class DefendSelfGameTests {
                 helper.assertTrue(kept.get(AbstractPet.MAINHAND_SLOT).is(Items.WOODEN_HOE), "the save has " + kept.get(AbstractPet.MAINHAND_SLOT) + " in the hand");
                 helper.assertTrue(kept.get(POCKET).is(Items.IRON_SWORD), "the save has " + kept.get(POCKET) + " where the sword is kept");
 
-                AbstractPet loaded = (AbstractPet) EntityType.create(saved, helper.getLevel()).orElseThrow();
+                AbstractPet loaded = (AbstractPet) EntityType.create(saved, helper.getLevel(), EntitySpawnReason.LOAD).orElseThrow();
                 helper.assertTrue(loaded.getMainHandItem().is(Items.WOODEN_HOE), "the pet read from the save holds " + loaded.getMainHandItem());
                 helper.assertTrue(loaded.getPetJobId() == InitRegistry.FARMER_ID, "the pet read from the save is not a farmer");
                 helper.assertTrue(pet.getMainHandItem().is(Items.IRON_SWORD), "saving took the sword out of the pet's hand");
@@ -147,7 +148,7 @@ public final class DefendSelfGameTests {
             })
             .thenExecute(() -> {
                 zombie.setInvulnerable(false);
-                zombie.kill();
+                zombie.kill(helper.getLevel());
             })
             .thenWaitUntil(() -> {
                 helper.assertTrue(pet.getPendingGift().isEmpty(), "the present was not taken to the owner after the fight");

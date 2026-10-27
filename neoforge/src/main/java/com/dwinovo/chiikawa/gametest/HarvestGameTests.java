@@ -182,7 +182,7 @@ public final class HarvestGameTests {
         for (int slot = AbstractPet.MAINHAND_SLOT + 1; slot < pet.getBackpack().getContainerSize(); slot++) {
             ItemStack stack = pet.getBackpack().getItem(slot);
             if (!stack.isEmpty()) {
-                held.merge(stack.getDescriptionId(), stack.getCount(), Integer::sum);
+                held.merge(stack.getItem().getDescriptionId(), stack.getCount(), Integer::sum);
             }
         }
         return held;
