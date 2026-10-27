@@ -116,7 +116,10 @@ public final class GameTestRegistration {
             String template, String batch, int timeoutTicks, Consumer<GameTestHelper> body) {
         String name = className + "." + method.toLowerCase(Locale.ROOT);
         String structure = prefix == null || prefix.value() ? className + "." + template : template;
-        FUNCTIONS.register(name, () -> body);
+        FUNCTIONS.register(name, () -> helper -> {
+            BatchYards.note(batch, helper);
+            body.accept(helper);
+        });
         CASES.add(new Case(Identifier.fromNamespaceAndPath(namespace, name),
             Identifier.fromNamespaceAndPath(namespace, structure), batch, timeoutTicks));
     }
@@ -180,7 +183,7 @@ public final class GameTestRegistration {
 
     /**
      * A batch's world, settled by its {@link BeforeBatch} methods when the batch starts and put back by its
-     * {@link AfterBatch} methods once it has run.
+     * {@link AfterBatch} methods once it has run, and its yards cleared.
      */
     private record Batch(String name) implements TestEnvironmentDefinition {
         static final MapCodec<Batch> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -195,6 +198,7 @@ public final class GameTestRegistration {
         @Override
         public void teardown(ServerLevel level) {
             RESTORERS.getOrDefault(name, List.of()).forEach(restorer -> invoke(restorer, level));
+            BatchYards.clear(name, level);
         }
 
         @Override
