@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.testing.TestErrands;
-import com.mojang.serialization.Dynamic;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
@@ -15,7 +14,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.Identifier;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -33,18 +32,17 @@ class BrainSaveTest {
     private static final ResourceKey<Level> OVERWORLD = Level.OVERWORLD;
     private static final GlobalPos HOME = GlobalPos.of(OVERWORLD, new BlockPos(3, 64, -7));
     private static final long SLEPT = 123456L;
-    /** The brain a build knows: the memories it lists, as {@code AbstractPet.MEMORY_TYPES} does. */
-    private static Brain.Provider<LivingEntity> KNOWN;
+    /** The memories a build knows: the ones it lists, as {@code AbstractPet.MEMORY_TYPES} does. */
+    private static final List<MemoryModuleType<?>> KNOWN = List.of(MemoryModuleType.HOME, MemoryModuleType.LAST_SLEPT);
 
     @BeforeAll
     static void bootstrapped() {
         TestErrands.load();
-        KNOWN = Brain.provider(List.of(MemoryModuleType.HOME, MemoryModuleType.LAST_SLEPT), List.of());
     }
 
     @Test
     void aSavedBrainComesBackWhole() {
-        Brain<LivingEntity> back = KNOWN.makeBrain(new Dynamic<>(NbtOps.INSTANCE, saved(KNOWN)));
+        Brain<LivingEntity> back = loaded(KNOWN, saved(KNOWN));
 
         assertEquals(Optional.of(HOME), back.getMemory(MemoryModuleType.HOME));
         assertEquals(Optional.of(SLEPT), back.getMemory(MemoryModuleType.LAST_SLEPT));
@@ -57,7 +55,7 @@ class BrainSaveTest {
         retired.putBoolean("value", true);
         memories.put("chiikawa:retired_memory", retired);
 
-        Brain<LivingEntity> back = KNOWN.makeBrain(new Dynamic<>(NbtOps.INSTANCE, wrapped(memories)));
+        Brain<LivingEntity> back = loaded(KNOWN, wrapped(memories));
 
         assertEquals(Optional.empty(), back.getMemory(MemoryModuleType.HOME), "the stranger takes the rest down with it");
         assertEquals(Optional.empty(), back.getMemory(MemoryModuleType.LAST_SLEPT));
@@ -66,14 +64,14 @@ class BrainSaveTest {
     @Test
     void aMemoryRegisteredButNotInTheBrainIsLeftOutAloneAndTheRestKept() {
         CompoundTag memories = memoriesOf(saved(KNOWN));
-        Brain.Provider<LivingEntity> wider = Brain.provider(List.of(MemoryModuleType.HOME, MemoryModuleType.LAST_SLEPT,
-            MemoryModuleType.LAST_WOKEN), List.of());
-        Brain<LivingEntity> source = wider.makeBrain(new Dynamic<>(NbtOps.INSTANCE, wrapped(memories)));
+        List<MemoryModuleType<?>> wider = List.of(MemoryModuleType.HOME, MemoryModuleType.LAST_SLEPT,
+            MemoryModuleType.LAST_WOKEN);
+        Brain<LivingEntity> source = loaded(wider, wrapped(memories));
         source.setMemory(MemoryModuleType.LAST_WOKEN, 99L);
         CompoundTag withExtra = memoriesOf(serialized(source));
         assertTrue(withExtra.contains("minecraft:last_woken"), "the stranger is in the save");
 
-        Brain<LivingEntity> back = KNOWN.makeBrain(new Dynamic<>(NbtOps.INSTANCE, wrapped(withExtra)));
+        Brain<LivingEntity> back = loaded(KNOWN, wrapped(withExtra));
 
         assertEquals(Optional.of(HOME), back.getMemory(MemoryModuleType.HOME));
         assertEquals(Optional.of(SLEPT), back.getMemory(MemoryModuleType.LAST_SLEPT));
@@ -88,21 +86,27 @@ class BrainSaveTest {
         broken.putString("value", "not a time");
         memories.put("minecraft:last_slept", broken);
 
-        Brain<LivingEntity> back = KNOWN.makeBrain(new Dynamic<>(NbtOps.INSTANCE, wrapped(memories)));
+        Brain<LivingEntity> back = loaded(KNOWN, wrapped(memories));
 
         assertEquals(Optional.empty(), back.getMemory(MemoryModuleType.HOME));
         assertEquals(Optional.empty(), back.getMemory(MemoryModuleType.LAST_SLEPT));
     }
 
-    private static Tag saved(Brain.Provider<LivingEntity> provider) {
-        Brain<LivingEntity> brain = provider.makeBrain(new Dynamic<>(NbtOps.INSTANCE, wrapped(new CompoundTag())));
+    private static Tag saved(List<MemoryModuleType<?>> memories) {
+        Brain<LivingEntity> brain = loaded(memories, wrapped(new CompoundTag()));
         brain.setMemory(MemoryModuleType.HOME, HOME);
         brain.setMemory(MemoryModuleType.LAST_SLEPT, SLEPT);
         return serialized(brain);
     }
 
     private static Tag serialized(Brain<LivingEntity> brain) {
-        return brain.serializeStart(NbtOps.INSTANCE).getOrThrow();
+        return Brain.Packed.CODEC.encodeStart(NbtOps.INSTANCE, brain.pack()).getOrThrow();
+    }
+
+    /** A brain over the given memories, made from a save the way the game makes a mob's: a save it cannot read is no memories. */
+    private static Brain<LivingEntity> loaded(List<MemoryModuleType<?>> memories, Tag saved) {
+        Brain.Packed packed = Brain.Packed.CODEC.parse(NbtOps.INSTANCE, saved).result().orElse(Brain.Packed.EMPTY);
+        return new Brain<LivingEntity>(memories, List.of(), List.of(), packed.memories(), RandomSource.create()) { };
     }
 
     private static CompoundTag memoriesOf(Tag brain) {

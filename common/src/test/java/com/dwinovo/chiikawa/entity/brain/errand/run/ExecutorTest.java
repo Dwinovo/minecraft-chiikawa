@@ -24,13 +24,10 @@ import com.dwinovo.chiikawa.testing.StubErrand;
 import com.dwinovo.chiikawa.testing.TestErrands;
 import com.dwinovo.chiikawa.testing.TestRests;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
-import com.mojang.serialization.Dynamic;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
@@ -438,9 +435,7 @@ class ExecutorTest {
     }
 
     private static Brain<?> brain() {
-        CompoundTag saved = new CompoundTag();
-        saved.put("memories", new CompoundTag());
-        return Brain.<LivingEntity>provider(List.of(), List.of()).makeBrain(new Dynamic<>(NbtOps.INSTANCE, saved));
+        return new Brain<LivingEntity>();
     }
 
     private Executor executorOver(TestRests.Store rests, DecisionLog decisions) {

@@ -53,7 +53,7 @@ public final class SettingsGameTests {
         WorldSettings before = store.get();
         try {
             store.set(before.withChatter(0.0F));
-            helper.assertFalse(PetSpeech.say(pet, VoiceMoment.HURT).isPresent(), Component.literal("Chiikawa spoke in a world with no chatter"));
+            helper.assertFalse(PetSpeech.say(pet, VoiceMoment.HURT).isPresent(), "Chiikawa spoke in a world with no chatter");
 
             store.set(before.withChatter(1.0F));
             helper.assertTrue(PetSpeech.say(pet, VoiceMoment.HURT).isPresent(),

@@ -5,6 +5,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.NOON;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.carries;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.count;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.setDayTime;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 
@@ -193,13 +194,13 @@ public final class GiftGameTests {
         GiftingSettings settings = GiftingSettings.current().orElseThrow(() -> new AssertionError("no gifting settings were loaded"));
 
         helper.assertTrue(settings.cooldownTicks() == 24000 && settings.ownerDailyLimit() == DAILY_LIMIT && settings.fadeTicks() == 24000,
-            Component.literal("a pet gives one present a day, an owner is given three and a present is remembered for a day: " + settings));
+            "a pet gives one present a day, an owner is given three and a present is remembered for a day: " + settings);
         Map<GiftOccasion, Float> chances = new EnumMap<>(GiftOccasion.class);
         settings.occasions().forEach((occasion, how) -> chances.put(occasion, how.chance()));
         helper.assertTrue(chances.equals(Map.of(GiftOccasion.FOUND_SOMETHING, 0.5F, GiftOccasion.GOT_PAID, 0.2F,
-            GiftOccasion.PASSED_EXAM, 0.5F, GiftOccasion.WAS_TREATED, 0.3F, GiftOccasion.FILM_FULL, 1.0F)), Component.literal("the chances are " + chances));
+            GiftOccasion.PASSED_EXAM, 0.5F, GiftOccasion.WAS_TREATED, 0.3F, GiftOccasion.FILM_FULL, 1.0F)), "the chances are " + chances);
         helper.assertTrue(settings.occasion(GiftOccasion.WAS_TREATED).orElseThrow().delayTicks() == 1200,
-            Component.literal("a treat is answered a minute later"));
+            "a treat is answered a minute later");
         helper.succeed();
     }
 
@@ -221,10 +222,10 @@ public final class GiftGameTests {
         List.of(rakko, furuhonya, chiikawa).forEach(pet -> thinkOf(pet, GiftOccasion.FILM_FULL));
 
         helper.succeedWhen(() -> {
-            helper.assertTrue(rakkosOwner.getInventory().countItem(Items.CAKE) == 1, Component.literal("Rakko never gave its sweet"));
-            helper.assertTrue(furuhonyasOwner.getInventory().countItem(Items.BOOK) == 1, Component.literal("Furuhonya never gave its book"));
+            helper.assertTrue(rakkosOwner.getInventory().countItem(Items.CAKE) == 1, "Rakko never gave its sweet");
+            helper.assertTrue(furuhonyasOwner.getInventory().countItem(Items.BOOK) == 1, "Furuhonya never gave its book");
             helper.assertTrue(chiikawa.getPendingGift().isEmpty() && chiikawasOwner.getInventory().countItem(Items.BOOK) == 0
-                && carries(chiikawa, Items.BOOK), Component.literal("Chiikawa gave a book, which is not what it is known for"));
+                && carries(chiikawa, Items.BOOK), "Chiikawa gave a book, which is not what it is known for");
         });
     }
 
@@ -270,12 +271,12 @@ public final class GiftGameTests {
         owner.getInventory().clearContent();
         helper.succeedWhen(() -> {
             helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 1,
-                Component.literal("the owner has " + owner.getInventory().countItem(Items.COOKIE) + " cookies, not the one"));
-            helper.assertTrue(count(pet, Items.COOKIE) == 2, Component.literal("the pet has " + count(pet, Items.COOKIE) + " cookies left"));
-            helper.assertTrue(pet.getPendingGift().isEmpty(), Component.literal("the pet handed the cookie over and kept hold of it too"));
+                "the owner has " + owner.getInventory().countItem(Items.COOKIE) + " cookies, not the one");
+            helper.assertTrue(count(pet, Items.COOKIE) == 2, "the pet has " + count(pet, Items.COOKIE) + " cookies left");
+            helper.assertTrue(pet.getPendingGift().isEmpty(), "the pet handed the cookie over and kept hold of it too");
             long resting = pet.getBrain().getTimeUntilExpiry(InitMemory.GIFT_COOLDOWN.get());
-            helper.assertTrue(resting > RESTING, Component.literal("the pet rests from giving for " + resting + " ticks, not a day"));
-            helper.assertTrue(pet.giftIntentions().held().isEmpty(), Component.literal("the pet still has the present in mind"));
+            helper.assertTrue(resting > RESTING, "the pet rests from giving for " + resting + " ticks, not a day");
+            helper.assertTrue(pet.giftIntentions().held().isEmpty(), "the pet still has the present in mind");
         });
     }
 
@@ -299,10 +300,10 @@ public final class GiftGameTests {
             // The handbook is the advancement's, on the owner's joining.
             List<ItemStack> given = owner.getInventory().getNonEquipmentItems().stream()
                 .filter(stack -> !stack.isEmpty() && !stack.is(InitItems.HANDBOOK.get())).toList();
-            helper.assertTrue(given.isEmpty(), Component.literal("the owner was given something: " + given));
-            helper.assertTrue(pet.getPendingGift().isEmpty(), Component.literal("the pet was carrying something over"));
-            helper.assertFalse(pet.getBrain().hasMemoryValue(InitMemory.GIFT_COOLDOWN.get()), Component.literal("the pet gave a present"));
-            helper.assertTrue(pet.giftIntentions().held().isPresent(), Component.literal("the pet gave up the thought of a present, though it could not give one"));
+            helper.assertTrue(given.isEmpty(), "the owner was given something: " + given);
+            helper.assertTrue(pet.getPendingGift().isEmpty(), "the pet was carrying something over");
+            helper.assertFalse(pet.getBrain().hasMemoryValue(InitMemory.GIFT_COOLDOWN.get()), "the pet gave a present");
+            helper.assertTrue(pet.giftIntentions().held().isPresent(), "the pet gave up the thought of a present, though it could not give one");
             helper.assertTrue(carries(pet, InitItems.CAMERA.get()) && Wallet.count(pet.getBackpack()) == POCKET_MONEY
                 && carries(pet, InitItems.FILM.get()), "the pet no longer has all that it had");
             helper.succeed();
@@ -347,8 +348,8 @@ public final class GiftGameTests {
             BuiltInRegistries.ITEM.getKey(InitItems.CAMERA.get())));
 
         helper.runAfterDelay(NOTHING_TICKS, () -> {
-            helper.assertTrue(pet.giftIntentions().held().isEmpty(), Component.literal("the pet thought of a present for a roll it has not finished"));
-            helper.assertFalse(owner.getInventory().contains(new ItemStack(InitItems.FILM.get())), Component.literal("the owner was given the roll"));
+            helper.assertTrue(pet.giftIntentions().held().isEmpty(), "the pet thought of a present for a roll it has not finished");
+            helper.assertFalse(owner.getInventory().contains(new ItemStack(InitItems.FILM.get())), "the owner was given the roll");
             helper.succeed();
         });
     }
@@ -499,13 +500,13 @@ public final class GiftGameTests {
                 pet.setRules(PetRules.DEFAULT.with(PetRules.Toggle.GIFT, false));
                 thinkOf(pet, GiftOccasion.WAS_TREATED);
             }
-            helper.assertTrue(told[0], Component.literal("the pet never set off with a present"));
-            helper.assertTrue(pet.getPendingGift().isEmpty(), Component.literal("the pet still carries the cookie"));
-            helper.assertTrue(count(pet, Items.COOKIE) == 2, Component.literal("the pet has " + count(pet, Items.COOKIE) + " cookies, not the two"));
-            helper.assertFalse(owner.getInventory().contains(new ItemStack(Items.COOKIE)), Component.literal("the owner was given the cookie"));
-            helper.assertFalse(pet.getBrain().hasMemoryValue(InitMemory.GIFT_COOLDOWN.get()), Component.literal("a present never given tired the pet"));
-            helper.assertTrue(pet.giftIntentions().held().isEmpty(), Component.literal("the pet thought of a present it was told not to give"));
-            helper.assertTrue(++settled[0] > SETTLED_TICKS, Component.literal("too soon to say it does not set off again"));
+            helper.assertTrue(told[0], "the pet never set off with a present");
+            helper.assertTrue(pet.getPendingGift().isEmpty(), "the pet still carries the cookie");
+            helper.assertTrue(count(pet, Items.COOKIE) == 2, "the pet has " + count(pet, Items.COOKIE) + " cookies, not the two");
+            helper.assertFalse(owner.getInventory().contains(new ItemStack(Items.COOKIE)), "the owner was given the cookie");
+            helper.assertFalse(pet.getBrain().hasMemoryValue(InitMemory.GIFT_COOLDOWN.get()), "a present never given tired the pet");
+            helper.assertTrue(pet.giftIntentions().held().isEmpty(), "the pet thought of a present it was told not to give");
+            helper.assertTrue(++settled[0] > SETTLED_TICKS, "too soon to say it does not set off again");
         });
     }
 
@@ -528,16 +529,16 @@ public final class GiftGameTests {
 
         helper.runAfterDelay(THINKING_TICKS, () -> {
             helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 1,
-                Component.literal("the owner has " + owner.getInventory().countItem(Items.COOKIE) + " cookies, not the one"));
+                "the owner has " + owner.getInventory().countItem(Items.COOKIE) + " cookies, not the one");
             thinkOf(pet, GiftOccasion.WAS_TREATED);
             thinkOf(pet, GiftOccasion.FILM_FULL);
-            helper.assertTrue(pet.giftIntentions().held().isEmpty(), Component.literal("the pet thought of another present while it rests"));
+            helper.assertTrue(pet.giftIntentions().held().isEmpty(), "the pet thought of another present while it rests");
         });
         helper.runAfterDelay(THINKING_TICKS * 2, () -> {
             helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 1,
-                Component.literal("the owner has " + owner.getInventory().countItem(Items.COOKIE) + " cookies, not the one"));
-            helper.assertTrue(count(pet, Items.COOKIE) == 4, Component.literal("the pet has " + count(pet, Items.COOKIE) + " cookies left, not four"));
-            helper.assertTrue(pet.getPendingGift().isEmpty(), Component.literal("the pet is carrying another present"));
+                "the owner has " + owner.getInventory().countItem(Items.COOKIE) + " cookies, not the one");
+            helper.assertTrue(count(pet, Items.COOKIE) == 4, "the pet has " + count(pet, Items.COOKIE) + " cookies left, not four");
+            helper.assertTrue(pet.getPendingGift().isEmpty(), "the pet is carrying another present");
             helper.succeed();
         });
     }
@@ -560,10 +561,10 @@ public final class GiftGameTests {
         thinkOf(idler, GiftOccasion.GOT_PAID);
 
         helper.succeedWhen(() -> {
-            helper.assertTrue(idlersOwner.getInventory().countItem(Items.WHEAT_SEEDS) == 1, Component.literal("the pet with no work never gave its seed"));
-            helper.assertTrue(farmersOwner.getInventory().countItem(Items.POPPY) == 1, Component.literal("the farmer never gave the flower it had"));
+            helper.assertTrue(idlersOwner.getInventory().countItem(Items.WHEAT_SEEDS) == 1, "the pet with no work never gave its seed");
+            helper.assertTrue(farmersOwner.getInventory().countItem(Items.POPPY) == 1, "the farmer never gave the flower it had");
             helper.assertTrue(farmersOwner.getInventory().countItem(Items.WHEAT_SEEDS) == 0
-                && count(farmer, Items.WHEAT_SEEDS) == 4, Component.literal("the farmer gave the seeds it plants"));
+                && count(farmer, Items.WHEAT_SEEDS) == 4, "the farmer gave the seeds it plants");
         });
     }
 
@@ -588,13 +589,13 @@ public final class GiftGameTests {
 
         helper.succeedWhen(() -> {
             helper.assertTrue(idlersOwner.getInventory().countItem(Items.IRON_SWORD) + idlersOwner.getInventory().countItem(Items.ARROW) == 1,
-                Component.literal("the pet with no work never gave one of its sword and its arrows"));
-            helper.assertTrue(fencersOwner.getInventory().countItem(Items.POPPY) == 1, Component.literal("the fencer never gave the flower it had"));
-            helper.assertTrue(archersOwner.getInventory().countItem(Items.POPPY) == 1, Component.literal("the archer never gave the flower it had"));
+                "the pet with no work never gave one of its sword and its arrows");
+            helper.assertTrue(fencersOwner.getInventory().countItem(Items.POPPY) == 1, "the fencer never gave the flower it had");
+            helper.assertTrue(archersOwner.getInventory().countItem(Items.POPPY) == 1, "the archer never gave the flower it had");
             helper.assertTrue(fencersOwner.getInventory().countItem(Items.IRON_SWORD) == 0 && carries(fencer, Items.IRON_SWORD),
-                Component.literal("the fencer gave a sword"));
+                "the fencer gave a sword");
             helper.assertTrue(archersOwner.getInventory().countItem(Items.ARROW) == 0 && count(archer, Items.ARROW) == 4,
-                Component.literal("the archer gave its arrows"));
+                "the archer gave its arrows");
         });
     }
 
@@ -614,13 +615,13 @@ public final class GiftGameTests {
 
         helper.runAfterDelay(NOTHING_TICKS, () -> {
             helper.assertTrue(owner.getInventory().countItem(Items.POPPY) == DAILY_LIMIT,
-                Component.literal("the owner has " + owner.getInventory().countItem(Items.POPPY) + " flowers, not " + DAILY_LIMIT));
+                "the owner has " + owner.getInventory().countItem(Items.POPPY) + " flowers, not " + DAILY_LIMIT);
             long giving = pets.stream().filter(each -> each.getBrain().hasMemoryValue(InitMemory.GIFT_COOLDOWN.get())
                 && !carries(each, Items.POPPY)).count();
-            helper.assertTrue(giving == DAILY_LIMIT, Component.literal(giving + " pets gave a present"));
-            helper.assertTrue(pets.stream().allMatch(each -> each.getPendingGift().isEmpty()), Component.literal("a pet is still carrying its present"));
+            helper.assertTrue(giving == DAILY_LIMIT, giving + " pets gave a present");
+            helper.assertTrue(pets.stream().allMatch(each -> each.getPendingGift().isEmpty()), "a pet is still carrying its present");
             ServerLevel level = helper.getLevel();
-            helper.assertTrue(GiftLedger.of(level).leftToday(level, owner.getUUID()) == 0, Component.literal("the owner may be given more today"));
+            helper.assertTrue(GiftLedger.of(level).leftToday(level, owner.getUUID()) == 0, "the owner may be given more today");
             helper.succeed();
         });
     }
@@ -641,24 +642,24 @@ public final class GiftGameTests {
 
         helper.startSequence()
             .thenWaitUntil(() -> helper.assertTrue(pet.getIntent().filter(ErrandIds.GIFT_OWNER::equals).isPresent()
-                && !pet.getPendingGift().isEmpty(), Component.literal("the pet never set off with a present")))
+                && !pet.getPendingGift().isEmpty(), "the pet never set off with a present"))
             .thenExecute(() -> {
                 // A hand that is free: the handbook the advancement gave the owner on joining is in it otherwise.
                 owner.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-                helper.assertTrue(pet.mobInteract(owner, InteractionHand.MAIN_HAND).consumesAction(), Component.literal("the click was not taken"));
-                helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 1, Component.literal("the owner was not given the cookie at once"));
-                helper.assertTrue(pet.getPendingGift().isEmpty(), Component.literal("the pet still holds the present"));
+                helper.assertTrue(pet.mobInteract(owner, InteractionHand.MAIN_HAND).consumesAction(), "the click was not taken");
+                helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 1, "the owner was not given the cookie at once");
+                helper.assertTrue(pet.getPendingGift().isEmpty(), "the pet still holds the present");
                 ServerLevel level = helper.getLevel();
                 helper.assertTrue(GiftLedger.of(level).leftToday(level, owner.getUUID()) == DAILY_LIMIT - 1,
-                    Component.literal("the present was not counted against the owner's day"));
+                    "the present was not counted against the owner's day");
                 helper.assertTrue(pet.getBrain().getTimeUntilExpiry(InitMemory.GIFT_COOLDOWN.get()) > RESTING,
-                    Component.literal("the pet is not resting from having given a present"));
+                    "the pet is not resting from having given a present");
             })
             .thenExecuteAfter(SETTLED_TICKS, () -> {
                 helper.assertTrue(pet.getIntent().filter(ErrandIds.GIFT_OWNER::equals).isEmpty(),
-                    Component.literal("the pet goes on bringing a present that is no longer in its paws"));
-                helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 1, Component.literal("the owner was given a second cookie"));
-                helper.assertTrue(count(pet, Items.COOKIE) == 2, Component.literal("the pet has " + count(pet, Items.COOKIE) + " cookies, not the two"));
+                    "the pet goes on bringing a present that is no longer in its paws");
+                helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 1, "the owner was given a second cookie");
+                helper.assertTrue(count(pet, Items.COOKIE) == 2, "the pet has " + count(pet, Items.COOKIE) + " cookies, not the two");
             })
             .thenSucceed();
     }
@@ -681,13 +682,13 @@ public final class GiftGameTests {
                 owner.teleportTo(near.getX() + 0.5, near.getY(), near.getZ() + 0.5);
             })
             .thenExecuteAfter(AWAY_TICKS, () -> {
-                helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 0, Component.literal("the owner was given a present that was forgotten"));
-                helper.assertTrue(count(pet, Items.COOKIE) == 2, Component.literal("the pet gave away what it was no longer thinking of giving"));
+                helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 0, "the owner was given a present that was forgotten");
+                helper.assertTrue(count(pet, Items.COOKIE) == 2, "the pet gave away what it was no longer thinking of giving");
                 thinkOf(pet, GiftOccasion.WAS_TREATED);
                 helper.assertTrue(pet.giftIntentions().held().filter(held -> !held.hasFaded(helper.getLevel().getGameTime())).isPresent(),
-                    Component.literal("the pet did not think of another present once the first was forgotten"));
+                    "the pet did not think of another present once the first was forgotten");
             })
-            .thenWaitUntil(() -> helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 1, Component.literal("the owner was not given the second")))
+            .thenWaitUntil(() -> helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 1, "the owner was not given the second"))
             .thenSucceed();
     }
 
@@ -706,26 +707,26 @@ public final class GiftGameTests {
 
         helper.startSequence()
             .thenWaitUntil(() -> helper.assertTrue(pet.getPerformance().startsWith("sleep") && !pet.getPendingGift().isEmpty(),
-                Component.literal("the pet never lay down by the bed with the present")))
+                "the pet never lay down by the bed with the present"))
             .thenExecute(() -> {
                 // As the sleep errand lies it down, from the same data: there is one account of how a character looks asleep.
                 helper.assertTrue(pet.getPerformance().equals(SleepErrand.sleeps().orElseThrow()
-                    .performanceOf(BuiltInRegistries.ENTITY_TYPE.getKey(pet.getType()))), Component.literal("waiting by the bed, the pet lies otherwise than it sleeps: " + pet.getPerformance()));
+                    .performanceOf(BuiltInRegistries.ENTITY_TYPE.getKey(pet.getType()))), "waiting by the bed, the pet lies otherwise than it sleeps: " + pet.getPerformance());
                 helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 0 && cookiesNear(helper, head).isEmpty(),
-                    Component.literal("the present was given before the owner woke"));
-                level.setDayTime(DAWN);
+                    "the present was given before the owner woke");
+                setDayTime(level, DAWN);
                 owner.stopSleepInBed(false, true);
             })
-            .thenWaitUntil(() -> helper.assertTrue(!cookiesNear(helper, head).isEmpty(), Component.literal("no present was left by the bed")))
+            .thenWaitUntil(() -> helper.assertTrue(!cookiesNear(helper, head).isEmpty(), "no present was left by the bed"))
             .thenExecute(() -> {
-                helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 0, Component.literal("the present was put into the owner's hands"));
-                helper.assertTrue(pet.getPendingGift().isEmpty() && count(pet, Items.COOKIE) == 2, Component.literal("the pet is still holding the present"));
+                helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) == 0, "the present was put into the owner's hands");
+                helper.assertTrue(pet.getPendingGift().isEmpty() && count(pet, Items.COOKIE) == 2, "the pet is still holding the present");
                 helper.assertTrue(pet.getBrain().getTimeUntilExpiry(InitMemory.GIFT_COOLDOWN.get()) > RESTING,
-                    Component.literal("the pet is not resting from having given a present"));
+                    "the pet is not resting from having given a present");
                 helper.assertTrue(GiftLedger.of(level).leftToday(level, owner.getUUID()) == DAILY_LIMIT - 1,
-                    Component.literal("the present was not counted against the owner's day"));
-                helper.assertTrue(pet.getPerformance().isEmpty(), Component.literal("the pet is still lying by the bed: " + pet.getPerformance() + " on "
-                    + pet.getMind().errands().errand() + " " + pet.getMind().log().entries()));
+                    "the present was not counted against the owner's day");
+                helper.assertTrue(pet.getPerformance().isEmpty(), "the pet is still lying by the bed: " + pet.getPerformance() + " on "
+                    + pet.getMind().errands().errand() + " " + pet.getMind().log().entries());
             })
             .thenSucceed();
     }
@@ -744,16 +745,16 @@ public final class GiftGameTests {
 
         helper.startSequence()
             .thenWaitUntil(() -> helper.assertTrue(pet.getPerformance().startsWith("sleep") && !pet.getPendingGift().isEmpty(),
-                Component.literal("the pet never lay down by the bed with the present")))
+                "the pet never lay down by the bed with the present"))
             .thenExecute(() -> owner.stopSleepInBed(false, true))
             .thenWaitUntil(() -> helper.assertTrue(pet.getPendingGift().isEmpty() && pet.getPerformance().isEmpty(),
-                Component.literal("the pet is still waiting by the bed")))
+                "the pet is still waiting by the bed"))
             .thenExecuteAfter(SETTLED_TICKS, () -> {
                 helper.assertTrue(cookiesNear(helper, head).isEmpty() && owner.getInventory().countItem(Items.COOKIE) == 0,
-                    Component.literal("a present was given to an owner woken in the night"));
-                helper.assertTrue(count(pet, Items.COOKIE) == 3, Component.literal("the present was not put back: " + count(pet, Items.COOKIE) + " cookies"));
+                    "a present was given to an owner woken in the night");
+                helper.assertTrue(count(pet, Items.COOKIE) == 3, "the present was not put back: " + count(pet, Items.COOKIE) + " cookies");
                 helper.assertTrue(pet.getBrain().getTimeUntilExpiry(InitMemory.GIFT_COOLDOWN.get()) < RESTING,
-                    Component.literal("a present never given tired the pet for a day"));
+                    "a present never given tired the pet for a day");
             })
             .thenSucceed();
     }

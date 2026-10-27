@@ -1,6 +1,7 @@
 package com.dwinovo.chiikawa.init;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.entity.PetRules;
 import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.qualification.LicenceView;
 import com.dwinovo.chiikawa.task.PetTask;
@@ -23,6 +24,9 @@ public final class InitEntityDataSerializers {
     public static final EntityDataSerializer<List<LicenceView>> LICENCE_VIEWS =
         EntityDataSerializer.forValueType(ByteBufCodecs.fromCodecWithRegistries(LicenceView.LIST_CODEC));
 
+    /** What the owner has told a pet it may and may not do, see {@link com.dwinovo.chiikawa.entity.AbstractPet#getRules}. */
+    public static final EntityDataSerializer<PetRules> PET_RULES = EntityDataSerializer.forValueType(PetRules.STREAM_CODEC);
+
     private InitEntityDataSerializers() {
     }
 
@@ -31,5 +35,7 @@ public final class InitEntityDataSerializers {
             Identifier.fromNamespaceAndPath(Constants.MOD_ID, "optional_pet_task"), OPTIONAL_PET_TASK);
         Services.REGISTRY.registerEntityDataSerializer(
             Identifier.fromNamespaceAndPath(Constants.MOD_ID, "licence_views"), LICENCE_VIEWS);
+        Services.REGISTRY.registerEntityDataSerializer(
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "pet_rules"), PET_RULES);
     }
 }

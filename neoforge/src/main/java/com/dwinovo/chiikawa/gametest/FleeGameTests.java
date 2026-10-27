@@ -17,7 +17,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
@@ -65,11 +64,11 @@ public final class FleeGameTests {
         pet.hurt(zombie.damageSources().mobAttack(zombie), 1.0F);
 
         helper.succeedWhen(() -> {
-            helper.assertTrue(cowering(pet), Component.literal("the pet did not run and hide, doing " + pet.getIntent()));
+            helper.assertTrue(cowering(pet), "the pet did not run and hide, doing " + pet.getIntent());
             helper.assertTrue(pet.distanceTo(zombie) > owner.distanceTo(zombie),
-                Component.literal("the pet hid " + (int) pet.distanceTo(zombie) + " blocks from the zombie, with its owner " + (int) owner.distanceTo(zombie)));
-            helper.assertTrue(pet.distanceTo(owner) < 4.0, Component.literal("the pet hid " + (int) pet.distanceTo(owner) + " blocks from its owner"));
-            helper.assertTrue(zombie.getHealth() == zombie.getMaxHealth(), Component.literal("the pet struck back though it was told not to fight"));
+                "the pet hid " + (int) pet.distanceTo(zombie) + " blocks from the zombie, with its owner " + (int) owner.distanceTo(zombie));
+            helper.assertTrue(pet.distanceTo(owner) < 4.0, "the pet hid " + (int) pet.distanceTo(owner) + " blocks from its owner");
+            helper.assertTrue(zombie.getHealth() == zombie.getMaxHealth(), "the pet struck back though it was told not to fight");
         });
     }
 
@@ -88,19 +87,19 @@ public final class FleeGameTests {
 
         helper.startSequence()
             .thenWaitUntil(() -> {
-                helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, Component.literal("running changed what it was told"));
-                helper.assertTrue(cowering(pet), Component.literal("the pet did not run and hide, doing " + pet.getIntent()));
-                helper.assertTrue(pet.distanceTo(owner) < 4.0, Component.literal("the pet hid " + (int) pet.distanceTo(owner) + " blocks from its owner"));
+                helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, "running changed what it was told");
+                helper.assertTrue(cowering(pet), "the pet did not run and hide, doing " + pet.getIntent());
+                helper.assertTrue(pet.distanceTo(owner) < 4.0, "the pet hid " + (int) pet.distanceTo(owner) + " blocks from its owner");
             })
             .thenWaitUntil(() -> {
-                helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, Component.literal("running changed what it was told"));
-                helper.assertFalse(pet.getMind().errands().isOn(ErrandIds.FLEE), Component.literal("the pet is still hiding, doing " + pet.getIntent()));
+                helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, "running changed what it was told");
+                helper.assertFalse(pet.getMind().errands().isOn(ErrandIds.FLEE), "the pet is still hiding, doing " + pet.getIntent());
                 helper.assertTrue(pet.blockPosition().distSqr(helper.absolutePos(seat)) <= CROSSING,
-                    Component.literal("the pet is " + (int) Math.sqrt(pet.blockPosition().distSqr(helper.absolutePos(seat))) + " blocks from its seat"));
+                    "the pet is " + (int) Math.sqrt(pet.blockPosition().distSqr(helper.absolutePos(seat))) + " blocks from its seat");
             })
             .thenExecute(() -> {
-                helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, Component.literal("the pet is no longer told to sit"));
-                helper.assertTrue(zombie.getHealth() == zombie.getMaxHealth(), Component.literal("the pet struck back though it was told to sit"));
+                helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, "the pet is no longer told to sit");
+                helper.assertTrue(zombie.getHealth() == zombie.getMaxHealth(), "the pet struck back though it was told to sit");
             })
             .thenSucceed();
     }
@@ -119,10 +118,10 @@ public final class FleeGameTests {
         pet.hurt(zombie.damageSources().mobAttack(zombie), 1.0F);
 
         helper.succeedWhen(() -> {
-            helper.assertTrue(cowering(pet), Component.literal("the pet did not run and hide, doing " + pet.getIntent()));
+            helper.assertTrue(cowering(pet), "the pet did not run and hide, doing " + pet.getIntent());
             helper.assertTrue(pet.blockPosition().distSqr(helper.absolutePos(home)) <= CROSSING,
-                Component.literal("the pet is hiding " + (int) Math.sqrt(pet.blockPosition().distSqr(helper.absolutePos(home))) + " blocks from home"));
-            helper.assertTrue(zombie.getHealth() == zombie.getMaxHealth(), Component.literal("the pet hit the zombie with nothing to hit it with"));
+                "the pet is hiding " + (int) Math.sqrt(pet.blockPosition().distSqr(helper.absolutePos(home))) + " blocks from home");
+            helper.assertTrue(zombie.getHealth() == zombie.getMaxHealth(), "the pet hit the zombie with nothing to hit it with");
         });
     }
 
@@ -135,7 +134,7 @@ public final class FleeGameTests {
 
         helper.runAtTickTime(HIDE_TICKS - 20, () -> {
             helper.assertFalse(pet.getMind().errands().isOn(ErrandIds.FLEE) || pet.getMind().log().entries().stream().anyMatch(entry ->
-                entry instanceof DecisionLog.Ended ended && ended.errand().equals(ErrandIds.FLEE)), Component.literal("the pet ran from its owner's sword"));
+                entry instanceof DecisionLog.Ended ended && ended.errand().equals(ErrandIds.FLEE)), "the pet ran from its owner's sword");
             helper.succeed();
         });
     }

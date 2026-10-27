@@ -196,7 +196,7 @@ public class PetAttackbleEntitySensor extends Sensor<AbstractPet> {
         if (owner != null && (owner.getLastHurtByMob() == foe || owner.getLastHurtMob() == foe) || after(foe, pet.getOwner())) {
             on.add(Ground.OWNER);
         }
-        if (foe.getType().is(InitTag.ENTITY_HOSTILE_ENTITY)) {
+        if (foe.typeHolder().is(InitTag.ENTITY_HOSTILE_ENTITY)) {
             on.add(Ground.NEARBY);
             on.add(Ground.HUNT);
         }

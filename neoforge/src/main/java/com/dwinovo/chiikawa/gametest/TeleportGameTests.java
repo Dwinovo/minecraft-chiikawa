@@ -14,7 +14,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
 import com.dwinovo.chiikawa.init.InitEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
@@ -73,17 +72,17 @@ public final class TeleportGameTests {
         long[] brought = {-1};
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(WorkData.HUNT_MELEE), Component.literal("the pet never went for the zombie")))
+            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(WorkData.HUNT_MELEE), "the pet never went for the zombie"))
             .thenExecute(() -> {
-                helper.assertTrue(pet.teleportToOwner(helper.getLevel(), owner, "test"), Component.literal("the pet was not brought to its owner"));
+                helper.assertTrue(pet.teleportToOwner(helper.getLevel(), owner, "test"), "the pet was not brought to its owner");
                 brought[0] = helper.getLevel().getGameTime();
             })
             .thenWaitUntil(() -> helper.assertTrue(endedByTheMove(pet, brought[0]),
-                Component.literal("the fight did not end for the pet having been moved: " + pet.getMind().log().entries())))
+                "the fight did not end for the pet having been moved: " + pet.getMind().log().entries()))
             .thenExecuteFor(WATCH_TICKS, () -> {
-                helper.assertFalse(pet.getMind().errands().isOn(WorkData.HUNT_MELEE), Component.literal("the pet went back to the fight it was taken away from"));
-                helper.assertTrue(pet.distanceTo(zombie) > BEYOND_THE_SENSOR, Component.literal("the pet is " + (int) pet.distanceTo(zombie)
-                    + " blocks from the zombie"));
+                helper.assertFalse(pet.getMind().errands().isOn(WorkData.HUNT_MELEE), "the pet went back to the fight it was taken away from");
+                helper.assertTrue(pet.distanceTo(zombie) > BEYOND_THE_SENSOR, "the pet is " + (int) pet.distanceTo(zombie)
+                    + " blocks from the zombie");
             })
             .thenSucceed();
     }

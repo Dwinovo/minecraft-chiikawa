@@ -121,8 +121,8 @@ public final class SocialGameTests {
             .thenIdle(SETTLE_TICKS)
             .thenExecute(() -> thinkOf(momonga, PetInteractionData.CLING, chiikawa))
             .thenWaitUntil(() -> {
-                helper.assertTrue(reservedBy(chiikawa, momonga), Component.literal("Chiikawa was never asked"));
-                helper.assertTrue(runs(chiikawa, ErrandIds.COOPERATE), Component.literal("Chiikawa did not stop to play along"));
+                helper.assertTrue(reservedBy(chiikawa, momonga), "Chiikawa was never asked");
+                helper.assertTrue(runs(chiikawa, ErrandIds.COOPERATE), "Chiikawa did not stop to play along");
                 waitingAt.set(chiikawa.position());
             })
             .thenExecute(() -> helper.assertTrue(SocialRules.accepts(PetInteractionData.CLING, scene(PetInteractionData.CLING),
@@ -137,7 +137,7 @@ public final class SocialGameTests {
             .thenWaitUntil(() -> helper.assertTrue(sceneOver(momonga, chiikawa), "the scene never ended"))
             .thenExecute(() -> helper.assertFalse(
                 engaged(chiikawa),
-                Component.literal("Chiikawa was kept waiting after the scene")))
+                "Chiikawa was kept waiting after the scene"))
             .thenSucceed();
     }
 
@@ -161,11 +161,11 @@ public final class SocialGameTests {
                     helper.getLevel().getGameTime() + SHORT_WAIT));
             })
             .thenWaitUntil(() -> helper.assertTrue(runs(chiikawa, ErrandIds.COOPERATE),
-                Component.literal("Chiikawa did not wait for the pet it was told was coming")))
+                "Chiikawa did not wait for the pet it was told was coming"))
             .thenWaitUntil(() -> {
                 helper.assertFalse(engaged(chiikawa),
-                    Component.literal("the reservation never ran out"));
-                helper.assertFalse(runs(chiikawa, ErrandIds.COOPERATE), Component.literal("Chiikawa is still waiting for nobody"));
+                    "the reservation never ran out");
+                helper.assertFalse(runs(chiikawa, ErrandIds.COOPERATE), "Chiikawa is still waiting for nobody");
             })
             .thenSucceed();
     }
@@ -198,7 +198,7 @@ public final class SocialGameTests {
             .thenWaitUntil(() -> helper.assertTrue(reservedBy(chiikawa, momonga), "Chiikawa was never asked"))
             .thenWaitUntil(() -> {
                 helper.assertFalse(engaged(chiikawa),
-                    Component.literal("Momonga never let go of Chiikawa"));
+                    "Momonga never let go of Chiikawa");
                 helper.assertFalse(momonga.getBrain().hasMemoryValue(InitMemory.INTERACTION_PLAN.get()),
                     "Momonga is still set on a pet it cannot reach");
             })
@@ -221,9 +221,9 @@ public final class SocialGameTests {
             .thenIdle(SETTLE_TICKS)
             .thenExecute(() -> thinkOf(momonga, PetInteractionData.CLING, chiikawa))
             .thenExecuteFor(LEAVE_IT_TICKS, () -> {
-                helper.assertTrue(runs(momonga, ErrandIds.STAY), Component.literal("a sitting pet got up"));
+                helper.assertTrue(runs(momonga, ErrandIds.STAY), "a sitting pet got up");
                 helper.assertFalse(engaged(chiikawa),
-                    Component.literal("a sitting pet asked another over"));
+                    "a sitting pet asked another over");
             })
             .thenSucceed();
     }
@@ -242,10 +242,10 @@ public final class SocialGameTests {
                 "a sitting pet was up for a scene"))
             .thenExecute(() -> thinkOf(momonga, PetInteractionData.CLING, chiikawa))
             .thenExecuteFor(LEAVE_IT_TICKS, () -> {
-                helper.assertTrue(runs(chiikawa, ErrandIds.STAY), Component.literal("a sitting pet was made to get up"));
+                helper.assertTrue(runs(chiikawa, ErrandIds.STAY), "a sitting pet was made to get up");
                 helper.assertFalse(engaged(chiikawa),
-                    Component.literal("a sitting pet was asked over"));
-                helper.assertTrue(momonga.getPerformance().isEmpty(), Component.literal("Momonga clung onto a sitting pet"));
+                    "a sitting pet was asked over");
+                helper.assertTrue(momonga.getPerformance().isEmpty(), "Momonga clung onto a sitting pet");
             })
             .thenSucceed();
     }
@@ -273,7 +273,7 @@ public final class SocialGameTests {
                     "Chiikawa does not remember having been clung to by Momonga");
             })
             .thenWaitUntil(() -> {
-                helper.assertTrue(runs(newcomer.get(), ErrandIds.WANDER), Component.literal("the newcomer never settled"));
+                helper.assertTrue(runs(newcomer.get(), ErrandIds.WANDER), "the newcomer never settled");
                 long now = helper.getLevel().getGameTime();
                 PetInteraction cling = scene(PetInteractionData.CLING);
                 helper.assertTrue(SocialRules.accepts(PetInteractionData.CLING, cling, momonga, chiikawa, now).isEmpty(),
@@ -311,13 +311,13 @@ public final class SocialGameTests {
             .thenIdle(SETTLE_TICKS)
             // Momonga, who knows nothing of that, sets off to ask, if it has not already.
             .thenExecute(() -> thinkOf(momonga, PetInteractionData.CLING, chiikawa))
-            .thenWaitUntil(() -> helper.assertTrue(timesTurnedDown(momonga) == 1, Component.literal("Momonga was never turned down")))
+            .thenWaitUntil(() -> helper.assertTrue(timesTurnedDown(momonga) == 1, "Momonga was never turned down"))
             .thenExecute(() -> {
                 long left = restLeft(momonga, PetInteractionData.CLING, chiikawa, helper);
                 helper.assertTrue(left > 0 && left <= TURNED_DOWN_REST_TICKS,
-                    Component.literal("Momonga is held back from Chiikawa for " + left + " ticks, not the few seconds of a refusal"));
+                    "Momonga is held back from Chiikawa for " + left + " ticks, not the few seconds of a refusal");
                 helper.assertTrue(cling.cooldownTicks() > TURNED_DOWN_REST_TICKS * 10,
-                    Component.literal("a day is not very different from a few seconds in this data pack"));
+                    "a day is not very different from a few seconds in this data pack");
             })
             .thenIdle(TURNED_DOWN_REST_TICKS)
             .thenExecute(() -> {
@@ -330,10 +330,10 @@ public final class SocialGameTests {
                 thinkOf(momonga, PetInteractionData.CLING, chiikawa);
             })
             .thenWaitUntil(() -> helper.assertTrue(timesTurnedDown(momonga) == 2,
-                Component.literal("Momonga did not ask Chiikawa again, " + restLeft(momonga, PetInteractionData.CLING, chiikawa, helper)
+                "Momonga did not ask Chiikawa again, " + restLeft(momonga, PetInteractionData.CLING, chiikawa, helper)
                     + " ticks of rest left, " + momonga.distanceTo(chiikawa) + " blocks from it, which is "
                     + (SocialRules.accepts(PetInteractionData.CLING, cling, momonga, chiikawa, helper.getLevel().getGameTime())
-                        .isPresent() ? "" : "not ") + "a partner for it, doing " + doing(momonga) + " and " + doing(chiikawa))))
+                        .isPresent() ? "" : "not ") + "a partner for it, doing " + doing(momonga) + " and " + doing(chiikawa)))
             .thenSucceed();
     }
 
@@ -351,16 +351,16 @@ public final class SocialGameTests {
             .thenIdle(SETTLE_TICKS)
             .thenExecute(() -> thinkOf(momonga, PetInteractionData.CLING, chiikawa))
             .thenWaitUntil(() -> helper.assertTrue("cling".equals(momonga.getPerformance())
-                    && "clung_to".equals(chiikawa.getPerformance()), Component.literal("the scene never began")))
+                    && "clung_to".equals(chiikawa.getPerformance()), "the scene never began"))
             .thenExecute(() -> PetMind.post(momonga, new Message.Moved("test")))
-            .thenWaitUntil(() -> helper.assertTrue(sceneOver(momonga, chiikawa), Component.literal("the scene was never ended")))
+            .thenWaitUntil(() -> helper.assertTrue(sceneOver(momonga, chiikawa), "the scene was never ended"))
             .thenExecute(() -> {
                 helper.assertTrue(restLeft(momonga, PetInteractionData.CLING, chiikawa, helper) > cooldown - RUN_DOWN_TICKS,
-                    Component.literal("Momonga, who was taken away, rests from Chiikawa for only "
-                        + restLeft(momonga, PetInteractionData.CLING, chiikawa, helper) + " of the " + cooldown + " ticks"));
+                    "Momonga, who was taken away, rests from Chiikawa for only "
+                        + restLeft(momonga, PetInteractionData.CLING, chiikawa, helper) + " of the " + cooldown + " ticks");
                 helper.assertTrue(restLeft(chiikawa, PetInteractionData.CLING, momonga, helper) > cooldown - RUN_DOWN_TICKS,
-                    Component.literal("Chiikawa, who was left, rests from Momonga for only "
-                        + restLeft(chiikawa, PetInteractionData.CLING, momonga, helper) + " of the " + cooldown + " ticks"));
+                    "Chiikawa, who was left, rests from Momonga for only "
+                        + restLeft(chiikawa, PetInteractionData.CLING, momonga, helper) + " of the " + cooldown + " ticks");
             })
             .thenSucceed();
     }

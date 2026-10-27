@@ -7,7 +7,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 
 /**
@@ -53,6 +52,6 @@ final class Residue {
             left.add("a present in its paws");
         }
         scenario.untidy().apply(ran).ifPresent(left::add);
-        helper.assertTrue(left.isEmpty(), Component.literal("the pet left its errand still holding " + String.join(", ", left)));
+        helper.assertTrue(left.isEmpty(), "the pet left its errand still holding " + String.join(", ", left));
     }
 }

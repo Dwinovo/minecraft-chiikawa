@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.phys.Vec3;
@@ -85,7 +84,7 @@ public final class SelectorGameTests {
         pet.getRandom().setSeed(SEED);
         long untouched = pet.getRandom().nextLong();
 
-        helper.assertTrue(afterLooking == untouched, Component.literal("looking at the candidates drew from the pet's random"));
+        helper.assertTrue(afterLooking == untouched, "looking at the candidates drew from the pet's random");
         helper.succeed();
     }
 
@@ -103,7 +102,7 @@ public final class SelectorGameTests {
         long rest = shipped.get(ErrandIds.STAY).rests().gaveUp().amount().left().orElseThrow();
 
         helper.runAtTickTime(SETTLED - 2, () -> pets.forEach(pet -> helper.assertTrue(pet.getIntent().filter(ErrandIds.STAY::equals).isPresent(),
-            Component.literal("a pet told to sit is not on the stay errand"))));
+            "a pet told to sit is not on the stay errand")));
         helper.runAtTickTime(SETTLED, () -> pets.forEach(pet -> seats.add(pet.position())));
         helper.onEachTick(() -> showsNothing(helper, pets, seats, "when its errand ran out of time"));
         helper.runAtTickTime(SETTLED + SHORT_STAY + AFTER_THE_LIMIT, () -> {
@@ -116,12 +115,12 @@ public final class SelectorGameTests {
                         ended = i;
                     }
                 }
-                helper.assertTrue(ended >= 0, Component.literal("the errand never ran out of time"));
+                helper.assertTrue(ended >= 0, "the errand never ran out of time");
                 DecisionLog.Entry restart = log.subList(ended + 1, log.size()).stream()
                     .filter(entry -> entry instanceof DecisionLog.Switched switched && ErrandIds.STAY.equals(switched.to()))
                     .findFirst().orElse(null);
                 helper.assertTrue(restart != null && restart.gameTime() - log.get(ended).gameTime() <= rest + 2,
-                    Component.literal("a sitting pet was not back on the stay errand once its rest of " + rest + " ticks was over"));
+                    "a sitting pet was not back on the stay errand once its rest of " + rest + " ticks was over");
             }
             helper.succeed();
         });
@@ -147,15 +146,15 @@ public final class SelectorGameTests {
                     if (!(log.get(i) instanceof DecisionLog.Ended end && end.errand().equals(ErrandIds.STAY))) {
                         continue;
                     }
-                    helper.assertTrue(end.outcome() instanceof Outcome.Done, Component.literal("a habit of a sitting pet ended " + end.outcome()));
+                    helper.assertTrue(end.outcome() instanceof Outcome.Done, "a habit of a sitting pet ended " + end.outcome());
                     habits++;
                     DecisionLog.Entry next = log.subList(i + 1, log.size()).stream()
                         .filter(entry -> entry instanceof DecisionLog.Switched).findFirst().orElse(null);
                     helper.assertTrue(next == null || next instanceof DecisionLog.Switched switched
                             && ErrandIds.STAY.equals(switched.to()) && switched.gameTime() - end.gameTime() <= 1,
-                        Component.literal("a sitting pet did not go on to its next habit at once: " + next));
+                        "a sitting pet did not go on to its next habit at once: " + next);
                 }
-                helper.assertTrue(habits >= 2, Component.literal("a sitting pet had " + habits + " habits in " + HABITS_TICKS + " ticks"));
+                helper.assertTrue(habits >= 2, "a sitting pet had " + habits + " habits in " + HABITS_TICKS + " ticks");
             }
             helper.succeed();
         });
@@ -183,10 +182,10 @@ public final class SelectorGameTests {
         for (int i = 0; i < pets.size(); i++) {
             AbstractPet pet = pets.get(i);
             helper.assertTrue(pet.position().distanceToSqr(seats.get(i)) < 1.0E-6,
-                Component.literal("a sitting pet moved from where it sat " + when + ": " + pet.getType()));
-            helper.assertTrue(pet.getActivity() == PetActivity.NONE, Component.literal("a sitting pet took up a pose " + when));
-            helper.assertTrue(pet.getPerformance().isEmpty(), Component.literal("a sitting pet started a scene " + when));
-            helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, Component.literal("a sitting pet was told to get up " + when));
+                "a sitting pet moved from where it sat " + when + ": " + pet.getType());
+            helper.assertTrue(pet.getActivity() == PetActivity.NONE, "a sitting pet took up a pose " + when);
+            helper.assertTrue(pet.getPerformance().isEmpty(), "a sitting pet started a scene " + when);
+            helper.assertTrue(pet.getPetDirective() == PetDirective.STAY, "a sitting pet was told to get up " + when);
         }
     }
 }

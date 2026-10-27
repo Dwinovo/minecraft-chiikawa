@@ -9,7 +9,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.step.LiveHandle;
 import com.dwinovo.chiikawa.init.InitEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.pathfinder.Path;
@@ -52,14 +51,14 @@ public final class WalkGameTests {
         helper.runAfterDelay(SETTLED_TICKS, () -> {
             handle.walkTo(first, 1.0F, 0);
             pet.getBrain().tick(level, pet);
-            helper.assertTrue(planned(pet, first), Component.literal("the mover did not plan the first walk: " + pet.getNavigation().getPath()));
+            helper.assertTrue(planned(pet, first), "the mover did not plan the first walk: " + pet.getNavigation().getPath());
         });
         helper.runAfterDelay(SETTLED_TICKS + 1, () -> pet.getBrain().tick(level, pet));
         helper.runAfterDelay(SETTLED_TICKS + 2, () -> {
             handle.stopWalking();
             handle.walkTo(second, 1.0F, 0);
             pet.getBrain().tick(level, pet);
-            helper.assertTrue(planned(pet, second), Component.literal("the mover went on along the path to the last walk: " + pet.getNavigation().getPath()));
+            helper.assertTrue(planned(pet, second), "the mover went on along the path to the last walk: " + pet.getNavigation().getPath());
             helper.succeed();
         });
     }

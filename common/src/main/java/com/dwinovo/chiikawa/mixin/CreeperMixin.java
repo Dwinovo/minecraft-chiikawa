@@ -28,6 +28,6 @@ public abstract class CreeperMixin extends Monster {
     @Inject(method = "registerGoals", at = @At("TAIL"))
     private void chiikawa$avoidTaggedPets(CallbackInfo callback) {
         this.goalSelector.addGoal(3, new AvoidEntityGoal<>(this, AbstractPet.class,
-            entity -> entity.getType().is(InitTag.CREEPERS_AVOID), 6.0F, 1.0, 1.2, EntitySelector.NO_CREATIVE_OR_SPECTATOR::test));
+            entity -> entity.typeHolder().is(InitTag.CREEPERS_AVOID), 6.0F, 1.0, 1.2, EntitySelector.NO_CREATIVE_OR_SPECTATOR::test));
     }
 }
