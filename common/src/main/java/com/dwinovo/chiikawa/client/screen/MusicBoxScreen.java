@@ -12,6 +12,7 @@ import com.dwinovo.chiikawa.network.MusicPayloads.MusicCatalogRequestPayload;
 import com.dwinovo.chiikawa.platform.Services;
 import com.dwinovo.chiikawa.ui.DrawSurface;
 import com.dwinovo.chiikawa.ui.Rect;
+import com.dwinovo.chiikawa.ui.TextWrap;
 import com.dwinovo.chiikawa.ui.Ui;
 import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.UiTheme;
@@ -21,6 +22,7 @@ import com.dwinovo.chiikawa.ui.widget.TitledPanel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.ToIntFunction;
 import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -43,6 +45,9 @@ import net.minecraft.world.InteractionHand;
  */
 public class MusicBoxScreen extends Screen {
     private static final int PANEL_W = 236;
+    /** The room a line of the panel's hints has, and how many lines the empty-library hint may take under the catalog line. */
+    static final int HINT_W = PANEL_W - 2 * UiStyle.PAD;
+    static final int HINT_LINES = 3;
     private static final int ROWS = 8;
     /** Rows sit against one another; the tint under the cursor is what separates them. */
     private static final int ROW_H = UiStyle.ROW_H;
@@ -126,16 +131,27 @@ public class MusicBoxScreen extends Screen {
         addRenderableWidget(UiButton.text(leftPos + UiStyle.PAD, modeY, PANEL_W - 2 * UiStyle.PAD,
             UiStyle.CONTROL_H, modeLabel, this::cycleMode));
 
-        // The two doings sit in the middle, between the two page arrows.
-        Component folder = Component.translatable("screen.chiikawa.music_box.open_folder");
+        // The doings sit in the middle, between the two page arrows. Opening the folder is offered only where
+        // it is the folder the songs are read from: on someone else's server they are read from the server's.
         Component reload = Component.translatable("screen.chiikawa.music_box.reload");
-        int folderWidth = buttonWidth(folder);
         int reloadWidth = buttonWidth(reload);
-        int doingsX = leftPos + (PANEL_W - folderWidth - UiStyle.GAP - reloadWidth) / 2;
-        addRenderableWidget(UiButton.text(doingsX, footerY, folderWidth, UiStyle.CONTROL_H, folder,
-            this::openMusicFolder));
-        addRenderableWidget(UiButton.text(doingsX + folderWidth + UiStyle.GAP, footerY, reloadWidth,
-            UiStyle.CONTROL_H, reload, () -> requestCatalog(true)));
+        if (hostsWorld()) {
+            Component folder = Component.translatable("screen.chiikawa.music_box.open_folder");
+            int folderWidth = buttonWidth(folder);
+            int doingsX = leftPos + (PANEL_W - folderWidth - UiStyle.GAP - reloadWidth) / 2;
+            addRenderableWidget(UiButton.text(doingsX, footerY, folderWidth, UiStyle.CONTROL_H, folder,
+                this::openMusicFolder));
+            addRenderableWidget(UiButton.text(doingsX + folderWidth + UiStyle.GAP, footerY, reloadWidth,
+                UiStyle.CONTROL_H, reload, () -> requestCatalog(true)));
+        } else {
+            addRenderableWidget(UiButton.text(leftPos + (PANEL_W - reloadWidth) / 2, footerY, reloadWidth,
+                UiStyle.CONTROL_H, reload, () -> requestCatalog(true)));
+        }
+    }
+
+    /** Whether this game runs the world it is playing, alone or opened to a LAN: then the song library is its own folder. */
+    private static boolean hostsWorld() {
+        return Minecraft.getInstance().hasSingleplayerServer();
     }
 
     private void cycleMode() {
@@ -168,12 +184,21 @@ public class MusicBoxScreen extends Screen {
             int middle = contentY + (ROWS * ROW_H - UiStyle.LINE) / 2;
             Ui.emptyState(surface, Component.translatable("screen.chiikawa.music_box.empty_catalog").getString(),
                 leftPos + PANEL_W / 2, middle);
-            Ui.emptyState(surface, Component.translatable("screen.chiikawa.music_box.empty_hint").getString(),
-                leftPos + PANEL_W / 2, middle + UiStyle.LINE + UiStyle.GAP);
+            int y = middle + UiStyle.LINE + UiStyle.GAP;
+            for (String line : hintLines(this.font::width)) {
+                Ui.emptyState(surface, line, leftPos + PANEL_W / 2, y);
+                y += UiStyle.LINE;
+            }
         } else if (hasFailedTracks()) {
             Ui.emptyState(surface, Component.translatable("screen.chiikawa.music_box.format_hint").getString(),
                 leftPos + PANEL_W / 2, modeY - UiStyle.GAP - UiStyle.LINE);
         }
+    }
+
+    /** What the empty list says to do about it, broken into lines to fit the panel: the words differ by whose folder it is. */
+    private static List<String> hintLines(ToIntFunction<String> width) {
+        String key = hostsWorld() ? "screen.chiikawa.music_box.empty_hint" : "screen.chiikawa.music_box.empty_hint_server";
+        return TextWrap.wrap(Component.translatable(key).getString(), HINT_W, width);
     }
 
     private void openMusicFolder() {
