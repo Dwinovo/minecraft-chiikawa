@@ -24,6 +24,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -286,7 +287,7 @@ public class LaborBoardBlockEntity extends BlockEntity {
      * as a saved one is.
      */
     @Override
-    protected void applyImplicitComponents(BlockEntity.DataComponentInput componentInput) {
+    protected void applyImplicitComponents(DataComponentGetter componentInput) {
         super.applyImplicitComponents(componentInput);
         boardLevel = componentInput.getOrDefault(InitDataComponents.BOARD_LEVEL.get(), BoardLevels.FIRST_LEVEL);
     }

@@ -238,22 +238,22 @@ public final class RhythmGameTests {
         helper.startSequence()
             // The day is ending, and every pet has found the bed by the time the night comes.
             .thenWaitUntil(() -> pets.forEach(pet -> helper.assertTrue(pet.getBrain().hasMemoryValue(MemoryModuleType.NEAREST_BED),
-                pet.getType().toShortString() + " never found the bed as the day ended")))
+                Component.literal(pet.getType().toShortString() + " never found the bed as the day ended"))))
             .thenExecute(() -> helper.getLevel().setDayTime(MIDNIGHT))
             .thenWaitUntil(() -> pets.forEach(pet -> helper.assertTrue(pet.getMind().errands().isOn(ErrandIds.SLEEP)
                     && pet.getPerformance().startsWith("sleep"),
-                pet.getType().toShortString() + " never lay down: it is " + pet.getMind().errands().errand() + " at " + pet.position())))
+                Component.literal(pet.getType().toShortString() + " never lay down: it is " + pet.getMind().errands().errand() + " at " + pet.position()))))
             .thenExecuteAfter(LYING_TICKS, () -> {
                 List<AbstractPet> onTheBed = pets.stream().filter(pet -> onTheBed(helper, pet, head)).toList();
-                helper.assertTrue(onTheBed.size() == 1, onTheBed.size() + " pets lie on the one bed (head " + helper.absolutePos(head) + "): "
-                    + pets.stream().map(pet -> pet.getType().toShortString() + " at " + pet.position() + " " + pet.getBoundingBox()).toList());
+                helper.assertTrue(onTheBed.size() == 1, Component.literal(onTheBed.size() + " pets lie on the one bed (head " + helper.absolutePos(head) + "): "
+                    + pets.stream().map(pet -> pet.getType().toShortString() + " at " + pet.position() + " " + pet.getBoundingBox()).toList()));
                 pets.stream().filter(pet -> !onTheBed.contains(pet)).forEach(pet -> {
                     helper.assertTrue(pet.onGround() && pet.getY() < helper.absolutePos(head).getY() + 0.1,
-                        pet.getType().toShortString() + " is not on the ground: " + pet.position());
+                        Component.literal(pet.getType().toShortString() + " is not on the ground: " + pet.position()));
                     helper.assertTrue(pet.getMind().errands().isOn(ErrandIds.SLEEP) && pet.getPerformance().startsWith("sleep"),
-                        pet.getType().toShortString() + " is not asleep on the ground: it is " + pet.getMind().errands().errand());
+                        Component.literal(pet.getType().toShortString() + " is not asleep on the ground: it is " + pet.getMind().errands().errand()));
                 });
-                helper.assertTrue(pets.stream().allMatch(pet -> pet.getMind().errands().isOn(ErrandIds.SLEEP)), "a pet got up");
+                helper.assertTrue(pets.stream().allMatch(pet -> pet.getMind().errands().isOn(ErrandIds.SLEEP)), Component.literal("a pet got up"));
             })
             .thenSucceed();
     }
