@@ -9,7 +9,9 @@ import com.dwinovo.chiikawa.platform.Services;
 import java.util.function.Supplier;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.ExtraCodecs;
 
 public final class InitDataComponents {
     public static final Supplier<DataComponentType<MusicBoxSelection>> MUSIC_BOX_SELECTION =
@@ -56,6 +58,20 @@ public final class InitDataComponents {
             () -> DataComponentType.<FilmRoll>builder()
                 .persistent(FilmRoll.CODEC)
                 .networkSynchronized(FilmRoll.STREAM_CODEC)
+                .build()
+        );
+
+    /**
+     * How far the owner had paid a labor board up when it was taken up; a board at the first level carries none. Kept
+     * raw, as the board saves it: see {@code LaborBoardBlockEntity}.
+     */
+    public static final Supplier<DataComponentType<Integer>> BOARD_LEVEL =
+        Services.REGISTRY.register(
+            BuiltInRegistries.DATA_COMPONENT_TYPE,
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "board_level"),
+            () -> DataComponentType.<Integer>builder()
+                .persistent(ExtraCodecs.POSITIVE_INT)
+                .networkSynchronized(ByteBufCodecs.VAR_INT)
                 .build()
         );
 
