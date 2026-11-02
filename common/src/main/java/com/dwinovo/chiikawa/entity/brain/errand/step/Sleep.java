@@ -7,22 +7,21 @@ import com.dwinovo.chiikawa.entity.brain.errand.run.Step;
 import com.dwinovo.chiikawa.entity.brain.errand.run.StepStatus;
 import com.dwinovo.chiikawa.entity.brain.errand.run.StepTag;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
+import com.dwinovo.chiikawa.entity.brain.errand.view.PetBed;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 /**
  * Lies down and sleeps, as its character does: on the bed it was walking to, if it still can, and otherwise where it
- * stands. It only lies there, as a cat lies on a bed: it never goes to sleep in it, so the bed is not taken from a player
- * who comes to it, and it does not stop one getting in. Done when it wakes, with the morning or with the owner whose
- * sleep it shares. Always interruptible, and whatever matters more wakes it.
+ * stands, on the floor beside the bed if another pet has taken it. It only lies there, as a cat lies on a bed: it never
+ * goes to sleep in it, so the bed is not taken from a player who comes to it, and it does not stop one getting in. Done
+ * when it wakes, with the morning or with the owner whose sleep it shares. Always interruptible, and whatever matters
+ * more wakes it.
  */
 public final class Sleep implements Step {
     /** How high the top of a bed is above the floor it stands on: nine pixels of sixteen. */
@@ -58,15 +57,19 @@ public final class Sleep implements Step {
         performance = sleeps.performanceOf(BuiltInRegistries.ENTITY_TYPE.getKey(pet.getType()));
         handle.stopWalking();
         handle.clearLook();
-        bed.ifPresent(head -> lieOn(handle, pet.level(), head));
+        bed.ifPresent(head -> lieOn(handle, pet, head));
     }
 
-    /** Sets the pet down on the bed, along it, unless something has made it no bed for a pet since: a player in it. */
-    private static void lieOn(Handle handle, Level level, BlockPos head) {
-        BlockState state = level.getBlockState(head);
-        if (state.is(BlockTags.BEDS) && !state.getOptionalValue(BedBlock.OCCUPIED).orElse(false)) {
+    /**
+     * Sets the pet down on the bed, along it, unless something has made it no bed for this pet since it set off: a player in
+     * it, or another pet that got there first. Then it lies on the floor beside it, as a pet with no bed to go to does.
+     */
+    private static void lieOn(Handle handle, AbstractPet pet, BlockPos head) {
+        if (PetBed.isFreeFor(pet, head)) {
             handle.snapTo(new Vec3(head.getX() + 0.5, head.getY() + BED_TOP, head.getZ() + 0.5),
-                state.getOptionalValue(BedBlock.FACING).map(facing -> facing.toYRot()).orElse(0.0F));
+                pet.level().getBlockState(head).getOptionalValue(BedBlock.FACING).map(facing -> facing.toYRot()).orElse(0.0F));
+        } else {
+            PetBed.groundBeside(pet, head).ifPresent(spot -> handle.snapTo(spot, pet.getYRot()));
         }
     }
 

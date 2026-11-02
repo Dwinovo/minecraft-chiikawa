@@ -164,6 +164,8 @@ public final class LiveHandle implements Handle {
     @Override
     public void snapTo(Vec3 position, float yaw) {
         pet.moveTo(position.x, position.y, position.z, yaw, 0.0F);
+        // Put down is put down: the pace it came at does not carry it off the place, up a step or off a bed.
+        pet.setDeltaMovement(Vec3.ZERO);
         faceYaw(yaw);
     }
 

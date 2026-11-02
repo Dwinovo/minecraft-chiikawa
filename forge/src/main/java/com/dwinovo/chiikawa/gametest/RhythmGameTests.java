@@ -16,6 +16,7 @@ import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.settings.WorldSettings;
 import com.dwinovo.chiikawa.settings.WorldSettingsStore;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
+import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.AfterBatch;
@@ -52,6 +53,7 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 @PrefixGameTestTemplate(false)
 public final class RhythmGameTests {
     private static final String BED_BATCH = "chiikawa_rhythm_bed";
+    private static final String SHARED_BED_BATCH = "chiikawa_rhythm_shared_bed";
     private static final String OWNERS_BED_BATCH = "chiikawa_rhythm_owners_bed";
     private static final String HEEL_BATCH = "chiikawa_rhythm_heel";
     private static final String MORNING_BATCH = "chiikawa_rhythm_morning";
@@ -83,6 +85,11 @@ public final class RhythmGameTests {
 
     @BeforeBatch(batch = BED_BATCH)
     public static void duskForABed(ServerLevel level) {
+        settleWorld(level, Difficulty.NORMAL, DUSK);
+    }
+
+    @BeforeBatch(batch = SHARED_BED_BATCH)
+    public static void duskForPetsAndOneBed(ServerLevel level) {
         settleWorld(level, Difficulty.NORMAL, DUSK);
     }
 
@@ -134,6 +141,11 @@ public final class RhythmGameTests {
 
     @AfterBatch(batch = BED_BATCH)
     public static void dayAfterTheBed(ServerLevel level) {
+        settleWorld(level, Difficulty.NORMAL, NOON);
+    }
+
+    @AfterBatch(batch = SHARED_BED_BATCH)
+    public static void dayAfterTheSharedBed(ServerLevel level) {
         settleWorld(level, Difficulty.NORMAL, NOON);
     }
 
@@ -209,6 +221,43 @@ public final class RhythmGameTests {
                 helper.assertTrue(pet.getIcon() == PetIcon.SLEEPY, "a sleeping pet wears " + pet.getIcon());
                 helper.assertFalse(pet.isSleeping(), "the pet was put to sleep in the bed, as a player is");
                 helper.assertFalse(helper.getBlockState(head).getValue(BedBlock.OCCUPIED), "the bed was taken by the pet");
+            })
+            .thenSucceed();
+    }
+
+    /**
+     * Three pets are free and there is one bed, and the night comes to all of them at once, so each sets off for it as a bed
+     * nobody is on. The first there lies down on it; the others find it taken and sleep on the ground where they stand, and
+     * never on it too.
+     */
+    @GameTest(template = "floor16", batch = SHARED_BED_BATCH, timeoutTicks = WALK_TICKS)
+    public static void pets_that_share_a_bed_do_not_lie_on_it_together(GameTestHelper helper) {
+        BlockPos head = new BlockPos(10, STAND, 10);
+        putBed(helper, head);
+        List<AbstractPet> pets = List.of(
+            GameTestKit.owned(helper, InitEntity.CHIIKAWA_PET.get(), new BlockPos(4, STAND, 4)),
+            GameTestKit.owned(helper, InitEntity.USAGI_PET.get(), new BlockPos(4, STAND, 10)),
+            GameTestKit.owned(helper, InitEntity.KURIMANJU_PET.get(), new BlockPos(4, STAND, 14)));
+
+        helper.startSequence()
+            // The day is ending, and every pet has found the bed by the time the night comes.
+            .thenWaitUntil(() -> pets.forEach(pet -> helper.assertTrue(pet.getBrain().hasMemoryValue(MemoryModuleType.NEAREST_BED),
+                pet.getType().toShortString() + " never found the bed as the day ended")))
+            .thenExecute(() -> helper.getLevel().setDayTime(MIDNIGHT))
+            .thenWaitUntil(() -> pets.forEach(pet -> helper.assertTrue(pet.getMind().errands().isOn(ErrandIds.SLEEP)
+                    && pet.getPerformance().startsWith("sleep"),
+                pet.getType().toShortString() + " never lay down: it is " + pet.getMind().errands().errand() + " at " + pet.position())))
+            .thenExecuteAfter(LYING_TICKS, () -> {
+                List<AbstractPet> onTheBed = pets.stream().filter(pet -> onTheBed(helper, pet, head)).toList();
+                helper.assertTrue(onTheBed.size() == 1, onTheBed.size() + " pets lie on the one bed (head " + helper.absolutePos(head) + "): "
+                    + pets.stream().map(pet -> pet.getType().toShortString() + " at " + pet.position() + " " + pet.getBoundingBox()).toList());
+                pets.stream().filter(pet -> !onTheBed.contains(pet)).forEach(pet -> {
+                    helper.assertTrue(pet.onGround() && pet.getY() < helper.absolutePos(head).getY() + 0.1,
+                        pet.getType().toShortString() + " is not on the ground: " + pet.position());
+                    helper.assertTrue(pet.getMind().errands().isOn(ErrandIds.SLEEP) && pet.getPerformance().startsWith("sleep"),
+                        pet.getType().toShortString() + " is not asleep on the ground: it is " + pet.getMind().errands().errand());
+                });
+                helper.assertTrue(pets.stream().allMatch(pet -> pet.getMind().errands().isOn(ErrandIds.SLEEP)), "a pet got up");
             })
             .thenSucceed();
     }
