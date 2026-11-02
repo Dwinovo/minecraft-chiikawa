@@ -31,6 +31,7 @@ import net.minecraft.world.level.storage.loot.entries.TagEntry;
 import net.minecraft.world.level.storage.loot.functions.CopyComponentsFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.advancements.criterion.StatePropertiesPredicate;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
@@ -72,7 +73,7 @@ public final class ModLootTableProvider extends LootTableProvider {
             // Takes its level with it, as a beehive takes its bees: the owner paid for it.
             output.accept(InitBlocks.LABOR_BOARD.get().getLootTable().orElseThrow(), LootTable.lootTable().withPool(
                 selfPool(InitBlocks.LABOR_BOARD.get()).apply(CopyComponentsFunction
-                    .copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY)
+                    .copyComponentsFromBlockEntity(LootContextParams.BLOCK_ENTITY)
                     .include(InitDataComponents.BOARD_LEVEL.get()))));
             dropSelf(output, InitBlocks.SHOP.get());
             // Only the desk half drops it, as only the head of a bed drops the bed.
