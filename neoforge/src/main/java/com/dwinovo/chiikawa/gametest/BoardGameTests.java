@@ -5,6 +5,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.addSong;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.count;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.holding;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.owned;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.readySong;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
@@ -31,18 +32,26 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * The labor board, end to end: a pet that may not weed for free walks over, takes the
@@ -274,6 +283,74 @@ public final class BoardGameTests {
             .thenWaitUntil(() -> helper.assertTrue(musician.get().getTask().isPresent(),
                 Component.literal("the musician never took the music slip")))
             .thenSucceed();
+    }
+
+    /**
+     * The levels an owner paid for go with the board when it is broken, and come back when it is
+     * put down again, the way a beehive keeps its bees: a board that threw them away would have
+     * charged for something it did not keep.
+     */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void a_broken_board_keeps_the_levels_paid_for(GameTestHelper helper) {
+        BlockPos at = new BlockPos(3, STAND, 3);
+        helper.setBlock(at, InitBlocks.LABOR_BOARD.get());
+        LaborBoardBlockEntity board = (LaborBoardBlockEntity) helper.getBlockEntity(at);
+        helper.assertTrue(board.upgrade() && board.upgrade(), "the board had no two levels to sell");
+        int paidUp = board.boardLevel();
+        ServerPlayer player = survivalPlayer(helper);
+
+        ItemStack dropped = breakByHand(helper, player, at);
+        helper.assertTrue(dropped.is(InitBlocks.LABOR_BOARD.get().asItem()), "the board dropped " + dropped);
+        helper.assertTrue(Integer.valueOf(paidUp).equals(dropped.get(InitDataComponents.BOARD_LEVEL.get())),
+            "the board dropped without the level " + paidUp + " it was paid up to: " + dropped.getComponentsPatch());
+
+        player.setItemInHand(InteractionHand.MAIN_HAND, dropped);
+        Vec3 top = Vec3.atBottomCenterOf(helper.absolutePos(at));
+        player.gameMode.useItemOn(player, helper.getLevel(), dropped, InteractionHand.MAIN_HAND,
+            new BlockHitResult(top, Direction.UP, helper.absolutePos(at.below()), false));
+
+        helper.assertTrue(helper.getBlockState(at).is(InitBlocks.LABOR_BOARD.get()), "the board was not put down again");
+        helper.assertTrue(((LaborBoardBlockEntity) helper.getBlockEntity(at)).boardLevel() == paidUp,
+            "the board came back at level " + ((LaborBoardBlockEntity) helper.getBlockEntity(at)).boardLevel()
+                + ", not the " + paidUp + " it was paid up to");
+        helper.succeed();
+    }
+
+    /** A board that was never paid up drops a plain board, which stacks with any other. */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void a_board_at_its_first_level_drops_a_plain_board(GameTestHelper helper) {
+        BlockPos at = new BlockPos(3, STAND, 3);
+        helper.setBlock(at, InitBlocks.LABOR_BOARD.get());
+
+        ItemStack dropped = breakByHand(helper, survivalPlayer(helper), at);
+
+        helper.assertTrue(dropped.is(InitBlocks.LABOR_BOARD.get().asItem()), "the board dropped " + dropped);
+        helper.assertTrue(dropped.get(InitDataComponents.BOARD_LEVEL.get()) == null,
+            "a board never paid up dropped carrying a level: " + dropped.getComponentsPatch());
+        helper.assertTrue(ItemStack.isSameItemSameComponents(dropped, new ItemStack(InitBlocks.LABOR_BOARD.get())),
+            "a board never paid up would not stack with a plain one");
+        helper.succeed();
+    }
+
+    /** A mock player turns up in creative, where nothing broken drops. */
+    private static ServerPlayer survivalPlayer(GameTestHelper helper) {
+        ServerPlayer player = player(helper);
+        player.setGameMode(GameType.SURVIVAL);
+        return player;
+    }
+
+    /**
+     * Breaks the block through the player's game mode, which is what runs the loot table, and
+     * picks up the one item it threw out.
+     */
+    private static ItemStack breakByHand(GameTestHelper helper, ServerPlayer player, BlockPos at) {
+        BlockPos absolute = helper.absolutePos(at);
+        helper.assertTrue(player.gameMode.destroyBlock(absolute), "the player could not break the board");
+        List<ItemEntity> thrown = helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(absolute).inflate(2));
+        helper.assertTrue(thrown.size() == 1, "breaking the board threw out " + thrown.size() + " items");
+        ItemStack dropped = thrown.get(0).getItem().copy();
+        thrown.get(0).discard();
+        return dropped;
     }
 
     /**
