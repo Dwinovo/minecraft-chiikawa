@@ -591,7 +591,7 @@ public final class SocialGameTests {
         return doing(pet) + " (" + pet.getPerformance() + ", "
             + pet.getBrain().getMemory(InitMemory.INTERACTION_PLAN.get()).map(plan -> "with a plan").orElse("no plan")
             + ") and " + doing(partner) + " (" + partner.getPerformance() + "), "
-            + String.format("%.1f", pet.distanceTo(partner)) + " blocks apart at day time " + pet.level().getDayTime()
+            + String.format("%.1f", pet.distanceTo(partner)) + " blocks apart at day time " + pet.level().getOverworldClockTime()
             + ", after " + pet.getMind().log().entries() + " and " + partner.getMind().log().entries();
     }
 
