@@ -68,7 +68,7 @@ public final class LanguageData {
                 "附近没有野草", "附近没有蘑菇", "要领到对应的工作牌才会做", "只在夜里做",
                 "已经带着一张工作牌", "附近的公告板没有合适的工作牌",
                 "商店里没有它想要又买得起的", "手上没有要送的东西");
-            addBlockTranslations(adder, "劳动公告板", "商店");
+            addBlockTranslations(adder, "劳动公告板", "商店", "等级 %s");
             addSupplyTranslations(adder, "双肩包", "小熊挎包", "鲸鱼挎包", "星星挎包", "给宠物背上，背包多 10 格",
                     "简单料理", "喂给宠物，一阵子干活更起劲",
                     "宠物铃铛", "叫回你的宠物，跨维度也听得见；响过一次要等半分钟");
@@ -330,7 +330,7 @@ public final class LanguageData {
                 "合うお仕事カードを取ったときだけやる", "夜だけやる",
                 "もうお仕事カードを持っている", "近くの掲示板に合うカードがない",
                 "お店に欲しくて買えるものがない", "渡すものを持っていない");
-            addBlockTranslations(adder, "労働掲示板", "お店");
+            addBlockTranslations(adder, "労働掲示板", "お店", "レベル%s");
             addSupplyTranslations(adder, "リュック", "くまのポーチ", "くじらのポーチ", "星のポーチ", "ペットに背負わせると、持ち物が10マス増える",
                     "かんたんごはん", "ペットに食べさせると、しばらくお仕事にやる気が出る",
                     "ペットベル", "ペットを呼び戻す。別のディメンションでも聞こえる。一度鳴らすと30秒待つ");
@@ -592,7 +592,7 @@ public final class LanguageData {
                 "Só com uma ficha compatível", "Só se faz à noite",
                 "Já está com uma ficha", "Nenhuma ficha adequada em um quadro por perto",
                 "Nada aqui que queira e possa pagar", "Nada para dar");
-            addBlockTranslations(adder, "Quadro de Trabalho", "Loja");
+            addBlockTranslations(adder, "Quadro de Trabalho", "Loja", "Nível %s");
             addSupplyTranslations(adder, "Mochila de Costas", "Bolsa do Urso", "Bolsa da Baleia", "Bolsa da Estrela", "Usada por um pet: mais dez espaços",
                     "Prato Simples", "Dado a um pet: com mais vontade de trabalhar por um tempo",
                     "Sino do Pet", "Chama seus pets para casa, até de outra dimensão; meio minuto entre os toques");
@@ -859,7 +859,7 @@ public final class LanguageData {
                 "근처에 잡초가 없어", "근처에 버섯이 없어", "맞는 전표를 받아야 해", "밤에만 해",
                 "이미 전표를 들고 있어", "근처 게시판에 맞는 전표가 없어",
                 "사고 싶고 살 수 있는 물건이 없어", "건넬 것이 없어");
-            addBlockTranslations(adder, "알바 게시판", "상점");
+            addBlockTranslations(adder, "알바 게시판", "상점", "레벨 %s");
             addSupplyTranslations(adder, "배낭", "곰 가방", "고래 가방", "별 가방", "펫에게 입히면 가방이 10칸 늘어",
                     "간단한 요리", "펫에게 먹이면 한동안 일을 더 하려 해",
                     "펫 방울", "펫을 불러. 다른 차원에서도 들려. 한 번 울리면 30초를 기다려");
@@ -1123,7 +1123,7 @@ public final class LanguageData {
                 "Only with a matching slip", "Only done at night",
                 "Already carries a slip", "No slip for it on a nearby board",
                 "Nothing here it wants and can afford", "Nothing to give");
-            addBlockTranslations(adder, "Labor Board", "Shop");
+            addBlockTranslations(adder, "Labor Board", "Shop", "Level %s");
             addSupplyTranslations(adder, "Rucksack", "Bear Pouch", "Whale Pouch", "Star Pouch", "Worn by a pet: ten more slots",
                     "Simple Dish", "Fed to a pet: keener on work for a while",
                     "Pet Bell", "Calls your pets home, even from another dimension; half a minute between rings");
@@ -1617,9 +1617,11 @@ public final class LanguageData {
         adder.add("message.chiikawa.gift.left_by_bed", leftByBed);
     }
 
-    private static void addBlockTranslations(Adder adder, String laborBoard, String shop) {
+    /** The blocks' names, and the line under a labor board that was taken up paid for, saying how far. */
+    private static void addBlockTranslations(Adder adder, String laborBoard, String shop, String boardLevelTip) {
         adder.add("block.chiikawa.labor_board", laborBoard);
         adder.add("block.chiikawa.shop", shop);
+        adder.add("tooltip.chiikawa.labor_board.level", boardLevelTip);
     }
 
     /**
