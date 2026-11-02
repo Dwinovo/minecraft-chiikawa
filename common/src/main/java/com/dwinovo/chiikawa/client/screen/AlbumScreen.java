@@ -24,17 +24,6 @@ import net.minecraft.network.chat.Component;
  * here the frame says it is being developed.
  */
 public class AlbumScreen extends Screen {
-    /** What size the picture is taken to be: the camera's own, 4 by 3. */
-    private static final int PICTURE_WIDTH = 320;
-    private static final int PICTURE_HEIGHT = 240;
-    /** The most a picture is blown up by; past that it is only a blur. */
-    private static final double MAX_SCALE = 2.0;
-    /** The lines the caption is given room for. */
-    private static final int CAPTION_LINES = 2;
-    private static final int MIN_PICTURE_WIDTH = 96;
-    /** Kept clear between the frame and the window's edges. */
-    private static final int MARGIN = 4;
-
     private final List<PhotoData> shots;
     private int page;
     private int leftPos, topPos, panelWidth, panelHeight, footerY;
@@ -76,19 +65,13 @@ public class AlbumScreen extends Screen {
 
     /** Fits the frame to the window: the picture as big as the room allows, the caption under it. */
     private void layOut() {
-        int roomWidth = this.width - 2 * MARGIN - 2 * UiStyle.PAD;
-        // What is left of the height once the title, the caption, the page buttons and the paper round them are paid for.
-        int roomHeight = this.height - 2 * MARGIN - TitledPanel.SIGN_RISE - UiStyle.TITLE_H - 3 * UiStyle.PAD
-            - 2 * UiStyle.GAP - CAPTION_LINES * UiStyle.LINE - UiStyle.CONTROL_H;
-        double scale = Math.min(MAX_SCALE, Math.min((double) roomWidth / PICTURE_WIDTH, (double) roomHeight / PICTURE_HEIGHT));
-        int pictureWidth = Math.max(MIN_PICTURE_WIDTH, (int) (PICTURE_WIDTH * scale));
-        int pictureHeight = pictureWidth * PICTURE_HEIGHT / PICTURE_WIDTH;
+        int pictureWidth = AlbumLayout.pictureWidth(this.width, this.height);
+        int pictureHeight = AlbumLayout.pictureHeight(pictureWidth);
 
-        this.panelWidth = pictureWidth + 2 * UiStyle.PAD;
-        this.panelHeight = UiStyle.TITLE_H + UiStyle.PAD + pictureHeight + UiStyle.GAP + CAPTION_LINES * UiStyle.LINE
-            + UiStyle.GAP + UiStyle.CONTROL_H + UiStyle.PAD;
+        this.panelWidth = AlbumLayout.panelWidth(pictureWidth);
+        this.panelHeight = AlbumLayout.panelHeight(pictureHeight);
         this.leftPos = (this.width - panelWidth) / 2;
-        this.topPos = Math.max(TitledPanel.SIGN_RISE + MARGIN, (this.height - panelHeight) / 2);
+        this.topPos = PanelFit.top(this.height, panelHeight);
         this.footerY = topPos + panelHeight - UiStyle.PAD - UiStyle.CONTROL_H;
         this.frame = new Rect(leftPos + UiStyle.PAD, TitledPanel.contentY(topPos), pictureWidth, pictureHeight);
     }
@@ -128,7 +111,7 @@ public class AlbumScreen extends Screen {
 
         int y = frame.bottom() + UiStyle.GAP;
         List<String> caption = TextWrap.wrap(shot.caption().getString(), panelWidth - 2 * UiStyle.PAD, this.font::width);
-        for (String line : caption.subList(0, Math.min(caption.size(), CAPTION_LINES))) {
+        for (String line : caption.subList(0, Math.min(caption.size(), AlbumLayout.CAPTION_LINES))) {
             surface.drawText(line, leftPos + (panelWidth - surface.textWidth(line)) / 2, y, UiTheme.TEXT);
             y += UiStyle.LINE;
         }

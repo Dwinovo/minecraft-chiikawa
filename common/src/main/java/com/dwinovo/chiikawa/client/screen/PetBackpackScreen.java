@@ -59,18 +59,13 @@ import net.minecraft.world.item.ItemStack;
  */
 public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> {
     private static final int PANEL_WIDTH = OrdersLayout.PANEL_WIDTH;
-    /** The backpack page, the tallest: the pet's things and the player's under them. */
-    private static final int BACKPACK_HEIGHT = 214;
-    /** The orders page: three orders, then what the pet may do, how it fights and whether it swaps to a weapon. */
-    private static final int ORDERS_HEIGHT = 217;
-    /** The tallest page, which the panel's top edge is placed for. */
-    private static final int TALLEST = Math.max(BACKPACK_HEIGHT, ORDERS_HEIGHT);
+    private static final int BACKPACK_HEIGHT = PetScreenLayout.BACKPACK_HEIGHT;
+    private static final int ORDERS_HEIGHT = PetScreenLayout.ORDERS_HEIGHT;
 
     /** Where the hearts sit: under the name board, above everything on the page. */
     private static final int HEARTS_Y = 12;
-    /** Where a page's contents start. */
-    private static final int CONTENT_Y = 24;
-    private static final Rect PORTRAIT = new Rect(UiStyle.PAD, CONTENT_Y, 56, 64);
+    private static final int CONTENT_Y = PetScreenLayout.CONTENT_Y;
+    private static final Rect PORTRAIT = PetScreenLayout.PORTRAIT;
     private static final int PORTRAIT_SCALE = 34;
     /** Nudges the model down inside its window (entity-space units; +down). */
     private static final float PORTRAIT_Y_OFFSET = 0.18F;
@@ -83,7 +78,7 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
 
     /** Status page: the slip card beside the picture. */
     private static final Rect WORK_CARD = new Rect(70, CONTENT_Y, 114, 40);
-    private static final int CHIP_H = 20;
+    private static final int CHIP_H = PetScreenLayout.CHIP_H;
 
     private static final Rect ORDER_FIRST = new Rect(UiStyle.PAD, CONTENT_Y, OrdersLayout.CARD_W, 31);
     private static final int ORDER_PITCH = 36;
@@ -139,7 +134,7 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
         super.init();
         // The top edge is placed for the tallest page and stays put for the others.
         this.leftPos = (this.width - PANEL_WIDTH) / 2;
-        this.topPos = (this.height - TALLEST + Tabs.HEIGHT) / 2;
+        this.topPos = PetScreenLayout.top(this.height);
         showPage(page);
     }
 
@@ -372,14 +367,11 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
         notes.add(new HoverNote(card, List.of(Component.translatable(question).getString())));
     }
 
-    /**
-     * How tall the status page is: the picture and what is beside it, the present when
-     * there is one, the job chip under that, and the two cards of what the pet would do next and why it is not at work.
-     */
+    /** How tall the status page is, for the pet in it. */
     private int statusHeight() {
         AbstractPet pet = this.menu.getPet(Minecraft.getInstance().level);
         boolean gift = pet != null && !pet.getPendingGift().isEmpty();
-        return PORTRAIT.bottom() + 6 + (gift ? 36 : 0) + CHIP_H + UiStyle.GAP + StatusLayout.OUTLOOK_H + UiStyle.PAD;
+        return PetScreenLayout.statusHeight(gift);
     }
 
     /** A small sticker: a picture and a few words, with more waiting under the cursor. */

@@ -70,12 +70,9 @@ public class LaborBoardScreen extends Screen {
 
     @Override
     protected void init() {
-        int rows = Math.max(1, slips.size());
-        this.panelHeight = UiStyle.TITLE_H + UiStyle.PAD
-            + rows * UiStyle.ROW_H + (rows - 1) * UiStyle.GAP
-            + UiStyle.GAP_SECTION + UiStyle.CONTROL_H + UiStyle.PAD;
+        this.panelHeight = BoardLayout.panelHeight(slips.size());
         this.leftPos = (this.width - WIDTH) / 2;
-        this.topPos = (this.height - panelHeight) / 2;
+        this.topPos = PanelFit.top(this.height, panelHeight);
         this.contentY = TitledPanel.contentY(topPos);
         this.footerY = topPos + panelHeight - UiStyle.PAD - UiStyle.CONTROL_H;
         clearWidgets();

@@ -48,13 +48,13 @@ public class MusicBoxScreen extends Screen {
     /** The room a line of the panel's hints has, and how many lines the empty-library hint may take under the catalog line. */
     static final int HINT_W = PANEL_W - 2 * UiStyle.PAD;
     static final int HINT_LINES = 3;
-    private static final int ROWS = 8;
-    /** Rows sit against one another; the tint under the cursor is what separates them. */
-    private static final int ROW_H = UiStyle.ROW_H;
+    private static final int ROW_H = MusicBoxLayout.ROW_H;
 
     private final int handIndex;
     private List<MusicTrackView> tracks;
     private int page;
+    /** How many rows the list shows: as many as the window has the room for, the rest of the tracks on further pages. */
+    private int rows = MusicBoxLayout.MOST_ROWS;
     private int leftPos, topPos, panelHeight;
     private int listY, modeY, footerY;
     private PlaybackMode mode;
@@ -87,11 +87,10 @@ public class MusicBoxScreen extends Screen {
 
     @Override
     protected void init() {
-        int hint = hasFailedTracks() ? UiStyle.LINE + UiStyle.GAP : 0;
-        this.panelHeight = UiStyle.TITLE_H + UiStyle.PAD + ROWS * ROW_H + UiStyle.PAD
-            + hint + UiStyle.CONTROL_H + UiStyle.GAP + UiStyle.CONTROL_H + UiStyle.PAD;
+        this.rows = MusicBoxLayout.rows(this.height, hasFailedTracks());
+        this.panelHeight = MusicBoxLayout.panelHeight(rows, hasFailedTracks());
         this.leftPos = (this.width - PANEL_W) / 2;
-        this.topPos = (this.height - panelHeight) / 2;
+        this.topPos = PanelFit.top(this.height, panelHeight);
         this.listY = topPos + UiStyle.TITLE_H + UiStyle.PAD;
         this.footerY = topPos + panelHeight - UiStyle.PAD - UiStyle.CONTROL_H;
         this.modeY = footerY - UiStyle.GAP - UiStyle.CONTROL_H;
@@ -101,8 +100,8 @@ public class MusicBoxScreen extends Screen {
     private void rebuildButtons() {
         clearWidgets();
         clampPage();
-        int start = page * ROWS;
-        int end = Math.min(tracks.size(), start + ROWS);
+        int start = page * rows;
+        int end = Math.min(tracks.size(), start + rows);
         for (int i = start; i < end; i++) {
             MusicTrackView track = tracks.get(i);
             RowButton row = new RowButton(leftPos + UiStyle.PAD, listY + (i - start) * ROW_H, track);
@@ -181,7 +180,7 @@ public class MusicBoxScreen extends Screen {
             UiStyle.centerIn(topPos, UiStyle.TITLE_H, surface.lineHeight()), UiTheme.TEXT_MUTED);
 
         if (tracks.isEmpty()) {
-            int middle = contentY + (ROWS * ROW_H - UiStyle.LINE) / 2;
+            int middle = contentY + (rows * ROW_H - UiStyle.LINE) / 2;
             Ui.emptyState(surface, Component.translatable("screen.chiikawa.music_box.empty_catalog").getString(),
                 leftPos + PANEL_W / 2, middle);
             int y = middle + UiStyle.LINE + UiStyle.GAP;
@@ -235,7 +234,7 @@ public class MusicBoxScreen extends Screen {
     }
 
     private int pages() {
-        return Math.max(1, (tracks.size() + ROWS - 1) / ROWS);
+        return Math.max(1, (tracks.size() + rows - 1) / rows);
     }
 
     private void clampPage() {
