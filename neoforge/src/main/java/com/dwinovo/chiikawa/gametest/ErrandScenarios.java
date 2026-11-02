@@ -265,7 +265,7 @@ final class ErrandScenarios {
      * so these pets are put off strolling: the cue is where the scenario put it when the pet looks. A scenario is one of
      * these if the reach of what finds its cue is less than a stroll further than where the pet starts.
      */
-    private static final Set<ResourceLocation> CUED = Set.of(ErrandIds.PICK_UP_ITEM,
+    private static final Set<Identifier> CUED = Set.of(ErrandIds.PICK_UP_ITEM,
         WorkData.HARVEST, WorkData.PLANT, WorkData.DELIVER, WorkData.WEED, WorkData.PICK_MUSHROOM,
         PastimeData.RAIN_SHELTER, CharacterPastimeData.COWER, CharacterPastimeData.SWEETS_STARE);
 
