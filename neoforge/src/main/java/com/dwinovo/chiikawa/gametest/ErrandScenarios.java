@@ -256,6 +256,16 @@ final class ErrandScenarios {
     /** The errands that are done in the tick they begin. */
     private static final Set<Identifier> INSTANT = Set.of(ErrandIds.OFFER_GIFT);
 
+    /**
+     * The errands whose scenario puts something down for the pet's senses to find, which they take in only so far and only
+     * every second or two. A pet that strolls off before they next look can be out of reach of it for as long as a case waits,
+     * so these pets are put off strolling: the cue is where the scenario put it when the pet looks. A scenario is one of
+     * these if the reach of what finds its cue is less than a stroll further than where the pet starts.
+     */
+    private static final Set<ResourceLocation> CUED = Set.of(ErrandIds.PICK_UP_ITEM,
+        WorkData.HARVEST, WorkData.PLANT, WorkData.DELIVER, WorkData.WEED, WorkData.PICK_MUSHROOM,
+        PastimeData.RAIN_SHELTER, CharacterPastimeData.COWER, CharacterPastimeData.SWEETS_STARE);
+
     /** The errands whose scenario is not ready the moment the case starts, and what it waits for. */
     private static final Map<Identifier, Needs> NEEDS = Map.of(WorkData.PLAY_MUSIC, new Needs(
         helper -> addSong(ServerMusicSystem.library(helper.getLevel().getServer()), SONG, SONG_SECONDS),
@@ -279,9 +289,18 @@ final class ErrandScenarios {
     static List<Case> cases() {
         List<Case> cases = new ArrayList<>();
         BY_ERRAND.forEach((errand, setUp) -> cases.add(new Case(errand.getPath(), errand, INSTANT.contains(errand),
-            Optional.ofNullable(NEEDS.get(errand)), setUp)));
+            Optional.ofNullable(NEEDS.get(errand)), CUED.contains(errand) ? staysPut(setUp) : setUp)));
         cases.addAll(ALSO);
         return cases;
+    }
+
+    /** @return the setup, with its pet put off strolling */
+    private static Function<GameTestHelper, Scenario> staysPut(Function<GameTestHelper, Scenario> setUp) {
+        return helper -> {
+            Scenario scenario = setUp.apply(helper);
+            GameTestKit.putOff(scenario.pet(), ErrandIds.WANDER);
+            return scenario;
+        };
     }
 
 
@@ -356,15 +375,13 @@ final class ErrandScenarios {
 
     /**
      * A pet out in the rain with a roof a few steps off: it walks under it and sits there for a while. It sits where the
-     * rain does not fall and nothing is left of it in the world. It does not potter about first, since the shelter it saw
-     * can be out of its sight by the time a stroll is over.
+     * rain does not fall and nothing is left of it in the world.
      */
     private static Scenario rainShelter(GameTestHelper helper) {
         rain(helper);
         roof(helper, 8, 8);
         AbstractPet pet = GameTestKit.owned(helper, InitEntity.HACHIWARE_PET.get(), new BlockPos(5, STAND, 5));
         pet.setPetDirective(PetDirective.FREE);
-        GameTestKit.putOff(pet, ErrandIds.WANDER);
         return new Scenario(pet, 2, ran -> Optional.empty());
     }
 
@@ -460,13 +477,11 @@ final class ErrandScenarios {
     }
 
     /**
-     * Rakko and a cake lying a few blocks off: it goes over and stares at it. It does not potter about first, since a stroll
-     * begun before its senses next look round can take it out of sight of the cake.
+     * Rakko and a cake lying a few blocks off: it goes over and stares at it.
      */
     private static Scenario sweetsStare(GameTestHelper helper) {
         AbstractPet pet = GameTestKit.owned(helper, InitEntity.RAKKO_PET.get(), new BlockPos(4, STAND, 4));
         pet.setPetDirective(PetDirective.FREE);
-        GameTestKit.putOff(pet, ErrandIds.WANDER);
         helper.spawnItem(Items.CAKE, new BlockPos(9, STAND, 8));
         return new Scenario(pet, 2, ran -> Optional.empty());
     }
