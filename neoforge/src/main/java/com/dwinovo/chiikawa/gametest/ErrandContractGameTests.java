@@ -183,8 +183,8 @@ public final class ErrandContractGameTests {
                     helper.startSequence()
                         .thenWaitUntil(() -> needs.check().accept(helper))
                         .thenExecute(() -> {
-                            helper.runAfterDelay(timeoutTicks, () -> helper.fail(Component.literal(
-                                "the case was not over " + timeoutTicks + " ticks after its scenario was ready")));
+                            helper.runAfterDelay(timeoutTicks, () -> helper.fail(
+                                "the case was not over " + timeoutTicks + " ticks after its scenario was ready"));
                             body.accept(helper);
                         });
                 }, () -> body.accept(helper));

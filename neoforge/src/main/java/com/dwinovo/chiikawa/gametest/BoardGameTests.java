@@ -295,24 +295,24 @@ public final class BoardGameTests {
         BlockPos at = new BlockPos(3, STAND, 3);
         helper.setBlock(at, InitBlocks.LABOR_BOARD.get());
         LaborBoardBlockEntity board = helper.getBlockEntity(at, LaborBoardBlockEntity.class);
-        helper.assertTrue(board.upgrade() && board.upgrade(), Component.literal("the board had no two levels to sell"));
+        helper.assertTrue(board.upgrade() && board.upgrade(), "the board had no two levels to sell");
         int paidUp = board.boardLevel();
         ServerPlayer player = survivalPlayer(helper);
 
         ItemStack dropped = breakByHand(helper, player, at);
-        helper.assertTrue(dropped.is(InitBlocks.LABOR_BOARD.get().asItem()), Component.literal("the board dropped " + dropped));
+        helper.assertTrue(dropped.is(InitBlocks.LABOR_BOARD.get().asItem()), "the board dropped " + dropped);
         helper.assertTrue(Integer.valueOf(paidUp).equals(dropped.get(InitDataComponents.BOARD_LEVEL.get())),
-            Component.literal("the board dropped without the level " + paidUp + " it was paid up to: " + dropped.getComponentsPatch()));
+            "the board dropped without the level " + paidUp + " it was paid up to: " + dropped.getComponentsPatch());
 
         player.setItemInHand(InteractionHand.MAIN_HAND, dropped);
         Vec3 top = Vec3.atBottomCenterOf(helper.absolutePos(at));
         player.gameMode.useItemOn(player, helper.getLevel(), dropped, InteractionHand.MAIN_HAND,
             new BlockHitResult(top, Direction.UP, helper.absolutePos(at.below()), false));
 
-        helper.assertTrue(helper.getBlockState(at).is(InitBlocks.LABOR_BOARD.get()), Component.literal("the board was not put down again"));
+        helper.assertTrue(helper.getBlockState(at).is(InitBlocks.LABOR_BOARD.get()), "the board was not put down again");
         helper.assertTrue(helper.getBlockEntity(at, LaborBoardBlockEntity.class).boardLevel() == paidUp,
-            Component.literal("the board came back at level " + helper.getBlockEntity(at, LaborBoardBlockEntity.class).boardLevel()
-                + ", not the " + paidUp + " it was paid up to"));
+            "the board came back at level " + helper.getBlockEntity(at, LaborBoardBlockEntity.class).boardLevel()
+                + ", not the " + paidUp + " it was paid up to");
         helper.succeed();
     }
 
@@ -324,11 +324,11 @@ public final class BoardGameTests {
 
         ItemStack dropped = breakByHand(helper, survivalPlayer(helper), at);
 
-        helper.assertTrue(dropped.is(InitBlocks.LABOR_BOARD.get().asItem()), Component.literal("the board dropped " + dropped));
+        helper.assertTrue(dropped.is(InitBlocks.LABOR_BOARD.get().asItem()), "the board dropped " + dropped);
         helper.assertTrue(dropped.get(InitDataComponents.BOARD_LEVEL.get()) == null,
-            Component.literal("a board never paid up dropped carrying a level: " + dropped.getComponentsPatch()));
+            "a board never paid up dropped carrying a level: " + dropped.getComponentsPatch());
         helper.assertTrue(ItemStack.isSameItemSameComponents(dropped, new ItemStack(InitBlocks.LABOR_BOARD.get())),
-            Component.literal("a board never paid up would not stack with a plain one"));
+            "a board never paid up would not stack with a plain one");
         helper.succeed();
     }
 
@@ -345,9 +345,9 @@ public final class BoardGameTests {
      */
     private static ItemStack breakByHand(GameTestHelper helper, ServerPlayer player, BlockPos at) {
         BlockPos absolute = helper.absolutePos(at);
-        helper.assertTrue(player.gameMode.destroyBlock(absolute), Component.literal("the player could not break the board"));
+        helper.assertTrue(player.gameMode.destroyBlock(absolute), "the player could not break the board");
         List<ItemEntity> thrown = helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(absolute).inflate(2));
-        helper.assertTrue(thrown.size() == 1, Component.literal("breaking the board threw out " + thrown.size() + " items"));
+        helper.assertTrue(thrown.size() == 1, "breaking the board threw out " + thrown.size() + " items");
         ItemStack dropped = thrown.get(0).getItem().copy();
         thrown.get(0).discard();
         return dropped;
