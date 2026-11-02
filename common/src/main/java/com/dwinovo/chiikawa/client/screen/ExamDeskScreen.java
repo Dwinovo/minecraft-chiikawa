@@ -43,11 +43,9 @@ import net.minecraft.world.item.ItemStack;
  */
 public class ExamDeskScreen extends Screen {
     private static final int WIDTH = 236;
-    private static final int LINE_H = 11;
+    private static final int LINE_H = ExamDeskLayout.NEWS_H;
     /** Room for the word and the fee, whichever language it is in. */
     private static final int BUTTON_MIN_W = 48;
-    /** As many pets as fit; an owner with more nearby sees the likeliest first. */
-    private static final int MAX_ROWS = 8;
 
     private final DeskViewPayload view;
     private int licence;
@@ -66,13 +64,12 @@ public class ExamDeskScreen extends Screen {
     @Override
     protected void init() {
         Optional<OfferView> offer = offer();
-        int shown = offer.map(o -> Math.min(MAX_ROWS, o.candidates().size())).orElse(0);
-        int tabs = view.offers().size() > 1 ? UiStyle.CONTROL_H + UiStyle.GAP : 0;
-        int list = Math.max(1, shown) * UiStyle.ROW_PITCH;
-        this.panelHeight = UiStyle.TITLE_H + UiStyle.PAD + LINE_H + UiStyle.GAP + tabs + UiStyle.ROW_H + UiStyle.GAP + list
-            + UiStyle.PAD;
+        boolean tabbed = view.offers().size() > 1;
+        int shown = offer.map(o -> ExamDeskLayout.rows(this.height, tabbed, o.candidates().size())).orElse(0);
+        int tabs = tabbed ? UiStyle.CONTROL_H + UiStyle.GAP : 0;
+        this.panelHeight = ExamDeskLayout.panelHeight(shown, tabbed);
         this.leftPos = (this.width - WIDTH) / 2;
-        this.topPos = (this.height - panelHeight) / 2;
+        this.topPos = PanelFit.top(this.height, panelHeight);
         int contentY = TitledPanel.contentY(topPos);
         int tabsY = contentY + LINE_H + UiStyle.GAP;
         this.headerY = tabsY + tabs;
