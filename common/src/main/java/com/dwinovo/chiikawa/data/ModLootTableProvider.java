@@ -23,6 +23,7 @@ import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.entries.TagEntry;
+import net.minecraft.world.level.storage.loot.functions.CopyNbtFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.advancements.critereon.StatePropertiesPredicate;
@@ -30,6 +31,7 @@ import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
+import net.minecraft.world.level.storage.loot.providers.nbt.ContextNbtProvider;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
@@ -62,7 +64,10 @@ public final class ModLootTableProvider extends LootTableProvider {
     private static final class BlockDrops implements LootTableSubProvider {
         @Override
         public void generate(BiConsumer<ResourceLocation, LootTable.Builder> output) {
-            dropSelf(output, InitBlocks.LABOR_BOARD.get());
+            // Takes its level with it, as a beehive takes its bees: the owner paid for it.
+            output.accept(InitBlocks.LABOR_BOARD.get().getLootTable(), LootTable.lootTable().withPool(
+                selfPool(InitBlocks.LABOR_BOARD.get()).apply(CopyNbtFunction.copyData(ContextNbtProvider.BLOCK_ENTITY)
+                    .copy("Level", "BlockEntityTag.Level"))));
             dropSelf(output, InitBlocks.SHOP.get());
             // Only the desk half drops it, as only the head of a bed drops the bed.
             dropSelf(output, InitBlocks.EXAM_DESK.get(), LootItemBlockStatePropertyCondition
