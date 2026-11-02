@@ -4,6 +4,7 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.block.DeskPart;
 import com.dwinovo.chiikawa.block.ExamDeskBlock;
 import com.dwinovo.chiikawa.init.InitBlocks;
+import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.init.InitTag;
 import com.dwinovo.chiikawa.qualification.LicenceRequirement;
@@ -27,6 +28,7 @@ import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.entries.TagEntry;
+import net.minecraft.world.level.storage.loot.functions.CopyComponentsFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.advancements.predicates.StatePropertiesPredicate;
@@ -67,7 +69,11 @@ public final class ModLootTableProvider extends LootTableProvider {
     private static final class BlockDrops implements LootTableSubProvider {
         @Override
         public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
-            dropSelf(output, InitBlocks.LABOR_BOARD.get());
+            // Takes its level with it, as a beehive takes its bees: the owner paid for it.
+            output.accept(InitBlocks.LABOR_BOARD.get().getLootTable(), LootTable.lootTable().withPool(
+                selfPool(InitBlocks.LABOR_BOARD.get()).apply(CopyComponentsFunction
+                    .copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY)
+                    .include(InitDataComponents.BOARD_LEVEL.get()))));
             dropSelf(output, InitBlocks.SHOP.get());
             // Only the desk half drops it, as only the head of a bed drops the bed.
             dropSelf(output, InitBlocks.EXAM_DESK.get(), LootItemBlockStatePropertyCondition
