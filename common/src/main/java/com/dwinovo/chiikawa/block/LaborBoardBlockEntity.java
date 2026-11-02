@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.errand.view.LivePetView;
 import com.dwinovo.chiikawa.entity.job.JobWork;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
+import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.network.BoardPayloads;
 import com.dwinovo.chiikawa.task.BoardLevels;
 import com.dwinovo.chiikawa.task.BoardSlips;
@@ -23,6 +24,7 @@ import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -44,6 +46,8 @@ import net.minecraft.world.level.storage.ValueOutput;
 public class LaborBoardBlockEntity extends BlockEntity {
     private static final Codec<List<BoardSlot>> SLOTS_CODEC = BoardSlot.CODEC.listOf();
     private static final long NOT_ROLLED = -1L;
+    /** Where the level is saved; also what an item carrying it leaves out of the block entity data it keeps. */
+    private static final String LEVEL_TAG = "Level";
     /** How often a board looks at the clock: a second is soon enough for a plate to go up. */
     private static final int CLOCK_TICKS = 20;
 
@@ -257,7 +261,7 @@ public class LaborBoardBlockEntity extends BlockEntity {
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
         output.putLong("Day", day);
-        output.putInt("Level", boardLevel);
+        output.putInt(LEVEL_TAG, boardLevel);
         output.store("Slots", SLOTS_CODEC, slots);
     }
 
@@ -267,12 +271,39 @@ public class LaborBoardBlockEntity extends BlockEntity {
         day = input.getLongOr("Day", NOT_ROLLED);
         // Kept as saved and read within the levels there are when it is used: a pack that
         // takes levels away for a while does not cost the board the ones it paid for.
-        boardLevel = input.getInt("Level")
+        boardLevel = input.getInt(LEVEL_TAG)
             .map(saved -> Math.max(BoardLevels.FIRST_LEVEL, saved))
             .orElse(BoardLevels.FIRST_LEVEL);
         slots = input.read("Slots", SLOTS_CODEC).orElse(List.of());
         // A save holds the slips and the plates follow from them; a player's game is sent
         // the plates alone.
         hanging = input.getInt("Hanging").orElseGet(() -> BoardSlips.hanging(slots));
+    }
+
+    /**
+     * Gives the level back to a board placed from an item that carries it, the way a beehive gets its
+     * bees back. A level carried on an item is kept raw and read within the levels there are when it is used,
+     * as a saved one is.
+     */
+    @Override
+    protected void applyImplicitComponents(BlockEntity.DataComponentInput componentInput) {
+        super.applyImplicitComponents(componentInput);
+        boardLevel = componentInput.getOrDefault(InitDataComponents.BOARD_LEVEL.get(), BoardLevels.FIRST_LEVEL);
+    }
+
+    /** Puts the level on the item the board drops as, unless it is the first: a plain board is a plain item that stacks. */
+    @Override
+    protected void collectImplicitComponents(DataComponentMap.Builder components) {
+        super.collectImplicitComponents(components);
+        if (boardLevel > BoardLevels.FIRST_LEVEL) {
+            components.set(InitDataComponents.BOARD_LEVEL.get(), boardLevel);
+        }
+    }
+
+    /** The level travels as a component of the item, not as saved data beside it. */
+    @Override
+    public void removeComponentsFromTag(CompoundTag tag) {
+        super.removeComponentsFromTag(tag);
+        tag.remove(LEVEL_TAG);
     }
 }
