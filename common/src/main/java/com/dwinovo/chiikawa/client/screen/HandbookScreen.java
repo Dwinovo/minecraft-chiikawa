@@ -38,8 +38,6 @@ public class HandbookScreen extends Screen {
     private static final int MAX_HEIGHT = HandbookLayout.MAX_HEIGHT;
     private static final int SCENE_MAX = HandbookLayout.SCENE_MAX;
     private static final int SCENE_MIN = HandbookLayout.SCENE_MIN;
-    /** Kept clear between the panel and the window's edges. */
-    private static final int MARGIN = 4;
     private static final int ROW_H = 16;
     private static final int TITLE_LINE = HandbookLayout.TITLE_LINE;
     private static final int LINK_H = HandbookLayout.LINK_H;
@@ -64,9 +62,9 @@ public class HandbookScreen extends Screen {
 
     @Override
     protected void init() {
-        this.panelHeight = Math.min(MAX_HEIGHT, this.height - TitledPanel.SIGN_RISE - 2 * MARGIN);
+        this.panelHeight = Math.min(MAX_HEIGHT, PanelFit.room(this.height));
         this.leftPos = (this.width - WIDTH) / 2;
-        this.topPos = Math.max(TitledPanel.SIGN_RISE + MARGIN, (this.height - panelHeight) / 2);
+        this.topPos = PanelFit.top(this.height, panelHeight);
         this.contentY = TitledPanel.contentY(topPos);
         this.contentH = HandbookLayout.contentHeight(panelHeight);
         clearWidgets();
