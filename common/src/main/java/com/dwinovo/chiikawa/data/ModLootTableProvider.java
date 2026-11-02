@@ -70,7 +70,7 @@ public final class ModLootTableProvider extends LootTableProvider {
         @Override
         public void generate(BiConsumer<ResourceKey<LootTable>, LootTable.Builder> output) {
             // Takes its level with it, as a beehive takes its bees: the owner paid for it.
-            output.accept(InitBlocks.LABOR_BOARD.get().getLootTable(), LootTable.lootTable().withPool(
+            output.accept(InitBlocks.LABOR_BOARD.get().getLootTable().orElseThrow(), LootTable.lootTable().withPool(
                 selfPool(InitBlocks.LABOR_BOARD.get()).apply(CopyComponentsFunction
                     .copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY)
                     .include(InitDataComponents.BOARD_LEVEL.get()))));
