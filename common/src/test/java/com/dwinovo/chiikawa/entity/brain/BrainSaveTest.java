@@ -50,8 +50,13 @@ class BrainSaveTest {
         assertEquals(Optional.of(SLEPT), back.getMemory(MemoryModuleType.LAST_SLEPT));
     }
 
+    /**
+     * A memory id nobody registered is not loaded, and the pet still loads. On this version it takes the rest of the pet's
+     * memories down with it, which is why an id a save may hold stays registered; a version that keeps what it can read of a
+     * brain loses only that one.
+     */
     @Test
-    void aMemoryIdNobodyRegisteredWipesAllTheMemoriesOfThePet() {
+    void aMemoryIdNobodyRegisteredIsNotLoaded() {
         CompoundTag memories = memoriesOf(saved(KNOWN));
         CompoundTag retired = new CompoundTag();
         retired.putBoolean("value", true);
@@ -81,8 +86,12 @@ class BrainSaveTest {
         assertThrows(IllegalStateException.class, () -> back.getMemory(MemoryModuleType.LAST_WOKEN), "nor may it be asked for");
     }
 
+    /**
+     * A memory whose value no longer reads is not loaded, and the pet still loads. On this version it takes the rest of the
+     * pet's memories down with it, as an id nobody registered does.
+     */
     @Test
-    void aMemoryWhoseValueNoLongerReadsWipesAllTheMemoriesOfThePetToo() {
+    void aMemoryWhoseValueNoLongerReadsIsNotLoaded() {
         CompoundTag memories = memoriesOf(saved(KNOWN));
         CompoundTag broken = new CompoundTag();
         broken.putString("value", "not a time");
