@@ -7,6 +7,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.holding;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.owned;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.readySong;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.SONG_IMPORT_TICKS;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 
@@ -78,8 +79,6 @@ public final class BoardGameTests {
     /** The song the musician's box selects. */
     private static final String SONG = "chiikawa_gametest_board_song";
     private static final int SONG_SECONDS = 1;
-    /** A song is imported in its own time, off the server thread, which the server does not wait for. */
-    private static final int SONG_IMPORT_TICKS = 100000;
 
     @BeforeBatch(batch = BATCH)
     public static void settle(ServerLevel level) {
