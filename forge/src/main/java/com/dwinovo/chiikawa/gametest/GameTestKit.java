@@ -354,6 +354,8 @@ public final class GameTestKit {
 
     /** Low, to keep a song's file small; the library resamples it like any other. */
     private static final int SONG_RATE = 8000;
+    /** A song is imported in its own time, off the server thread, which the server does not wait for: a case that needs one waits this long. */
+    static final int SONG_IMPORT_TICKS = 100000;
 
     /**
      * Writes a song of silence — which is all the server ever looks at — into the server's
