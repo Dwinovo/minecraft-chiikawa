@@ -1,22 +1,15 @@
 package com.dwinovo.chiikawa.block;
 
 import com.dwinovo.chiikawa.init.InitBlockEntities;
-import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.network.BoardServerPacketHandler;
 import com.dwinovo.chiikawa.platform.Services;
 import com.mojang.serialization.MapCodec;
-import java.util.List;
 import java.util.Map;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -76,16 +69,6 @@ public class LaborBoardBlock extends BaseEntityBlock {
     @Override
     protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return Shapes.empty();
-    }
-
-    /** Says how far the board was paid up, when the item carries it. */
-    @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        super.appendHoverText(stack, context, tooltip, flag);
-        Integer level = stack.get(InitDataComponents.BOARD_LEVEL.get());
-        if (level != null) {
-            tooltip.add(Component.translatable("tooltip.chiikawa.labor_board.level", level).withStyle(ChatFormatting.GRAY));
-        }
     }
 
     /** The notes face whoever places the board. */
