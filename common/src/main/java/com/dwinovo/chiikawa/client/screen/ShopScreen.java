@@ -40,8 +40,8 @@ import net.minecraft.world.item.ItemStack;
  */
 public class ShopScreen extends Screen {
     private static final int PANEL_W = 236;
-    private static final int ROWS = 7;
-    private static final int ROW_H = UiStyle.ROW_H;
+    private static final int ROWS = ShopLayout.ROWS;
+    private static final int ROW_H = ShopLayout.ROW_H;
 
     private final BlockPos shop;
     private final List<PriceView> prices;
@@ -61,10 +61,9 @@ public class ShopScreen extends Screen {
 
     @Override
     protected void init() {
-        this.panelHeight = UiStyle.TITLE_H + UiStyle.PAD + ROWS * ROW_H + UiStyle.PAD
-            + UiStyle.CONTROL_H + UiStyle.PAD;
+        this.panelHeight = ShopLayout.panelHeight();
         this.leftPos = (this.width - PANEL_W) / 2;
-        this.topPos = (this.height - panelHeight) / 2;
+        this.topPos = PanelFit.top(this.height, panelHeight);
         this.listY = TitledPanel.contentY(topPos);
         this.footerY = topPos + panelHeight - UiStyle.PAD - UiStyle.CONTROL_H;
         this.coin = new ItemIcon(Wallet.coins(1));
