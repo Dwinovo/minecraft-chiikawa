@@ -7,6 +7,7 @@ import com.dwinovo.chiikawa.item.HachiwareWeapon;
 import com.dwinovo.chiikawa.item.DescribedItem;
 import com.dwinovo.chiikawa.item.FilmItem;
 import com.dwinovo.chiikawa.item.HandbookItem;
+import com.dwinovo.chiikawa.item.LaborBoardItem;
 import com.dwinovo.chiikawa.item.MusicBoxItem;
 import com.dwinovo.chiikawa.item.PetBellItem;
 import com.dwinovo.chiikawa.item.PetDollItem;
@@ -55,7 +56,7 @@ public final class InitItems {
     public static final Supplier<Item> MUSIC_BOX =
         registerItem("music_box", MusicBoxItem::new);
     public static final Supplier<BlockItem> LABOR_BOARD =
-        registerItem("labor_board", properties -> new BlockItem(InitBlocks.LABOR_BOARD.get(), properties.useBlockDescriptionPrefix()));
+        registerItem("labor_board", properties -> new LaborBoardItem(InitBlocks.LABOR_BOARD.get(), properties.useBlockDescriptionPrefix()));
     public static final Supplier<BlockItem> SHOP =
         registerItem("shop", properties -> new BlockItem(InitBlocks.SHOP.get(), properties.useBlockDescriptionPrefix()));
     public static final Supplier<BlockItem> EXAM_DESK =
