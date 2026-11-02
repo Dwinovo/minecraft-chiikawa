@@ -105,12 +105,13 @@ public final class SaveGameTests {
     }
 
     /**
-     * A memory id nobody registered in the save takes every other memory of the pet down with it: the home, the
-     * cooldowns, the rests, the photographed biomes. So an id a save may hold stays registered, and a build that does not
-     * know an id a newer build saved, as an older build does not know the rests the errands keep, loses these.
+     * A memory id nobody registered in the save is not loaded, and the pet still loads. On this version it takes every
+     * other memory of the pet down with it: the home, the cooldowns, the rests, the photographed biomes. So an id a save may
+     * hold stays registered, and a build that does not know an id a newer build saved, as an older build does not know the
+     * rests the errands keep, loses these.
      */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 20)
-    public static void a_save_holding_a_memory_nobody_registered_loads_with_none_of_the_memories(GameTestHelper helper) {
+    public static void a_save_holding_a_memory_nobody_registered_loads_without_it(GameTestHelper helper) {
         AbstractPet loaded = readBack(helper, remembering(helper), saved -> {
             CompoundTag retired = new CompoundTag();
             retired.putBoolean("value", true);
