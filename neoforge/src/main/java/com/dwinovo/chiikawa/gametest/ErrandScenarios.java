@@ -6,6 +6,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.addSong;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.carries;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.ownedPet;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
+import static com.dwinovo.chiikawa.gametest.GameTestKit.SONG_IMPORT_TICKS;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.readySong;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 
@@ -56,6 +57,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -190,9 +192,23 @@ final class ErrandScenarios {
      * @param instant whether the errand is done in the tick it begins, so that there is no step to cut it at and it is
      *                never seen running: its cases are the ones that ask what it offers and see it done, see
      *                {@link ErrandContractGameTests}
+     * @param needs what the world is to have before the setup is run, if anything
      * @param setUp the setup
      */
-    record Case(String name, ResourceLocation errand, boolean instant, Function<GameTestHelper, Scenario> setUp) {
+    record Case(String name, ResourceLocation errand, boolean instant, Optional<Needs> needs,
+                Function<GameTestHelper, Scenario> setUp) {
+    }
+
+    /**
+     * What the world is to have before a scenario is set up, when it comes in its own time and no tick of the case is
+     * spent on it: the case begins it, waits for it as long as it is given, and only then sets the scenario up and starts
+     * the clock the errand is held to, so that the clock counts the errand and not the wait.
+     *
+     * @param begin starts it
+     * @param check fails the case with what is wanting until it is so
+     * @param ticks how long to wait for it
+     */
+    record Needs(Consumer<GameTestHelper> begin, Consumer<GameTestHelper> check, int ticks) {
     }
 
     private static final Map<ResourceLocation, Function<GameTestHelper, Scenario>> BY_ERRAND = Map.ofEntries(
@@ -238,9 +254,16 @@ final class ErrandScenarios {
     /** The errands that are done in the tick they begin. */
     private static final Set<ResourceLocation> INSTANT = Set.of(ErrandIds.OFFER_GIFT);
 
+    /** The errands whose scenario is not ready the moment the case starts, and what it waits for. */
+    private static final Map<ResourceLocation, Needs> NEEDS = Map.of(WorkData.PLAY_MUSIC, new Needs(
+        helper -> addSong(ServerMusicSystem.library(helper.getLevel().getServer()), SONG, SONG_SECONDS),
+        helper -> helper.assertTrue(readySong(ServerMusicSystem.library(helper.getLevel().getServer()), SONG).isPresent(),
+            "the song was never imported"),
+        SONG_IMPORT_TICKS));
+
     /** The setups beside an errand's own, for the other way it goes about it. */
     private static final List<Case> ALSO = List.of(
-        new Case("gift_owner_bedside", ErrandIds.GIFT_OWNER, false, ErrandScenarios::giftOwnerBedside));
+        new Case("gift_owner_bedside", ErrandIds.GIFT_OWNER, false, Optional.empty(), ErrandScenarios::giftOwnerBedside));
 
     private ErrandScenarios() {
     }
@@ -253,19 +276,12 @@ final class ErrandScenarios {
     /** @return every setup the contract cases are made from: each errand's own, then those for its other ways */
     static List<Case> cases() {
         List<Case> cases = new ArrayList<>();
-        BY_ERRAND.forEach((errand, setUp) -> cases.add(new Case(errand.getPath(), errand, INSTANT.contains(errand), setUp)));
+        BY_ERRAND.forEach((errand, setUp) -> cases.add(new Case(errand.getPath(), errand, INSTANT.contains(errand),
+            Optional.ofNullable(NEEDS.get(errand)), setUp)));
         cases.addAll(ALSO);
         return cases;
     }
 
-    /** @return the pet and what the errand touches, set up in the case's level */
-    static Scenario setUp(ResourceLocation errand, GameTestHelper helper) {
-        Function<GameTestHelper, Scenario> setUp = BY_ERRAND.get(errand);
-        if (setUp == null) {
-            throw new IllegalArgumentException(errand + " has no scenario");
-        }
-        return setUp.apply(helper);
-    }
 
     /**
      * A pet at heel and its owner across the yard, just short of the reach of the area it acts in and so a walk of a few seconds.
@@ -976,22 +992,18 @@ final class ErrandScenarios {
 
     /**
      * Hachiware with a music box set to play the one song over and over, the song written to the server's music folder the
-     * way a player adds one and imported in its own time: the box is put in the pet's hand once the song is ready. However
-     * it is cut short, no stream of the song is left going for the pet.
+     * way a player adds one and imported in its own time, which the case waits for before this is set up, see {@link #NEEDS}.
+     * However it is cut short, no stream of the song is left going for the pet.
      */
     private static Scenario playMusic(GameTestHelper helper) {
         ServerMusicLibrary library = ServerMusicSystem.library(helper.getLevel().getServer());
-        addSong(library, SONG, SONG_SECONDS);
+        MusicTrackView song = readySong(library, SONG).orElseThrow();
         AbstractPet pet = GameTestKit.owned(helper, InitEntity.HACHIWARE_PET.get(), new BlockPos(8, STAND, 8));
-        boolean[] given = {false};
-        helper.onEachTick(() -> readySong(library, SONG).filter(track -> !given[0]).ifPresent(track -> {
-            given[0] = true;
-            ItemStack box = new ItemStack(InitItems.MUSIC_BOX.get());
-            box.set(InitDataComponents.MUSIC_BOX_SELECTION.get(), new MusicBoxSelection(track.trackId(), SONG, 1));
-            box.set(InitDataComponents.MUSIC_BOX_MODE.get(), PlaybackMode.REPEAT_ONE);
-            pet.setItemSlot(EquipmentSlot.MAINHAND, box);
-        }));
-        return new Scenario(pet, 1, ran -> readySong(library, SONG).map(MusicTrackView::trackId)
+        ItemStack box = new ItemStack(InitItems.MUSIC_BOX.get());
+        box.set(InitDataComponents.MUSIC_BOX_SELECTION.get(), new MusicBoxSelection(song.trackId(), SONG, 1));
+        box.set(InitDataComponents.MUSIC_BOX_MODE.get(), PlaybackMode.REPEAT_ONE);
+        pet.setItemSlot(EquipmentSlot.MAINHAND, box);
+        return new Scenario(pet, 1, ran -> Optional.of(song.trackId())
             .filter(track -> ServerMusicSystem.streams(helper.getLevel().getServer()).isPlaying(pet, track))
             .map(track -> "the song is still being streamed for the pet"));
     }

@@ -57,7 +57,9 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
  * no step to cut it at and is never seen running: it has the case that asks what it offers, and one that sees it done
  * and rested as its data says, which are the two a pet with no mind of its own and a pet with one can show.
  *
- * <p>The cases are made when the game registers them, one set for each scenario.
+ * <p>The cases are made when the game registers them, one set for each scenario. What a case is held to is counted from
+ * when its scenario is ready: one that needs something that comes in its own time, such as a song imported, waits for it
+ * first, see {@link ErrandScenarios.Needs}.
  */
 @GameTestHolder(Constants.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -165,14 +167,27 @@ public final class ErrandContractGameTests {
     /**
      * A case of its own batch, so that it runs alone: a pet in the yard next to it, such as another case's, is a friend
      * for a photographer to take a photo of and a rival for a pet to pick up an item from.
+     *
+     * @param timeoutTicks how long the case has once its scenario is ready; the game's own time limit is that and the
+     *                     longest the scenario is given to be ready
      */
     private static TestFunction testOf(String what, ErrandScenarios.Case scenario, int timeoutTicks,
             Consumer<GameTestHelper> body) {
+        int wait = scenario.needs().map(ErrandScenarios.Needs::ticks).orElse(0);
         return new TestFunction(BATCH + "_" + what + "_" + scenario.name(),
             ErrandContractGameTests.class.getSimpleName().toLowerCase() + "." + what + "_" + scenario.name(), TEMPLATE,
-            timeoutTicks, 0L, true, helper -> {
+            wait + timeoutTicks, 0L, true, helper -> {
                 settleWorld(helper.getLevel(), Difficulty.NORMAL, NOON);
-                body.accept(helper);
+                scenario.needs().ifPresentOrElse(needs -> {
+                    needs.begin().accept(helper);
+                    helper.startSequence()
+                        .thenWaitUntil(() -> needs.check().accept(helper))
+                        .thenExecute(() -> {
+                            helper.runAfterDelay(timeoutTicks, () -> helper.fail(
+                                "the case was not over " + timeoutTicks + " ticks after its scenario was ready"));
+                            body.accept(helper);
+                        });
+                }, () -> body.accept(helper));
             });
     }
 
@@ -219,7 +234,7 @@ public final class ErrandContractGameTests {
         AbstractPet pet = scenario.pet();
         Watch watch = new Watch();
         boolean[] done = {false};
-        helper.runAtTickTime(SETTLING, () -> helper.assertTrue(watch.seen != null || done[0],
+        helper.runAfterDelay(SETTLING, () -> helper.assertTrue(watch.seen != null || done[0],
             "the pet never set off on " + id + ": " + whereItStands(pet, id)));
         helper.onEachTick(() -> {
             if (done[0]) {
@@ -253,7 +268,7 @@ public final class ErrandContractGameTests {
         Watch watch = new Watch();
         int[] next = {0};
         long[] told = {-1};
-        helper.runAtTickTime(INTERRUPT_CASE_TICKS - 1, () -> helper.assertTrue(next[0] == points.length,
+        helper.runAfterDelay(INTERRUPT_CASE_TICKS - 1, () -> helper.assertTrue(next[0] == points.length,
             id + " was cut short only " + next[0] + " times: " + whereItStands(pet, id)));
         helper.onEachTick(() -> {
             if (next[0] == points.length) {
@@ -295,7 +310,7 @@ public final class ErrandContractGameTests {
         ResourceLocation id = setUp.errand();
         ErrandScenarios.Scenario scenario = setUp.setUp().apply(helper);
         AbstractPet pet = scenario.pet();
-        helper.runAtTickTime(SETTLING, () -> helper.assertTrue(endedSince(pet, id, -1).isPresent(),
+        helper.runAfterDelay(SETTLING, () -> helper.assertTrue(endedSince(pet, id, -1).isPresent(),
             "the pet never did " + id + ": " + whereItStands(pet, id)));
         helper.onEachTick(() -> {
             Optional<DecisionLog.Ended> ended = endedSince(pet, id, -1);
