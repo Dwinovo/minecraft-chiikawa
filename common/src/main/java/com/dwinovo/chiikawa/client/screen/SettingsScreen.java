@@ -70,14 +70,9 @@ public class SettingsScreen extends Screen {
         this.hintLines = Math.max(wrap(worldOnlyHint()).size(), wrap(readOnlyHint()).size());
         int volumeLines = wrap(volumeHint()).size();
 
-        int contentHeight = 3 * UiStyle.CONTROL_H + 2 * UiStyle.GAP
-            + UiStyle.GAP + hintLines * UiStyle.LINE
-            + UiStyle.GAP_SECTION + UiStyle.CONTROL_H
-            + UiStyle.GAP + volumeLines * UiStyle.LINE
-            + UiStyle.GAP_SECTION + UiStyle.CONTROL_H;
-        this.panelHeight = UiStyle.TITLE_H + UiStyle.PAD + contentHeight + UiStyle.PAD;
+        this.panelHeight = SettingsLayout.panelHeight(hintLines, volumeLines);
         this.leftPos = (this.width - PANEL_W) / 2;
-        this.topPos = Math.max(TitledPanel.SIGN_RISE + UiStyle.GAP, (this.height - panelHeight) / 2);
+        this.topPos = PanelFit.top(this.height, panelHeight);
 
         int x = leftPos + UiStyle.PAD;
         int y = TitledPanel.contentY(topPos);
