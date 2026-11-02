@@ -60,7 +60,7 @@ public final class LanguageData {
                 "獭师父的剑"
             );
             addMusicBoxTranslations(adder, "八音盒", "未选择歌曲", "歌曲：%s", "选择歌曲", "导入中", "导入失败", "没有可播放的歌曲",
-                "把 MP3 / WAV 文件放入文件夹后点击刷新", "部分歌曲导入失败", "请使用 MP3 格式的音频", "打开文件夹", "刷新", "上一页", "下一页");
+                "把 MP3 / WAV 文件放入文件夹后点击刷新", "请把 MP3 / WAV 放进服务器的 config/chiikawa/music 文件夹，再点刷新", "部分歌曲导入失败", "请使用 MP3 格式的音频", "打开文件夹", "刷新", "上一页", "下一页");
             addMusicBoxModeTranslations(adder, "播放模式：%s", "单次播放", "列表循环", "随机播放", "单曲循环");
             addIntentFailureTranslations(adder, "无法跟随主人", "主人就在附近", "没什么可做的", "目标不在范围内",
                 "目标离开了活动范围", "已离开活动范围", "附近没有可拾取的物品", "没有可收割的作物", "没有可种植的耕地", "没有可存放的容器",
@@ -321,7 +321,7 @@ public final class LanguageData {
                 "ラッコの剣"
             );
             addMusicBoxTranslations(adder, "オルゴール", "曲が選ばれていません", "曲：%s", "曲を選ぶ", "読み込み中", "読み込み失敗", "再生できる曲がありません",
-                "MP3・WAVファイルをフォルダに入れて、更新を押してください", "一部の曲を読み込めませんでした", "MP3形式の音声を使ってください", "フォルダを開く", "更新", "前のページ", "次のページ");
+                "MP3・WAVファイルをフォルダに入れて、更新を押してください", "サーバーの config/chiikawa/music フォルダにMP3・WAVを入れて、更新を押してください", "一部の曲を読み込めませんでした", "MP3形式の音声を使ってください", "フォルダを開く", "更新", "前のページ", "次のページ");
             addMusicBoxModeTranslations(adder, "再生モード：%s", "1回だけ再生", "全曲リピート", "シャッフル再生", "1曲リピート");
             addIntentFailureTranslations(adder, "飼い主についていけない", "飼い主がすぐ近くにいる", "することがない", "目標が届かないところにいる",
                 "目標が行動範囲の外に出た", "行動範囲の外に出た", "近くに拾えるアイテムがない", "収穫できる作物がない", "種をまける耕地がない", "しまえる入れ物がない",
@@ -583,7 +583,7 @@ public final class LanguageData {
                 "Espada do Rakko"
             );
             addMusicBoxTranslations(adder, "Caixa de Música", "Nenhuma música selecionada", "Música: %s", "Escolher Música", "Importando", "Falhou", "Nenhuma música para tocar",
-                "Coloque arquivos MP3 / WAV na pasta e depois recarregue", "Algumas músicas não puderam ser importadas", "Use arquivos de áudio MP3", "Abrir Pasta", "Recarregar", "Página anterior", "Próxima página");
+                "Coloque arquivos MP3 / WAV na pasta e depois recarregue", "Coloque MP3 / WAV na pasta config/chiikawa/music do servidor e recarregue", "Algumas músicas não puderam ser importadas", "Use arquivos de áudio MP3", "Abrir Pasta", "Recarregar", "Página anterior", "Próxima página");
             addMusicBoxModeTranslations(adder, "Reprodução: %s", "Tocar uma vez", "Repetir tudo", "Aleatório", "Repetir uma");
             addIntentFailureTranslations(adder, "Não consegue seguir o dono", "O dono está por perto", "Nada para fazer", "O alvo está fora de alcance",
                 "O alvo saiu da área permitida", "Saiu da área permitida", "Nenhum item para pegar", "Nenhuma plantação para colher", "Nenhuma terra arada para plantar", "Nenhum recipiente para entregar",
@@ -851,7 +851,7 @@ public final class LanguageData {
                 "랏코의 검"
             );
             addMusicBoxTranslations(adder, "오르골", "선택된 곡 없음", "곡: %s", "곡 고르기", "가져오는 중", "실패", "재생할 곡이 없어",
-                "폴더에 MP3 / WAV를 넣고 새로고침해", "일부 곡을 가져오지 못했어", "MP3 파일을 써 줘", "폴더 열기", "새로고침", "이전 페이지", "다음 페이지");
+                "폴더에 MP3 / WAV를 넣고 새로고침해", "서버의 config/chiikawa/music 폴더에 MP3 / WAV를 넣고 새로고침해", "일부 곡을 가져오지 못했어", "MP3 파일을 써 줘", "폴더 열기", "새로고침", "이전 페이지", "다음 페이지");
             addMusicBoxModeTranslations(adder, "재생: %s", "한 번 재생", "목록 반복", "무작위", "한 곡 반복");
             addIntentFailureTranslations(adder, "주인을 따라갈 수 없어", "주인이 바로 옆에 있어", "할 일이 없어", "목표가 범위 밖이야",
                 "목표가 활동 범위를 벗어났어", "활동 범위를 벗어났어", "주울 물건이 없어", "수확할 작물이 없어", "심을 밭이 없어", "넣을 상자가 없어",
@@ -1114,7 +1114,7 @@ public final class LanguageData {
                 "Rakko's Sword"
             );
             addMusicBoxTranslations(adder, "Music Box", "No song selected", "Song: %s", "Choose Song", "Importing", "Failed", "No playable songs",
-                "Put MP3 / WAV files in the folder, then reload", "Some songs failed to import", "Please use MP3 audio files", "Open Folder", "Reload", "Previous page", "Next page");
+                "Put MP3 / WAV files in the folder, then reload", "Put MP3 / WAV in the server's config/chiikawa/music folder, then reload", "Some songs failed to import", "Please use MP3 audio files", "Open Folder", "Reload", "Previous page", "Next page");
             addMusicBoxModeTranslations(adder, "Playback: %s", "Play once", "Repeat all", "Shuffle", "Repeat one");
             addIntentFailureTranslations(adder, "Can't follow the owner", "Owner is close by", "Nothing to do", "Target is out of range",
                 "Target left the allowed area", "Left the allowed area", "No item to pick up", "No crop to harvest", "No farmland to plant", "No container to deliver to",
@@ -1948,6 +1948,7 @@ public final class LanguageData {
         String failed,
         String emptyCatalog,
         String emptyHint,
+        String emptyHintServer,
         String importFailed,
         String formatHint,
         String openFolder,
@@ -1963,6 +1964,7 @@ public final class LanguageData {
         adder.add("screen.chiikawa.music_box.failed", failed);
         adder.add("screen.chiikawa.music_box.empty_catalog", emptyCatalog);
         adder.add("screen.chiikawa.music_box.empty_hint", emptyHint);
+        adder.add("screen.chiikawa.music_box.empty_hint_server", emptyHintServer);
         adder.add("screen.chiikawa.music_box.import_failed", importFailed);
         adder.add("screen.chiikawa.music_box.format_hint", formatHint);
         adder.add("screen.chiikawa.music_box.open_folder", openFolder);
