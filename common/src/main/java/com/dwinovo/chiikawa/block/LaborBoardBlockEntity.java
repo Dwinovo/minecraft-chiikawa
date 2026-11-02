@@ -43,6 +43,8 @@ import net.minecraft.world.level.block.state.BlockState;
 public class LaborBoardBlockEntity extends BlockEntity {
     private static final Codec<List<BoardSlot>> SLOTS_CODEC = BoardSlot.CODEC.listOf();
     private static final long NOT_ROLLED = -1L;
+    /** Where the level is saved; also what a dropped board keeps of it, under {@code BlockEntityTag}, and what its tooltip reads. */
+    static final String LEVEL_TAG = "Level";
     /** How often a board looks at the clock: a second is soon enough for a plate to go up. */
     private static final int CLOCK_TICKS = 20;
 
@@ -256,7 +258,10 @@ public class LaborBoardBlockEntity extends BlockEntity {
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
         tag.putLong("Day", day);
-        tag.putInt("Level", boardLevel);
+        // Only above the first level: a board never paid up drops with no data and stacks with a new one.
+        if (boardLevel > BoardLevels.FIRST_LEVEL) {
+            tag.putInt(LEVEL_TAG, boardLevel);
+        }
         tag.put("Slots", SLOTS_CODEC.encodeStart(NbtOps.INSTANCE, slots).getOrThrow(false, Constants.LOG::error));
     }
 
@@ -266,8 +271,8 @@ public class LaborBoardBlockEntity extends BlockEntity {
         day = tag.contains("Day", Tag.TAG_LONG) ? tag.getLong("Day") : NOT_ROLLED;
         // Kept as saved and read within the levels there are when it is used: a pack that
         // takes levels away for a while does not cost the board the ones it paid for.
-        boardLevel = tag.contains("Level", Tag.TAG_INT)
-            ? Math.max(BoardLevels.FIRST_LEVEL, tag.getInt("Level"))
+        boardLevel = tag.contains(LEVEL_TAG, Tag.TAG_INT)
+            ? Math.max(BoardLevels.FIRST_LEVEL, tag.getInt(LEVEL_TAG))
             : BoardLevels.FIRST_LEVEL;
         slots = tag.contains("Slots", Tag.TAG_LIST)
             ? SLOTS_CODEC.parse(NbtOps.INSTANCE, tag.get("Slots")).result().orElse(List.of())
