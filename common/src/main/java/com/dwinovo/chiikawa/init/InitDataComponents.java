@@ -68,7 +68,7 @@ public final class InitDataComponents {
     public static final Supplier<DataComponentType<Integer>> BOARD_LEVEL =
         Services.REGISTRY.register(
             BuiltInRegistries.DATA_COMPONENT_TYPE,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "board_level"),
+            new ResourceLocation(Constants.MOD_ID, "board_level"),
             () -> DataComponentType.<Integer>builder()
                 .persistent(ExtraCodecs.POSITIVE_INT)
                 .networkSynchronized(ByteBufCodecs.VAR_INT)
