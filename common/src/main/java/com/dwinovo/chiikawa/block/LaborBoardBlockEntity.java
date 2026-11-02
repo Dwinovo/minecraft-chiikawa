@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.entity.brain.constraint.PetOwnership;
 import com.dwinovo.chiikawa.entity.brain.errand.view.LivePetView;
 import com.dwinovo.chiikawa.entity.job.JobWork;
 import com.dwinovo.chiikawa.init.InitBlockEntities;
+import com.dwinovo.chiikawa.init.InitDataComponents;
 import com.dwinovo.chiikawa.network.BoardPayloads;
 import com.dwinovo.chiikawa.task.BoardLevels;
 import com.dwinovo.chiikawa.task.BoardSlips;
@@ -22,6 +23,7 @@ import java.util.function.UnaryOperator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
@@ -43,6 +45,8 @@ import net.minecraft.world.level.block.state.BlockState;
 public class LaborBoardBlockEntity extends BlockEntity {
     private static final Codec<List<BoardSlot>> SLOTS_CODEC = BoardSlot.CODEC.listOf();
     private static final long NOT_ROLLED = -1L;
+    /** Where the level is saved; also what an item carrying it leaves out of the block entity data it keeps. */
+    private static final String LEVEL_TAG = "Level";
     /** How often a board looks at the clock: a second is soon enough for a plate to go up. */
     private static final int CLOCK_TICKS = 20;
 
@@ -256,7 +260,7 @@ public class LaborBoardBlockEntity extends BlockEntity {
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.putLong("Day", day);
-        tag.putInt("Level", boardLevel);
+        tag.putInt(LEVEL_TAG, boardLevel);
         tag.put("Slots", SLOTS_CODEC.encodeStart(NbtOps.INSTANCE, slots).getOrThrow());
     }
 
@@ -266,8 +270,8 @@ public class LaborBoardBlockEntity extends BlockEntity {
         day = tag.contains("Day", Tag.TAG_LONG) ? tag.getLong("Day") : NOT_ROLLED;
         // Kept as saved and read within the levels there are when it is used: a pack that
         // takes levels away for a while does not cost the board the ones it paid for.
-        boardLevel = tag.contains("Level", Tag.TAG_INT)
-            ? Math.max(BoardLevels.FIRST_LEVEL, tag.getInt("Level"))
+        boardLevel = tag.contains(LEVEL_TAG, Tag.TAG_INT)
+            ? Math.max(BoardLevels.FIRST_LEVEL, tag.getInt(LEVEL_TAG))
             : BoardLevels.FIRST_LEVEL;
         slots = tag.contains("Slots", Tag.TAG_LIST)
             ? SLOTS_CODEC.parse(NbtOps.INSTANCE, tag.get("Slots")).result().orElse(List.of())
@@ -275,5 +279,32 @@ public class LaborBoardBlockEntity extends BlockEntity {
         // A save holds the slips and the plates follow from them; a player's game is sent
         // the plates alone.
         hanging = tag.contains("Hanging", Tag.TAG_INT) ? tag.getInt("Hanging") : BoardSlips.hanging(slots);
+    }
+
+    /**
+     * Gives the level back to a board placed from an item that carries it, the way a beehive gets its
+     * bees back. A level carried on an item is kept raw and read within the levels there are when it is used,
+     * as a saved one is.
+     */
+    @Override
+    protected void applyImplicitComponents(BlockEntity.DataComponentInput componentInput) {
+        super.applyImplicitComponents(componentInput);
+        boardLevel = componentInput.getOrDefault(InitDataComponents.BOARD_LEVEL.get(), BoardLevels.FIRST_LEVEL);
+    }
+
+    /** Puts the level on the item the board drops as, unless it is the first: a plain board is a plain item that stacks. */
+    @Override
+    protected void collectImplicitComponents(DataComponentMap.Builder components) {
+        super.collectImplicitComponents(components);
+        if (boardLevel > BoardLevels.FIRST_LEVEL) {
+            components.set(InitDataComponents.BOARD_LEVEL.get(), boardLevel);
+        }
+    }
+
+    /** The level travels as a component of the item, not as saved data beside it. */
+    @Override
+    public void removeComponentsFromTag(CompoundTag tag) {
+        super.removeComponentsFromTag(tag);
+        tag.remove(LEVEL_TAG);
     }
 }
