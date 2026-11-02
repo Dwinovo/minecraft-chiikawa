@@ -303,8 +303,8 @@ public class LaborBoardBlockEntity extends BlockEntity {
 
     /** The level travels as a component of the item, not as saved data beside it. */
     @Override
-    public void removeComponentsFromTag(CompoundTag tag) {
-        super.removeComponentsFromTag(tag);
-        tag.remove(LEVEL_TAG);
+    public void removeComponentsFromTag(ValueOutput output) {
+        super.removeComponentsFromTag(output);
+        output.discard(LEVEL_TAG);
     }
 }
