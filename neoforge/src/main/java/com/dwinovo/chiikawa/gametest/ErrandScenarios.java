@@ -65,6 +65,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
@@ -272,7 +273,7 @@ final class ErrandScenarios {
     private static final Map<Identifier, Needs> NEEDS = Map.of(WorkData.PLAY_MUSIC, new Needs(
         helper -> addSong(ServerMusicSystem.library(helper.getLevel().getServer()), SONG, SONG_SECONDS),
         helper -> helper.assertTrue(readySong(ServerMusicSystem.library(helper.getLevel().getServer()), SONG).isPresent(),
-            "the song was never imported"),
+            Component.literal("the song was never imported")),
         SONG_IMPORT_TICKS));
 
     /** The setups beside an errand's own, for the other way it goes about it. */
