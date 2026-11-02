@@ -38,7 +38,6 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -51,7 +50,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.BedBlock;
-import net.minecraft.world.phys.AABB;
 
 /**
  * A view of a live pet, for one evaluation. Each fact is worked out the first time an errand asks
@@ -427,21 +425,14 @@ public final class LivePetView implements PetView {
     }
 
     /**
-     * As a cat finds a bed to lie on, only the one the sensor remembers: no one in it, as the game keeps count with
-     * {@code OCCUPIED} for a player, and no pet on either half of it.
+     * As a cat finds a bed to lie on, only the one the sensor remembers, and only while it is {@link PetBed#isFreeFor free
+     * for} this pet.
      */
     private Optional<GlobalPos> findFreeBed() {
         Level level = pet.level();
         return pet.getBrain().getMemory(MemoryModuleType.NEAREST_BED)
             .filter(level::isLoaded)
-            .filter(head -> level.getBlockState(head).is(BlockTags.BEDS)
-                && !level.getBlockState(head).getOptionalValue(BedBlock.OCCUPIED).orElse(false))
-            .filter(head -> {
-                BlockPos foot = level.getBlockState(head).getOptionalValue(BedBlock.FACING)
-                    .map(facing -> head.relative(facing.getOpposite())).orElse(head);
-                AABB bed = new AABB(head).minmax(new AABB(foot));
-                return level.getEntitiesOfClass(AbstractPet.class, bed, other -> other != pet).isEmpty();
-            })
+            .filter(head -> PetBed.isFreeFor(pet, head))
             .map(head -> GlobalPos.of(level.dimension(), head));
     }
 
