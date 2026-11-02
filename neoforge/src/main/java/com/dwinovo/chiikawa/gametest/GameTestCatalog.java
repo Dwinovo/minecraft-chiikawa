@@ -97,7 +97,10 @@ public final class GameTestCatalog {
             int timeoutTicks, Consumer<GameTestHelper> body) {
         ResourceLocation id = ResourceLocation.fromNamespaceAndPath(namespace,
             holder.getSimpleName().toLowerCase(Locale.ROOT) + "." + name);
-        FUNCTIONS.register(id.getPath(), () -> body);
+        FUNCTIONS.register(id.getPath(), () -> helper -> {
+            BatchYards.note(batch, helper);
+            body.accept(helper);
+        });
         CASES.add(new Case(id, namespace, template, batch, timeoutTicks));
     }
 
@@ -166,7 +169,7 @@ public final class GameTestCatalog {
 
     /**
      * A batch: the world settled by the batch's {@link BeforeBatch} methods before its cases run, and put back by its
-     * {@link AfterBatch} methods once they have.
+     * {@link AfterBatch} methods once they have, and its yards cleared.
      */
     private record Batch(String name) implements TestEnvironmentDefinition {
         static final MapCodec<Batch> CODEC = Codec.STRING.fieldOf("batch").xmap(Batch::new, Batch::name);
@@ -179,6 +182,7 @@ public final class GameTestCatalog {
         @Override
         public void teardown(ServerLevel level) {
             AFTER_BATCH.getOrDefault(name, List.of()).forEach(handle -> run(handle, level));
+            BatchYards.clear(name, level);
         }
 
         @Override
