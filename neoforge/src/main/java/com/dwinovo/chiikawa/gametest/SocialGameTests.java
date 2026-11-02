@@ -407,7 +407,8 @@ public final class SocialGameTests {
                     new FinishedSlip(PetTaskTypeData.WEEDING, now));
                 thinkOf(kurimanju, PetInteractionData.COFFEE, chiikawa);
             })
-            .thenWaitUntil(() -> helper.assertTrue("drink".equals(chiikawa.getPerformance()), Component.literal("the coffee never came")))
+            .thenWaitUntil(() -> helper.assertTrue("drink".equals(chiikawa.getPerformance()),
+                Component.literal("the coffee never came: " + state(kurimanju, chiikawa))))
             .thenExecute(() -> helper.assertTrue(chiikawa.isEager(), Component.literal("the coffee did not perk Chiikawa up")))
             .thenSucceed();
     }
@@ -426,7 +427,8 @@ public final class SocialGameTests {
         helper.startSequence()
             .thenIdle(SETTLE_TICKS)
             .thenExecute(() -> thinkOf(momonga, PetInteractionData.CLING, chiikawa))
-            .thenWaitUntil(() -> helper.assertTrue("clung_to".equals(chiikawa.getPerformance()), Component.literal("the scene never began")))
+            .thenWaitUntil(() -> helper.assertTrue("clung_to".equals(chiikawa.getPerformance()),
+                Component.literal("the scene never began: " + state(momonga, chiikawa))))
             .thenWaitUntil(() -> helper.assertTrue(sceneOver(momonga, chiikawa), Component.literal("the scene never ended")))
             .thenExecute(() -> assertSaid(helper, momonga, VoiceMoment.TURNED_DOWN))
             .thenSucceed();
@@ -582,6 +584,15 @@ public final class SocialGameTests {
     /** @return what the pet is on, for a case to say what it found */
     private static String doing(AbstractPet pet) {
         return pet.getIntent().map(ResourceLocation::getPath).orElse("nothing");
+    }
+
+    /** @return where a scene that never began got to, for a case to say what it found */
+    private static String state(AbstractPet pet, AbstractPet partner) {
+        return doing(pet) + " (" + pet.getPerformance() + ", "
+            + pet.getBrain().getMemory(InitMemory.INTERACTION_PLAN.get()).map(plan -> "with a plan").orElse("no plan")
+            + ") and " + doing(partner) + " (" + partner.getPerformance() + "), "
+            + String.format("%.1f", pet.distanceTo(partner)) + " blocks apart at day time " + pet.level().getDayTime()
+            + ", after " + pet.getMind().log().entries() + " and " + partner.getMind().log().entries();
     }
 
     /** @return how many times the pet has gone over to ask another to play and been told no */
