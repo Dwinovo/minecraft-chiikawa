@@ -1,6 +1,6 @@
 package com.dwinovo.chiikawa.anim.render;
 
-import com.dwinovo.chiikawa.anim.state.PetAnimContext;
+import com.dwinovo.chiikawa.anim.pose.BoneVisibilityRule;
 import java.util.List;
 
 /**
@@ -14,7 +14,7 @@ import java.util.List;
  * @param animations the animations that show the bone, by short name
  * @param unless animations that put it away again while they play over one of those
  */
-public record ShownDuring(List<String> animations, List<String> unless) implements BoneVisibilityRule {
+public record ShownDuring(List<String> animations, List<String> unless) implements BoneVisibilityRule<ChiikawaRenderState> {
     public ShownDuring {
         animations = List.copyOf(animations);
         unless = List.copyOf(unless);
@@ -35,14 +35,14 @@ public record ShownDuring(List<String> animations, List<String> unless) implemen
     }
 
     @Override
-    public boolean isVisible(ChiikawaRenderState state, PetAnimContext ctx) {
+    public boolean isVisible(ChiikawaRenderState state) {
         for (String animation : unless) {
-            if (ChiikawaEntityRenderer.isAnyControllerPlaying(state, animation)) {
+            if (state.pose.isAnyPlaying(animation)) {
                 return false;
             }
         }
         for (String animation : animations) {
-            if (ChiikawaEntityRenderer.isAnyControllerPlaying(state, animation)) {
+            if (state.pose.isAnyPlaying(animation)) {
                 return true;
             }
         }
