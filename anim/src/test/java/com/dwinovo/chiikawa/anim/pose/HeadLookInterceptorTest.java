@@ -1,4 +1,4 @@
-package com.dwinovo.chiikawa.anim.render;
+package com.dwinovo.chiikawa.anim.pose;
 
 import com.dwinovo.chiikawa.anim.pose.BedrockRotation;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,18 +48,18 @@ class HeadLookInterceptorTest {
         return world;
     }
 
-    private static ChiikawaRenderState looking(float yaw, float pitch) {
-        ChiikawaRenderState state = new ChiikawaRenderState();
-        state.netHeadYaw = yaw;
-        state.headPitch = pitch;
-        return state;
+    private static PoseFrame looking(float yaw, float pitch) {
+        PoseFrame frame = new PoseFrame();
+        frame.netHeadYaw = yaw;
+        frame.headPitch = pitch;
+        return frame;
     }
 
     @Test
     void aSittingPetLookingAsideAndUpKeepsItsHeadLevel() {
         // Sitting: the body leans forward 15 degrees and the head leans back 15 to stay upright.
         float[] buf = pose(15, -15);
-        new HeadLookInterceptor().apply(skeleton(), looking(60, -30), null, buf);
+        new HeadLookInterceptor("AllHead").apply(skeleton(), looking(60, -30), null, buf);
         Vector3f across = headInModel(buf).transform(new Vector3f(1, 0, 0));
         assertEquals(0.0f, across.y, 1.0e-4f, "the head rolled over as the leaning body turned it");
     }
@@ -67,7 +67,7 @@ class HeadLookInterceptorTest {
     @Test
     void theHeadTurnsAsTheLookSaysWhateverTheBodyDoes() {
         float[] buf = pose(15, -15);
-        new HeadLookInterceptor().apply(skeleton(), looking(60, -30), null, buf);
+        new HeadLookInterceptor("AllHead").apply(skeleton(), looking(60, -30), null, buf);
         Quaternionf want = BedrockRotation.of(new Quaternionf(), 30 * DEG, -60 * DEG, 0);
         Vector3f forward = headInModel(buf).transform(new Vector3f(0, 0, -1));
         Vector3f wanted = want.transform(new Vector3f(0, 0, -1));
@@ -79,7 +79,7 @@ class HeadLookInterceptorTest {
     @Test
     void standingStraightTheHeadTakesTheLookAsItIs() {
         float[] buf = pose(0, 0);
-        new HeadLookInterceptor().apply(skeleton(), looking(40, 20), null, buf);
+        new HeadLookInterceptor("AllHead").apply(skeleton(), looking(40, 20), null, buf);
         int head = 2 * PoseSampler.FLOATS_PER_BONE;
         assertEquals(-20 * DEG, buf[head], 1.0e-4f);
         assertEquals(-40 * DEG, buf[head + 1], 1.0e-4f);

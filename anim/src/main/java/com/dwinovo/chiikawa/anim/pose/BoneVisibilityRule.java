@@ -1,20 +1,17 @@
-package com.dwinovo.chiikawa.anim.render;
-
-import com.dwinovo.chiikawa.anim.state.PetAnimContext;
+package com.dwinovo.chiikawa.anim.pose;
 
 /**
  * Predicate over per-frame state that decides whether a named bone should be
- * rendered. Registered against a renderer via
- * {@link ChiikawaEntityRenderer#addBoneVisibilityRule}, evaluated once per
- * frame at extract time, result stored in {@link ChiikawaRenderState#hiddenBones}.
+ * drawn. Registered against a {@link BoneVisibility}, evaluated once per frame
+ * when the frame's state is captured, the result kept as the frame's hidden-bone
+ * flags.
  *
  * <p>This is the long-term home for "this bone shows when X" logic — it does
  * not require modifying the {@code .geo.json} or {@code .animation.json}
  * (Blockbench's default export stays untouched), and it does not require a
  * Molang variable bridge to be authored alongside each animation. The rule is
- * a pure Java lambda over the same {@link PetAnimContext} the rest of the
- * state machine reads, so it composes naturally with controllers and
- * interceptors.
+ * a pure Java lambda over the same state the rest of the pipeline reads, so it
+ * composes naturally with controllers and interceptors.
  *
  * <h2>Bedrock spec note</h2>
  * The Bedrock geometry schema does <em>not</em> declare a {@code visibility}
@@ -33,18 +30,19 @@ import com.dwinovo.chiikawa.anim.state.PetAnimContext;
  * the absence of a vote means hidden.
  *
  * <h2>Children</h2>
- * Hiding a bone hides its entire subtree —
- * {@link com.dwinovo.chiikawa.anim.render.ModelRenderer#renderBone} early-returns
- * on hidden bones, never recursing into children. This matches the intent
+ * Hiding a bone hides its entire subtree — the model drawer skips a hidden
+ * bone without recursing into its children. This matches the intent
  * 90% of the time (hide a guitar bone → its strings/tuners children also
  * disappear) and is more conservative than GeckoLib v5's split
  * {@code skipRender / skipChildrenRender} flags, which is a known footgun.
+ *
+ * @param <S> the caller's per-frame state the rule reads, see {@link BoneVisibility}
  */
 @FunctionalInterface
-public interface BoneVisibilityRule {
+public interface BoneVisibilityRule<S> {
     /**
      * @return {@code true} if the bone should render this frame; {@code false}
      *         to vote for hiding it
      */
-    boolean isVisible(ChiikawaRenderState state, PetAnimContext ctx);
+    boolean isVisible(S state);
 }
