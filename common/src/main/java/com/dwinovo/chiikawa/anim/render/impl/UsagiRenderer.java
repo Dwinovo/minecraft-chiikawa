@@ -16,7 +16,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 public class UsagiRenderer extends ChiikawaEntityRenderer<UsagiPet> {
     public UsagiRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, "usagi");
-        addBoneVisibilityRule("Mouth3", (state, animCtx) -> isTalking(state));
+        addBoneVisibilityRule("Mouth3", state -> isTalking(state));
         addBoneVisibilityRule("Mouth3", ShownDuring.any("happy"));
     }
 }

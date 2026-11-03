@@ -18,7 +18,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 public class RakkoRenderer extends ChiikawaEntityRenderer<RakkoPet> {
     public RakkoRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, "rakko");
-        addBoneVisibilityRule("Mouth3", (state, animCtx) -> isTalking(state));
-        addBoneVisibilityRule("Cape", (state, animCtx) -> BagLayer.wearOf(state) != BagItem.Wear.ON_BACK);
+        addBoneVisibilityRule("Mouth3", state -> isTalking(state));
+        addBoneVisibilityRule("Cape", state -> BagLayer.wearOf(state) != BagItem.Wear.ON_BACK);
     }
 }
