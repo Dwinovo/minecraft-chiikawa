@@ -22,22 +22,23 @@ import org.joml.Quaternionf;
  */
 public final class PetIconRenderer {
     /**
+     * @param nameShown whether the game draws the pet's name tag, which the icon hangs over
      * @return what is on the pet's mind this frame, or {@code null} when there is no card to draw
      */
     @Nullable
-    public Mind extract(AbstractPet pet, float partialTick) {
+    public Mind extract(AbstractPet pet, boolean nameShown, float partialTick) {
         PixelArt sprite = sprite(pet.getIcon());
         if (sprite == null || Minecraft.getInstance().options.hideGui || pet.getSpeech().isPresent()) {
             return null;
         }
         Vec3 nameTag = OverHead.spot(pet, partialTick);
-        return nameTag == null ? null : new Mind(sprite, nameTag);
+        return nameTag == null ? null : new Mind(sprite, nameTag, nameShown);
     }
 
     public void render(Mind mind, PoseStack poseStack, MultiBufferSource bufferSource, Font font,
                        Quaternionf cameraOrientation) {
         PixelArt sprite = mind.sprite();
-        OverHead.draw(mind.nameTag(), poseStack, bufferSource, font, cameraOrientation, 1.0F, surface -> {
+        OverHead.draw(mind.nameTag(), mind.nameShown(), poseStack, bufferSource, font, cameraOrientation, 1.0F, surface -> {
             int width = sprite.width() + 2 * UiStyle.GAP;
             int height = sprite.height() + 2 * UiStyle.TIGHT;
             int x = -width / 2;
@@ -52,8 +53,9 @@ public final class PetIconRenderer {
      *
      * @param sprite  the picture on the card
      * @param nameTag where the game draws the pet's name tag, relative to the pet
+     * @param nameShown whether the game draws the name tag there
      */
-    public record Mind(PixelArt sprite, Vec3 nameTag) {
+    public record Mind(PixelArt sprite, Vec3 nameTag, boolean nameShown) {
     }
 
     /** @return the picture for an icon, none for no icon */

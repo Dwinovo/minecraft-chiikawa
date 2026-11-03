@@ -283,11 +283,13 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         }
 
         // Taken with the rest of the state, as a name tag's text is; a pet drawn as a picture
-        // in a screen says nothing over its head.
+        // in a screen says nothing over its head. What hangs over the head clears the name tag
+        // when there is one, which the state says once the game has decided on it.
+        boolean nameShown = state.nameTag != null;
         state.put(PetData.SPEECH, !drawingPortrait && entity instanceof AbstractPet pet
-            ? speech.extract(pet, partialTick) : null);
+            ? speech.extract(pet, nameShown, partialTick) : null);
         state.put(PetData.ICON, !drawingPortrait && entity instanceof AbstractPet pet
-            ? icon.extract(pet, partialTick) : null);
+            ? icon.extract(pet, nameShown, partialTick) : null);
 
         if (entity instanceof ChiikawaAnimated animated) {
             long nowNs = AnimationClock.fromTicks(entity.tickCount, partialTick);
