@@ -5,8 +5,7 @@ import java.util.List;
 /**
  * Code-bounded sustained loop activity. The third animation-need bucket
  * (alongside one-shot {@link PetAction}/{@link PetReaction} edge events and
- * the always-running decorative loops registered via
- * {@link com.dwinovo.chiikawa.client.anim.render.ChiikawaEntityRenderer#addLoopingController}).
+ * the always-running decorative loops such as {@link PetControllers#BLINK}).
  *
  * <h2>Why this exists</h2>
  * Short events ({@code triggerAction(HARVEST)}) play the harvest swing exactly
