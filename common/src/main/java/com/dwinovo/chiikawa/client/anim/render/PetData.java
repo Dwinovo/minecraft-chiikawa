@@ -24,9 +24,7 @@ public enum PetData {
     /** Worn {@link net.minecraft.world.item.ItemStack} snapshot consumed by {@code BagLayer} and the strap rules. */
     WORN_BAG,
     /** What the pet is saying, consumed by {@code SpeechBubbleRenderer}; {@code null} when it says nothing. */
-    SPEECH,
-    /** What is on the pet's mind, consumed by {@code PetIconRenderer}; {@code null} when it shows nothing. */
-    ICON;
+    SPEECH;
 
     /** Cached values() to avoid per-frame allocation; treat as immutable. */
     public static final PetData[] VALUES = values();
