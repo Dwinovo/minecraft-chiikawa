@@ -1,6 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain.personality;
 
-import com.dwinovo.chiikawa.anim.state.PetReaction;
+import com.dwinovo.chiikawa.entity.anim.PetReaction;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
