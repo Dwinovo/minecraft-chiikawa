@@ -11,6 +11,8 @@ import com.dwinovo.chiikawa.entity.brain.errand.pastime.Pastime;
 import com.dwinovo.chiikawa.entity.brain.errand.pastime.PastimeTuning;
 import com.dwinovo.chiikawa.entity.brain.errand.pastime.Stage;
 import com.dwinovo.chiikawa.entity.brain.errand.remark.PetRemark;
+import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSources;
+import com.dwinovo.chiikawa.entity.brain.errand.rest.RestSpec;
 import com.dwinovo.chiikawa.social.Beat;
 import com.dwinovo.chiikawa.testing.AnimationFiles;
 import com.dwinovo.chiikawa.voice.PetVoice;
@@ -170,6 +172,21 @@ class PastimeDataTest {
         }
         assertTrue(((PastimeTuning) PastimeData.settings().get(CharacterPastimeData.EVENING_DRINK).tuning()).cooldownTicks() >= 24000,
             "an evening is a day apart from the next");
+    }
+
+    @Test
+    void aNewPetRestsFromEveryPastimeThatAnswersNothingAndFromNoOtherPastime() {
+        Set<ResourceLocation> unconditioned = new TreeSet<>();
+        PastimeData.works().forEach((errand, work) -> {
+            boolean answersNothing = work.pastime().orElseThrow().when().isEmpty();
+            if (answersNothing) {
+                unconditioned.add(errand);
+            }
+            assertEquals(answersNothing ? RestSpec.from(RestSources.PASTIME_COOLDOWN) : RestSpec.NONE,
+                PastimeData.settings().get(errand).rests().born(), errand.toString());
+        });
+        assertEquals(new TreeSet<>(List.of(CharacterPastimeData.FRENZY, CharacterPastimeData.SWORD_PRACTICE)), unconditioned,
+            "today these two");
     }
 
     @Test

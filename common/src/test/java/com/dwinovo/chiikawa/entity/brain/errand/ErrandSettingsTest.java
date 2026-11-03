@@ -228,6 +228,32 @@ class ErrandSettingsTest {
     }
 
     @Test
+    void aRestAtBirthIsOptionalAndWrittenOnlyWhenThereIsOne() {
+        ErrandSettings<?> without = parse(ErrandIds.PICK_UP_ITEM, PLANT).getOrThrow();
+        ErrandSettings<?> with = parse(ErrandIds.PICK_UP_ITEM,
+            PLANT.replace("\"interrupted\": 0", "\"interrupted\": 0, \"born\": { \"from\": \"chiikawa:pastime_cooldown\" }")).getOrThrow();
+
+        assertEquals(RestSpec.NONE, without.rests().born());
+        assertEquals(RestSpec.from(RestSources.PASTIME_COOLDOWN), with.rests().born());
+        assertFalse(ErrandSettings.codecOf(ErrandIds.PICK_UP_ITEM).encodeStart(JsonOps.INSTANCE, without).getOrThrow()
+            .getAsJsonObject().getAsJsonObject("rests").has("born"));
+        JsonElement written = ErrandSettings.codecOf(ErrandIds.PICK_UP_ITEM).encodeStart(JsonOps.INSTANCE, with).getOrThrow();
+        assertEquals("chiikawa:pastime_cooldown",
+            written.getAsJsonObject().getAsJsonObject("rests").getAsJsonObject("born").get("from").getAsString());
+        assertEquals(with, ErrandSettings.codecOf(ErrandIds.PICK_UP_ITEM).parse(JsonOps.INSTANCE, written).getOrThrow());
+        assertEquals(without, ErrandSettings.codecOf(ErrandIds.PICK_UP_ITEM).parse(JsonOps.INSTANCE,
+            ErrandSettings.codecOf(ErrandIds.PICK_UP_ITEM).encodeStart(JsonOps.INSTANCE, without).getOrThrow()).getOrThrow());
+    }
+
+    @Test
+    void aRestAtBirthIsOnTheErrandAndNeverOnASubject() {
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"interrupted\": 0",
+            "\"interrupted\": 0, \"born\": { \"ticks\": 100, \"per\": \"subject\" }")).isError());
+        assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"interrupted\": 0",
+            "\"interrupted\": 0, \"born\": 100")).isSuccess());
+    }
+
+    @Test
     void anErrandThatNeverEndsOrHasNoPriorityIsRejected() {
         assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"max_ticks\": 600", "\"max_ticks\": 0")).isError());
         assertTrue(parse(ErrandIds.PICK_UP_ITEM, PLANT.replace("\"max_ticks\": 600", "\"max_ticks\": -5")).isError());

@@ -6,8 +6,12 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.ownedPet;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 
 import com.dwinovo.chiikawa.Constants;
+import com.dwinovo.chiikawa.data.CharacterPastimeData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
+import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
+import com.dwinovo.chiikawa.entity.brain.errand.Errands;
+import com.dwinovo.chiikawa.entity.brain.errand.pastime.PastimeTuning;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.item.PetDollItem;
@@ -44,6 +48,8 @@ import net.minecraft.world.phys.AABB;
 public final class LifeGameTests {
     private static final String BATCH = "chiikawa_life";
     private static final int RITUAL_TICKS = 600;
+    /** How many pets are born to look at how long they rest: the part is drawn, and one of them could draw none. */
+    private static final int BORN = 8;
 
     private static final int STAND = 2;
 
@@ -73,6 +79,35 @@ public final class LifeGameTests {
                 + pet.getMainHandItem()));
         helper.assertTrue(pet.getPetDirective() == PetDirective.FREE,
             Component.literal("a wild pet was not left to its own devices"));
+        helper.succeed();
+    }
+
+    /**
+     * A pet the game spawns is born resting from what it would do for no reason, so that a Usagi that comes out of an egg does
+     * not have its fit in the first breath: some part of the fit's cooldown, from none of it to all of it. What a pet does
+     * for a reason stays free to it, so that the first storm it meets frightens it. The part is drawn, so the case looks at
+     * several pets and asks of each only that it is within the cooldown.
+     */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 20)
+    public static void a_pet_is_born_resting_from_what_it_would_do_for_no_reason(GameTestHelper helper) {
+        BlockPos at = helper.absolutePos(new BlockPos(3, STAND, 3));
+        long cooldown = ((PastimeTuning) ErrandSettings.of(CharacterPastimeData.FRENZY).orElseThrow().tuning()).cooldownTicks();
+        long now = helper.getLevel().getGameTime();
+        long longest = 0;
+
+        for (int born = 0; born < BORN; born++) {
+            AbstractPet pet = InitEntity.USAGI_PET.get().spawn(helper.getLevel(), at, MobSpawnType.SPAWN_EGG);
+            helper.assertTrue(pet != null, "nothing spawned");
+            long rest = Errands.restsOf(pet.getBrain(), CharacterPastimeData.FRENZY).remaining(null, now);
+            helper.assertTrue(rest >= 0 && rest <= cooldown,
+                "a new pet was resting from its fit for " + rest + " ticks, and the fit's cooldown is " + cooldown);
+            helper.assertTrue(Errands.restsOf(pet.getBrain(), CharacterPastimeData.COWER).remaining(null, now) == 0,
+                "a new pet was resting from being frightened, which it has a reason for");
+            longest = Math.max(longest, rest);
+            pet.discard();
+        }
+
+        helper.assertTrue(longest > 0, "none of " + BORN + " new pets was resting from its fit");
         helper.succeed();
     }
 
