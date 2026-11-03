@@ -1155,7 +1155,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     /**
      * A pet spawning in the wild picks up a tool its personality leans towards, which
-     * decides its job, and roams freely around where it spawned.
+     * decides its job, and roams freely around where it spawned. However it comes, it is born resting from
+     * what it would do for no reason, see {@link PetMind#born}.
      */
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason spawnType,
@@ -1168,6 +1169,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         }
         // However it came, a new pet is nobody's yet, and goes its own way until it is tamed.
         setPetDirective(PetDirective.FREE);
+        // And it has not yet done anything, so what it would do for no reason is not due the moment it is there.
+        mind.born(level.getRandom());
         return super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
     }
 
