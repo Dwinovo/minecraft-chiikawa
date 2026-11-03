@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.data.SoundData;
 import com.dwinovo.chiikawa.init.InitSounds;
 
 import net.minecraft.data.PackOutput;

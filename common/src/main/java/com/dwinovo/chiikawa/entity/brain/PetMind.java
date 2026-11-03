@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.anim.state.PetReaction;
+import com.dwinovo.chiikawa.entity.anim.PetReaction;
 import com.dwinovo.chiikawa.camera.PhotoResults;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
