@@ -1,6 +1,5 @@
 package com.dwinovo.chiikawa.data;
 
-import com.dwinovo.chiikawa.data.TagData;
 import java.util.concurrent.CompletableFuture;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
