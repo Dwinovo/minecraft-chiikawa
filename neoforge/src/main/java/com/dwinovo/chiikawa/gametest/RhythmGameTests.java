@@ -10,7 +10,6 @@ import com.dwinovo.chiikawa.data.PastimeData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
-import com.dwinovo.chiikawa.entity.brain.errand.run.PetIcon;
 import com.dwinovo.chiikawa.entity.brain.errand.view.LivePetView;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.settings.WorldSettings;
@@ -212,11 +211,10 @@ public final class RhythmGameTests {
                     + ", the bed it knows of is " + pet.getBrain().getMemory(MemoryModuleType.NEAREST_BED))))
             .thenExecuteAfter(LYING_TICKS, () -> {
                 helper.assertTrue(onTheBed(helper, pet, head) && pet.getMind().errands().isOn(ErrandIds.SLEEP),
-                    Component.literal("the pet left the bed it was sleeping on"));
-                helper.assertTrue(pet.getPerformance().startsWith("sleep"), Component.literal("the pet is not shown asleep: " + pet.getPerformance()));
-                helper.assertTrue(pet.getIcon() == PetIcon.SLEEPY, Component.literal("a sleeping pet wears " + pet.getIcon()));
-                helper.assertFalse(pet.isSleeping(), Component.literal("the pet was put to sleep in the bed, as a player is"));
-                helper.assertFalse(helper.getBlockState(head).getValue(BedBlock.OCCUPIED), Component.literal("the bed was taken by the pet"));
+                    "the pet left the bed it was sleeping on");
+                helper.assertTrue(pet.getPerformance().startsWith("sleep"), "the pet is not shown asleep: " + pet.getPerformance());
+                helper.assertFalse(pet.isSleeping(), "the pet was put to sleep in the bed, as a player is");
+                helper.assertFalse(helper.getBlockState(head).getValue(BedBlock.OCCUPIED), "the bed was taken by the pet");
             })
             .thenSucceed();
     }
@@ -320,9 +318,8 @@ public final class RhythmGameTests {
             .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(ErrandIds.SLEEP) && pet.getPerformance().startsWith("sleep"),
                 Component.literal("the pet never lay down: it is " + pet.getMind().errands().errand())))
             .thenExecute(() -> helper.getLevel().setDayTime(MORNING))
-            .thenWaitUntil(() -> helper.assertTrue(!pet.getMind().errands().isOn(ErrandIds.SLEEP) && pet.getPerformance().isEmpty()
-                    && pet.getIcon() != PetIcon.SLEEPY,
-                Component.literal("the pet is still asleep in the morning: " + pet.getMind().errands().errand())))
+            .thenWaitUntil(() -> helper.assertTrue(!pet.getMind().errands().isOn(ErrandIds.SLEEP) && pet.getPerformance().isEmpty(),
+                "the pet is still asleep in the morning: " + pet.getMind().errands().errand()))
             .thenSucceed();
     }
 

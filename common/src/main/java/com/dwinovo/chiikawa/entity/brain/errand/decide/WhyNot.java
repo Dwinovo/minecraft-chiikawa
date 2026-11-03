@@ -8,9 +8,9 @@ import net.minecraft.resources.Identifier;
 
 /**
  * Why a pet is not at work, as its last decision found: the work of its job that had nothing to offer, and what it
- * said was the matter, when none of that work could start. The one account the pet's head icon, the remark it makes of
- * what it is short of and its screen are all made from, so they cannot tell different stories. Immutable; a pet that
- * is at work, or has no work to do, has none.
+ * said was the matter, when none of that work could start. The one account the remark the pet makes of what it is short
+ * of and its screen are both made from, so they cannot tell different stories. Immutable; a pet that is at work, or has
+ * no work to do, has none.
  *
  * @param errand the work that has nothing to offer; of the work there is, the first that names what the pet is short of,
  *               and otherwise the first

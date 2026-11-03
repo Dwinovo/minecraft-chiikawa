@@ -14,7 +14,6 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.WhyNot;
-import com.dwinovo.chiikawa.entity.brain.errand.run.PetIcon;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
 import com.dwinovo.chiikawa.network.PetPayloads.PetOutlookPayload;
@@ -29,14 +28,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 /**
- * What a pet lets its owner see of what is on its mind: the picture over its head, a word in passing about what it is short
- * of, and what its screen says. All three are made from the one account of why the pet is not at work that its mind keeps.
+ * What a pet lets its owner see of what is on its mind: a word in passing about what it is short of, and what its screen
+ * says. Both are made from the one account of why the pet is not at work that its mind keeps.
  *
  * <p>What a pet said is read back from its memory of it, and what its screen is told from the payload the server builds for
  * it, because the stand-in players these cases make cannot be sent a mod's own packets. A pet that talks is in a batch of its
@@ -47,7 +44,6 @@ import net.minecraft.world.item.Items;
 public final class TransparencyGameTests {
     private static final String MISSING_BATCH = "chiikawa_transparency_missing";
     private static final String SILENT_BATCH = "chiikawa_transparency_silent";
-    private static final String ICON_BATCH = "chiikawa_transparency_icon";
     private static final String SCREEN_BATCH = "chiikawa_transparency_screen";
     private static final int STAND = 2;
     /** How long a pet has to be short of something before it says so, as the remark has it. */
@@ -79,11 +75,6 @@ public final class TransparencyGameTests {
         WorldSettingsStore.of(level).set(before);
     }
 
-    @BeforeBatch(batch = ICON_BATCH)
-    public static void settleForTheIcons(ServerLevel level) {
-        settleWorld(level, Difficulty.NORMAL, NOON);
-    }
-
     @BeforeBatch(batch = SCREEN_BATCH)
     public static void settleForTheScreen(ServerLevel level) {
         settleWorld(level, Difficulty.NORMAL, NOON);
@@ -91,19 +82,18 @@ public final class TransparencyGameTests {
 
     /**
      * A farmer with a hoe and not a seed to its name, its owner by: after half a minute of it Rakko says so, in its own
-     * words and about the seeds, once, and wears the picture of a pet that is short of something the while. The remark is
-     * rested for a good deal longer than the pet's own quiet, which is what the wait at the end shows.
+     * words and about the seeds, once. The remark is rested for a good deal longer than the pet's own quiet, which is what
+     * the wait at the end shows.
      */
     @GameTest(template = "floor16", batch = MISSING_BATCH, timeoutTicks = LACKED_TICKS + SAY_TICKS + QUIET_TICKS + 100)
-    public static void a_farmer_out_of_seeds_says_so_once_and_shows_it(GameTestHelper helper) {
+    public static void a_farmer_out_of_seeds_says_so_once(GameTestHelper helper) {
         quietYard(helper, NOON);
         ServerPlayer owner = player(helper);
         AbstractPet pet = farmerOf(helper, owner, new BlockPos(8, STAND, 8));
         keepNear(helper, owner, pet);
 
         helper.runAfterDelay(LACKED_TICKS - SAY_TICKS, () -> {
-            helper.assertFalse(said(pet).isPresent(), Component.literal("the pet spoke up before it had been short of anything for long"));
-            helper.assertTrue(pet.getIcon() == PetIcon.MISSING, Component.literal("the pet short of seeds wears " + pet.getIcon()));
+            helper.assertFalse(said(pet).isPresent(), "the pet spoke up before it had been short of anything for long");
         });
         helper.runAfterDelay(LACKED_TICKS + SAY_TICKS, () -> {
             assertSaid(helper, pet, VoiceMoment.MISSING);
@@ -118,7 +108,7 @@ public final class TransparencyGameTests {
         });
     }
 
-    /** The world's chatter turned right down silences a remark as it does any other line, and the picture over the head stays. */
+    /** The world's chatter turned right down silences a remark as it does any other line, and the pet still knows what it is short of. */
     @GameTest(template = "floor16", batch = SILENT_BATCH, timeoutTicks = LACKED_TICKS + SAY_TICKS + 100)
     public static void a_farmer_out_of_seeds_keeps_quiet_in_a_world_with_no_chatter(GameTestHelper helper) {
         quietYard(helper, NOON);
@@ -127,66 +117,10 @@ public final class TransparencyGameTests {
         keepNear(helper, owner, pet);
 
         helper.runAfterDelay(LACKED_TICKS + SAY_TICKS, () -> {
-            helper.assertFalse(said(pet).isPresent(), Component.literal("the pet spoke in a world with no chatter: " + said(pet)));
-            helper.assertTrue(pet.getIcon() == PetIcon.MISSING, Component.literal("the pet short of seeds wears " + pet.getIcon()));
+            helper.assertFalse(said(pet).isPresent(), "the pet spoke in a world with no chatter: " + said(pet));
+            helper.assertTrue(pet.getMind().whyNot().flatMap(WhyNot::lack).isPresent(), "the pet short of seeds found nothing it lacks");
             helper.succeed();
         });
-    }
-
-    /** A pet with a present for its owner wears a gift over its head while it carries it, and not once it has given it. */
-    @GameTest(template = "floor16", batch = ICON_BATCH, timeoutTicks = ARRIVE_TICKS)
-    public static void a_pet_with_a_present_shows_the_gift_icon(GameTestHelper helper) {
-        ServerPlayer owner = player(helper);
-        BlockPos across = helper.absolutePos(new BlockPos(12, STAND, 12));
-        owner.teleportTo(across.getX() + 0.5, across.getY(), across.getZ() + 0.5);
-        AbstractPet pet = pet(helper, InitEntity.USAGI_PET.get(), new BlockPos(3, STAND, 3), false);
-        pet.tame(owner);
-        pet.setPetDirective(PetDirective.FREE);
-        pet.setPendingGift(new ItemStack(Items.CAKE));
-        boolean[] shown = {false};
-
-        helper.onEachTick(() -> shown[0] |= pet.getIcon() == PetIcon.GIFT && !pet.getPendingGift().isEmpty());
-        helper.succeedWhen(() -> {
-            helper.assertTrue(shown[0], Component.literal("the pet carried its present without showing it"));
-            helper.assertTrue(owner.getInventory().contains(new ItemStack(Items.CAKE)), Component.literal("the owner never got the cake"));
-            helper.assertTrue(pet.getIcon() == PetIcon.NONE, Component.literal("the pet still wears " + pet.getIcon() + " with its paws empty"));
-        });
-    }
-
-    /** A pet of someone's with seeds but nothing to sow or reap is looking for work, by day. */
-    @GameTest(template = "floor16", batch = ICON_BATCH, timeoutTicks = 100)
-    public static void a_farmer_with_nothing_to_do_shows_it_is_looking_for_work(GameTestHelper helper) {
-        AbstractPet pet = farmerWithNothingToDo(helper, new BlockPos(8, STAND, 8), true);
-
-        helper.succeedWhen(() -> helper.assertTrue(pet.getIcon() == PetIcon.SEEKING_WORK, Component.literal("the pet wears " + pet.getIcon())));
-    }
-
-    /**
-     * The pictures over a pet's head are messages to its owner, so a wild pet wears none: one that finds as little to do as
-     * its tamed neighbour, which wears the picture of looking for work, wears nothing.
-     */
-    @GameTest(template = "floor16", batch = ICON_BATCH, timeoutTicks = 100)
-    public static void a_wild_pet_with_nothing_to_do_shows_nothing_where_a_tamed_one_shows_it_is_looking_for_work(GameTestHelper helper) {
-        AbstractPet tamed = farmerWithNothingToDo(helper, new BlockPos(7, STAND, 8), true);
-        AbstractPet wild = farmerWithNothingToDo(helper, new BlockPos(9, STAND, 8), false);
-
-        helper.succeedWhen(() -> {
-            helper.assertTrue(tamed.getIcon() == PetIcon.SEEKING_WORK, "the tamed pet wears " + tamed.getIcon());
-            helper.assertTrue(wild.getMind().whyNot().isPresent(), "the wild pet has not yet found it has nothing to do");
-            helper.assertTrue(wild.getIcon() == PetIcon.NONE, "the wild pet wears " + wild.getIcon());
-        });
-    }
-
-    /** A pet that runs from what hurt it wears the picture of a frightened one. */
-    @GameTest(template = "floor8", batch = ICON_BATCH, timeoutTicks = 200)
-    public static void a_pet_running_from_a_foe_shows_it_is_scared(GameTestHelper helper) {
-        AbstractPet pet = pet(helper, InitEntity.KURIMANJU_PET.get(), new BlockPos(3, STAND, 3), true);
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(6, STAND, 6));
-        zombie.setNoAi(true);
-
-        pet.hurt(zombie.damageSources().mobAttack(zombie), 1.0F);
-
-        helper.succeedWhen(() -> helper.assertTrue(pet.getIcon() == PetIcon.SCARED, Component.literal("the pet wears " + pet.getIcon())));
     }
 
     /**
@@ -231,13 +165,6 @@ public final class TransparencyGameTests {
         AbstractPet pet = holding(pet(helper, InitEntity.RAKKO_PET.get(), rel, false), Items.WOODEN_HOE);
         pet.tame(owner);
         pet.setPetDirective(PetDirective.FREE);
-        return pet;
-    }
-
-    /** A farmer with a hoe and seeds and not a crop to sow or reap, of someone's or wild. */
-    private static AbstractPet farmerWithNothingToDo(GameTestHelper helper, BlockPos rel, boolean owned) {
-        AbstractPet pet = holding(pet(helper, InitEntity.RAKKO_PET.get(), rel, owned), Items.WOODEN_HOE);
-        pet.getBackpack().addItem(new ItemStack(Items.WHEAT_SEEDS, 8));
         return pet;
     }
 
