@@ -25,15 +25,29 @@ class PetIconsTest {
     }
 
     @Test
+    void aPetWithNoOwnerShowsNothingWhateverIsOnItsMind() {
+        for (DayPhase phase : DayPhase.values()) {
+            PetIcons.Signs wild = new PetIcons.Signs(false, true, true, Optional.of(MISSING), phase);
+
+            assertEquals(PetIcon.NONE, PetIcons.of(Set.of(), wild), phase::name);
+            assertEquals(PetIcon.NONE, PetIcons.of(Set.of(), new PetIcons.Signs(false, false, false, Optional.of(SEEKING), phase)),
+                phase::name);
+            for (StepTag tag : new StepTag[] {StepTag.SCARED, StepTag.SLEEPING, StepTag.ASKING}) {
+                assertEquals(PetIcon.NONE, PetIcons.of(Set.of(tag), wild), phase + " " + tag);
+            }
+        }
+    }
+
+    @Test
     void aFrightenedPetShowsItWhateverElseIsOnItsMind() {
-        PetIcons.Signs full = new PetIcons.Signs(true, true, Optional.of(MISSING), DayPhase.DAY);
+        PetIcons.Signs full = new PetIcons.Signs(true, true, true, Optional.of(MISSING), DayPhase.DAY);
 
         assertEquals(PetIcon.SCARED, PetIcons.of(Set.of(StepTag.SCARED), full));
     }
 
     @Test
     void aPetLyingAsleepShowsItBeforeAnythingElseButFright() {
-        PetIcons.Signs full = new PetIcons.Signs(true, true, Optional.of(MISSING), DayPhase.NIGHT);
+        PetIcons.Signs full = new PetIcons.Signs(true, true, true, Optional.of(MISSING), DayPhase.NIGHT);
 
         assertEquals(PetIcon.SLEEPY, PetIcons.of(Set.of(StepTag.SLEEPING), full));
         assertEquals(PetIcon.SLEEPY, PetIcons.of(Set.of(StepTag.SLEEPING), PetIcons.Signs.NONE));
@@ -42,7 +56,7 @@ class PetIconsTest {
 
     @Test
     void aPetWaitingToBePraisedShowsItAfterFrightAndSleepAndBeforeAnythingAboutPresentsOrWork() {
-        PetIcons.Signs full = new PetIcons.Signs(true, true, Optional.of(MISSING), DayPhase.DAY);
+        PetIcons.Signs full = new PetIcons.Signs(true, true, true, Optional.of(MISSING), DayPhase.DAY);
 
         assertEquals(PetIcon.PRAISE, PetIcons.of(Set.of(StepTag.ASKING), full));
         assertEquals(PetIcon.PRAISE, PetIcons.of(Set.of(StepTag.ASKING), PetIcons.Signs.NONE));
@@ -53,33 +67,33 @@ class PetIconsTest {
     @Test
     void aPetThatIsDrowsyButAwakeShowsNoSleepOnlyTheStepItIsAtIsAsleep() {
         for (DayPhase phase : DayPhase.values()) {
-            assertEquals(PetIcon.NONE, PetIcons.of(Set.of(), new PetIcons.Signs(false, false, Optional.empty(), phase)), phase::name);
+            assertEquals(PetIcon.NONE, PetIcons.of(Set.of(), new PetIcons.Signs(true, false, false, Optional.empty(), phase)), phase::name);
         }
     }
 
     @Test
     void aPresentInThePawsOrInMindAndReadyShowsAGiftBeforeAnythingAboutWork() {
-        assertEquals(PetIcon.GIFT, PetIcons.of(Set.of(), new PetIcons.Signs(true, false, Optional.of(MISSING), DayPhase.DAY)));
-        assertEquals(PetIcon.GIFT, PetIcons.of(Set.of(), new PetIcons.Signs(false, true, Optional.of(SEEKING), DayPhase.DAY)));
+        assertEquals(PetIcon.GIFT, PetIcons.of(Set.of(), new PetIcons.Signs(true, true, false, Optional.of(MISSING), DayPhase.DAY)));
+        assertEquals(PetIcon.GIFT, PetIcons.of(Set.of(), new PetIcons.Signs(true, false, true, Optional.of(SEEKING), DayPhase.DAY)));
     }
 
     @Test
     void aPetShortOfSomethingShowsItBeforeShowingThatItIsLookingForWork() {
-        assertEquals(PetIcon.MISSING, PetIcons.of(Set.of(), new PetIcons.Signs(false, false, Optional.of(MISSING), DayPhase.DAY)));
+        assertEquals(PetIcon.MISSING, PetIcons.of(Set.of(), new PetIcons.Signs(true, false, false, Optional.of(MISSING), DayPhase.DAY)));
     }
 
     @Test
     void aPetWithNoWorkToDoByDayIsLookingForSome() {
         for (DayPhase phase : new DayPhase[] {DayPhase.MORNING, DayPhase.DAY, DayPhase.EVENING}) {
-            assertEquals(PetIcon.SEEKING_WORK, PetIcons.of(Set.of(), new PetIcons.Signs(false, false, Optional.of(SEEKING), phase)),
+            assertEquals(PetIcon.SEEKING_WORK, PetIcons.of(Set.of(), new PetIcons.Signs(true, false, false, Optional.of(SEEKING), phase)),
                 phase::name);
         }
     }
 
     @Test
     void atNightAPetWithNoWorkIsNotLookingForAnyButOneShortOfSomethingStillShowsIt() {
-        assertEquals(PetIcon.NONE, PetIcons.of(Set.of(), new PetIcons.Signs(false, false, Optional.of(SEEKING), DayPhase.NIGHT)));
-        assertEquals(PetIcon.MISSING, PetIcons.of(Set.of(), new PetIcons.Signs(false, false, Optional.of(MISSING), DayPhase.NIGHT)));
+        assertEquals(PetIcon.NONE, PetIcons.of(Set.of(), new PetIcons.Signs(true, false, false, Optional.of(SEEKING), DayPhase.NIGHT)));
+        assertEquals(PetIcon.MISSING, PetIcons.of(Set.of(), new PetIcons.Signs(true, false, false, Optional.of(MISSING), DayPhase.NIGHT)));
     }
 
     @Test
