@@ -1,6 +1,5 @@
 package com.dwinovo.chiikawa.data;
 
-import com.dwinovo.chiikawa.data.SoundData;
 import com.dwinovo.chiikawa.init.InitSounds;
 import com.dwinovo.chiikawa.Constants;
 import com.google.gson.JsonArray;

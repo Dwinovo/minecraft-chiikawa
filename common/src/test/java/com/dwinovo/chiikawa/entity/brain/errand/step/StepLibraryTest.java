@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.entity.brain.errand.step;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.dwinovo.chiikawa.anim.state.PetActivity;
+import com.dwinovo.chiikawa.entity.anim.PetActivity;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.errand.run.StepStatus;
 import com.dwinovo.chiikawa.entity.brain.errand.run.StepTag;
