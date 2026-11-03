@@ -1439,8 +1439,8 @@
 			"animation_length": 4.52,
 			"bones": {
 				"Root": {
-					"rotation": [0, 0, -90],
-					"position": [4, 5.18, 0],
+					"rotation": [90, 0, -90],
+					"position": [0.63, 5.17, 7.56],
 					"scale": {
 						"0.0": [1, 1, 1],
 						"1.8": [1.01, 1, 1.01],
