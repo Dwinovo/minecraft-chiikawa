@@ -103,8 +103,8 @@ public final class AnimationBaker {
     }
 
     private static void bakeChannel(int boneIdx, byte type, JsonElement data, List<BakedBoneChannel> out) {
-        if (data.isJsonArray()) {
-            // Bare-array shorthand ("rotation": [x, y, z]).
+        if (isVectorValue(data)) {
+            // Bare shorthand ("rotation": [x, y, z], or "scale": 0 for all three axes).
             Vec3WithMolang v = readVec3(data);
             applyMirrorAndUnits(v, type);
             if (isConstantIdentity(type, v)) return;
@@ -132,7 +132,7 @@ public final class AnimationBaker {
             } catch (NumberFormatException ex) {
                 continue;
             }
-            if (!e.getValue().isJsonObject() && !e.getValue().isJsonArray()) continue;
+            if (!e.getValue().isJsonObject() && !isVectorValue(e.getValue())) continue;
             keys.add(new TimedKey(t, e.getValue()));
         }
         if (keys.isEmpty()) return;
@@ -152,7 +152,7 @@ public final class AnimationBaker {
             Vec3WithMolang post;
             byte lerp = BakedBoneChannel.LERP_LINEAR;
 
-            if (key.value.isJsonArray()) {
+            if (isVectorValue(key.value)) {
                 Vec3WithMolang v = readVec3(key.value);
                 pre = v;
                 post = v.shallowCopy();
@@ -260,39 +260,65 @@ public final class AnimationBaker {
         return false;
     }
 
-    private static Vec3WithMolang readVec3(JsonElement el) {
-        float[] num = new float[3];
-        MolangNode[] molang = null;
-        if (el == null || !el.isJsonArray()) return new Vec3WithMolang(num, null);
-        JsonArray arr = el.getAsJsonArray();
-        int n = Math.min(3, arr.size());
-        for (int i = 0; i < n; i++) {
-            JsonElement c = arr.get(i);
-            if (!c.isJsonPrimitive()) continue;
-            JsonPrimitive p = c.getAsJsonPrimitive();
-            if (p.isNumber()) {
-                num[i] = p.getAsFloat();
-            } else if (p.isString()) {
-                String s = p.getAsString();
-                try {
-                    num[i] = Float.parseFloat(s);
-                } catch (NumberFormatException ignored) {
-                    if (molang == null) molang = new MolangNode[3];
-                    molang[i] = MolangCompiler.compile(s);
-                }
-            }
-        }
-        return new Vec3WithMolang(num, molang);
+    /**
+     * Whether {@code el} is a vector value in one of the forms Bedrock allows wherever a vector
+     * stands: an array, or a single number or Molang string, which means that value on all
+     * three axes (Blockbench writes {@code "scale": 0} for a uniform scale).
+     */
+    private static boolean isVectorValue(JsonElement el) {
+        return el.isJsonArray() || isScalar(el);
     }
 
+    private static boolean isScalar(JsonElement el) {
+        return el.isJsonPrimitive() && (el.getAsJsonPrimitive().isNumber() || el.getAsJsonPrimitive().isString());
+    }
+
+    /**
+     * The one reader of a vector value, for constant channels, keyframes and their
+     * {@code pre} / {@code post} alike: an array's components, or a scalar spread to all three
+     * axes. Anything else reads as zero.
+     */
+    private static Vec3WithMolang readVec3(JsonElement el) {
+        Vec3WithMolang v = Vec3WithMolang.zero();
+        if (el == null) return v;
+        if (el.isJsonArray()) {
+            JsonArray arr = el.getAsJsonArray();
+            int n = Math.min(3, arr.size());
+            for (int i = 0; i < n; i++) {
+                readComponent(arr.get(i), v, i);
+            }
+        } else if (isScalar(el)) {
+            readComponent(el, v, 0);
+            v.num[1] = v.num[2] = v.num[0];
+            if (v.molang != null) v.molang[1] = v.molang[2] = v.molang[0];
+        }
+        return v;
+    }
+
+    /** Reads one component into axis {@code i}: a number, or a string that is a number or Molang. */
+    private static void readComponent(JsonElement c, Vec3WithMolang v, int i) {
+        if (!c.isJsonPrimitive()) return;
+        JsonPrimitive p = c.getAsJsonPrimitive();
+        if (p.isNumber()) {
+            v.num[i] = p.getAsFloat();
+        } else if (p.isString()) {
+            String s = p.getAsString();
+            try {
+                v.num[i] = Float.parseFloat(s);
+            } catch (NumberFormatException ignored) {
+                if (v.molang == null) v.molang = new MolangNode[3];
+                v.molang[i] = MolangCompiler.compile(s);
+            }
+        }
+    }
+
+    /** A keyframe's {@code pre} or {@code post}: a vector value, or an object holding it as {@code vector}. */
     private static Vec3WithMolang readVec3FromKfPart(JsonElement kfPart) {
         if (kfPart == null) return Vec3WithMolang.zero();
-        if (kfPart.isJsonArray()) return readVec3(kfPart);
         if (kfPart.isJsonObject()) {
-            JsonObject o = kfPart.getAsJsonObject();
-            if (o.has("vector")) return readVec3(o.get("vector"));
+            return readVec3(kfPart.getAsJsonObject().get("vector"));
         }
-        return Vec3WithMolang.zero();
+        return readVec3(kfPart);
     }
 
     /**
