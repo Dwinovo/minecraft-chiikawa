@@ -29,7 +29,7 @@ import net.minecraft.util.ExtraCodecs;
  *                 the highest priority are looked at
  * @param score how much the pet fancies it among errands of its priority, before its personality weighs it
  * @param maxTicks the longest the errand runs before the pet gives up on it
- * @param rests how long the pet leaves the errand alone once it has ended
+ * @param rests how long the pet leaves the errand alone once it has ended, and for how long at the most when it is born
  * @param yieldsTo errands of the same priority that must have nothing to do before this one is started:
  *                 the farmer's strict order, which no score a personality could close
  * @param overlays things the pet does on the side while on this errand, such as chatting
@@ -50,20 +50,23 @@ public record ErrandSettings<T>(int priority, float score, int maxTicks, Rests r
      * @param done it did what it set out to do
      * @param gaveUp it could not, or took too long; never nothing, or the pet would set off on it again at once
      * @param interrupted something more important took the pet away
+     * @param born how long a newborn pet leaves the errand alone at the most: it draws a part of this, from none of it to
+     *             all, so that a pet does not start an errand that asks nothing of the world the moment it is born
      * @param reports how long after something that is told to the errand later: a photo that was stored, or lost
      */
-    public record Rests(RestSpec done, RestSpec gaveUp, RestSpec interrupted, Map<String, RestSpec> reports) {
+    public record Rests(RestSpec done, RestSpec gaveUp, RestSpec interrupted, RestSpec born, Map<String, RestSpec> reports) {
         public static final Codec<Rests> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             RestSpec.CODEC.fieldOf("done").forGetter(Rests::done),
             RestSpec.LASTING.fieldOf("gave_up").forGetter(Rests::gaveUp),
             RestSpec.CODEC.fieldOf("interrupted").forGetter(Rests::interrupted),
+            ExtraCodecs.strictOptionalField(RestSpec.ON_ERRAND, "born", RestSpec.NONE).forGetter(Rests::born),
             ExtraCodecs.strictOptionalField(Codec.unboundedMap(Codec.STRING, RestSpec.CODEC), "reports", Map.of())
                 .forGetter(Rests::reports)
         ).apply(instance, Rests::new));
 
-        /** @return rests with no reports */
+        /** @return rests with no rest at birth and no reports */
         public static Rests of(RestSpec done, RestSpec gaveUp, RestSpec interrupted) {
-            return new Rests(done, gaveUp, interrupted, Map.of());
+            return new Rests(done, gaveUp, interrupted, RestSpec.NONE, Map.of());
         }
     }
 
@@ -112,6 +115,13 @@ public record ErrandSettings<T>(int priority, float score, int maxTicks, Rests r
     /** @return these settings with the pet doing these on the side, see {@link com.dwinovo.chiikawa.entity.brain.errand.run.Overlay} */
     public ErrandSettings<T> withOverlays(ResourceLocation... overlays) {
         return new ErrandSettings<>(priority, score, maxTicks, rests, yieldsTo, List.of(overlays), startVoice, tuning);
+    }
+
+    /** @return these settings with a newborn pet leaving the errand alone for a part of this, see {@link Rests#born} */
+    public ErrandSettings<T> bornResting(RestSpec born) {
+        return new ErrandSettings<>(priority, score, maxTicks,
+            new Rests(rests.done(), rests.gaveUp(), rests.interrupted(), born, rests.reports()),
+            yieldsTo, overlays, startVoice, tuning);
     }
 
     /** @return these settings with the pet saying this on setting off */
