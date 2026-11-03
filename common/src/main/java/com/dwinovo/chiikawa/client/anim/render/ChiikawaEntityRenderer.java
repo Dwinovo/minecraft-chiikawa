@@ -17,7 +17,6 @@ import com.dwinovo.chiikawa.anim.pose.BoneVisibilityRule;
 import com.dwinovo.chiikawa.anim.pose.HeadLookInterceptor;
 import com.dwinovo.chiikawa.anim.pose.PoseComposer;
 import com.dwinovo.chiikawa.client.anim.render.layer.HeldItemLayer;
-import com.dwinovo.chiikawa.client.voice.PetIconRenderer;
 import com.dwinovo.chiikawa.client.voice.SpeechBubbleRenderer;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.entity.AbstractPet;
@@ -281,9 +280,11 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         if (entity instanceof AbstractPet pet) {
             state.put(PetData.WORN_BAG, pet.getItemBySlot(EquipmentSlot.CHEST));
         }
+        // Taken with the rest of the state, as a name tag's text is; a pet drawn as a picture
+        // in a screen says nothing over its head. What hangs over the head clears the name tag
+        // when there is one, which the state says once the game has decided on it.
         if (!drawingPortrait && entity instanceof AbstractPet pet) {
             speech.extract(pet, state, partialTick);
-            icon.extract(pet, state, partialTick);
         }
 
         if (entity instanceof ChiikawaAnimated animated) {
@@ -328,8 +329,6 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
 
     /** What the pet is saying, over its head. */
     private final SpeechBubbleRenderer speech = new SpeechBubbleRenderer();
-    /** What is on its mind, over its head when it is not saying anything. */
-    private final PetIconRenderer icon = new PetIconRenderer();
 
     /**
      * Draws a pet as a picture in a screen: the model, and nothing over its head. When its
@@ -383,6 +382,5 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         poseStack.popPose();
         super.submit(state, poseStack, collector, camera);
         speech.submit(state, poseStack, collector, getFont(), camera);
-        icon.submit(state, poseStack, collector, getFont(), camera);
     }
 }
