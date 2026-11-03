@@ -74,7 +74,7 @@ public final class ModelBaker {
             }
             int cubeCount = cubeList.size() - cubeStart;
 
-            // Bake-time X flip into the renderer's coordinate frame.
+            // Bake-time X flip mirrors the old Bedrock model baking behavior.
             // Blockbench exports with display +X stored as JSON -X, so a bone whose
             // visual position is on the modeler's RIGHT (chiikawa's left, JSON +X)
             // must render on the player's LEFT-of-chiikawa side. We negate JSON X
@@ -168,7 +168,7 @@ public final class ModelBaker {
         float sy = pickF(cube.size, 1, 0);
         float sz = pickF(cube.size, 2, 0);
 
-        // Bake-time X flip into the renderer's coordinate frame. JSON's [origin.x,
+        // Bake-time X flip. JSON's [origin.x,
         // origin.x + size.x] becomes [-(origin.x + size.x), -origin.x]. The cube
         // keeps the same width but lives on the negated X side of the bone frame.
         float minX = -(ox + sx), minY = oy, minZ = oz;
@@ -293,7 +293,7 @@ public final class ModelBaker {
      * order in {@link com.dwinovo.chiikawa.anim.render.ModelRenderer}). When
      * {@code uFlip} is true, the U coordinates are mirrored — the rectangle's
      * right edge ends up on the geometric TL/BL vertices and the left edge on
-     * TR/BR. This compensates for the baked X mirror on non-mirrored cubes.
+     * TR/BR. This preserves the exported Bedrock UV orientation for non-mirrored cubes.
      */
     private static void setFaceQuadUV(float[][] dst, float u0, float v0, float u1, float v1, boolean uFlip) {
         if (uFlip) {
