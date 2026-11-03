@@ -8,10 +8,8 @@ public enum StepTag {
     IN_SCENE,
     /** Playing music for whoever is near. */
     PLAYING_MUSIC,
-    /** Frightened, and running from what hurt it or cowering until it is safe. */
-    SCARED,
-    /** Lying down asleep: the pet does not stir for the little things, and shows it is asleep. */
+    /** Lying down asleep: the pet does not stir for the little things. */
     SLEEPING,
-    /** Waiting to be praised by its owner, and showing that it wants to be. */
+    /** Waiting to be praised by its owner: a click from them, or a friend of theirs, is the praise. */
     ASKING
 }
