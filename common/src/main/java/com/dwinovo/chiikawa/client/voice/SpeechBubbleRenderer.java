@@ -29,8 +29,8 @@ public final class SpeechBubbleRenderer {
     /** How long a line takes to fade at the end of its time, in ticks. */
     private static final float FADE_TICKS = 10.0F;
 
-    /** A line up over a pet this frame: its words, the pet's name-tag spot, and how much of it shows. */
-    public record Shown(String line, Vec3 nameTag, float alpha) {
+    /** A line up over a pet this frame: its words, the pet's name-tag spot and whether a name tag is drawn there, and how much of it shows. */
+    public record Shown(String line, Vec3 nameTag, boolean nameShown, float alpha) {
     }
 
     public void extract(AbstractPet pet, ChiikawaRenderState state, float partialTick) {
@@ -45,7 +45,7 @@ public final class SpeechBubbleRenderer {
             float left = speech.left(pet.tickCount, partialTick);
             state.put(PetData.SPEECH, new Shown(Component.translatable(speech.line(),
                 speech.subject().map(Component::translatable).orElse(Component.empty())).getString(), nameTag,
-                Mth.clamp(left / FADE_TICKS, 0.0F, 1.0F)));
+                state.nameTag != null, Mth.clamp(left / FADE_TICKS, 0.0F, 1.0F)));
         });
     }
 
@@ -55,7 +55,7 @@ public final class SpeechBubbleRenderer {
         if (shown == null) {
             return;
         }
-        OverHead.draw(shown.nameTag(), poseStack, collector, font, camera, shown.alpha(), surface -> {
+        OverHead.draw(shown.nameTag(), shown.nameShown(), poseStack, collector, font, camera, shown.alpha(), surface -> {
             Bubble bubble = new Bubble(shown.line());
             bubble.draw(surface, -bubble.width(surface) / 2, -bubble.height(surface) - Bubble.TAIL, 0);
         });
