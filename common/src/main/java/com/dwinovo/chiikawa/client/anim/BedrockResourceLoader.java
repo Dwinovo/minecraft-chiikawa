@@ -28,8 +28,8 @@ import java.util.Map;
  * baked against the model with the matching short key. Each animation in the
  * file is registered under {@code <ns>:<file>/<anim_name>} (e.g.
  * {@code chiikawa:chiikawa/idle}). Decorative animations like {@code blink}
- * and {@code breath} are authored in the same animation file, then wired into
- * controllers in code via {@code ChiikawaEntityRenderer.addLoopingController}.
+ * are authored in the same animation file, then wired into a controller of
+ * their own, see {@link com.dwinovo.chiikawa.entity.anim.PetControllers}.
  */
 public final class BedrockResourceLoader implements ResourceManagerReloadListener {
 
