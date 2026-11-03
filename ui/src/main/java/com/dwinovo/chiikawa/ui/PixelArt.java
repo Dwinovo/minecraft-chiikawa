@@ -142,20 +142,6 @@ public record PixelArt(String... rows) {
         ".XwwwwXXwwwwX.",
         "..XXXX..XXXX..");
 
-    /** An exclamation mark on a pink disc: something is wrong, run. */
-    public static final PixelArt ALERT = new PixelArt(
-        "....XXXXX....",
-        "..XXpppppXX..",
-        ".XppppXppppX.",
-        ".XppppXppppX.",
-        ".XppppXppppX.",
-        ".XppppXppppX.",
-        ".XpppppppppX.",
-        ".XppppXppppX.",
-        ".XpppppppppX.",
-        "..XXpppppXX..",
-        "....XXXXX....");
-
     /** A question mark on a paper disc: something is missing. */
     public static final PixelArt QUESTION = new PixelArt(
         "....XXXXX....",
@@ -166,34 +152,6 @@ public record PixelArt(String... rows) {
         ".XwwwwwXwwwX.",
         ".XwwwwXwwwwX.",
         ".XwwwwwwwwwX.",
-        ".XwwwwXwwwwX.",
-        "..XXwwwwwXX..",
-        "....XXXXX....");
-
-    /** A big Z and a small one on a paper disc: asleep. */
-    public static final PixelArt SLEEPY = new PixelArt(
-        "....XXXXX....",
-        "..XXwwwwwXX..",
-        ".XwwwwwXXXwX.",
-        ".XwwwwwwXwwX.",
-        ".XwwwwwXXXwX.",
-        ".XwXXXXXwwwX.",
-        ".XwwwwXwwwwX.",
-        ".XwwXwwwwwwX.",
-        ".XwXXXXXwwwX.",
-        "..XXwwwwwXX..",
-        "....XXXXX....");
-
-    /** A pink heart on a paper disc: it wants to be praised. */
-    public static final PixelArt PRAISE = new PixelArt(
-        "....XXXXX....",
-        "..XXwwwwwXX..",
-        ".XwXXXwXXXwX.",
-        ".XXpppXpppXX.",
-        ".XXpppppppXX.",
-        ".XwXpppppXwX.",
-        ".XwwXpppXwwX.",
-        ".XwwwXpXwwwX.",
         ".XwwwwXwwwwX.",
         "..XXwwwwwXX..",
         "....XXXXX....");
