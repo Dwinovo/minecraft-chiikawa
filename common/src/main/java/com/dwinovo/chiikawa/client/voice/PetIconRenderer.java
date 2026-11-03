@@ -19,13 +19,14 @@ import org.joml.Quaternionf;
  * the pet is saying, which is drawn at the same spot.
  */
 public final class PetIconRenderer {
-    public void render(AbstractPet pet, PoseStack poseStack, MultiBufferSource bufferSource, Font font,
+    /** @param nameShown whether the game draws the pet's name tag, which the icon hangs over */
+    public void render(AbstractPet pet, boolean nameShown, PoseStack poseStack, MultiBufferSource bufferSource, Font font,
                        Quaternionf cameraOrientation, float partialTick) {
         PixelArt sprite = sprite(pet.getIcon());
         if (sprite == null || Minecraft.getInstance().options.hideGui || pet.getSpeech().isPresent()) {
             return;
         }
-        OverHead.draw(pet, poseStack, bufferSource, font, cameraOrientation, 1.0F, surface -> {
+        OverHead.draw(pet, nameShown, poseStack, bufferSource, font, cameraOrientation, 1.0F, surface -> {
             int width = sprite.width() + 2 * UiStyle.GAP;
             int height = sprite.height() + 2 * UiStyle.TIGHT;
             int x = -width / 2;
