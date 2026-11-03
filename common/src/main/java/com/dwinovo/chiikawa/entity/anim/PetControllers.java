@@ -1,9 +1,12 @@
 package com.dwinovo.chiikawa.entity.anim;
 
+import java.util.List;
+
 /**
- * The names of the animation controllers every pet has, in the order they run (a later one
- * is drawn over an earlier one). The renderer registers its controllers under these names
- * and the pet addresses its one-shot animations to them, so both sides read the same list.
+ * The names of the animation controllers every pet has, and the one place that says in what
+ * order they run (a later one is drawn over an earlier one). The renderer registers its
+ * controllers under these names, in {@link #ORDER}, and the pet addresses its one-shot
+ * animations to them, so both sides read the same list.
  */
 public final class PetControllers {
     private PetControllers() {
@@ -26,4 +29,7 @@ public final class PetControllers {
      * the face stays as the reaction left it.
      */
     public static final String TALK = "talk";
+
+    /** Every controller a pet has, in the order they run. */
+    public static final List<String> ORDER = List.of(MAIN, BLINK, ACTION, REACTION, TALK);
 }
