@@ -533,8 +533,8 @@ public final class PetMind {
 
     /** @return what the icon over the pet's head is worked out from besides the step the pet is at */
     private PetIcons.Signs iconSigns() {
-        return new PetIcons.Signs(!pet.getPendingGift().isEmpty(), !GiftOutlook.of(pet).picks().isEmpty(), whyNot,
-            DayPhase.in(pet.level()));
+        return new PetIcons.Signs(PetOwnership.of(pet) instanceof PetOwnership.Owned, !pet.getPendingGift().isEmpty(),
+            !GiftOutlook.of(pet).picks().isEmpty(), whyNot, DayPhase.in(pet.level()));
     }
 
     private Permits permits(LivePetView view) {
