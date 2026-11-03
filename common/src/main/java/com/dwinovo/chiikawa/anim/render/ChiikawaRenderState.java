@@ -1,6 +1,6 @@
 package com.dwinovo.chiikawa.anim.render;
 
-import com.dwinovo.chiikawa.anim.controller.ControllerSnapshot;
+import com.dwinovo.chiikawa.anim.pose.PoseFrame;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
 
@@ -11,13 +11,11 @@ import net.minecraft.resources.Identifier;
  * the renderer uses to look up baked data and bind a texture.
  *
  * <h2>Animation snapshot</h2>
- * The animator's per-controller state is captured as a
- * {@link ControllerSnapshot} array in registration order — controllers run
- * later in the array compose on top of earlier ones via the renderer's submit
- * loop. Putting an immutable snapshot here (rather than the live animator
- * reference) keeps the submit pass a pure function of render-state plus baked
- * data: a second extract for an inventory preview snapshots fresh values
- * without disturbing the world-render submit.
+ * What the engine reads to pose the entity is captured in {@link #pose}: the animator's
+ * per-controller state as an immutable snapshot (rather than the live animator
+ * reference), the clock, and the few numbers its interceptors feed on. That keeps the submit
+ * pass a pure function of render-state plus baked data: a second extract for an
+ * inventory preview snapshots fresh values without disturbing the world-render submit.
  *
  * <h2>Extras</h2>
  * Layer- and interceptor-specific data goes through the {@link PetData}
@@ -31,45 +29,28 @@ public class ChiikawaRenderState extends LivingEntityRenderState {
     /** Texture path. */
     public Identifier texture;
     /**
-     * Per-controller snapshot in registration order. The submit pass iterates
-     * this and samples each controller into the shared pose buffer using its
-     * declared {@link com.dwinovo.chiikawa.anim.controller.BlendMode}.
+     * What the engine poses the entity from, captured during extract: the controller snapshots
+     * in registration order, the pause-aware animation time, walk speed, and head look.
+     * The submit pass composes the entity's pose from it.
+     *
+     * <p>The head look is taken here, during extract, rather than worked out from
+     * {@link #yRot} − {@link #bodyRot} at submit time: {@link net.minecraft.client.gui.screens.inventory.InventoryScreen#extractEntityInInventoryFollowsMouse}
+     * <em>overwrites</em> {@code bodyRot} / {@code yRot} after extract finishes, giving a
+     * difference that has nothing to do with the entity's real head turn.
      */
-    public ControllerSnapshot[] controllerSnapshots = EMPTY;
-    /**
-     * Pause-aware animation time captured during extract. The submit pass must
-     * reuse this value so controller state and pose sampling agree exactly for
-     * the render-state snapshot.
-     */
-    public long animationTimeNs;
+    public final PoseFrame pose = new PoseFrame();
     /**
      * Per-bone hidden flag, parallel to the model's bone array
      * (length {@code = bones.length}, indexed by bone index). Computed at
      * extract time by evaluating any registered
-     * {@link BoneVisibilityRule}s. {@code true} = the bone (and its entire
+     * {@link com.dwinovo.chiikawa.anim.pose.BoneVisibilityRule}s. {@code true} = the bone (and its entire
      * subtree) should be skipped during rendering.
      *
      * <p>Empty (zero-length) when the renderer has no visibility rules
      * registered — saves the per-frame allocation in the common case.
      */
     public boolean[] hiddenBones = EMPTY_HIDDEN;
-    /** {@code walkAnimation.speed(partialTick)} — feeds Molang {@code query.ground_speed}. */
-    public float walkSpeed;
-    /**
-     * Head yaw relative to body, in degrees, captured at extract time.
-     *
-     * <p>Stored here rather than recomputed from {@link #yRot} − {@link #bodyRot}
-     * at submit time because {@link net.minecraft.client.gui.screens.inventory.InventoryScreen#extractEntityInInventoryFollowsMouse}
-     * <em>overwrites</em> {@code bodyRot} / {@code yRot} after extract finishes
-     * (it sets {@code yRot = f * 20}, {@code bodyRot = 180 + f * 20}, giving a
-     * −180 difference that has nothing to do with the entity's real head turn).
-     * Snapshot this value during extract so submit uses the live entity state.
-     */
-    public float netHeadYaw;
-    /** Head pitch (entity X rotation) in degrees, captured at extract time for the same reason. */
-    public float headPitch;
 
-    private static final ControllerSnapshot[] EMPTY = new ControllerSnapshot[0];
     private static final boolean[] EMPTY_HIDDEN = new boolean[0];
 
     private final Object[] extras = new Object[PetData.VALUES.length];

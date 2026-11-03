@@ -290,7 +290,7 @@ public final class ModelBaker {
 
     /**
      * Fills 4 vertex UVs in TL → BL → BR → TR order (matching the geometry vertex
-     * order in {@link com.dwinovo.chiikawa.anim.render.ModelRenderer}). When
+     * order the model drawer emits). When
      * {@code uFlip} is true, the U coordinates are mirrored — the rectangle's
      * right edge ends up on the geometric TL/BL vertices and the left edge on
      * TR/BR. This preserves the exported Bedrock UV orientation for non-mirrored cubes.
