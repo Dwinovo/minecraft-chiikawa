@@ -8,7 +8,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.anim.state.PetActivity;
+import com.dwinovo.chiikawa.entity.anim.PetActivity;
 import com.dwinovo.chiikawa.camera.CameraSettings;
 import com.dwinovo.chiikawa.camera.FilmRolls;
 import com.dwinovo.chiikawa.camera.PhotoScout;

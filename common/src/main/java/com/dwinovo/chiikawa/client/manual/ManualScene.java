@@ -1,8 +1,8 @@
 package com.dwinovo.chiikawa.client.manual;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.anim.render.ChiikawaEntityRenderer;
-import com.dwinovo.chiikawa.anim.render.PropRenderer;
+import com.dwinovo.chiikawa.client.anim.render.ChiikawaEntityRenderer;
+import com.dwinovo.chiikawa.client.anim.render.PropRenderer;
 import com.dwinovo.chiikawa.client.ui.mc.GuiSurface;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;

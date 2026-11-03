@@ -7,7 +7,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.quietYard;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.readySong;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.anim.state.PetActivity;
+import com.dwinovo.chiikawa.entity.anim.PetActivity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.constraint.AnchorSettings;
