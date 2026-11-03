@@ -72,7 +72,7 @@ public final class ErrandSettingsData {
         // finishing and being cut short need rest nothing of their own. An invitation that is declined or not answered, or
         // a walk that never gets there, never began it: those rest the pair only a few seconds, so that they are not asked
         // again in the very next breath.
-        Rests scene = new Rests(NONE, RestSpec.ticksPerSubject(100), NONE,
+        Rests scene = new Rests(NONE, RestSpec.ticksPerSubject(100), NONE, NONE,
             Map.of(Meeting.PLAYED, RestSpec.fromPerSubject(RestSources.SCENE_COOLDOWN)));
         Map<ResourceLocation, ErrandSettings<?>> settings = new HashMap<>(Map.ofEntries(
             // Following is worth more the further the owner is, up to max_score; the score here is the least.
@@ -117,7 +117,7 @@ public final class ErrandSettingsData {
             // The walk to the owner, or the wait by their bed, is what the time limit is for. A fight at the same priority goes first.
             // A bedside gift is left when the owner wakes from the night's sleep, just after dawn as the day's clock reads it.
             entry(ErrandIds.GIFT_OWNER, errand(80, 0.85F, 2400,
-                new Rests(NONE, RestSpec.ticks(600), NONE, Map.of(Presents.GIVEN, RestSpec.from(RestSources.GIFTING_COOLDOWN))),
+                new Rests(NONE, RestSpec.ticks(600), NONE, NONE, Map.of(Presents.GIVEN, RestSpec.from(RestSources.GIFTING_COOLDOWN))),
                 new ErrandTunings.GiftOwner(1.0F, 1, 2.0, 0.77F, 0.8F, 100))
                 .yieldingTo(WorkData.MELEE, WorkData.RANGED, ErrandIds.DEFEND_SELF)),
             entry(ErrandIds.SOCIALIZE, errand(30, 0.35F, 1200, scene, new ErrandTunings.Socialize(0.6F, 1, 5))),
@@ -131,7 +131,7 @@ public final class ErrandSettingsData {
             // already rests for it, and none before it does; when the pet is told the picture was stored the
             // rest is the camera's, and when it was lost only as long as it takes to try again.
             entry(ErrandIds.TAKE_PHOTO, errand(40, 0.45F, 1200,
-                new Rests(NONE, RestSpec.from(RestSources.CAMERA_RETRY), NONE,
+                new Rests(NONE, RestSpec.from(RestSources.CAMERA_RETRY), NONE, NONE,
                     Map.of("taken", RestSpec.from(RestSources.PHOTO_UPLOAD_WAIT),
                         "stored", RestSpec.from(RestSources.CAMERA_COOLDOWN),
                         "failed", RestSpec.from(RestSources.CAMERA_RETRY))),

@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
 import java.util.function.Function;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -18,11 +19,12 @@ import org.jetbrains.annotations.Nullable;
  * What is written comes from the errand's settings: a number of ticks, or a named number asked of
  * the system it lives in (see {@link RestSources}).
  *
- * <p>Two ways of writing, because two things happen. An errand that ends is told by the executor and
+ * <p>Three ways of writing, because three things happen. An errand that ends is told by the executor and
  * only ever lengthens a rest: a photo stored while the camera is still up has already rested the
  * pet for the camera's cooldown, and an errand that gives up after it must not cut that short. A
  * report, told by a step as it does something or later by whatever was waited on, replaces: the shutter
- * rests the pet for the upload, and a photo that did not come back shortens that to the retry.
+ * rests the pet for the upload, and a photo that did not come back shortens that to the retry. A pet that is born
+ * is told by the mind, and rests each errand whose settings ask for it a random part of the rest they name.
  */
 public final class RestLedger {
     private static final String LOG_PREFIX = "[chiikawa-errand] ";
@@ -131,6 +133,23 @@ public final class RestLedger {
         RestSpec spec = settings.apply(errand).map(found -> found.rests().reports().get(report)).orElse(null);
         if (spec != null) {
             stores.apply(errand).restFor(subject(spec, context), ticks(errand, spec, context), now);
+        }
+    }
+
+    /**
+     * A pet has just been born. Rests the errand, if its settings say it rests at birth, for a part of that rest drawn
+     * uniformly from none of it to all of it, so that not every pet of a kind starts the errand in the same breath after
+     * the same wait. A rest of none, or of a source that resolves to none, rests nothing. For the mind alone.
+     *
+     * @param errand the errand
+     * @param random where the part is drawn
+     * @param now the current game time
+     */
+    public void afterBirth(ResourceLocation errand, RandomSource random, long now) {
+        RestSpec spec = settings.apply(errand).map(found -> found.rests().born()).orElse(RestSpec.NONE);
+        long ticks = ticks(errand, spec, RestContext.of(errand));
+        if (ticks > 0) {
+            stores.apply(errand).restFor(null, (long) (random.nextDouble() * (ticks + 1)), now);
         }
     }
 
