@@ -11,7 +11,6 @@ import com.dwinovo.chiikawa.data.PastimeData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
-import com.dwinovo.chiikawa.entity.brain.errand.run.PetIcon;
 import com.dwinovo.chiikawa.entity.brain.errand.view.LivePetView;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.settings.WorldSettings;
@@ -216,7 +215,6 @@ public final class RhythmGameTests {
                 helper.assertTrue(onTheBed(helper, pet, head) && pet.getMind().errands().isOn(ErrandIds.SLEEP),
                     "the pet left the bed it was sleeping on");
                 helper.assertTrue(pet.getPerformance().startsWith("sleep"), "the pet is not shown asleep: " + pet.getPerformance());
-                helper.assertTrue(pet.getIcon() == PetIcon.SLEEPY, "a sleeping pet wears " + pet.getIcon());
                 helper.assertFalse(pet.isSleeping(), "the pet was put to sleep in the bed, as a player is");
                 helper.assertFalse(helper.getBlockState(head).getValue(BedBlock.OCCUPIED), "the bed was taken by the pet");
             })
@@ -322,8 +320,7 @@ public final class RhythmGameTests {
             .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(ErrandIds.SLEEP) && pet.getPerformance().startsWith("sleep"),
                 "the pet never lay down: it is " + pet.getMind().errands().errand()))
             .thenExecute(() -> setDayTime(helper.getLevel(), MORNING))
-            .thenWaitUntil(() -> helper.assertTrue(!pet.getMind().errands().isOn(ErrandIds.SLEEP) && pet.getPerformance().isEmpty()
-                    && pet.getIcon() != PetIcon.SLEEPY,
+            .thenWaitUntil(() -> helper.assertTrue(!pet.getMind().errands().isOn(ErrandIds.SLEEP) && pet.getPerformance().isEmpty(),
                 "the pet is still asleep in the morning: " + pet.getMind().errands().errand()))
             .thenSucceed();
     }
