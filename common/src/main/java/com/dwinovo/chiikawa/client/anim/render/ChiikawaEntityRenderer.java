@@ -191,15 +191,10 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     }
 
     /**
-     * Helper for subclasses to register a constant looping controller — the
-     * common "blink / breath / tail-idle" pattern. The handler is a closure
+     * A constant looping controller, such as the blink. The handler is a closure
      * over the animation lookup so a missing anim file (during dev) doesn't
      * crash the renderer.
      */
-    protected final void addLoopingController(String name, BlendMode blendMode, String animationName) {
-        addController(loopingController(name, blendMode, animationName));
-    }
-
     private ControllerConfig<PetAnimContext> loopingController(String name, BlendMode blendMode, String animationName) {
         Identifier key = animKey(animationName);
         return new ControllerConfig<>(name, blendMode, 0f, ctx -> AnimationLibrary.get(key));
