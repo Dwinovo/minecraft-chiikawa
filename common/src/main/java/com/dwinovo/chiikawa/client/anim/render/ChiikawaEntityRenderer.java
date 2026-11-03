@@ -54,7 +54,8 @@ import java.util.List;
  *
  * <h2>Controllers</h2>
  * Subclasses register {@link ControllerConfig}s in their constructor. The
- * base class registers a single state-driven {@link PetControllers#MAIN} controller that
+ * base class registers the controllers of {@link PetControllers#ORDER}: the ambient
+ * {@link PetControllers#BLINK}, a single state-driven {@link PetControllers#MAIN} controller that
  * resolves a base loop via {@link PetAnimationResolver}, plus the
  * {@link PetControllers#ACTION}, {@link PetControllers#REACTION} and {@link PetControllers#TALK}
  * dummy controllers that {@link com.dwinovo.chiikawa.entity.AbstractPet} asks one-shot
@@ -153,30 +154,23 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             addBoneVisibilityRule(prop.bone(), prop.shownDuring());
         }
 
-        // Default controllers shared by all pets, in priority-from-low order, as
-        // PetControllers lists them and says why they rank so.
+        // Default controllers shared by all pets, in the order PetControllers lists them and says why.
         // Sub-classes append further decorative or override controllers on top.
-        addController(new ControllerConfig<>(
-                PetControllers.MAIN,
-                BlendMode.OVERRIDE,
-                MAIN_TRANSITION_SEC,
-                this::resolveMainAnimation));
-        addLoopingController(PetControllers.BLINK, BlendMode.OVERRIDE, "blink");
-        addController(new ControllerConfig<>(
-                PetControllers.ACTION,
-                BlendMode.OVERRIDE,
-                TRIGGER_STOP_FADE_SEC,
-                ControllerHandler::neverPlay));
-        addController(new ControllerConfig<>(
-                PetControllers.REACTION,
-                BlendMode.OVERRIDE,
-                TRIGGER_STOP_FADE_SEC,
-                ControllerHandler::neverPlay));
-        addController(new ControllerConfig<>(
-                PetControllers.TALK,
-                BlendMode.OVERRIDE,
-                TRIGGER_STOP_FADE_SEC,
-                ControllerHandler::neverPlay));
+        for (String controller : PetControllers.ORDER) {
+            addController(defaultController(controller));
+        }
+    }
+
+    /** What the pet's own controller of this name runs: the one place that says how each of them behaves. */
+    private ControllerConfig<PetAnimContext> defaultController(String name) {
+        return switch (name) {
+            case PetControllers.BLINK -> loopingController(name, BlendMode.OVERRIDE, "blink");
+            case PetControllers.MAIN -> new ControllerConfig<>(
+                    name, BlendMode.OVERRIDE, MAIN_TRANSITION_SEC, this::resolveMainAnimation);
+            case PetControllers.ACTION, PetControllers.REACTION, PetControllers.TALK -> new ControllerConfig<>(
+                    name, BlendMode.OVERRIDE, TRIGGER_STOP_FADE_SEC, ControllerHandler::neverPlay);
+            default -> throw new IllegalStateException("no default controller for " + name);
+        };
     }
 
     /** Register an additional {@link RenderLayer}; runs after the main mesh in registration order. */
@@ -203,8 +197,12 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
      * crash the renderer.
      */
     protected final void addLoopingController(String name, BlendMode blendMode, String animationName) {
+        addController(loopingController(name, blendMode, animationName));
+    }
+
+    private ControllerConfig<PetAnimContext> loopingController(String name, BlendMode blendMode, String animationName) {
         Identifier key = animKey(animationName);
-        addController(new ControllerConfig<>(name, blendMode, 0f, ctx -> AnimationLibrary.get(key)));
+        return new ControllerConfig<>(name, blendMode, 0f, ctx -> AnimationLibrary.get(key));
     }
 
     /**
