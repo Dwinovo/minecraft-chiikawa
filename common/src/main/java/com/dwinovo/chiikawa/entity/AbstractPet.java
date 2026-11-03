@@ -1,14 +1,13 @@
 package com.dwinovo.chiikawa.entity;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.client.anim.AnimationLibrary;
 import com.dwinovo.chiikawa.entity.anim.ChiikawaAnimated;
-import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
 import com.dwinovo.chiikawa.anim.runtime.AnimationClock;
 import com.dwinovo.chiikawa.anim.runtime.Animator;
 import com.dwinovo.chiikawa.entity.anim.PetAction;
 import com.dwinovo.chiikawa.entity.anim.PetActivity;
 import com.dwinovo.chiikawa.entity.anim.PetAnimContext;
+import com.dwinovo.chiikawa.entity.anim.PetControllers;
 import com.dwinovo.chiikawa.entity.anim.PetReaction;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
@@ -39,7 +38,6 @@ import com.dwinovo.chiikawa.voice.VoiceMoment;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Dynamic;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -206,12 +204,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     public static final int TRIGGER_USE_MAINHAND = 1;
     public static final int TRIGGER_SWORD_ATTACK = 2;
 
-    /** Controller name receiving action triggers — must match {@link com.dwinovo.chiikawa.client.anim.render.ChiikawaEntityRenderer#CONTROLLER_ACTION}. */
-    private static final String ACTION_CONTROLLER = "action";
-    /** Controller name receiving reaction triggers — must match {@link com.dwinovo.chiikawa.client.anim.render.ChiikawaEntityRenderer#CONTROLLER_REACTION}. */
-    private static final String REACTION_CONTROLLER = "reaction";
-    /** Controller name the pet talks on — must match {@link com.dwinovo.chiikawa.client.anim.render.ChiikawaEntityRenderer#CONTROLLER_TALK}. */
-    private static final String TALK_CONTROLLER = "talk";
     private static final java.util.List<MemoryModuleType<?>> MEMORY_TYPES = java.util.List.of(
         MemoryModuleType.PATH,
         MemoryModuleType.DOORS_TO_CLOSE,
@@ -1025,9 +1017,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         if (seq == 0 || seq == lastSeenTriggerSeq) return;
         lastSeenTriggerSeq = seq;
         PetAction action = PetAction.fromNetworkId(packed & 0xFF);
-        if (action != PetAction.NONE && !playActionAnimation(action)) {
-            Constants.LOG.warn("[chiikawa-anim] no baked animation for action '{}' on {}", action,
-                BuiltInRegistries.ENTITY_TYPE.getKey(getType()));
+        if (action != PetAction.NONE) {
+            playActionAnimation(action);
         }
     }
 
@@ -1046,16 +1037,14 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * Plays an action's animation once on this copy of the pet, the first of its candidates
      * this pet has: what a synced trigger does on a player's game, and what a picture of a
      * pet at work does directly. Client side.
-     *
-     * @return whether the pet had any of them
      */
-    public boolean playActionAnimation(PetAction action) {
-        return playOnce(ACTION_CONTROLLER, action.animationCandidates());
+    public void playActionAnimation(PetAction action) {
+        playOnce(PetControllers.ACTION, action.animationCandidates());
     }
 
     /** As {@link #playActionAnimation}, for a reaction, on its own layer. */
-    public boolean playReactionAnimation(PetReaction reaction) {
-        return playOnce(REACTION_CONTROLLER, reaction.animationCandidates());
+    public void playReactionAnimation(PetReaction reaction) {
+        playOnce(PetControllers.REACTION, reaction.animationCandidates());
     }
 
     /**
@@ -1070,7 +1059,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      */
     public void speak(String line, int ticks, Optional<String> subject) {
         speech = new PetSpeech.Heard(line, tickCount, ticks, subject);
-        playOnce(TALK_CONTROLLER, List.of(PetSpeech.mouth(line)));
+        playOnce(PetControllers.TALK, List.of(PetSpeech.mouth(line)));
     }
 
     /** What this copy of the pet is saying right now, if anything. Client side. */
@@ -1081,25 +1070,19 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     /**
      * Plays the first of these animations this pet has, once, on the action layer: for a
      * picture that asks for a move by name, and for a move the server names by data (see
-     * {@link PetGesture}), since which moves there are differs from pet to pet. Client side.
-     *
-     * @return whether the pet had any of them
+     * {@link PetGesture}), since which moves there are differs from pet to pet: a pet without
+     * any of them shows nothing. Client side.
      */
-    public boolean playAnimation(List<String> candidates) {
-        return playOnce(ACTION_CONTROLLER, candidates);
+    public void playAnimation(List<String> candidates) {
+        playOnce(PetControllers.ACTION, candidates);
     }
 
-    private boolean playOnce(String controller, List<String> candidates) {
-        Identifier typeId = BuiltInRegistries.ENTITY_TYPE.getKey(getType());
-        for (String name : candidates) {
-            BakedAnimation anim = AnimationLibrary.get(
-                    Identifier.fromNamespaceAndPath(typeId.getNamespace(), typeId.getPath() + "/" + name));
-            if (anim != null) {
-                getPetAnimator().playOnce(controller, anim, AnimationClock.fromTicks(tickCount, 0f));
-                return true;
-            }
-        }
-        return false;
+    /**
+     * Asks the animator for a one-shot by name, as an entity starts a vanilla animation state;
+     * which clip a name is, is for the renderer's side to say when it next draws the pet.
+     */
+    private void playOnce(String controller, List<String> candidates) {
+        getPetAnimator().playOnce(controller, candidates, AnimationClock.fromTicks(tickCount, 0f));
     }
 
     @Override
