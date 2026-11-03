@@ -60,6 +60,7 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
@@ -193,6 +194,18 @@ public final class PetMind {
      */
     public void report(Identifier errand, String report) {
         rests.afterReport(errand, report, RestContext.NONE, pet.level().getGameTime());
+    }
+
+    /**
+     * Tells the pet it has just been born, which is once, by the game's own spawning: it rests each errand whose settings ask
+     * it to at birth, see {@link ErrandSettings.Rests#born}, so that it does not set off on every errand the moment it is there.
+     * Not for a pet that is loaded, tamed or brought back.
+     *
+     * @param random where the length of each rest is drawn
+     */
+    public void born(RandomSource random) {
+        long now = pet.level().getGameTime();
+        ErrandSettings.all().keySet().forEach(errand -> rests.afterBirth(errand, random, now));
     }
 
     /** Has the pet decide again at its next tick instead of waiting for its turn. */

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.data.CharacterPastimeData;
 import com.dwinovo.chiikawa.data.PastimeData;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandSettings;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandTunings;
@@ -19,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.RandomSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -44,7 +46,7 @@ class RestLedgerTest {
     void setUp() {
         RestLedger.forgetReported();
         photo = TestRests.settings(1200, new ErrandSettings.Rests(RestSpec.ticks(UPLOAD_WAIT), RestSpec.ticks(RETRY),
-            RestSpec.ticks(0), Map.of("stored", RestSpec.ticks(CAMERA_COOLDOWN), "failed", RestSpec.ticks(RETRY))));
+            RestSpec.ticks(0), RestSpec.NONE, Map.of("stored", RestSpec.ticks(CAMERA_COOLDOWN), "failed", RestSpec.ticks(RETRY))));
         ledger = ledger(photo);
     }
 
@@ -122,7 +124,7 @@ class RestLedgerTest {
     @Test
     void aRestOnASubjectIsOnThatSubjectAndNotTheErrand() {
         ErrandSettings<String> plant = TestRests.settings(600, new ErrandSettings.Rests(RestSpec.ticks(0),
-            RestSpec.ticksPerSubject(200), RestSpec.ticks(0), Map.of()));
+            RestSpec.ticksPerSubject(200), RestSpec.ticks(0), RestSpec.NONE, Map.of()));
         RestLedger plants = ledger(plant);
 
         plants.afterOutcome(running(PLANT, plant, subject("crop-1")), Outcome.gaveUp("unreachable"), NOW);
@@ -145,7 +147,7 @@ class RestLedgerTest {
     @Test
     void aRestOnASubjectOfAPlanWithNoneIsOnTheErrand() {
         ErrandSettings<String> plant = TestRests.settings(600, new ErrandSettings.Rests(RestSpec.ticks(0),
-            RestSpec.ticksPerSubject(200), RestSpec.ticks(0), Map.of()));
+            RestSpec.ticksPerSubject(200), RestSpec.ticks(0), RestSpec.NONE, Map.of()));
         RestLedger plants = ledger(plant);
 
         plants.afterOutcome(running(PLANT, plant, new Plan() {
@@ -202,7 +204,7 @@ class RestLedgerTest {
     void aNamedNumberIsAskedOfItsSourceWithWhatTheRestIsAbout() {
         RestSources.register(RestSources.CAMERA_RETRY, context -> context.key().map(key -> key.equals(CAMERA) ? 77L : 5L).orElse(-1L));
         ErrandSettings<String> fromSource = TestRests.settings(1200, new ErrandSettings.Rests(RestSpec.ticks(0),
-            RestSpec.from(RestSources.CAMERA_RETRY), RestSpec.ticks(0), Map.of("failed", RestSpec.from(RestSources.CAMERA_RETRY))));
+            RestSpec.from(RestSources.CAMERA_RETRY), RestSpec.ticks(0), RestSpec.NONE, Map.of("failed", RestSpec.from(RestSources.CAMERA_RETRY))));
         RestLedger sourced = ledger(fromSource);
 
         sourced.afterOutcome(running(PHOTO, fromSource, new Plan() {
@@ -247,6 +249,72 @@ class RestLedgerTest {
         };
 
         assertEquals(0, restedByPastime(settings, elsewhere, 1.0F));
+    }
+
+    @Test
+    void aPetThatIsBornRestsAnErrandThatAsksForAPartOfWhatItNamesFromNoneOfItToAllOfIt() {
+        int born = 10;
+        ErrandSettings<String> asking = bornResting(RestSpec.ticks(born));
+        RandomSource random = RandomSource.create(7L);
+        long least = Long.MAX_VALUE;
+        long most = Long.MIN_VALUE;
+
+        for (int pet = 0; pet < 1000; pet++) {
+            TestRests.Store fresh = new TestRests.Store();
+            new RestLedger(errand -> fresh, errand -> Optional.of(asking), errors::add).afterBirth(PHOTO, random, NOW);
+            long rest = fresh.remaining(null, NOW);
+            least = Math.min(least, rest);
+            most = Math.max(most, rest);
+        }
+
+        assertEquals(0, least, "it may be born with none of it left");
+        assertEquals(born, most, "and with all of it, never more");
+    }
+
+    @Test
+    void aPetThatIsBornRestsNothingFromAnErrandThatDoesNotAskOrThatHasNoSettings() {
+        ledger(photo).afterBirth(PHOTO, RandomSource.create(1), NOW);
+        ledger(photo).afterBirth(PLANT, RandomSource.create(1), NOW);
+
+        assertEquals(0, store.writes());
+    }
+
+    @Test
+    void aPetThatIsBornRestsNothingFromASourceThatComesToNone() {
+        Optional<RestSources.Resolver> registered = RestSources.resolver(RestSources.CAMERA_RETRY);
+        RestSources.register(RestSources.CAMERA_RETRY, context -> 0L);
+        try {
+            ledger(bornResting(RestSpec.from(RestSources.CAMERA_RETRY))).afterBirth(PHOTO, RandomSource.create(1), NOW);
+
+            assertEquals(0, store.writes());
+        } finally {
+            registered.ifPresent(resolver -> RestSources.register(RestSources.CAMERA_RETRY, resolver));
+        }
+    }
+
+    @Test
+    void aPetThatIsBornRestsAPastimeForAPartOfItsCooldownInTheWorldItIsBornIn() {
+        TestErrands.load();
+        ErrandSettings<?> settings = ErrandSettings.of(CharacterPastimeData.FRENZY).orElseThrow();
+        int cooldown = ((ErrandTunings.Perform) settings.tuning()).cooldownTicks();
+        assertEquals(RestSpec.from(RestSources.PASTIME_COOLDOWN), settings.rests().born());
+
+        RandomSource random = RandomSource.create(7L);
+        for (float pastimes : new float[] {1.0F, 2.0F, 0.5F}) {
+            long most = 0;
+            for (int pet = 0; pet < 200; pet++) {
+                TestRests.Store fresh = new TestRests.Store();
+                new RestLedger(errand -> fresh, errand -> Optional.of(settings), errors::add, () -> pastimes)
+                    .afterBirth(CharacterPastimeData.FRENZY, random, NOW);
+                most = Math.max(most, fresh.remaining(null, NOW));
+                assertTrue(fresh.remaining(null, NOW) <= Math.round(cooldown / pastimes), "more than its cooldown");
+            }
+            assertTrue(most > Math.round(cooldown / pastimes) / 2, "never drew a long rest at " + pastimes);
+        }
+    }
+
+    private static ErrandSettings<String> bornResting(RestSpec born) {
+        return TestRests.settings(1200, new ErrandSettings.Rests(RestSpec.ticks(0), RestSpec.ticks(1), RestSpec.ticks(0), born, Map.of()));
     }
 
     /** How long a pastime that was done rests the errand, in a world that has them this much as the data says. */
@@ -298,7 +366,7 @@ class RestLedgerTest {
 
     /** The rests of the gift errand: none for finishing, half a minute for giving up, and the cooldown once a present is given. */
     private static ErrandSettings<String> giftRests() {
-        return TestRests.settings(2400, new ErrandSettings.Rests(RestSpec.ticks(0), RestSpec.ticks(600), RestSpec.ticks(0),
+        return TestRests.settings(2400, new ErrandSettings.Rests(RestSpec.ticks(0), RestSpec.ticks(600), RestSpec.ticks(0), RestSpec.NONE,
             Map.of("given", RestSpec.from(RestSources.GIFTING_COOLDOWN))));
     }
 
@@ -306,7 +374,7 @@ class RestLedgerTest {
     void aNamedNumberThatIsZeroIsTheirChoiceAndNotClamped() {
         RestSources.register(RestSources.CAMERA_COOLDOWN, context -> 0L);
         ErrandSettings<String> zero = TestRests.settings(1200, new ErrandSettings.Rests(RestSpec.ticks(0),
-            RestSpec.ticks(1), RestSpec.ticks(0), Map.of("stored", RestSpec.from(RestSources.CAMERA_COOLDOWN))));
+            RestSpec.ticks(1), RestSpec.ticks(0), RestSpec.NONE, Map.of("stored", RestSpec.from(RestSources.CAMERA_COOLDOWN))));
         RestLedger sourced = ledger(zero);
         sourced.afterReport(PHOTO, "stored", RestContext.NONE, NOW - 5);
         assertEquals(0, sourced.remaining(PHOTO, NOW), "left at nothing, and said nothing about");
@@ -328,7 +396,7 @@ class RestLedgerTest {
 
     private void sourceNobodyRegisteredRestsForNothing() {
         ErrandSettings<String> missing = TestRests.settings(1200, new ErrandSettings.Rests(RestSpec.ticks(0),
-            RestSpec.from(RestSources.MUSIC_RETRY), RestSpec.ticks(0), Map.of()));
+            RestSpec.from(RestSources.MUSIC_RETRY), RestSpec.ticks(0), RestSpec.NONE, Map.of()));
         RestLedger sourced = ledger(missing);
 
         sourced.afterOutcome(running(PHOTO, missing, new Plan() {
@@ -346,7 +414,7 @@ class RestLedgerTest {
     /** The rests of a scene: its cooldown from the report that it began, a few seconds if it never did. */
     private static ErrandSettings<String> scene() {
         return TestRests.settings(1200, new ErrandSettings.Rests(RestSpec.ticks(0), RestSpec.ticksPerSubject(SCENE_GUARD),
-            RestSpec.ticks(0), Map.of("played", RestSpec.ticksPerSubject(SCENE_COOLDOWN))));
+            RestSpec.ticks(0), RestSpec.NONE, Map.of("played", RestSpec.ticksPerSubject(SCENE_COOLDOWN))));
     }
 
     private RestLedger ledger(ErrandSettings<?> settings) {

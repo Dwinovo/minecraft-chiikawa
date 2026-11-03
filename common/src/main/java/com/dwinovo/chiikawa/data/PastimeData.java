@@ -34,7 +34,8 @@ import net.minecraft.util.valueproviders.UniformInt;
  * <p>These are the pastimes every character has a part in. Those of one character, or of a few, are written beside them in
  * {@link CharacterPastimeData}, and all of them are here to everything that asks for the pastimes there are. Priority 10, where a pet's idle time is: a pet does one when the reason is there and nothing that matters more is, and
  * it takes the place of wandering. Each rests for its cooldown from when it was done, which the world's setting for how
- * often pets pass the time scales.
+ * often pets pass the time scales. A pastime with no cue to wait for is rested from birth too, a part of that cooldown drawn
+ * at random, or a new pet would do it at once.
  */
 public final class PastimeData {
     /** Getting out of the rain: under a roof or a tree, or, for Chiikawa, close to the owner. */
@@ -124,6 +125,10 @@ public final class PastimeData {
         settings.put(RAIN_PLAY, settings(0.5F, PLAYING_LIMIT, rests, new ErrandTunings.Perform(RAIN_COOLDOWN)));
         settings.put(WATCH_OWNER_WORK, settings(0.3F, WATCHING_LIMIT, rests,
             new ErrandTunings.Visit(WATCHING_COOLDOWN, WALK_SPEED, 2, 3.0, PLACE_REACH)));
+        // A pastime that answers nothing is startable the moment a pet is born unless that is rested: Usagi's fit, Rakko's practice.
+        Map<Identifier, Work<?, ?>> works = works();
+        settings.replaceAll((errand, found) -> works.get(errand).pastime().orElseThrow().when().isEmpty()
+            ? found.bornResting(RestSpec.from(RestSources.PASTIME_COOLDOWN)) : found);
         return settings;
     }
 
