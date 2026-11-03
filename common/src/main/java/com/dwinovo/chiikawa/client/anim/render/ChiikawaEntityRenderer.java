@@ -17,7 +17,6 @@ import com.dwinovo.chiikawa.anim.pose.BoneVisibilityRule;
 import com.dwinovo.chiikawa.anim.pose.HeadLookInterceptor;
 import com.dwinovo.chiikawa.anim.pose.PoseComposer;
 import com.dwinovo.chiikawa.client.anim.render.layer.HeldItemLayer;
-import com.dwinovo.chiikawa.client.voice.PetIconRenderer;
 import com.dwinovo.chiikawa.client.voice.SpeechBubbleRenderer;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.entity.AbstractPet;
@@ -288,8 +287,6 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         boolean nameShown = state.nameTag != null;
         state.put(PetData.SPEECH, !drawingPortrait && entity instanceof AbstractPet pet
             ? speech.extract(pet, nameShown, partialTick) : null);
-        state.put(PetData.ICON, !drawingPortrait && entity instanceof AbstractPet pet
-            ? icon.extract(pet, nameShown, partialTick) : null);
 
         if (entity instanceof ChiikawaAnimated animated) {
             long nowNs = AnimationClock.fromTicks(entity.tickCount, partialTick);
@@ -333,8 +330,6 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
 
     /** What the pet is saying, over its head. */
     private final SpeechBubbleRenderer speech = new SpeechBubbleRenderer();
-    /** What is on its mind, over its head when it is not saying anything. */
-    private final PetIconRenderer icon = new PetIconRenderer();
 
     /**
      * Draws a pet as a picture in a screen: the model, and nothing over its head. When its
@@ -390,17 +385,13 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         renderOverHead(state, poseStack, bufferSource, packedLight);
     }
 
-    /** The name tag, as vanilla draws it, and what the pet is saying or has on its mind above it. */
+    /** The name tag, as vanilla draws it, and what the pet is saying above it. */
     private void renderOverHead(ChiikawaRenderState state, PoseStack poseStack, MultiBufferSource bufferSource,
                                 int packedLight) {
         super.render(state, poseStack, bufferSource, packedLight);
         SpeechBubbleRenderer.Saying saying = state.get(PetData.SPEECH);
         if (saying != null) {
             speech.render(saying, poseStack, bufferSource, getFont(), entityRenderDispatcher.cameraOrientation());
-        }
-        PetIconRenderer.Mind mind = state.get(PetData.ICON);
-        if (mind != null) {
-            icon.render(mind, poseStack, bufferSource, getFont(), entityRenderDispatcher.cameraOrientation());
         }
     }
 }
