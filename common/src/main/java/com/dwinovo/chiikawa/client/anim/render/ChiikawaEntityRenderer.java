@@ -26,8 +26,10 @@ import com.dwinovo.chiikawa.client.anim.render.layer.BagLayer;
 import com.dwinovo.chiikawa.client.anim.render.layer.RenderLayer;
 import com.dwinovo.chiikawa.client.anim.render.layer.RenderLayerContext;
 import com.dwinovo.chiikawa.anim.runtime.AnimationClock;
+import com.dwinovo.chiikawa.anim.runtime.AnimationSource;
 import com.dwinovo.chiikawa.anim.runtime.Animator;
 import com.dwinovo.chiikawa.entity.anim.PetAnimContext;
+import com.dwinovo.chiikawa.entity.anim.PetControllers;
 import com.dwinovo.chiikawa.entity.anim.PetAnimationResolver;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -55,12 +57,12 @@ import java.util.List;
  *
  * <h2>Controllers</h2>
  * Subclasses register {@link ControllerConfig}s in their constructor. The
- * base class registers a single state-driven {@code "main"} controller that
+ * base class registers a single state-driven {@link PetControllers#MAIN} controller that
  * resolves a base loop via {@link PetAnimationResolver}, plus the
- * {@code "action"}, {@code "reaction"} and {@code "talk"} dummy controllers that
- * {@link com.dwinovo.chiikawa.entity.AbstractPet} dispatches one-shot
- * animations to. Subclasses append decorative controllers (blink, breath, ...)
- * via {@link #addController}.
+ * {@link PetControllers#ACTION}, {@link PetControllers#REACTION} and {@link PetControllers#TALK}
+ * dummy controllers that {@link com.dwinovo.chiikawa.entity.AbstractPet} asks one-shot
+ * animations of by name, resolved here against this pet's animations. Subclasses append
+ * decorative controllers (breath, ...) via {@link #addController}.
  *
  * <p>Controllers run in registration order; later controllers' samples
  * compose on top of earlier ones in the shared pose buffer per their
@@ -77,22 +79,6 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     /** Default base-loop animation name. */
     private static final String DEFAULT_LOOP_NAME = "idle";
 
-    /** Controller name carrying state-driven base loop (idle/walk/run/sit/...). */
-    public static final String CONTROLLER_MAIN = "main";
-    /** Controller name receiving one-shot action triggers from {@link com.dwinovo.chiikawa.entity.AbstractPet}. */
-    public static final String CONTROLLER_ACTION = "action";
-    /** Controller name receiving one-shot reaction triggers. */
-    public static final String CONTROLLER_REACTION = "reaction";
-    /** Controller name the pet opens its mouth on while it says something. */
-    public static final String CONTROLLER_TALK = "talk";
-    /**
-     * Controller name driving the ambient blink loop. Plays the {@code blink}
-     * animation from each pet's animation file as a constant decorative loop.
-     * Pets without a {@code blink} animation get a no-op (handler returns
-     * {@code null} and the controller stays silent) — graceful degradation,
-     * no per-pet code needed.
-     */
-    public static final String CONTROLLER_BLINK = "blink";
     /** Pets are 0.6 blocks wide; this matches vanilla small-mob shadow sizing. */
     private static final float DEFAULT_SHADOW_RADIUS = 0.4f;
     /**
@@ -111,6 +97,8 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     protected final ResourceLocation modelKey;
     protected final ResourceLocation textureLocation;
     protected final ResourceLocation defaultLoopKey;
+    /** This pet's animations by short name, where the animator resolves the one-shots it was asked for. */
+    private final AnimationSource animations = name -> AnimationLibrary.get(animKey(name));
 
     private final ModelRenderer mesh = new ModelRenderer();
     private final Quaternionf rotBuf = new Quaternionf();
@@ -168,38 +156,27 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             addBoneVisibilityRule(prop.bone(), prop.shownDuring());
         }
 
-        // Default controllers shared by all pets, in priority-from-low order:
-        //   "main"     state-driven base loop
-        //   "blink"    ambient eye-blink decorative loop (graceful no-op when
-        //              the pet's animation file has no "blink" animation)
-        //   "action"   externally-triggered one-shot semantic actions — runs
-        //              after blink so a gameplay action's eye keyframes (if
-        //              any) override ambient blinking
-        //   "reaction" externally-triggered one-shot emotional reactions —
-        //              same priority rationale as action
-        //   "talk"     the mouth opening while the pet says a line — after
-        //              reaction, whose face arrives in the same tick and would
-        //              otherwise replace it; it keys only the mouth, so the rest
-        //              of the face stays as the reaction left it
+        // Default controllers shared by all pets, in priority-from-low order, as
+        // PetControllers lists them and says why they rank so.
         // Sub-classes append further decorative or override controllers on top.
         addController(new ControllerConfig<>(
-                CONTROLLER_MAIN,
+                PetControllers.MAIN,
                 BlendMode.OVERRIDE,
                 MAIN_TRANSITION_SEC,
                 this::resolveMainAnimation));
-        addLoopingController(CONTROLLER_BLINK, BlendMode.OVERRIDE, "blink");
+        addLoopingController(PetControllers.BLINK, BlendMode.OVERRIDE, "blink");
         addController(new ControllerConfig<>(
-                CONTROLLER_ACTION,
+                PetControllers.ACTION,
                 BlendMode.OVERRIDE,
                 TRIGGER_STOP_FADE_SEC,
                 ControllerHandler::neverPlay));
         addController(new ControllerConfig<>(
-                CONTROLLER_REACTION,
+                PetControllers.REACTION,
                 BlendMode.OVERRIDE,
                 TRIGGER_STOP_FADE_SEC,
                 ControllerHandler::neverPlay));
         addController(new ControllerConfig<>(
-                CONTROLLER_TALK,
+                PetControllers.TALK,
                 BlendMode.OVERRIDE,
                 TRIGGER_STOP_FADE_SEC,
                 ControllerHandler::neverPlay));
@@ -246,7 +223,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
      * <p>Typical usage in a subclass constructor:
      * <pre>{@code
      * addBoneVisibilityRule("guitar",
-     *     state -> state.pose.isPlaying(CONTROLLER_ACTION, "play_guitar"));
+     *     state -> state.pose.isPlaying(PetControllers.ACTION, "play_guitar"));
      * }</pre>
      */
     protected final void addBoneVisibilityRule(String boneName, BoneVisibilityRule<ChiikawaRenderState> rule) {
@@ -323,7 +300,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             long bakeStamp = currentModel == null ? 0L : currentModel.bakeStamp;
             state.pose.controllerSnapshots = animated.getPetAnimator().advance(controllers,
                     animated.getAnimContext(state.pose.walkSpeed), entity.getUUID().getLeastSignificantBits(),
-                    nowNs, bakeStamp);
+                    nowNs, bakeStamp, animations);
             state.hiddenBones = visibility.evaluate(currentModel, state);
         }
     }
@@ -340,7 +317,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
      * yet (common during dev when only some animations are authored).
      */
     protected BakedAnimation resolveMainAnimation(PetAnimContext ctx) {
-        BakedAnimation wanted = firstAvailable(PetAnimationResolver.resolve(ctx));
+        BakedAnimation wanted = animations.firstOf(PetAnimationResolver.resolve(ctx));
         if (wanted != null) return wanted;
         return AnimationLibrary.get(defaultLoopKey);
     }
@@ -349,15 +326,6 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     protected final ResourceLocation animKey(String name) {
         return ResourceLocation.fromNamespaceAndPath(modelKey.getNamespace(),
                 modelKey.getPath() + "/" + name);
-    }
-
-    /** First animation in the candidate list that exists in the library, or {@code null}. */
-    protected final BakedAnimation firstAvailable(Iterable<String> names) {
-        for (String name : names) {
-            BakedAnimation animation = AnimationLibrary.get(animKey(name));
-            if (animation != null) return animation;
-        }
-        return null;
     }
 
     /** Whether a pet is being drawn as a picture in a screen rather than in the world. */
