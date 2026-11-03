@@ -41,7 +41,7 @@ import net.minecraft.util.valueproviders.UniformInt;
  *
  * <p>Priority 10, where a pet's idle time is. Each is done for a reason of its own but two, Usagi's fits and Rakko's practice,
  * which are done for none and are rare because they rest a long time after: a pastime rests for its cooldown from when it was
- * done.
+ * done, and a new pet rests from these two for a part of it, see {@link PastimeData}.
  */
 public final class CharacterPastimeData {
     /** Chiikawa, frightened by a storm or a creeper about to go off. */

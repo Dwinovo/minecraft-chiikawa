@@ -60,6 +60,11 @@ public record RestSpec(Either<Integer, ResourceLocation> amount, Per per) {
         ? DataResult.success(spec)
         : DataResult.error(() -> "A rest after giving up must last more than 0 ticks"));
 
+    /** A rest on the errand as a whole: what a newborn pet is given, which has nothing yet to have a subject. */
+    public static final Codec<RestSpec> ON_ERRAND = CODEC.validate(spec -> spec.per == Per.ERRAND
+        ? DataResult.success(spec)
+        : DataResult.error(() -> "A rest at birth must be on the errand, not on a subject"));
+
     /** @return a rest of this many ticks on the errand */
     public static RestSpec ticks(int ticks) {
         return new RestSpec(Either.left(ticks), Per.ERRAND);
