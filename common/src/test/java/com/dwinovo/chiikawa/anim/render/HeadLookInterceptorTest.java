@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.anim.render;
 
+import com.dwinovo.chiikawa.anim.pose.BedrockRotation;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.dwinovo.chiikawa.anim.baked.BakedBone;

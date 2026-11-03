@@ -13,6 +13,10 @@ configurations {
     uiJava{
         canBeResolved = true
     }
+    // 纯 JVM 的动画引擎,同样按源码并入。
+    animJava{
+        canBeResolved = true
+    }
 }
 
 dependencies {
@@ -28,6 +32,7 @@ dependencies {
     commonJava project(path: ':common', configuration: 'commonJava')
     commonResources project(path: ':common', configuration: 'commonResources')
     uiJava project(path: ':ui', configuration: 'uiJava')
+    animJava project(path: ':anim', configuration: 'animJava')
 }
 
 tasks.named('compileJava', JavaCompile) {
@@ -35,6 +40,8 @@ tasks.named('compileJava', JavaCompile) {
     source(configurations.commonJava)
     dependsOn(configurations.uiJava)
     source(configurations.uiJava)
+    dependsOn(configurations.animJava)
+    source(configurations.animJava)
 }
 
 processResources {
@@ -47,6 +54,8 @@ tasks.named('javadoc', Javadoc).configure {
     source(configurations.commonJava)
     dependsOn(configurations.uiJava)
     source(configurations.uiJava)
+    dependsOn(configurations.animJava)
+    source(configurations.animJava)
 }
 
 tasks.named('sourcesJar', Jar) {
@@ -54,6 +63,8 @@ tasks.named('sourcesJar', Jar) {
     from(configurations.commonJava)
     dependsOn(configurations.uiJava)
     from(configurations.uiJava)
+    dependsOn(configurations.animJava)
+    from(configurations.animJava)
     dependsOn(configurations.commonResources)
     from(configurations.commonResources)
 }
