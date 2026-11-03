@@ -1,6 +1,6 @@
 package com.dwinovo.chiikawa.client.screen;
 
-import com.dwinovo.chiikawa.anim.render.ChiikawaEntityRenderer;
+import com.dwinovo.chiikawa.client.anim.render.ChiikawaEntityRenderer;
 import com.dwinovo.chiikawa.client.ui.PetStatusText;
 import com.dwinovo.chiikawa.client.ui.mc.GuiSurface;
 import com.dwinovo.chiikawa.client.ui.mc.ItemIcon;

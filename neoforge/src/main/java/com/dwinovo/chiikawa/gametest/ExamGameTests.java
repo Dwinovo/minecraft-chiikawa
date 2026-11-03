@@ -7,7 +7,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.worker;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.anim.state.PetActivity;
+import com.dwinovo.chiikawa.entity.anim.PetActivity;
 import com.dwinovo.chiikawa.block.DeskBooking;
 import com.dwinovo.chiikawa.block.DeskPart;
 import com.dwinovo.chiikawa.block.DeskSheet;

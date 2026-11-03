@@ -1,6 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain.errand.step;
 
-import com.dwinovo.chiikawa.anim.state.PetActivity;
+import com.dwinovo.chiikawa.entity.anim.PetActivity;
 import com.dwinovo.chiikawa.camera.CameraSettings;
 import com.dwinovo.chiikawa.camera.PhotoDelivery;
 import com.dwinovo.chiikawa.camera.PhotoPlan;
