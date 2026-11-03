@@ -1,6 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain.errand.run;
 
-import com.dwinovo.chiikawa.anim.state.PetActivity;
+import com.dwinovo.chiikawa.entity.anim.PetActivity;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import java.util.Set;
 

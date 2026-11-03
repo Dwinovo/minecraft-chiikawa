@@ -1,7 +1,6 @@
 package com.dwinovo.chiikawa.data;
 
 import com.dwinovo.chiikawa.Chiikawa;
-import com.dwinovo.chiikawa.data.LanguageData;
 
 import net.minecraft.data.PackOutput;
 import net.neoforged.neoforge.common.data.LanguageProvider;
