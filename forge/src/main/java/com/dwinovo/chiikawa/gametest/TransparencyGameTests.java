@@ -157,19 +157,34 @@ public final class TransparencyGameTests {
         });
     }
 
-    /** A pet with seeds but nothing to sow or reap is looking for work, by day. */
+    /** A pet of someone's with seeds but nothing to sow or reap is looking for work, by day. */
     @GameTest(template = "floor16", batch = ICON_BATCH, timeoutTicks = 100)
     public static void a_farmer_with_nothing_to_do_shows_it_is_looking_for_work(GameTestHelper helper) {
-        AbstractPet pet = holding(pet(helper, InitEntity.RAKKO_PET.get(), new BlockPos(8, STAND, 8), false), Items.WOODEN_HOE);
-        pet.getBackpack().addItem(new ItemStack(Items.WHEAT_SEEDS, 8));
+        AbstractPet pet = farmerWithNothingToDo(helper, new BlockPos(8, STAND, 8), true);
 
         helper.succeedWhen(() -> helper.assertTrue(pet.getIcon() == PetIcon.SEEKING_WORK, "the pet wears " + pet.getIcon()));
+    }
+
+    /**
+     * The pictures over a pet's head are messages to its owner, so a wild pet wears none: one that finds as little to do as
+     * its tamed neighbour, which wears the picture of looking for work, wears nothing.
+     */
+    @GameTest(template = "floor16", batch = ICON_BATCH, timeoutTicks = 100)
+    public static void a_wild_pet_with_nothing_to_do_shows_nothing_where_a_tamed_one_shows_it_is_looking_for_work(GameTestHelper helper) {
+        AbstractPet tamed = farmerWithNothingToDo(helper, new BlockPos(7, STAND, 8), true);
+        AbstractPet wild = farmerWithNothingToDo(helper, new BlockPos(9, STAND, 8), false);
+
+        helper.succeedWhen(() -> {
+            helper.assertTrue(tamed.getIcon() == PetIcon.SEEKING_WORK, "the tamed pet wears " + tamed.getIcon());
+            helper.assertTrue(wild.getMind().whyNot().isPresent(), "the wild pet has not yet found it has nothing to do");
+            helper.assertTrue(wild.getIcon() == PetIcon.NONE, "the wild pet wears " + wild.getIcon());
+        });
     }
 
     /** A pet that runs from what hurt it wears the picture of a frightened one. */
     @GameTest(template = "floor8", batch = ICON_BATCH, timeoutTicks = 200)
     public static void a_pet_running_from_a_foe_shows_it_is_scared(GameTestHelper helper) {
-        AbstractPet pet = pet(helper, InitEntity.KURIMANJU_PET.get(), new BlockPos(3, STAND, 3), false);
+        AbstractPet pet = pet(helper, InitEntity.KURIMANJU_PET.get(), new BlockPos(3, STAND, 3), true);
         Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(6, STAND, 6));
         zombie.setNoAi(true);
 
@@ -220,6 +235,13 @@ public final class TransparencyGameTests {
         AbstractPet pet = holding(pet(helper, InitEntity.RAKKO_PET.get(), rel, false), Items.WOODEN_HOE);
         pet.tame(owner);
         pet.setPetDirective(PetDirective.FREE);
+        return pet;
+    }
+
+    /** A farmer with a hoe and seeds and not a crop to sow or reap, of someone's or wild. */
+    private static AbstractPet farmerWithNothingToDo(GameTestHelper helper, BlockPos rel, boolean owned) {
+        AbstractPet pet = holding(pet(helper, InitEntity.RAKKO_PET.get(), rel, owned), Items.WOODEN_HOE);
+        pet.getBackpack().addItem(new ItemStack(Items.WHEAT_SEEDS, 8));
         return pet;
     }
 
