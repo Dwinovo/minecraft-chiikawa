@@ -6,8 +6,13 @@ import com.dwinovo.chiikawa.anim.controller.ControllerInstance;
 import com.dwinovo.chiikawa.anim.controller.ControllerRoster;
 import com.dwinovo.chiikawa.anim.controller.ControllerSnapshot;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Per-entity animation state. Holds one {@link ControllerInstance} per
@@ -28,8 +33,12 @@ import java.util.List;
  * dormant for its entire lifetime — it costs only a single empty {@code List}.
  *
  * <h2>One-shot triggers</h2>
- * {@link #playOnce} dispatches an externally-driven one-shot animation to the
- * named controller (typically {@code "action"} or {@code "reaction"}). The
+ * {@link #playOnce} asks for an externally-driven one-shot animation on the
+ * named controller (typically {@code "action"} or {@code "reaction"}) <em>by
+ * name</em>, the way an entity starts a vanilla {@code AnimationState} without
+ * knowing the clip: the request is kept, and the next {@link #advance} resolves
+ * the names against the {@link AnimationSource} it is given. A request made before
+ * the first advance is therefore not lost, whatever side of the game made it. The
  * triggered animation overrides the controller's state handler until its
  * baked duration elapses (once, even if the animation file loops), then the
  * handler resumes. Mirrors GeckoLib's
@@ -40,17 +49,26 @@ import java.util.List;
  */
 public final class Animator<I> {
 
+    private static final Logger LOG = LoggerFactory.getLogger(Animator.class);
+
+    /** A one-shot asked for by name and not yet resolved: the candidates, and when it was asked for. */
+    private record Request(List<String> candidates, long requestedNs) {
+    }
+
     /**
      * Stable per-entity offset latched by {@link #latchPhaseSeed} and propagated
      * to controller instances. {@link Long#MIN_VALUE} = unset.
      */
     private long phaseSeed = Long.MIN_VALUE;
     private List<ControllerInstance<I>> controllers = List.of();
+    /** The latest request for each controller, resolved and cleared by the next {@link #advance}. */
+    private final Map<String, Request> requests = new LinkedHashMap<>();
 
     /**
      * Brings every controller up to date for one frame and captures what each plays: the
      * single call a frame makes, in the order that keeps it right (materialise on the first
-     * call, latch the phase, drop what a reload made stale, run the handlers, snapshot).
+     * call, latch the phase, drop what a reload made stale, resolve the requests made since
+     * the last frame, run the handlers, snapshot).
      *
      * @param roster     the controllers to run; only the first call materialises them,
      *                   re-passing the same roster afterwards is a no-op
@@ -61,15 +79,17 @@ public final class Animator<I> {
      * @param bakeStamp  stamp of the bake the entity's model has now, so animations from an
      *                   earlier bake (a resource reload) are dropped; {@code 0} when
      *                   there is none to compare with
+     * @param animations where the names of {@link #playOnce} requests are resolved
      * @return one immutable snapshot per controller, in registration order
      */
     public ControllerSnapshot[] advance(ControllerRoster<I> roster, I input, long uniqueness, long nowNs,
-                                        long bakeStamp) {
+                                        long bakeStamp, AnimationSource animations) {
         ensureInitialised(roster);
         latchPhaseSeed(uniqueness, nowNs);
         if (bakeStamp != 0L) {
             for (ControllerInstance<I> c : controllers) c.clearStale(bakeStamp);
         }
+        resolveRequests(animations);
         for (ControllerInstance<I> c : controllers) c.tick(input, nowNs);
         ControllerSnapshot[] out = new ControllerSnapshot[controllers.size()];
         for (int i = 0; i < out.length; i++) out[i] = controllers.get(i).snapshot();
@@ -112,19 +132,38 @@ public final class Animator<I> {
     }
 
     /**
-     * Trigger a one-shot animation on the named controller. The trigger
-     * overrides the controller's state handler until {@code animation}'s
-     * baked duration elapses, playing once even if the animation file loops
-     * (or, for {@code HOLD_ON_LAST_FRAME}, until the
-     * trigger is replaced or cleared).
+     * Ask for a one-shot animation on the named controller: the first of the candidates
+     * (short names) that {@link AnimationSource} has at the next {@link #advance}. The trigger
+     * overrides the controller's state handler until the animation's baked duration elapses,
+     * playing once even if the animation file loops (or, for {@code HOLD_ON_LAST_FRAME}, until
+     * the trigger is replaced or cleared). It starts at {@code nowNs}, the time of the request,
+     * not of the frame that resolves it.
      *
-     * <p>For gameplay events that arrive from outside the frame loop, such as a
-     * synced action or reaction: the receiver looks up the matching
-     * {@link BakedAnimation} and calls this on the controller meant for it.
+     * <p>For gameplay events that arrive from outside the frame loop, such as a synced action or
+     * reaction. A later request for the same controller before the next advance replaces this
+     * one; a controller the roster does not have ignores it; when none of the candidates exists
+     * nothing plays and the miss is logged once.
      */
-    public void playOnce(String controllerName, BakedAnimation animation, long nowNs) {
-        ControllerInstance<I> c = byName(controllerName);
-        if (c != null) c.playOnce(animation, nowNs);
+    public void playOnce(String controllerName, List<String> candidates, long nowNs) {
+        requests.put(controllerName, new Request(List.copyOf(candidates), nowNs));
+    }
+
+    /** Hands every pending request to its controller, as the animation its candidates name. */
+    private void resolveRequests(AnimationSource animations) {
+        if (requests.isEmpty()) return;
+        for (Map.Entry<String, Request> entry : requests.entrySet()) {
+            ControllerInstance<I> controller = byName(entry.getKey());
+            if (controller == null) continue;
+            Request request = entry.getValue();
+            BakedAnimation animation = animations.firstOf(request.candidates());
+            if (animation == null) {
+                LOG.debug("[chiikawa-anim] no animation on controller '{}' among {}", entry.getKey(),
+                        request.candidates());
+                continue;
+            }
+            controller.playOnce(animation, request.requestedNs());
+        }
+        requests.clear();
     }
 
     /** Look up a controller by name. {@code null} for unknown names. */
