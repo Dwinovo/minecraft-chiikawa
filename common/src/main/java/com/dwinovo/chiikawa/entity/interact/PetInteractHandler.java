@@ -6,7 +6,6 @@ import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.PetFriends;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
-import com.dwinovo.chiikawa.entity.brain.errand.run.PetIcon;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
 import com.dwinovo.chiikawa.gifting.GiftOccasion;
 import com.dwinovo.chiikawa.platform.Services;
@@ -70,7 +69,7 @@ public final class PetInteractHandler {
         if (isTame && isOwner && !isSneaking && held.isEmpty() && !pet.getPendingGift().isEmpty()) {
             return handleClaimGift(level, pet, player);
         }
-        if (mayCommand && !isSneaking && pet.getIcon() == PetIcon.PRAISE) {
+        if (mayCommand && !isSneaking && pet.getMind().asking()) {
             return handlePraise(level, pet, player);
         }
         if (isTame && isOwner && !isSneaking && !isFood) {
@@ -207,8 +206,9 @@ public final class PetInteractHandler {
     }
 
     /**
-     * The owner, or a friend of theirs, gives a pet the praise it is asking for: the icon over its head says it is, and the
-     * click is what it wants, instead of the opening of its bag.
+     * The owner, or a friend of theirs, gives a pet the praise it is asking for: the click is what it wants, instead of the
+     * opening of its bag. Only the server knows the pet is asking, so a client takes the click as it would any other and the
+     * server, which is told of it first, decides.
      */
     private static InteractionResult handlePraise(Level level, AbstractPet pet, Player player) {
         if (!level.isClientSide()) {
