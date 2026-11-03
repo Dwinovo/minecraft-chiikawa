@@ -12,7 +12,6 @@ import com.dwinovo.chiikawa.entity.anim.PetReaction;
 import com.dwinovo.chiikawa.entity.brain.PetTargeting;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
-import com.dwinovo.chiikawa.entity.brain.errand.run.PetIcon;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Projection;
 import com.dwinovo.chiikawa.entity.brain.task.tameable.FloatBehavior;
 import com.dwinovo.chiikawa.entity.brain.personality.PetPersonalities;
@@ -192,11 +191,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * {@link #ACTIVITY}, but named by data rather than by code.
      */
     private static final EntityDataAccessor<String> PERFORMANCE = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.STRING);
-    /**
-     * The picture over the pet's head, as a {@link PetIcon}'s id; see {@link #icon}. Not saved: the executor works it out
-     * again as the pet is back.
-     */
-    private static final EntityDataAccessor<Byte> ICON = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.BYTE);
 
     /**
      * What the owner has told the pet it may and may not do, as {@link PetRules#CODEC} writes it; empty is the default.
@@ -597,21 +591,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     }
 
     /**
-     * For the pet's executor alone: the picture over the pet's head.
-     */
-    @Override
-    public void icon(PetIcon icon) {
-        this.entityData.set(ICON, icon.id());
-    }
-
-    /**
-     * @return the picture over the pet's head; readable on both sides
-     */
-    public PetIcon getIcon() {
-        return PetIcon.byId(this.entityData.get(ICON));
-    }
-
-    /**
      * @return the registry id of the pet's current capability, such as {@code chiikawa:farmer}
      */
     public ResourceLocation getCapabilityId() {
@@ -982,7 +961,6 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         builder.define(EAGER_UNTIL, 0L);
         builder.define(LICENCES, new CompoundTag());
         builder.define(PERFORMANCE, "");
-        builder.define(ICON, PetIcon.NONE.id());
         builder.define(RULES, new CompoundTag());
     }
 

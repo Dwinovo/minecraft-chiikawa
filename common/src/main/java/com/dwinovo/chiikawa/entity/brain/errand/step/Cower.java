@@ -5,9 +5,7 @@ import com.dwinovo.chiikawa.entity.brain.errand.ErrandTunings;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Handle;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Step;
 import com.dwinovo.chiikawa.entity.brain.errand.run.StepStatus;
-import com.dwinovo.chiikawa.entity.brain.errand.run.StepTag;
 import com.dwinovo.chiikawa.entity.brain.errand.view.Attacker;
-import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -55,10 +53,5 @@ public final class Cower implements Step {
     @Override
     public String performance() {
         return performance;
-    }
-
-    @Override
-    public Set<StepTag> tags() {
-        return Set.of(StepTag.SCARED);
     }
 }
