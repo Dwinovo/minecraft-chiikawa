@@ -20,8 +20,8 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 public class MomongaRenderer extends ChiikawaEntityRenderer<MomongaPet> {
     public MomongaRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, "momonga");
-        addBoneVisibilityRule("Mouth3", (state, animCtx) -> isTalking(state));
-        addBoneVisibilityRule("tail", (state, animCtx) -> BagLayer.wearOf(state) != BagItem.Wear.ON_BACK);
+        addBoneVisibilityRule("Mouth3", state -> isTalking(state));
+        addBoneVisibilityRule("tail", state -> BagLayer.wearOf(state) != BagItem.Wear.ON_BACK);
         addBoneVisibilityRule("HappyEyes", ShownDuring.any("happy", "sleep", "cute", "revive"));
         addBoneVisibilityRule("CryEyes", ShownDuring.any("hurt", "yawn"));
         addBoneVisibilityRule("Tears", ShownDuring.any("hurt"));

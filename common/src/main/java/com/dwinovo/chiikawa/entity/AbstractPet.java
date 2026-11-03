@@ -5,7 +5,7 @@ import com.dwinovo.chiikawa.anim.api.AnimationLibrary;
 import com.dwinovo.chiikawa.anim.api.ChiikawaAnimated;
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
 import com.dwinovo.chiikawa.anim.runtime.AnimationClock;
-import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
+import com.dwinovo.chiikawa.anim.runtime.Animator;
 import com.dwinovo.chiikawa.anim.state.PetAction;
 import com.dwinovo.chiikawa.anim.state.PetActivity;
 import com.dwinovo.chiikawa.anim.state.PetAnimContext;
@@ -153,7 +153,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      * server/client boundary. Layout: high 24 bits = monotonic sequence
      * counter, low 8 bits = animation id (see {@code TRIGGER_*}). Bumping the
      * sequence on the server causes {@link #onSyncedDataUpdated} to fire on
-     * every client watcher, which dispatches a {@link PetAnimator#playOnce}
+     * every client watcher, which dispatches a {@link Animator#playOnce}
      * to the relevant controller.
      */
     private static final EntityDataAccessor<Integer> ANIM_TRIGGER = SynchedEntityData.defineId(AbstractPet.class, EntityDataSerializers.INT);
@@ -264,7 +264,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         InitSensor.PET_SURROUNDINGS_SENSOR.get()
     );
     /** Lazily allocated on first client-side read; server instances pay nothing. */
-    private PetAnimator petAnimator;
+    private Animator<PetAnimContext> petAnimator;
     /** Last {@link #ANIM_TRIGGER} sequence number this client handled. Server copy is unused. */
     private int lastSeenTriggerSeq;
     /** Last {@link #REACTION_TRIGGER} sequence number this client handled. Server copy is unused. */
@@ -930,9 +930,10 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
         return null; // Safety: no offspring.
     }
 
-    public PetAnimator getPetAnimator() {
+    @Override
+    public Animator<PetAnimContext> getPetAnimator() {
         if (petAnimator == null) {
-            petAnimator = new PetAnimator();
+            petAnimator = new Animator<>();
         }
         return petAnimator;
     }
