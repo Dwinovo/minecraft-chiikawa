@@ -20,7 +20,7 @@ public class ChiikawaRenderer extends ChiikawaEntityRenderer<ChiikawaPet> {
     public ChiikawaRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, "chiikawa");
         addBoneVisibilityRule("Mouth3", state -> isTalking(state));
-        addBoneVisibilityRule("HappyEyes", ShownDuring.any("happy", "revive"));
+        addBoneVisibilityRule("HappyEyes", ShownDuring.any("happy", "sleep", "revive"));
         addBoneVisibilityRule("CryEyes", ShownDuring.any("hurt", "yawn", "cry"));
         addBoneVisibilityRule("Tears", ShownDuring.any("hurt", "cry", "revive"));
         addBoneVisibilityRule("Sweat", ShownDuring.any("confused", "exam"));
