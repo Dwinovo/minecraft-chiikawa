@@ -20,8 +20,8 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 public class ShisaRenderer extends ChiikawaEntityRenderer<ShisaPet> {
     public ShisaRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, "shisa");
-        addBoneVisibilityRule("Mouth3", (state, animCtx) -> isTalking(state));
-        addBoneVisibilityRule("tail", (state, animCtx) -> BagLayer.wearOf(state) != BagItem.Wear.ON_BACK);
+        addBoneVisibilityRule("Mouth3", state -> isTalking(state));
+        addBoneVisibilityRule("tail", state -> BagLayer.wearOf(state) != BagItem.Wear.ON_BACK);
         addBoneVisibilityRule("HappyEyes", ShownDuring.any("happy", "yawn", "revive"));
         addBoneVisibilityRule("Tears", ShownDuring.any("revive"));
         addBoneVisibilityRule("Sweat", ShownDuring.any("hurt", "confused"));

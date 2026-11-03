@@ -17,7 +17,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 public class KurimanjuRenderer extends ChiikawaEntityRenderer<KurimanjuPet> {
     public KurimanjuRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, "kurimanju");
-        addBoneVisibilityRule("Mouth3", (state, animCtx) -> isTalking(state));
+        addBoneVisibilityRule("Mouth3", state -> isTalking(state));
         // Its yawn at an exam: the exam opens the mouth for it, and keeps it shut otherwise.
         addBoneVisibilityRule("Mouth3", ShownDuring.any("exam"));
         addBoneVisibilityRule("HappyEyes", ShownDuring.any("happy", "yawn", "sleep", "drink", "sigh"));

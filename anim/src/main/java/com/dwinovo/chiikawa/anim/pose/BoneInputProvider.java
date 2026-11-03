@@ -1,10 +1,10 @@
-package com.dwinovo.chiikawa.anim.render;
+package com.dwinovo.chiikawa.anim.pose;
 
 import com.dwinovo.chiikawa.anim.molang.MolangContext;
 
 /**
  * Pre-sampling stage that fills the {@link MolangContext} with values derived
- * from {@link ChiikawaRenderState} (or any other client-side source).
+ * from {@link PoseFrame}.
  *
  * <p>Conceptually the inverse of {@link BoneInterceptor}: providers run
  * <em>before</em> {@link com.dwinovo.chiikawa.anim.runtime.PoseSampler} so
@@ -19,10 +19,10 @@ import com.dwinovo.chiikawa.anim.molang.MolangContext;
  * an existing one) that fills it. The submit path itself does not change.
  *
  * <p>Providers are stateless aside from immutable configuration, just like
- * {@link com.dwinovo.chiikawa.anim.render.layer.RenderLayer}.
+ * the render layers that draw on top of the pose.
  */
 @FunctionalInterface
 public interface BoneInputProvider {
 
-    void fill(ChiikawaRenderState state, MolangContext ctx);
+    void fill(PoseFrame frame, MolangContext ctx);
 }

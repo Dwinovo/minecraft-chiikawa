@@ -2,8 +2,8 @@ package com.dwinovo.chiikawa.anim.controller;
 
 /**
  * Static configuration for a single animation controller. Registered once per
- * renderer (shared across every entity of that type), then materialised into
- * one mutable {@link ControllerInstance} per entity.
+ * {@link ControllerRoster} (shared across every entity that roster animates),
+ * then materialised into one mutable {@link ControllerInstance} per entity.
  *
  * <p>Controllers are evaluated in registration order — within a frame, every
  * controller writes into the same shared pose buffer, so a controller
@@ -12,9 +12,9 @@ package com.dwinovo.chiikawa.anim.controller;
  *
  * <h2>Naming</h2>
  * The {@code name} is used as the lookup key for one-shot triggers
- * (e.g. {@link com.dwinovo.chiikawa.entity.AbstractPet} dispatching action
- * triggers to the {@code "action"} controller). Two controllers on the same
- * animator must not share a name.
+ * ({@link com.dwinovo.chiikawa.anim.runtime.Animator#playOnce}, e.g. a gameplay event dispatching an action to
+ * the {@code "action"} controller). Two controllers on the same roster must
+ * not share a name.
  *
  * @param name          stable identifier used to address this controller for
  *                      external one-shot triggers
@@ -24,16 +24,17 @@ package com.dwinovo.chiikawa.anim.controller;
  *                      animations; {@code 0} disables crossfading on this
  *                      controller (typical for constant decorative loops)
  * @param handler       state-driven animation picker; must be a pure function
- *                      of the inputs to keep extract idempotent. May be
- *                      {@link ControllerHandler}{@code (state, ctx) -> null}
+ *                      of its input to keep advancing idempotent. May be
+ *                      {@link ControllerHandler#neverPlay}
  *                      for controllers that only run on external triggers
  *                      ({@code playOnce}).
+ * @param <I>           what the handler picks by, see {@link ControllerHandler}
  */
-public record ControllerConfig(
+public record ControllerConfig<I>(
         String name,
         BlendMode blendMode,
         float transitionSec,
-        ControllerHandler handler
+        ControllerHandler<I> handler
 ) {
     public ControllerConfig {
         if (name == null || name.isBlank()) {
@@ -41,6 +42,6 @@ public record ControllerConfig(
         }
         if (blendMode == null) blendMode = BlendMode.OVERRIDE;
         if (transitionSec < 0f) transitionSec = 0f;
-        if (handler == null) handler = (state, ctx) -> null;
+        if (handler == null) handler = ControllerHandler::neverPlay;
     }
 }

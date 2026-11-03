@@ -1,4 +1,4 @@
-package com.dwinovo.chiikawa.anim.render;
+package com.dwinovo.chiikawa.anim.pose;
 
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
 import com.dwinovo.chiikawa.anim.baked.BakedBone;
@@ -9,12 +9,9 @@ import com.dwinovo.chiikawa.anim.baked.LoopMode;
 import com.dwinovo.chiikawa.anim.controller.BlendMode;
 import com.dwinovo.chiikawa.anim.controller.ControllerSnapshot;
 import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
-import com.dwinovo.chiikawa.anim.state.PetAnimContext;
-import com.dwinovo.chiikawa.entity.PetDirective;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *   <li>Bones without rules don't appear hidden in the output</li>
  *   <li>Rules referencing bones the model lacks are silently ignored</li>
  *   <li>Empty rules / null model short-circuits to the empty sentinel</li>
- *   <li>{@code isControllerPlaying} matches by both controller name AND animation name</li>
+ *   <li>{@link PoseFrame#isPlaying} matches by both controller name AND animation name</li>
  * </ul>
  */
 class BoneVisibilityTest {
@@ -47,8 +44,8 @@ class BoneVisibilityTest {
         return new BakedModel(bones, new BakedCube[0], roots, idx, 64, 64);
     }
 
-    private static ChiikawaRenderState stateWithControllers(ControllerSnapshot... snapshots) {
-        ChiikawaRenderState state = new ChiikawaRenderState();
+    private static PoseFrame stateWithControllers(ControllerSnapshot... snapshots) {
+        PoseFrame state = new PoseFrame();
         state.controllerSnapshots = snapshots;
         return state;
     }
@@ -64,17 +61,13 @@ class BoneVisibilityTest {
                 channel, null, 0L, 0f, false);
     }
 
-    private static PetAnimContext ctx() {
-        return PetAnimContext.base(PetDirective.FOLLOW, 0, 0f);
-    }
-
     @Test
     void boneWithNoRuleStaysVisible() {
         BakedModel model = modelOf("body", "guitar");
-        Map<String, List<BoneVisibilityRule>> rules = new HashMap<>();
+        BoneVisibility<PoseFrame> rules = new BoneVisibility<>();
         // Only register a rule for guitar — body has no rule.
-        rules.put("guitar", List.of((s, c) -> false));
-        boolean[] hidden = BoneVisibility.evaluate(rules, model, stateWithControllers(), ctx());
+        rules.add("guitar", s -> false);
+        boolean[] hidden = rules.evaluate(model, stateWithControllers());
 
         assertEquals(2, hidden.length);
         assertFalse(hidden[0], "body has no rule → visible");
@@ -84,33 +77,31 @@ class BoneVisibilityTest {
     @Test
     void multipleRulesUseOrSemantics() {
         BakedModel model = modelOf("guitar");
-        Map<String, List<BoneVisibilityRule>> rules = new HashMap<>();
-        rules.put("guitar", List.of(
-                (s, c) -> false,            // votes hidden
-                (s, c) -> true,             // votes visible — should win
-                (s, c) -> false));
-        boolean[] hidden = BoneVisibility.evaluate(rules, model, stateWithControllers(), ctx());
+        BoneVisibility<PoseFrame> rules = new BoneVisibility<>();
+        rules.add("guitar", s -> false);            // votes hidden
+        rules.add("guitar", s -> true);             // votes visible — should win
+        rules.add("guitar", s -> false);
+        boolean[] hidden = rules.evaluate(model, stateWithControllers());
         assertFalse(hidden[0], "any rule voting visible exposes the bone");
     }
 
     @Test
     void allRulesVotingHiddenHidesTheBone() {
         BakedModel model = modelOf("guitar");
-        Map<String, List<BoneVisibilityRule>> rules = new HashMap<>();
-        rules.put("guitar", List.of(
-                (s, c) -> false,
-                (s, c) -> false));
-        boolean[] hidden = BoneVisibility.evaluate(rules, model, stateWithControllers(), ctx());
+        BoneVisibility<PoseFrame> rules = new BoneVisibility<>();
+        rules.add("guitar", s -> false);
+        rules.add("guitar", s -> false);
+        boolean[] hidden = rules.evaluate(model, stateWithControllers());
         assertTrue(hidden[0]);
     }
 
     @Test
     void ruleForUnknownBoneIsSilentlyIgnored() {
         BakedModel model = modelOf("body");
-        Map<String, List<BoneVisibilityRule>> rules = new HashMap<>();
+        BoneVisibility<PoseFrame> rules = new BoneVisibility<>();
         // Rule references a bone the model doesn't have.
-        rules.put("guitar_that_does_not_exist", List.of((s, c) -> false));
-        boolean[] hidden = BoneVisibility.evaluate(rules, model, stateWithControllers(), ctx());
+        rules.add("guitar_that_does_not_exist", s -> false);
+        boolean[] hidden = rules.evaluate(model, stateWithControllers());
         // Body still visible (no rule applies); no exception thrown.
         assertEquals(1, hidden.length);
         assertFalse(hidden[0]);
@@ -119,55 +110,55 @@ class BoneVisibilityTest {
     @Test
     void emptyRulesReturnsEmptySentinel() {
         BakedModel model = modelOf("body");
-        boolean[] hidden = BoneVisibility.evaluate(Map.of(), model, stateWithControllers(), ctx());
+        boolean[] hidden = new BoneVisibility<PoseFrame>().evaluate(model, stateWithControllers());
         assertEquals(0, hidden.length, "no rules → no per-frame allocation");
     }
 
     @Test
     void nullModelReturnsEmptySentinel() {
-        Map<String, List<BoneVisibilityRule>> rules = new HashMap<>();
-        rules.put("guitar", List.of((s, c) -> true));
-        boolean[] hidden = BoneVisibility.evaluate(rules, null, stateWithControllers(), ctx());
+        BoneVisibility<PoseFrame> rules = new BoneVisibility<>();
+        rules.add("guitar", s -> true);
+        boolean[] hidden = rules.evaluate(null, stateWithControllers());
         assertEquals(0, hidden.length);
     }
 
     @Test
     void isControllerPlayingMatchesByNameAndAnimation() {
-        ChiikawaRenderState state = stateWithControllers(
+        PoseFrame state = stateWithControllers(
                 snapshotOf("main", "idle"),
                 snapshotOf("action", "play_guitar"));
 
-        assertTrue(ChiikawaEntityRenderer.isControllerPlaying(state, "action", "play_guitar"));
-        assertFalse(ChiikawaEntityRenderer.isControllerPlaying(state, "action", "harvest"),
+        assertTrue(state.isPlaying( "action", "play_guitar"));
+        assertFalse(state.isPlaying( "action", "harvest"),
                 "wrong animation name → no match");
-        assertFalse(ChiikawaEntityRenderer.isControllerPlaying(state, "main", "play_guitar"),
+        assertFalse(state.isPlaying( "main", "play_guitar"),
                 "wrong controller name → no match");
-        assertFalse(ChiikawaEntityRenderer.isControllerPlaying(state, "missing", "play_guitar"),
+        assertFalse(state.isPlaying( "missing", "play_guitar"),
                 "controller not registered → no match");
     }
 
     @Test
     void isControllerPlayingHandlesIdleController() {
-        ChiikawaRenderState state = stateWithControllers(
+        PoseFrame state = stateWithControllers(
                 snapshotOf("action", null));   // idle (no current animation)
-        assertFalse(ChiikawaEntityRenderer.isControllerPlaying(state, "action", "play_guitar"),
+        assertFalse(state.isPlaying( "action", "play_guitar"),
                 "idle controller never matches");
     }
 
     @Test
     void isAnyControllerPlayingMatchesIrrespectiveOfController() {
-        ChiikawaRenderState state = stateWithControllers(
+        PoseFrame state = stateWithControllers(
                 snapshotOf("main", "idle"),
                 snapshotOf("action", "guitar"));
-        assertTrue(ChiikawaEntityRenderer.isAnyControllerPlaying(state, "guitar"),
+        assertTrue(state.isAnyPlaying( "guitar"),
                 "any controller playing the named animation = true");
-        assertFalse(ChiikawaEntityRenderer.isAnyControllerPlaying(state, "missing_anim"));
+        assertFalse(state.isAnyPlaying( "missing_anim"));
 
         // Even when the matching animation is on main rather than action.
-        ChiikawaRenderState onMain = stateWithControllers(
+        PoseFrame onMain = stateWithControllers(
                 snapshotOf("main", "guitar"),
                 snapshotOf("action", null));
-        assertTrue(ChiikawaEntityRenderer.isAnyControllerPlaying(onMain, "guitar"),
+        assertTrue(onMain.isAnyPlaying( "guitar"),
                 "controller-agnostic match works regardless of which controller plays it");
     }
 
@@ -176,24 +167,23 @@ class BoneVisibilityTest {
         // Concrete scenario: hachiware's guitar bone is hidden by default and
         // visible only when the action controller is sampling play_guitar.
         BakedModel model = modelOf("body", "RightHand", "guitar");
-        Map<String, List<BoneVisibilityRule>> rules = new HashMap<>();
-        rules.put("guitar", List.of(
-                (s, c) -> ChiikawaEntityRenderer.isControllerPlaying(s, "action", "play_guitar")));
+        BoneVisibility<PoseFrame> rules = new BoneVisibility<>();
+        rules.add("guitar", s -> s.isPlaying("action", "play_guitar"));
 
         // Case 1: action controller idle → guitar hidden.
-        ChiikawaRenderState idleState = stateWithControllers(
+        PoseFrame idleState = stateWithControllers(
                 snapshotOf("main", "idle"),
                 snapshotOf("action", null));
-        boolean[] hidden = BoneVisibility.evaluate(rules, model, idleState, ctx());
+        boolean[] hidden = rules.evaluate(model, idleState);
         assertFalse(hidden[0], "body visible");
         assertFalse(hidden[1], "RightHand visible");
         assertTrue(hidden[2], "guitar hidden when not playing play_guitar");
 
         // Case 2: action controller plays play_guitar → guitar visible.
-        ChiikawaRenderState playingState = stateWithControllers(
+        PoseFrame playingState = stateWithControllers(
                 snapshotOf("main", "idle"),
                 snapshotOf("action", "play_guitar"));
-        hidden = BoneVisibility.evaluate(rules, model, playingState, ctx());
+        hidden = rules.evaluate(model, playingState);
         assertFalse(hidden[2], "guitar visible while play_guitar is sampled");
     }
 }

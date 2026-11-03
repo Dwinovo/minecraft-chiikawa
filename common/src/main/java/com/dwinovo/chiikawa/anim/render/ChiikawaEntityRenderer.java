@@ -9,8 +9,13 @@ import com.dwinovo.chiikawa.anim.baked.BakedModel;
 import com.dwinovo.chiikawa.anim.controller.BlendMode;
 import com.dwinovo.chiikawa.anim.controller.ControllerConfig;
 import com.dwinovo.chiikawa.anim.controller.ControllerHandler;
-import com.dwinovo.chiikawa.anim.controller.ControllerSnapshot;
-import com.dwinovo.chiikawa.anim.molang.MolangContext;
+import com.dwinovo.chiikawa.anim.controller.ControllerRoster;
+import com.dwinovo.chiikawa.anim.pose.BasicMolangInputProvider;
+import com.dwinovo.chiikawa.anim.pose.BoneInterceptor;
+import com.dwinovo.chiikawa.anim.pose.BoneVisibility;
+import com.dwinovo.chiikawa.anim.pose.BoneVisibilityRule;
+import com.dwinovo.chiikawa.anim.pose.HeadLookInterceptor;
+import com.dwinovo.chiikawa.anim.pose.PoseComposer;
 import com.dwinovo.chiikawa.anim.render.layer.HeldItemLayer;
 import com.dwinovo.chiikawa.client.voice.PetIconRenderer;
 import com.dwinovo.chiikawa.client.voice.SpeechBubbleRenderer;
@@ -21,10 +26,7 @@ import com.dwinovo.chiikawa.anim.render.layer.BagLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayer;
 import com.dwinovo.chiikawa.anim.render.layer.RenderLayerContext;
 import com.dwinovo.chiikawa.anim.runtime.AnimationClock;
-import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
-import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
-import com.dwinovo.chiikawa.anim.runtime.PoseMixer;
-import com.dwinovo.chiikawa.anim.runtime.PoseSampler;
+import com.dwinovo.chiikawa.anim.runtime.Animator;
 import com.dwinovo.chiikawa.anim.state.PetAnimContext;
 import com.dwinovo.chiikawa.anim.state.PetAnimationResolver;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -41,15 +43,13 @@ import net.minecraft.world.entity.LivingEntity;
 import org.joml.Quaternionf;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Base entity renderer for Bedrock-format pets. Owns the per-pet controller
- * roster, the model lookup, the Bedrock entity transform, and per-frame pose
- * sampling.
+ * roster, the model lookup, and the Bedrock entity transform; the engine
+ * ({@link Animator}, {@link PoseComposer}, {@link BoneVisibility}) advances the
+ * controllers and composes the pose, this class draws it.
  *
  * <h2>Controllers</h2>
  * Subclasses register {@link ControllerConfig}s in their constructor. The
@@ -101,6 +101,10 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
      * feel responsive); only fade-<em>out</em> uses this value.
      */
     private static final float TRIGGER_STOP_FADE_SEC = 0.15f;
+    /** Crossfade of the state-driven main controller between base loops. */
+    private static final float MAIN_TRANSITION_SEC = 0.16f;
+    /** The bone the head look-at turns, in every pet's model. */
+    private static final String HEAD_BONE = "AllHead";
 
     protected final Identifier modelKey;
     protected final Identifier textureLocation;
@@ -108,29 +112,16 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
 
     private final ModelRenderer mesh = new ModelRenderer();
     private final Quaternionf rotBuf = new Quaternionf();
-    private final MolangContext molangCtx = new MolangContext();
     /**
      * Per-pet controller registry, declared in subclass constructors and
-     * frozen once the renderer is built. The same list is handed to every
-     * entity's {@link PetAnimator} on first extract — controllers themselves
+     * frozen once the renderer is built. The same roster is handed to every
+     * entity's {@link Animator} on first extract — controllers themselves
      * are stateless config; per-entity mutable state lives in
      * {@link com.dwinovo.chiikawa.anim.controller.ControllerInstance}.
      */
-    private final List<ControllerConfig> controllerConfigs = new ArrayList<>();
-    /**
-     * Pre-sampling MoLang context fillers. Run in registration order before
-     * {@code PoseSampler}, so any MoLang expression evaluated during sampling
-     * sees the values it needs.
-     */
-    private final List<BoneInputProvider> inputProviders = new ArrayList<>();
-    /**
-     * Procedural pose-buffer overrides organised by stage. Stages run in
-     * {@link BoneInterceptor.Stage} declaration order; within a stage,
-     * interceptors run in registration order. Subclasses register additional
-     * interceptors from their constructor via {@link #addInterceptor}.
-     */
-    private final EnumMap<BoneInterceptor.Stage, List<BoneInterceptor>> interceptors =
-            new EnumMap<>(BoneInterceptor.Stage.class);
+    private final ControllerRoster<PetAnimContext> controllers = new ControllerRoster<>();
+    /** Turns the controllers' snapshots into the pose the model is drawn from. */
+    private final PoseComposer poseComposer = new PoseComposer();
     /**
      * Visual layers that run after the main mesh submits, in registration order.
      * Subclasses register additional layers (props, emissive overlays, capes...)
@@ -138,13 +129,11 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
      */
     private final List<RenderLayer> renderLayers = new ArrayList<>();
     /**
-     * Per-bone visibility rules keyed by bone name. A bone with one or more
-     * rules is visible when <em>any</em> rule votes {@code true}; absence of
-     * a vote means the bone is hidden that frame. Bones never registered are
-     * always visible (the {@link #hasVisibilityRules} fast-path skips
-     * evaluation entirely when this map is empty).
+     * Per-bone visibility rules. A bone with one or more rules is visible
+     * when <em>any</em> rule votes {@code true}; absence of a vote means the
+     * bone is hidden that frame. Bones never registered are always visible.
      */
-    private final Map<String, List<BoneVisibilityRule>> visibilityRules = new HashMap<>();
+    private final BoneVisibility<ChiikawaRenderState> visibility = new BoneVisibility<>();
 
     protected ChiikawaEntityRenderer(EntityRendererProvider.Context ctx, String name) {
         super(ctx);
@@ -156,21 +145,21 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
                 name + "/" + DEFAULT_LOOP_NAME);
 
         // Default MoLang inputs.
-        addInputProvider(new BasicMolangInputProvider());
-        // Default interceptors shared by all pets. Subclasses can append more.
+        poseComposer.addInputProvider(new BasicMolangInputProvider());
+        // Default interceptors shared by all pets.
         // Head look-at is the only universal procedural override — every pet
         // tracks the player's view direction. Ear / tail sway used to live on
         // a hardcoded PHYSICS_SECONDARY interceptor; it was removed once
         // animator-authored ear/tail keyframes (in idle/walk/etc.) became the
         // single source of truth, so animation data isn't silently overwritten.
-        addInterceptor(BoneInterceptor.Stage.LOOK_AT, new HeadLookInterceptor());
+        poseComposer.addInterceptor(BoneInterceptor.Stage.LOOK_AT, new HeadLookInterceptor(HEAD_BONE));
         // Default layers shared by all pets.
         addRenderLayer(new HeldItemLayer(PropBone.bones()));
         addRenderLayer(new BagLayer());
         // A bag's strap is part of the pet's own model, there only while a bag worn
         // that way is on.
         for (BagItem.Wear wear : BagItem.Wear.values()) {
-            addBoneVisibilityRule(wear.strap(), (state, animCtx) -> BagLayer.wearOf(state) == wear);
+            addBoneVisibilityRule(wear.strap(), state -> BagLayer.wearOf(state) == wear);
         }
         // What a pet has with it only while it does something, likewise part of its model.
         for (PropBone prop : PropBone.values()) {
@@ -191,40 +180,27 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         //              otherwise replace it; it keys only the mouth, so the rest
         //              of the face stays as the reaction left it
         // Sub-classes append further decorative or override controllers on top.
-        addController(new ControllerConfig(
+        addController(new ControllerConfig<>(
                 CONTROLLER_MAIN,
                 BlendMode.OVERRIDE,
-                PetAnimator.DEFAULT_BASE_TRANSITION_SEC,
+                MAIN_TRANSITION_SEC,
                 this::resolveMainAnimation));
         addLoopingController(CONTROLLER_BLINK, BlendMode.OVERRIDE, "blink");
-        addController(new ControllerConfig(
+        addController(new ControllerConfig<>(
                 CONTROLLER_ACTION,
                 BlendMode.OVERRIDE,
                 TRIGGER_STOP_FADE_SEC,
                 ControllerHandler::neverPlay));
-        addController(new ControllerConfig(
+        addController(new ControllerConfig<>(
                 CONTROLLER_REACTION,
                 BlendMode.OVERRIDE,
                 TRIGGER_STOP_FADE_SEC,
                 ControllerHandler::neverPlay));
-        addController(new ControllerConfig(
+        addController(new ControllerConfig<>(
                 CONTROLLER_TALK,
                 BlendMode.OVERRIDE,
                 TRIGGER_STOP_FADE_SEC,
                 ControllerHandler::neverPlay));
-    }
-
-    /** Register a {@link BoneInputProvider} that fills MoLang context before sampling. */
-    protected final void addInputProvider(BoneInputProvider provider) {
-        inputProviders.add(provider);
-    }
-
-    /**
-     * Register an additional {@link BoneInterceptor} into the named stage.
-     * Stages run in {@link BoneInterceptor.Stage} declaration order.
-     */
-    protected final void addInterceptor(BoneInterceptor.Stage stage, BoneInterceptor interceptor) {
-        interceptors.computeIfAbsent(stage, k -> new ArrayList<>()).add(interceptor);
     }
 
     /** Register an additional {@link RenderLayer}; runs after the main mesh in registration order. */
@@ -238,15 +214,10 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
      * ones in the shared pose buffer.
      *
      * <p>Two controllers must not share a name. Names are used by
-     * {@link PetAnimator#playOnce} to dispatch external one-shot triggers.
+     * {@link Animator#playOnce} to dispatch external one-shot triggers.
      */
-    protected final void addController(ControllerConfig config) {
-        for (ControllerConfig existing : controllerConfigs) {
-            if (existing.name().equals(config.name())) {
-                throw new IllegalStateException("duplicate controller name: " + config.name());
-            }
-        }
-        controllerConfigs.add(config);
+    protected final void addController(ControllerConfig<PetAnimContext> config) {
+        controllers.add(config);
     }
 
     /**
@@ -257,7 +228,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
      */
     protected final void addLoopingController(String name, BlendMode blendMode, String animationName) {
         Identifier key = animKey(animationName);
-        addController(new ControllerConfig(name, blendMode, 0f, (state, ctx) -> AnimationLibrary.get(key)));
+        addController(new ControllerConfig<>(name, blendMode, 0f, ctx -> AnimationLibrary.get(key)));
     }
 
     /**
@@ -273,67 +244,11 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
      * <p>Typical usage in a subclass constructor:
      * <pre>{@code
      * addBoneVisibilityRule("guitar",
-     *     (state, ctx) -> isControllerPlaying(state, CONTROLLER_ACTION, "play_guitar"));
+     *     state -> state.pose.isPlaying(CONTROLLER_ACTION, "play_guitar"));
      * }</pre>
      */
-    protected final void addBoneVisibilityRule(String boneName, BoneVisibilityRule rule) {
-        visibilityRules.computeIfAbsent(boneName, k -> new ArrayList<>()).add(rule);
-    }
-
-    /** Whether any visibility rule has been registered — fast-path skip when none. */
-    private boolean hasVisibilityRules() {
-        return !visibilityRules.isEmpty();
-    }
-
-    /**
-     * Helper for visibility rules: returns whether the named controller is
-     * currently sampling the named animation (case-sensitive). Rules can use
-     * this to express "bone visible when controller X plays animation Y" —
-     * the most common pattern (held props, prop-specific bones).
-     *
-     * @param state          current render-state snapshot
-     * @param controllerName e.g. {@link #CONTROLLER_ACTION}
-     * @param animationName  short name (e.g. {@code "play_guitar"})
-     */
-    public static boolean isControllerPlaying(ChiikawaRenderState state,
-                                              String controllerName, String animationName) {
-        if (state == null || state.controllerSnapshots == null) return false;
-        for (var snapshot : state.controllerSnapshots) {
-            if (snapshot == null || !controllerName.equals(snapshot.name())) continue;
-            if (snapshot.current() == null) return false;
-            return animationName.equals(snapshot.current().animation().name);
-        }
-        return false;
-    }
-
-    /**
-     * Visibility-rule helper: returns whether <em>any</em> controller is
-     * currently sampling the named animation. Useful when the rule shouldn't
-     * care which controller plays it (e.g. "show guitar bone whenever some
-     * controller — main, action, whatever — plays the {@code guitar}
-     * animation").
-     *
-     * <p>Checks both the controller's {@code current} and {@code previous}
-     * channels. The {@code previous} check is what keeps a prop visible
-     * during a fade-OUT crossfade — without it, the prop pops out the moment
-     * the resolver picks a new animation, even though the body is still
-     * mid-fade in the prop's pose. Equivalent to "is the named animation
-     * still contributing to the pose buffer for any controller".
-     */
-    public static boolean isAnyControllerPlaying(ChiikawaRenderState state, String animationName) {
-        if (state == null || state.controllerSnapshots == null) return false;
-        for (var snapshot : state.controllerSnapshots) {
-            if (snapshot == null) continue;
-            if (snapshot.current() != null
-                    && animationName.equals(snapshot.current().animation().name)) {
-                return true;
-            }
-            if (snapshot.previous() != null
-                    && animationName.equals(snapshot.previous().animation().name)) {
-                return true;
-            }
-        }
-        return false;
+    protected final void addBoneVisibilityRule(String boneName, BoneVisibilityRule<ChiikawaRenderState> rule) {
+        visibility.add(boneName, rule);
     }
 
     /**
@@ -343,7 +258,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
      */
     public static boolean isTalking(ChiikawaRenderState state) {
         for (String mouth : PetSpeech.MOUTHS) {
-            if (isAnyControllerPlaying(state, mouth)) {
+            if (state.pose.isAnyPlaying(mouth)) {
                 return true;
             }
         }
@@ -372,13 +287,13 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
             state.xRot = pitch;
             state.scale = living.getScale();
             state.ageInTicks = living.tickCount + partialTick;
-            state.walkSpeed = living.walkAnimation.speed(partialTick);
+            state.pose.walkSpeed = living.walkAnimation.speed(partialTick);
             state.hasRedOverlay = living.hurtTime > 0 || living.deathTime > 0;
             state.deathTime = living.deathTime > 0 ? living.deathTime + partialTick : 0.0f;
             // Capture the head-look snapshot here so it survives the post-extract
             // bodyRot/yRot stomp performed by InventoryScreen.renderEntityInInventoryFollowsMouse.
-            state.netHeadYaw = net.minecraft.util.Mth.wrapDegrees(headRot - bodyRot);
-            state.headPitch  = pitch;
+            state.pose.netHeadYaw = net.minecraft.util.Mth.wrapDegrees(headRot - bodyRot);
+            state.pose.headPitch  = pitch;
 
             // Stash the live mainhand stack — HeldItemLayer resolves it into
             // a fresh ItemStackRenderState at submit time. Lives on the typed
@@ -396,22 +311,16 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         }
 
         if (entity instanceof ChiikawaAnimated animated) {
-            PetAnimator animator = animated.getPetAnimator();
-            animator.ensureInitialised(controllerConfigs);
             long nowNs = AnimationClock.fromTicks(entity.tickCount, partialTick);
-            state.animationTimeNs = nowNs;
-            animator.setPhaseSeed(entity.getUUID().getLeastSignificantBits(), nowNs);
+            state.pose.animationTimeNs = nowNs;
 
-            // Drop any controller still holding a pre-reload BakedAnimation.
+            // A controller still holding a pre-reload BakedAnimation is dropped by the animator.
             BakedModel currentModel = ModelLibrary.get(modelKey);
-            if (currentModel != null) {
-                animator.clearStale(currentModel.bakeStamp);
-            }
-
-            PetAnimContext ctx = animated.getAnimContext(state.walkSpeed);
-            animator.tick(state, ctx, nowNs);
-            state.controllerSnapshots = animator.snapshot();
-            evaluateVisibilityRules(state, ctx, currentModel);
+            long bakeStamp = currentModel == null ? 0L : currentModel.bakeStamp;
+            state.pose.controllerSnapshots = animated.getPetAnimator().advance(controllers,
+                    animated.getAnimContext(state.pose.walkSpeed), entity.getUUID().getLeastSignificantBits(),
+                    nowNs, bakeStamp);
+            state.hiddenBones = visibility.evaluate(currentModel, state);
         }
     }
 
@@ -421,27 +330,12 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
     }
 
     /**
-     * Evaluate every registered {@link BoneVisibilityRule} into
-     * {@link ChiikawaRenderState#hiddenBones}. Skipped entirely when no rules
-     * are registered (the common case for pets without conditional props).
-     */
-    private void evaluateVisibilityRules(ChiikawaRenderState state, PetAnimContext ctx, BakedModel model) {
-        if (!hasVisibilityRules()) {
-            state.hiddenBones = EMPTY_HIDDEN_BONES;
-            return;
-        }
-        state.hiddenBones = BoneVisibility.evaluate(visibilityRules, model, state, ctx);
-    }
-
-    private static final boolean[] EMPTY_HIDDEN_BONES = new boolean[0];
-
-    /**
      * Default {@code "main"} controller handler — picks the base loop via
      * {@link PetAnimationResolver} with a graceful fallback to
      * {@code "<modelKey>/idle"} when none of the resolver's candidates exist
      * yet (common during dev when only some animations are authored).
      */
-    protected BakedAnimation resolveMainAnimation(ChiikawaRenderState state, PetAnimContext ctx) {
+    protected BakedAnimation resolveMainAnimation(PetAnimContext ctx) {
         BakedAnimation wanted = firstAvailable(PetAnimationResolver.resolve(ctx));
         if (wanted != null) return wanted;
         return AnimationLibrary.get(defaultLoopKey);
@@ -495,39 +389,7 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         BakedModel model = ModelLibrary.get(state.modelKey);
         if (model == null) return;
 
-        // Pose buffer is allocated per-submit because submitCustomGeometry may
-        // defer the draw lambda; a renderer-shared buffer would be overwritten
-        // by the next entity's submit before this one's lambda runs.
-        int boneCount = model.bones.length;
-        float[] poseBuf = new float[boneCount * PoseSampler.FLOATS_PER_BONE];
-        PoseSampler.resetIdentity(poseBuf, boneCount);
-
-        // Frame-level MoLang context. query.anim_time is filled per-channel
-        // by PoseSampler; the input providers fill the rest.
-        molangCtx.reset();
-        for (BoneInputProvider provider : inputProviders) {
-            provider.fill(state, molangCtx);
-        }
-
-        long nowNs = state.animationTimeNs;
-        // Iterate controllers in registration order. Each controller writes
-        // into the shared pose buffer per its blend mode — later controllers
-        // override or blend on top of earlier ones.
-        for (ControllerSnapshot snapshot : state.controllerSnapshots) {
-            sampleController(snapshot, nowNs, molangCtx, poseBuf, boneCount);
-        }
-
-        // Procedural overrides (head look-at, ear sway, future SpringBone).
-        // Run after all controllers so they cleanly override the affected
-        // bones; stage order ensures physics-secondary interceptors see the
-        // look-at result.
-        for (BoneInterceptor.Stage stage : BoneInterceptor.Stage.VALUES) {
-            List<BoneInterceptor> stageList = interceptors.get(stage);
-            if (stageList == null) continue;
-            for (BoneInterceptor interceptor : stageList) {
-                interceptor.apply(model, state, molangCtx, poseBuf);
-            }
-        }
+        float[] poseBuf = poseComposer.compose(model, state.pose);
 
         poseStack.pushPose();
         // Bedrock entity rendering — see ModelBaker for the X-mirror reasoning.
@@ -555,87 +417,5 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         super.submit(state, poseStack, collector, camera);
         speech.submit(state, poseStack, collector, getFont(), camera);
         icon.submit(state, poseStack, collector, getFont(), camera);
-    }
-
-    /**
-     * Sample one controller's contribution into the pose buffer. Three paths:
-     *
-     * <ol>
-     *   <li><b>Crossfade</b> (within-controller switch, e.g. main: idle→sit) —
-     *       sample {@code previous} and {@code current} into temp buffers
-     *       (each starting from the existing pose buffer so unanimated bones
-     *       stay put) and lerp them back into the shared buffer.</li>
-     *   <li><b>Stop-fade</b> (controller going silent, e.g. action: harvest
-     *       finished) — sample {@code current} into the buffer normally, then
-     *       lerp it <em>back toward what was in the buffer before</em> using
-     *       the fade alpha. As alpha goes 0→1 the controller's contribution
-     *       gradually disappears, blending smoothly to whatever earlier
-     *       controllers wrote.</li>
-     *   <li><b>Normal</b> — single sample call, fast path.</li>
-     * </ol>
-     *
-     * <p>Both fade paths work for OVERRIDE and ADDITIVE alike — for ADDITIVE
-     * the "fully applied" pose is what's in the buffer after sampling, and
-     * lerping toward the pre-existing buffer naturally fades the additive
-     * delta back to zero.
-     */
-    private void sampleController(ControllerSnapshot snapshot, long nowNs,
-                                  MolangContext ctx, float[] poseBuf, int boneCount) {
-        if (snapshot == null || snapshot.isIdle()) return;
-
-        if (snapshot.hasCrossfade()) {
-            crossfade(snapshot, nowNs, ctx, poseBuf, boneCount);
-            return;
-        }
-        if (snapshot.isFadingOut()) {
-            stopFade(snapshot, nowNs, ctx, poseBuf, boneCount);
-            return;
-        }
-        PoseSampler.sample(snapshot.current(), snapshot.blendMode(), nowNs, ctx, poseBuf);
-    }
-
-    /**
-     * Within-controller crossfade. Both channels are sampled on top of the
-     * existing pose buffer (so bones neither animation touches keep their
-     * earlier-controller values), then lerped per
-     * {@link PoseMixer#fadeAlpha smoothstep alpha}.
-     */
-    private void crossfade(ControllerSnapshot snapshot, long nowNs,
-                           MolangContext ctx, float[] poseBuf, int boneCount) {
-        int len = boneCount * PoseSampler.FLOATS_PER_BONE;
-        float[] fromPose = new float[len];
-        float[] toPose   = new float[len];
-        System.arraycopy(poseBuf, 0, fromPose, 0, len);
-        System.arraycopy(poseBuf, 0, toPose,   0, len);
-
-        BlendMode mode = snapshot.blendMode();
-        PoseSampler.sample(snapshot.previous(), mode, nowNs, ctx, fromPose);
-        PoseSampler.sample(snapshot.current(),  mode, nowNs, ctx, toPose);
-        float alpha = PoseMixer.fadeAlpha(snapshot.fadeStartNs(), snapshot.fadeDurationSec(), nowNs);
-        PoseMixer.blend(fromPose, toPose, alpha, poseBuf, boneCount);
-    }
-
-    /**
-     * Stop-fade: the controller is going silent, but its contribution lerps
-     * toward the buffer's pre-sample state (= whatever earlier controllers
-     * wrote) over {@code fadeDurationSec}.
-     *
-     * <p>Implementation: snapshot the buffer, apply the controller's full
-     * contribution, then lerp from "with contribution" toward "without"
-     * as alpha goes 0→1. At alpha=0 the controller still fully contributes;
-     * at alpha=1 it's effectively absent.
-     */
-    private void stopFade(ControllerSnapshot snapshot, long nowNs,
-                          MolangContext ctx, float[] poseBuf, int boneCount) {
-        int len = boneCount * PoseSampler.FLOATS_PER_BONE;
-        float[] existing = new float[len];
-        System.arraycopy(poseBuf, 0, existing, 0, len);
-
-        PoseSampler.sample(snapshot.current(), snapshot.blendMode(), nowNs, ctx, poseBuf);
-
-        float alpha = PoseMixer.fadeAlpha(snapshot.fadeStartNs(), snapshot.fadeDurationSec(), nowNs);
-        // lerp(poseBuf, existing, alpha) → poseBuf
-        // alpha=0: full contribution remains; alpha=1: fully reverts to existing.
-        PoseMixer.blend(poseBuf, existing, alpha, poseBuf, boneCount);
     }
 }
