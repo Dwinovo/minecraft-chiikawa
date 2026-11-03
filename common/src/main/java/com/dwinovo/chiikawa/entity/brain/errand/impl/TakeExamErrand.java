@@ -1,6 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain.errand.impl;
 
-import com.dwinovo.chiikawa.anim.state.PetActivity;
+import com.dwinovo.chiikawa.entity.anim.PetActivity;
 import com.dwinovo.chiikawa.entity.brain.errand.Check;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;

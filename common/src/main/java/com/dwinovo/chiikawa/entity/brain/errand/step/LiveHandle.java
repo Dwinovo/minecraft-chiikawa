@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.entity.brain.errand.step;
 
-import com.dwinovo.chiikawa.anim.state.PetAction;
-import com.dwinovo.chiikawa.anim.state.PetReaction;
+import com.dwinovo.chiikawa.entity.anim.PetAction;
+import com.dwinovo.chiikawa.entity.anim.PetReaction;
 import com.dwinovo.chiikawa.block.ExamDeskBlockEntity;
 import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
