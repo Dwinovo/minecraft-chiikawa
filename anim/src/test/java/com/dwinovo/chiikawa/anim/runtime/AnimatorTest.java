@@ -10,6 +10,9 @@ import com.dwinovo.chiikawa.anim.controller.ControllerRoster;
 import com.dwinovo.chiikawa.anim.controller.ControllerSnapshot;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -18,12 +21,20 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /** The animator is advanced once a frame with the roster, and hands back what each controller plays. */
 class AnimatorTest {
 
+    private static final AnimationSource NONE = name -> null;
+
     private static BakedAnimation loop(String name, long bakeStamp) {
         return new BakedAnimation(name, 1f, LoopMode.LOOP, new BakedBoneChannel[0], bakeStamp);
     }
 
     private static BakedAnimation once(String name) {
         return new BakedAnimation(name, 1f, LoopMode.PLAY_ONCE, new BakedBoneChannel[0]);
+    }
+
+    private static AnimationSource of(BakedAnimation... animations) {
+        Map<String, BakedAnimation> byName = new java.util.HashMap<>();
+        for (BakedAnimation animation : animations) byName.put(animation.name, animation);
+        return byName::get;
     }
 
     /** A "main" controller that plays whatever the input is, and an "action" one that only runs on triggers. */
@@ -39,7 +50,7 @@ class AnimatorTest {
         Animator<BakedAnimation> animator = new Animator<>();
         BakedAnimation idle = loop("idle", 0L);
 
-        ControllerSnapshot[] snapshots = animator.advance(roster(), idle, 7L, 1_000_000_000L, 0L);
+        ControllerSnapshot[] snapshots = animator.advance(roster(), idle, 7L, 1_000_000_000L, 0L, NONE);
 
         assertEquals(2, snapshots.length);
         assertEquals("main", snapshots[0].name());
@@ -53,13 +64,50 @@ class AnimatorTest {
         Animator<BakedAnimation> animator = new Animator<>();
         ControllerRoster<BakedAnimation> roster = roster();
         BakedAnimation harvest = once("harvest");
-        animator.advance(roster, loop("idle", 0L), 7L, 0L, 0L);
+        animator.advance(roster, loop("idle", 0L), 7L, 0L, 0L, NONE);
 
-        animator.playOnce("action", harvest, 0L);
-        animator.playOnce("missing", once("never"), 0L);
-        ControllerSnapshot[] snapshots = animator.advance(roster, loop("idle", 0L), 7L, 100_000_000L, 0L);
+        animator.playOnce("action", List.of("harvest"), 0L);
+        animator.playOnce("missing", List.of("harvest"), 0L);
+        ControllerSnapshot[] snapshots = animator.advance(roster, loop("idle", 0L), 7L, 100_000_000L, 0L, of(harvest));
 
         assertSame(harvest, snapshots[1].current().animation());
+    }
+
+    @Test
+    void aRequestMadeBeforeTheFirstAdvancePlaysOnIt() {
+        Animator<BakedAnimation> animator = new Animator<>();
+        BakedAnimation harvest = once("harvest");
+
+        animator.playOnce("action", List.of("harvest"), 0L);
+        ControllerSnapshot[] snapshots = animator.advance(roster(), loop("idle", 0L), 7L, 100_000_000L, 0L, of(harvest));
+
+        assertSame(harvest, snapshots[1].current().animation());
+    }
+
+    @Test
+    void aRequestWhoseCandidatesAreAllMissingPlaysNothing() {
+        Animator<BakedAnimation> animator = new Animator<>();
+        ControllerRoster<BakedAnimation> roster = roster();
+
+        animator.playOnce("action", List.of("harvest", "use"), 0L);
+        ControllerSnapshot[] snapshots = animator.advance(roster, loop("idle", 0L), 7L, 100_000_000L, 0L, of(once("sit")));
+
+        assertNull(snapshots[1].current());
+        // And it is not asked for again once the animations turn up.
+        snapshots = animator.advance(roster, loop("idle", 0L), 7L, 200_000_000L, 0L, of(once("harvest")));
+        assertNull(snapshots[1].current());
+    }
+
+    @Test
+    void theFirstCandidateThatExistsWins() {
+        Animator<BakedAnimation> animator = new Animator<>();
+        BakedAnimation use = once("use");
+
+        animator.playOnce("action", List.of("harvest", "use", "sit"), 0L);
+        ControllerSnapshot[] snapshots = animator.advance(roster(), loop("idle", 0L), 7L, 100_000_000L, 0L,
+            of(once("sit"), use));
+
+        assertSame(use, snapshots[1].current().animation());
     }
 
     @Test
@@ -68,11 +116,11 @@ class AnimatorTest {
         ControllerRoster<BakedAnimation> roster = new ControllerRoster<>();
         roster.add(new ControllerConfig<>("main", BlendMode.OVERRIDE, 0f, input -> null));
         BakedAnimation stale = loop("idle", 1L);
-        animator.advance(roster, null, 7L, 0L, 1L);
-        animator.playOnce("main", stale, 0L);
-        assertSame(stale, animator.advance(roster, null, 7L, 1L, 1L)[0].current().animation());
+        animator.advance(roster, null, 7L, 0L, 1L, NONE);
+        animator.playOnce("main", List.of("idle"), 0L);
+        assertSame(stale, animator.advance(roster, null, 7L, 1L, 1L, of(stale))[0].current().animation());
 
-        ControllerSnapshot[] after = animator.advance(roster, null, 7L, 2L, 2L);
+        ControllerSnapshot[] after = animator.advance(roster, null, 7L, 2L, 2L, NONE);
 
         assertNull(after[0].current(), "the controller kept an animation baked before the reload");
     }
@@ -91,8 +139,8 @@ class AnimatorTest {
         Animator<BakedAnimation> a = new Animator<>();
         Animator<BakedAnimation> b = new Animator<>();
 
-        long startA = a.advance(roster, idle, 1L, 5_000_000_000L, 0L)[0].current().startTimeNs();
-        long startB = b.advance(roster, idle, 4000L, 5_000_000_000L, 0L)[0].current().startTimeNs();
+        long startA = a.advance(roster, idle, 1L, 5_000_000_000L, 0L, NONE)[0].current().startTimeNs();
+        long startB = b.advance(roster, idle, 4000L, 5_000_000_000L, 0L, NONE)[0].current().startTimeNs();
 
         assertEquals(3_999_000_000L, startA - startB);
     }
