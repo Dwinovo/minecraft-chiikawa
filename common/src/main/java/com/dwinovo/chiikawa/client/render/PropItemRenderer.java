@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.client.render;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.anim.render.PropRenderer;
+import com.dwinovo.chiikawa.client.anim.render.PropRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.client.model.geom.EntityModelSet;
