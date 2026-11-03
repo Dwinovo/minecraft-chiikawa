@@ -10,8 +10,8 @@ package com.dwinovo.chiikawa.anim.molang;
  * <ul>
  *   <li>{@code query.anim_time} — set per channel by
  *       {@link com.dwinovo.chiikawa.anim.runtime.PoseSampler#sample}</li>
- *   <li>{@code query.ground_speed} — set per frame by the renderer from
- *       {@code walkAnimation.speed}</li>
+ *   <li>{@code query.ground_speed} — set per frame from
+ *       {@link com.dwinovo.chiikawa.anim.pose.PoseFrame#walkSpeed}</li>
  * </ul>
  *
  * <h2>What's intentionally not in scope</h2>
@@ -20,7 +20,7 @@ package com.dwinovo.chiikawa.anim.molang;
  * Blockbench's IK helper variables ({@code v.L6_P0}, {@code v.L4_P0},
  * {@code v.L6_P00}). None of these have a SET site in any tool we use; head
  * orientation is driven procedurally by
- * {@link com.dwinovo.chiikawa.anim.render.HeadLookInterceptor}, and ear /
+ * {@link com.dwinovo.chiikawa.anim.pose.HeadLookInterceptor}, and ear /
  * tail motion is animator-authored in the base loop animation files (idle /
  * walk / sit / ...). Resolving these legacy variables to a real slot only
  * opens the door to mis-evaluation (e.g. {@code Root.rotZ = 0.4*ysm.head_yaw}

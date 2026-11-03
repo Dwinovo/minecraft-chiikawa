@@ -2,12 +2,12 @@ package com.dwinovo.chiikawa.anim.controller;
 
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
 import com.dwinovo.chiikawa.anim.baked.LoopMode;
-import com.dwinovo.chiikawa.anim.render.ChiikawaRenderState;
 import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
-import com.dwinovo.chiikawa.anim.state.PetAnimContext;
 
 /**
  * Per-entity mutable state for one {@link ControllerConfig}.
+ *
+ * @param <I> what the config's handler picks by, see {@link ControllerHandler}
  *
  * <h2>What it tracks</h2>
  * <ul>
@@ -24,9 +24,8 @@ import com.dwinovo.chiikawa.anim.state.PetAnimContext;
  *   <li>{@code triggeredAnim} — a {@link #playOnce} override that wins over
  *       the handler until its baked duration elapses, whatever the animation
  *       file's {@code loop} says (the same clip may be a looping locomotion
- *       state elsewhere). GeckoLib's {@code triggeredAnim} mechanism, used by
- *       {@link com.dwinovo.chiikawa.entity.AbstractPet}'s synced action /
- *       reaction packets.</li>
+ *       state elsewhere). GeckoLib's {@code triggeredAnim} mechanism, used for
+ *       one-shot gameplay events such as a synced action or reaction.</li>
  * </ul>
  *
  * <h2>Two kinds of fade, one timer</h2>
@@ -34,14 +33,15 @@ import com.dwinovo.chiikawa.anim.state.PetAnimContext;
  * fadeDurationSec}. They never coexist — entering one cancels the other.
  *
  * <h2>Lifecycle per frame</h2>
- * {@link #tick} runs at extract time and bookkeeps fades. {@link #snapshot}
- * produces an immutable {@link ControllerSnapshot} for the renderer's submit
- * pass. Splitting tick from sample ensures the second extract for an
- * inventory preview cannot drift relative to the world-render submit.
+ * {@link #tick} runs when the frame's state is captured and bookkeeps fades.
+ * {@link #snapshot} produces an immutable {@link ControllerSnapshot} for the
+ * pose to be sampled from at draw time. Splitting tick from sample ensures a
+ * second capture of the same entity in one frame (a preview drawn beside the
+ * world) cannot drift relative to the first.
  */
-public final class ControllerInstance {
+public final class ControllerInstance<I> {
 
-    private final ControllerConfig config;
+    private final ControllerConfig<I> config;
     /**
      * Stable per-entity offset used as the {@code startTimeNs} for looping
      * animations we want phase-shifted across entities (so two pets created at
@@ -72,11 +72,11 @@ public final class ControllerInstance {
     private BakedAnimation triggeredAnim;
     private long triggeredStartNs;
 
-    public ControllerInstance(ControllerConfig config) {
+    public ControllerInstance(ControllerConfig<I> config) {
         this.config = config;
     }
 
-    public ControllerConfig config() {
+    public ControllerConfig<I> config() {
         return config;
     }
 
@@ -149,7 +149,7 @@ public final class ControllerInstance {
     }
 
     /**
-     * Advance this controller's state for the upcoming render pass.
+     * Advance this controller's state for the upcoming frame.
      *
      * <ol>
      *   <li>Reap finished within-controller crossfades and stop-fades.</li>
@@ -160,7 +160,7 @@ public final class ControllerInstance {
      *       {@code null} starts a stop-fade (if a current was active).</li>
      * </ol>
      */
-    public void tick(ChiikawaRenderState state, PetAnimContext ctx, long nowNs) {
+    public void tick(I input, long nowNs) {
         // Reap finished within-controller crossfade (previous → current).
         if (previousAnim != null && fadeFinished(nowNs)) {
             previousAnim = null;
@@ -190,7 +190,7 @@ public final class ControllerInstance {
             }
         }
 
-        BakedAnimation wanted = config.handler().handle(state, ctx);
+        BakedAnimation wanted = config.handler().handle(input);
         if (wanted == null) {
             // Handler says "nothing this frame". If we were playing something,
             // start a stop-fade so the bone(s) the controller was animating
@@ -288,7 +288,7 @@ public final class ControllerInstance {
         return elapsed >= (long) (anim.durationSec * 1_000_000_000L);
     }
 
-    /** Build the immutable snapshot the renderer will sample at submit time. */
+    /** Build the immutable snapshot the pose will be sampled from at draw time. */
     public ControllerSnapshot snapshot() {
         AnimationChannel currentChannel = currentAnim == null
                 ? null
