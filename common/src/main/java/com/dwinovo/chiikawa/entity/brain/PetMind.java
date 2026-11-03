@@ -31,7 +31,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.rest.RestContext;
 import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Executor;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Handle;
-import com.dwinovo.chiikawa.entity.brain.errand.run.PetIcons;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
 import com.dwinovo.chiikawa.entity.brain.errand.run.StepTag;
 import com.dwinovo.chiikawa.entity.brain.errand.step.LiveHandle;
@@ -40,7 +39,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.view.LivePetView;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkActions;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkErrand;
 import com.dwinovo.chiikawa.entity.job.JobWork;
-import com.dwinovo.chiikawa.gifting.GiftOutlook;
 import com.dwinovo.chiikawa.gifting.GiftingSettings;
 import com.dwinovo.chiikawa.gifting.Presents;
 import com.dwinovo.chiikawa.qualification.ExamStage;
@@ -121,8 +119,8 @@ public final class PetMind {
     private final Executor executor;
     private final ErrandView errands;
     /**
-     * Why the pet is not at work, as its last decision found; not saved. The one account its head icon, its remarks and
-     * its screen are made from, written by {@link #decide} alone.
+     * Why the pet is not at work, as its last decision found; not saved. The one account its remarks and its screen are
+     * made from, written by {@link #decide} alone.
      */
     private Optional<WhyNot> whyNot = Optional.empty();
     /** Set when the pet has been told something that may change its mind, until it next decides. */
@@ -139,7 +137,7 @@ public final class PetMind {
             Constants.LOG::error,
             () -> PetConstraints.pastimesOf(pet));
         this.handle = new LiveHandle(pet);
-        this.executor = new Executor(handle, pet, rests, log, this::iconSigns);
+        this.executor = new Executor(handle, pet, rests, log);
         this.errands = ErrandView.of(executor, desk);
     }
 
@@ -268,6 +266,15 @@ public final class PetMind {
     /** @return whether the pet is lying asleep, in which it makes no remarks */
     private boolean asleep() {
         return atStepTagged(StepTag.SLEEPING);
+    }
+
+    /**
+     * @return whether the pet is waiting to be praised, which a click from its owner, or a friend of theirs, does: see
+     *         {@code PetInteractHandler}. Worked out where the steps run, which is the server alone, so a client's pet is never
+     *         asking.
+     */
+    public boolean asking() {
+        return atStepTagged(StepTag.ASKING);
     }
 
     /** @return whether the step the pet is at makes this of it */
@@ -530,12 +537,6 @@ public final class PetMind {
                 PetSpeech.say(pet, voice);
             }
         });
-    }
-
-    /** @return what the icon over the pet's head is worked out from besides the step the pet is at */
-    private PetIcons.Signs iconSigns() {
-        return new PetIcons.Signs(PetOwnership.of(pet) instanceof PetOwnership.Owned, !pet.getPendingGift().isEmpty(),
-            !GiftOutlook.of(pet).picks().isEmpty(), whyNot, DayPhase.in(pet.level()));
     }
 
     private Permits permits(LivePetView view) {

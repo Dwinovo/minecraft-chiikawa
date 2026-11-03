@@ -17,7 +17,6 @@ import com.dwinovo.chiikawa.anim.pose.BoneVisibilityRule;
 import com.dwinovo.chiikawa.anim.pose.HeadLookInterceptor;
 import com.dwinovo.chiikawa.anim.pose.PoseComposer;
 import com.dwinovo.chiikawa.client.anim.render.layer.HeldItemLayer;
-import com.dwinovo.chiikawa.client.voice.PetIconRenderer;
 import com.dwinovo.chiikawa.client.voice.SpeechBubbleRenderer;
 import com.dwinovo.chiikawa.voice.PetSpeech;
 import com.dwinovo.chiikawa.entity.AbstractPet;
@@ -312,8 +311,6 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
 
     /** What the pet is saying, over its head. */
     private final SpeechBubbleRenderer speech = new SpeechBubbleRenderer();
-    /** What is on its mind, over its head when it is not saying anything. */
-    private final PetIconRenderer icon = new PetIconRenderer();
 
     /**
      * Draws a pet as a picture in a screen: the model, and nothing over its head. When its
@@ -342,10 +339,8 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         renderState(entity, state, poseStack, bufferSource, packedLight);
         super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
         if (!drawingPortrait && entity instanceof AbstractPet pet) {
-            // What hangs over the head clears the name tag when there is one, which the renderer alone says.
-            boolean nameShown = shouldShowName(entity);
-            speech.render(pet, nameShown, poseStack, bufferSource, getFont(), entityRenderDispatcher.cameraOrientation(), partialTick);
-            icon.render(pet, nameShown, poseStack, bufferSource, getFont(), entityRenderDispatcher.cameraOrientation(), partialTick);
+            // The bubble clears the name tag when there is one, which the renderer alone says.
+            speech.render(pet, shouldShowName(entity), poseStack, bufferSource, getFont(), entityRenderDispatcher.cameraOrientation(), partialTick);
         }
     }
 

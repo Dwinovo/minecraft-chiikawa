@@ -14,9 +14,9 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Asks someone to praise the pet, as its character asks, and waits for it for as long as the stage says: it holds the pose of
  * the stage with its eyes on them, plays the opening beat as it begins and the recurring one each time it comes round, and
- * wears the icon that tells anyone passing that a click is wanted. Told it was praised, it is glad and done. Never told, it
- * plays the closing beat as the time runs out, which is its turning to a tantrum, and is done as well. Always interruptible,
- * and an interrupted pet makes no scene.
+ * is tagged {@link StepTag#ASKING}, which is how a click from the owner is known for the praise it wants. Told it was
+ * praised, it is glad and done. Never told, it plays the closing beat as the time runs out, which is its turning to a
+ * tantrum, and is done as well. Always interruptible, and an interrupted pet makes no scene.
  */
 public final class Ask implements Step {
     private final Stage stage;
