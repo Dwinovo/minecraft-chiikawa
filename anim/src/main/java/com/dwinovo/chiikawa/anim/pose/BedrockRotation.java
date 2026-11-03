@@ -1,4 +1,4 @@
-package com.dwinovo.chiikawa.anim.render;
+package com.dwinovo.chiikawa.anim.pose;
 
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
