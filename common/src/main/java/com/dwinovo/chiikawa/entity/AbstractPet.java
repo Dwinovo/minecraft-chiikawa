@@ -1,15 +1,15 @@
 package com.dwinovo.chiikawa.entity;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.anim.api.AnimationLibrary;
-import com.dwinovo.chiikawa.anim.api.ChiikawaAnimated;
+import com.dwinovo.chiikawa.client.anim.AnimationLibrary;
+import com.dwinovo.chiikawa.entity.anim.ChiikawaAnimated;
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
 import com.dwinovo.chiikawa.anim.runtime.AnimationClock;
 import com.dwinovo.chiikawa.anim.runtime.Animator;
-import com.dwinovo.chiikawa.anim.state.PetAction;
-import com.dwinovo.chiikawa.anim.state.PetActivity;
-import com.dwinovo.chiikawa.anim.state.PetAnimContext;
-import com.dwinovo.chiikawa.anim.state.PetReaction;
+import com.dwinovo.chiikawa.entity.anim.PetAction;
+import com.dwinovo.chiikawa.entity.anim.PetActivity;
+import com.dwinovo.chiikawa.entity.anim.PetAnimContext;
+import com.dwinovo.chiikawa.entity.anim.PetReaction;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.errand.run.PetIcon;
@@ -161,7 +161,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     /**
      * Synced byte storing the current {@link PetActivity} the pet is in.
      * Server-side Brain behaviors set/clear via {@link #setActivity}; the
-     * client-side {@link com.dwinovo.chiikawa.anim.state.PetAnimationResolver}
+     * client-side {@link com.dwinovo.chiikawa.entity.anim.PetAnimationResolver}
      * reads it as the highest-priority animation candidate. This is the
      * "level state" channel — orthogonal to the edge-event triggers above.
      * {@link SynchedEntityData}'s delta-on-change suppresses no-op packets,
@@ -211,11 +211,11 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
     public static final int TRIGGER_USE_MAINHAND = 1;
     public static final int TRIGGER_SWORD_ATTACK = 2;
 
-    /** Controller name receiving action triggers — must match {@link com.dwinovo.chiikawa.anim.render.ChiikawaEntityRenderer#CONTROLLER_ACTION}. */
+    /** Controller name receiving action triggers — must match {@link com.dwinovo.chiikawa.client.anim.render.ChiikawaEntityRenderer#CONTROLLER_ACTION}. */
     private static final String ACTION_CONTROLLER = "action";
-    /** Controller name receiving reaction triggers — must match {@link com.dwinovo.chiikawa.anim.render.ChiikawaEntityRenderer#CONTROLLER_REACTION}. */
+    /** Controller name receiving reaction triggers — must match {@link com.dwinovo.chiikawa.client.anim.render.ChiikawaEntityRenderer#CONTROLLER_REACTION}. */
     private static final String REACTION_CONTROLLER = "reaction";
-    /** Controller name the pet talks on — must match {@link com.dwinovo.chiikawa.anim.render.ChiikawaEntityRenderer#CONTROLLER_TALK}. */
+    /** Controller name the pet talks on — must match {@link com.dwinovo.chiikawa.client.anim.render.ChiikawaEntityRenderer#CONTROLLER_TALK}. */
     private static final String TALK_CONTROLLER = "talk";
     private static final java.util.List<MemoryModuleType<?>> MEMORY_TYPES = java.util.List.of(
         MemoryModuleType.PATH,

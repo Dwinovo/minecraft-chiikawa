@@ -1,6 +1,6 @@
 package com.dwinovo.chiikawa.social;
 
-import com.dwinovo.chiikawa.anim.state.PetReaction;
+import com.dwinovo.chiikawa.entity.anim.PetReaction;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetGesture;
 import com.dwinovo.chiikawa.utils.ModCodecs;

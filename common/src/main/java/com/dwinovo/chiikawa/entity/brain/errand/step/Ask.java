@@ -1,6 +1,6 @@
 package com.dwinovo.chiikawa.entity.brain.errand.step;
 
-import com.dwinovo.chiikawa.anim.state.PetReaction;
+import com.dwinovo.chiikawa.entity.anim.PetReaction;
 import com.dwinovo.chiikawa.entity.brain.errand.inbox.Message;
 import com.dwinovo.chiikawa.entity.brain.errand.pastime.Stage;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Handle;
