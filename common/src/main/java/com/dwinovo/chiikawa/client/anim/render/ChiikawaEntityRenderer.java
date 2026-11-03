@@ -342,8 +342,10 @@ public abstract class ChiikawaEntityRenderer<T extends Entity> extends EntityRen
         renderState(entity, state, poseStack, bufferSource, packedLight);
         super.render(entity, entityYaw, partialTick, poseStack, bufferSource, packedLight);
         if (!drawingPortrait && entity instanceof AbstractPet pet) {
-            speech.render(pet, poseStack, bufferSource, getFont(), entityRenderDispatcher.cameraOrientation(), partialTick);
-            icon.render(pet, poseStack, bufferSource, getFont(), entityRenderDispatcher.cameraOrientation(), partialTick);
+            // What hangs over the head clears the name tag when there is one, which the renderer alone says.
+            boolean nameShown = shouldShowName(entity);
+            speech.render(pet, nameShown, poseStack, bufferSource, getFont(), entityRenderDispatcher.cameraOrientation(), partialTick);
+            icon.render(pet, nameShown, poseStack, bufferSource, getFont(), entityRenderDispatcher.cameraOrientation(), partialTick);
         }
     }
 

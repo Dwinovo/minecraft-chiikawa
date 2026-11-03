@@ -23,14 +23,15 @@ public final class SpeechBubbleRenderer {
     /** How long a line takes to fade at the end of its time, in ticks. */
     private static final float FADE_TICKS = 10.0F;
 
-    public void render(AbstractPet pet, PoseStack poseStack, MultiBufferSource bufferSource, Font font,
+    /** @param nameShown whether the game draws the pet's name tag, which the bubble hangs over */
+    public void render(AbstractPet pet, boolean nameShown, PoseStack poseStack, MultiBufferSource bufferSource, Font font,
                        Quaternionf cameraOrientation, float partialTick) {
         if (Minecraft.getInstance().options.hideGui || !ClientSettingsStore.current().speechBubbles()) {
             return;
         }
         pet.getSpeech().ifPresent(speech -> {
             float left = speech.left(pet.tickCount, partialTick);
-            OverHead.draw(pet, poseStack, bufferSource, font, cameraOrientation, partialTick,
+            OverHead.draw(pet, nameShown, poseStack, bufferSource, font, cameraOrientation, partialTick,
                 Mth.clamp(left / FADE_TICKS, 0.0F, 1.0F), surface -> {
                     Bubble bubble = new Bubble(Component.translatable(speech.line(),
                         speech.subject().map(Component::translatable).orElse(Component.empty())).getString());
