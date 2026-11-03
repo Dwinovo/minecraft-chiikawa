@@ -1,12 +1,10 @@
 package com.dwinovo.chiikawa.anim.controller;
 
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
-import com.dwinovo.chiikawa.anim.render.ChiikawaRenderState;
-import com.dwinovo.chiikawa.anim.state.PetAnimContext;
 
 /**
- * Pure function from gameplay state to "what should this controller play
- * right now". Called every render-state extract, must be idempotent —
+ * Pure function from the caller's per-frame state to "what should this controller play
+ * right now". Called every time the animator advances, must be idempotent —
  * returning the same animation in two consecutive frames is a no-op (the
  * controller short-circuits on equality).
  *
@@ -18,23 +16,24 @@ import com.dwinovo.chiikawa.anim.state.PetAnimContext;
  * the data this codebase actually has: there's no {@code RawAnimation} stage
  * chain, no {@code PlayState} tri-state — just "play this animation, or
  * nothing".
+ *
+ * @param <I> what the caller hands the animator each frame for its handlers to pick by;
+ *            the engine never looks inside it
  */
 @FunctionalInterface
-public interface ControllerHandler {
+public interface ControllerHandler<I> {
     /**
-     * @param state per-frame render-state snapshot
-     * @param ctx   gameplay state snapshot (mode / locomotion / job ...)
+     * @param input the caller's state for this frame
      * @return animation to play, or {@code null} for "no contribution"
      */
-    BakedAnimation handle(ChiikawaRenderState state, PetAnimContext ctx);
+    BakedAnimation handle(I input);
 
     /**
      * Handler for controllers that only run on external triggers — the state
-     * machine never picks an animation for them. Used by the {@code "action"}
-     * and {@code "reaction"} controllers, which receive their animations via
-     * {@link com.dwinovo.chiikawa.anim.runtime.PetAnimator#playOnce}.
+     * machine never picks an animation for them. For controllers that receive
+     * their animations only via {@link com.dwinovo.chiikawa.anim.runtime.Animator#playOnce}.
      */
-    static BakedAnimation neverPlay(ChiikawaRenderState state, PetAnimContext ctx) {
+    static <I> BakedAnimation neverPlay(I input) {
         return null;
     }
 }

@@ -37,12 +37,12 @@ public class HachiwareRenderer extends ChiikawaEntityRenderer<HachiwarePet> {
     public HachiwareRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, "hachiware");
         addBoneVisibilityRule("Mouth3",
-                (state, animCtx) -> PropBone.GUITAR.shownDuring().isVisible(state, animCtx) || isTalking(state));
+                state -> PropBone.GUITAR.shownDuring().isVisible(state) || isTalking(state));
         addBoneVisibilityRule("Mouth3", ShownDuring.any("happy", "hurt"));
         addBoneVisibilityRule("HappyEyes", ShownDuring.any("happy", "yawn", "revive"));
         addBoneVisibilityRule("Tears", ShownDuring.any("revive"));
         addBoneVisibilityRule("Sweat", ShownDuring.any("exam"));
         addBoneVisibilityRule("RightHandLocator",
-                (state, animCtx) -> !PropBone.GUITAR.shownDuring().isVisible(state, animCtx));
+                state -> !PropBone.GUITAR.shownDuring().isVisible(state));
     }
 }
