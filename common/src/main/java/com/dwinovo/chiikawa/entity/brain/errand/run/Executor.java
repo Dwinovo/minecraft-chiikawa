@@ -12,7 +12,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.rest.RestLedger;
 import com.dwinovo.chiikawa.voice.VoiceMoment;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,16 +30,13 @@ import org.jetbrains.annotations.Nullable;
  * <p>Beside the step, the {@link Overlay}s the errand's settings name are ticked, with an {@link Aside} that says,
  * makes a move and glances but cannot walk. The same aside is handed to whatever else passes remarks on the pet, see {@link #aside}.
  *
- * <p>What the player's game is shown of the pet is published here and nowhere else: the errand, the pose, the scene
- * and the icon over its head, which is worked out by {@link PetIcons} from the step the pet is at and what it is
- * asked about the pet besides.
+ * <p>What the player's game is shown of the pet is published here and nowhere else: the errand, the pose and the scene.
  */
 public final class Executor {
     private final Handle handle;
     private final Projection projection;
     private final RestLedger rests;
     private final DecisionLog log;
-    private final Supplier<PetIcons.Signs> signs;
     private final Aside aside = new Aside() {
         @Override
         public boolean say(VoiceMoment moment, Optional<String> subject) {
@@ -71,22 +67,18 @@ public final class Executor {
     /** The pose and the scene last published, so that only a change is: see {@link #project}. */
     private PetActivity projectedActivity = PetActivity.NONE;
     private String projectedPerformance = "";
-    private PetIcon projectedIcon = PetIcon.NONE;
 
     /**
      * @param handle the pet
      * @param projection where to publish what the pet is doing
      * @param rests where an errand's rest is written when it ends
      * @param log where an errand's end is recorded
-     * @param signs what the icon over the pet's head is worked out from besides the step it is at, asked at every
-     *              projection
      */
-    public Executor(Handle handle, Projection projection, RestLedger rests, DecisionLog log, Supplier<PetIcons.Signs> signs) {
+    public Executor(Handle handle, Projection projection, RestLedger rests, DecisionLog log) {
         this.handle = handle;
         this.projection = projection;
         this.rests = rests;
         this.log = log;
-        this.signs = signs;
     }
 
     /** @return what may be done to the pet beside its errand, in passing: say something, make a move and glance, and nothing that moves it */
@@ -243,8 +235,7 @@ public final class Executor {
 
     /**
      * Publishes what the pet is doing. The errand is published as it is; the pose and the scene only when
-     * what the step claims of them changes, and they are cleared the tick the step that claimed them ends. The icon
-     * is worked out afresh at every projection, a pet on no errand included, and published when it changes.
+     * what the step claims of them changes, and they are cleared the tick the step that claimed them ends.
      */
     private void project() {
         projection.intent(running == null ? null : running.errand());
@@ -257,11 +248,6 @@ public final class Executor {
         if (!performance.equals(projectedPerformance)) {
             projectedPerformance = performance;
             projection.performance(performance);
-        }
-        PetIcon icon = PetIcons.of(running == null ? Set.of() : running.tags(), signs.get());
-        if (icon != projectedIcon) {
-            projectedIcon = icon;
-            projection.icon(icon);
         }
     }
 }

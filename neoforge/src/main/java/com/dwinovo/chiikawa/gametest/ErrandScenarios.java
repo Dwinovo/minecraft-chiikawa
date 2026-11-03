@@ -441,7 +441,7 @@ final class ErrandScenarios {
 
     /**
      * Momonga with another pet sitting a few blocks off and its owner across the yard: it copies the other for a moment, walks
-     * over to its owner and asks to be praised, for as long as its time is. Cut short at any step it leaves no icon behind.
+     * over to its owner and asks to be praised, for as long as its time is. Cut short at any step it leaves no wait for praise behind.
      */
     private static Scenario askPraise(GameTestHelper helper) {
         ServerPlayer owner = ownerAcross(helper);
