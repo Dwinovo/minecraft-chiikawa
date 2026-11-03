@@ -1,5 +1,6 @@
 package com.dwinovo.chiikawa.anim.render;
 
+import com.dwinovo.chiikawa.anim.pose.BedrockRotation;
 import com.dwinovo.chiikawa.anim.baked.BakedBone;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
 import com.dwinovo.chiikawa.anim.molang.MolangContext;
