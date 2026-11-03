@@ -1,0 +1,48 @@
+package com.dwinovo.chiikawa.client.anim.render.impl;
+
+import com.dwinovo.chiikawa.client.anim.render.ChiikawaEntityRenderer;
+import com.dwinovo.chiikawa.client.anim.render.PropBone;
+import com.dwinovo.chiikawa.client.anim.render.ShownDuring;
+import com.dwinovo.chiikawa.entity.impl.HachiwarePet;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+
+/**
+ * Hachiware's renderer adds model-specific conditional bones. Its {@code guitar} prop shows
+ * only while the {@code guitar} animation plays, as every {@link com.dwinovo.chiikawa.client.anim.render.PropBone}
+ * does. The {@code Mouth3} expression bone, its open mouth, shows while it sings along
+ * to the guitar and while it talks. The main-hand locator does the inverse of
+ * the guitar so the music box item disappears during the performance instead
+ * of clipping through the authored guitar prop.
+ *
+ * <p>Its faces: pleased, a big open-mouthed laugh with its eyes shut in arcs; yawning, its
+ * eyes shut in the same arcs; hurt, no tears — it grits its teeth and shouts, mouth open;
+ * brought back, moved to tears, the one time it cries. Stuck at an exam, two beads of sweat,
+ * as in the series.
+ *
+ * <p>The animator originally shipped a companion {@code noguitar} animation
+ * whose only keyframe is {@code guitar.scale = 0} — a hand-rolled "hide
+ * guitar by default" workaround. With the {@link com.dwinovo.chiikawa.anim.pose.BoneVisibilityRule}
+ * pipeline that workaround is no longer needed: the guitar's rule is the source of
+ * truth, the {@code noguitar} animation is dead data and can be deleted from
+ * the json file.
+ *
+ * <p>Actually <em>playing</em> {@code guitar} (so the bone appears) is a
+ * separate concern handled by gameplay code: the musician's performance sets
+ * {@link com.dwinovo.chiikawa.entity.anim.PetActivity#PLAY_GUITAR}, for which
+ * {@link com.dwinovo.chiikawa.entity.anim.PetAnimationResolver} returns
+ * {@code "guitar"}. Outside a performance the guitar stays hidden — exactly
+ * the "屏蔽 guitar 展示" default the model needs.
+ */
+public class HachiwareRenderer extends ChiikawaEntityRenderer<HachiwarePet> {
+    public HachiwareRenderer(EntityRendererProvider.Context ctx) {
+        super(ctx, "hachiware");
+        addBoneVisibilityRule("Mouth3",
+                state -> PropBone.GUITAR.shownDuring().isVisible(state) || isTalking(state));
+        addBoneVisibilityRule("Mouth3", ShownDuring.any("happy", "hurt"));
+        addBoneVisibilityRule("HappyEyes", ShownDuring.any("happy", "yawn", "revive"));
+        addBoneVisibilityRule("Tears", ShownDuring.any("revive"));
+        addBoneVisibilityRule("Sweat", ShownDuring.any("exam"));
+        addBoneVisibilityRule("RightHandLocator",
+                state -> !PropBone.GUITAR.shownDuring().isVisible(state));
+    }
+}

@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.data;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.anim.state.PetReaction;
+import com.dwinovo.chiikawa.entity.anim.PetReaction;
 import com.dwinovo.chiikawa.init.InitEntity;
 import com.dwinovo.chiikawa.init.InitTag;
 import com.dwinovo.chiikawa.social.Beat;

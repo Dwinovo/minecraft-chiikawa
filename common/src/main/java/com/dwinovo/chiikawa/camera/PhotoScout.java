@@ -1,6 +1,6 @@
 package com.dwinovo.chiikawa.camera;
 
-import com.dwinovo.chiikawa.anim.state.PetActivity;
+import com.dwinovo.chiikawa.entity.anim.PetActivity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.view.DayPhase;

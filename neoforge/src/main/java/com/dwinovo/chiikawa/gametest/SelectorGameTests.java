@@ -7,7 +7,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.ownedPet;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.anim.state.PetActivity;
+import com.dwinovo.chiikawa.entity.anim.PetActivity;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
