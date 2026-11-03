@@ -1,6 +1,6 @@
 package com.dwinovo.chiikawa.data;
 
-import com.dwinovo.chiikawa.anim.render.PropRenderer;
+import com.dwinovo.chiikawa.client.anim.render.PropRenderer;
 import com.dwinovo.chiikawa.client.render.PropItemRenderer;
 import com.dwinovo.chiikawa.init.InitItems;
 import java.util.Optional;

@@ -1,6 +1,6 @@
 package com.dwinovo.chiikawa.client.manual;
 
-import com.dwinovo.chiikawa.anim.render.PropRenderer;
+import com.dwinovo.chiikawa.client.anim.render.PropRenderer;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;

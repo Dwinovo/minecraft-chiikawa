@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.client.voice;
 
-import com.dwinovo.chiikawa.anim.render.ChiikawaRenderState;
-import com.dwinovo.chiikawa.anim.render.PetData;
+import com.dwinovo.chiikawa.client.anim.render.ChiikawaRenderState;
+import com.dwinovo.chiikawa.client.anim.render.PetData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.brain.errand.run.PetIcon;
 import com.dwinovo.chiikawa.ui.PixelArt;
