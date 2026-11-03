@@ -2,7 +2,7 @@ package com.dwinovo.chiikawa.anim.render.layer;
 
 import com.dwinovo.chiikawa.anim.baked.BakedBone;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
-import com.dwinovo.chiikawa.anim.render.BedrockRotation;
+import com.dwinovo.chiikawa.anim.pose.BedrockRotation;
 import com.dwinovo.chiikawa.anim.runtime.PoseSampler;
 import com.mojang.blaze3d.vertex.PoseStack;
 import org.joml.Quaternionf;
