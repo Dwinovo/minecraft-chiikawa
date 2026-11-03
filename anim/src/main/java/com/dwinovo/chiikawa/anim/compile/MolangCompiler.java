@@ -1,9 +1,10 @@
 package com.dwinovo.chiikawa.anim.compile;
 
-import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.anim.molang.MolangContext;
 import com.dwinovo.chiikawa.anim.molang.MolangFn;
 import com.dwinovo.chiikawa.anim.molang.MolangNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,10 +26,13 @@ import java.util.List;
  * <h2>Soft failure</h2>
  * Unknown variables / functions / unparseable input log a warning and yield
  * {@code Const(0)} rather than throwing. The animation still plays — the
- * affected channel just stays at zero. This keeps a single bad expression
- * from breaking the entire pipeline.
+ * affected channel just stays at zero. This keeps missing optional variables
+ * harmless and prevents a single bad expression from
+ * breaking the entire pipeline.
  */
 public final class MolangCompiler {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MolangCompiler.class);
 
     private final String src;
     private int pos;
@@ -45,12 +49,12 @@ public final class MolangCompiler {
             MolangNode root = p.parseExpr();
             p.skipWhitespace();
             if (p.pos != p.src.length()) {
-                Constants.LOG.warn("[chiikawa-anim] trailing input in molang '{}' at {}", input, p.pos);
+                LOG.warn("[chiikawa-anim] trailing input in molang '{}' at {}", input, p.pos);
                 return new MolangNode.Const(0);
             }
             return root;
         } catch (RuntimeException ex) {
-            Constants.LOG.warn("[chiikawa-anim] failed to parse molang '{}': {}", input, ex.getMessage());
+            LOG.warn("[chiikawa-anim] failed to parse molang '{}': {}", input, ex.getMessage());
             return new MolangNode.Const(0);
         }
     }
@@ -152,12 +156,12 @@ public final class MolangCompiler {
     private MolangNode makeFnCall(String name, List<MolangNode> args) {
         int fnId = resolveFn(name);
         if (fnId == MolangFn.FN_UNKNOWN) {
-            Constants.LOG.warn("[chiikawa-anim] unknown molang function '{}'; using 0", name);
+            LOG.warn("[chiikawa-anim] unknown molang function '{}'; using 0", name);
             return new MolangNode.Const(0);
         }
         int required = MolangFn.requiredArity(fnId);
         if (args.size() != required) {
-            Constants.LOG.warn("[chiikawa-anim] molang '{}' expects {} arg(s) but got {}; using 0",
+            LOG.warn("[chiikawa-anim] molang '{}' expects {} arg(s) but got {}; using 0",
                     name, required, args.size());
             return new MolangNode.Const(0);
         }
@@ -167,7 +171,7 @@ public final class MolangCompiler {
     private MolangNode makeVarRef(String name) {
         int slot = MolangContext.resolveSlot(name);
         if (slot < 0) {
-            Constants.LOG.warn("[chiikawa-anim] unknown molang variable '{}'; using 0", name);
+            LOG.warn("[chiikawa-anim] unknown molang variable '{}'; using 0", name);
             return new MolangNode.Const(0);
         }
         return new MolangNode.Var(slot);
