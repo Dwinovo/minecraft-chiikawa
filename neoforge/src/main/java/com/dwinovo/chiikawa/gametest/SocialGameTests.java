@@ -12,7 +12,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.wild;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.anim.state.PetActivity;
+import com.dwinovo.chiikawa.entity.anim.PetActivity;
 import com.dwinovo.chiikawa.data.PetInteractionData;
 import com.dwinovo.chiikawa.data.PetTaskTypeData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
