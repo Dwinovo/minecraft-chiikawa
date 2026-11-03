@@ -7,11 +7,13 @@ import java.util.Set;
 
 /**
  * Which icon a pet wears, from what it is and what it found: one pure table, so what shows over its head is a function
- * of facts the rest of the game already has and not another thing to keep in step. The first row that holds wins:
+ * of facts the rest of the game already has and not another thing to keep in step. The icons are messages to the pet's owner,
+ * so a pet with none wears none. The first row that holds wins:
  *
  * <table>
  *   <caption>The icons</caption>
  *   <tr><th>Icon</th><th>When</th></tr>
+ *   <tr><td>{@link PetIcon#NONE}</td><td>it has no owner: it is wild, and has no one to tell</td></tr>
  *   <tr><td>{@link PetIcon#SCARED}</td><td>the step it is at is {@link StepTag#SCARED}</td></tr>
  *   <tr><td>{@link PetIcon#SLEEPY}</td><td>the step it is at is {@link StepTag#SLEEPING}: it is lying down asleep</td></tr>
  *   <tr><td>{@link PetIcon#PRAISE}</td><td>the step it is at is {@link StepTag#ASKING}: it is waiting to be praised</td></tr>
@@ -28,14 +30,15 @@ public final class PetIcons {
     /**
      * What the table asks of the pet besides the step it is at.
      *
+     * @param owned whether it has an owner to tell
      * @param carryingPresent whether it has a present for its owner in its paws
      * @param presentReady whether it has a present in mind that it may set off with, and something to give
      * @param whyNot why it is not at work, if it is not
      * @param phase the part of the day
      */
-    public record Signs(boolean carryingPresent, boolean presentReady, Optional<WhyNot> whyNot, DayPhase phase) {
-        /** A pet with nothing to show, by day. */
-        public static final Signs NONE = new Signs(false, false, Optional.empty(), DayPhase.DAY);
+    public record Signs(boolean owned, boolean carryingPresent, boolean presentReady, Optional<WhyNot> whyNot, DayPhase phase) {
+        /** A pet with an owner and nothing to show, by day. */
+        public static final Signs NONE = new Signs(true, false, false, Optional.empty(), DayPhase.DAY);
     }
 
     /**
@@ -44,6 +47,9 @@ public final class PetIcons {
      * @return the icon it wears
      */
     public static PetIcon of(Set<StepTag> tags, Signs signs) {
+        if (!signs.owned()) {
+            return PetIcon.NONE;
+        }
         if (tags.contains(StepTag.SCARED)) {
             return PetIcon.SCARED;
         }
