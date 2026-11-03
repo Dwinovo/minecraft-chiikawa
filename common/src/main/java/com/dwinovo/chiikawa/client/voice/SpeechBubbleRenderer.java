@@ -29,10 +29,11 @@ public final class SpeechBubbleRenderer {
     private static final float FADE_TICKS = 10.0F;
 
     /**
+     * @param nameShown whether the game draws the pet's name tag, which the bubble hangs over
      * @return what the pet is saying this frame, or {@code null} when there is no bubble to draw
      */
     @Nullable
-    public Saying extract(AbstractPet pet, float partialTick) {
+    public Saying extract(AbstractPet pet, boolean nameShown, float partialTick) {
         if (Minecraft.getInstance().options.hideGui || !ClientSettingsStore.current().speechBubbles()) {
             return null;
         }
@@ -43,14 +44,14 @@ public final class SpeechBubbleRenderer {
             }
             float left = speech.left(pet.tickCount, partialTick);
             return new Saying(Component.translatable(speech.line(),
-                speech.subject().map(Component::translatable).orElse(Component.empty())).getString(), nameTag,
+                speech.subject().map(Component::translatable).orElse(Component.empty())).getString(), nameTag, nameShown,
                 Mth.clamp(left / FADE_TICKS, 0.0F, 1.0F));
         }).orElse(null);
     }
 
     public void render(Saying saying, PoseStack poseStack, MultiBufferSource bufferSource, Font font,
                        Quaternionf cameraOrientation) {
-        OverHead.draw(saying.nameTag(), poseStack, bufferSource, font, cameraOrientation, saying.alpha(), surface -> {
+        OverHead.draw(saying.nameTag(), saying.nameShown(), poseStack, bufferSource, font, cameraOrientation, saying.alpha(), surface -> {
             Bubble bubble = new Bubble(saying.words());
             bubble.draw(surface, -bubble.width(surface) / 2, -bubble.height(surface) - Bubble.TAIL, 0);
         });
@@ -61,8 +62,9 @@ public final class SpeechBubbleRenderer {
      *
      * @param words   what it says, in the player's language
      * @param nameTag where the game draws the pet's name tag, relative to the pet
+     * @param nameShown whether the game draws the name tag there
      * @param alpha   how much of the bubble shows, from 0 as it fades out to 1
      */
-    public record Saying(String words, Vec3 nameTag, float alpha) {
+    public record Saying(String words, Vec3 nameTag, boolean nameShown, float alpha) {
     }
 }
