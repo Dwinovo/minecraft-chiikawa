@@ -1,6 +1,5 @@
 package com.dwinovo.chiikawa.anim.compile;
 
-import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.anim.baked.BakedAnimation;
 import com.dwinovo.chiikawa.anim.baked.BakedBoneChannel;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
@@ -10,6 +9,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -37,6 +38,8 @@ import java.util.Map;
  */
 public final class AnimationBaker {
 
+    private static final Logger LOG = LoggerFactory.getLogger(AnimationBaker.class);
+
     private static final double DEG_TO_RAD = Math.PI / 180.0;
     private static final float DEG_TO_RAD_F = (float) DEG_TO_RAD;
 
@@ -59,10 +62,10 @@ public final class AnimationBaker {
                 out.put(name, baked);
                 totalChannels += baked.channels.length;
             } catch (Exception ex) {
-                Constants.LOG.error("[chiikawa-anim] failed to bake animation {}: {}", name, ex.toString());
+                LOG.error("[chiikawa-anim] failed to bake animation {}: {}", name, ex.toString());
             }
         }
-        Constants.LOG.debug("[chiikawa-anim] baked {} animations, {} live channels (identity channels pruned)",
+        LOG.debug("[chiikawa-anim] baked {} animations, {} live channels (identity channels pruned)",
                 out.size(), totalChannels);
         return out;
     }
