@@ -29,7 +29,11 @@ class ControllerInstanceTest {
     }
 
     private static BakedAnimation loopAnim(String name) {
-        return new BakedAnimation(name, 1f, LoopMode.LOOP, new BakedBoneChannel[0]);
+        return loopAnim(name, 1f);
+    }
+
+    private static BakedAnimation loopAnim(String name, float duration) {
+        return new BakedAnimation(name, duration, LoopMode.LOOP, new BakedBoneChannel[0]);
     }
 
     private static BakedAnimation holdAnim(String name, float duration) {
@@ -59,6 +63,54 @@ class ControllerInstanceTest {
         // Past harvest's 1s duration — handler resumes.
         c.tick(null, null, t0 + 1_500_000_000L);
         assertSame(idle, c.snapshot().current().animation(), "post-trigger: handler resumes");
+    }
+
+    @Test
+    void triggerOfALoopingClipPlaysOnceAndHandlerResumes() {
+        // Regression: a clip the file marks "loop" (jump is also the locomotion
+        // jump state) used to be played non-looping as a trigger but never
+        // reported finished, so it held its last frame over walk/idle for good.
+        BakedAnimation jump = loopAnim("jump", 0.5f);
+        BakedAnimation walk = loopAnim("walk");
+        ControllerConfig config = new ControllerConfig("action", BlendMode.OVERRIDE, 0.15f,
+                (state, ctx) -> null);
+        ControllerInstance c = new ControllerInstance(config);
+
+        long t0 = 1_000_000_000L;
+        c.playOnce(jump, t0);
+        c.tick(null, null, t0 + 400_000_000L);
+        assertSame(jump, c.snapshot().current().animation(), "mid-trigger: jump plays");
+        assertFalse(c.snapshot().current().looping(), "a trigger is sampled once, never wrapped");
+
+        long postEnd = t0 + 600_000_000L;
+        c.tick(null, null, postEnd);
+        assertTrue(c.snapshot().isFadingOut(), "past its duration the trigger ends into the stop-fade");
+
+        c.tick(null, null, postEnd + 200_000_000L);
+        assertTrue(c.snapshot().isIdle(), "post-fade: the looping clip no longer holds the controller");
+
+        // It can be triggered again afterwards.
+        c.playOnce(jump, postEnd + 300_000_000L);
+        c.tick(null, null, postEnd + 300_000_000L);
+        assertSame(jump, c.snapshot().current().animation(), "re-trigger plays again");
+        assertFalse(c.snapshot().isFadingOut());
+    }
+
+    @Test
+    void triggerOfALoopingClipHandsBackToTheHandlerAnimation() {
+        BakedAnimation jump = loopAnim("jump", 0.5f);
+        BakedAnimation idle = loopAnim("idle");
+        ControllerConfig config = new ControllerConfig("main", BlendMode.OVERRIDE, 0f,
+                (state, ctx) -> idle);
+        ControllerInstance c = new ControllerInstance(config);
+
+        long t0 = 1_000_000_000L;
+        c.playOnce(jump, t0);
+        c.tick(null, null, t0);
+        assertSame(jump, c.snapshot().current().animation(), "trigger wins over the handler");
+
+        c.tick(null, null, t0 + 600_000_000L);
+        assertSame(idle, c.snapshot().current().animation(), "after its duration the handler's animation is back");
     }
 
     @Test

@@ -23,8 +23,9 @@ import org.jspecify.annotations.Nullable;
  *       fade completes, {@code currentAnim} is cleared and the controller
  *       goes silent.</li>
  *   <li>{@code triggeredAnim} — a {@link #playOnce} override that wins over
- *       the handler until its baked duration elapses. GeckoLib's
- *       {@code triggeredAnim} mechanism, used by
+ *       the handler until its baked duration elapses, whatever the animation
+ *       file's {@code loop} says (the same clip may be a looping locomotion
+ *       state elsewhere). GeckoLib's {@code triggeredAnim} mechanism, used by
  *       {@link com.dwinovo.chiikawa.entity.AbstractPet}'s synced action /
  *       reaction packets.</li>
  * </ul>
@@ -96,7 +97,9 @@ public final class ControllerInstance {
 
     /**
      * Trigger a one-shot animation that wins over the {@link ControllerHandler}
-     * until its baked duration elapses. {@link LoopMode#HOLD_ON_LAST_FRAME}
+     * until its baked duration elapses. It plays exactly once even if the
+     * animation file loops (a clip shared with a looping handler state, such
+     * as {@code jump}, is still a one-shot here). {@link LoopMode#HOLD_ON_LAST_FRAME}
      * animations stay until the next {@code playOnce} or {@link #clearTrigger}.
      *
      * <p>Re-triggering with a different animation restarts the timer.
@@ -173,14 +176,15 @@ public final class ControllerInstance {
 
         // Triggered animation overrides the handler until it finishes.
         if (triggeredAnim != null) {
-            if (isAnimationFinished(triggeredAnim, triggeredStartNs, nowNs)) {
+            if (isTriggerFinished(triggeredAnim, triggeredStartNs, nowNs)) {
                 // Trigger ended — let it fade out from its last pose.
                 triggeredAnim = null;
                 if (currentAnim != null) {
                     enterStopFade(nowNs);
                 }
             } else {
-                // Still active — switch to triggered without fade-in.
+                // Still active — switch to triggered without fade-in. A trigger
+                // never wraps (see isTriggerFinished), so it is sampled non-looping.
                 switchTo(triggeredAnim, triggeredStartNs, /*looping=*/false, /*allowFade=*/false, nowNs);
                 fadingOut = false;
                 return;
@@ -269,11 +273,16 @@ public final class ControllerInstance {
         return nowNs - fadeStartNs >= (long) (fadeDurationSec * 1_000_000_000L);
     }
 
-    /** Returns {@code true} if {@code anim} has reached the end of its baked duration. */
-    private static boolean isAnimationFinished(BakedAnimation anim, long startNs, long nowNs) {
+    /**
+     * Returns {@code true} if the trigger {@code anim} has reached the end of
+     * its baked duration. A trigger is played once (non-looping) whatever the
+     * file's loop mode, so only {@link LoopMode#HOLD_ON_LAST_FRAME} outlasts
+     * the duration; a {@code LOOP} clip would otherwise clamp on its last frame
+     * for good.
+     */
+    private static boolean isTriggerFinished(BakedAnimation anim, long startNs, long nowNs) {
         if (anim == null) return true;
         if (anim.loopMode == LoopMode.HOLD_ON_LAST_FRAME) return false;
-        if (anim.loopMode == LoopMode.LOOP) return false;
         if (anim.durationSec <= 0f) return true;
         long elapsed = nowNs - startNs;
         if (elapsed < 0L) return false;
