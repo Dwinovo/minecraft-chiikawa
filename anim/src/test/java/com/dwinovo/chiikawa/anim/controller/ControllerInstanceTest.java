@@ -44,24 +44,24 @@ class ControllerInstanceTest {
     void triggerOverridesHandlerUntilFinished() {
         BakedAnimation idle = loopAnim("idle");
         BakedAnimation harvest = playOnceAnim("harvest", 1f);
-        ControllerConfig config = new ControllerConfig("main", BlendMode.OVERRIDE, 0f,
-                (state, ctx) -> idle);
-        ControllerInstance c = new ControllerInstance(config);
+        ControllerConfig<Object> config = new ControllerConfig<>("main", BlendMode.OVERRIDE, 0f,
+                input -> idle);
+        ControllerInstance<Object> c = new ControllerInstance<>(config);
 
         long t0 = 1_000_000_000L;
-        c.tick(null, null, t0);
+        c.tick(null, t0);
         assertSame(idle, c.snapshot().current().animation(), "before trigger: handler chooses idle");
 
         c.playOnce(harvest, t0);
-        c.tick(null, null, t0);
+        c.tick(null, t0);
         assertSame(harvest, c.snapshot().current().animation(), "while triggered: harvest wins");
 
         // 0.5s into harvest — still triggered.
-        c.tick(null, null, t0 + 500_000_000L);
+        c.tick(null, t0 + 500_000_000L);
         assertSame(harvest, c.snapshot().current().animation(), "mid-trigger: still harvest");
 
         // Past harvest's 1s duration — handler resumes.
-        c.tick(null, null, t0 + 1_500_000_000L);
+        c.tick(null, t0 + 1_500_000_000L);
         assertSame(idle, c.snapshot().current().animation(), "post-trigger: handler resumes");
     }
 
@@ -72,26 +72,26 @@ class ControllerInstanceTest {
         // reported finished, so it held its last frame over walk/idle for good.
         BakedAnimation jump = loopAnim("jump", 0.5f);
         BakedAnimation walk = loopAnim("walk");
-        ControllerConfig config = new ControllerConfig("action", BlendMode.OVERRIDE, 0.15f,
-                (state, ctx) -> null);
-        ControllerInstance c = new ControllerInstance(config);
+        ControllerConfig<Object> config = new ControllerConfig<>("action", BlendMode.OVERRIDE, 0.15f,
+                input -> null);
+        ControllerInstance<Object> c = new ControllerInstance<>(config);
 
         long t0 = 1_000_000_000L;
         c.playOnce(jump, t0);
-        c.tick(null, null, t0 + 400_000_000L);
+        c.tick(null, t0 + 400_000_000L);
         assertSame(jump, c.snapshot().current().animation(), "mid-trigger: jump plays");
         assertFalse(c.snapshot().current().looping(), "a trigger is sampled once, never wrapped");
 
         long postEnd = t0 + 600_000_000L;
-        c.tick(null, null, postEnd);
+        c.tick(null, postEnd);
         assertTrue(c.snapshot().isFadingOut(), "past its duration the trigger ends into the stop-fade");
 
-        c.tick(null, null, postEnd + 200_000_000L);
+        c.tick(null, postEnd + 200_000_000L);
         assertTrue(c.snapshot().isIdle(), "post-fade: the looping clip no longer holds the controller");
 
         // It can be triggered again afterwards.
         c.playOnce(jump, postEnd + 300_000_000L);
-        c.tick(null, null, postEnd + 300_000_000L);
+        c.tick(null, postEnd + 300_000_000L);
         assertSame(jump, c.snapshot().current().animation(), "re-trigger plays again");
         assertFalse(c.snapshot().isFadingOut());
     }
@@ -100,29 +100,29 @@ class ControllerInstanceTest {
     void triggerOfALoopingClipHandsBackToTheHandlerAnimation() {
         BakedAnimation jump = loopAnim("jump", 0.5f);
         BakedAnimation idle = loopAnim("idle");
-        ControllerConfig config = new ControllerConfig("main", BlendMode.OVERRIDE, 0f,
-                (state, ctx) -> idle);
-        ControllerInstance c = new ControllerInstance(config);
+        ControllerConfig<Object> config = new ControllerConfig<>("main", BlendMode.OVERRIDE, 0f,
+                input -> idle);
+        ControllerInstance<Object> c = new ControllerInstance<>(config);
 
         long t0 = 1_000_000_000L;
         c.playOnce(jump, t0);
-        c.tick(null, null, t0);
+        c.tick(null, t0);
         assertSame(jump, c.snapshot().current().animation(), "trigger wins over the handler");
 
-        c.tick(null, null, t0 + 600_000_000L);
+        c.tick(null, t0 + 600_000_000L);
         assertSame(idle, c.snapshot().current().animation(), "after its duration the handler's animation is back");
     }
 
     @Test
     void holdOnLastFrameDoesNotAutoFinish() {
         BakedAnimation hold = holdAnim("freeze", 1f);
-        ControllerConfig config = new ControllerConfig("react", BlendMode.OVERRIDE, 0f,
+        ControllerConfig<Object> config = new ControllerConfig<>("react", BlendMode.OVERRIDE, 0f,
                 ControllerHandler::neverPlay);
-        ControllerInstance c = new ControllerInstance(config);
+        ControllerInstance<Object> c = new ControllerInstance<>(config);
 
         long t0 = 1_000_000_000L;
         c.playOnce(hold, t0);
-        c.tick(null, null, t0 + 5_000_000_000L); // way past duration
+        c.tick(null, t0 + 5_000_000_000L); // way past duration
         assertSame(hold, c.snapshot().current().animation(),
                 "HOLD_ON_LAST_FRAME ignores the duration timeout");
     }
@@ -131,26 +131,26 @@ class ControllerInstanceTest {
     void clearTriggerReturnsControlToHandler() {
         BakedAnimation idle = loopAnim("idle");
         BakedAnimation hold = holdAnim("scratch", 0.5f);
-        ControllerConfig config = new ControllerConfig("main", BlendMode.OVERRIDE, 0f,
-                (state, ctx) -> idle);
-        ControllerInstance c = new ControllerInstance(config);
+        ControllerConfig<Object> config = new ControllerConfig<>("main", BlendMode.OVERRIDE, 0f,
+                input -> idle);
+        ControllerInstance<Object> c = new ControllerInstance<>(config);
 
         c.playOnce(hold, 0L);
-        c.tick(null, null, 0L);
+        c.tick(null, 0L);
         assertSame(hold, c.snapshot().current().animation());
 
         c.clearTrigger();
-        c.tick(null, null, 1_000_000_000L);
+        c.tick(null, 1_000_000_000L);
         assertSame(idle, c.snapshot().current().animation(), "after clearTrigger: handler resumes");
     }
 
     @Test
     void handlerReturningNullProducesIdleSnapshot() {
-        ControllerConfig config = new ControllerConfig("decoration", BlendMode.OVERRIDE, 0f,
+        ControllerConfig<Object> config = new ControllerConfig<>("decoration", BlendMode.OVERRIDE, 0f,
                 ControllerHandler::neverPlay);
-        ControllerInstance c = new ControllerInstance(config);
+        ControllerInstance<Object> c = new ControllerInstance<>(config);
 
-        c.tick(null, null, 0L);
+        c.tick(null, 0L);
         assertTrue(c.snapshot().isIdle(), "no animation chosen → idle snapshot");
         assertNull(c.snapshot().current(), "current channel must be null when idle");
     }
@@ -164,22 +164,22 @@ class ControllerInstanceTest {
         BakedAnimation idle = loopAnim("idle");
         BakedAnimation sit  = loopAnim("sit");
         boolean[] selectSit = {false};
-        ControllerConfig config = new ControllerConfig("main", BlendMode.OVERRIDE, 0.16f,
-                (state, ctx) -> selectSit[0] ? sit : idle);
-        ControllerInstance c = new ControllerInstance(config);
+        ControllerConfig<Object> config = new ControllerConfig<>("main", BlendMode.OVERRIDE, 0.16f,
+                input -> selectSit[0] ? sit : idle);
+        ControllerInstance<Object> c = new ControllerInstance<>(config);
 
         // Latch a phase seed several seconds in the past, like a real entity would.
         long phaseSeed = 1_000_000_000L;
         c.setPhaseSeed(phaseSeed);
 
         long t0 = phaseSeed + 5_000_000_000L; // 5s "later"
-        c.tick(null, null, t0);
+        c.tick(null, t0);
         assertSame(idle, c.snapshot().current().animation());
         assertNull(c.snapshot().previous(), "no previous before switch");
 
         // Trigger the switch to sit.
         selectSit[0] = true;
-        c.tick(null, null, t0);
+        c.tick(null, t0);
         ControllerSnapshot s = c.snapshot();
         assertSame(sit,  s.current().animation(),  "current is now sit");
         assertSame(idle, s.previous().animation(), "previous is idle (fading out)");
@@ -192,18 +192,18 @@ class ControllerInstanceTest {
     void handlerReturningNullEntersStopFadeWhenTransitionConfigured() {
         BakedAnimation harvest = playOnceAnim("harvest", 1f);
         // Action-style controller: handler never plays, fades out over 0.15s.
-        ControllerConfig config = new ControllerConfig("action", BlendMode.OVERRIDE, 0.15f,
+        ControllerConfig<Object> config = new ControllerConfig<>("action", BlendMode.OVERRIDE, 0.15f,
                 ControllerHandler::neverPlay);
-        ControllerInstance c = new ControllerInstance(config);
+        ControllerInstance<Object> c = new ControllerInstance<>(config);
 
         long t0 = 1_000_000_000L;
         c.playOnce(harvest, t0);
-        c.tick(null, null, t0);
+        c.tick(null, t0);
         assertSame(harvest, c.snapshot().current().animation(), "trigger active");
 
         // Trigger ends: the controller should enter stop-fade, not snap to idle.
         long postEnd = t0 + 1_500_000_000L;
-        c.tick(null, null, postEnd);
+        c.tick(null, postEnd);
         ControllerSnapshot s = c.snapshot();
         assertTrue(s.isFadingOut(), "after trigger ends, controller is fading out");
         assertSame(harvest, s.current().animation(),
@@ -211,7 +211,7 @@ class ControllerInstanceTest {
         assertEquals(0.15f, s.fadeDurationSec(), 1e-6f);
 
         // After fade duration elapses, controller goes truly silent.
-        c.tick(null, null, postEnd + 200_000_000L);
+        c.tick(null, postEnd + 200_000_000L);
         assertTrue(c.snapshot().isIdle(), "post-fade: controller is silent");
         assertFalse(c.snapshot().isFadingOut());
     }
@@ -220,13 +220,13 @@ class ControllerInstanceTest {
     void handlerReturningNullSnapsWhenNoTransitionConfigured() {
         // transitionSec=0 means stop is a clean cut, no fade-out state.
         BakedAnimation harvest = playOnceAnim("harvest", 1f);
-        ControllerConfig config = new ControllerConfig("instant", BlendMode.OVERRIDE, 0f,
+        ControllerConfig<Object> config = new ControllerConfig<>("instant", BlendMode.OVERRIDE, 0f,
                 ControllerHandler::neverPlay);
-        ControllerInstance c = new ControllerInstance(config);
+        ControllerInstance<Object> c = new ControllerInstance<>(config);
 
         c.playOnce(harvest, 0L);
-        c.tick(null, null, 0L);
-        c.tick(null, null, 2_000_000_000L); // past harvest duration
+        c.tick(null, 0L);
+        c.tick(null, 2_000_000_000L); // past harvest duration
         assertTrue(c.snapshot().isIdle(), "no transition = clean cut to idle");
         assertFalse(c.snapshot().isFadingOut());
     }
@@ -236,19 +236,19 @@ class ControllerInstanceTest {
         BakedAnimation idle = loopAnim("idle");
         BakedAnimation harvest = playOnceAnim("harvest", 1f);
         boolean[] handlerActive = {false};
-        ControllerConfig config = new ControllerConfig("hybrid", BlendMode.OVERRIDE, 0.15f,
-                (state, ctx) -> handlerActive[0] ? idle : null);
-        ControllerInstance c = new ControllerInstance(config);
+        ControllerConfig<Object> config = new ControllerConfig<>("hybrid", BlendMode.OVERRIDE, 0.15f,
+                input -> handlerActive[0] ? idle : null);
+        ControllerInstance<Object> c = new ControllerInstance<>(config);
 
         long t0 = 1_000_000_000L;
         c.playOnce(harvest, t0);
-        c.tick(null, null, t0);
-        c.tick(null, null, t0 + 1_500_000_000L); // trigger ends → stop-fade
+        c.tick(null, t0);
+        c.tick(null, t0 + 1_500_000_000L); // trigger ends → stop-fade
         assertTrue(c.snapshot().isFadingOut());
 
         // Mid stop-fade, the handler decides to play idle. Stop-fade must cancel.
         handlerActive[0] = true;
-        c.tick(null, null, t0 + 1_550_000_000L);
+        c.tick(null, t0 + 1_550_000_000L);
         assertFalse(c.snapshot().isFadingOut(), "handler producing animation cancels stop-fade");
         assertSame(idle, c.snapshot().current().animation());
     }

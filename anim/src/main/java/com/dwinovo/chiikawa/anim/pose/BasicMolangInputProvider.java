@@ -1,4 +1,4 @@
-package com.dwinovo.chiikawa.anim.render;
+package com.dwinovo.chiikawa.anim.pose;
 
 import com.dwinovo.chiikawa.anim.molang.MolangContext;
 
@@ -7,7 +7,7 @@ import com.dwinovo.chiikawa.anim.molang.MolangContext;
  * baseline pet animation depends on:
  *
  * <ul>
- *   <li>{@code query.ground_speed} ← {@link ChiikawaRenderState#walkSpeed}</li>
+ *   <li>{@code query.ground_speed} ← {@link PoseFrame#walkSpeed}</li>
  * </ul>
  *
  * <p>{@code query.anim_time} is intentionally not set here — that slot is
@@ -17,7 +17,7 @@ import com.dwinovo.chiikawa.anim.molang.MolangContext;
 public final class BasicMolangInputProvider implements BoneInputProvider {
 
     @Override
-    public void fill(ChiikawaRenderState state, MolangContext ctx) {
-        ctx.vars[MolangContext.SLOT_GROUND_SPEED] = state.walkSpeed;
+    public void fill(PoseFrame frame, MolangContext ctx) {
+        ctx.vars[MolangContext.SLOT_GROUND_SPEED] = frame.walkSpeed;
     }
 }

@@ -1,4 +1,4 @@
-package com.dwinovo.chiikawa.anim.render;
+package com.dwinovo.chiikawa.anim.pose;
 
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
 import com.dwinovo.chiikawa.anim.molang.MolangContext;
@@ -6,12 +6,12 @@ import com.dwinovo.chiikawa.anim.molang.MolangContext;
 /**
  * Programmatic post-processing pass that runs <em>after</em>
  * {@link com.dwinovo.chiikawa.anim.runtime.PoseSampler} and <em>before</em>
- * {@link ModelRenderer}, mutating the pose buffer in place.
+ * the model is drawn, mutating the pose buffer in place.
  *
- * <p>This hook is where the renderer overrides specific bones with values
+ * <p>This hook is where the engine overrides specific bones with values
  * derived from live entity state (head look-at, ear sway, tail wag, future
  * spring-bone secondary motion) rather than from the animation file. Working
- * on the flat {@code float[]} pose buffer instead of the {@code PoseStack}
+ * on the flat {@code float[]} pose buffer instead of a matrix stack
  * avoids redundant matrix push/pop pairs and keeps the data layout
  * JNI-friendly for a future Rust port.
  *
@@ -43,5 +43,5 @@ public interface BoneInterceptor {
         public static final Stage[] VALUES = values();
     }
 
-    void apply(BakedModel model, ChiikawaRenderState state, MolangContext ctx, float[] poseBuf);
+    void apply(BakedModel model, PoseFrame frame, MolangContext ctx, float[] poseBuf);
 }

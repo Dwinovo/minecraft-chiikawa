@@ -1,29 +1,28 @@
 package com.dwinovo.chiikawa.anim.controller;
 
 import com.dwinovo.chiikawa.anim.runtime.AnimationChannel;
-import org.jspecify.annotations.Nullable;
 
 /**
- * Immutable per-frame snapshot of a {@link ControllerInstance}, captured at
- * extract time and consumed by the renderer at submit time.
+ * Immutable per-frame snapshot of a {@link ControllerInstance}, captured when
+ * the frame's state is and consumed when the pose is sampled at draw time.
  *
- * <p>Putting a snapshot rather than the live instance into the render-state
- * preserves the contract that submit is a pure function of render-state +
- * baked data — a second extract in the same frame
- * ({@code InventoryScreen.renderEntityInInventoryFollowsMouse}) snapshots
- * fresh values without disturbing what the world-render submit had captured.
+ * <p>Putting a snapshot rather than the live instance into the frame's state
+ * preserves the contract that drawing is a pure function of that state +
+ * baked data — a second capture in the same frame (a preview of the same
+ * entity drawn beside the world) snapshots fresh values without disturbing
+ * what the first had captured.
  *
  * <h2>Three sample paths</h2>
  * <ol>
  *   <li>Idle — {@link #current} is {@code null}; the controller contributes
  *       nothing this frame.</li>
  *   <li>Crossfade — {@link #previous} and {@link #current} both non-null.
- *       Within-controller switch (e.g. main: idle → sit). Renderer samples
+ *       Within-controller switch (e.g. main: idle → sit). The pose composer samples
  *       both, lerps via {@code fadeStartNs / fadeDurationSec}.</li>
  *   <li>Stop-fade — {@link #fadingOut} is {@code true}, {@link #previous} is
  *       {@code null}. The controller is in the process of going silent
  *       (handler returned {@code null} or a triggered animation finished).
- *       Renderer samples {@link #current} but lerps the contribution toward
+ *       The pose composer samples {@link #current} but lerps the contribution toward
  *       whatever earlier controllers wrote into the pose buffer.</li>
  * </ol>
  *
@@ -31,7 +30,7 @@ import org.jspecify.annotations.Nullable;
  * {@link ControllerInstance#enterStopFade} drops any pending crossfade.
  *
  * @param name             identity of the source controller (debug only)
- * @param blendMode        how the renderer should combine this controller's
+ * @param blendMode        how the pose composer should combine this controller's
  *                         contribution with the existing pose buffer values
  * @param current          channel that is currently authoritative for this
  *                         controller, or {@code null} when the controller is
@@ -46,8 +45,8 @@ import org.jspecify.annotations.Nullable;
 public record ControllerSnapshot(
         String name,
         BlendMode blendMode,
-        @Nullable AnimationChannel current,
-        @Nullable AnimationChannel previous,
+        AnimationChannel current,
+        AnimationChannel previous,
         long fadeStartNs,
         float fadeDurationSec,
         boolean fadingOut
