@@ -22,7 +22,7 @@ public class ShisaRenderer extends ChiikawaEntityRenderer<ShisaPet> {
         super(ctx, "shisa");
         addBoneVisibilityRule("Mouth3", state -> isTalking(state));
         addBoneVisibilityRule("tail", state -> BagLayer.wearOf(state) != BagItem.Wear.ON_BACK);
-        addBoneVisibilityRule("HappyEyes", ShownDuring.any("happy", "yawn", "revive"));
+        addBoneVisibilityRule("HappyEyes", ShownDuring.any("happy", "yawn", "sleep", "revive"));
         addBoneVisibilityRule("Tears", ShownDuring.any("revive"));
         addBoneVisibilityRule("Sweat", ShownDuring.any("hurt", "confused"));
     }
