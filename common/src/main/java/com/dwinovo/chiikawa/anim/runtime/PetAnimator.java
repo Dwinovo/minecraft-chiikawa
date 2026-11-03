@@ -32,7 +32,8 @@ import java.util.List;
  * {@link #playOnce} dispatches an externally-driven one-shot animation to the
  * named controller (typically {@code "action"} or {@code "reaction"}). The
  * triggered animation overrides the controller's state handler until its
- * baked duration elapses, then the handler resumes. Mirrors GeckoLib's
+ * baked duration elapses (once, even if the animation file loops), then the
+ * handler resumes. Mirrors GeckoLib's
  * {@code triggerAnimation}.
  */
 public final class PetAnimator {
@@ -117,7 +118,8 @@ public final class PetAnimator {
     /**
      * Trigger a one-shot animation on the named controller. The trigger
      * overrides the controller's state handler until {@code animation}'s
-     * baked duration elapses (or, for {@code HOLD_ON_LAST_FRAME}, until the
+     * baked duration elapses, playing once even if the animation file loops
+     * (or, for {@code HOLD_ON_LAST_FRAME}, until the
      * trigger is replaced or cleared).
      *
      * <p>Used by {@link com.dwinovo.chiikawa.entity.AbstractPet}'s synced
