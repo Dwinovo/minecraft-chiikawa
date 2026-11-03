@@ -3,7 +3,6 @@ package com.dwinovo.chiikawa.data;
 import java.util.concurrent.CompletableFuture;
 
 import com.dwinovo.chiikawa.Constants;
-import com.dwinovo.chiikawa.data.TagData;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;

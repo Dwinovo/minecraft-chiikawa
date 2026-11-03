@@ -1,7 +1,7 @@
 package com.dwinovo.chiikawa.manual;
 
-import com.dwinovo.chiikawa.anim.state.PetAction;
-import com.dwinovo.chiikawa.anim.state.PetReaction;
+import com.dwinovo.chiikawa.entity.anim.PetAction;
+import com.dwinovo.chiikawa.entity.anim.PetReaction;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
