@@ -19,7 +19,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 public class ChiikawaRenderer extends ChiikawaEntityRenderer<ChiikawaPet> {
     public ChiikawaRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, "chiikawa");
-        addBoneVisibilityRule("Mouth3", (state, animCtx) -> isTalking(state));
+        addBoneVisibilityRule("Mouth3", state -> isTalking(state));
         addBoneVisibilityRule("HappyEyes", ShownDuring.any("happy", "revive"));
         addBoneVisibilityRule("CryEyes", ShownDuring.any("hurt", "yawn", "cry"));
         addBoneVisibilityRule("Tears", ShownDuring.any("hurt", "cry", "revive"));
