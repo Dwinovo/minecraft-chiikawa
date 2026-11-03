@@ -267,7 +267,12 @@ public final class PetMind {
 
     /** @return whether the pet is lying asleep, in which it makes no remarks */
     private boolean asleep() {
-        return executor.running().filter(running -> running.tags().contains(StepTag.SLEEPING)).isPresent();
+        return atStepTagged(StepTag.SLEEPING);
+    }
+
+    /** @return whether the step the pet is at makes this of it */
+    private boolean atStepTagged(StepTag tag) {
+        return executor.running().filter(running -> running.tags().contains(tag)).isPresent();
     }
 
     private boolean endedDoneIn(long now) {
