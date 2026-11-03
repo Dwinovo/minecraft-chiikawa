@@ -16,8 +16,8 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 public class FuruhonyaRenderer extends ChiikawaEntityRenderer<FuruhonyaPet> {
     public FuruhonyaRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, "furuhonya");
-        addBoneVisibilityRule("Mouth3", (state, animCtx) -> isTalking(state));
-        addBoneVisibilityRule("Mouth2", (state, animCtx) -> isTalking(state));
+        addBoneVisibilityRule("Mouth3", state -> isTalking(state));
+        addBoneVisibilityRule("Mouth2", state -> isTalking(state));
         addBoneVisibilityRule("Tear", ShownDuring.any("hurt"));
     }
 }

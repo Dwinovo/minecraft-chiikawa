@@ -1,20 +1,20 @@
 package com.dwinovo.chiikawa.anim.api;
 
-import com.dwinovo.chiikawa.anim.runtime.PetAnimator;
+import com.dwinovo.chiikawa.anim.runtime.Animator;
 import com.dwinovo.chiikawa.anim.state.PetAnimContext;
 
 /**
  * Marker interface for entities driven by the chiikawa animation pipeline.
  * Implementing this lets the entity renderer find the per-entity
- * {@link PetAnimator} and pull a {@link PetAnimContext} for the state-driven
+ * {@link Animator} and pull a {@link PetAnimContext} for the state-driven
  * controllers.
  *
  * <p>All pet entities implement this through {@code AbstractPet}.
  */
 public interface ChiikawaAnimated {
 
-    /** Per-entity animator. Holds one {@code ControllerInstance} per registered controller. */
-    PetAnimator getPetAnimator();
+    /** Per-entity animator. Holds one {@code ControllerInstance} per controller of the renderer's roster. */
+    Animator<PetAnimContext> getPetAnimator();
 
     /**
      * Snapshot of gameplay state, consumed by every controller's state

@@ -1,6 +1,5 @@
-package com.dwinovo.chiikawa.anim.render;
+package com.dwinovo.chiikawa.anim.pose;
 
-import com.dwinovo.chiikawa.anim.pose.BedrockRotation;
 import com.dwinovo.chiikawa.anim.baked.BakedBone;
 import com.dwinovo.chiikawa.anim.baked.BakedModel;
 import com.dwinovo.chiikawa.anim.molang.MolangContext;
@@ -9,13 +8,12 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /**
- * {@link BoneInterceptor.Stage#LOOK_AT} interceptor that points {@code AllHead}
+ * {@link BoneInterceptor.Stage#LOOK_AT} interceptor that points the head bone
  * along the entity's view direction.
  *
- * <p>Reads {@link ChiikawaRenderState#netHeadYaw} and {@link ChiikawaRenderState#headPitch}
- * — both captured at extract time — rather than the live {@code yRot} /
- * {@code bodyRot} fields, which {@code InventoryScreen} overwrites with
- * mouse-derived values during inventory previews.
+ * <p>Reads {@link PoseFrame#netHeadYaw} and {@link PoseFrame#headPitch}
+ * — both captured with the frame — rather than the live rotations of the
+ * entity, which a preview screen may overwrite with values of its own.
  *
  * <p>The look is taken in the pet's own frame, not the head's parent's: the pets have no
  * neck, so the head hangs straight off a body that animations lean (sitting tips the upper
@@ -28,15 +26,21 @@ public final class HeadLookInterceptor implements BoneInterceptor {
 
     private static final float DEG_TO_RAD = (float) (Math.PI / 180.0);
 
+    private final String headBone;
     private final Quaternionf parent = new Quaternionf();
     private final Quaternionf turn = new Quaternionf();
     private final Quaternionf look = new Quaternionf();
     private final Quaternionf local = new Quaternionf();
     private final Vector3f euler = new Vector3f();
 
+    /** @param headBone the name of the bone that is the head, in the models this is applied to */
+    public HeadLookInterceptor(String headBone) {
+        this.headBone = headBone;
+    }
+
     @Override
-    public void apply(BakedModel model, ChiikawaRenderState state, MolangContext ctx, float[] poseBuf) {
-        Integer headIdx = model.boneIndex.get("AllHead");
+    public void apply(BakedModel model, PoseFrame frame, MolangContext ctx, float[] poseBuf) {
+        Integer headIdx = model.boneIndex.get(headBone);
         if (headIdx == null) return;
         int base = headIdx * PoseSampler.FLOATS_PER_BONE;
 
@@ -50,7 +54,7 @@ public final class HeadLookInterceptor implements BoneInterceptor {
             parent.premul(turn);
         }
 
-        BedrockRotation.of(look, -state.headPitch * DEG_TO_RAD, -state.netHeadYaw * DEG_TO_RAD, 0f);
+        BedrockRotation.of(look, -frame.headPitch * DEG_TO_RAD, -frame.netHeadYaw * DEG_TO_RAD, 0f);
         BedrockRotation.of(turn, poseBuf[base], poseBuf[base + 1], poseBuf[base + 2]);
         // P⁻¹ · look · P · (the head's own animated turn)
         local.set(parent).conjugate().mul(look).mul(parent).mul(turn);
