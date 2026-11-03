@@ -96,7 +96,7 @@ class ExecutorTest {
 
     @Test
     void aPetOnNoErrandHasItsIconWorkedOutAsWellAtEveryTick() {
-        signs = new PetIcons.Signs(true, false, Optional.empty(), DayPhase.DAY);
+        signs = new PetIcons.Signs(true, true, false, Optional.empty(), DayPhase.DAY);
         executor.tick(1);
         assertEquals(PetIcon.GIFT, projection.icon, "a present is shown by a pet that is on no errand");
 
