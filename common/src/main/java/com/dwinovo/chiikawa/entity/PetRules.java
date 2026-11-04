@@ -1,11 +1,13 @@
 package com.dwinovo.chiikawa.entity;
 
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
+import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * What the owner has told a pet it may do, from its screen: whether it picks up what lies on the ground, and how far it takes
@@ -36,6 +38,21 @@ public record PetRules(boolean pickUp, CombatStance stance) {
     /** @return whether no rule forbids errands of this category; most categories have none */
     public boolean permits(ErrandCategory category) {
         return pickUp || category != ErrandCategory.PICK_UP;
+    }
+
+    /**
+     * Whether the owner's rules permit the work a slip counts, which a slip never overrides: what the owner has switched
+     * off stays off however good the pay. The one place a work counter is tied to a rule, so a slip that needs one asks it
+     * here: putting monsters down needs the stance {@link CombatStance#CLEAR}, the one that lets a pet go after them.
+     *
+     * @param counter the work counter of a slip, see {@link PetWorkCounters}
+     * @return whether a pet under these rules may take a slip that counts it
+     */
+    public boolean permitsWork(ResourceLocation counter) {
+        if (PetWorkCounters.SLAY.equals(counter)) {
+            return stance == CombatStance.CLEAR;
+        }
+        return true;
     }
 
     /** @return these rules with picking up on or off */
