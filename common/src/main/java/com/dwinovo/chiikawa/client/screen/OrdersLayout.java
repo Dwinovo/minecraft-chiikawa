@@ -9,7 +9,7 @@ import com.dwinovo.chiikawa.ui.UiStyle;
 public final class OrdersLayout {
     /** The pet screen is as wide on every page. */
     public static final int PANEL_WIDTH = 192;
-    /** An order's card and the weapon swap's: the panel's width inside its padding. */
+    /** An order's card and the picking up card's: the panel's width inside its padding. */
     public static final int CARD_W = PANEL_WIDTH - 2 * UiStyle.PAD;
     /** What a tick on the right of a card takes from the words. */
     private static final int TICK_W = 22;
@@ -24,7 +24,7 @@ public final class OrdersLayout {
     /** How wide a stance's name may be, centred in its card. */
     public static final int STANCE_TEXT_W = STANCE_W - 2 * UiStyle.GAP;
 
-    /** How wide the weapon swap's name may be, from the card's left padding to its tick. */
+    /** How wide the picking up card's name may be, from the card's left padding to its tick. */
     public static final int SWAP_TEXT_W = CARD_W - UiStyle.PAD - TICK_W;
 
     private OrdersLayout() {
