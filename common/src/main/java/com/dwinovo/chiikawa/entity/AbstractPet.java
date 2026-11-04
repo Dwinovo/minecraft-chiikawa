@@ -280,6 +280,8 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
             AbstractPet.this.refreshJobFromMainhand();
         }
     };
+    /** Where what the pet is given or finds goes; never the hand or the bag's slot, see {@link PetPockets}. */
+    private final PetPockets pockets = new PetPockets(backpack, this::isWearingBag);
 
     protected AbstractPet(EntityType<? extends TamableAnimal> entityType, Level level) {
         super(entityType, level);
@@ -292,6 +294,14 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
 
     public SimpleContainer getBackpack() {
         return backpack;
+    }
+
+    /**
+     * @return where to put away what the pet is given or finds: its own pockets, and the bag's while it wears one, and
+     *         never the hand or the bag's slot; the backpack's own {@code addItem} fills those too
+     */
+    public PetPockets pockets() {
+        return pockets;
     }
 
     /**
@@ -348,7 +358,7 @@ public class AbstractPet extends TamableAnimal implements RangedAttackMob, Chiik
      */
     public void dropResourcesToPetInv(BlockState state, ServerLevel level, BlockPos pos, BlockEntity blockEntity, ItemStack tool) {
         for (ItemStack drop : Block.getDrops(state, level, pos, blockEntity, this, tool)) {
-            ItemStack remainder = backpack.addItem(drop);
+            ItemStack remainder = pockets.stow(drop);
             if (!remainder.isEmpty()) {
                 Block.popResource(level, pos, remainder);
             }

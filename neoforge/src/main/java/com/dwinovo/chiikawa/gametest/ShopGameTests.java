@@ -58,7 +58,7 @@ public final class ShopGameTests {
     public static void a_pet_with_wages_buys_itself_something(GameTestHelper helper) {
         helper.setBlock(new BlockPos(9, STAND, 4), InitBlocks.SHOP.get());
         AbstractPet pet = holding(worker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
-        pet.getBackpack().addItem(new ItemStack(Items.EMERALD, WAGES));
+        pet.pockets().stow(new ItemStack(Items.EMERALD, WAGES));
 
         helper.succeedWhen(() -> {
             helper.assertTrue(Wallet.count(pet.getBackpack()) < WAGES, Component.literal("the pet never spent a thing"));
@@ -173,7 +173,7 @@ public final class ShopGameTests {
     public static void a_free_pet_does_not_go_to_a_shop_outside_its_area(GameTestHelper helper) {
         helper.setBlock(new BlockPos(22, STAND, 3), InitBlocks.SHOP.get());
         AbstractPet pet = holding(worker(helper, new BlockPos(3, STAND, 3)), Items.WOODEN_HOE);
-        pet.getBackpack().addItem(new ItemStack(Items.EMERALD, WAGES));
+        pet.pockets().stow(new ItemStack(Items.EMERALD, WAGES));
 
         helper.onEachTick(() -> helper.assertFalse(pet.getIntent().filter(ErrandIds.SHOP::equals).isPresent(),
             Component.literal("the pet set off for a shop outside its area")));
@@ -191,7 +191,7 @@ public final class ShopGameTests {
     public static void a_wild_pet_does_not_go_shopping(GameTestHelper helper) {
         helper.setBlock(new BlockPos(9, STAND, 4), InitBlocks.SHOP.get());
         AbstractPet pet = holding(wildWorker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
-        pet.getBackpack().addItem(new ItemStack(Items.EMERALD, WAGES));
+        pet.pockets().stow(new ItemStack(Items.EMERALD, WAGES));
 
         helper.runAtTickTime(LEAVE_IT_TICKS, () -> {
             helper.assertTrue(Wallet.count(pet.getBackpack()) == WAGES, Component.literal("a wild pet went shopping"));
