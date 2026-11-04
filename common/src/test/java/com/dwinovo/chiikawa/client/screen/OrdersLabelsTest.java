@@ -47,10 +47,10 @@ class OrdersLabelsTest {
     }
 
     @Test
-    void theWeaponSwapsNameFitsItsCard() {
+    void thePickingUpCardsNameFitsItsCard() {
         List<String> tooWide = new ArrayList<>();
         for (String locale : LanguageData.LOCALES) {
-            fits(tooWide, locale, collect(locale), "screen.chiikawa.pet.swap", OrdersLayout.SWAP_TEXT_W);
+            fits(tooWide, locale, collect(locale), "screen.chiikawa.pet.rules.pick_up", OrdersLayout.SWAP_TEXT_W);
         }
         assertEquals(List.of(), tooWide);
     }
