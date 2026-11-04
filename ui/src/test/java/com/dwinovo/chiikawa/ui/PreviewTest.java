@@ -13,7 +13,6 @@ import com.dwinovo.chiikawa.ui.widget.Price;
 import com.dwinovo.chiikawa.ui.widget.Segments;
 import com.dwinovo.chiikawa.ui.widget.Sign;
 import com.dwinovo.chiikawa.ui.widget.Switch;
-import com.dwinovo.chiikawa.ui.widget.TabStrip;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.List;
@@ -84,13 +83,8 @@ class PreviewTest {
         RasterSurface surface = new RasterSurface(240, 200, 0xFF33402F);
         int px = 16;
         int py = 40;
-        TabStrip tabs = new TabStrip(new Rect(px, py, 200, 140), List.of(
-            new TabStrip.Tab((s, x, y) -> s.drawIcon(Icon.NONE, x, y), "Bag"),
-            new TabStrip.Tab((s, x, y) -> PixelArt.GEAR.drawCentered(s, x, y, UiStyle.ICON), "Settings")), surface::textWidth);
 
-        tabs.drawBehind(surface, 0);
         Ui.card(surface, px, py, 200, 140);
-        tabs.drawFront(surface, 0, UiTheme.PANEL);
         Sign.draw(surface, px + 200 - 10 - Sign.width(surface, "Usagi"), py - 9, "Usagi");
         Hearts.draw(surface, px + 200 - 10 - Hearts.width(20), py + 12, 15, 20);
 
@@ -118,15 +112,9 @@ class PreviewTest {
     void drawsThePetScreenWidgetsForALook() throws Exception {
         RasterSurface surface = new RasterSurface(320, 240, 0xFF33402F);
         Rect panel = new Rect(10, 50, 300, 166);
-        List<TabStrip.Tab> tabs = List.of(
-            new TabStrip.Tab((s, x, y) -> s.drawIcon(Icon.NONE, x, y), "Backpack"),
-            new TabStrip.Tab((s, x, y) -> PixelArt.GEAR.drawCentered(s, x, y, UiStyle.ICON), "Settings"));
-        TabStrip strip = new TabStrip(panel, tabs, surface::textWidth);
 
-        strip.drawBehind(surface, 0);
         Ui.card(surface, panel.x(), panel.y(), panel.width(), panel.height());
         Banner.draw(surface, panel.x() + 2, panel.y() + 2, panel.width() - 4, 68, UiTheme.ACCENT_PALE);
-        strip.drawFront(surface, 0, UiTheme.ACCENT_PALE);
 
         int x = panel.x() + 94;
         int y = panel.y();
@@ -147,8 +135,6 @@ class PreviewTest {
         }
         Ui.divider(surface, card.x() - 4, card.y() + 41, 128);
         PixelArt.BAG.drawCentered(surface, card.x() + 4, card.y() + 53, UiStyle.SLOT);
-        Switch.draw(surface, panel.x() + 250, y + 100, true, false);
-        Switch.draw(surface, panel.x() + 250, y + 120, false, false);
 
         File out = new File("build/ui-preview-pet.png");
         out.getParentFile().mkdirs();

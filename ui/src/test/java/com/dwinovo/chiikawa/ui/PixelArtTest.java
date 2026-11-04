@@ -7,7 +7,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class PixelArtTest {
-    private static final List<PixelArt> SHIPPED = List.of(PixelArt.GIFT, PixelArt.PICK_UP, PixelArt.GEAR, PixelArt.BAG);
+    private static final List<PixelArt> SHIPPED = List.of(PixelArt.GIFT, PixelArt.PICK_UP, PixelArt.BAG);
 
     @Test
     void everyIconFitsWhereAnItemWould() {
@@ -26,12 +26,6 @@ class PixelArtTest {
                 }
             }
         }
-    }
-
-    @Test
-    void theGearIsTheSizeOfTheTabItIsDrawnOn() {
-        assertEquals(14, PixelArt.GEAR.width());
-        assertEquals(14, PixelArt.GEAR.height());
     }
 
     @Test
