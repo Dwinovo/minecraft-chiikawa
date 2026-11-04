@@ -689,7 +689,7 @@ final class ErrandScenarios {
     private static Scenario shop(GameTestHelper helper) {
         helper.setBlock(new BlockPos(13, STAND, 4), InitBlocks.SHOP.get());
         AbstractPet pet = GameTestKit.worker(helper, new BlockPos(3, STAND, 4));
-        pet.getBackpack().addItem(new ItemStack(Items.EMERALD, WAGES));
+        pet.pockets().stow(new ItemStack(Items.EMERALD, WAGES));
         return new Scenario(pet, 2, ran -> {
             boolean paid = Wallet.count(pet.getBackpack()) < WAGES;
             boolean goods = false;
@@ -789,8 +789,8 @@ final class ErrandScenarios {
         AbstractPet pet = GameTestKit.pet(helper, InitEntity.HACHIWARE_PET.get(), new BlockPos(4, STAND, 4), false);
         pet.tame(owner);
         pet.setPetDirective(PetDirective.FREE);
-        pet.getBackpack().addItem(new ItemStack(InitItems.CAMERA.get()));
-        pet.getBackpack().addItem(new ItemStack(InitItems.FILM.get(), FILM));
+        pet.pockets().stow(new ItemStack(InitItems.CAMERA.get()));
+        pet.pockets().stow(new ItemStack(InitItems.FILM.get(), FILM));
         pet.getBrain().setMemory(InitMemory.PHOTOGRAPHED_BIOMES.get(), PhotoScout.biomeOf(pet).map(List::of).orElseThrow());
         AbstractPet friend = GameTestKit.pet(helper, InitEntity.CHIIKAWA_PET.get(), new BlockPos(11, STAND, 4), false);
         friend.setNoAi(true);
@@ -837,7 +837,7 @@ final class ErrandScenarios {
     private static Scenario plant(GameTestHelper helper) {
         helper.setBlock(WORK.below(), moistFarmland());
         AbstractPet pet = GameTestKit.holding(GameTestKit.worker(helper, FARMER), Items.WOODEN_HOE);
-        pet.getBackpack().addItem(new ItemStack(Items.WHEAT_SEEDS, SEEDS));
+        pet.pockets().stow(new ItemStack(Items.WHEAT_SEEDS, SEEDS));
         return new Scenario(pet, 2, ran -> {
             boolean planted = helper.getBlockState(WORK).is(Blocks.WHEAT);
             int used = SEEDS - GameTestKit.count(pet, Items.WHEAT_SEEDS);
@@ -858,7 +858,7 @@ final class ErrandScenarios {
     private static Scenario deliver(GameTestHelper helper) {
         helper.setBlock(WORK, Blocks.CHEST);
         AbstractPet pet = GameTestKit.holding(GameTestKit.worker(helper, FARMER), Items.WOODEN_HOE);
-        pet.getBackpack().addItem(new ItemStack(Items.WHEAT, CROP));
+        pet.pockets().stow(new ItemStack(Items.WHEAT, CROP));
         return new Scenario(pet, 3 + CROP, ran -> {
             ChestBlockEntity chest = helper.getBlockEntity(WORK, ChestBlockEntity.class);
             int stored = 0;
@@ -956,7 +956,7 @@ final class ErrandScenarios {
     private static AbstractPet archer(GameTestHelper helper) {
         settleWorld(helper.getLevel(), Difficulty.NORMAL, GameTestKit.MIDNIGHT);
         AbstractPet pet = GameTestKit.holding(ownedPet(helper, ARCHER), Items.BOW);
-        pet.getBackpack().addItem(new ItemStack(Items.ARROW, ARROWS));
+        pet.pockets().stow(new ItemStack(Items.ARROW, ARROWS));
         return pet;
     }
 
