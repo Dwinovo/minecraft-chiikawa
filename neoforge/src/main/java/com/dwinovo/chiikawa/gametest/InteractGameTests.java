@@ -245,6 +245,30 @@ public final class InteractGameTests {
         }, owner, friend);
     }
 
+    /**
+     * Money handed to a pet with nothing in its hand and no bag goes into its own pockets: its hand stays empty, so its job
+     * does not change, the slot for its bag is left for a bag, and the bag's ten are not there to be filled.
+     */
+    @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
+    public static void money_goes_into_the_pockets_and_not_the_hand_or_the_bag(GameTestHelper helper) {
+        ServerPlayer owner = player(helper);
+        AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
+        pet.tame(owner);
+        owner.setShiftKeyDown(false);
+        int coins = Items.EMERALD.getDefaultMaxStackSize() / 2;
+        owner.setItemInHand(InteractionHand.MAIN_HAND, Wallet.coins(coins));
+
+        pet.mobInteract(owner, InteractionHand.MAIN_HAND);
+
+        helper.assertTrue(Wallet.count(pet.getBackpack()) == coins, "the pet has " + Wallet.count(pet.getBackpack()) + " emeralds");
+        helper.assertTrue(pet.getBackpack().getItem(AbstractPet.MAINHAND_SLOT).isEmpty(), "the money went into the pet's hand");
+        helper.assertTrue(pet.getBackpack().getItem(AbstractPet.BAG_SLOT).isEmpty(), "the money went into the pet's bag slot");
+        for (int slot = AbstractPet.BACKPACK_SIZE; slot < pet.getBackpack().getContainerSize(); slot++) {
+            helper.assertTrue(pet.getBackpack().getItem(slot).isEmpty(), "the money went into a bag the pet is not wearing");
+        }
+        helper.succeed();
+    }
+
     /** What the pet may do is for its owner to say: a stranger's rules are not heard, and a friend's are not either. */
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 100)
     public static void a_stranger_cannot_change_the_rules(GameTestHelper helper) {
