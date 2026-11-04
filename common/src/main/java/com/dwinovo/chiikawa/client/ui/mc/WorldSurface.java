@@ -2,7 +2,6 @@ package com.dwinovo.chiikawa.client.ui.mc;
 
 import com.dwinovo.chiikawa.ui.DrawSurface;
 import com.dwinovo.chiikawa.ui.Icon;
-import com.dwinovo.chiikawa.ui.UiStyle;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -96,7 +95,7 @@ public final class WorldSurface implements DrawSurface {
      * swelled; centred on the card instead, a block would have its back half swallowed.
      */
     @Override
-    public void drawIcon(Icon icon, int x, int y) {
+    public void drawIcon(Icon icon, int x, int y, int size) {
         if (!(icon instanceof ItemIcon item) || item.stack().isEmpty()) {
             return;
         }
@@ -105,10 +104,10 @@ public final class WorldSurface implements DrawSurface {
         minecraft.getItemModelResolver().updateForTopItem(state, item.stack(), ItemDisplayContext.GUI,
             minecraft.level, null, 0);
         pose.pushPose();
-        pose.translate(x + UiStyle.ICON / 2.0F, y + UiStyle.ICON / 2.0F, nextLayer() + LAYER_STEP / 2.0F);
+        pose.translate(x + size / 2.0F, y + size / 2.0F, nextLayer() + LAYER_STEP / 2.0F);
         // The game hands an item a block-wide space with y up; this one is icon-wide with y
         // down, and one layer deep.
-        pose.scale(UiStyle.ICON, -UiStyle.ICON, LAYER_STEP);
+        pose.scale(size, -size, LAYER_STEP);
         state.submit(pose, collector, FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0);
         pose.popPose();
     }
