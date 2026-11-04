@@ -7,7 +7,7 @@ import com.dwinovo.chiikawa.data.LaborBoardLevelData;
 import com.dwinovo.chiikawa.data.LanguageData;
 import com.dwinovo.chiikawa.testing.MinecraftFont;
 import com.dwinovo.chiikawa.ui.TextWrap;
-import com.dwinovo.chiikawa.ui.widget.Tabs;
+import com.dwinovo.chiikawa.ui.widget.TabStrip;
 import com.dwinovo.chiikawa.ui.widget.TitledPanel;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -77,15 +77,36 @@ class ScreenFitTest {
         assertEquals(List.of(), outside);
     }
 
-    /** The pet screen has its tabs over the panel where the others have a board, and every page is under its tallest. */
+    /**
+     * The pet screen is one size on both of its pages, and has the pet rising over its top edge and the tabs standing on it:
+     * the panel and what rises over it fit the smallest window in height and in width, the margin kept on every side.
+     */
     @Test
-    void thePetScreenAndItsTabsFitTheSmallestWindowOnEveryPage() {
+    void thePetScreenAndThePetOverItFitTheSmallestWindowInWidthAndHeight() {
+        int left = PetScreenLayout.left(PanelFit.SMALLEST_WIDTH);
         int top = PetScreenLayout.top(SMALLEST);
-        assertTrue(top - Tabs.HEIGHT >= 0, "the tabs of the pet screen start above the window: " + (top - Tabs.HEIGHT));
-        assertTrue(top + PetScreenLayout.TALLEST <= SMALLEST, "the pet screen ends at " + (top + PetScreenLayout.TALLEST));
-        for (int page : new int[] {PetScreenLayout.BACKPACK_HEIGHT, PetScreenLayout.ORDERS_HEIGHT,
-                PetScreenLayout.statusHeight(true), PetScreenLayout.statusHeight(false)}) {
-            assertTrue(page <= PetScreenLayout.TALLEST, "a page of the pet screen is " + page + " high, past the tallest it is placed for");
+        int highest = top - Math.max(PetScreenLayout.RISE, TabStrip.HEIGHT);
+
+        assertTrue(left >= PanelFit.MARGIN, "the pet screen starts " + left + " from the window's left edge");
+        assertTrue(left + PetScreenLayout.PANEL_W <= PanelFit.SMALLEST_WIDTH - PanelFit.MARGIN,
+            "the pet screen ends at " + (left + PetScreenLayout.PANEL_W) + " of " + PanelFit.SMALLEST_WIDTH);
+        assertTrue(highest >= PanelFit.MARGIN, "the pet and the tabs reach up to " + highest);
+        assertTrue(top + PetScreenLayout.PANEL_H <= SMALLEST - PanelFit.MARGIN,
+            "the pet screen ends at " + (top + PetScreenLayout.PANEL_H) + " of " + SMALLEST);
+        assertTrue(PetScreenLayout.RISE >= TabStrip.HEIGHT, "the tabs stand higher than the pet rises");
+    }
+
+    @Test
+    void thePetScreenFitsEveryWindowFromTheSmallestUp() {
+        for (int height = SMALLEST; height <= 2 * SMALLEST; height++) {
+            int top = PetScreenLayout.top(height);
+            assertTrue(top - PetScreenLayout.RISE >= PanelFit.MARGIN && top + PetScreenLayout.PANEL_H <= height - PanelFit.MARGIN,
+                "the pet screen does not fit a window " + height + " high");
+        }
+        for (int width = PanelFit.SMALLEST_WIDTH; width <= 2 * PanelFit.SMALLEST_WIDTH; width++) {
+            int left = PetScreenLayout.left(width);
+            assertTrue(left >= PanelFit.MARGIN && left + PetScreenLayout.PANEL_W <= width - PanelFit.MARGIN,
+                "the pet screen does not fit a window " + width + " wide");
         }
     }
 
