@@ -357,7 +357,7 @@ public final class GiftGameTests {
     public static void shopping_never_makes_a_present(GameTestHelper helper) {
         helper.setBlock(new BlockPos(9, STAND, 4), InitBlocks.SHOP.get());
         AbstractPet pet = GameTestKit.holding(GameTestKit.worker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
-        pet.getBackpack().addItem(new ItemStack(Items.EMERALD, WAGES));
+        pet.pockets().stow(new ItemStack(Items.EMERALD, WAGES));
 
         helper.succeedWhen(() -> {
             // Back to the counter as soon as it has left it.
