@@ -190,13 +190,15 @@ public class LaborBoardBlockEntity extends BlockEntity {
     }
 
     /**
-     * Whether {@code pet} holds what a slip of this type asks of it, and could do the work it counts: a slip that asks
-     * nothing, anyone may take. Pure, since offering, holding and claiming a slip all ask it.
+     * Whether {@code pet} holds what a slip of this type asks of it, could do the work it counts, and its owner's rules
+     * permit that work: a slip that asks nothing, anyone may take. Pure, since offering, holding and claiming a slip all
+     * ask it.
      */
     private static boolean mayTake(AbstractPet pet, PetTask slip) {
         PetTaskType type = PetTaskTypes.all().get(slip.type());
         boolean licensed = type == null || type.requires().map(requirement -> requirement.metBy(pet.licences())).orElse(true);
-        return licensed && JobWork.readyFor(pet, LivePetView.of(pet), slip.counter());
+        return licensed && pet.getRules().permitsWork(slip.counter())
+            && JobWork.readyFor(pet, LivePetView.of(pet), slip.counter());
     }
 
     private void update(int index, UnaryOperator<BoardSlot> change) {
