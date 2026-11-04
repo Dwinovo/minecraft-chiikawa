@@ -96,7 +96,7 @@ public final class LifeGameTests {
         long longest = 0;
 
         for (int born = 0; born < BORN; born++) {
-            AbstractPet pet = InitEntity.USAGI_PET.get().spawn(helper.getLevel(), at, MobSpawnType.SPAWN_EGG);
+            AbstractPet pet = InitEntity.USAGI_PET.get().spawn(helper.getLevel(), at, EntitySpawnReason.SPAWN_ITEM_USE);
             helper.assertTrue(pet != null, "nothing spawned");
             long rest = Errands.restsOf(pet.getBrain(), CharacterPastimeData.FRENZY).remaining(null, now);
             helper.assertTrue(rest >= 0 && rest <= cooldown,
