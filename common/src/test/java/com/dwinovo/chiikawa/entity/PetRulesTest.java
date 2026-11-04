@@ -4,7 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
+import com.dwinovo.chiikawa.task.PetWorkCounters;
 import io.netty.buffer.Unpooled;
 import java.util.Set;
 import net.minecraft.nbt.CompoundTag;
@@ -99,6 +101,27 @@ class PetRulesTest {
 
         for (ErrandCategory category : ErrandCategory.values()) {
             assertEquals(category != ErrandCategory.PICK_UP, off.permits(category), category.name());
+        }
+    }
+
+    @Test
+    void puttingMonstersDownIsWorkOnlyTheStanceThatClearsPermits() {
+        for (CombatStance stance : CombatStance.values()) {
+            for (boolean pickUp : new boolean[] {true, false}) {
+                PetRules rules = new PetRules(pickUp, stance);
+
+                assertEquals(stance == CombatStance.CLEAR, rules.permitsWork(PetWorkCounters.SLAY), rules.toString());
+            }
+        }
+    }
+
+    @Test
+    void workWithNoRuleTiedToItIsPermittedWhateverTheOwnerHasTold() {
+        for (CombatStance stance : CombatStance.values()) {
+            PetRules rules = new PetRules(false, stance);
+
+            assertTrue(rules.permitsWork(WorkData.WEED_PULLED), rules.toString());
+            assertTrue(rules.permitsWork(WorkData.PLAY_MUSIC_SECOND), rules.toString());
         }
     }
 
