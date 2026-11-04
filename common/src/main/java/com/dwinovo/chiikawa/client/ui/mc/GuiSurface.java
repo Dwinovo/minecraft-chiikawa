@@ -44,20 +44,20 @@ public record GuiSurface(GuiGraphics graphics, Font font) implements DrawSurface
         }
         // The game draws an item sixteen wide wherever it is told to; a smaller one is the same item under a smaller scale.
         float scale = (float) size / UiStyle.ICON;
-        graphics.pose().pushPose();
-        graphics.pose().translate(x, y, 0.0F);
-        graphics.pose().scale(scale, scale, 1.0F);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(x, y);
+        graphics.pose().scale(scale, scale);
         graphics.renderItem(item.stack(), 0, 0);
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
     }
 
     /** Draws text {@code scale} times as large with its top-left corner at x, y, for a name that is the heading of a card. */
     public void drawTextScaled(String text, int x, int y, int scale, int argb) {
-        graphics.pose().pushPose();
-        graphics.pose().translate(x, y, 0.0F);
-        graphics.pose().scale(scale, scale, 1.0F);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(x, y);
+        graphics.pose().scale(scale, scale);
         graphics.drawString(font, text, 0, 0, argb, false);
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
     }
 
     @Override
