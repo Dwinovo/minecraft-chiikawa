@@ -17,14 +17,15 @@ import java.util.function.ToIntFunction;
  *
  * @param nameScale how many times the size of the font the name is drawn at
  * @param nameWidth how wide the name is drawn, at that size, the most it may take; a name that is wider is cut
- * @param jobWidth how wide the job's chip is, its picture and its words
+ * @param jobWidth how wide the job's chip is, its picture when it has one and its words
+ * @param jobFace whether the job's chip has a picture: a pet with nothing in its hand has none to show
  * @param rankWidth how wide the licence's chip is, nothing when there is none
  * @param moneyX where the pocket money's badge starts
  * @param moneyWidth how wide it is
  * @param eagerX where the keenness's badge starts, nothing when the pet is not keen
  * @param eagerWidth how wide it is, nothing when the pet is not keen
  */
-public record HeaderRow(int nameScale, int nameWidth, int jobWidth, int rankWidth, int moneyX, int moneyWidth, int eagerX,
+public record HeaderRow(int nameScale, int nameWidth, int jobWidth, boolean jobFace, int rankWidth, int moneyX, int moneyWidth, int eagerX,
                         int eagerWidth) {
     /** The air between the name and the first chip. */
     static final int NAME_GAP = UiStyle.GAP;
@@ -50,12 +51,17 @@ public record HeaderRow(int nameScale, int nameWidth, int jobWidth, int rankWidt
         return chipWidth - Chip.overhead();
     }
 
+    /** How much room the words of the job's chip have. */
+    public int jobWords() {
+        return jobWidth - Chip.overhead(jobFace);
+    }
+
     /**
      * @param textWidth how wide the game draws a string
      * @param rank the words on the licence's chip, when there is a licence to show
      * @param eager how long the pet's keenness has left, when it is keen
      */
-    public static HeaderRow place(ToIntFunction<String> textWidth, String name, String job, Optional<String> rank, String money,
+    public static HeaderRow place(ToIntFunction<String> textWidth, String name, String job, boolean jobFace, Optional<String> rank, String money,
             Optional<String> eager) {
         int right = PetScreenLayout.RIGHT;
         int eagerWidth = eager.map(words -> Chip.overhead() + textWidth.applyAsInt(words)).orElse(0);
@@ -67,7 +73,7 @@ public record HeaderRow(int nameScale, int nameWidth, int jobWidth, int rankWidt
         int moneyX = right - moneyWidth;
         int room = moneyX - UiStyle.GAP - PetScreenLayout.TEXT_X;
 
-        int jobWidth = Chip.overhead() + textWidth.applyAsInt(job);
+        int jobWidth = Chip.overhead(jobFace) + textWidth.applyAsInt(job);
         int rankWidth = rank.map(words -> Chip.overhead() + textWidth.applyAsInt(words)).orElse(0);
         int nameRoom = room - NAME_GAP - jobWidth - (rank.isPresent() ? CHIP_GAP + rankWidth : 0);
         int nameWide = textWidth.applyAsInt(name);
@@ -77,7 +83,7 @@ public record HeaderRow(int nameScale, int nameWidth, int jobWidth, int rankWidt
         if (nameWidth > nameRoom) {
             // Crowded: the chips give up some of their words, down to a few letters, before the name gives up any.
             int over = nameWidth - nameRoom;
-            int fromJob = Math.min(over, Math.max(0, jobWidth - Chip.overhead() - LEAST_WORDS));
+            int fromJob = Math.min(over, Math.max(0, jobWidth - Chip.overhead(jobFace) - LEAST_WORDS));
             jobWidth -= fromJob;
             over -= fromJob;
             if (rank.isPresent()) {
@@ -87,6 +93,6 @@ public record HeaderRow(int nameScale, int nameWidth, int jobWidth, int rankWidt
             }
             nameWidth = Math.max(0, nameWidth - over);
         }
-        return new HeaderRow(scale, nameWidth, jobWidth, rankWidth, moneyX, moneyWidth, eagerX, eagerWidth);
+        return new HeaderRow(scale, nameWidth, jobWidth, jobFace, rankWidth, moneyX, moneyWidth, eagerX, eagerWidth);
     }
 }
