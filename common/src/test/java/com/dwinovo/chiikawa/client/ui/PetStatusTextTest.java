@@ -50,14 +50,14 @@ class PetStatusTextTest {
         assertEquals("0:00", PetStatusText.clock(19));
     }
 
-    private static LicenceView licence(String id, boolean practised, Optional<ResourceLocation> job) {
-        return new LicenceView(ResourceLocation.fromNamespaceAndPath("chiikawa", id), ResourceLocation.withDefaultNamespace("book"),
+    private static LicenceView licence(String id, boolean practised, Optional<Identifier> job) {
+        return new LicenceView(Identifier.fromNamespaceAndPath("chiikawa", id), Identifier.withDefaultNamespace("book"),
             2, 5, practised, false, false, job);
     }
 
     @Test
     void aLicenceWhoseNextStepIsTheOwnersIsTheOneShownBeforeTheOneForTheWork() {
-        ResourceLocation farmer = ResourceLocation.fromNamespaceAndPath("chiikawa", "farmer");
+        Identifier farmer = Identifier.fromNamespaceAndPath("chiikawa", "farmer");
         LicenceView forTheWork = licence("weeding", false, Optional.of(farmer));
         LicenceView ready = licence("music", true, Optional.empty());
 
@@ -67,8 +67,8 @@ class PetStatusTextTest {
 
     @Test
     void withNoLicenceReadyAndNoneForTheWorkNoneIsShown() {
-        ResourceLocation farmer = ResourceLocation.fromNamespaceAndPath("chiikawa", "farmer");
-        ResourceLocation archer = ResourceLocation.fromNamespaceAndPath("chiikawa", "archer");
+        Identifier farmer = Identifier.fromNamespaceAndPath("chiikawa", "farmer");
+        Identifier archer = Identifier.fromNamespaceAndPath("chiikawa", "archer");
 
         assertEquals(Optional.empty(), PetStatusText.licenceShown(List.of(licence("shooting", false, Optional.of(archer))), farmer));
         assertEquals(Optional.empty(), PetStatusText.licenceShown(List.of(), farmer));
