@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.qualification;
 
 import com.dwinovo.chiikawa.task.PetTaskType;
 import com.dwinovo.chiikawa.task.PetTaskTypes;
+import com.dwinovo.chiikawa.utils.ModCodecs;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
@@ -33,7 +34,7 @@ public record LicenceView(ResourceLocation qualification, ResourceLocation book,
         Codec.BOOL.fieldOf("practised").forGetter(LicenceView::practised),
         Codec.BOOL.fieldOf("called").forGetter(LicenceView::called),
         Codec.BOOL.fieldOf("awaiting_results").forGetter(LicenceView::awaitingResults),
-        ResourceLocation.CODEC.optionalFieldOf("job").forGetter(LicenceView::job)
+        ModCodecs.strictOptionalField(ResourceLocation.CODEC, "job").forGetter(LicenceView::job)
     ).apply(instance, LicenceView::new));
     public static final Codec<List<LicenceView>> LIST_CODEC = CODEC.listOf();
 
