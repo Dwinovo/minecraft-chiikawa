@@ -54,6 +54,15 @@ public final class UiButton extends AbstractButton {
         return new UiButton(x, y, width, height, narration, painter, action);
     }
 
+    /**
+     * A button that draws nothing of itself: its place on a screen is where something the screen draws is pressed, a switch
+     * or a cell of a row of choices, and it keeps the game's own clicking, keyboard and narration for it.
+     */
+    public static UiButton over(Rect area, Component narration, Runnable action) {
+        return new UiButton(area.x(), area.y(), area.width(), area.height(), narration,
+            (surface, shown, hovered, active) -> { }, action);
+    }
+
     /** The usual button: paper, pink under the cursor, flat and quiet when it cannot be pressed. */
     private static Painter standard(Face face) {
         return (surface, area, hovered, active) -> {

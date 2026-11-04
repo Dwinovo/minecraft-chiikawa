@@ -54,6 +54,18 @@ class LicenceViewTest {
         assertTrue(LicenceView.of(WEEDING, weeding, called.sat(true), at(3, MORNING)).awaitingResults());
     }
 
+    @Test
+    void theNextStepIsTheOwnersOnlyOncePracticedAndNeitherCalledNorAwaitingNorAtTheTop() {
+        GlobalPos board = GlobalPos.of(Level.OVERWORLD, BlockPos.ZERO);
+        Licence called = Licence.NONE.practised().called(board, 3L);
+
+        assertFalse(LicenceView.of(WEEDING, weeding, Licence.NONE, at(3, MORNING)).ready(), "not practised");
+        assertTrue(LicenceView.of(WEEDING, weeding, Licence.NONE.practised(), at(3, MORNING)).ready());
+        assertFalse(LicenceView.of(WEEDING, weeding, called, at(3, MORNING)).ready(), "called");
+        assertFalse(LicenceView.of(WEEDING, weeding, called.sat(true), at(3, MORNING)).ready(), "awaiting results");
+        assertFalse(LicenceView.of(WEEDING, weeding, Licence.holding(5).practised(), at(3, MORNING)).ready(), "at the top");
+    }
+
     private static long at(long day, long timeOfDay) {
         return day * Level.TICKS_PER_DAY + timeOfDay;
     }

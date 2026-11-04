@@ -27,25 +27,27 @@ import net.minecraft.world.SimpleContainer;
 import com.dwinovo.chiikawa.shop.Wallet;
 
 public class PetBackpackMenu extends AbstractContainerMenu {
-    // Where the slots are. The screen draws a well behind each one by asking the slot
-    // where it is, so these numbers are the layout and there is no second copy of them.
-    // An item sits a pixel inside its 18px well, and wells sit side by side.
-    private static final int SLOT_PITCH = 18;
-    /** The hand, beside the pet's picture. */
-    private static final int MAINHAND_X = 71;
-    private static final int MAINHAND_Y = 25;
-    /** The bag the pet wears, under the hand that holds its tool. */
-    private static final int BAG_X = MAINHAND_X;
-    private static final int BAG_Y = MAINHAND_Y + 21;
-    private static final int PET_GRID_X = 95;
-    private static final int PET_GRID_Y = MAINHAND_Y;
-    /** How wide the pet's own grid is; the bag's ten hang under it in two rows. */
-    private static final int PET_GRID_COLUMNS = 5;
-    /** Where the bag's rows start: under the pockets, with a gap to say they are another thing. */
-    private static final int BAG_ROWS_Y = 83;
-    private static final int PLAYER_INV_X = 16;
-    private static final int PLAYER_INV_Y = 132;
-    private static final int HOTBAR_Y = 190;
+    // Where the slots are, from the panel's top-left corner. The screen draws a well behind each one by asking the slot
+    // where it is, so these numbers are the layout and there is no second copy of them. An item sits a pixel inside its
+    // 18px well, and wells sit side by side. The pet's own are in a card on the left and the player's to the right of it,
+    // the hotbar level with the bag's second row; see PetScreenLayout for the card they are in.
+    public static final int SLOT_PITCH = 18;
+    /** The pet's hand, level with the middle of its own ten. */
+    public static final int MAINHAND_X = 9;
+    public static final int MAINHAND_Y = 88;
+    /** The pet's own ten: two rows of five, to the right of its hand. */
+    public static final int PET_GRID_X = 30;
+    public static final int PET_GRID_Y = 79;
+    /** How wide the pet's own grid is, and the bag's under it. */
+    public static final int GRID_COLUMNS = 5;
+    /** The bag the pet wears, level with the middle of the bag's own ten. */
+    public static final int BAG_X = MAINHAND_X;
+    public static final int BAG_Y = 128;
+    /** Where the bag's rows start: under the pockets, across a line that says they are another thing. */
+    public static final int BAG_ROWS_Y = 119;
+    public static final int PLAYER_INV_X = 129;
+    public static final int PLAYER_INV_Y = 79;
+    public static final int HOTBAR_Y = 137;
 
     private final AbstractPet pet;
     private final Level level;
@@ -108,14 +110,14 @@ public class PetBackpackMenu extends AbstractContainerMenu {
             this.addSlot(new BagSlot(handler, BAG_X, BAG_Y));
             int slot = AbstractPet.BAG_SLOT + 1;
             for (int row = 0; slot < Math.min(petSlotCount, AbstractPet.BACKPACK_SIZE); row++) {
-                for (int col = 0; col < PET_GRID_COLUMNS && slot < AbstractPet.BACKPACK_SIZE; col++) {
+                for (int col = 0; col < GRID_COLUMNS && slot < AbstractPet.BACKPACK_SIZE; col++) {
                     this.addSlot(new PageSlot(handler, slot++,
                         PET_GRID_X + col * SLOT_PITCH, PET_GRID_Y + row * SLOT_PITCH));
                 }
             }
             // The bag's own ten, waiting under the pet's grid for a bag to be worn.
             for (int row = 0; slot < petSlotCount; row++) {
-                for (int col = 0; col < PET_GRID_COLUMNS && slot < petSlotCount; col++) {
+                for (int col = 0; col < GRID_COLUMNS && slot < petSlotCount; col++) {
                     this.addSlot(new BagContentSlot(handler, slot++,
                         PET_GRID_X + col * SLOT_PITCH, BAG_ROWS_Y + row * SLOT_PITCH));
                 }
@@ -179,6 +181,16 @@ public class PetBackpackMenu extends AbstractContainerMenu {
     /** @return what the server last said of the pet, once it has said anything. Client only. */
     public Optional<PetOutlookPayload> outlook() {
         return outlook;
+    }
+
+    /** Whether a slot is the one the worn bag goes in. */
+    public boolean isBagSlot(Slot slot) {
+        return slot instanceof BagSlot;
+    }
+
+    /** Whether a slot is one of the bag's own ten, which are there to be used only while a bag is worn. */
+    public boolean isBagContent(Slot slot) {
+        return slot instanceof BagContentSlot;
     }
 
     /** Shows or hides every slot, for the page of the pet screen that is open. Client only. */
