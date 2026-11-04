@@ -128,32 +128,27 @@ class PetConstraintsTest {
     // ---- permission table ------------------------------------------------------
 
     @Test
-    void eachSwitchForbidsItsCategoryAndNothingElse() {
+    void pickingUpOffForbidsPickingUpAndNothingElse() {
+        PetRules rules = PetRules.DEFAULT.withPickUp(false);
         for (PetDirective directive : PetDirective.values()) {
-            for (PetRules.Toggle toggle : PetRules.Toggle.values()) {
-                PetRules rules = PetRules.DEFAULT.with(toggle, false);
-                for (ErrandCategory category : ErrandCategory.values()) {
-                    boolean expected = category != toggle.category()
-                        && PetConstraints.allows(directive, OWNED, PetRules.DEFAULT, PASTIMES, category);
-                    assertEquals(expected, PetConstraints.allows(directive, OWNED, rules, PASTIMES, category),
-                        () -> directive + " / " + toggle + " off / " + category);
-                }
+            for (ErrandCategory category : ErrandCategory.values()) {
+                boolean expected = category != ErrandCategory.PICK_UP
+                    && PetConstraints.allows(directive, OWNED, PetRules.DEFAULT, PASTIMES, category);
+                assertEquals(expected, PetConstraints.allows(directive, OWNED, rules, PASTIMES, category),
+                    () -> directive + " / picking up off / " + category);
             }
         }
     }
 
     @Test
-    void aSwitchOffForbidsItsCategoryEvenInTheDirectiveThatPermitsItMost() {
-        assertFalse(PetConstraints.allows(PetDirective.FREE, OWNED, PetRules.DEFAULT.with(PetRules.Toggle.SHOP, false), PASTIMES, ErrandCategory.SHOP));
-        assertFalse(PetConstraints.allows(PetDirective.FOLLOW, OWNED, PetRules.DEFAULT.with(PetRules.Toggle.GIFT, false), PASTIMES, ErrandCategory.GIFT));
-        assertFalse(PetConstraints.allows(PetDirective.FOLLOW, OWNED, PetRules.DEFAULT.with(PetRules.Toggle.SOCIAL, false), PASTIMES, ErrandCategory.SOCIAL));
-        assertFalse(PetConstraints.allows(PetDirective.FOLLOW, OWNED, PetRules.DEFAULT.with(PetRules.Toggle.PHOTO, false), PASTIMES, ErrandCategory.PHOTO));
-        assertFalse(PetConstraints.allows(PetDirective.FREE, OWNED, PetRules.DEFAULT.with(PetRules.Toggle.PICK_UP, false), PASTIMES, ErrandCategory.PICK_UP));
+    void pickingUpOffForbidsItEvenInTheDirectiveThatPermitsItMost() {
+        assertTrue(PetConstraints.allows(PetDirective.FREE, OWNED, PetRules.DEFAULT, PASTIMES, ErrandCategory.PICK_UP));
+        assertFalse(PetConstraints.allows(PetDirective.FREE, OWNED, PetRules.DEFAULT.withPickUp(false), PASTIMES, ErrandCategory.PICK_UP));
     }
 
     @Test
-    void theStanceAndTheSwapForbidNothing() {
-        PetRules rules = PetRules.DEFAULT.withStance(CombatStance.NONE).withSwap(false);
+    void theStanceForbidsNothing() {
+        PetRules rules = PetRules.DEFAULT.withStance(CombatStance.NONE);
         for (PetDirective directive : PetDirective.values()) {
             for (ErrandCategory category : ErrandCategory.values()) {
                 assertEquals(PetConstraints.allows(directive, OWNED, PetRules.DEFAULT, PASTIMES, category),
@@ -164,10 +159,7 @@ class PetConstraintsTest {
 
     @Test
     void gettingOutOfHarmsWayIsPermittedWhateverThePetIsToldAndWhoeverItBelongsTo() {
-        PetRules everythingOff = PetRules.DEFAULT.withStance(CombatStance.NONE).withSwap(false);
-        for (PetRules.Toggle toggle : PetRules.Toggle.values()) {
-            everythingOff = everythingOff.with(toggle, false);
-        }
+        PetRules everythingOff = PetRules.DEFAULT.withStance(CombatStance.NONE).withPickUp(false);
         for (PetDirective directive : PetDirective.values()) {
             for (PetOwnership ownership : List.of(OWNED, PetOwnership.WILD)) {
                 assertTrue(PetConstraints.allows(directive, ownership, everythingOff, PASTIMES, ErrandCategory.SAFETY),
@@ -177,17 +169,16 @@ class PetConstraintsTest {
     }
 
     @Test
-    void everythingSwitchedOffStillLeavesFollowingStayingWanderingAndFighting() {
-        PetRules rules = PetRules.DEFAULT;
-        for (PetRules.Toggle toggle : PetRules.Toggle.values()) {
-            rules = rules.with(toggle, false);
-        }
+    void pickingUpOffStillLeavesFollowingStayingWanderingFightingAndShopping() {
+        PetRules rules = PetRules.DEFAULT.withPickUp(false);
 
         assertTrue(PetConstraints.allows(PetDirective.FOLLOW, OWNED, rules, PASTIMES, ErrandCategory.FOLLOW_OWNER));
         assertTrue(PetConstraints.allows(PetDirective.FOLLOW, OWNED, rules, PASTIMES, ErrandCategory.WANDER));
         assertTrue(PetConstraints.allows(PetDirective.FOLLOW, OWNED, rules, PASTIMES, ErrandCategory.COMBAT));
+        assertTrue(PetConstraints.allows(PetDirective.FOLLOW, OWNED, rules, PASTIMES, ErrandCategory.SOCIAL));
         assertTrue(PetConstraints.allows(PetDirective.STAY, OWNED, rules, PASTIMES, ErrandCategory.STAY));
         assertTrue(PetConstraints.allows(PetDirective.FREE, OWNED, rules, PASTIMES, ErrandCategory.WORK));
+        assertTrue(PetConstraints.allows(PetDirective.FREE, OWNED, rules, PASTIMES, ErrandCategory.SHOP));
     }
 
     @Test
