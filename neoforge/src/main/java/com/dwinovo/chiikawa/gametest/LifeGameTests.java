@@ -98,17 +98,17 @@ public final class LifeGameTests {
 
         for (int born = 0; born < BORN; born++) {
             AbstractPet pet = InitEntity.USAGI_PET.get().spawn(helper.getLevel(), at, EntitySpawnReason.SPAWN_ITEM_USE);
-            helper.assertTrue(pet != null, "nothing spawned");
+            helper.assertTrue(pet != null, Component.literal("nothing spawned"));
             long rest = Errands.restsOf(pet.getBrain(), CharacterPastimeData.FRENZY).remaining(null, now);
             helper.assertTrue(rest >= 0 && rest <= cooldown,
-                "a new pet was resting from its fit for " + rest + " ticks, and the fit's cooldown is " + cooldown);
+                Component.literal("a new pet was resting from its fit for " + rest + " ticks, and the fit's cooldown is " + cooldown));
             helper.assertTrue(Errands.restsOf(pet.getBrain(), CharacterPastimeData.COWER).remaining(null, now) == 0,
-                "a new pet was resting from being frightened, which it has a reason for");
+                Component.literal("a new pet was resting from being frightened, which it has a reason for"));
             longest = Math.max(longest, rest);
             pet.discard();
         }
 
-        helper.assertTrue(longest > 0, "none of " + BORN + " new pets was resting from its fit");
+        helper.assertTrue(longest > 0, Component.literal("none of " + BORN + " new pets was resting from its fit"));
         helper.succeed();
     }
 
