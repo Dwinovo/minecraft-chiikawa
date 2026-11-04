@@ -10,7 +10,7 @@ package com.dwinovo.chiikawa.ui;
  *
  * <h2>The letters</h2>
  * {@code X} ink, {@code W} white, {@code w} paper, {@code o} wood, {@code l} light wood,
- * {@code d} dark wood, {@code p} pink, {@code g} leaf; anything else is left clear.
+ * {@code d} dark wood, {@code p} pink, {@code g} leaf, {@code s} shade; anything else is left clear.
  */
 public record PixelArt(String... rows) {
     /** A labor slip on its string — what a pet is working at. */
@@ -166,6 +166,36 @@ public record PixelArt(String... rows) {
         "......XX..",
         "......X...");
 
+    /** A cog in wood: what can be set. */
+    public static final PixelArt GEAR = new PixelArt(
+        ".....XXXX.....",
+        ".XX..XooX..XX.",
+        ".XoXXXooXXXoX.",
+        ".XooooooooooX.",
+        "..XoooXXoooX..",
+        "XXXooX..XooXXX",
+        "XooooX..XooooX",
+        "XooooX..XooooX",
+        "XXXooX..XooXXX",
+        "..XoooXXoooX..",
+        ".XooooooooooX.",
+        ".XoXXXooXXXoX.",
+        ".XX..XooX..XX.",
+        ".....XXXX.....");
+
+    /** A bag, as a shadow in the shade of an empty well: where a bag would be worn. */
+    public static final PixelArt BAG = new PixelArt(
+        "....ssss....",
+        "...s....s...",
+        "..ssssssss..",
+        ".ssssssssss.",
+        ".ssssssssss.",
+        ".ss.ssss.ss.",
+        ".ss.ssss.ss.",
+        ".ssssssssss.",
+        ".ssssssssss.",
+        "..ssssssss..");
+
     /** A tick: this is the one that is picked. */
     public static final PixelArt CHECK = new PixelArt(
         "........XX",
@@ -224,6 +254,7 @@ public record PixelArt(String... rows) {
             case 'd' -> UiTheme.WOOD_DARK;
             case 'p' -> UiTheme.ACCENT_SOFT;
             case 'g' -> UiTheme.LEAF;
+            case 's' -> UiTheme.SHADE;
             default -> 0;
         };
     }
