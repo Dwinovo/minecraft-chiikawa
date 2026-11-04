@@ -119,7 +119,8 @@ final class PetHeader {
         Optional<String> rank = licence.map(view -> PetStatusText.licenceRank(view).getString());
         int money = menu.petMoney();
         Optional<String> eager = pet.isEager() ? Optional.of(PetStatusText.clock(pet.eagerTicksLeft())) : Optional.empty();
-        HeaderRow row = HeaderRow.place(surface::textWidth, name, job, rank, String.valueOf(money), eager);
+        ItemStack hand = pet.getMainHandItem();
+        HeaderRow row = HeaderRow.place(surface::textWidth, name, job, !hand.isEmpty(), rank, String.valueOf(money), eager);
         int y = top + PetScreenLayout.ROW_Y;
 
         String shown = TextClip.clip(name, row.nameWidth() / row.nameScale(), surface::textWidth);
@@ -129,7 +130,9 @@ final class PetHeader {
             surface.drawText(shown, left + PetScreenLayout.TEXT_X, UiStyle.centerIn(y, Chip.HEIGHT, surface.lineHeight()),
                 UiTheme.TEXT);
         }
-        chip(surface, item(pet.getMainHandItem()), job, left + row.jobX(), y, row.jobWidth(), UiTheme.SURFACE, false, List.of());
+        // With nothing in its hand there is nothing to picture the job by: a chip of its words, not a gap before them.
+        Chip.draw(surface, hand.isEmpty() ? null : item(hand), TextClip.clip(job, row.jobWords(), surface::textWidth), left + row.jobX(), y,
+            UiTheme.SURFACE, false);
         licence.ifPresent(view -> chip(surface, item(new ItemStack(BuiltInRegistries.ITEM.get(view.book()))), rank.orElse(""),
             left + row.rankX(), y, row.rankWidth(), UiTheme.LEAF_PALE, view.ready(),
             PetStatusText.licenceNotes(view).stream().map(Component::getString).toList()));
