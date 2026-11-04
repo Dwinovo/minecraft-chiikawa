@@ -1,35 +1,30 @@
 package com.dwinovo.chiikawa.entity;
 
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
-import com.dwinovo.chiikawa.task.PetWorkCounters;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
 
 /**
- * What the owner has told a pet it may do, from its screen: whether it picks up what lies on the ground, and how far it takes
- * part in a fight. The rest of what a pet does is the owner's to hold back by other means already, the bag it is given, the
- * camera and the pocket money, so nothing else is a rule. The owner draws the boundary and the pet keeps its own days inside
- * it, so these hold whatever the pet would fancy, see {@link com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints#allows}.
+ * What the owner has told a pet it may do, from its screen: whether it picks up what lies on the ground. The rest of what a
+ * pet does is the owner's to hold back by other means already, the bag it is given, the weapon in its hand or bag, the camera
+ * and the pocket money, so nothing else is a rule. The owner draws the boundary and the pet keeps its own days inside it, so
+ * these hold whatever the pet would fancy, see {@link com.dwinovo.chiikawa.entity.brain.constraint.PetConstraints#allows}.
  *
  * <p>Saved with the pet as {@code Rules} and synced to its owner's screen; a key a save lacks is the default, which is how a
- * pet always was: picking up, {@link CombatStance#CLEAR}. Written only by the owner's own hand, see
- * {@link AbstractPet#setRules}.
+ * pet always was: picking up. Written only by the owner's own hand, see {@link AbstractPet#setRules}.
  *
  * @param pickUp whether the pet picks up what lies on the ground near it, while it is free
- * @param stance how far it takes part in a fight
  */
-public record PetRules(boolean pickUp, CombatStance stance) {
+public record PetRules(boolean pickUp) {
     /** How a pet is until its owner says otherwise. */
-    public static final PetRules DEFAULT = new PetRules(true, CombatStance.CLEAR);
+    public static final PetRules DEFAULT = new PetRules(true);
 
     /** As saved, and as sent: a key that is missing is the default's. */
     public static final Codec<PetRules> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        Codec.BOOL.optionalFieldOf("PickUp", DEFAULT.pickUp).forGetter(PetRules::pickUp),
-        CombatStance.CODEC.optionalFieldOf("Stance", DEFAULT.stance).forGetter(PetRules::stance)
+        Codec.BOOL.optionalFieldOf("PickUp", DEFAULT.pickUp).forGetter(PetRules::pickUp)
     ).apply(instance, PetRules::new));
 
     /** As sent from the screen to the server. */
@@ -40,28 +35,8 @@ public record PetRules(boolean pickUp, CombatStance stance) {
         return pickUp || category != ErrandCategory.PICK_UP;
     }
 
-    /**
-     * Whether the owner's rules permit the work a slip counts, which a slip never overrides: what the owner has switched
-     * off stays off however good the pay. The one place a work counter is tied to a rule, so a slip that needs one asks it
-     * here: putting monsters down needs the stance {@link CombatStance#CLEAR}, the one that lets a pet go after them.
-     *
-     * @param counter the work counter of a slip, see {@link PetWorkCounters}
-     * @return whether a pet under these rules may take a slip that counts it
-     */
-    public boolean permitsWork(ResourceLocation counter) {
-        if (PetWorkCounters.SLAY.equals(counter)) {
-            return stance == CombatStance.CLEAR;
-        }
-        return true;
-    }
-
     /** @return these rules with picking up on or off */
     public PetRules withPickUp(boolean pickUp) {
-        return new PetRules(pickUp, stance);
-    }
-
-    /** @return these rules with another stance */
-    public PetRules withStance(CombatStance stance) {
-        return new PetRules(pickUp, stance);
+        return new PetRules(pickUp);
     }
 }

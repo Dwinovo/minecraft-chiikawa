@@ -135,7 +135,7 @@ public interface PetView {
     /** @return who hurt the pet lately, while the game's hurt-by memory holds it, if it was a creature that is its to answer */
     Optional<Attacker> attacker();
 
-    /** @return the grounds the owner's orders let the pet fight on now; none for a pet told to sit or not to fight */
+    /** @return the grounds the owner's orders let the pet fight on now; none for a pet told to sit */
     Set<Ground> foeGrounds();
 
     /** @return what the pet has to fight with */

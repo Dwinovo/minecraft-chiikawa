@@ -8,9 +8,7 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.CombatStance;
 import com.dwinovo.chiikawa.entity.PetDirective;
-import com.dwinovo.chiikawa.entity.PetRules;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.entity.brain.errand.decide.DecisionLog;
 import com.dwinovo.chiikawa.entity.brain.errand.run.Running;
@@ -49,27 +47,6 @@ public final class FleeGameTests {
     @BeforeBatch(batch = BATCH)
     public static void settle(ServerLevel level) {
         settleWorld(level, Difficulty.NORMAL, MIDNIGHT);
-    }
-
-    /**
-     * Told not to fight, a pet that is hit runs to its owner and gets behind them, farther from what hit it than they are,
-     * and does not strike back though it holds a sword.
-     */
-    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = HIDE_TICKS)
-    public static void a_pet_told_not_to_fight_hides_behind_its_owner_when_hit(GameTestHelper helper) {
-        ServerPlayer owner = owner(helper, new BlockPos(11, STAND, 8));
-        AbstractPet pet = holding(heeling(helper, owner, new BlockPos(6, STAND, 8)), Items.IRON_SWORD);
-        pet.setRules(PetRules.DEFAULT.withStance(CombatStance.NONE));
-        Zombie zombie = zombie(helper, new BlockPos(3, STAND, 8));
-        pet.hurt(zombie.damageSources().mobAttack(zombie), 1.0F);
-
-        helper.succeedWhen(() -> {
-            helper.assertTrue(cowering(pet), Component.literal("the pet did not run and hide, doing " + pet.getIntent()));
-            helper.assertTrue(pet.distanceTo(zombie) > owner.distanceTo(zombie),
-                Component.literal("the pet hid " + (int) pet.distanceTo(zombie) + " blocks from the zombie, with its owner " + (int) owner.distanceTo(zombie)));
-            helper.assertTrue(pet.distanceTo(owner) < 4.0, Component.literal("the pet hid " + (int) pet.distanceTo(owner) + " blocks from its owner"));
-            helper.assertTrue(zombie.getHealth() == zombie.getMaxHealth(), Component.literal("the pet struck back though it was told not to fight"));
-        });
     }
 
     /**
