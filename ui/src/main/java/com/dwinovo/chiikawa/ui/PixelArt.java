@@ -9,91 +9,10 @@ package com.dwinovo.chiikawa.ui;
  * read and edited where it is used, and it cannot fall out of step with the palette.
  *
  * <h2>The letters</h2>
- * {@code X} ink, {@code W} white, {@code w} paper, {@code o} wood, {@code l} light wood,
- * {@code d} dark wood, {@code p} pink, {@code g} leaf, {@code s} shade; anything else is left clear.
+ * {@code X} ink, {@code w} paper, {@code o} wood, {@code l} light wood, {@code p} pink, {@code g} leaf,
+ * {@code s} shade; anything else is left clear.
  */
 public record PixelArt(String... rows) {
-    /** A labor slip on its string — what a pet is working at. */
-    public static final PixelArt SLIP = new PixelArt(
-        "....XX....",
-        "...X..X...",
-        "....XX....",
-        "....X.....",
-        ".XXXXXXXX.",
-        "XllllllllX",
-        "XlooollllX",
-        "XlooollllX",
-        "XllllllllX",
-        "XldddddllX",
-        "XllllllllX",
-        "XldddllllX",
-        "XllllllllX",
-        ".XXXXXXXX.");
-
-    /** A speech bubble with three dots — what a Chiikawa says most, and what an order is. */
-    public static final PixelArt SPEECH = new PixelArt(
-        "..XXXXXXXXXX..",
-        ".XwwwwwwwwwwX.",
-        "XwwwwwwwwwwwwX",
-        "XwwwwwwwwwwwwX",
-        "XwwdwwwdwwwdwX",
-        "XwwdwwwdwwwdwX",
-        "XwwwwwwwwwwwwX",
-        ".XwwwwwwwwwwX.",
-        "..XXXXwXXXXX..",
-        ".....XwX......",
-        "......XX......");
-
-    /** Two sets of paw prints: walking along behind someone. */
-    public static final PixelArt PAWS = new PixelArt(
-        "X.X.......",
-        ".......X.X",
-        "XXX.......",
-        "XXX....XXX",
-        ".X.....XXX",
-        "........X.",
-        "..X.X.....",
-        ".........",
-        "..XXX.....",
-        "..XXX.....",
-        "...X......");
-
-    /** A round cushion: somewhere to sit and stay. */
-    public static final PixelArt CUSHION = new PixelArt(
-        "..XXXXXXXXXX..",
-        ".XppppppppppX.",
-        "XppWWppppppppX",
-        "XppppppppppppX",
-        "XppppppppppppX",
-        ".XppppppppppX.",
-        "..XXXXXXXXXX..");
-
-    /** A tuft of grass: out in the field, getting on with it. */
-    public static final PixelArt TUFT = new PixelArt(
-        ".....X......",
-        "....XgX...X.",
-        "X...XgX..XgX",
-        "XgX.XgX..XgX",
-        "XgXXgggX.XgX",
-        ".XgXgggXXgX.",
-        ".XggggggggX.",
-        "..XggggggX..",
-        ".XXXXXXXXXX.");
-
-    /** A shop front under its striped awning: going shopping. */
-    public static final PixelArt SHOP = new PixelArt(
-        "XXXXXXXXXXXXXX",
-        "XpWpWpWpWpWpWX",
-        "XpWpWpWpWpWpWX",
-        "XXXXXXXXXXXXXX",
-        ".XwwwwwwwwwwX.",
-        ".XwwXXXXXXwwX.",
-        ".XwwXllllXwwX.",
-        ".XwwXllllXwwX.",
-        ".XwwXXXXXXwwX.",
-        ".XwwwwwwwwwwX.",
-        ".XXXXXXXXXXXX.");
-
     /** A wrapped box with a pink ribbon: a present. */
     public static final PixelArt GIFT = new PixelArt(
         "..XXX...XXX..",
@@ -108,18 +27,6 @@ public record PixelArt(String... rows) {
         "XwwwwwpwwwwwX",
         ".XXXXXXXXXXX.");
 
-    /** A camera with its lens and its flash: taking a photo. */
-    public static final PixelArt PHOTO = new PixelArt(
-        "....XXXX......",
-        "XXXXXXXXXXXXXX",
-        "XwwwwXXXXwwppX",
-        "XwwwXddddXwwwX",
-        "XwwwXdWddXwwwX",
-        "XwwwXddddXwwwX",
-        "XwwwwXXXXwwwwX",
-        "XwwwwwwwwwwwwX",
-        "XXXXXXXXXXXXXX");
-
     /** A basket with a leaf and a berry in it: picking things up. */
     public static final PixelArt PICK_UP = new PixelArt(
         "....XXXXXX....",
@@ -131,40 +38,6 @@ public record PixelArt(String... rows) {
         ".XololololoX..",
         "..XlolololoX..",
         "...XXXXXXXX...");
-
-    /** Two round faces side by side: calling on a friend. */
-    public static final PixelArt SOCIAL = new PixelArt(
-        "..XXXX..XXXX..",
-        ".XwwwwXXwwwwX.",
-        "XwwXwwXXwwXwwX",
-        "XwwwwwXXwwwwwX",
-        "XppwwwXXwwwppX",
-        ".XwwwwXXwwwwX.",
-        "..XXXX..XXXX..");
-
-    /** A question mark on a paper disc: something is missing. */
-    public static final PixelArt QUESTION = new PixelArt(
-        "....XXXXX....",
-        "..XXwwwwwXX..",
-        ".XwwwXXXwwwX.",
-        ".XwwXwwwXwwX.",
-        ".XwwwwwwXwwX.",
-        ".XwwwwwXwwwX.",
-        ".XwwwwXwwwwX.",
-        ".XwwwwwwwwwX.",
-        ".XwwwwXwwwwX.",
-        "..XXwwwwwXX..",
-        "....XXXXX....");
-
-    /** An arrow pointing on: what comes next. */
-    public static final PixelArt NEXT = new PixelArt(
-        "......X...",
-        "......XX..",
-        "XXXXXXXXX.",
-        "XXXXXXXXXX",
-        "XXXXXXXXX.",
-        "......XX..",
-        "......X...");
 
     /** A cog in wood: what can be set. */
     public static final PixelArt GEAR = new PixelArt(
@@ -195,16 +68,6 @@ public record PixelArt(String... rows) {
         ".ssssssssss.",
         ".ssssssssss.",
         "..ssssssss..");
-
-    /** A tick: this is the one that is picked. */
-    public static final PixelArt CHECK = new PixelArt(
-        "........XX",
-        ".......XXX",
-        "......XXX.",
-        "XX...XXX..",
-        "XXX.XXX...",
-        ".XXXXX....",
-        "..XXX.....");
 
     public int width() {
         int widest = 0;
@@ -247,11 +110,9 @@ public record PixelArt(String... rows) {
     static int colour(char c) {
         return switch (c) {
             case 'X' -> UiTheme.INK;
-            case 'W' -> UiTheme.HIGHLIGHT;
             case 'w' -> UiTheme.PANEL;
             case 'o' -> UiTheme.WOOD;
             case 'l' -> UiTheme.WOOD_LIGHT;
-            case 'd' -> UiTheme.WOOD_DARK;
             case 'p' -> UiTheme.ACCENT_SOFT;
             case 'g' -> UiTheme.LEAF;
             case 's' -> UiTheme.SHADE;

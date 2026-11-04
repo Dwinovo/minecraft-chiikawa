@@ -6,6 +6,7 @@ import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.qualification.LicenceView;
 import com.dwinovo.chiikawa.qualification.PetExams;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -37,6 +38,12 @@ public final class PetStatusText {
     /** How far along a slip is, as a count. Numbers read the same in every language. */
     public static Component slipCount(PetTask task) {
         return Component.literal(task.progress() + "/" + task.target());
+    }
+
+    /** Ticks as minutes and seconds, the way a timer on a label reads. */
+    public static String clock(long ticks) {
+        long seconds = ticks / 20;
+        return seconds / 60 + ":" + String.format(Locale.ROOT, "%02d", seconds % 60);
     }
 
     /** What a slip type is called. */
@@ -103,5 +110,16 @@ public final class PetStatusText {
             next = Component.translatable("screen.chiikawa.pet.licence.ready");
         }
         return List.of(held, next);
+    }
+
+    /**
+     * @param licences every licence the pet has a view of
+     * @param job the pet's job now
+     * @return the one licence the pet's screen shows: a licence whose next step is its owner's to take, since that is the
+     *         one worth a look; else the licence for the work the pet does; else none
+     */
+    public static Optional<LicenceView> licenceShown(List<LicenceView> licences, ResourceLocation job) {
+        return licences.stream().filter(LicenceView::ready).findFirst()
+            .or(() -> licences.stream().filter(licence -> licence.job().filter(job::equals).isPresent()).findFirst());
     }
 }
