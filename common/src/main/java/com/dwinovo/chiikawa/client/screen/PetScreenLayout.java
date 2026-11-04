@@ -86,22 +86,17 @@ public final class PetScreenLayout {
 
     // ---- the settings page --------------------------------------------------------
 
-    /** One card as tall as the backpack's, two rows sharing its height with a line between them. */
+    /** One card as tall as the backpack's, with the one row in it. */
     public static final Rect SETTINGS_CARD = new Rect(4, PET_CARD.y(), 286, PET_CARD.height());
-    public static final int ROW_H = (SETTINGS_CARD.height() - 3) / 2;
+    public static final int ROW_H = SETTINGS_CARD.height() - 2;
     public static final int FIRST_ROW_Y = SETTINGS_CARD.y() + 1;
-    public static final int SETTINGS_DIVIDER_Y = FIRST_ROW_Y + ROW_H;
-    public static final int SECOND_ROW_Y = SETTINGS_DIVIDER_Y + 1;
     /** Where a row's picture is, and its words: the title, and under it the line that says what it does. */
     public static final int ROW_ICON_X = SETTINGS_CARD.x() + UiStyle.PAD;
     public static final int ROW_TEXT_X = ROW_ICON_X + UiStyle.ICON + UiStyle.GAP;
     /** Where a row's control ends. */
     public static final int ROW_CONTROL_RIGHT = SETTINGS_CARD.right() - UiStyle.PAD;
-    /** How wide the control of the three stances is. */
-    public static final int STANCE_W = 120;
     /** How wide a line of the words of a row may be: the room up to its control, and the air before that. */
     public static final int SWITCH_ROW_ROOM = ROW_CONTROL_RIGHT - Switch.WIDTH - UiStyle.PAD - ROW_TEXT_X;
-    public static final int STANCE_ROW_ROOM = ROW_CONTROL_RIGHT - STANCE_W - UiStyle.PAD - ROW_TEXT_X;
 
     private PetScreenLayout() {
     }
