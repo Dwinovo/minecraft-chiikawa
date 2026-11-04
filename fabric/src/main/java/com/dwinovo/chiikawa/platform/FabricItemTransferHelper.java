@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 
 public class FabricItemTransferHelper implements IItemTransferHelper {
@@ -20,17 +19,6 @@ public class FabricItemTransferHelper implements IItemTransferHelper {
     @Override
     public int insertIntoBlock(ServerLevel level, BlockPos pos, ItemStack stack, boolean simulate) {
         Storage<ItemVariant> storage = findBlockStorage(level, pos);
-        return insertIntoStorage(storage, stack, simulate);
-    }
-
-    @Override
-    public boolean hasEntityStorage(Entity entity) {
-        return findEntityStorage(entity) != null;
-    }
-
-    @Override
-    public int insertIntoEntity(Entity entity, ItemStack stack, boolean simulate) {
-        Storage<ItemVariant> storage = findEntityStorage(entity);
         return insertIntoStorage(storage, stack, simulate);
     }
 
@@ -46,10 +34,6 @@ public class FabricItemTransferHelper implements IItemTransferHelper {
             }
         }
         return null;
-    }
-
-    private static Storage<ItemVariant> findEntityStorage(Entity entity) {
-        return FabricCapabilityHelper.ENTITY_ITEM_STORAGE.find(entity, null);
     }
 
     private static int insertIntoStorage(Storage<ItemVariant> storage, ItemStack stack, boolean simulate) {
