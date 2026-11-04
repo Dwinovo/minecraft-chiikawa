@@ -23,8 +23,6 @@ class LanguageDataUiTranslationTest {
         "screen.chiikawa.labor_board.taken_by",
         "screen.chiikawa.pet.doing.nothing",
         "screen.chiikawa.pet.bag_hint",
-        "screen.chiikawa.pet.tab.backpack",
-        "screen.chiikawa.pet.tab.settings",
         "screen.chiikawa.pet.eager",
         "screen.chiikawa.pet.money",
         "screen.chiikawa.pet.gift_badge",
