@@ -112,7 +112,7 @@ class PetOutlookTest {
     @Test
     void whatTheScreenIsToldComesBackAsItWasSent() {
         PetOutlookPayload outlook = new PetOutlookPayload(PET, Optional.of(WorkData.HARVEST), Optional.of("intent.chiikawa.fail.no_crop"),
-            Optional.of("tag.item.minecraft.arrows"), Optional.of(ResourceLocation.withDefaultNamespace("arrow")));
+            Optional.of("tag.item.minecraft.arrows"), Optional.of(new ResourceLocation("arrow")));
         RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), RegistryAccess.EMPTY);
 
         PetOutlookPayload.STREAM_CODEC.encode(buffer, outlook);

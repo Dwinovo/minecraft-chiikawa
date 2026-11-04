@@ -51,13 +51,13 @@ class PetStatusTextTest {
     }
 
     private static LicenceView licence(String id, boolean practised, Optional<ResourceLocation> job) {
-        return new LicenceView(ResourceLocation.fromNamespaceAndPath("chiikawa", id), ResourceLocation.withDefaultNamespace("book"),
+        return new LicenceView(new ResourceLocation("chiikawa", id), new ResourceLocation("book"),
             2, 5, practised, false, false, job);
     }
 
     @Test
     void aLicenceWhoseNextStepIsTheOwnersIsTheOneShownBeforeTheOneForTheWork() {
-        ResourceLocation farmer = ResourceLocation.fromNamespaceAndPath("chiikawa", "farmer");
+        ResourceLocation farmer = new ResourceLocation("chiikawa", "farmer");
         LicenceView forTheWork = licence("weeding", false, Optional.of(farmer));
         LicenceView ready = licence("music", true, Optional.empty());
 
@@ -67,8 +67,8 @@ class PetStatusTextTest {
 
     @Test
     void withNoLicenceReadyAndNoneForTheWorkNoneIsShown() {
-        ResourceLocation farmer = ResourceLocation.fromNamespaceAndPath("chiikawa", "farmer");
-        ResourceLocation archer = ResourceLocation.fromNamespaceAndPath("chiikawa", "archer");
+        ResourceLocation farmer = new ResourceLocation("chiikawa", "farmer");
+        ResourceLocation archer = new ResourceLocation("chiikawa", "archer");
 
         assertEquals(Optional.empty(), PetStatusText.licenceShown(List.of(licence("shooting", false, Optional.of(archer))), farmer));
         assertEquals(Optional.empty(), PetStatusText.licenceShown(List.of(), farmer));

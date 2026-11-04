@@ -20,7 +20,7 @@ class LackKeyTest {
 
     @Test
     void anItemIsPicturedByItself() {
-        ResourceLocation musicBox = ResourceLocation.fromNamespaceAndPath("chiikawa", "music_box");
+        ResourceLocation musicBox = new ResourceLocation("chiikawa", "music_box");
 
         assertEquals(Optional.of(musicBox), LackKey.item(musicBox).icon());
     }
