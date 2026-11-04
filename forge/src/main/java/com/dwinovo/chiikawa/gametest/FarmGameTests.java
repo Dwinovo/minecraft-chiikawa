@@ -75,7 +75,7 @@ public final class FarmGameTests {
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WORK_TICKS)
     public static void a_farmer_sows_empty_farmland(GameTestHelper helper) {
         AbstractPet pet = holding(worker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
-        pet.getBackpack().addItem(new ItemStack(Items.WHEAT_SEEDS, 8));
+        pet.pockets().stow(new ItemStack(Items.WHEAT_SEEDS, 8));
 
         BlockPos bed = new BlockPos(7, STAND - 1, 4);
         // Watered, or the farmland dries out and turns back to dirt mid-case.
@@ -112,7 +112,7 @@ public final class FarmGameTests {
     private static void sows(GameTestHelper helper, net.minecraft.world.item.Item seed, net.minecraft.world.level.block.Block crop,
             net.minecraft.world.level.block.state.BlockState soil) {
         AbstractPet pet = holding(worker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
-        pet.getBackpack().addItem(new ItemStack(seed, 8));
+        pet.pockets().stow(new ItemStack(seed, 8));
         BlockPos bed = new BlockPos(7, STAND - 1, 4);
         helper.setBlock(bed, soil);
 
@@ -154,7 +154,7 @@ public final class FarmGameTests {
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WORK_TICKS)
     public static void a_farmer_puts_the_crop_in_a_chest(GameTestHelper helper) {
         AbstractPet pet = holding(worker(helper, new BlockPos(4, STAND, 4)), Items.WOODEN_HOE);
-        pet.getBackpack().addItem(new ItemStack(Items.WHEAT, 12));
+        pet.pockets().stow(new ItemStack(Items.WHEAT, 12));
 
         BlockPos chest = new BlockPos(7, STAND, 4);
         helper.setBlock(chest, Blocks.CHEST);

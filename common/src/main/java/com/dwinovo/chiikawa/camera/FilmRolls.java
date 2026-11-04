@@ -5,6 +5,7 @@ import com.dwinovo.chiikawa.photo.FilmRoll;
 import com.dwinovo.chiikawa.photo.PhotoData;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.Item;
@@ -57,12 +58,13 @@ public final class FilmRolls {
      * Records a shot on the first roll in the container that has some but not all of its shots
      * taken; failing that, begins a roll from fresh film, taking one off the pile.
      *
+     * @param stow puts a roll away beside the film it came from, as the pet's pockets do; gives back what did not fit
      * @param exposures how many shots a roll begun now holds
      * @param overflow where a roll goes that there is no room for beside the film it came from
      * @return the roll the shot is on, nothing if there was no film to record it on
      */
-    public static Optional<ItemStack> record(SimpleContainer container, Item film, int exposures, PhotoData shot,
-            Consumer<ItemStack> overflow) {
+    public static Optional<ItemStack> record(SimpleContainer container, UnaryOperator<ItemStack> stow, Item film, int exposures,
+            PhotoData shot, Consumer<ItemStack> overflow) {
         for (int slot = 0; slot < container.getContainerSize(); slot++) {
             ItemStack stack = container.getItem(slot);
             if (isOpen(stack, film)) {
@@ -79,7 +81,7 @@ public final class FilmRolls {
                 if (stack.isEmpty()) {
                     container.setItem(slot, roll);
                 } else {
-                    ItemStack left = container.addItem(roll);
+                    ItemStack left = stow.apply(roll);
                     if (!left.isEmpty()) {
                         overflow.accept(left);
                     }

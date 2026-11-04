@@ -133,7 +133,7 @@ public final class GuardGameTests {
     public static void an_archer_backs_up_to_where_its_bow_works(GameTestHelper helper) {
         ServerPlayer owner = owner(helper, MIDDLE);
         AbstractPet pet = holding(heeling(helper, owner, MIDDLE), Items.BOW);
-        pet.getBackpack().addItem(new ItemStack(Items.ARROW, 16));
+        pet.pockets().stow(new ItemStack(Items.ARROW, 16));
         Zombie zombie = helper.spawn(EntityType.ZOMBIE, MIDDLE.offset(1, 0, 0));
         zombie.setNoAi(true);
         zombie.setTarget(owner);
@@ -233,7 +233,7 @@ public final class GuardGameTests {
     public static void an_archer_answers_a_creeper_from_outside_the_blast(GameTestHelper helper) {
         ServerPlayer owner = owner(helper, MIDDLE);
         AbstractPet pet = holding(heeling(helper, owner, MIDDLE), Items.BOW);
-        pet.getBackpack().addItem(new ItemStack(Items.ARROW, 16));
+        pet.pockets().stow(new ItemStack(Items.ARROW, 16));
         Creeper creeper = helper.spawn(EntityType.CREEPER, MIDDLE.offset(8, 0, 0));
         creeper.setNoAi(true);
 
