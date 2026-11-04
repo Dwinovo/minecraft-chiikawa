@@ -581,12 +581,12 @@ public final class CameraGameTests {
 
         helper.assertFalse(bought(pet, shop, money).contains(film), "Hachiware bought film with no camera to put it in");
 
-        pet.getBackpack().addItem(new ItemStack(camera));
+        pet.pockets().stow(new ItemStack(camera));
         Set<Item> withACamera = bought(pet, shop, money);
         helper.assertTrue(withACamera.contains(film), "Hachiware with a camera never bought film");
         helper.assertFalse(withACamera.contains(camera), "Hachiware bought a second camera");
 
-        pet.getBackpack().addItem(new ItemStack(film));
+        pet.pockets().stow(new ItemStack(film));
         helper.assertFalse(bought(pet, shop, money).contains(film), "Hachiware bought film with film to shoot on");
         pet.getBackpack().removeItemType(film, 64);
 
@@ -651,7 +651,7 @@ public final class CameraGameTests {
         helper.setBlock(new BlockPos(9, STAND, 4), InitBlocks.SHOP.get());
         ServerPlayer owner = ownerAt(helper, new BlockPos(2, STAND, 12));
         AbstractPet pet = photographer(helper, InitEntity.HACHIWARE_PET.get(), owner, camera, false);
-        pet.getBackpack().addItem(new ItemStack(Items.EMERALD, money));
+        pet.pockets().stow(new ItemStack(Items.EMERALD, money));
         return pet;
     }
 
@@ -683,10 +683,10 @@ public final class CameraGameTests {
         pet.tame(owner);
         pet.setPetDirective(PetDirective.FREE);
         if (camera) {
-            pet.getBackpack().addItem(new ItemStack(InitItems.CAMERA.get()));
+            pet.pockets().stow(new ItemStack(InitItems.CAMERA.get()));
         }
         if (film) {
-            pet.getBackpack().addItem(new ItemStack(InitItems.FILM.get(), ROLLS));
+            pet.pockets().stow(new ItemStack(InitItems.FILM.get(), ROLLS));
         }
         return pet;
     }

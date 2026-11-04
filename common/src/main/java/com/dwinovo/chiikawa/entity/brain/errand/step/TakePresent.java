@@ -49,7 +49,7 @@ public final class TakePresent implements Step {
         if (pet.getPendingGift().isEmpty()) {
             return;
         }
-        ItemStack left = pet.getBackpack().addItem(pet.getPendingGift());
+        ItemStack left = pet.pockets().stow(pet.getPendingGift());
         if (!left.isEmpty()) {
             pet.spawnAtLocation(left);
         }

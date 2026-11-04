@@ -2,11 +2,9 @@ package com.dwinovo.chiikawa.entity.brain.errand.view;
 
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.init.InitTag;
-import com.dwinovo.chiikawa.platform.Services;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.world.Container;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 
@@ -39,37 +37,15 @@ public record PickableItem(UUID id, GlobalPos where) {
     }
 
     /**
-     * Puts the stack in the pet's bag as far as it fits: in what the pet exposes as its storage, and failing that
-     * in the bag itself.
+     * Puts the stack away in the pet's pockets as far as it fits.
      *
      * @param simulate whether to only find out how much would fit
      * @return how many of the stack went in, or would
      */
     public static int store(AbstractPet pet, ItemStack stack, boolean simulate) {
-        int inserted = Services.ITEM_TRANSFER.insertIntoEntity(pet, stack, simulate);
-        return inserted > 0 ? inserted : storeInContainer(pet.getBackpack(), stack, simulate);
-    }
-
-    /** Fills the container slot by slot in order. */
-    private static int storeInContainer(Container container, ItemStack stack, boolean simulate) {
-        int left = stack.getCount();
-        for (int slot = 0; slot < container.getContainerSize() && left > 0; slot++) {
-            ItemStack held = container.getItem(slot);
-            if (held.isEmpty()) {
-                int moved = Math.min(left, stack.getMaxStackSize());
-                if (!simulate) {
-                    container.setItem(slot, stack.copyWithCount(moved));
-                }
-                left -= moved;
-            } else if (ItemStack.isSameItemSameComponents(held, stack)) {
-                int moved = Math.min(left, held.getMaxStackSize() - held.getCount());
-                if (moved > 0 && !simulate) {
-                    held.grow(moved);
-                    container.setItem(slot, held);
-                }
-                left -= Math.max(moved, 0);
-            }
+        if (simulate) {
+            return pet.pockets().roomFor(stack);
         }
-        return stack.getCount() - left;
+        return stack.getCount() - pet.pockets().stow(stack).getCount();
     }
 }

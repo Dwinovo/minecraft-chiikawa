@@ -44,7 +44,7 @@ public final class SlipWages {
             .withParameter(LootContextParams.THIS_ENTITY, pet)
             .create(LootContextParamSets.GIFT);
         for (ItemStack stack : reward.getRandomItems(params)) {
-            ItemStack remainder = pet.getBackpack().addItem(stack);
+            ItemStack remainder = pet.pockets().stow(stack);
             if (!remainder.isEmpty()) {
                 pet.spawnAtLocation(remainder);
             }
