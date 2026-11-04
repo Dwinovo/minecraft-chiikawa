@@ -122,7 +122,7 @@ final class PetHeader {
         // With nothing in its hand there is nothing to picture the job by: a chip of its words, not a gap before them.
         Chip.draw(surface, hand.isEmpty() ? null : item(hand), TextClip.clip(job, row.jobWords(), surface::textWidth), left + row.jobX(), y,
             UiTheme.SURFACE, false);
-        licence.ifPresent(view -> chip(surface, item(new ItemStack(BuiltInRegistries.ITEM.get(view.book()))), rank.orElse(""),
+        licence.ifPresent(view -> chip(surface, item(new ItemStack(BuiltInRegistries.ITEM.getValue(view.book()))), rank.orElse(""),
             left + row.rankX(), y, row.rankWidth(), UiTheme.LEAF_PALE, view.ready(),
             PetStatusText.licenceNotes(view).stream().map(Component::getString).toList()));
 
@@ -193,7 +193,7 @@ final class PetHeader {
 
         if (outlook.flatMap(PetOutlookPayload::lackKey).isPresent()) {
             String reason = PetStatusText.notWorking(outlook.get()).map(Component::getString).orElse("");
-            Optional<ItemStack> lacked = outlook.get().lackIcon().map(id -> new ItemStack(BuiltInRegistries.ITEM.get(id)))
+            Optional<ItemStack> lacked = outlook.get().lackIcon().map(id -> new ItemStack(BuiltInRegistries.ITEM.getValue(id)))
                 .filter(stack -> !stack.isEmpty());
             SpeechRow row = SpeechRow.lacking(surface::textWidth, bubble.width(), reason,
                 lacked.map(stack -> stack.getHoverName().getString()).orElse(""));

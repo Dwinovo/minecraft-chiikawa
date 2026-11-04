@@ -58,7 +58,7 @@ public sealed interface LackKey {
         public Optional<Identifier> icon() {
             TagKey<Item> key = TagKey.create(Registries.ITEM, tag);
             // Asked of the items and not of the tag, which is not there to be asked until the tags are bound.
-            return BuiltInRegistries.ITEM.holders().filter(holder -> holder.is(key)).findFirst()
+            return BuiltInRegistries.ITEM.listElements().filter(holder -> holder.is(key)).findFirst()
                 .map(holder -> holder.key().identifier());
         }
     }
