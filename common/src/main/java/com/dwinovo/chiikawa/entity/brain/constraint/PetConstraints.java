@@ -6,10 +6,8 @@ import com.dwinovo.chiikawa.entity.PetRules;
 import com.dwinovo.chiikawa.entity.brain.combat.Ground;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
 import com.dwinovo.chiikawa.entity.brain.sensor.FoeCandidates;
-import com.dwinovo.chiikawa.task.PetTask;
 import com.dwinovo.chiikawa.settings.WorldSettings;
 import com.dwinovo.chiikawa.settings.WorldSettingsStore;
-import com.dwinovo.chiikawa.task.PetWorkCounters;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.core.GlobalPos;
@@ -175,8 +173,7 @@ public final class PetConstraints {
      * @return the grounds the owner's orders let the pet fight on now, see {@link FoeCandidates}
      */
     public static Set<Ground> foesOf(AbstractPet pet, PetOwnership ownership, boolean fights) {
-        boolean slaying = pet.getTask().map(PetTask::counter).filter(PetWorkCounters.SLAY::equals).isPresent();
-        return FoeCandidates.of(pet.getRules().stance(), pet.getPetDirective(), ownership, slaying, fights);
+        return FoeCandidates.of(pet.getRules().stance(), pet.getPetDirective(), ownership, fights);
     }
 
     private static Optional<GlobalPos> followableOwnerPos(AbstractPet pet) {

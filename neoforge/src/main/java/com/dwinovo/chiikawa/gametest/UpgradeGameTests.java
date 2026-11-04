@@ -10,6 +10,8 @@ import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.block.LaborBoardBlockEntity;
 import com.dwinovo.chiikawa.data.LaborBoardLevelData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
+import com.dwinovo.chiikawa.entity.CombatStance;
+import com.dwinovo.chiikawa.entity.PetRules;
 import com.dwinovo.chiikawa.init.InitBlocks;
 import com.dwinovo.chiikawa.init.InitRegistry;
 import com.dwinovo.chiikawa.network.BoardPayloads;
@@ -44,6 +46,8 @@ public final class UpgradeGameTests {
     private static final BlockPos BOARD = new BlockPos(3, STAND, 3);
     /** More than any level costs, so a case about paying is never a case about saving up. */
     private static final int PLENTY = 64;
+    /** Long enough to be sure a pet that was going to walk over to the board has done so. */
+    private static final int DECLINE_TICKS = 300;
 
     @BeforeBatch(batch = BATCH)
     public static void settle(ServerLevel level) {
@@ -181,6 +185,42 @@ public final class UpgradeGameTests {
         helper.succeedWhen(() -> helper.assertTrue(
             pet.getTask().map(task -> task.counter().equals(PetWorkCounters.SLAY)).orElse(false),
             Component.literal("the fencer came away with " + pet.getTask().map(task -> task.type().toString()).orElse("nothing"))));
+    }
+
+    /**
+     * The owner's stance has the last word over a slip: a fencer told not to fight leaves the hunting slip hanging, and
+     * takes it the moment the stance clears.
+     */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = DECLINE_TICKS + 1200)
+    public static void a_fencer_told_not_to_fight_leaves_a_hunting_slip_alone(GameTestHelper helper) {
+        leavesHuntingSlipUntilStanceClears(helper, CombatStance.NONE);
+    }
+
+    /** Helping only in retaliation is not clearing monsters, so the hunting slip stays up just the same. */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = DECLINE_TICKS + 1200)
+    public static void a_fencer_that_only_retaliates_leaves_a_hunting_slip_alone(GameTestHelper helper) {
+        leavesHuntingSlipUntilStanceClears(helper, CombatStance.RETALIATE);
+    }
+
+    private static void leavesHuntingSlipUntilStanceClears(GameTestHelper helper, CombatStance stance) {
+        BlockPos where = boardOfferingHunting(helper);
+        helper.setBlock(where, InitBlocks.LABOR_BOARD.get());
+        if (helper.getBlockEntity(where) instanceof LaborBoardBlockEntity board) {
+            while (board.upgrade()) {
+                // paid up to the top, which is where hunting comes from
+            }
+        }
+        AbstractPet pet = holding(worker(helper, new BlockPos(4, STAND, 4)), Items.IRON_SWORD);
+        pet.setRules(PetRules.DEFAULT.withStance(stance));
+
+        helper.startSequence()
+            .thenExecuteFor(DECLINE_TICKS, () -> helper.assertTrue(pet.getTask().isEmpty(),
+                "a fencer told " + stance + " took " + pet.getTask().map(task -> task.type().toString()).orElse("nothing")))
+            .thenExecute(() -> pet.setRules(PetRules.DEFAULT.withStance(CombatStance.CLEAR)))
+            .thenWaitUntil(() -> helper.assertTrue(
+                pet.getTask().map(task -> task.counter().equals(PetWorkCounters.SLAY)).orElse(false),
+                "the fencer left the hunting slip after the stance cleared"))
+            .thenSucceed();
     }
 
     /** A board on the floor, at the level it is placed at. */
