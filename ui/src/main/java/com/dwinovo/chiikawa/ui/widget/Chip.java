@@ -33,25 +33,35 @@ public final class Chip {
     private Chip() {
     }
 
-    /** What {@link #draw} will take up, for a caller laying out from the right edge. */
+    /** What {@link #draw} will take up with a picture, for a caller laying out from the right edge. */
     public static int width(DrawSurface surface, String label) {
         return overhead() + surface.textWidth(label);
     }
 
     /** What a chip takes up beside its words: for a caller that works out how much room they have. */
     public static int overhead() {
-        return 2 * IN + FACE + UiStyle.TIGHT;
+        return overhead(true);
+    }
+
+    /** @param face whether the chip has a picture: one without is only its words and the air round them */
+    public static int overhead(boolean face) {
+        return 2 * IN + (face ? FACE + UiStyle.TIGHT : 0);
     }
 
     /**
+     * @param face the picture, or null for a chip that is only its words
      * @param marked whether to put the pink dot on the chip's corner
      * @return the width it took, so a caller can place the next one
      */
     public static int draw(DrawSurface surface, Face face, String label, int x, int y, int fill, boolean marked) {
-        int width = width(surface, label);
+        int width = overhead(face != null) + surface.textWidth(label);
         Ui.sticker(surface, x, y, width, HEIGHT, Ui.CARD_RADIUS, fill);
-        face.draw(surface, x + IN, UiStyle.centerIn(y, HEIGHT, FACE));
-        surface.drawText(label, x + IN + FACE + UiStyle.TIGHT, UiStyle.centerIn(y, HEIGHT, surface.lineHeight()), UiTheme.TEXT);
+        int wordsX = x + IN;
+        if (face != null) {
+            face.draw(surface, x + IN, UiStyle.centerIn(y, HEIGHT, FACE));
+            wordsX += FACE + UiStyle.TIGHT;
+        }
+        surface.drawText(label, wordsX, UiStyle.centerIn(y, HEIGHT, surface.lineHeight()), UiTheme.TEXT);
         if (marked) {
             Ui.roundRect(surface, x + width - DOT + DOT_OUT, y - DOT_OUT, DOT, DOT, DOT / 2, UiTheme.INK);
             Ui.roundRect(surface, x + width - DOT + DOT_OUT + 1, y - DOT_OUT + 1, DOT - 2, DOT - 2, DOT / 2 - 1, UiTheme.ACCENT);

@@ -29,21 +29,21 @@ public class PetBackpackMenu extends AbstractContainerMenu {
     // Where the slots are, from the panel's top-left corner. The screen draws a well behind each one by asking the slot
     // where it is, so these numbers are the layout and there is no second copy of them. An item sits a pixel inside its
     // 18px well, and wells sit side by side. The pet's own are in a card on the left and the player's to the right of it,
-    // the hotbar level with the bag's second row; see PetScreenLayout for the card they are in.
+    // the hotbar level with the bag's first row; see PetScreenLayout for the card they are in.
     public static final int SLOT_PITCH = 18;
-    /** The pet's hand, level with the middle of its own ten. */
+    /** The pet's hand, level with the middle of its own fifteen. */
     public static final int MAINHAND_X = 9;
-    public static final int MAINHAND_Y = 88;
-    /** The pet's own ten: two rows of five, to the right of its hand. */
+    public static final int MAINHAND_Y = 97;
+    /** The pet's own fifteen: three rows of five, to the right of its hand. */
     public static final int PET_GRID_X = 30;
     public static final int PET_GRID_Y = 79;
     /** How wide the pet's own grid is, and the bag's under it. */
     public static final int GRID_COLUMNS = 5;
     /** The bag the pet wears, level with the middle of the bag's own ten. */
     public static final int BAG_X = MAINHAND_X;
-    public static final int BAG_Y = 128;
+    public static final int BAG_Y = 146;
     /** Where the bag's rows start: under the pockets, across a line that says they are another thing. */
-    public static final int BAG_ROWS_Y = 119;
+    public static final int BAG_ROWS_Y = 137;
     public static final int PLAYER_INV_X = 129;
     public static final int PLAYER_INV_Y = 79;
     public static final int HOTBAR_Y = 137;

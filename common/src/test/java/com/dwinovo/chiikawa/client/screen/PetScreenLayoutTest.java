@@ -21,13 +21,13 @@ class PetScreenLayoutTest {
     }
 
     @Test
-    void thePetsOwnSlotsAreInItsCardTheHandAndTenAboveTheLineAndTheBagAndItsTenUnderIt() {
+    void thePetsOwnSlotsAreInItsCardTheHandAndFifteenAboveTheLineAndTheBagAndItsTenUnderIt() {
         Rect card = PetScreenLayout.PET_CARD;
         int pitch = PetBackpackMenu.SLOT_PITCH;
         Rect hand = well(PetBackpackMenu.MAINHAND_X, PetBackpackMenu.MAINHAND_Y);
         Rect bag = well(PetBackpackMenu.BAG_X, PetBackpackMenu.BAG_Y);
         Rect ten = new Rect(PetBackpackMenu.PET_GRID_X - 1, PetBackpackMenu.PET_GRID_Y - 1,
-            PetBackpackMenu.GRID_COLUMNS * pitch, 2 * pitch);
+            PetBackpackMenu.GRID_COLUMNS * pitch, 3 * pitch);
         Rect bagTen = new Rect(PetBackpackMenu.PET_GRID_X - 1, PetBackpackMenu.BAG_ROWS_Y - 1,
             PetBackpackMenu.GRID_COLUMNS * pitch, 2 * pitch);
 
@@ -40,9 +40,9 @@ class PetScreenLayoutTest {
     }
 
     @Test
-    void theHandIsLevelWithTheMiddleOfTheTenAndTheBagWithTheMiddleOfTheBagsTen() {
+    void theHandIsLevelWithTheMiddleOfTheFifteenAndTheBagWithTheMiddleOfTheBagsTen() {
         int pitch = PetBackpackMenu.SLOT_PITCH;
-        int middleOfTen = PetBackpackMenu.PET_GRID_Y - 1 + pitch;
+        int middleOfTen = PetBackpackMenu.PET_GRID_Y - 1 + 3 * pitch / 2;
         int middleOfBagsTen = PetBackpackMenu.BAG_ROWS_Y - 1 + pitch;
 
         assertEquals(middleOfTen, PetBackpackMenu.MAINHAND_Y - 1 + UiStyle.SLOT / 2);
@@ -50,7 +50,7 @@ class PetScreenLayoutTest {
     }
 
     @Test
-    void thePlayersSlotsAreBesideTheCardAndInsideThePanelWithTheHotbarLevelWithTheBagsSecondRow() {
+    void thePlayersSlotsAreBesideTheCardAndInsideThePanelWithTheHotbarLevelWithTheBagsFirstRow() {
         int pitch = PetBackpackMenu.SLOT_PITCH;
         Rect panel = new Rect(0, 0, PetScreenLayout.PANEL_W, PetScreenLayout.PANEL_H);
         Rect inventory = new Rect(PetBackpackMenu.PLAYER_INV_X - 1, PetBackpackMenu.PLAYER_INV_Y - 1, 9 * pitch, 3 * pitch);
@@ -59,7 +59,9 @@ class PetScreenLayoutTest {
         assertTrue(inside(panel, inventory) && inside(panel, hotbar));
         assertTrue(inventory.x() >= PetScreenLayout.PET_CARD.right(), "the player's slots run under the pet's card");
         assertTrue(inventory.y() >= PetScreenLayout.BANNER_H, "the player's slots run under the banner");
-        assertEquals(PetBackpackMenu.BAG_ROWS_Y + pitch, PetBackpackMenu.HOTBAR_Y, "the hotbar is not level with the bag's second row");
+        assertEquals(PetBackpackMenu.BAG_ROWS_Y, PetBackpackMenu.HOTBAR_Y, "the hotbar is not level with the bag's first row");
+        assertEquals(PetBackpackMenu.PLAYER_INV_Y + 3 * pitch + 4, PetBackpackMenu.HOTBAR_Y, "the hotbar is not four pixels under the inventory");
+        assertEquals(PetBackpackMenu.PET_GRID_Y, PetBackpackMenu.PLAYER_INV_Y, "the inventory is not level with the pet's first row");
         assertTrue(inventory.bottom() < hotbar.y(), "no air between the inventory and the hotbar");
         assertTrue(hotbar.right() <= PetScreenLayout.RIGHT, "the player's slots pass the banner's right edge");
     }
