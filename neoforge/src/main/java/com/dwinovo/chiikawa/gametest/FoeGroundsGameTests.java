@@ -75,18 +75,32 @@ public final class FoeGroundsGameTests {
     }
 
     /**
-     * Let loose, a pet with a hunting slip hunts even when it has been told to help only in retaliation: the slip is what it
-     * was sent for.
+     * The owner's stance has the last word: a hunting slip, carried by a free fencer told to help only in retaliation, does not
+     * send it after a zombie that is no one's trouble.
      */
-    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = FIGHT_TICKS)
-    public static void a_free_fencer_with_a_slay_slip_hunts(GameTestHelper helper) {
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WATCH_TICKS + 100)
+    public static void a_free_fencer_that_only_retaliates_does_not_hunt_with_a_slay_slip(GameTestHelper helper) {
         AbstractPet pet = holding(ownedPet(helper, HERE), Items.IRON_SWORD);
         pet.setRules(PetRules.DEFAULT.withStance(CombatStance.RETALIATE));
         pet.setTask(HuntGameTests.hunting());
         Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(9, STAND, 4));
         zombie.setNoAi(true);
 
-        helper.succeedWhen(() -> helper.assertTrue(hurt(zombie), Component.literal("a free fencer with a slip for monsters left a zombie alone")));
+        helper.runAtTickTime(WATCH_TICKS, () -> {
+            helper.assertTrue(zombie.getHealth() == zombie.getMaxHealth(), "a slip for monsters sent a retaliating fencer after a zombie");
+            helper.succeed();
+        });
+    }
+
+    /** Where the owner's stance clears, a free fencer with a hunting slip hunts, as it always has. */
+    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = FIGHT_TICKS)
+    public static void a_free_fencer_with_a_slay_slip_hunts_where_the_stance_clears(GameTestHelper helper) {
+        AbstractPet pet = holding(ownedPet(helper, HERE), Items.IRON_SWORD);
+        pet.setTask(HuntGameTests.hunting());
+        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(9, STAND, 4));
+        zombie.setNoAi(true);
+
+        helper.succeedWhen(() -> helper.assertTrue(hurt(zombie), "a free fencer with a slip for monsters left a zombie alone"));
     }
 
     /** And without the slip, a free fencer told to retaliate has no business with a zombie that is no one's trouble. */
