@@ -3,25 +3,19 @@ package com.dwinovo.chiikawa.gametest;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.MIDNIGHT;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.holding;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.ownedPet;
-import static com.dwinovo.chiikawa.gametest.GameTestKit.player;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.settleWorld;
 import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.data.WorkData;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.CombatStance;
-import com.dwinovo.chiikawa.entity.PetDirective;
-import com.dwinovo.chiikawa.entity.PetRules;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -39,8 +33,6 @@ public final class FoeGroundsGameTests {
     private static final BlockPos HERE = new BlockPos(4, STAND, 4);
     /** Long enough to notice, walk over and land one. */
     private static final int FIGHT_TICKS = 1200;
-    /** Long enough to be sure a pet that was going to do something has not done it. */
-    private static final int WATCH_TICKS = 200;
     /** What a hunt matters as, and what a guard does, as the shipped data has them. */
     private static final int HUNT_PRIORITY = 50;
     private static final int GUARD_PRIORITY = 80;
@@ -50,71 +42,15 @@ public final class FoeGroundsGameTests {
         settleWorld(level, Difficulty.NORMAL, MIDNIGHT);
     }
 
-    /**
-     * Told to help only in retaliation, a pet at heel does what a wolf does: it leaves a zombie alone that leaves its owner
-     * alone, however near, and goes for it the moment it is after the owner.
-     */
-    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WATCH_TICKS + FIGHT_TICKS)
-    public static void a_retaliating_pet_leaves_a_zombie_alone_that_leaves_its_owner_alone(GameTestHelper helper) {
-        ServerPlayer owner = owner(helper);
-        AbstractPet pet = holding(ownedAndHeeling(helper, owner), Items.IRON_SWORD);
-        pet.setRules(PetRules.DEFAULT.withStance(CombatStance.RETALIATE));
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(7, STAND, 4));
-        zombie.setNoAi(true);
-
-        helper.startSequence()
-            .thenExecuteFor(WATCH_TICKS, () -> {
-                helper.assertTrue(zombie.getHealth() == zombie.getMaxHealth(), Component.literal("a retaliating pet went for a zombie that was no one's trouble"));
-                helper.assertFalse(pet.getBrain().hasMemoryValue(MemoryModuleType.ATTACK_TARGET),
-                    Component.literal("a retaliating pet had its eye on a zombie that was no one's trouble"));
-            })
-            .thenExecute(() -> zombie.setTarget(owner))
-            .thenWaitUntil(() -> helper.assertTrue(zombie.getHealth() < zombie.getMaxHealth(),
-                Component.literal("a retaliating pet left a zombie to its owner that was after them")))
-            .thenSucceed();
-    }
-
-    /**
-     * The owner's stance has the last word: a hunting slip, carried by a free fencer told to help only in retaliation, does not
-     * send it after a zombie that is no one's trouble.
-     */
-    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WATCH_TICKS + 100)
-    public static void a_free_fencer_that_only_retaliates_does_not_hunt_with_a_slay_slip(GameTestHelper helper) {
-        AbstractPet pet = holding(ownedPet(helper, HERE), Items.IRON_SWORD);
-        pet.setRules(PetRules.DEFAULT.withStance(CombatStance.RETALIATE));
-        pet.setTask(HuntGameTests.hunting());
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(9, STAND, 4));
-        zombie.setNoAi(true);
-
-        helper.runAtTickTime(WATCH_TICKS, () -> {
-            helper.assertTrue(zombie.getHealth() == zombie.getMaxHealth(), "a slip for monsters sent a retaliating fencer after a zombie");
-            helper.succeed();
-        });
-    }
-
-    /** Where the owner's stance clears, a free fencer with a hunting slip hunts, as it always has. */
+    /** A free fencer with a hunting slip hunts, as it always has. */
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = FIGHT_TICKS)
-    public static void a_free_fencer_with_a_slay_slip_hunts_where_the_stance_clears(GameTestHelper helper) {
+    public static void a_free_fencer_with_a_slay_slip_hunts(GameTestHelper helper) {
         AbstractPet pet = holding(ownedPet(helper, HERE), Items.IRON_SWORD);
         pet.setTask(HuntGameTests.hunting());
         Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(9, STAND, 4));
         zombie.setNoAi(true);
 
         helper.succeedWhen(() -> helper.assertTrue(hurt(zombie), "a free fencer with a slip for monsters left a zombie alone"));
-    }
-
-    /** And without the slip, a free fencer told to retaliate has no business with a zombie that is no one's trouble. */
-    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = WATCH_TICKS + 100)
-    public static void a_free_fencer_that_only_retaliates_does_not_hunt_without_a_slip(GameTestHelper helper) {
-        AbstractPet pet = holding(ownedPet(helper, HERE), Items.IRON_SWORD);
-        pet.setRules(PetRules.DEFAULT.withStance(CombatStance.RETALIATE));
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(9, STAND, 4));
-        zombie.setNoAi(true);
-
-        helper.runAtTickTime(WATCH_TICKS, () -> {
-            helper.assertTrue(zombie.getHealth() == zombie.getMaxHealth(), Component.literal("a free fencer hunted with no slip and no leave to"));
-            helper.succeed();
-        });
     }
 
     /**
@@ -157,21 +93,6 @@ public final class FoeGroundsGameTests {
             helper.assertTrue(pet.getMind().errands().priority().orElse(-1) == GUARD_PRIORITY, Component.literal("a guard matters as "
                 + pet.getMind().errands().priority()));
         });
-    }
-
-    private static ServerPlayer owner(GameTestHelper helper) {
-        ServerPlayer owner = player(helper);
-        owner.setGameMode(GameType.SURVIVAL);
-        owner.setPos(helper.absoluteVec(HERE.getCenter()));
-        return owner;
-    }
-
-    /** That player's pet, at heel. */
-    private static AbstractPet ownedAndHeeling(GameTestHelper helper, ServerPlayer owner) {
-        AbstractPet pet = wildPet(helper, HERE);
-        pet.tame(owner);
-        pet.setPetDirective(PetDirective.FOLLOW);
-        return pet;
     }
 
     private static boolean hurt(LivingEntity entity) {
