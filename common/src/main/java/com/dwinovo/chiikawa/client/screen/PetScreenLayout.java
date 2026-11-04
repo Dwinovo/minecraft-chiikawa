@@ -6,27 +6,25 @@ import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.widget.Chip;
 import com.dwinovo.chiikawa.ui.widget.Segments;
 import com.dwinovo.chiikawa.ui.widget.Switch;
-import com.dwinovo.chiikawa.ui.widget.TabStrip;
 
 /**
  * Where everything on the pet screen is, and the room the words on it have, which the screen is laid out by and the labels
- * of every language are measured against, see {@code PetScreenLabelsTest}. The panel is as big on both of its pages and its
- * top edge never moves between them, so the tabs and the pet stay where the hand left them. The pet's picture rises over the
- * panel's top edge, so what has to fit the window is the panel and that, see {@code ScreenFitTest}. Every position is from
- * the panel's top-left corner. Nothing here needs the game, so a test can ask.
+ * of every language are measured against, see {@code PetScreenLabelsTest}. The pet's picture rises over the panel's top edge,
+ * so what has to fit the window is the panel and that, see {@code ScreenFitTest}. Every position is from the panel's top-left
+ * corner. Nothing here needs the game, so a test can ask.
  *
- * <p>Where the slots are is the menu's to say, {@link PetBackpackMenu}; the card the pet's own are in and the lines on it are
- * here, and drawn round them.
+ * <p>Where the slots are is the menu's to say, {@link PetBackpackMenu}; the card the pet's own are in, the lines on it and the
+ * row under the player's hotbar are here, and drawn round them.
  */
 public final class PetScreenLayout {
     public static final int PANEL_W = 300;
     public static final int PANEL_H = 184;
-    /** How far the pet's picture rises above the panel's top edge: more than the tabs do. */
+    /** How far the pet's picture rises above the panel's top edge: the tallest of the pets, ears and all. */
     public static final int RISE = 24;
 
     // ---- the banner ---------------------------------------------------------------
 
-    /** How tall the banner is, its line along the bottom included: the page starts under it. */
+    /** How tall the banner is, its line along the bottom included: the slots start under it. */
     public static final int BANNER_H = 70;
     /** Where the banner's contents end on the right. */
     public static final int RIGHT = 290;
@@ -75,28 +73,23 @@ public final class PetScreenLayout {
     public static final int REASON_ROOM = bubble(true).width() - 2 * SpeechRow.AIR - SpeechRow.AIR - SpeechRow.ICON;
     /** The names of the orders in the control, which the cells of are as wide as their words. */
     public static final int ORDERS_ROOM = ORDERS.width();
-    /** The tabs are not to reach back over the pet. */
-    public static final int TABS_ROOM = PANEL_W - TabStrip.INSET - (MODEL.right() + UiStyle.GAP_SECTION);
 
-    // ---- the backpack page --------------------------------------------------------
+    // ---- the pet's card -----------------------------------------------------------
 
     /** The card the pet's own slots are in, the hand and the fifteen, then a line across it, then the bag and the bag's ten. */
     public static final Rect PET_CARD = new Rect(4, 74, 120, 102);
     public static final int CARD_DIVIDER_Y = 133;
 
-    // ---- the settings page --------------------------------------------------------
+    // ---- the auto-pickup row ------------------------------------------------------
 
-    /** One card as tall as the backpack's, with the one row in it. */
-    public static final Rect SETTINGS_CARD = new Rect(4, PET_CARD.y(), 286, PET_CARD.height());
-    public static final int ROW_H = SETTINGS_CARD.height() - 2;
-    public static final int FIRST_ROW_Y = SETTINGS_CARD.y() + 1;
-    /** Where a row's picture is, and its words: the title, and under it the line that says what it does. */
-    public static final int ROW_ICON_X = SETTINGS_CARD.x() + UiStyle.PAD;
-    public static final int ROW_TEXT_X = ROW_ICON_X + UiStyle.ICON + UiStyle.GAP;
-    /** Where a row's control ends. */
-    public static final int ROW_CONTROL_RIGHT = SETTINGS_CARD.right() - UiStyle.PAD;
-    /** How wide a line of the words of a row may be: the room up to its control, and the air before that. */
-    public static final int SWITCH_ROW_ROOM = ROW_CONTROL_RIGHT - Switch.WIDTH - UiStyle.PAD - ROW_TEXT_X;
+    /** Under the player's hotbar, as wide as the slots above it, down to the pet's card's bottom edge. */
+    public static final Rect PICK_UP_ROW = new Rect(PetBackpackMenu.PLAYER_INV_X - 1,
+        PetBackpackMenu.HOTBAR_Y - 1 + PetBackpackMenu.SLOT_PITCH, 9 * PetBackpackMenu.SLOT_PITCH,
+        PET_CARD.bottom() - (PetBackpackMenu.HOTBAR_Y - 1 + PetBackpackMenu.SLOT_PITCH));
+    /** Where the row's name starts, beside its picture. */
+    public static final int PICK_UP_TEXT_X = PICK_UP_ROW.x() + UiStyle.ICON + UiStyle.GAP;
+    /** How wide the name may be: the room up to the switch, and the air before that. */
+    public static final int PICK_UP_ROOM = PICK_UP_ROW.right() - Switch.WIDTH - UiStyle.GAP - PICK_UP_TEXT_X;
 
     private PetScreenLayout() {
     }
