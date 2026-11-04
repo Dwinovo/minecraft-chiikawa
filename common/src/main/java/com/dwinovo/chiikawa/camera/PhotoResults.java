@@ -58,8 +58,8 @@ public final class PhotoResults {
         }
         PhotoData shot = PhotoData.taken(stored.photo(), stored.kind(), stored.name(), pet.level(),
             pet.getDisplayName().getString());
-        Optional<ItemStack> roll = FilmRolls.record(pet.getBackpack(), PhotoScout.filmOf(camera.get()), camera.get().exposures(),
-            shot, left -> pet.spawnAtLocation((ServerLevel) pet.level(), left));
+        Optional<ItemStack> roll = FilmRolls.record(pet.getBackpack(), pet.pockets()::stow, PhotoScout.filmOf(camera.get()),
+            camera.get().exposures(), shot, left -> pet.spawnAtLocation((ServerLevel) pet.level(), left));
         if (roll.isEmpty()) {
             return false;
         }

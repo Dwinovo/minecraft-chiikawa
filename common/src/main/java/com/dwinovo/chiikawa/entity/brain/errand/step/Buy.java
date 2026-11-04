@@ -65,7 +65,7 @@ public final class Buy implements Step {
         ItemStack goods = new ItemStack(entry.item(), entry.count());
         // Paid for only once there is somewhere to put it: a pet with a full bag goes home
         // with its money rather than handing it over for nothing.
-        if (!pet.getBackpack().canAddItem(goods)) {
+        if (pet.pockets().roomFor(goods) < goods.getCount()) {
             return StepStatus.gaveUp("no_room");
         }
         if (!Wallet.pay(pet.getBackpack(), entry.buy())) {
@@ -89,7 +89,7 @@ public final class Buy implements Step {
             pet.heal(PetInteractHandler.FEED_HEAL);
             return;
         }
-        ItemStack remainder = pet.getBackpack().addItem(goods);
+        ItemStack remainder = pet.pockets().stow(goods);
         if (!remainder.isEmpty()) {
             pet.spawnAtLocation((ServerLevel) pet.level(), remainder);
         }
