@@ -54,6 +54,8 @@ public final class UiTheme {
     public static final int WOOD_DARK = 0xFFB3844F;
     /** Laid over a row the cursor is on. */
     public static final int HOVER = 0x33F49AB1;
+    /** The faint dots on a banner, so a wash of colour is paper with a pattern and not a flat fill. */
+    public static final int DOTS = 0xBFFFFFFF;
     /** Under a card, so it stands off what is behind it. */
     public static final int SHADOW = 0x46140E08;
 
