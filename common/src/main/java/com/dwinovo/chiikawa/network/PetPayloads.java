@@ -103,12 +103,15 @@ public final class PetPayloads {
      * @param next the errand it would start if it were on none, other than the one it is on
      * @param whyNotKey the translation key of why it is not at work, when it is not
      * @param lackKey the translation key of what it is short of, when that is why
+     * @param lackIcon an item to picture what it is short of by, when that is why and there is one
      */
     public record PetOutlookPayload(int pet, Optional<ResourceLocation> next, Optional<String> whyNotKey,
-                                    Optional<String> lackKey) implements MusicPayloads.Payload {
+                                    Optional<String> lackKey, Optional<ResourceLocation> lackIcon)
+            implements MusicPayloads.Payload {
         public static PetOutlookPayload read(FriendlyByteBuf buffer) {
             return new PetOutlookPayload(buffer.readVarInt(), buffer.readOptional(FriendlyByteBuf::readResourceLocation),
-                buffer.readOptional(FriendlyByteBuf::readUtf), buffer.readOptional(FriendlyByteBuf::readUtf));
+                buffer.readOptional(FriendlyByteBuf::readUtf), buffer.readOptional(FriendlyByteBuf::readUtf),
+                buffer.readOptional(FriendlyByteBuf::readResourceLocation));
         }
 
         /**
@@ -125,7 +128,8 @@ public final class PetPayloads {
                     .thenComparing(line -> line.score().orElse(0.0F)))
                 .map(DecisionTrace.Line::errand);
             return new PetOutlookPayload(pet, next, whyNot.map(WhyNot::reasonKey),
-                whyNot.flatMap(WhyNot::lack).map(LackKey::translationKey));
+                whyNot.flatMap(WhyNot::lack).map(LackKey::translationKey),
+                whyNot.flatMap(WhyNot::lack).flatMap(LackKey::icon));
         }
 
         @Override
@@ -139,6 +143,7 @@ public final class PetPayloads {
             buffer.writeOptional(next, FriendlyByteBuf::writeResourceLocation);
             buffer.writeOptional(whyNotKey, FriendlyByteBuf::writeUtf);
             buffer.writeOptional(lackKey, FriendlyByteBuf::writeUtf);
+            buffer.writeOptional(lackIcon, FriendlyByteBuf::writeResourceLocation);
         }
     }
 }

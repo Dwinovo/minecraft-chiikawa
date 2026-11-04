@@ -3,6 +3,8 @@ package com.dwinovo.chiikawa.client.ui;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.dwinovo.chiikawa.network.PetPayloads.PetOutlookPayload;
+import com.dwinovo.chiikawa.qualification.LicenceView;
+import java.util.List;
 import java.util.Optional;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
@@ -16,7 +18,7 @@ class PetStatusTextTest {
     @Test
     void whatThePetIsShortOfIsSaidInPlaceOfTheReasonItGaveWhichMayBeAboutSomethingElse() {
         PetOutlookPayload outlook = new PetOutlookPayload(1, Optional.of(WANDER), Optional.of("intent.chiikawa.fail.no_farmland"),
-            Optional.of("tag.item.chiikawa.entity_plant_crops"));
+            Optional.of("tag.item.chiikawa.entity_plant_crops"), Optional.empty());
 
         Component words = PetStatusText.notWorking(outlook).orElseThrow();
 
@@ -28,8 +30,8 @@ class PetStatusTextTest {
 
     @Test
     void withNothingShortTheReasonIsSaidAsItIsAndAPetAtWorkHasNone() {
-        PetOutlookPayload seeking = new PetOutlookPayload(1, Optional.empty(), Optional.of("intent.chiikawa.fail.no_crop"), Optional.empty());
-        PetOutlookPayload atWork = new PetOutlookPayload(1, Optional.of(WANDER), Optional.empty(), Optional.empty());
+        PetOutlookPayload seeking = new PetOutlookPayload(1, Optional.empty(), Optional.of("intent.chiikawa.fail.no_crop"), Optional.empty(), Optional.empty());
+        PetOutlookPayload atWork = new PetOutlookPayload(1, Optional.of(WANDER), Optional.empty(), Optional.empty(), Optional.empty());
 
         assertEquals("intent.chiikawa.fail.no_crop", ((TranslatableContents) PetStatusText.notWorking(seeking).orElseThrow().getContents()).getKey());
         assertEquals(Optional.empty(), PetStatusText.notWorking(atWork));
@@ -38,5 +40,37 @@ class PetStatusTextTest {
     @Test
     void whatItWouldDoNextIsNamedAsTheErrandIsEverywhere() {
         assertEquals("intent.chiikawa.wander", ((TranslatableContents) PetStatusText.next(WANDER).getContents()).getKey());
+    }
+
+    @Test
+    void aTimerReadsAsMinutesAndSecondsWithTheSecondsToTwoPlaces() {
+        assertEquals("3:20", PetStatusText.clock(200 * 20));
+        assertEquals("0:05", PetStatusText.clock(5 * 20));
+        assertEquals("12:00", PetStatusText.clock(720 * 20));
+        assertEquals("0:00", PetStatusText.clock(19));
+    }
+
+    private static LicenceView licence(String id, boolean practised, Optional<ResourceLocation> job) {
+        return new LicenceView(new ResourceLocation("chiikawa", id), new ResourceLocation("book"),
+            2, 5, practised, false, false, job);
+    }
+
+    @Test
+    void aLicenceWhoseNextStepIsTheOwnersIsTheOneShownBeforeTheOneForTheWork() {
+        ResourceLocation farmer = new ResourceLocation("chiikawa", "farmer");
+        LicenceView forTheWork = licence("weeding", false, Optional.of(farmer));
+        LicenceView ready = licence("music", true, Optional.empty());
+
+        assertEquals(Optional.of(ready), PetStatusText.licenceShown(List.of(forTheWork, ready), farmer));
+        assertEquals(Optional.of(forTheWork), PetStatusText.licenceShown(List.of(forTheWork), farmer));
+    }
+
+    @Test
+    void withNoLicenceReadyAndNoneForTheWorkNoneIsShown() {
+        ResourceLocation farmer = new ResourceLocation("chiikawa", "farmer");
+        ResourceLocation archer = new ResourceLocation("chiikawa", "archer");
+
+        assertEquals(Optional.empty(), PetStatusText.licenceShown(List.of(licence("shooting", false, Optional.of(archer))), farmer));
+        assertEquals(Optional.empty(), PetStatusText.licenceShown(List.of(), farmer));
     }
 }

@@ -61,7 +61,7 @@ class PetOutlookTest {
         PetOutlookPayload outlook = PetOutlookPayload.of(PET, look, whyNot(look));
 
         assertEquals(new PetOutlookPayload(PET, Optional.of(ErrandIds.WANDER), Optional.of("intent.chiikawa.fail.no_farmland"),
-            Optional.of("tag.item.chiikawa.entity_plant_crops")), outlook);
+            Optional.of("tag.item.chiikawa.entity_plant_crops"), Optional.empty()), outlook);
     }
 
     @Test
@@ -85,7 +85,7 @@ class PetOutlookTest {
 
         PetOutlookPayload outlook = PetOutlookPayload.of(PET, look, whyNot(look));
 
-        assertEquals(new PetOutlookPayload(PET, Optional.of(ErrandIds.WANDER), Optional.empty(), Optional.empty()), outlook);
+        assertEquals(new PetOutlookPayload(PET, Optional.of(ErrandIds.WANDER), Optional.empty(), Optional.empty(), Optional.empty()), outlook);
         // Were it on none, harvesting is the first thing it would do.
         assertEquals(Optional.of(WorkData.HARVEST), PetOutlookPayload.of(PET, look(FARM, view, Optional.empty()), Optional.empty()).next());
     }
@@ -111,7 +111,7 @@ class PetOutlookTest {
     @Test
     void whatTheScreenIsToldComesBackAsItWasSent() {
         PetOutlookPayload outlook = new PetOutlookPayload(PET, Optional.of(WorkData.HARVEST), Optional.of("intent.chiikawa.fail.no_crop"),
-            Optional.of("tag.item.minecraft.arrows"));
+            Optional.of("tag.item.minecraft.arrows"), Optional.of(new ResourceLocation("arrow")));
         FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
 
         outlook.write(buffer);
