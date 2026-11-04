@@ -7,7 +7,6 @@ import com.dwinovo.chiikawa.data.LaborBoardLevelData;
 import com.dwinovo.chiikawa.data.LanguageData;
 import com.dwinovo.chiikawa.testing.MinecraftFont;
 import com.dwinovo.chiikawa.ui.TextWrap;
-import com.dwinovo.chiikawa.ui.widget.TabStrip;
 import com.dwinovo.chiikawa.ui.widget.TitledPanel;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -78,22 +77,21 @@ class ScreenFitTest {
     }
 
     /**
-     * The pet screen is one size on both of its pages, and has the pet rising over its top edge and the tabs standing on it:
-     * the panel and what rises over it fit the smallest window in height and in width, the margin kept on every side.
+     * The pet screen has the pet rising over its top edge: the panel and what rises over it fit the smallest window in height
+     * and in width, the margin kept on every side.
      */
     @Test
     void thePetScreenAndThePetOverItFitTheSmallestWindowInWidthAndHeight() {
         int left = PetScreenLayout.left(PanelFit.SMALLEST_WIDTH);
         int top = PetScreenLayout.top(SMALLEST);
-        int highest = top - Math.max(PetScreenLayout.RISE, TabStrip.HEIGHT);
+        int highest = top - PetScreenLayout.RISE;
 
         assertTrue(left >= PanelFit.MARGIN, "the pet screen starts " + left + " from the window's left edge");
         assertTrue(left + PetScreenLayout.PANEL_W <= PanelFit.SMALLEST_WIDTH - PanelFit.MARGIN,
             "the pet screen ends at " + (left + PetScreenLayout.PANEL_W) + " of " + PanelFit.SMALLEST_WIDTH);
-        assertTrue(highest >= PanelFit.MARGIN, "the pet and the tabs reach up to " + highest);
+        assertTrue(highest >= PanelFit.MARGIN, "the pet reaches up to " + highest);
         assertTrue(top + PetScreenLayout.PANEL_H <= SMALLEST - PanelFit.MARGIN,
             "the pet screen ends at " + (top + PetScreenLayout.PANEL_H) + " of " + SMALLEST);
-        assertTrue(PetScreenLayout.RISE >= TabStrip.HEIGHT, "the tabs stand higher than the pet rises");
     }
 
     @Test
