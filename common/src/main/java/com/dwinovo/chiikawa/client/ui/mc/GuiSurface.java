@@ -2,6 +2,7 @@ package com.dwinovo.chiikawa.client.ui.mc;
 
 import com.dwinovo.chiikawa.ui.DrawSurface;
 import com.dwinovo.chiikawa.ui.Icon;
+import com.dwinovo.chiikawa.ui.UiStyle;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
@@ -33,10 +34,30 @@ public record GuiSurface(GuiGraphicsExtractor graphics, Font font) implements Dr
     }
 
     @Override
-    public void drawIcon(Icon icon, int x, int y) {
-        if (icon instanceof ItemIcon item) {
-            graphics.item(item.stack(), x, y);
+    public void drawIcon(Icon icon, int x, int y, int size) {
+        if (!(icon instanceof ItemIcon item)) {
+            return;
         }
+        if (size == UiStyle.ICON) {
+            graphics.item(item.stack(), x, y);
+            return;
+        }
+        // The game draws an item sixteen wide wherever it is told to; a smaller one is the same item under a smaller scale.
+        float scale = (float) size / UiStyle.ICON;
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(x, y);
+        graphics.pose().scale(scale, scale);
+        graphics.item(item.stack(), 0, 0);
+        graphics.pose().popMatrix();
+    }
+
+    /** Draws text {@code scale} times as large with its top-left corner at x, y, for a name that is the heading of a card. */
+    public void drawTextScaled(String text, int x, int y, int scale, int argb) {
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(x, y);
+        graphics.pose().scale(scale, scale);
+        graphics.text(font, text, 0, 0, argb, false);
+        graphics.pose().popMatrix();
     }
 
     @Override
