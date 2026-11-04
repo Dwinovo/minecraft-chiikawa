@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import com.dwinovo.chiikawa.data.LanguageData;
-import com.dwinovo.chiikawa.entity.CombatStance;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.brain.errand.LackKey;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkActions;
@@ -64,26 +63,6 @@ class PetScreenLabelsTest {
             if (width > PetScreenLayout.ORDERS_ROOM) {
                 tooWide.add(locale + " orders " + names + " need " + width + ", the control is " + PetScreenLayout.ORDERS_ROOM);
             }
-        }
-        assertEquals(List.of(), tooWide);
-    }
-
-    @Test
-    void theThreeStancesFitTheirControlAndEachHasALineThatFitsItsRow() {
-        List<String> tooWide = new ArrayList<>();
-        for (String locale : LanguageData.LOCALES) {
-            Map<String, String> words = collect(locale);
-            List<String> names = new ArrayList<>();
-            for (CombatStance stance : SettingsPage.STANCES) {
-                String key = PET + "stance." + stance.getSerializedName();
-                names.add(get(words, key));
-                fits(tooWide, locale, key + ".hint", get(words, key + ".hint"), PetScreenLayout.STANCE_ROW_ROOM);
-            }
-            int width = Segments.minWidth(MinecraftFont::width, names);
-            if (width > PetScreenLayout.STANCE_W) {
-                tooWide.add(locale + " stances " + names + " need " + width + ", the control is " + PetScreenLayout.STANCE_W);
-            }
-            fits(tooWide, locale, PET + "stance", get(words, PET + "stance"), PetScreenLayout.STANCE_ROW_ROOM);
         }
         assertEquals(List.of(), tooWide);
     }

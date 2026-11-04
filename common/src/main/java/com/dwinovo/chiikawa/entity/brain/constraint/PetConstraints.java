@@ -173,7 +173,7 @@ public final class PetConstraints {
      * @return the grounds the owner's orders let the pet fight on now, see {@link FoeCandidates}
      */
     public static Set<Ground> foesOf(AbstractPet pet, PetOwnership ownership, boolean fights) {
-        return FoeCandidates.of(pet.getRules().stance(), pet.getPetDirective(), ownership, fights);
+        return FoeCandidates.of(pet.getPetDirective(), ownership, fights);
     }
 
     private static Optional<GlobalPos> followableOwnerPos(AbstractPet pet) {
