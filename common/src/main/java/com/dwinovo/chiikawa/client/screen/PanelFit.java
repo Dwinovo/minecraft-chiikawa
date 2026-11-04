@@ -12,6 +12,8 @@ public final class PanelFit {
      * window 320 by 240 scaled pixels, so a screen has to fit 240 high, as a 1280 by 720 window at scale 3 is exactly that.
      */
     public static final int SMALLEST_WINDOW = 240;
+    /** And how wide it is: the same scale leaves the window 320 scaled pixels wide at the least, so a screen has to fit that. */
+    public static final int SMALLEST_WIDTH = 320;
     /** Kept clear between a panel, and the board hung over its top edge, and the window's edges. */
     public static final int MARGIN = 4;
 
