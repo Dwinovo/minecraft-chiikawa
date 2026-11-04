@@ -10,7 +10,7 @@ class PixelArtTest {
     private static final List<PixelArt> SHIPPED = List.of(
         PixelArt.SLIP, PixelArt.SPEECH, PixelArt.PAWS, PixelArt.CUSHION, PixelArt.TUFT, PixelArt.CHECK,
         PixelArt.SHOP, PixelArt.GIFT, PixelArt.PHOTO, PixelArt.PICK_UP, PixelArt.SOCIAL, PixelArt.QUESTION,
-        PixelArt.NEXT);
+        PixelArt.NEXT, PixelArt.GEAR, PixelArt.BAG);
 
     @Test
     void everyIconFitsWhereAnItemWould() {
@@ -29,6 +29,12 @@ class PixelArtTest {
                 }
             }
         }
+    }
+
+    @Test
+    void theGearIsTheSizeOfTheTabItIsDrawnOn() {
+        assertEquals(14, PixelArt.GEAR.width());
+        assertEquals(14, PixelArt.GEAR.height());
     }
 
     @Test
