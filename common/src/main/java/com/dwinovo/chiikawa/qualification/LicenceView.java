@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ExtraCodecs;
 
 /**
  * What a pet's screen shows about one of its licences, worked out on the server, where the
@@ -33,7 +34,7 @@ public record LicenceView(ResourceLocation qualification, ResourceLocation book,
         Codec.BOOL.fieldOf("practised").forGetter(LicenceView::practised),
         Codec.BOOL.fieldOf("called").forGetter(LicenceView::called),
         Codec.BOOL.fieldOf("awaiting_results").forGetter(LicenceView::awaitingResults),
-        ResourceLocation.CODEC.optionalFieldOf("job").forGetter(LicenceView::job)
+        ExtraCodecs.strictOptionalField(ResourceLocation.CODEC, "job").forGetter(LicenceView::job)
     ).apply(instance, LicenceView::new));
     public static final Codec<List<LicenceView>> LIST_CODEC = CODEC.listOf();
 
