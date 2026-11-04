@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.dwinovo.chiikawa.init.InitTag;
 import java.util.Optional;
 import net.minecraft.SharedConstants;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.Bootstrap;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ class LackKeyTest {
 
     @Test
     void anItemIsPicturedByItself() {
-        ResourceLocation musicBox = ResourceLocation.fromNamespaceAndPath("chiikawa", "music_box");
+        Identifier musicBox = Identifier.fromNamespaceAndPath("chiikawa", "music_box");
 
         assertEquals(Optional.of(musicBox), LackKey.item(musicBox).icon());
     }
