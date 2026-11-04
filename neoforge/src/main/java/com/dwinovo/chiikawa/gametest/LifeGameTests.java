@@ -120,7 +120,7 @@ public final class LifeGameTests {
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = RITUAL_TICKS)
     public static void a_doll_on_a_cake_brings_the_pet_back_with_its_tool(GameTestHelper helper) {
         AbstractPet pet = holding(ownedPet(helper, new BlockPos(3, STAND, 3)), Items.WOODEN_HOE);
-        pet.getBackpack().addItem(new ItemStack(Items.WHEAT, 5));
+        pet.pockets().stow(new ItemStack(Items.WHEAT, 5));
         pet.hurt(pet.damageSources().generic(), pet.getMaxHealth() * 2.0F);
 
         BlockPos cake = new BlockPos(5, STAND, 3);
