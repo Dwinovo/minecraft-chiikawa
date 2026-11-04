@@ -118,7 +118,7 @@ public final class PetStatusText {
      * @return the one licence the pet's screen shows: a licence whose next step is its owner's to take, since that is the
      *         one worth a look; else the licence for the work the pet does; else none
      */
-    public static Optional<LicenceView> licenceShown(List<LicenceView> licences, ResourceLocation job) {
+    public static Optional<LicenceView> licenceShown(List<LicenceView> licences, Identifier job) {
         return licences.stream().filter(LicenceView::ready).findFirst()
             .or(() -> licences.stream().filter(licence -> licence.job().filter(job::equals).isPresent()).findFirst());
     }
