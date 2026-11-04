@@ -126,10 +126,8 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
 
     private void renderNotes(GuiGraphics graphics, int mouseX, int mouseY) {
         GuiSurface surface = new GuiSurface(graphics, this.font);
-        int tab = tabs.at(mouseX, mouseY);
-        List<String> lines = tab >= 0
-            ? List.of(Component.translatable(Page.values()[tab].key).getString())
-            : notes.at(mouseX, mouseY).orElse(List.of());
+        // The tabs say their own names, so there is nothing to add under the cursor on them.
+        List<String> lines = tabs.at(mouseX, mouseY) >= 0 ? List.of() : notes.at(mouseX, mouseY).orElse(List.of());
         if (!lines.isEmpty()) {
             surface.onTop(() -> Tooltip.draw(surface, lines, mouseX, mouseY, this.width, this.height));
         }
