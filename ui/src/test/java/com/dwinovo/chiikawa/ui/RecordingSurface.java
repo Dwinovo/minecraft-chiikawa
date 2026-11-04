@@ -15,7 +15,10 @@ public final class RecordingSurface implements DrawSurface {
     public record Text(String text, int x, int y, int argb) {
     }
 
-    public record DrawnIcon(Icon icon, int x, int y) {
+    public record DrawnIcon(Icon icon, int x, int y, int size) {
+        public DrawnIcon(Icon icon, int x, int y) {
+            this(icon, x, y, UiStyle.ICON);
+        }
     }
 
     public final List<Rectangle> rects = new ArrayList<>();
@@ -33,8 +36,8 @@ public final class RecordingSurface implements DrawSurface {
     }
 
     @Override
-    public void drawIcon(Icon icon, int x, int y) {
-        icons.add(new DrawnIcon(icon, x, y));
+    public void drawIcon(Icon icon, int x, int y, int size) {
+        icons.add(new DrawnIcon(icon, x, y, size));
     }
 
     @Override
