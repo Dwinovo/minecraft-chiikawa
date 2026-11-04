@@ -9,7 +9,6 @@ import com.dwinovo.chiikawa.entity.brain.errand.LackKey;
 import com.dwinovo.chiikawa.entity.brain.errand.work.WorkActions;
 import com.dwinovo.chiikawa.testing.MinecraftFont;
 import com.dwinovo.chiikawa.ui.widget.Segments;
-import com.dwinovo.chiikawa.ui.widget.TabStrip;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,8 +22,8 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Every word drawn on the pet screen fits the room the screen draws it in, in every language, measured with the game's own
- * font: the banner's name, job and licence, the speech bubble, the tabs, the order and stance controls, and the two rows of
- * the settings page. A word that does not fit is shortened in its language and not cut with an ellipsis, which a player
+ * font: the banner's name, job and licence, the speech bubble, the order control, and the auto-pickup row under the hotbar.
+ * A word that does not fit is shortened in its language and not cut with an ellipsis, which a player
  * reads as a word nobody finished. The rooms are {@link PetScreenLayout}'s. What waits under the cursor is not here: that has
  * the room of the screen.
  */
@@ -35,19 +34,6 @@ class PetScreenLabelsTest {
     static void bootstrap() {
         SharedConstants.tryDetectVersion();
         Bootstrap.bootStrap();
-    }
-
-    @Test
-    void theTabsAreNamedAndStillStandClearOfThePet() {
-        List<String> tooWide = new ArrayList<>();
-        for (String locale : LanguageData.LOCALES) {
-            Map<String, String> words = collect(locale);
-            int strip = TabStrip.stripWidth(MinecraftFont::width, List.of(get(words, PET + "tab.backpack"), get(words, PET + "tab.settings")));
-            if (strip > PetScreenLayout.TABS_ROOM) {
-                tooWide.add(locale + " tabs are " + strip + " wide, the room is " + PetScreenLayout.TABS_ROOM);
-            }
-        }
-        assertEquals(List.of(), tooWide);
     }
 
     @Test
@@ -68,12 +54,12 @@ class PetScreenLabelsTest {
     }
 
     @Test
-    void pickingUpHasATitleAndALineThatFitItsRow() {
+    void autoPickupHasANameThatFitsItsRowAndALineUnderTheCursorInEveryLanguage() {
         List<String> tooWide = new ArrayList<>();
         for (String locale : LanguageData.LOCALES) {
             Map<String, String> words = collect(locale);
-            fits(tooWide, locale, PET + "pick_up", get(words, PET + "pick_up"), PetScreenLayout.SWITCH_ROW_ROOM);
-            fits(tooWide, locale, PET + "pick_up.hint", get(words, PET + "pick_up.hint"), PetScreenLayout.SWITCH_ROW_ROOM);
+            fits(tooWide, locale, PET + "pick_up", get(words, PET + "pick_up"), PetScreenLayout.PICK_UP_ROOM);
+            assertFalse(get(words, PET + "pick_up.hint").isBlank(), "nothing is said of picking up in " + locale);
         }
         assertEquals(List.of(), tooWide);
     }

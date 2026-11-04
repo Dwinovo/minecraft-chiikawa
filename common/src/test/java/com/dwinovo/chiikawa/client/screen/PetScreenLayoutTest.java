@@ -8,9 +8,10 @@ import com.dwinovo.chiikawa.ui.Rect;
 import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.widget.Hearts;
 import com.dwinovo.chiikawa.ui.widget.Segments;
+import com.dwinovo.chiikawa.ui.widget.Switch;
 import org.junit.jupiter.api.Test;
 
-/** The pet screen's layout is one drawing: the slots the menu places sit in the cards the screen draws round them. */
+/** The pet screen's layout is one drawing: the slots the menu places sit in the card the screen draws round them, and the one row it adds is under the hotbar. */
 class PetScreenLayoutTest {
     private static Rect well(int slotX, int slotY) {
         return new Rect(slotX - 1, slotY - 1, UiStyle.SLOT, UiStyle.SLOT);
@@ -67,14 +68,27 @@ class PetScreenLayoutTest {
     }
 
     @Test
-    void theCardsAreUnderTheBannerAndInsideThePanel() {
+    void theCardIsUnderTheBannerAndInsideThePanel() {
         Rect panel = new Rect(0, 0, PetScreenLayout.PANEL_W, PetScreenLayout.PANEL_H);
 
-        for (Rect card : new Rect[] {PetScreenLayout.PET_CARD, PetScreenLayout.SETTINGS_CARD}) {
-            assertTrue(inside(panel, card) && card.y() > PetScreenLayout.BANNER_H, card + " is not under the banner in the panel");
-        }
-        assertEquals(PetScreenLayout.PET_CARD.y(), PetScreenLayout.SETTINGS_CARD.y());
-        assertEquals(PetScreenLayout.PET_CARD.bottom(), PetScreenLayout.SETTINGS_CARD.bottom());
+        assertTrue(inside(panel, PetScreenLayout.PET_CARD) && PetScreenLayout.PET_CARD.y() > PetScreenLayout.BANNER_H,
+            PetScreenLayout.PET_CARD + " is not under the banner in the panel");
+    }
+
+    @Test
+    void theAutoPickupRowIsUnderTheHotbarAsWideAsTheSlotsAndEndsWithThePetsCard() {
+        int pitch = PetBackpackMenu.SLOT_PITCH;
+        Rect hotbar = new Rect(PetBackpackMenu.PLAYER_INV_X - 1, PetBackpackMenu.HOTBAR_Y - 1, 9 * pitch, pitch);
+        Rect row = PetScreenLayout.PICK_UP_ROW;
+
+        assertEquals(hotbar.x(), row.x(), "the row does not start at the slots' left edge");
+        assertEquals(hotbar.right(), row.right(), "the row does not end at the slots' right edge");
+        assertEquals(hotbar.bottom(), row.y(), "the row is not right under the hotbar");
+        assertEquals(PetScreenLayout.PET_CARD.bottom(), row.bottom(), "the row does not end with the pet's card");
+        assertTrue(inside(new Rect(0, 0, PetScreenLayout.PANEL_W, PetScreenLayout.PANEL_H), row), row + " is not in the panel");
+        assertTrue(row.height() >= Switch.HEIGHT && row.height() >= UiStyle.ICON, "the switch or its picture does not fit the row");
+        assertTrue(PetScreenLayout.PICK_UP_TEXT_X >= row.x() + UiStyle.ICON && PetScreenLayout.PICK_UP_ROOM > 0,
+            "no room for the name between the picture and the switch");
     }
 
     @Test
@@ -101,14 +115,5 @@ class PetScreenLayoutTest {
         assertEquals(-PetScreenLayout.RISE, model.y());
         assertTrue(model.bottom() > PetScreenLayout.FLOOR_Y && model.bottom() < PetScreenLayout.BANNER_H);
         assertTrue(PetScreenLayout.SHADOW.bottom() <= model.bottom() + 1);
-    }
-
-    @Test
-    void theSettingsRowFillsTheCard() {
-        Rect card = PetScreenLayout.SETTINGS_CARD;
-
-        assertEquals(card.y() + 1, PetScreenLayout.FIRST_ROW_Y);
-        assertTrue(PetScreenLayout.FIRST_ROW_Y + PetScreenLayout.ROW_H <= card.bottom() - 1);
-        assertTrue(PetScreenLayout.SWITCH_ROW_ROOM > 0);
     }
 }
