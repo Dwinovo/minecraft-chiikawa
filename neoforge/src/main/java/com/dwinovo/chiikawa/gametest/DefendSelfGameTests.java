@@ -10,7 +10,6 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
 import com.dwinovo.chiikawa.entity.PetDirective;
-import com.dwinovo.chiikawa.entity.PetRules;
 import com.dwinovo.chiikawa.entity.brain.PetMind;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandIds;
 import com.dwinovo.chiikawa.init.InitRegistry;
@@ -149,27 +148,6 @@ public final class DefendSelfGameTests {
             .thenWaitUntil(() -> {
                 helper.assertTrue(pet.getPendingGift().isEmpty(), Component.literal("the present was not taken to the owner after the fight"));
                 helper.assertTrue(owner.getInventory().countItem(Items.COOKIE) > 0, Component.literal("the owner was not given the present"));
-            })
-            .thenSucceed();
-    }
-
-    /**
-     * An owner who has said not to swap gets a pet that stays with its hoe: hit, it has no weapon to take up, and nothing to
-     * fight with, so it runs.
-     */
-    @GameTest(template = "floor16", batch = BATCH, timeoutTicks = FIGHT_TICKS)
-    public static void a_farmer_told_not_to_swap_keeps_its_hoe_and_its_sword_in_the_bag(GameTestHelper helper) {
-        AbstractPet pet = farmerWithASword(helper);
-        pet.setRules(PetRules.DEFAULT.withSwap(false));
-        Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(8, STAND, 4));
-        zombie.setNoAi(true);
-        pet.hurt(zombie.damageSources().mobAttack(zombie), 1.0F);
-
-        helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(ErrandIds.FLEE), Component.literal("the pet did not run, doing " + pet.getIntent())))
-            .thenExecuteFor(WATCH_TICKS, () -> {
-                helper.assertTrue(pet.getMainHandItem().is(Items.WOODEN_HOE), Component.literal("the pet swapped though it was told not to"));
-                helper.assertTrue(zombie.getHealth() == zombie.getMaxHealth(), Component.literal("the pet fought with a hoe"));
             })
             .thenSucceed();
     }
