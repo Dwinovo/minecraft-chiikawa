@@ -17,7 +17,7 @@ class HeaderRowTest {
     }
 
     private static HeaderRow place(String name, String job, String rank, String money, String eager) {
-        return HeaderRow.place(HeaderRowTest::width, name, job, Optional.ofNullable(rank), money, Optional.ofNullable(eager));
+        return HeaderRow.place(HeaderRowTest::width, name, job, true, Optional.ofNullable(rank), money, Optional.ofNullable(eager));
     }
 
     @Test
@@ -81,6 +81,15 @@ class HeaderRowTest {
         assertTrue(HeaderRow.wordsIn(row.jobWidth()) >= HeaderRow.LEAST_WORDS, "the job lost all its words");
         assertTrue(HeaderRow.wordsIn(row.rankWidth()) >= HeaderRow.LEAST_WORDS, "the licence lost all its words");
         assertTrue(row.nameWidth() < width("A name somebody gave a pet and is very long indeed"), "the name was not cut");
+    }
+
+    @Test
+    void aJobWithNoPictureIsOnlyItsWordsAndTheAirRoundThem() {
+        HeaderRow row = HeaderRow.place(HeaderRowTest::width, "Usagi", "None", false, Optional.empty(), "12", Optional.empty());
+
+        assertEquals(Chip.overhead(false) + width("None"), row.jobWidth());
+        assertTrue(row.jobWidth() < Chip.overhead() + width("None"));
+        assertEquals(width("None"), row.jobWords());
     }
 
     @Test

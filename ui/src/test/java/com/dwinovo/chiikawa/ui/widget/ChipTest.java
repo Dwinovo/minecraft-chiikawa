@@ -44,4 +44,13 @@ class ChipTest {
         Chip.draw(plain, (s, x, y) -> { }, "4", 10, 20, UiTheme.SURFACE, false);
         assertFalse(plain.hasRectOf(UiTheme.ACCENT), "a dot on a chip that is not marked");
     }
+
+    @Test
+    void aChipWithNoPictureIsItsWordsAloneWithNoGapBeforeThem() {
+        int width = Chip.draw(surface, null, "None", 10, 20, UiTheme.SURFACE, false);
+
+        assertEquals(Chip.overhead(false) + surface.textWidth("None"), width);
+        assertTrue(width < Chip.width(surface, "None"));
+        assertEquals(10 + (width - surface.textWidth("None")) / 2, surface.texts.get(0).x(), "the words are not centred in the chip");
+    }
 }
