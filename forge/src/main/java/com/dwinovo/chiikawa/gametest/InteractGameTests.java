@@ -257,7 +257,7 @@ public final class InteractGameTests {
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         owner.setShiftKeyDown(false);
-        int coins = Items.EMERALD.getDefaultMaxStackSize() / 2;
+        int coins = Items.EMERALD.getMaxStackSize() / 2;
         owner.setItemInHand(InteractionHand.MAIN_HAND, Wallet.coins(coins));
 
         pet.mobInteract(owner, InteractionHand.MAIN_HAND);

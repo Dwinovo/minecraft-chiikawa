@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 /** Where a pet puts things: its own pockets, and the bag's only while it wears one, never the hand or the bag's slot. */
 class PetPocketsTest {
     private static final int FIRST_POCKET = AbstractPet.BAG_SLOT + 1;
-    private static final int STACK = Items.EMERALD.getDefaultMaxStackSize();
+    private static final int STACK = Items.EMERALD.getMaxStackSize();
     private static final int POCKETS = AbstractPet.BACKPACK_SIZE - FIRST_POCKET;
 
     private final SimpleContainer backpack = new SimpleContainer(AbstractPet.FULL_BACKPACK_SIZE);
