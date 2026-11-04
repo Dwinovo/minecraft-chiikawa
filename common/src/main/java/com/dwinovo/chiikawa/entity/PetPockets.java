@@ -34,7 +34,7 @@ public final class PetPockets {
         int end = end();
         for (int slot = start(); slot < end && !left.isEmpty(); slot++) {
             ItemStack held = backpack.getItem(slot);
-            if (!held.isEmpty() && ItemStack.isSameItemSameComponents(held, left)) {
+            if (!held.isEmpty() && ItemStack.isSameItemSameTags(held, left)) {
                 int moved = Math.min(left.getCount(), capacityOf(held) - held.getCount());
                 if (moved > 0) {
                     held.grow(moved);
@@ -62,7 +62,7 @@ public final class PetPockets {
             ItemStack held = backpack.getItem(slot);
             if (held.isEmpty()) {
                 room += capacityOf(stack);
-            } else if (ItemStack.isSameItemSameComponents(held, stack)) {
+            } else if (ItemStack.isSameItemSameTags(held, stack)) {
                 room += capacityOf(held) - held.getCount();
             }
         }
