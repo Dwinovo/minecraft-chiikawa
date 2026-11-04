@@ -23,7 +23,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
  *
  * <p>This is the only AI class that reads {@link PetDirective}. Every rule that is
  * a mode check, whatever the errand or sensor, lives in {@link #anchorOf},
- * {@link #allows} or {@link #foesOf}, and so does the owner's switching a kind of errand off.
+ * {@link #allows} or {@link #foesOf}, and so does the owner's switching picking up off.
  */
 public final class PetConstraints {
     private PetConstraints() {
@@ -120,7 +120,7 @@ public final class PetConstraints {
     }
 
     /**
-     * Pure permission table. Wild pets ignore the directive. A kind of errand the owner has switched off is not
+     * Pure permission table. Wild pets ignore the directive. Picking up, when the owner has switched it off, is not
      * permitted whatever the directive says, and nor are pastimes in a world that has turned them off.
      *
      * @param pastimes the world's setting for how often pets pass the time; none at all forbids the pastimes
