@@ -1,7 +1,6 @@
 package com.dwinovo.chiikawa.platform;
 
 import com.dwinovo.chiikawa.platform.services.IItemTransferHelper;
-import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -9,10 +8,7 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.Container;
-import com.dwinovo.chiikawa.entity.AbstractPet;
 
 public class FabricItemTransferHelper implements IItemTransferHelper {
     @Override
@@ -26,17 +22,6 @@ public class FabricItemTransferHelper implements IItemTransferHelper {
         return insertIntoStorage(storage, stack, simulate);
     }
 
-    @Override
-    public boolean hasEntityStorage(Entity entity) {
-        return findEntityStorage(entity) != null;
-    }
-
-    @Override
-    public int insertIntoEntity(Entity entity, ItemStack stack, boolean simulate) {
-        Storage<ItemVariant> storage = findEntityStorage(entity);
-        return insertIntoStorage(storage, stack, simulate);
-    }
-
     private static Storage<ItemVariant> findBlockStorage(ServerLevel level, BlockPos pos) {
         Storage<ItemVariant> storage = ItemStorage.SIDED.find(level, pos, null);
         if (storage != null) {
@@ -47,16 +32,6 @@ public class FabricItemTransferHelper implements IItemTransferHelper {
             if (storage != null) {
                 return storage;
             }
-        }
-        return null;
-    }
-
-    private static Storage<ItemVariant> findEntityStorage(Entity entity) {
-        if (entity instanceof AbstractPet pet) {
-            return ContainerStorage.of(pet.getBackpack(), null);
-        }
-        if (entity instanceof Container container) {
-            return ContainerStorage.of(container, null);
         }
         return null;
     }
