@@ -119,11 +119,7 @@ public final class LanguageData {
                     "在家附近干活、逛街、领牌子");
             addPetOutlookTranslations(adder, "需要%s", "接下来想做的事", "为什么没在干活");
             addPetRulesTranslations(adder,
-                    "逛商店",
-                    "送礼物",
-                    "拍照",
                     "捡东西",
-                    "串门",
                     "开着：会自己去做",
                     "关着：不会去做",
                     "主动清怪",
@@ -131,9 +127,7 @@ public final class LanguageData {
                     "只帮你反击",
                     "只打攻击你的和你正在打的",
                     "不参战",
-                    "跟着你但不动手，被打了就躲到你身后",
-                    "自卫时换武器",
-                    "被攻击时从背包里换上武器还手，打完换回工具");
+                    "跟着你但不动手，被打了就躲到你身后");
             // What the pets say (design 0.1.1, section 3), in the words Chinese fans know the lines by.
             addVoiceLines(adder, "chiikawa", VoiceMoment.TAME, "哇……");
             addVoiceLines(adder, "chiikawa", VoiceMoment.HURT, "不要！！", "呜……呜……");
@@ -381,11 +375,7 @@ public final class LanguageData {
                     "家の近くで働いて買い物する");
             addPetOutlookTranslations(adder, "%sが必要", "次にやりたいこと", "働いていない理由");
             addPetRulesTranslations(adder,
-                    "お買い物",
-                    "プレゼント",
-                    "写真",
                     "拾い物",
-                    "遊びに行く",
                     "オン：自分からやる",
                     "オフ：やらない",
                     "先に戦う",
@@ -393,9 +383,7 @@ public final class LanguageData {
                     "守るだけ",
                     "あなたを襲うものと、あなたが戦っているものだけと戦う",
                     "戦わない",
-                    "そばにいて戦わない。攻撃されたらあなたの後ろに隠れる",
-                    "武器に持ち替える",
-                    "攻撃されたら持ち物から武器を出して反撃し、終わったら道具に戻す");
+                    "そばにいて戦わない。攻撃されたらあなたの後ろに隠れる");
             // What the pets say (design 0.1.1, section 3): the series' own lines.
             addVoiceLines(adder, "chiikawa", VoiceMoment.TAME, "ワァ…");
             addVoiceLines(adder, "chiikawa", VoiceMoment.HURT, "ヤダッ!!", "ウッ…ウッ…");
@@ -648,11 +636,7 @@ public final class LanguageData {
                     "Trabalha perto de casa");
             addPetOutlookTranslations(adder, "Precisa de %s", "O que quer fazer em seguida", "Por que não está trabalhando");
             addPetRulesTranslations(adder,
-                    "Compras",
-                    "Presentes",
-                    "Fotos",
                     "Coletar coisas",
-                    "Visitar amigos",
                     "Ligado: faz por conta própria",
                     "Desligado: não faz",
                     "Caçar",
@@ -660,9 +644,7 @@ public final class LanguageData {
                     "Proteger",
                     "Só luta contra quem ataca você ou contra quem você está atacando",
                     "Sem lutas",
-                    "Fica com você e não luta; se levar um golpe, se esconde atrás de você",
-                    "Trocar de arma",
-                    "Quando algo ataca, pega uma arma da mochila para revidar e depois volta à ferramenta");
+                    "Fica com você e não luta; se levar um golpe, se esconde atrás de você");
             // What the pets say (design 0.1.1, section 3), in Portuguese: the sounds stay as they are and the words carry the same meaning.
             addVoiceLines(adder, "chiikawa", VoiceMoment.TAME, "Wah...");
             addVoiceLines(adder, "chiikawa", VoiceMoment.HURT, "Nooo!!", "Hic... hic...");
@@ -912,11 +894,7 @@ public final class LanguageData {
                     "집 근처에서 일하고 쇼핑해");
             addPetOutlookTranslations(adder, "%s 필요", "다음에 하고 싶은 일", "일하지 않는 이유");
             addPetRulesTranslations(adder,
-                    "쇼핑",
-                    "선물",
-                    "사진",
                     "줍기",
-                    "놀러 가기",
                     "켜짐: 알아서 해",
                     "꺼짐: 하지 않아",
                     "먼저 싸움",
@@ -924,9 +902,7 @@ public final class LanguageData {
                     "지키기만",
                     "너를 공격하는 상대와 네가 싸우는 상대하고만 싸워",
                     "안 싸움",
-                    "곁에 있되 싸우지 않아. 맞으면 네 뒤로 숨어",
-                    "무기 바꿔 들기",
-                    "공격받으면 가방에서 무기를 꺼내 맞서고, 끝나면 도구로 돌아가");
+                    "곁에 있되 싸우지 않아. 맞으면 네 뒤로 숨어");
             // What the pets say, in the words Korean-speaking fans know the lines by.
             addVoiceLines(adder, "chiikawa", VoiceMoment.TAME, "와아...");
             addVoiceLines(adder, "chiikawa", VoiceMoment.HURT, "싫어!!", "윽... 윽...");
@@ -1179,11 +1155,7 @@ public final class LanguageData {
                     "Works around home");
             addPetOutlookTranslations(adder, "Needs %s", "What it feels like doing next", "Why it is not at work");
             addPetRulesTranslations(adder,
-                    "Shopping",
-                    "Giving presents",
-                    "Taking photos",
                     "Picking things up",
-                    "Visiting friends",
                     "On: does this on its own",
                     "Off: will not do this",
                     "Hunt",
@@ -1191,9 +1163,7 @@ public final class LanguageData {
                     "Guard me",
                     "Fights only what attacks you or what you are fighting",
                     "No fights",
-                    "Stays with you and does not fight; if hurt, it hides behind you",
-                    "Swap weapons",
-                    "Takes a weapon from its bag to fight back, then its tool again afterwards");
+                    "Stays with you and does not fight; if hurt, it hides behind you");
             // What the pets say (design 0.1.1, section 3), in the words English-speaking fans know the lines by.
             addVoiceLines(adder, "chiikawa", VoiceMoment.TAME, "Wah...");
             addVoiceLines(adder, "chiikawa", VoiceMoment.HURT, "Nooo!!", "Hic... hic...");
@@ -1806,17 +1776,12 @@ public final class LanguageData {
     }
 
     /**
-     * What an owner may tell a pet from the orders page: the five kinds of errand it can be told off, each with a line
-     * for how it stands, the three ways to take part in a fight with a line under each, and swapping to a weapon.
+     * What an owner may tell a pet from the orders page: whether it picks things up, with a line for how it stands, and the
+     * three ways to take part in a fight with a line under each.
      */
-    private static void addPetRulesTranslations(Adder adder, String shop, String gift, String photo, String pickUp,
-            String social, String on, String off, String clear, String clearHint, String retaliate, String retaliateHint,
-            String none, String noneHint, String swap, String swapHint) {
-        adder.add("screen.chiikawa.pet.rules.shop", shop);
-        adder.add("screen.chiikawa.pet.rules.gift", gift);
-        adder.add("screen.chiikawa.pet.rules.photo", photo);
+    private static void addPetRulesTranslations(Adder adder, String pickUp, String on, String off, String clear,
+            String clearHint, String retaliate, String retaliateHint, String none, String noneHint) {
         adder.add("screen.chiikawa.pet.rules.pick_up", pickUp);
-        adder.add("screen.chiikawa.pet.rules.social", social);
         adder.add("screen.chiikawa.pet.rules.on", on);
         adder.add("screen.chiikawa.pet.rules.off", off);
         adder.add("screen.chiikawa.pet.stance.clear", clear);
@@ -1825,8 +1790,6 @@ public final class LanguageData {
         adder.add("screen.chiikawa.pet.stance.retaliate.hint", retaliateHint);
         adder.add("screen.chiikawa.pet.stance.none", none);
         adder.add("screen.chiikawa.pet.stance.none.hint", noneHint);
-        adder.add("screen.chiikawa.pet.swap", swap);
-        adder.add("screen.chiikawa.pet.swap.hint", swapHint);
     }
 
     private static void addPetStatusTranslations(Adder adder, String doingNothing, String bagHint) {

@@ -12,8 +12,8 @@ import com.dwinovo.chiikawa.ui.widget.Tabs;
 public final class PetScreenLayout {
     /** The backpack page: the pet's things and the player's under them. */
     public static final int BACKPACK_HEIGHT = 214;
-    /** The orders page: three orders, then what the pet may do, how it fights and whether it swaps to a weapon. */
-    public static final int ORDERS_HEIGHT = 217;
+    /** The orders page: three orders, then whether the pet picks things up and how it fights. */
+    public static final int ORDERS_HEIGHT = 189;
     /** The tallest page, which the panel's top edge is placed for. */
     public static final int TALLEST = Math.max(BACKPACK_HEIGHT, ORDERS_HEIGHT);
     /** Where a page's contents start. */
