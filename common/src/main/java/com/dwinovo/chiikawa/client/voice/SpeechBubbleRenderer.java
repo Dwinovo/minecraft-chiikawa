@@ -47,7 +47,7 @@ public final class SpeechBubbleRenderer {
             float left = speech.left(pet.tickCount, partialTick);
             Bubble bubble = new Bubble(Component.translatable(speech.line(),
                 speech.subject().map(Component::translatable).orElse(Component.empty())).getString());
-            // 1.20.4 puts a name tag at a height of its own rather than at an attachment point: the top of the hitbox, and the rise.
+            // 1.20.2 puts a name tag at a height of its own rather than at an attachment point: the top of the hitbox, and the rise.
             float top = pet.getNameTagOffsetY() - NAME_TAG_RISE;
             poseStack.pushPose();
             poseStack.translate(0.0F, top + (nameShown ? NAME_TAG_RISE + ABOVE_NAME : ABOVE_HEAD), 0.0F);
