@@ -3,6 +3,7 @@ package com.dwinovo.chiikawa.entity;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.dwinovo.chiikawa.testing.ItemComponents;
 import net.minecraft.SharedConstants;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.SimpleContainer;
@@ -14,7 +15,8 @@ import org.junit.jupiter.api.Test;
 /** Where a pet puts things: its own pockets, and the bag's only while it wears one, never the hand or the bag's slot. */
 class PetPocketsTest {
     private static final int FIRST_POCKET = AbstractPet.BAG_SLOT + 1;
-    private static final int STACK = Items.EMERALD.getDefaultMaxStackSize();
+    /** An emerald's stack size, which the game only knows once the items have their components. */
+    private static int stackSize;
     private static final int POCKETS = AbstractPet.BACKPACK_SIZE - FIRST_POCKET;
 
     private final SimpleContainer backpack = new SimpleContainer(AbstractPet.FULL_BACKPACK_SIZE);
@@ -25,6 +27,8 @@ class PetPocketsTest {
     static void bootstrap() {
         SharedConstants.tryDetectVersion();
         Bootstrap.bootStrap();
+        ItemComponents.bind();
+        stackSize = Items.EMERALD.getDefaultMaxStackSize();
     }
 
     private void fillPockets(ItemStack stack) {
@@ -91,7 +95,7 @@ class PetPocketsTest {
         ItemStack left = pockets.stow(new ItemStack(Items.EMERALD, 30));
 
         assertTrue(left.isEmpty());
-        assertEquals(STACK, backpack.getItem(FIRST_POCKET + 3).getCount());
+        assertEquals(stackSize, backpack.getItem(FIRST_POCKET + 3).getCount());
         assertEquals(6, backpack.getItem(FIRST_POCKET).getCount());
     }
 
@@ -108,7 +112,7 @@ class PetPocketsTest {
 
     @Test
     void what_does_not_fit_comes_back_and_what_was_given_is_not_touched() {
-        fillPockets(new ItemStack(Items.EMERALD, STACK - 1));
+        fillPockets(new ItemStack(Items.EMERALD, stackSize - 1));
         ItemStack given = new ItemStack(Items.EMERALD, 30);
 
         ItemStack left = pockets.stow(given);
@@ -122,25 +126,25 @@ class PetPocketsTest {
 
     @Test
     void a_stack_is_never_put_in_a_slot_bigger_than_it_stacks_to() {
-        ItemStack left = pockets.stow(new ItemStack(Items.EMERALD, STACK + 10));
+        ItemStack left = pockets.stow(new ItemStack(Items.EMERALD, stackSize + 10));
 
         assertTrue(left.isEmpty());
-        assertEquals(STACK, backpack.getItem(FIRST_POCKET).getCount());
+        assertEquals(stackSize, backpack.getItem(FIRST_POCKET).getCount());
         assertEquals(10, backpack.getItem(FIRST_POCKET + 1).getCount());
     }
 
     @Test
     void room_is_what_stow_would_take() {
         fillPockets(new ItemStack(Items.DIRT, 64));
-        backpack.setItem(FIRST_POCKET, new ItemStack(Items.EMERALD, STACK - 4));
+        backpack.setItem(FIRST_POCKET, new ItemStack(Items.EMERALD, stackSize - 4));
         backpack.setItem(FIRST_POCKET + 1, ItemStack.EMPTY);
 
-        assertEquals(4 + STACK, pockets.roomFor(new ItemStack(Items.EMERALD, 2 * STACK)));
+        assertEquals(4 + stackSize, pockets.roomFor(new ItemStack(Items.EMERALD, 2 * stackSize)));
         assertEquals(5, pockets.roomFor(new ItemStack(Items.EMERALD, 5)));
         assertEquals(0, pockets.roomFor(new ItemStack(Items.WHEAT, 0)));
 
         wearingBag = true;
-        assertEquals(2 * STACK, pockets.roomFor(new ItemStack(Items.EMERALD, 2 * STACK)));
+        assertEquals(2 * stackSize, pockets.roomFor(new ItemStack(Items.EMERALD, 2 * stackSize)));
     }
 
     @Test
