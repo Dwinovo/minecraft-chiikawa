@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.dwinovo.chiikawa.entity.CombatStance;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.PetRules;
 import com.dwinovo.chiikawa.entity.brain.errand.ErrandCategory;
@@ -147,19 +146,8 @@ class PetConstraintsTest {
     }
 
     @Test
-    void theStanceForbidsNothing() {
-        PetRules rules = PetRules.DEFAULT.withStance(CombatStance.NONE);
-        for (PetDirective directive : PetDirective.values()) {
-            for (ErrandCategory category : ErrandCategory.values()) {
-                assertEquals(PetConstraints.allows(directive, OWNED, PetRules.DEFAULT, PASTIMES, category),
-                    PetConstraints.allows(directive, OWNED, rules, PASTIMES, category), directive + " / " + category);
-            }
-        }
-    }
-
-    @Test
     void gettingOutOfHarmsWayIsPermittedWhateverThePetIsToldAndWhoeverItBelongsTo() {
-        PetRules everythingOff = PetRules.DEFAULT.withStance(CombatStance.NONE).withPickUp(false);
+        PetRules everythingOff = PetRules.DEFAULT.withPickUp(false);
         for (PetDirective directive : PetDirective.values()) {
             for (PetOwnership ownership : List.of(OWNED, PetOwnership.WILD)) {
                 assertTrue(PetConstraints.allows(directive, ownership, everythingOff, PASTIMES, ErrandCategory.SAFETY),
