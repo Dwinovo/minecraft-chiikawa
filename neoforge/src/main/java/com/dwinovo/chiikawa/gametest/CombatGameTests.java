@@ -117,7 +117,7 @@ public final class CombatGameTests {
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = FIGHT_TICKS)
     public static void an_archer_with_arrows_shoots(GameTestHelper helper) {
         AbstractPet pet = holding(ownedPet(helper, new BlockPos(3, STAND, 4)), Items.BOW);
-        pet.getBackpack().addItem(new ItemStack(Items.ARROW, 16));
+        pet.pockets().stow(new ItemStack(Items.ARROW, 16));
         // Well inside what a pet can see, and still far enough that this is a bow shot.
         Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(10, STAND, 4));
         // Standing still. A zombie left to close the distance turns this into a scuffle,
@@ -135,7 +135,7 @@ public final class CombatGameTests {
     @GameTest(template = "floor16", batch = BATCH, timeoutTicks = FIGHT_TICKS)
     public static void an_archer_told_to_sit_mid_draw_does_not_shoot(GameTestHelper helper) {
         AbstractPet pet = holding(ownedPet(helper, new BlockPos(3, STAND, 4)), Items.BOW);
-        pet.getBackpack().addItem(new ItemStack(Items.ARROW, ARROWS));
+        pet.pockets().stow(new ItemStack(Items.ARROW, ARROWS));
         Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(10, STAND, 4));
         zombie.setNoAi(true);
 

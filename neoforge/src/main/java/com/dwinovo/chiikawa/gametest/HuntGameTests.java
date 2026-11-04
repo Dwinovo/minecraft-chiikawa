@@ -83,7 +83,7 @@ public final class HuntGameTests {
     @GameTest(template = "floor8", batch = BATCH, timeoutTicks = 200)
     public static void a_monster_the_pets_arrow_puts_down_counts(GameTestHelper helper) {
         AbstractPet pet = holding(hunter(helper), Items.BOW);
-        pet.getBackpack().addItem(new ItemStack(Items.ARROW, 8));
+        pet.pockets().stow(new ItemStack(Items.ARROW, 8));
         Zombie zombie = helper.spawn(EntityTypes.ZOMBIE, new BlockPos(5, STAND, 5));
         zombie.setHealth(1.0F);
 
