@@ -104,12 +104,11 @@ class PetScreenLayoutTest {
     }
 
     @Test
-    void theSettingsRowsAndTheLineBetweenThemFillTheCard() {
+    void theSettingsRowFillsTheCard() {
         Rect card = PetScreenLayout.SETTINGS_CARD;
 
         assertEquals(card.y() + 1, PetScreenLayout.FIRST_ROW_Y);
-        assertEquals(PetScreenLayout.FIRST_ROW_Y + PetScreenLayout.ROW_H, PetScreenLayout.SETTINGS_DIVIDER_Y);
-        assertTrue(PetScreenLayout.SECOND_ROW_Y + PetScreenLayout.ROW_H <= card.bottom() - 1);
-        assertTrue(PetScreenLayout.SWITCH_ROW_ROOM > 0 && PetScreenLayout.STANCE_ROW_ROOM > 0);
+        assertTrue(PetScreenLayout.FIRST_ROW_Y + PetScreenLayout.ROW_H <= card.bottom() - 1);
+        assertTrue(PetScreenLayout.SWITCH_ROW_ROOM > 0);
     }
 }
