@@ -25,10 +25,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 
 /**
- * Gets out of harm's way. A pet that has been hurt by something and will not fight it, because the owner has told it not to
- * or told it to sit, or because it has nothing to fight with, runs to hide behind its owner, or at home, or away, and cowers
- * until nothing has hurt it for a while and what did is far off. It matters more than anything else a pet does, and it is
- * the one errand that no order of the owner's keeps from the pet, a pet told to sit included.
+ * Gets out of harm's way. A pet that has been hurt by something and will not fight it, because it was told to sit or because
+ * it has nothing to fight with, runs to hide behind its owner, or at home, or away, and cowers until nothing has hurt it for
+ * a while and what did is far off. It matters more than anything else a pet does, and it is the one errand that no order of
+ * the owner's keeps from the pet, a pet told to sit included.
  *
  * <p>The owner's order is never changed by it: a pet told to sit that gets up to run goes back to where it sat when it is
  * safe, and sits again, since the sitting is the directive's. The errand has no place of its own to go to, and the pet itself

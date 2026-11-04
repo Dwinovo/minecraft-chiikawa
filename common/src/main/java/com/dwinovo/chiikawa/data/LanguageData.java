@@ -116,18 +116,10 @@ public final class LanguageData {
                     "有礼物",
                     "它会自己走过来递给你",
                     "捡地上的东西",
-                    "自由活动时，把附近掉在地上的东西收进背包",
-                    "遇到怪物");
+                    "自由活动时，把附近掉在地上的东西收进背包");
             addPetOutlookTranslations(adder,
                     "需要%s",
                     "接下来想做的事");
-            addPetStanceTranslations(adder,
-                    "主动清怪",
-                    "看到附近的敌对生物就上",
-                    "只反击",
-                    "只打攻击你的，和你正在打的",
-                    "不参战",
-                    "不动手，被打了就躲到你身后");
             // What the pets say (design 0.1.1, section 3), in the words Chinese fans know the lines by.
             addVoiceLines(adder, "chiikawa", VoiceMoment.TAME, "哇……");
             addVoiceLines(adder, "chiikawa", VoiceMoment.HURT, "不要！！", "呜……呜……");
@@ -372,18 +364,10 @@ public final class LanguageData {
                     "贈り物",
                     "自分で持ってきて渡してくれる",
                     "落ちている物を拾う",
-                    "自由行動のとき、近くの落とし物を持ち物に入れる",
-                    "モンスターに会ったら");
+                    "自由行動のとき、近くの落とし物を持ち物に入れる");
             addPetOutlookTranslations(adder,
                     "%sが必要",
                     "次にやりたいこと");
-            addPetStanceTranslations(adder,
-                    "攻める",
-                    "近くの敵に向かっていく",
-                    "守る",
-                    "あなたを守るときだけ戦う",
-                    "戦わない",
-                    "手を出さず、後ろに隠れる");
             // What the pets say (design 0.1.1, section 3): the series' own lines.
             addVoiceLines(adder, "chiikawa", VoiceMoment.TAME, "ワァ…");
             addVoiceLines(adder, "chiikawa", VoiceMoment.HURT, "ヤダッ!!", "ウッ…ウッ…");
@@ -633,18 +617,10 @@ public final class LanguageData {
                     "Mimo",
                     "Vai trazer por conta própria",
                     "Pegar coisas do chão",
-                    "Livre, guarda o que cai por perto",
-                    "Ao ver monstros");
+                    "Livre, guarda o que cai por perto");
             addPetOutlookTranslations(adder,
                     "Falta %s",
                     "O que quer fazer em seguida");
-            addPetStanceTranslations(adder,
-                    "Caçar",
-                    "Ataca monstros que vê",
-                    "Guarda",
-                    "Só luta por você",
-                    "Passivo",
-                    "Não luta e se esconde");
             // What the pets say (design 0.1.1, section 3), in Portuguese: the sounds stay as they are and the words carry the same meaning.
             addVoiceLines(adder, "chiikawa", VoiceMoment.TAME, "Wah...");
             addVoiceLines(adder, "chiikawa", VoiceMoment.HURT, "Nooo!!", "Hic... hic...");
@@ -891,18 +867,10 @@ public final class LanguageData {
                     "선물!",
                     "직접 가져올 거야",
                     "바닥의 물건 줍기",
-                    "자유 행동 중에 근처에 떨어진 물건을 가방에 넣어",
-                    "몬스터를 만나면");
+                    "자유 행동 중에 근처에 떨어진 물건을 가방에 넣어");
             addPetOutlookTranslations(adder,
                     "%s 필요",
                     "다음에 하고 싶은 일");
-            addPetStanceTranslations(adder,
-                    "먼저 싸움",
-                    "근처에 적이 보이면 달려들어",
-                    "반격만",
-                    "공격받거나 네가 싸울 때만",
-                    "안 싸움",
-                    "싸우지 않고 네 뒤로 숨어");
             // What the pets say, in the words Korean-speaking fans know the lines by.
             addVoiceLines(adder, "chiikawa", VoiceMoment.TAME, "와아...");
             addVoiceLines(adder, "chiikawa", VoiceMoment.HURT, "싫어!!", "윽... 윽...");
@@ -1152,18 +1120,10 @@ public final class LanguageData {
                     "Gift!",
                     "It will bring it over itself",
                     "Pick things up",
-                    "While roaming, puts nearby drops in its bag",
-                    "Meeting monsters");
+                    "While roaming, puts nearby drops in its bag");
             addPetOutlookTranslations(adder,
                     "Needs %s",
                     "What it feels like doing next");
-            addPetStanceTranslations(adder,
-                    "Hunt",
-                    "Charges at hostile mobs",
-                    "Defend",
-                    "Joins your fights only",
-                    "Passive",
-                    "Stays out of fights");
             // What the pets say (design 0.1.1, section 3), in the words English-speaking fans know the lines by.
             addVoiceLines(adder, "chiikawa", VoiceMoment.TAME, "Wah...");
             addVoiceLines(adder, "chiikawa", VoiceMoment.HURT, "Nooo!!", "Hic... hic...");
@@ -1749,11 +1709,11 @@ public final class LanguageData {
      */
     /**
      * The pet screen's pages. The tab names are what the tabs say; the gift badge is the one word on the badge for a present
-     * the pet carries, and its hint what waits under the cursor; the picking up and the stance each have a title and, under
-     * it, the line that says what they do.
+     * the pet carries, and its hint what waits under the cursor; picking up has a title and, under
+     * it, the line that says what it does.
      */
     private static void addPetScreenTranslations(Adder adder, String backpack, String settings, String eager, String money,
-            String giftBadge, String giftHint, String pickUp, String pickUpHint, String stance) {
+            String giftBadge, String giftHint, String pickUp, String pickUpHint) {
         adder.add("screen.chiikawa.pet.tab.backpack", backpack);
         adder.add("screen.chiikawa.pet.tab.settings", settings);
         adder.add("screen.chiikawa.pet.eager", eager);
@@ -1762,24 +1722,12 @@ public final class LanguageData {
         adder.add("screen.chiikawa.pet.gift_hint", giftHint);
         adder.add("screen.chiikawa.pet.pick_up", pickUp);
         adder.add("screen.chiikawa.pet.pick_up.hint", pickUpHint);
-        adder.add("screen.chiikawa.pet.stance", stance);
     }
 
     /** What the pet screen says of what the pet is short of, and the heading over what it would do next. */
     private static void addPetOutlookTranslations(Adder adder, String lacks, String next) {
         adder.add("screen.chiikawa.pet.outlook.lacks", lacks);
         adder.add("screen.chiikawa.pet.outlook.next", next);
-    }
-
-    /** The three ways to take part in a fight: the name in the control, and the line that says what it does. */
-    private static void addPetStanceTranslations(Adder adder, String clear, String clearHint, String retaliate,
-            String retaliateHint, String none, String noneHint) {
-        adder.add("screen.chiikawa.pet.stance.clear", clear);
-        adder.add("screen.chiikawa.pet.stance.clear.hint", clearHint);
-        adder.add("screen.chiikawa.pet.stance.retaliate", retaliate);
-        adder.add("screen.chiikawa.pet.stance.retaliate.hint", retaliateHint);
-        adder.add("screen.chiikawa.pet.stance.none", none);
-        adder.add("screen.chiikawa.pet.stance.none.hint", noneHint);
     }
 
     private static void addPetStatusTranslations(Adder adder, String doingNothing, String bagHint) {

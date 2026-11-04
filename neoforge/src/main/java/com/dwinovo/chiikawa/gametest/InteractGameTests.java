@@ -8,7 +8,6 @@ import static com.dwinovo.chiikawa.gametest.GameTestKit.wildPet;
 
 import com.dwinovo.chiikawa.Constants;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.CombatStance;
 import com.dwinovo.chiikawa.entity.PetDirective;
 import com.dwinovo.chiikawa.entity.PetRules;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
@@ -274,7 +273,7 @@ public final class InteractGameTests {
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         stranger.setPos(helper.absoluteVec(new BlockPos(3, STAND, 5).getCenter()));
-        PetRules rules = PetRules.DEFAULT.withPickUp(false).withStance(CombatStance.NONE);
+        PetRules rules = PetRules.DEFAULT.withPickUp(false);
 
         helper.assertFalse(PetServerPacketHandler.rule(stranger, pet, rules), Component.literal("a stranger's rules were heard"));
         helper.assertTrue(pet.getRules().equals(PetRules.DEFAULT), Component.literal("the pet took rules from a stranger"));
@@ -303,7 +302,7 @@ public final class InteractGameTests {
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         owner.setPos(helper.absoluteVec(new BlockPos(3, STAND, 5).getCenter()));
-        PetRules rules = PetRules.DEFAULT.withPickUp(false).withStance(CombatStance.RETALIATE);
+        PetRules rules = PetRules.DEFAULT.withPickUp(false);
 
         helper.assertTrue(PetServerPacketHandler.rule(owner, pet, rules), Component.literal("the owner's rules were refused"));
         helper.assertTrue(pet.getRules().equals(rules), Component.literal("the pet did not take its owner's rules"));
