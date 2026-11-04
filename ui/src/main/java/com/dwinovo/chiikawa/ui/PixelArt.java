@@ -39,23 +39,6 @@ public record PixelArt(String... rows) {
         "..XlolololoX..",
         "...XXXXXXXX...");
 
-    /** A cog in wood: what can be set. */
-    public static final PixelArt GEAR = new PixelArt(
-        ".....XXXX.....",
-        ".XX..XooX..XX.",
-        ".XoXXXooXXXoX.",
-        ".XooooooooooX.",
-        "..XoooXXoooX..",
-        "XXXooX..XooXXX",
-        "XooooX..XooooX",
-        "XooooX..XooooX",
-        "XXXooX..XooXXX",
-        "..XoooXXoooX..",
-        ".XooooooooooX.",
-        ".XoXXXooXXXoX.",
-        ".XX..XooX..XX.",
-        ".....XXXX.....");
-
     /** A bag, as a shadow in the shade of an empty well: where a bag would be worn. */
     public static final PixelArt BAG = new PixelArt(
         "....ssss....",
