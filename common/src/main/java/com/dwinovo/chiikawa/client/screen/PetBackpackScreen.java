@@ -1,106 +1,43 @@
 package com.dwinovo.chiikawa.client.screen;
 
-import com.dwinovo.chiikawa.client.anim.render.ChiikawaEntityRenderer;
-import com.dwinovo.chiikawa.client.ui.PetStatusText;
 import com.dwinovo.chiikawa.client.ui.mc.GuiSurface;
 import com.dwinovo.chiikawa.client.ui.mc.ItemIcon;
-import com.dwinovo.chiikawa.client.ui.mc.UiButton;
 import com.dwinovo.chiikawa.entity.AbstractPet;
-import com.dwinovo.chiikawa.entity.CombatStance;
-import com.dwinovo.chiikawa.entity.PetDirective;
-import com.dwinovo.chiikawa.entity.PetRules;
 import com.dwinovo.chiikawa.init.InitItems;
 import com.dwinovo.chiikawa.menu.PetBackpackMenu;
-import com.dwinovo.chiikawa.network.PetPayloads.PetDirectivePayload;
-import com.dwinovo.chiikawa.network.PetPayloads.PetOutlookPayload;
-import com.dwinovo.chiikawa.network.PetPayloads.PetRulesPayload;
-import com.dwinovo.chiikawa.platform.Services;
-import com.dwinovo.chiikawa.qualification.LicenceView;
-import com.dwinovo.chiikawa.shop.Wallet;
-import com.dwinovo.chiikawa.task.PetTask;
-import com.dwinovo.chiikawa.ui.DrawSurface;
 import com.dwinovo.chiikawa.ui.PixelArt;
 import com.dwinovo.chiikawa.ui.Rect;
-import com.dwinovo.chiikawa.ui.TextClip;
-import com.dwinovo.chiikawa.ui.TextWrap;
 import com.dwinovo.chiikawa.ui.Ui;
 import com.dwinovo.chiikawa.ui.UiStyle;
 import com.dwinovo.chiikawa.ui.UiTheme;
-import com.dwinovo.chiikawa.ui.widget.Bar;
-import com.dwinovo.chiikawa.ui.widget.Hearts;
-import com.dwinovo.chiikawa.ui.widget.Sign;
-import com.dwinovo.chiikawa.ui.widget.Slot;
-import com.dwinovo.chiikawa.ui.widget.Tabs;
+import com.dwinovo.chiikawa.ui.widget.Banner;
+import com.dwinovo.chiikawa.ui.widget.TabStrip;
 import com.dwinovo.chiikawa.ui.widget.Tooltip;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.UnaryOperator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * A pet's screen, in three pages behind three tabs: what it carries, how it is keeping,
- * and what it has been told to do and may do.
+ * A pet's screen, in two pages behind two tabs: what it carries, and what it may do.
  *
- * <p>Drawn after Chiikawa Pocket — paper stickers in an ink line, the pet's name on a
- * wooden board hung across the top edge, colour only where it means something — and
- * nothing on it is a texture. The panel is as tall as the page on it, and its top edge
- * never moves between pages, so the tabs and the name stay where the hand left them.
+ * <p>Drawn after Chiikawa Pocket — paper stickers in an ink line, colour only where it means something — and nothing on it is
+ * a texture. Over both pages is the same banner, with the pet in it standing on its floor and rising over the panel's top
+ * edge, so the pet, its name, its health and its order are in front of the hand whichever page it is on; what differs is
+ * what is under the banner. The panel is as big on both, and the tabs stand on its top edge at its right end.
  */
 public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> {
-    private static final int PANEL_WIDTH = OrdersLayout.PANEL_WIDTH;
-    private static final int BACKPACK_HEIGHT = PetScreenLayout.BACKPACK_HEIGHT;
-    private static final int ORDERS_HEIGHT = PetScreenLayout.ORDERS_HEIGHT;
-
-    /** Where the hearts sit: under the name board, above everything on the page. */
-    private static final int HEARTS_Y = 12;
-    private static final int CONTENT_Y = PetScreenLayout.CONTENT_Y;
-    private static final Rect PORTRAIT = PetScreenLayout.PORTRAIT;
-    private static final int PORTRAIT_SCALE = 34;
-    /** Nudges the model down inside its window (entity-space units; +down). */
-    private static final float PORTRAIT_Y_OFFSET = 0.18F;
-
-    /** Backpack page: what the pet is at, in a strip under its picture. */
-    private static final Rect WORK_STRIP = new Rect(UiStyle.PAD, 94, 56, 26);
-    /** Backpack page: where the bag's ten go when there is a bag. */
-    private static final Rect BAG_ROWS = new Rect(94, 82, 90, 36);
-    private static final int DIVIDER_Y = 125;
-
-    /** Status page: the slip card beside the picture. */
-    private static final Rect WORK_CARD = new Rect(70, CONTENT_Y, 114, 40);
-    private static final int CHIP_H = PetScreenLayout.CHIP_H;
-
-    private static final Rect ORDER_FIRST = new Rect(UiStyle.PAD, CONTENT_Y, OrdersLayout.CARD_W, 31);
-    private static final int ORDER_PITCH = 36;
-
-    /** Orders page: the line between the orders and the rules under them. */
-    private static final int RULES_DIVIDER_Y = 131;
-    /** Orders page: the switch for picking things up, a card across the page. */
-    private static final int PICK_UP_Y = 137;
-    private static final int PICK_UP_H = 20;
-    private static final Rect PICK_UP = new Rect(UiStyle.PAD, PICK_UP_Y, OrdersLayout.CARD_W, PICK_UP_H);
-    /** Orders page: the three stances, under it. */
-    private static final int STANCE_Y = PICK_UP_Y + PICK_UP_H + UiStyle.GAP;
-    private static final int STANCE_H = 20;
-
-    private static final int[] TAB_TINTS = {UiTheme.ACCENT_PALE, UiTheme.SKY_PALE, UiTheme.LEAF_PALE};
     private static final ItemStack BAG_ICON_STACK = new ItemStack(InitItems.BACKPACK.get());
 
     /** The pages, in tab order. */
     private enum Page {
         BACKPACK("screen.chiikawa.pet.tab.backpack"),
-        STATUS("screen.chiikawa.pet.tab.status"),
-        ORDERS("screen.chiikawa.pet.tab.orders");
+        SETTINGS("screen.chiikawa.pet.tab.settings");
 
         private final String key;
 
@@ -109,58 +46,50 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
         }
     }
 
-    private final List<Tabs.Face> tabFaces = List.of(
-        (surface, x, y) -> surface.drawIcon(new ItemIcon(BAG_ICON_STACK), x, y),
-        (surface, x, y) -> PixelArt.SLIP.drawCentered(surface, x, y, UiStyle.ICON),
-        (surface, x, y) -> PixelArt.SPEECH.drawCentered(surface, x, y, UiStyle.ICON));
-
+    private final HoverNotes notes = new HoverNotes();
+    private final PetHeader header = new PetHeader(notes);
+    private final BackpackPage backpackPage = new BackpackPage(notes);
+    private final SettingsPage settingsPage = new SettingsPage();
     private Page page = Page.BACKPACK;
-    /** Where the chips on the status page ended up, for their tooltips. */
-    private final List<HoverNote> notes = new ArrayList<>();
-
-    /** A patch of the screen with something to say under the cursor. */
-    private record HoverNote(Rect area, List<String> lines) {
-    }
+    private TabStrip tabs;
 
     public PetBackpackScreen(PetBackpackMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
-        this.imageWidth = PANEL_WIDTH;
-        this.imageHeight = BACKPACK_HEIGHT;
+        this.imageWidth = PetScreenLayout.PANEL_W;
+        this.imageHeight = PetScreenLayout.PANEL_H;
     }
 
     @Override
     protected void init() {
         super.init();
-        // The top edge is placed for the tallest page and stays put for the others.
-        this.leftPos = (this.width - PANEL_WIDTH) / 2;
+        this.leftPos = PetScreenLayout.left(this.width);
         this.topPos = PetScreenLayout.top(this.height);
+        this.tabs = new TabStrip(new Rect(this.leftPos, this.topPos, this.imageWidth, this.imageHeight), List.of(
+            new TabStrip.Tab((surface, x, y) -> surface.drawIcon(new ItemIcon(BAG_ICON_STACK), x, y),
+                Component.translatable(Page.BACKPACK.key).getString()),
+            new TabStrip.Tab((surface, x, y) -> PixelArt.GEAR.drawCentered(surface, x, y, UiStyle.ICON),
+                Component.translatable(Page.SETTINGS.key).getString())), this.font::width);
         showPage(page);
     }
 
     private void showPage(Page shown) {
         this.page = shown;
         this.menu.showSlots(shown == Page.BACKPACK);
-        this.imageHeight = shown == Page.BACKPACK ? BACKPACK_HEIGHT : shown == Page.ORDERS ? ORDERS_HEIGHT : statusHeight();
         clearWidgets();
-        if (shown == Page.ORDERS) {
-            PetDirective[] orders = PetDirective.values();
-            for (int i = 0; i < orders.length; i++) {
-                addRenderableWidget(orderButton(orders[i], i));
-            }
-            addRenderableWidget(pickUpButton());
-            for (CombatStance stance : CombatStance.values()) {
-                addRenderableWidget(stanceButton(stance));
-            }
+        header.buttons(this.leftPos, this.topPos, this.font::width, this::pet).forEach(this::addRenderableWidget);
+        if (shown == Page.SETTINGS) {
+            settingsPage.buttons(this.leftPos, this.topPos, this.font::width, this::pet).forEach(this::addRenderableWidget);
         }
+    }
+
+    private AbstractPet pet() {
+        return this.menu.getPet(Minecraft.getInstance().level);
     }
 
     // ---- drawing -------------------------------------------------------------------
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        if (page == Page.STATUS) {
-            this.imageHeight = statusHeight();
-        }
         notes.clear();
         super.render(graphics, mouseX, mouseY, partialTick);
         renderNotes(graphics, mouseX, mouseY);
@@ -172,374 +101,45 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
         GuiSurface surface = new GuiSurface(graphics, this.font);
         int x = this.leftPos;
         int y = this.topPos;
-        Tabs.drawBehind(surface, x, y, tabFaces, TAB_TINTS, page.ordinal());
+        tabs.drawBehind(surface, page.ordinal());
         Ui.card(surface, x, y, this.imageWidth, this.imageHeight);
-        Tabs.drawFront(surface, x, y, tabFaces.get(page.ordinal()), page.ordinal());
+        Banner.draw(surface, x + 2, y + 2, this.imageWidth - 4, PetScreenLayout.BANNER_H - 2, UiTheme.ACCENT_PALE);
+        tabs.drawFront(surface, page.ordinal(), UiTheme.ACCENT_PALE);
 
-        AbstractPet pet = this.menu.getPet(Minecraft.getInstance().level);
+        AbstractPet pet = pet();
         if (pet == null) {
             return;
         }
-        String name = pet.getDisplayName().getString();
-        Sign.draw(surface, x + this.imageWidth - 10 - Sign.width(surface, name), y - 9, name);
-        int maxHealth = Math.max(1, Mth.ceil(pet.getMaxHealth()));
-        Hearts.draw(surface, x + this.imageWidth - 10 - Hearts.width(maxHealth), y + HEARTS_Y,
-            Math.max(0, Mth.ceil(pet.getHealth())), maxHealth);
-
+        header.draw(graphics, surface, x, y, pet, this.menu, mouseX, mouseY);
         switch (page) {
-            case BACKPACK -> drawBackpack(graphics, surface, pet, mouseX, mouseY);
-            case STATUS -> drawStatus(graphics, surface, pet, mouseX, mouseY);
-            case ORDERS -> drawRules(surface);
+            case BACKPACK -> backpackPage.draw(surface, x, y, this.menu);
+            case SETTINGS -> settingsPage.draw(surface, x, y, pet.getRules(), mouseX, mouseY);
         }
     }
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        // The name board and the pages stand in for the default title and "Inventory" labels.
-    }
-
-    private void drawPortrait(GuiGraphics graphics, DrawSurface surface, AbstractPet pet, int mouseX, int mouseY) {
-        Rect at = PORTRAIT.offset(this.leftPos, this.topPos);
-        Ui.sticker(surface, at.x(), at.y(), at.width(), at.height(), Ui.CARD_RADIUS, UiTheme.SKY_PALE);
-        ChiikawaEntityRenderer.drawPortrait(() -> InventoryScreen.renderEntityInInventoryFollowsMouse(graphics,
-            at.x() + 2, at.y() + 2, at.right() - 2, at.bottom() - 2,
-            PORTRAIT_SCALE, PORTRAIT_Y_OFFSET, mouseX, mouseY, pet));
-    }
-
-    /**
-     * The pet's things: its hand and bag beside its picture, its pockets, and the bag's
-     * rows — or, with no bag worn, a dashed space that says what goes there.
-     */
-    private void drawBackpack(GuiGraphics graphics, GuiSurface surface, AbstractPet pet, int mouseX, int mouseY) {
-        drawPortrait(graphics, surface, pet, mouseX, mouseY);
-        // A well behind every slot, each one asked where it is — the menu owns the layout.
-        for (net.minecraft.world.inventory.Slot slot : this.menu.slots) {
-            if (slot.isActive()) {
-                Ui.well(surface, this.leftPos + slot.x - 1, this.topPos + slot.y - 1, UiStyle.SLOT, UiStyle.SLOT);
-            }
-        }
-        if (!pet.isWearingBag()) {
-            Rect bag = BAG_ROWS.offset(this.leftPos, this.topPos);
-            dashed(surface, bag);
-            surface.drawIcon(new ItemIcon(BAG_ICON_STACK), bag.x() + 26, UiStyle.centerIn(bag.y(), bag.height(), UiStyle.ICON));
-            surface.drawText("+10", bag.x() + 46, UiStyle.centerIn(bag.y(), bag.height(), surface.lineHeight()), UiTheme.TEXT_MUTED);
-            notes.add(new HoverNote(bag, List.of(Component.translatable("screen.chiikawa.pet.bag_hint").getString())));
-        }
-        drawWorkStrip(surface, pet);
-        Ui.divider(surface, this.leftPos, this.topPos + DIVIDER_Y, this.imageWidth);
-    }
-
-    /** What the pet is at, small: the slip's picture, the count and the bar, or a word. */
-    private void drawWorkStrip(GuiSurface surface, AbstractPet pet) {
-        Rect strip = WORK_STRIP.offset(this.leftPos, this.topPos);
-        Ui.sticker(surface, strip.x(), strip.y(), strip.width(), strip.height(), Ui.CARD_RADIUS, UiTheme.LEAF_PALE);
-        Optional<PetTask> slip = pet.getTask();
-        if (slip.isPresent()) {
-            PetTask task = slip.get();
-            surface.drawIcon(ItemIcon.of(task.icon()), strip.x() + 3, UiStyle.centerIn(strip.y(), strip.height(), UiStyle.ICON));
-            surface.drawText(PetStatusText.slipCount(task).getString(), strip.x() + 21, strip.y() + 4, UiTheme.TEXT);
-            Bar.draw(surface, strip.x() + 21, strip.y() + 15, strip.width() - 25, UiStyle.BAR_H,
-                task.progress(), task.target());
-            notes.add(new HoverNote(strip, slipDetail(pet, task)));
-        } else {
-            // A word on its own sits in the middle of its card, as a label on a button does.
-            String doing = TextClip.clip(PetStatusText.activity(pet).getString(),
-                strip.width() - 2 * UiStyle.GAP, surface::textWidth);
-            Ui.textCentered(surface, doing, strip, UiTheme.TEXT_MUTED);
-        }
-    }
-
-    /**
-     * How the pet is keeping: the slip in full, its mood and its money as two chips, the
-     * present it is carrying for its owner, and its job.
-     */
-    private void drawStatus(GuiGraphics graphics, GuiSurface surface, AbstractPet pet, int mouseX, int mouseY) {
-        drawPortrait(graphics, surface, pet, mouseX, mouseY);
-        Rect card = WORK_CARD.offset(this.leftPos, this.topPos);
-        Ui.sticker(surface, card.x(), card.y(), card.width(), card.height(), Ui.CARD_RADIUS, UiTheme.LEAF_PALE);
-        Optional<PetTask> slip = pet.getTask();
-        if (slip.isPresent()) {
-            PetTask task = slip.get();
-            Slot.draw(surface, ItemIcon.of(task.icon()), card.x() + 5, card.y() + 5);
-            Ui.textClipped(surface, PetStatusText.taskName(task.type()).getString(), card.x() + 28, card.y() + 6,
-                card.width() - 32, UiTheme.TEXT);
-            Ui.textClipped(surface, PetStatusText.activity(pet).getString(), card.x() + 28, card.y() + 16,
-                card.width() - 32, UiTheme.TEXT_MUTED);
-            String count = PetStatusText.slipCount(task).getString();
-            Ui.textRight(surface, count, card.right() - 6, card.y() + 28, UiTheme.TEXT);
-            Bar.draw(surface, card.x() + 5, card.y() + 28, card.width() - 16 - surface.textWidth(count),
-                UiStyle.BAR_H, task.progress(), task.target());
-            notes.add(new HoverNote(card, slipDetail(pet, task)));
-        } else {
-            surface.drawText(PetStatusText.activity(pet).getString(), card.x() + UiStyle.PAD, card.y() + 9, UiTheme.TEXT);
-            surface.drawText(Component.translatable("screen.chiikawa.pet.no_slip").getString(),
-                card.x() + UiStyle.PAD, card.y() + 21, UiTheme.TEXT_MUTED);
-        }
-
-        // Mood and money, a chip each; what they mean waits under the cursor.
-        int chipX = card.x();
-        int chipY = card.bottom() + UiStyle.GAP;
-        if (pet.isEager()) {
-            String left = clock(pet.eagerTicksLeft());
-            chipX += chip(surface, chipX, chipY, new ItemIcon(new ItemStack(InitItems.SIMPLE_DISH.get())), left,
-                UiTheme.ACCENT_PALE, List.of(Component.translatable("screen.chiikawa.pet.eager", left).getString()))
-                + UiStyle.GAP;
-        }
-        int money = this.menu.petMoney();
-        ItemStack coin = Wallet.coins(1);
-        chip(surface, chipX, chipY, new ItemIcon(coin), String.valueOf(money), UiTheme.LEAF_PALE,
-            List.of(Component.translatable("screen.chiikawa.pet.money", money, coin.getHoverName()).getString()));
-
-        int y = this.topPos + PORTRAIT.bottom() + 6;
-        ItemStack gift = pet.getPendingGift();
-        if (!gift.isEmpty()) {
-            int giftX = this.leftPos + UiStyle.PAD;
-            int giftW = this.imageWidth - 2 * UiStyle.PAD;
-            Ui.sticker(surface, giftX, y, giftW, 30, Ui.CARD_RADIUS, UiTheme.ACCENT_PALE);
-            Slot.draw(surface, new ItemIcon(gift), giftX + 6, y + 6);
-            surface.drawText(Component.translatable("screen.chiikawa.pet.gift").getString(), giftX + 30, y + 7, UiTheme.TEXT);
-            surface.drawText(Component.translatable("screen.chiikawa.pet.gift_hint").getString(), giftX + 30, y + 17,
-                UiTheme.TEXT_MUTED);
-            y += 30 + 6;
-        }
-        int x = this.leftPos + UiStyle.PAD;
-        x += chip(surface, x, y, new ItemIcon(pet.getMainHandItem()),
-            PetStatusText.jobName(pet.getCapabilityId()).getString(), UiTheme.SURFACE, List.of()) + UiStyle.GAP;
-        // A chip for each licence beside the job: the grade held, and what is next under the cursor.
-        for (LicenceView licence : pet.licenceViews()) {
-            x += chip(surface, x, y, new ItemIcon(new ItemStack(BuiltInRegistries.ITEM.getValue(licence.book()))),
-                PetStatusText.licenceRank(licence).getString(), UiTheme.LEAF_PALE,
-                PetStatusText.licenceNotes(licence).stream().map(Component::getString).toList()) + UiStyle.GAP;
-        }
-        drawOutlook(surface, y + CHIP_H + UiStyle.GAP);
-    }
-
-    /**
-     * What the server last said of the pet, under its job: what it would do next, and why it is not at work, a card each. The
-     * space is kept for them before the server has said anything, so the page does not jump when it does.
-     */
-    private void drawOutlook(GuiSurface surface, int top) {
-        Optional<PetOutlookPayload> outlook = this.menu.outlook();
-        outlook.flatMap(PetOutlookPayload::next).ifPresent(next -> outlookCard(surface, top, PixelArt.NEXT, UiTheme.LEAF_PALE,
-            PetStatusText.next(next).getString(), "screen.chiikawa.pet.outlook.next"));
-        outlook.flatMap(PetStatusText::notWorking).ifPresent(why -> {
-            boolean lacking = outlook.get().lackKey().isPresent();
-            outlookCard(surface, top + StatusLayout.ROW_H + UiStyle.GAP, lacking ? PixelArt.QUESTION : PixelArt.SLIP,
-                lacking ? UiTheme.ACCENT_PALE : UiTheme.SURFACE, why.getString(), "screen.chiikawa.pet.outlook.why");
-        });
-    }
-
-    /** A card with a picture and a few words, and what they are the answer to under the cursor. */
-    private void outlookCard(GuiSurface surface, int top, PixelArt sprite, int fill, String words, String question) {
-        Rect card = new Rect(this.leftPos + UiStyle.PAD, top, StatusLayout.CARD_W, StatusLayout.ROW_H);
-        Ui.sticker(surface, card.x(), card.y(), card.width(), card.height(), Ui.CARD_RADIUS, fill);
-        sprite.drawCentered(surface, card.x() + UiStyle.GAP, UiStyle.centerIn(card.y(), card.height(), StatusLayout.ROW_ICON_W),
-            StatusLayout.ROW_ICON_W);
-        List<String> lines = TextWrap.wrap(words, StatusLayout.ROW_TEXT_W, surface::textWidth);
-        if (lines.size() > StatusLayout.ROW_LINES) {
-            lines = new ArrayList<>(lines.subList(0, StatusLayout.ROW_LINES));
-            lines.set(StatusLayout.ROW_LINES - 1, TextClip.clip(lines.get(StatusLayout.ROW_LINES - 1) + "…",
-                StatusLayout.ROW_TEXT_W, surface::textWidth));
-        }
-        int textTop = UiStyle.centerIn(card.y(), card.height(), lines.size() * UiStyle.LINE - (UiStyle.LINE - surface.lineHeight()));
-        for (int line = 0; line < lines.size(); line++) {
-            surface.drawText(lines.get(line), card.x() + StatusLayout.ROW_TEXT_X, textTop + line * UiStyle.LINE, UiTheme.TEXT);
-        }
-        notes.add(new HoverNote(card, List.of(Component.translatable(question).getString())));
-    }
-
-    /** How tall the status page is, for the pet in it. */
-    private int statusHeight() {
-        AbstractPet pet = this.menu.getPet(Minecraft.getInstance().level);
-        boolean gift = pet != null && !pet.getPendingGift().isEmpty();
-        return PetScreenLayout.statusHeight(gift);
-    }
-
-    /** A small sticker: a picture and a few words, with more waiting under the cursor. */
-    private int chip(GuiSurface surface, int x, int y, ItemIcon icon, String label, int fill, List<String> note) {
-        int width = 3 + UiStyle.ICON + 3 + surface.textWidth(label) + 6;
-        Ui.sticker(surface, x, y, width, CHIP_H, Ui.CARD_RADIUS, fill);
-        surface.drawIcon(icon, x + 3, y + 2);
-        surface.drawText(label, x + 3 + UiStyle.ICON + 3, UiStyle.centerIn(y, CHIP_H, surface.lineHeight()), UiTheme.TEXT);
-        if (!note.isEmpty()) {
-            notes.add(new HoverNote(new Rect(x, y, width, CHIP_H), note));
-        }
-        return width;
-    }
-
-    /** One of the three orders, as a card to pick; the one in force is pink and ticked. */
-    private UiButton orderButton(PetDirective directive, int index) {
-        Rect at = ORDER_FIRST.offset(this.leftPos, this.topPos + index * ORDER_PITCH);
-        Component name = Component.translatable("screen.chiikawa.pet.order." + key(directive));
-        return UiButton.painted(at.x(), at.y(), at.width(), at.height(), name,
-            (surface, area, hovered, active) -> {
-                AbstractPet pet = this.menu.getPet(Minecraft.getInstance().level);
-                boolean current = pet != null && pet.getPetDirective() == directive;
-                int fill = current ? UiTheme.ACCENT_SOFT : hovered ? UiTheme.ACCENT_PALE : UiTheme.PANEL;
-                Ui.sticker(surface, area.x(), area.y(), area.width(), area.height(), Ui.PANEL_RADIUS, fill);
-                Ui.roundRect(surface, area.x() + 5, area.y() + 5, 21, 21, Ui.CARD_RADIUS, UiTheme.INK);
-                Ui.roundRect(surface, area.x() + 6, area.y() + 6, 19, 19, Ui.CARD_RADIUS - 1,
-                    current ? UiTheme.ACCENT_PALE : UiTheme.SURFACE);
-                icon(directive).drawCentered(surface, area.x() + 7, area.y() + 7, 17);
-                surface.drawText(name.getString(), area.x() + OrdersLayout.ORDER_TEXT_X, area.y() + 6, UiTheme.TEXT);
-                Ui.textClipped(surface, Component.translatable("screen.chiikawa.pet.order." + key(directive) + ".hint").getString(),
-                    area.x() + OrdersLayout.ORDER_TEXT_X, area.y() + 17, OrdersLayout.ORDER_TEXT_W, UiTheme.TEXT_MUTED);
-                if (current) {
-                    PixelArt.CHECK.draw(surface, area.right() - 18, UiStyle.centerIn(area.y(), area.height(), 7));
-                }
-            },
-            () -> {
-                AbstractPet pet = this.menu.getPet(Minecraft.getInstance().level);
-                if (pet != null && pet.getPetDirective() != directive) {
-                    Services.NETWORK.sendToServer(new PetDirectivePayload(pet.getId(), directive));
-                }
-            });
-    }
-
-    private static String key(PetDirective directive) {
-        return switch (directive) {
-            case FOLLOW -> "follow";
-            case STAY -> "stay";
-            case FREE -> "free";
-        };
-    }
-
-    private static PixelArt icon(PetDirective directive) {
-        return switch (directive) {
-            case FOLLOW -> PixelArt.PAWS;
-            case STAY -> PixelArt.CUSHION;
-            case FREE -> PixelArt.TUFT;
-        };
-    }
-
-    // ---- the rules ---------------------------------------------------------------------
-
-    /**
-     * What waits under the orders. The rules are buttons and draw themselves; this draws the line between them and the
-     * orders and leaves each one's words for the cursor.
-     */
-    private void drawRules(GuiSurface surface) {
-        Ui.divider(surface, this.leftPos, this.topPos + RULES_DIVIDER_Y, this.imageWidth);
-        PetRules rules = rules();
-        notes.add(new HoverNote(PICK_UP.offset(this.leftPos, this.topPos), List.of(
-            Component.translatable("screen.chiikawa.pet.rules.pick_up").getString(),
-            Component.translatable(rules.pickUp() ? "screen.chiikawa.pet.rules.on"
-                : "screen.chiikawa.pet.rules.off").getString())));
-        for (CombatStance stance : CombatStance.values()) {
-            String key = "screen.chiikawa.pet.stance." + stance.getSerializedName();
-            notes.add(new HoverNote(stanceArea(stance).offset(this.leftPos, this.topPos), List.of(
-                Component.translatable(key).getString(), Component.translatable(key + ".hint").getString())));
-        }
-    }
-
-    private static Rect stanceArea(CombatStance stance) {
-        return new Rect(UiStyle.PAD + stance.ordinal() * (OrdersLayout.STANCE_W + UiStyle.GAP), STANCE_Y,
-            OrdersLayout.STANCE_W, STANCE_H);
-    }
-
-    /** What the pet has been told it may do, as it is now: the default until the pet is there to ask. */
-    private PetRules rules() {
-        AbstractPet pet = this.menu.getPet(Minecraft.getInstance().level);
-        return pet == null ? PetRules.DEFAULT : pet.getRules();
-    }
-
-    /** Asks the server to change the rules, if the change is one. */
-    private void tell(UnaryOperator<PetRules> change) {
-        AbstractPet pet = this.menu.getPet(Minecraft.getInstance().level);
-        if (pet != null) {
-            PetRules now = pet.getRules();
-            PetRules next = change.apply(now);
-            if (!next.equals(now)) {
-                Services.NETWORK.sendToServer(new PetRulesPayload(pet.getId(), next));
-            }
-        }
-    }
-
-    /** One of the three stances, as a card in a row of them: the one in force is pink. */
-    private UiButton stanceButton(CombatStance stance) {
-        Rect at = stanceArea(stance).offset(this.leftPos, this.topPos);
-        Component name = Component.translatable("screen.chiikawa.pet.stance." + stance.getSerializedName());
-        return UiButton.painted(at.x(), at.y(), at.width(), at.height(), name,
-            (surface, area, hovered, active) -> {
-                int fill = rules().stance() == stance ? UiTheme.ACCENT_SOFT : hovered ? UiTheme.ACCENT_PALE : UiTheme.PANEL;
-                Ui.sticker(surface, area.x(), area.y(), area.width(), area.height(), Ui.CARD_RADIUS, fill);
-                Ui.textCentered(surface, TextClip.clip(name.getString(), OrdersLayout.STANCE_TEXT_W, surface::textWidth),
-                    area, UiTheme.TEXT);
-            },
-            () -> tell(rules -> rules.withStance(stance)));
-    }
-
-    /** Whether the pet picks up what lies on the ground: a card the width of the page, ticked while it does. */
-    private UiButton pickUpButton() {
-        Rect at = PICK_UP.offset(this.leftPos, this.topPos);
-        Component name = Component.translatable("screen.chiikawa.pet.rules.pick_up");
-        return UiButton.painted(at.x(), at.y(), at.width(), at.height(), name,
-            (surface, area, hovered, active) -> {
-                boolean on = rules().pickUp();
-                int fill = on ? UiTheme.ACCENT_SOFT : hovered ? UiTheme.ACCENT_PALE : UiTheme.PANEL;
-                Ui.sticker(surface, area.x(), area.y(), area.width(), area.height(), Ui.CARD_RADIUS, fill);
-                Ui.textClipped(surface, name.getString(), area.x() + UiStyle.PAD,
-                    UiStyle.centerIn(area.y(), area.height(), surface.lineHeight()), OrdersLayout.SWAP_TEXT_W, UiTheme.TEXT);
-                if (on) {
-                    PixelArt.CHECK.draw(surface, area.right() - 18, UiStyle.centerIn(area.y(), area.height(), 7));
-                }
-            },
-            () -> tell(rules -> rules.withPickUp(!rules.pickUp())));
-    }
-
-    /** A dashed outline: a space something could go in, not a thing that is there. */
-    private static void dashed(DrawSurface surface, Rect area) {
-        for (int at = 0; at < area.width(); at += 4) {
-            surface.fillRect(area.x() + at, area.y(), Math.min(2, area.width() - at), 1, UiTheme.SHADE);
-            surface.fillRect(area.x() + at, area.bottom() - 1, Math.min(2, area.width() - at), 1, UiTheme.SHADE);
-        }
-        for (int at = 0; at < area.height(); at += 4) {
-            surface.fillRect(area.x(), area.y() + at, 1, Math.min(2, area.height() - at), UiTheme.SHADE);
-            surface.fillRect(area.right() - 1, area.y() + at, 1, Math.min(2, area.height() - at), UiTheme.SHADE);
-        }
-    }
-
-    /** Ticks as minutes and seconds, the way a timer on a label reads. */
-    private static String clock(long ticks) {
-        long seconds = ticks / 20;
-        return seconds / 60 + ":" + String.format("%02d", seconds % 60);
+        // The banner and the pages say what the default title and "Inventory" labels would.
     }
 
     // ---- what waits under the cursor ---------------------------------------------------
 
     private void renderNotes(GuiGraphics graphics, int mouseX, int mouseY) {
         GuiSurface surface = new GuiSurface(graphics, this.font);
-        int tab = Tabs.at(this.leftPos, this.topPos, Page.values().length, mouseX, mouseY);
-        List<String> lines = null;
-        if (tab >= 0) {
-            lines = List.of(Component.translatable(Page.values()[tab].key).getString());
-        } else {
-            for (HoverNote note : notes) {
-                if (note.area().contains(mouseX, mouseY)) {
-                    lines = note.lines();
-                }
-            }
+        int tab = tabs.at(mouseX, mouseY);
+        List<String> lines = tab >= 0
+            ? List.of(Component.translatable(Page.values()[tab].key).getString())
+            : notes.at(mouseX, mouseY).orElse(List.of());
+        if (!lines.isEmpty()) {
+            surface.onTop(() -> Tooltip.draw(surface, lines, mouseX, mouseY, this.width, this.height));
         }
-        if (lines != null && !lines.isEmpty()) {
-            List<String> shown = lines;
-            surface.onTop(() -> Tooltip.draw(surface, shown, mouseX, mouseY, this.width, this.height));
-        }
-    }
-
-    /** The slip, spelled out: its name, what the pet is doing about it, how much, and for whom. */
-    private static List<String> slipDetail(AbstractPet pet, PetTask task) {
-        return List.of(
-            PetStatusText.taskName(task.type()).getString(),
-            PetStatusText.activity(pet).getString(),
-            PetStatusText.taskAmount(task.type(), task.target()).getString(),
-            PetStatusText.jobName(task.capability()).getString());
     }
 
     // ---- input -------------------------------------------------------------------------
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        int tab = Tabs.at(this.leftPos, this.topPos, Page.values().length, (int) mouseX, (int) mouseY);
+        int tab = tabs.at((int) mouseX, (int) mouseY);
         if (tab >= 0 && button == 0) {
             if (tab != page.ordinal()) {
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
@@ -552,8 +152,9 @@ public class PetBackpackScreen extends AbstractContainerScreen<PetBackpackMenu> 
 
     @Override
     protected boolean hasClickedOutside(double mouseX, double mouseY, int left, int top, int button) {
-        // The tabs and the name board stand above the panel; a click there is not a drop.
+        // The tabs, and the pet standing over the panel's edge, are not outside it: a click there is not a drop.
         return super.hasClickedOutside(mouseX, mouseY, left, top, button)
-            && Tabs.at(this.leftPos, this.topPos, Page.values().length, (int) mouseX, (int) mouseY) < 0;
+            && tabs.at((int) mouseX, (int) mouseY) < 0
+            && !PetScreenLayout.MODEL.offset(this.leftPos, this.topPos).contains((int) mouseX, (int) mouseY);
     }
 }

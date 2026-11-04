@@ -95,9 +95,11 @@ public final class PetPayloads {
      * @param next the errand it would start if it were on none, other than the one it is on
      * @param whyNotKey the translation key of why it is not at work, when it is not
      * @param lackKey the translation key of what it is short of, when that is why
+     * @param lackIcon an item to picture what it is short of by, when that is why and there is one
      */
     public record PetOutlookPayload(int pet, Optional<ResourceLocation> next, Optional<String> whyNotKey,
-                                    Optional<String> lackKey) implements CustomPacketPayload {
+                                    Optional<String> lackKey, Optional<ResourceLocation> lackIcon)
+            implements CustomPacketPayload {
         public static final Type<PetOutlookPayload> TYPE = new Type<>(
             ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "pet_outlook"));
         public static final StreamCodec<RegistryFriendlyByteBuf, PetOutlookPayload> STREAM_CODEC = StreamCodec.composite(
@@ -105,6 +107,7 @@ public final class PetPayloads {
             ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC), PetOutlookPayload::next,
             ByteBufCodecs.optional(ByteBufCodecs.STRING_UTF8), PetOutlookPayload::whyNotKey,
             ByteBufCodecs.optional(ByteBufCodecs.STRING_UTF8), PetOutlookPayload::lackKey,
+            ByteBufCodecs.optional(ResourceLocation.STREAM_CODEC), PetOutlookPayload::lackIcon,
             PetOutlookPayload::new);
 
         /**
@@ -121,7 +124,8 @@ public final class PetPayloads {
                     .thenComparing(line -> line.score().orElse(0.0F)))
                 .map(DecisionTrace.Line::errand);
             return new PetOutlookPayload(pet, next, whyNot.map(WhyNot::reasonKey),
-                whyNot.flatMap(WhyNot::lack).map(LackKey::translationKey));
+                whyNot.flatMap(WhyNot::lack).map(LackKey::translationKey),
+                whyNot.flatMap(WhyNot::lack).flatMap(LackKey::icon));
         }
 
         @Override
