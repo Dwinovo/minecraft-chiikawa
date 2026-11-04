@@ -3,10 +3,17 @@ package com.dwinovo.chiikawa.ui;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.dwinovo.chiikawa.ui.widget.Badge;
+import com.dwinovo.chiikawa.ui.widget.Banner;
 import com.dwinovo.chiikawa.ui.widget.Bar;
+import com.dwinovo.chiikawa.ui.widget.Bubble;
+import com.dwinovo.chiikawa.ui.widget.Chip;
+import com.dwinovo.chiikawa.ui.widget.DashedWell;
 import com.dwinovo.chiikawa.ui.widget.Hearts;
 import com.dwinovo.chiikawa.ui.widget.Price;
+import com.dwinovo.chiikawa.ui.widget.Segments;
 import com.dwinovo.chiikawa.ui.widget.Sign;
+import com.dwinovo.chiikawa.ui.widget.Switch;
+import com.dwinovo.chiikawa.ui.widget.TabStrip;
 import com.dwinovo.chiikawa.ui.widget.Tabs;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -58,8 +65,8 @@ class PreviewTest {
         }
 
         @Override
-        public void drawIcon(Icon icon, int x, int y) {
-            fillRect(x + 2, y + 2, 12, 12, 0x6089A86B);
+        public void drawIcon(Icon icon, int x, int y, int size) {
+            fillRect(x + size / 8, y + size / 8, size * 3 / 4, size * 3 / 4, 0x6089A86B);
         }
 
         @Override
@@ -104,6 +111,49 @@ class PreviewTest {
         Price.draw(surface, Icon.NONE, "Buy 3", px + 12, py + 124, 12, UiTheme.TEXT);
 
         File out = new File("build/ui-preview.png");
+        out.getParentFile().mkdirs();
+        ImageIO.write(surface.image, "png", out);
+        assertTrue(out.isFile());
+    }
+
+    /** The pet screen's pieces together, on a panel as wide as the screen's: a look at how the new widgets sit. */
+    @Test
+    void drawsThePetScreenWidgetsForALook() throws Exception {
+        RasterSurface surface = new RasterSurface(320, 240, 0xFF33402F);
+        Rect panel = new Rect(10, 50, 300, 166);
+        List<TabStrip.Tab> tabs = List.of(
+            new TabStrip.Tab((s, x, y) -> s.drawIcon(Icon.NONE, x, y), "Backpack"),
+            new TabStrip.Tab((s, x, y) -> PixelArt.GEAR.drawCentered(s, x, y, UiStyle.ICON), "Settings"));
+        TabStrip strip = new TabStrip(panel, tabs, surface::textWidth);
+
+        strip.drawBehind(surface, 0);
+        Ui.card(surface, panel.x(), panel.y(), panel.width(), panel.height());
+        Banner.draw(surface, panel.x() + 2, panel.y() + 2, panel.width() - 4, 68, UiTheme.ACCENT_PALE);
+        strip.drawFront(surface, 0, UiTheme.ACCENT_PALE);
+
+        int x = panel.x() + 94;
+        int y = panel.y();
+        Chip.draw(surface, (s, cx, cy) -> s.drawIcon(Icon.NONE, cx, cy, Chip.FACE), "Farmer", x + 40, y + 7, UiTheme.SURFACE, false);
+        Chip.draw(surface, (s, cx, cy) -> s.drawIcon(Icon.NONE, cx, cy, Chip.FACE), "Grade 4", x + 90, y + 7, UiTheme.LEAF_PALE, true);
+        Hearts.draw(surface, x, y + 30, 16, 20);
+        Segments.draw(surface, new Rect(panel.x() + 184, y + 27, 106, Segments.HEIGHT), List.of("Follow", "Sit", "Free"), 0, 2);
+        Rect bubble = new Rect(panel.x() + 96, y + 47, 194, 19);
+        Bubble.frame(surface, bubble, y + 56);
+        Bar.draw(surface, bubble.x() + 80, bubble.y() + 6, 60, UiStyle.BAR_H, 12, 32);
+
+        Rect card = new Rect(panel.x() + 4, y + 74, 120, 84);
+        Ui.sticker(surface, card.x(), card.y(), card.width(), card.height(), Ui.CARD_RADIUS, UiTheme.ACCENT_PALE);
+        Ui.well(surface, card.x() + 4, card.y() + 13, UiStyle.SLOT, UiStyle.SLOT);
+        for (int col = 0; col < 5; col++) {
+            Ui.well(surface, card.x() + 25 + col * 18, card.y() + 4, UiStyle.SLOT, UiStyle.SLOT);
+            DashedWell.draw(surface, card.x() + 25 + col * 18, card.y() + 44, UiStyle.SLOT, UiStyle.SLOT);
+        }
+        Ui.divider(surface, card.x() - 4, card.y() + 41, 128);
+        PixelArt.BAG.drawCentered(surface, card.x() + 4, card.y() + 53, UiStyle.SLOT);
+        Switch.draw(surface, panel.x() + 250, y + 100, true, false);
+        Switch.draw(surface, panel.x() + 250, y + 120, false, false);
+
+        File out = new File("build/ui-preview-pet.png");
         out.getParentFile().mkdirs();
         ImageIO.write(surface.image, "png", out);
         assertTrue(out.isFile());
