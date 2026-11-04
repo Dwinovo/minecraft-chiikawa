@@ -14,7 +14,6 @@ import com.dwinovo.chiikawa.ui.widget.Segments;
 import com.dwinovo.chiikawa.ui.widget.Sign;
 import com.dwinovo.chiikawa.ui.widget.Switch;
 import com.dwinovo.chiikawa.ui.widget.TabStrip;
-import com.dwinovo.chiikawa.ui.widget.Tabs;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.List;
@@ -85,15 +84,13 @@ class PreviewTest {
         RasterSurface surface = new RasterSurface(240, 200, 0xFF33402F);
         int px = 16;
         int py = 40;
-        List<Tabs.Face> faces = List.of(
-            (s, x, y) -> s.drawIcon(Icon.NONE, x, y),
-            (s, x, y) -> PixelArt.SLIP.drawCentered(s, x, y, UiStyle.ICON),
-            (s, x, y) -> PixelArt.SPEECH.drawCentered(s, x, y, UiStyle.ICON));
-        int[] tints = {UiTheme.ACCENT_PALE, UiTheme.SKY_PALE, UiTheme.LEAF_PALE};
+        TabStrip tabs = new TabStrip(new Rect(px, py, 200, 140), List.of(
+            new TabStrip.Tab((s, x, y) -> s.drawIcon(Icon.NONE, x, y), "Bag"),
+            new TabStrip.Tab((s, x, y) -> PixelArt.GEAR.drawCentered(s, x, y, UiStyle.ICON), "Settings")), surface::textWidth);
 
-        Tabs.drawBehind(surface, px, py, faces, tints, 1);
+        tabs.drawBehind(surface, 0);
         Ui.card(surface, px, py, 200, 140);
-        Tabs.drawFront(surface, px, py, faces.get(1), 1);
+        tabs.drawFront(surface, 0, UiTheme.PANEL);
         Sign.draw(surface, px + 200 - 10 - Sign.width(surface, "Usagi"), py - 9, "Usagi");
         Hearts.draw(surface, px + 200 - 10 - Hearts.width(20), py + 12, 15, 20);
 
@@ -107,7 +104,7 @@ class PreviewTest {
         Badge.draw(surface, "taken", px + 50, py + 96, UiTheme.SUCCESS);
         Ui.divider(surface, px, py + 120, 200);
         Ui.sticker(surface, px + 8, py + 124, 184, 12, Ui.CARD_RADIUS, UiTheme.ACCENT_SOFT);
-        PixelArt.CHECK.draw(surface, px + 175, py + 126);
+        Switch.draw(surface, px + 170, py + 125, true, false);
         Price.draw(surface, Icon.NONE, "Buy 3", px + 12, py + 124, 12, UiTheme.TEXT);
 
         File out = new File("build/ui-preview.png");
