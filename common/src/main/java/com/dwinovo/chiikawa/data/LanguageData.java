@@ -108,26 +108,26 @@ public final class LanguageData {
                     "升到 Lv.%1$s：每天 %2$s 张", "解锁：%s",
                     "已升满", "你有 %1$s 个%2$s");
             addPetStatusTranslations(adder, "闲着", "背上双肩包或挎包，可以多装 10 格");
-            addPetScreenTranslations(adder, "背包", "状态", "指令",
-                    "没有领工作牌",
+            addPetScreenTranslations(adder,
+                    "背包",
+                    "设置",
                     "干劲十足：还剩 %s",
                     "零花钱：%1$s 个%2$s",
-                    "准备送给你的礼物",
+                    "有礼物",
                     "它会自己走过来递给你",
-                    "跟在你身边，有怪就上",
-                    "待在原地不动",
-                    "在家附近干活、逛街、领牌子");
-            addPetOutlookTranslations(adder, "需要%s", "接下来想做的事", "为什么没在干活");
-            addPetRulesTranslations(adder,
-                    "捡东西",
-                    "开着：会自己去做",
-                    "关着：不会去做",
+                    "捡地上的东西",
+                    "自由活动时，把附近掉在地上的东西收进背包",
+                    "遇到怪物");
+            addPetOutlookTranslations(adder,
+                    "需要%s",
+                    "接下来想做的事");
+            addPetStanceTranslations(adder,
                     "主动清怪",
                     "看到附近的敌对生物就上",
-                    "只帮你反击",
-                    "只打攻击你的和你正在打的",
+                    "只反击",
+                    "只打攻击你的，和你正在打的",
                     "不参战",
-                    "跟着你但不动手，被打了就躲到你身后");
+                    "不动手，被打了就躲到你身后");
             // What the pets say (design 0.1.1, section 3), in the words Chinese fans know the lines by.
             addVoiceLines(adder, "chiikawa", VoiceMoment.TAME, "哇……");
             addVoiceLines(adder, "chiikawa", VoiceMoment.HURT, "不要！！", "呜……呜……");
@@ -271,7 +271,7 @@ public final class LanguageData {
             addPhotoIntentTranslations(adder, "拍照", "只有小八会拍照", "背包里没有相机", "背包里没有胶卷", "主人离得太远",
                 "主人现在顾不上", "现在没有想拍的");
         } else if ("ja_jp".equals(locale)) {
-            addCommonTranslations(adder, "ちいかわ", "持ち物", "ついてくる", "おすわり", "自由行動");
+            addCommonTranslations(adder, "ちいかわ", "持ち物", "ついてく", "おすわり", "自由");
             addDollTooltipTranslations(adder, "ぬいぐるみをケーキに置いてみる？");
             addHandbookTranslations(adder, "ちいかわのお仕事ハンドブック", "右クリックで開いて、遊び方を確認できます",
                 "このハンドブックはまだまっしろ");
@@ -348,7 +348,7 @@ public final class LanguageData {
                     "%sから返事がない。最後に見かけた場所にはもういない");
             addShopScreenTranslations(adder, "お店", "買う %s", "売る %s", "今日は売り物がありません",
                     "前のページ", "次のページ");
-            addIntentNameTranslations(adder, "飼い主についていく", "おすわり中", "ぶらぶら", "アイテムを拾う", "お仕事カードを取りに行く",
+            addIntentNameTranslations(adder, "飼い主についていく", "おすわり中", "ぶらぶら", "アイテムを拾う", "仕事カードを取りに行く",
                 "収穫", "種まき", "運ぶ", "草むしり", "キノコ採り", "討伐", "弓で射る", "演奏", "お買い物", "プレゼントを渡す");
             addCombatTranslations(adder, "敵を探して討つ", "敵を探して射る", "身を守る", "逃げる",
                 "襲ってくる相手がいない", "もう武器を持っている", "持ち替えられる武器がない", "戦って身を守る");
@@ -364,26 +364,26 @@ public final class LanguageData {
                     "Lv.%1$sで1日%2$s枚", "新しいお仕事：%s",
                     "最大レベル", "%2$sを%1$s個持っています");
             addPetStatusTranslations(adder, "ひま", "リュックかポーチを背負うと、持ち物が10マス増える");
-            addPetScreenTranslations(adder, "持ち物", "ようす", "指示",
-                    "お仕事カードなし",
+            addPetScreenTranslations(adder,
+                    "持ち物",
+                    "設定",
                     "やる気まんまん：残り%s",
                     "おこづかい：%2$s%1$s個",
-                    "あなたへのプレゼント",
+                    "贈り物",
                     "自分で持ってきて渡してくれる",
-                    "そばにいて、敵が来たら戦う",
-                    "その場から動かない",
-                    "家の近くで働いて買い物する");
-            addPetOutlookTranslations(adder, "%sが必要", "次にやりたいこと", "働いていない理由");
-            addPetRulesTranslations(adder,
-                    "拾い物",
-                    "オン：自分からやる",
-                    "オフ：やらない",
-                    "先に戦う",
-                    "近くの敵を見つけたら向かっていく",
-                    "守るだけ",
-                    "あなたを襲うものと、あなたが戦っているものだけと戦う",
+                    "落ちている物を拾う",
+                    "自由行動のとき、近くの落とし物を持ち物に入れる",
+                    "モンスターに会ったら");
+            addPetOutlookTranslations(adder,
+                    "%sが必要",
+                    "次にやりたいこと");
+            addPetStanceTranslations(adder,
+                    "攻める",
+                    "近くの敵に向かっていく",
+                    "守る",
+                    "あなたを守るときだけ戦う",
                     "戦わない",
-                    "そばにいて戦わない。攻撃されたらあなたの後ろに隠れる");
+                    "手を出さず、後ろに隠れる");
             // What the pets say (design 0.1.1, section 3): the series' own lines.
             addVoiceLines(adder, "chiikawa", VoiceMoment.TAME, "ワァ…");
             addVoiceLines(adder, "chiikawa", VoiceMoment.HURT, "ヤダッ!!", "ウッ…ウッ…");
@@ -544,7 +544,7 @@ public final class LanguageData {
             addHandbookChapter(adder, "licence", "A Licença de Capina",
                 "Coloque uma Mesa de Exame e clique com o botão direito nela para inscrever um pet por 1 diamante. O pet faz a prova durante o dia e recebe o resultado na manhã seguinte. Fichas de capina e o guia de estudo aumentam as chances. Um pet com licença ganha mais com a capina e, a partir do grau 3, pode pegar fichas de Capina Avançada.");
             adder.add("manual.chiikawa.more", "Mais no site →");
-            addJobTranslations(adder, "Trabalho", "Nenhum", "Agricultura", "Esgrima", "Arqueria", "Música", "Desconhecido");
+            addJobTranslations(adder, "Trabalho", "Nenhum", "Cultivo", "Esgrima", "Arqueria", "Música", "Incerto");
             addEntityTranslations(adder, "Usagi", "Hachiware", "Chiikawa", "Shisa", "Momonga", "Kurimanju", "Rakko", "Furuhonya");
             addItemTagTranslations(adder, "Ferramentas de Agricultura", "Ferramentas de Esgrima", "Ferramentas de Arqueria", "Ferramentas de Música", "Comidas para Domar", "Sementes", "Itens para Entregar", "Itens Coletáveis", "Petiscos para Pets", "Flechas");
             addItemTranslations(
@@ -588,8 +588,8 @@ public final class LanguageData {
                 "Licença de Capina", "%1$s passou na prova de %2$s, grau %3$s", "%1$s não passou na prova de %2$s, grau %3$s",
                 "Você inscreveu %1$s na prova de %2$s, grau %3$s", "%1$s entregou a prova de %2$s; resultado amanhã de manhã",
                 "%1$s perdeu a prova de %2$s de hoje", "A mesa de exame sumiu; a prova de %2$s de %1$s foi cancelada",
-                "A caminho de uma prova", "A caminho de ver o resultado", "Nenhuma mesa de exame para ir");
-            addLicenceScreenTranslations(adder, "Grau %s", "Nenhum", "%s: grau %s", "%s: ainda nenhum", "Tem o grau máximo",
+                "Indo fazer a prova", "Vendo o resultado", "Nenhuma mesa de exame para ir");
+            addLicenceScreenTranslations(adder, "Gr. %s", "Nenh.", "%s: grau %s", "%s: ainda nenhum", "Tem o grau máximo",
                 "Resultado amanhã de manhã", "Fazendo a prova hoje", "Precisa de um pouco mais de prática para fazer a prova",
                 "Pode se inscrever em uma mesa de exame");
             addExamDeskStatusTranslations(adder, "Mesa de Exame", "Escolha um pet para inscrever", "Inscrições só durante o dia",
@@ -602,22 +602,22 @@ public final class LanguageData {
             addExamDeskOddsTranslations(adder, "Base %s%%", "Trabalho feito +%s%%", "Reprovações anteriores +%s%%", "Leu o guia +%s%%",
                 "Personalidade ×%s", "Chance de passar %s (máx. %s%%)");
             addPetNewsTranslations(adder, "%1$s deu %2$s para você");
-            addGiftTranslations(adder, "Separando um presente", "Não pensa em dar um presente", "O dono já ganhou presentes demais hoje", "Nada para dar de presente", "%1$s deixou %2$s ao lado da sua cama");
+            addGiftTranslations(adder, "Separando presente", "Não pensa em dar um presente", "O dono já ganhou presentes demais hoje", "Nada para dar de presente", "%1$s deixou %2$s ao lado da sua cama");
             addRecallTranslations(adder, "%s veio correndo", "Você não tem pets para chamar",
                     "%s não respondeu; sumiu de onde foi visto pela última vez");
             addShopScreenTranslations(adder, "Loja", "Comprar %s", "Vender %s", "Nada à venda hoje",
                     "Página anterior", "Próxima página");
             addIntentNameTranslations(adder, "Seguindo o dono", "Sentando", "Passeando", "Pegando um item",
-                "Buscando uma ficha", "Colhendo", "Plantando", "Entregando", "Arrancando ervas daninhas", "Colhendo cogumelos",
-                "Lutando", "Atirando", "Se apresentando", "Fazendo compras", "Trazendo um presente");
+                "Buscando uma ficha", "Colhendo", "Plantando", "Entregando", "Capinando", "Colhendo cogumelos",
+                "Lutando", "Atirando", "Se apresentando", "Fazendo compras", "Trazendo presente");
             addCombatTranslations(adder, "Caçando", "Caçando com arco", "Se defendendo", "Se escondendo",
                 "Nada está atacando", "Já está com uma arma na mão", "Nenhuma arma de reserva na mochila", "Revida os ataques");
-            addRhythmTranslations(adder, "Dormindo", "Se abrigando da chuva", "Brincando na chuva", "Vendo o dono trabalhar",
+            addRhythmTranslations(adder, "Dormindo", "Fugindo da chuva", "Brincando na chuva", "Vendo o dono",
                 "O dono não está dormindo", "Nada a fazer agora", "Nenhum abrigo da chuva por perto", "Ninguém por perto para visitar");
             addPastimeTranslations(adder, "Tremendo de medo", "Fazendo bagunça", "Pedindo elogio", "Bebida da tarde", "Levando café", "De olho nos doces", "Treino de espada", "Recebendo o dono");
             addSocialTranslations(adder, "Visitando um amigo", "Brincando junto", "Ninguém por perto com quem queira brincar",
                 "Ninguém está vindo");
-            addTaskTypeTranslations(adder, "Capina", "%s ervas daninhas", "Apresentação de Rua", "%ss",
+            addTaskTypeTranslations(adder, "Capina", "%s ervas daninhas", "Show de Rua", "%ss",
                 "Caça a Monstros", "Tiro em Monstros", "%s abatidos", "Capina Avançada");
             addBoardScreenTranslations(adder, "Quadro de Trabalho", "%s no quadro", "Nenhuma ficha hoje",
                     "Só %s", "Aberta", "Pega", "Pega por %s",
@@ -625,26 +625,26 @@ public final class LanguageData {
                     "No Nv.%1$s: %2$s por dia", "Novo trabalho: %s",
                     "Totalmente melhorado", "Você tem %1$s × %2$s");
             addPetStatusTranslations(adder, "Sem fazer nada", "Uma mochila de costas ou uma bolsa adiciona mais dez espaços");
-            addPetScreenTranslations(adder, "Mochila", "Status", "Ordens",
-                    "Nenhuma ficha pega",
+            addPetScreenTranslations(adder,
+                    "Mochila",
+                    "Ajustes",
                     "Com vontade de trabalhar: faltam %s",
                     "Mesada: %1$s × %2$s",
-                    "Um presente para você",
+                    "Mimo",
                     "Vai trazer por conta própria",
-                    "Fica com você e luta",
-                    "Fica parado onde está",
-                    "Trabalha perto de casa");
-            addPetOutlookTranslations(adder, "Precisa de %s", "O que quer fazer em seguida", "Por que não está trabalhando");
-            addPetRulesTranslations(adder,
-                    "Coletar coisas",
-                    "Ligado: faz por conta própria",
-                    "Desligado: não faz",
+                    "Pegar coisas do chão",
+                    "Livre, guarda o que cai por perto",
+                    "Ao ver monstros");
+            addPetOutlookTranslations(adder,
+                    "Falta %s",
+                    "O que quer fazer em seguida");
+            addPetStanceTranslations(adder,
                     "Caçar",
-                    "Ataca os monstros hostis que vê por perto",
-                    "Proteger",
-                    "Só luta contra quem ataca você ou contra quem você está atacando",
-                    "Sem lutas",
-                    "Fica com você e não luta; se levar um golpe, se esconde atrás de você");
+                    "Ataca monstros que vê",
+                    "Guarda",
+                    "Só luta por você",
+                    "Passivo",
+                    "Não luta e se esconde");
             // What the pets say (design 0.1.1, section 3), in Portuguese: the sounds stay as they are and the words carry the same meaning.
             addVoiceLines(adder, "chiikawa", VoiceMoment.TAME, "Wah...");
             addVoiceLines(adder, "chiikawa", VoiceMoment.HURT, "Nooo!!", "Hic... hic...");
@@ -883,26 +883,26 @@ public final class LanguageData {
                     "Lv.%1$s이면 하루 %2$s장", "새 일: %s",
                     "최고 레벨", "%2$s %1$s개 보유");
             addPetStatusTranslations(adder, "한가함", "배낭이나 가방을 메면 10칸이 더 생겨");
-            addPetScreenTranslations(adder, "가방", "상태", "지시",
-                    "받은 전표가 없어",
+            addPetScreenTranslations(adder,
+                    "가방",
+                    "설정",
                     "일할 기분: %s 남음",
                     "용돈: %2$s %1$s개",
-                    "너에게 줄 선물",
+                    "선물!",
                     "직접 가져올 거야",
-                    "옆에 있다가 공격받으면 나서",
-                    "그 자리에 있어",
-                    "집 근처에서 일하고 쇼핑해");
-            addPetOutlookTranslations(adder, "%s 필요", "다음에 하고 싶은 일", "일하지 않는 이유");
-            addPetRulesTranslations(adder,
-                    "줍기",
-                    "켜짐: 알아서 해",
-                    "꺼짐: 하지 않아",
+                    "바닥의 물건 줍기",
+                    "자유 행동 중에 근처에 떨어진 물건을 가방에 넣어",
+                    "몬스터를 만나면");
+            addPetOutlookTranslations(adder,
+                    "%s 필요",
+                    "다음에 하고 싶은 일");
+            addPetStanceTranslations(adder,
                     "먼저 싸움",
                     "근처에 적이 보이면 달려들어",
-                    "지키기만",
-                    "너를 공격하는 상대와 네가 싸우는 상대하고만 싸워",
+                    "반격만",
+                    "공격받거나 네가 싸울 때만",
                     "안 싸움",
-                    "곁에 있되 싸우지 않아. 맞으면 네 뒤로 숨어");
+                    "싸우지 않고 네 뒤로 숨어");
             // What the pets say, in the words Korean-speaking fans know the lines by.
             addVoiceLines(adder, "chiikawa", VoiceMoment.TAME, "와아...");
             addVoiceLines(adder, "chiikawa", VoiceMoment.HURT, "싫어!!", "윽... 윽...");
@@ -1107,8 +1107,8 @@ public final class LanguageData {
                 "Weeding Licence", "%1$s passed the %2$s grade %3$s exam", "%1$s failed the %2$s grade %3$s exam",
                 "Signed %1$s up for the %2$s grade %3$s exam", "%1$s handed in the %2$s paper; results tomorrow morning",
                 "%1$s missed today's %2$s exam", "The exam desk is gone; %1$s's %2$s exam is off",
-                "Off to an exam", "Off to see the results", "No exam desk to go to");
-            addLicenceScreenTranslations(adder, "Grade %s", "None", "%s: grade %s", "%s: none yet", "Holds the top grade",
+                "Off to an exam", "Checking results", "No exam desk to go to");
+            addLicenceScreenTranslations(adder, "Gr. %s", "None", "%s: grade %s", "%s: none yet", "Holds the top grade",
                 "Results tomorrow morning", "Sitting the exam today", "Needs a little more work to sit it",
                 "Ready: sign it up at an exam desk");
             addExamDeskStatusTranslations(adder, "Exam Desk", "Pick a pet to sign up", "Sign-ups only in the daytime",
@@ -1121,7 +1121,7 @@ public final class LanguageData {
             addExamDeskOddsTranslations(adder, "Base %s%%", "Work done +%s%%", "Failed before +%s%%", "Read the guide +%s%%",
                 "Personality ×%s", "Pass chance %s (best %s%%)");
             addPetNewsTranslations(adder, "%1$s gave you %2$s");
-            addGiftTranslations(adder, "Getting a present ready", "No present in mind", "Owner has had enough presents today", "Nothing to give", "%1$s left %2$s by your bed");
+            addGiftTranslations(adder, "Wrapping a gift", "No present in mind", "Owner has had enough presents today", "Nothing to give", "%1$s left %2$s by your bed");
             addRecallTranslations(adder, "%s came running", "You have no pets to call",
                     "%s did not answer; it is gone from where it was last seen");
             addShopScreenTranslations(adder, "Shop", "Buy %s", "Sell %s", "Nothing for sale today",
@@ -1131,7 +1131,7 @@ public final class LanguageData {
                 "Fighting", "Shooting", "Performing", "Out shopping", "Bringing a present");
             addCombatTranslations(adder, "Hunting", "Hunting with a bow", "Defending itself", "Hiding",
                 "Nothing is attacking it", "Already holding a weapon", "No spare weapon in the bag", "It fights back");
-            addRhythmTranslations(adder, "Sleeping", "Sheltering from the rain", "Playing in the rain", "Watching its owner work",
+            addRhythmTranslations(adder, "Sleeping", "Out of the rain", "Playing in the rain", "Watching its owner",
                 "Its owner is awake", "Nothing to do it for", "No shelter from the rain nearby", "Nobody nearby to visit");
             addPastimeTranslations(adder, "Cowering", "Running wild", "Wanting praise", "Evening drink", "Bringing coffee", "Eyeing sweets", "Sword practice", "Greeting its owner");
             addSocialTranslations(adder, "Visiting a friend", "Playing along", "Nobody nearby it feels like playing with",
@@ -1144,26 +1144,26 @@ public final class LanguageData {
                     "At Lv.%1$s: %2$s a day", "New work: %s",
                     "Fully upgraded", "You have %1$s × %2$s");
             addPetStatusTranslations(adder, "Idle", "A rucksack or a pouch adds ten more slots");
-            addPetScreenTranslations(adder, "Backpack", "Status", "Orders",
-                    "No slip taken",
+            addPetScreenTranslations(adder,
+                    "Backpack",
+                    "Settings",
                     "Keen on work: %s left",
                     "Pocket money: %1$s × %2$s",
-                    "A present for you",
+                    "Gift!",
                     "It will bring it over itself",
-                    "Stays close and fights",
-                    "Stays right where it is",
-                    "Works around home");
-            addPetOutlookTranslations(adder, "Needs %s", "What it feels like doing next", "Why it is not at work");
-            addPetRulesTranslations(adder,
-                    "Picking things up",
-                    "On: does this on its own",
-                    "Off: will not do this",
+                    "Pick things up",
+                    "While roaming, puts nearby drops in its bag",
+                    "Meeting monsters");
+            addPetOutlookTranslations(adder,
+                    "Needs %s",
+                    "What it feels like doing next");
+            addPetStanceTranslations(adder,
                     "Hunt",
-                    "Goes after the hostile mobs it sees nearby",
-                    "Guard me",
-                    "Fights only what attacks you or what you are fighting",
-                    "No fights",
-                    "Stays with you and does not fight; if hurt, it hides behind you");
+                    "Charges at hostile mobs",
+                    "Defend",
+                    "Joins your fights only",
+                    "Passive",
+                    "Stays out of fights");
             // What the pets say (design 0.1.1, section 3), in the words English-speaking fans know the lines by.
             addVoiceLines(adder, "chiikawa", VoiceMoment.TAME, "Wah...");
             addVoiceLines(adder, "chiikawa", VoiceMoment.HURT, "Nooo!!", "Hic... hic...");
@@ -1748,42 +1748,32 @@ public final class LanguageData {
      * read the same in every language.
      */
     /**
-     * The pet screen's pages. The tab names are what the tabs say under the cursor; the
-     * order hints are the one line under each order, so they say what the pet will do
-     * rather than what the word means.
+     * The pet screen's pages. The tab names are what the tabs say; the gift badge is the one word on the badge for a present
+     * the pet carries, and its hint what waits under the cursor; the picking up and the stance each have a title and, under
+     * it, the line that says what they do.
      */
-    private static void addPetScreenTranslations(Adder adder, String backpack, String status, String orders,
-            String noSlip, String eager, String money, String gift, String giftHint,
-            String followHint, String stayHint, String freeHint) {
+    private static void addPetScreenTranslations(Adder adder, String backpack, String settings, String eager, String money,
+            String giftBadge, String giftHint, String pickUp, String pickUpHint, String stance) {
         adder.add("screen.chiikawa.pet.tab.backpack", backpack);
-        adder.add("screen.chiikawa.pet.tab.status", status);
-        adder.add("screen.chiikawa.pet.tab.orders", orders);
-        adder.add("screen.chiikawa.pet.no_slip", noSlip);
+        adder.add("screen.chiikawa.pet.tab.settings", settings);
         adder.add("screen.chiikawa.pet.eager", eager);
         adder.add("screen.chiikawa.pet.money", money);
-        adder.add("screen.chiikawa.pet.gift", gift);
+        adder.add("screen.chiikawa.pet.gift_badge", giftBadge);
         adder.add("screen.chiikawa.pet.gift_hint", giftHint);
-        adder.add("screen.chiikawa.pet.order.follow.hint", followHint);
-        adder.add("screen.chiikawa.pet.order.stay.hint", stayHint);
-        adder.add("screen.chiikawa.pet.order.free.hint", freeHint);
+        adder.add("screen.chiikawa.pet.pick_up", pickUp);
+        adder.add("screen.chiikawa.pet.pick_up.hint", pickUpHint);
+        adder.add("screen.chiikawa.pet.stance", stance);
     }
 
-    /** The status page's two cards: what the pet is short of, and the question each card answers under the cursor. */
-    private static void addPetOutlookTranslations(Adder adder, String lacks, String next, String why) {
+    /** What the pet screen says of what the pet is short of, and the heading over what it would do next. */
+    private static void addPetOutlookTranslations(Adder adder, String lacks, String next) {
         adder.add("screen.chiikawa.pet.outlook.lacks", lacks);
         adder.add("screen.chiikawa.pet.outlook.next", next);
-        adder.add("screen.chiikawa.pet.outlook.why", why);
     }
 
-    /**
-     * What an owner may tell a pet from the orders page: whether it picks things up, with a line for how it stands, and the
-     * three ways to take part in a fight with a line under each.
-     */
-    private static void addPetRulesTranslations(Adder adder, String pickUp, String on, String off, String clear,
-            String clearHint, String retaliate, String retaliateHint, String none, String noneHint) {
-        adder.add("screen.chiikawa.pet.rules.pick_up", pickUp);
-        adder.add("screen.chiikawa.pet.rules.on", on);
-        adder.add("screen.chiikawa.pet.rules.off", off);
+    /** The three ways to take part in a fight: the name in the control, and the line that says what it does. */
+    private static void addPetStanceTranslations(Adder adder, String clear, String clearHint, String retaliate,
+            String retaliateHint, String none, String noneHint) {
         adder.add("screen.chiikawa.pet.stance.clear", clear);
         adder.add("screen.chiikawa.pet.stance.clear.hint", clearHint);
         adder.add("screen.chiikawa.pet.stance.retaliate", retaliate);
