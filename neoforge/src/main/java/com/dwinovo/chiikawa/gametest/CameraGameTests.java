@@ -584,7 +584,7 @@ public final class CameraGameTests {
         helper.assertFalse(withACamera.contains(camera), Component.literal("Hachiware bought a second camera"));
 
         pet.pockets().stow(new ItemStack(film));
-        helper.assertFalse(bought(pet, shop, money).contains(film), "Hachiware bought film with film to shoot on");
+        helper.assertFalse(bought(pet, shop, money).contains(film), Component.literal("Hachiware bought film with film to shoot on"));
         pet.getBackpack().removeItemType(film, 64);
 
         ItemStack unfinished = FilmRolls.begin(film, 8, shot);

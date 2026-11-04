@@ -255,11 +255,11 @@ public final class InteractGameTests {
 
         pet.mobInteract(owner, InteractionHand.MAIN_HAND);
 
-        helper.assertTrue(Wallet.count(pet.getBackpack()) == coins, "the pet has " + Wallet.count(pet.getBackpack()) + " emeralds");
-        helper.assertTrue(pet.getBackpack().getItem(AbstractPet.MAINHAND_SLOT).isEmpty(), "the money went into the pet's hand");
-        helper.assertTrue(pet.getBackpack().getItem(AbstractPet.BAG_SLOT).isEmpty(), "the money went into the pet's bag slot");
+        helper.assertTrue(Wallet.count(pet.getBackpack()) == coins, Component.literal("the pet has " + Wallet.count(pet.getBackpack()) + " emeralds"));
+        helper.assertTrue(pet.getBackpack().getItem(AbstractPet.MAINHAND_SLOT).isEmpty(), Component.literal("the money went into the pet's hand"));
+        helper.assertTrue(pet.getBackpack().getItem(AbstractPet.BAG_SLOT).isEmpty(), Component.literal("the money went into the pet's bag slot"));
         for (int slot = AbstractPet.BACKPACK_SIZE; slot < pet.getBackpack().getContainerSize(); slot++) {
-            helper.assertTrue(pet.getBackpack().getItem(slot).isEmpty(), "the money went into a bag the pet is not wearing");
+            helper.assertTrue(pet.getBackpack().getItem(slot).isEmpty(), Component.literal("the money went into a bag the pet is not wearing"));
         }
         helper.succeed();
     }
@@ -288,8 +288,8 @@ public final class InteractGameTests {
         friend.setPos(helper.absoluteVec(new BlockPos(3, STAND, 5).getCenter()));
 
         asTeam(helper, () -> {
-            helper.assertFalse(PetServerPacketHandler.rule(friend, pet, PetRules.DEFAULT.withPickUp(false)), "a teammate's rules were heard");
-            helper.assertTrue(pet.getRules().equals(PetRules.DEFAULT), "the pet took rules from a teammate");
+            helper.assertFalse(PetServerPacketHandler.rule(friend, pet, PetRules.DEFAULT.withPickUp(false)), Component.literal("a teammate's rules were heard"));
+            helper.assertTrue(pet.getRules().equals(PetRules.DEFAULT), Component.literal("the pet took rules from a teammate"));
             helper.succeed();
         }, owner, friend);
     }
