@@ -20,7 +20,7 @@ import com.dwinovo.chiikawa.ui.widget.TabStrip;
  */
 public final class PetScreenLayout {
     public static final int PANEL_W = 300;
-    public static final int PANEL_H = 166;
+    public static final int PANEL_H = 184;
     /** How far the pet's picture rises above the panel's top edge: more than the tabs do. */
     public static final int RISE = 24;
 
@@ -80,14 +80,14 @@ public final class PetScreenLayout {
 
     // ---- the backpack page --------------------------------------------------------
 
-    /** The card the pet's own slots are in, the hand and the ten, then a line across it, then the bag and the bag's ten. */
-    public static final Rect PET_CARD = new Rect(4, 74, 120, 84);
-    public static final int CARD_DIVIDER_Y = 115;
+    /** The card the pet's own slots are in, the hand and the fifteen, then a line across it, then the bag and the bag's ten. */
+    public static final Rect PET_CARD = new Rect(4, 74, 120, 102);
+    public static final int CARD_DIVIDER_Y = 133;
 
     // ---- the settings page --------------------------------------------------------
 
-    /** One card, two rows with a line between them. */
-    public static final Rect SETTINGS_CARD = new Rect(4, 74, 286, 84);
+    /** One card as tall as the backpack's, two rows sharing its height with a line between them. */
+    public static final Rect SETTINGS_CARD = new Rect(4, PET_CARD.y(), 286, PET_CARD.height());
     public static final int ROW_H = (SETTINGS_CARD.height() - 3) / 2;
     public static final int FIRST_ROW_Y = SETTINGS_CARD.y() + 1;
     public static final int SETTINGS_DIVIDER_Y = FIRST_ROW_Y + ROW_H;
