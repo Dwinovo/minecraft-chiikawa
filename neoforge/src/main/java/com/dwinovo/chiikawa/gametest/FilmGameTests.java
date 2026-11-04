@@ -99,14 +99,14 @@ public final class FilmGameTests {
         ItemStack full = FilmRolls.begin(film(), 1, shot());
         bag.setItem(0, full);
 
-        helper.assertTrue(FilmItem.rollOf(full).full(), "a roll of one is not full with one shot");
-        helper.assertFalse(FilmRolls.hasRoom(bag, film()), "a full roll has room");
-        helper.assertTrue(FilmRolls.record(bag, bag::addItem, film(), EXPOSURES, shot(), dropped -> { }).isEmpty(), "a shot went on a full roll");
+        helper.assertTrue(FilmItem.rollOf(full).full(), Component.literal("a roll of one is not full with one shot"));
+        helper.assertFalse(FilmRolls.hasRoom(bag, film()), Component.literal("a full roll has room"));
+        helper.assertTrue(FilmRolls.record(bag, bag::addItem, film(), EXPOSURES, shot(), dropped -> { }).isEmpty(), Component.literal("a shot went on a full roll"));
 
         bag.setItem(3, new ItemStack(film()));
-        helper.assertTrue(FilmRolls.hasRoom(bag, film()), "fresh film has no room");
-        helper.assertTrue(FilmRolls.record(bag, bag::addItem, film(), EXPOSURES, shot(), dropped -> { }).isPresent(), "no new roll was begun");
-        helper.assertTrue(FilmItem.rollOf(full).shots().size() == 1, "the full roll took another shot");
+        helper.assertTrue(FilmRolls.hasRoom(bag, film()), Component.literal("fresh film has no room"));
+        helper.assertTrue(FilmRolls.record(bag, bag::addItem, film(), EXPOSURES, shot(), dropped -> { }).isPresent(), Component.literal("no new roll was begun"));
+        helper.assertTrue(FilmItem.rollOf(full).shots().size() == 1, Component.literal("the full roll took another shot"));
         helper.succeed();
     }
 

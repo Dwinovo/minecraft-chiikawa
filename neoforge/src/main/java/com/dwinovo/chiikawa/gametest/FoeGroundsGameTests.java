@@ -50,7 +50,7 @@ public final class FoeGroundsGameTests {
         Zombie zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(9, STAND, 4));
         zombie.setNoAi(true);
 
-        helper.succeedWhen(() -> helper.assertTrue(hurt(zombie), "a free fencer with a slip for monsters left a zombie alone"));
+        helper.succeedWhen(() -> helper.assertTrue(hurt(zombie), Component.literal("a free fencer with a slip for monsters left a zombie alone")));
     }
 
     /**

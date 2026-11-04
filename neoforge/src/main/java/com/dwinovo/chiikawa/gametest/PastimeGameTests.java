@@ -267,7 +267,7 @@ public final class PastimeGameTests {
         helper.startSequence()
             .thenWaitUntil(() -> helper.assertTrue(pet.getMind().errands().isOn(CharacterPastimeData.ASK_PRAISE)
                     && pet.getPerformance().equals("clap,cute"),
-                "the pet never copied its neighbour: it is " + pet.getMind().errands().errand() + " " + pet.getPerformance()))
+                Component.literal("the pet never copied its neighbour: it is " + pet.getMind().errands().errand() + " " + pet.getPerformance())))
             .thenWaitUntil(() -> helper.assertTrue(pet.getMind().asking() && pet.distanceTo(owner) < 4.0
                     && pet.getPerformance().equals("ask_praise"),
                 Component.literal("the pet never came to its owner to ask: it is " + pet.getMind().errands().errand() + " " + pet.getPerformance())))
@@ -285,12 +285,12 @@ public final class PastimeGameTests {
         AbstractPet pet = ownedBy(helper, InitEntity.MOMONGA_PET.get(), owner, new BlockPos(4, STAND, 4));
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().asking(), "the pet never asked to be praised"))
+            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().asking(), Component.literal("the pet never asked to be praised")))
             .thenWaitUntil(() -> helper.assertTrue(!pet.getMind().errands().isOn(CharacterPastimeData.ASK_PRAISE),
                 Component.literal("the pet asked for ever")))
             .thenExecute(() -> {
                 assertSaid(helper, pet, VoiceMoment.TURNED_DOWN);
-                helper.assertFalse(pet.getMind().asking(), "the pet still wants praising");
+                helper.assertFalse(pet.getMind().asking(), Component.literal("the pet still wants praising"));
             })
             .thenSucceed();
     }
@@ -307,7 +307,7 @@ public final class PastimeGameTests {
         long[] praisedAt = {-1};
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().asking(), "the pet never asked to be praised"))
+            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().asking(), Component.literal("the pet never asked to be praised")))
             .thenExecute(() -> {
                 owner.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
                 InteractionResult result = PetInteractHandler.handle(pet, owner, InteractionHand.MAIN_HAND);
@@ -315,7 +315,7 @@ public final class PastimeGameTests {
                 praisedAt[0] = helper.getLevel().getGameTime();
             })
             .thenWaitUntil(() -> helper.assertTrue(!pet.getMind().errands().isOn(CharacterPastimeData.ASK_PRAISE),
-                "the pet went on asking after it was praised"))
+                Component.literal("the pet went on asking after it was praised")))
             .thenExecute(() -> {
                 helper.assertTrue(helper.getLevel().getGameTime() - praisedAt[0] < 40, Component.literal("the pet was a long while being glad of it"));
                 helper.assertTrue(pet.getMind().log().entries().stream().anyMatch(entry ->
@@ -338,18 +338,18 @@ public final class PastimeGameTests {
         AbstractPet pet = ownedBy(helper, InitEntity.MOMONGA_PET.get(), owner, new BlockPos(4, STAND, 4));
 
         helper.startSequence()
-            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().asking(), "the pet never asked to be praised"))
+            .thenWaitUntil(() -> helper.assertTrue(pet.getMind().asking(), Component.literal("the pet never asked to be praised")))
             .thenExecute(() -> {
                 stranger.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
                 PetInteractHandler.handle(pet, stranger, InteractionHand.MAIN_HAND);
             })
-            .thenExecuteFor(20, () -> helper.assertTrue(pet.getMind().asking(), "a stranger praised somebody else's pet"))
+            .thenExecuteFor(20, () -> helper.assertTrue(pet.getMind().asking(), Component.literal("a stranger praised somebody else's pet")))
             .thenExecute(() -> asTeam(helper, () -> {
                 friend.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
                 PetInteractHandler.handle(pet, friend, InteractionHand.MAIN_HAND);
             }, owner, friend))
             .thenWaitUntil(() -> helper.assertTrue(!pet.getMind().errands().isOn(CharacterPastimeData.ASK_PRAISE),
-                "a friend's praise was not taken"))
+                Component.literal("a friend's praise was not taken")))
             .thenSucceed();
     }
 

@@ -93,7 +93,7 @@ public final class TransparencyGameTests {
         keepNear(helper, owner, pet);
 
         helper.runAfterDelay(LACKED_TICKS - SAY_TICKS, () -> {
-            helper.assertFalse(said(pet).isPresent(), "the pet spoke up before it had been short of anything for long");
+            helper.assertFalse(said(pet).isPresent(), Component.literal("the pet spoke up before it had been short of anything for long"));
         });
         helper.runAfterDelay(LACKED_TICKS + SAY_TICKS, () -> {
             assertSaid(helper, pet, VoiceMoment.MISSING);
@@ -117,8 +117,8 @@ public final class TransparencyGameTests {
         keepNear(helper, owner, pet);
 
         helper.runAfterDelay(LACKED_TICKS + SAY_TICKS, () -> {
-            helper.assertFalse(said(pet).isPresent(), "the pet spoke in a world with no chatter: " + said(pet));
-            helper.assertTrue(pet.getMind().whyNot().flatMap(WhyNot::lack).isPresent(), "the pet short of seeds found nothing it lacks");
+            helper.assertFalse(said(pet).isPresent(), Component.literal("the pet spoke in a world with no chatter: " + said(pet)));
+            helper.assertTrue(pet.getMind().whyNot().flatMap(WhyNot::lack).isPresent(), Component.literal("the pet short of seeds found nothing it lacks"));
             helper.succeed();
         });
     }
