@@ -109,14 +109,12 @@ public final class LanguageData {
                     "已升满", "你有 %1$s 个%2$s");
             addPetStatusTranslations(adder, "闲着", "背上双肩包或挎包，可以多装 10 格");
             addPetScreenTranslations(adder,
-                    "背包",
-                    "设置",
                     "干劲十足：还剩 %s",
                     "零花钱：%1$s 个%2$s",
                     "有礼物",
                     "它会自己走过来递给你",
-                    "捡地上的东西",
-                    "自由活动时，把附近掉在地上的东西收进背包");
+                    "自动拾取",
+                    "自由活动时，把附近掉落的物品收进背包");
             addPetOutlookTranslations(adder,
                     "需要%s",
                     "接下来想做的事");
@@ -357,14 +355,12 @@ public final class LanguageData {
                     "最大レベル", "%2$sを%1$s個持っています");
             addPetStatusTranslations(adder, "ひま", "リュックかポーチを背負うと、持ち物が10マス増える");
             addPetScreenTranslations(adder,
-                    "持ち物",
-                    "設定",
                     "やる気まんまん：残り%s",
                     "おこづかい：%2$s%1$s個",
                     "贈り物",
                     "自分で持ってきて渡してくれる",
-                    "落ちている物を拾う",
-                    "自由行動のとき、近くの落とし物を持ち物に入れる");
+                    "自動回収",
+                    "自由行動のとき、近くに落ちている物を持ち物に入れる");
             addPetOutlookTranslations(adder,
                     "%sが必要",
                     "次にやりたいこと");
@@ -610,14 +606,12 @@ public final class LanguageData {
                     "Totalmente melhorado", "Você tem %1$s × %2$s");
             addPetStatusTranslations(adder, "Sem fazer nada", "Uma mochila de costas ou uma bolsa adiciona mais dez espaços");
             addPetScreenTranslations(adder,
-                    "Mochila",
-                    "Ajustes",
                     "Com vontade de trabalhar: faltam %s",
                     "Mesada: %1$s × %2$s",
                     "Mimo",
                     "Vai trazer por conta própria",
-                    "Pegar coisas do chão",
-                    "Livre, guarda o que cai por perto");
+                    "Coleta automática",
+                    "Quando está livre, guarda na mochila o que cair por perto");
             addPetOutlookTranslations(adder,
                     "Falta %s",
                     "O que quer fazer em seguida");
@@ -860,13 +854,11 @@ public final class LanguageData {
                     "최고 레벨", "%2$s %1$s개 보유");
             addPetStatusTranslations(adder, "한가함", "배낭이나 가방을 메면 10칸이 더 생겨");
             addPetScreenTranslations(adder,
-                    "가방",
-                    "설정",
                     "일할 기분: %s 남음",
                     "용돈: %2$s %1$s개",
                     "선물!",
                     "직접 가져올 거야",
-                    "바닥의 물건 줍기",
+                    "자동 줍기",
                     "자유 행동 중에 근처에 떨어진 물건을 가방에 넣어");
             addPetOutlookTranslations(adder,
                     "%s 필요",
@@ -1113,14 +1105,12 @@ public final class LanguageData {
                     "Fully upgraded", "You have %1$s × %2$s");
             addPetStatusTranslations(adder, "Idle", "A rucksack or a pouch adds ten more slots");
             addPetScreenTranslations(adder,
-                    "Backpack",
-                    "Settings",
                     "Keen on work: %s left",
                     "Pocket money: %1$s × %2$s",
                     "Gift!",
                     "It will bring it over itself",
-                    "Pick things up",
-                    "While roaming, puts nearby drops in its bag");
+                    "Auto Pickup",
+                    "While roaming, puts nearby dropped items in its bag");
             addPetOutlookTranslations(adder,
                     "Needs %s",
                     "What it feels like doing next");
@@ -1708,14 +1698,11 @@ public final class LanguageData {
      * read the same in every language.
      */
     /**
-     * The pet screen's pages. The tab names are what the tabs say; the gift badge is the one word on the badge for a present
-     * the pet carries, and its hint what waits under the cursor; picking up has a title and, under
-     * it, the line that says what it does.
+     * The pet screen's words. The gift badge is the one word on the badge for a present the pet carries, and its hint what
+     * waits under the cursor; the auto-pickup row has its name and, under the cursor, the line that says what it does.
      */
-    private static void addPetScreenTranslations(Adder adder, String backpack, String settings, String eager, String money,
-            String giftBadge, String giftHint, String pickUp, String pickUpHint) {
-        adder.add("screen.chiikawa.pet.tab.backpack", backpack);
-        adder.add("screen.chiikawa.pet.tab.settings", settings);
+    private static void addPetScreenTranslations(Adder adder, String eager, String money, String giftBadge, String giftHint,
+            String pickUp, String pickUpHint) {
         adder.add("screen.chiikawa.pet.eager", eager);
         adder.add("screen.chiikawa.pet.money", money);
         adder.add("screen.chiikawa.pet.gift_badge", giftBadge);
