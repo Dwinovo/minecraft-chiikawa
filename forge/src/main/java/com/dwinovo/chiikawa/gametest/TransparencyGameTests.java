@@ -148,7 +148,7 @@ public final class TransparencyGameTests {
             helper.assertTrue(shortOfSeeds.whyNotKey().equals(Optional.of("intent.chiikawa.fail.no_farmland")), "the pet said " + shortOfSeeds);
             helper.assertTrue(shortOfSeeds.lackKey().equals(Optional.of("tag.item.chiikawa.entity_plant_crops")), "the pet said " + shortOfSeeds);
 
-            pet.getBackpack().addItem(new ItemStack(Items.WHEAT_SEEDS, 8));
+            pet.pockets().stow(new ItemStack(Items.WHEAT_SEEDS, 8));
             helper.runAfterDelay(40, () -> {
                 clientsMenu.receive(outlookOf(helper, pet));
                 PetOutlookPayload withSeeds = clientsMenu.outlook().orElseThrow();

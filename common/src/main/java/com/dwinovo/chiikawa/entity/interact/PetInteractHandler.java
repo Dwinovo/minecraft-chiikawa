@@ -148,9 +148,9 @@ public final class PetInteractHandler {
     private static InteractionResult handleGiveMoney(Level level, AbstractPet pet, Player player, InteractionHand hand) {
         if (!level.isClientSide()) {
             ItemStack held = player.getItemInHand(hand);
-            // The container copies what it is given and hands back what did not fit, leaving the
+            // The pockets copy what they are given and hands back what did not fit, leaving the
             // stack in the hand as it was: what the pet took is taken from the hand here.
-            ItemStack left = pet.getBackpack().addItem(held);
+            ItemStack left = pet.pockets().stow(held);
             if (left.getCount() == held.getCount()) {
                 // Nowhere to put it: nothing changes hands rather than the coins vanishing.
                 return InteractionResult.PASS;
