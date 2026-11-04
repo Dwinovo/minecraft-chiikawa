@@ -40,8 +40,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * The banner across the top of the pet screen, the same on both of its pages: the pet itself, standing on it and rising over
- * its edge, its name and what it does for a living, how much it has in its pockets and how keen it is, its health, the order
+ * The banner across the top of the pet screen: the pet itself, standing on it and rising over its edge, its name and what it does for a living, how much it has in its pockets and how keen it is, its health, the order
  * it has been given, and one thing it says. The words and the layout they are in are {@link HeaderRow} and
  * {@link SpeechRow}; this draws them, notes what waits under the cursor for each part, and makes the places the orders are
  * pressed.
