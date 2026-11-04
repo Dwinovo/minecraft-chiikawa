@@ -1,6 +1,8 @@
 package com.dwinovo.chiikawa.entity.brain.errand;
 
+import java.util.Optional;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -13,6 +15,9 @@ import net.minecraft.world.item.Item;
 public sealed interface LackKey {
     /** @return the translation key of what it is called, for a game to put into its own language */
     String translationKey();
+
+    /** @return an item to picture it by: the item itself, or the first of a tag's; none when a tag has nothing in it */
+    Optional<Identifier> icon();
 
     /** @return the lack of this item */
     static LackKey item(Identifier item) {
@@ -33,6 +38,11 @@ public sealed interface LackKey {
             return BuiltInRegistries.ITEM.getOptional(item).map(Item::getDescriptionId)
                 .orElseGet(() -> "item." + item.getNamespace() + "." + item.getPath().replace('/', '.'));
         }
+
+        @Override
+        public Optional<Identifier> icon() {
+            return Optional.of(item);
+        }
     }
 
     /**
@@ -42,6 +52,14 @@ public sealed interface LackKey {
         @Override
         public String translationKey() {
             return "tag.item." + tag.getNamespace() + "." + tag.getPath().replace('/', '.');
+        }
+
+        @Override
+        public Optional<Identifier> icon() {
+            TagKey<Item> key = TagKey.create(Registries.ITEM, tag);
+            // Asked of the items and not of the tag, which is not there to be asked until the tags are bound.
+            return BuiltInRegistries.ITEM.holders().filter(holder -> holder.is(key)).findFirst()
+                .map(holder -> holder.key().identifier());
         }
     }
 }

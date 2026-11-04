@@ -1,8 +1,11 @@
 package com.dwinovo.chiikawa.qualification;
 
+import com.dwinovo.chiikawa.task.PetTaskType;
+import com.dwinovo.chiikawa.task.PetTaskTypes;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 
@@ -17,9 +20,11 @@ import net.minecraft.resources.Identifier;
  * @param practised whether the pet has done the practice to sit it
  * @param called whether it has been called to sit the exam today
  * @param awaitingResults whether it sat the last exam and has not heard yet
+ * @param job the job whose slips are this licence's practice, so the screen can say which licence goes with the work a pet
+ *            is doing; none when the slip type is not loaded
  */
 public record LicenceView(Identifier qualification, Identifier book, int rank, int topRank,
-                          boolean practised, boolean called, boolean awaitingResults) {
+                          boolean practised, boolean called, boolean awaitingResults, Optional<Identifier> job) {
     public static final Codec<LicenceView> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         Identifier.CODEC.fieldOf("qualification").forGetter(LicenceView::qualification),
         Identifier.CODEC.fieldOf("book").forGetter(LicenceView::book),
@@ -27,7 +32,8 @@ public record LicenceView(Identifier qualification, Identifier book, int rank, i
         Codec.INT.fieldOf("top_rank").forGetter(LicenceView::topRank),
         Codec.BOOL.fieldOf("practised").forGetter(LicenceView::practised),
         Codec.BOOL.fieldOf("called").forGetter(LicenceView::called),
-        Codec.BOOL.fieldOf("awaiting_results").forGetter(LicenceView::awaitingResults)
+        Codec.BOOL.fieldOf("awaiting_results").forGetter(LicenceView::awaitingResults),
+        Identifier.CODEC.optionalFieldOf("job").forGetter(LicenceView::job)
     ).apply(instance, LicenceView::new));
     public static final Codec<List<LicenceView>> LIST_CODEC = CODEC.listOf();
 
@@ -38,11 +44,20 @@ public record LicenceView(Identifier qualification, Identifier book, int rank, i
         return new LicenceView(id, BuiltInRegistries.ITEM.getKey(qualification.book()),
             licence.held() == 0 ? 0 : qualification.rank(licence.held()), qualification.rank(qualification.grades()),
             licence.practice() >= qualification.requiredPractice(), QualificationExam.isCalledNow(licence, dayTime),
-            licence.paper().isPresent());
+            licence.paper().isPresent(),
+            Optional.ofNullable(PetTaskTypes.all().get(qualification.practiceTask())).map(PetTaskType::capability));
     }
 
     /** Whether the pet holds every grade there is. */
     public boolean top() {
         return rank == topRank;
+    }
+
+    /**
+     * Whether the next step is its owner's to take: the pet has done the practice, is not called to an exam or waiting to
+     * hear how one went, and has a grade left to sit. The owner opens an exam for it at an exam desk.
+     */
+    public boolean ready() {
+        return !top() && !awaitingResults && !called && practised;
     }
 }
