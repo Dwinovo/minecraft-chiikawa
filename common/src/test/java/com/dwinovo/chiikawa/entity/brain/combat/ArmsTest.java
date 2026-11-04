@@ -24,41 +24,34 @@ class ArmsTest {
 
     @Test
     void aSwordInHandIsAWeaponAndABowInHandIsOneOnlyWithAnArrowToLoose() {
-        assertTrue(Arms.choose(SWORD, backpack(SWORD), false, true).wielding());
-        assertTrue(Arms.choose(BOW, backpack(BOW), true, true).wielding());
-        assertFalse(Arms.choose(BOW, backpack(BOW), false, true).wielding());
-        assertFalse(Arms.choose(OTHER, backpack(OTHER), true, true).wielding());
+        assertTrue(Arms.choose(SWORD, backpack(SWORD), false).wielding());
+        assertTrue(Arms.choose(BOW, backpack(BOW), true).wielding());
+        assertFalse(Arms.choose(BOW, backpack(BOW), false).wielding());
+        assertFalse(Arms.choose(OTHER, backpack(OTHER), true).wielding());
     }
 
     @Test
     void aWeaponInTheBagIsOneToTakeUpAndTheFirstPocketOfThemIsTheOne() {
-        Arms arms = Arms.choose(OTHER, backpack(OTHER, OTHER, BOW, SWORD), true, true);
+        Arms arms = Arms.choose(OTHER, backpack(OTHER, OTHER, BOW, SWORD), true);
 
         assertFalse(arms.wielding());
         assertEquals(Optional.of(new Arms.Weapon(3, true)), arms.swap());
-        assertEquals(Optional.of(new Arms.Weapon(4, false)), Arms.choose(OTHER, backpack(OTHER, OTHER, OTHER, SWORD), true, true).swap());
+        assertEquals(Optional.of(new Arms.Weapon(4, false)), Arms.choose(OTHER, backpack(OTHER, OTHER, OTHER, SWORD), true).swap());
     }
 
     @Test
     void aBowInTheBagWithNothingToLooseIsNoWeapon() {
-        assertEquals(Optional.empty(), Arms.choose(OTHER, backpack(OTHER, BOW), false, true).swap());
-        assertEquals(Optional.of(new Arms.Weapon(3, false)), Arms.choose(OTHER, backpack(OTHER, BOW, SWORD), false, true).swap());
-    }
-
-    @Test
-    void anOwnerWhoSaysNoSwapMeansNoWeaponToTakeUpWhatIsInTheBag() {
-        Arms arms = Arms.choose(OTHER, backpack(OTHER, SWORD), true, false);
-
-        assertEquals(Optional.empty(), arms.swap());
+        assertEquals(Optional.empty(), Arms.choose(OTHER, backpack(OTHER, BOW), false).swap());
+        assertEquals(Optional.of(new Arms.Weapon(3, false)), Arms.choose(OTHER, backpack(OTHER, BOW, SWORD), false).swap());
     }
 
     @Test
     void thePocketForTheBagThePetWearsIsNotOneToSwapFrom() {
-        assertEquals(Optional.empty(), Arms.choose(OTHER, List.of(OTHER, SWORD), true, true).swap());
+        assertEquals(Optional.empty(), Arms.choose(OTHER, List.of(OTHER, SWORD), true).swap());
     }
 
     @Test
     void theHandIsNotAPocketToSwapFrom() {
-        assertEquals(Optional.empty(), Arms.choose(SWORD, backpack(SWORD), true, true).swap());
+        assertEquals(Optional.empty(), Arms.choose(SWORD, backpack(SWORD), true).swap());
     }
 }

@@ -250,7 +250,7 @@ public final class InteractGameTests {
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         stranger.setPos(helper.absoluteVec(new BlockPos(3, STAND, 5).getCenter()));
-        PetRules rules = PetRules.DEFAULT.with(PetRules.Toggle.SHOP, false).withStance(CombatStance.NONE);
+        PetRules rules = PetRules.DEFAULT.withPickUp(false).withStance(CombatStance.NONE);
 
         helper.assertFalse(PetServerPacketHandler.rule(stranger, pet, rules), "a stranger's rules were heard");
         helper.assertTrue(pet.getRules().equals(PetRules.DEFAULT), "the pet took rules from a stranger");
@@ -266,7 +266,7 @@ public final class InteractGameTests {
         friend.setPos(helper.absoluteVec(new BlockPos(3, STAND, 5).getCenter()));
 
         asTeam(helper, () -> {
-            helper.assertFalse(PetServerPacketHandler.rule(friend, pet, PetRules.DEFAULT.withSwap(false)), "a teammate's rules were heard");
+            helper.assertFalse(PetServerPacketHandler.rule(friend, pet, PetRules.DEFAULT.withPickUp(false)), "a teammate's rules were heard");
             helper.assertTrue(pet.getRules().equals(PetRules.DEFAULT), "the pet took rules from a teammate");
             helper.succeed();
         }, owner, friend);
@@ -279,7 +279,7 @@ public final class InteractGameTests {
         AbstractPet pet = wildPet(helper, new BlockPos(3, STAND, 3));
         pet.tame(owner);
         owner.setPos(helper.absoluteVec(new BlockPos(3, STAND, 5).getCenter()));
-        PetRules rules = PetRules.DEFAULT.with(PetRules.Toggle.PHOTO, false).withStance(CombatStance.RETALIATE).withSwap(false);
+        PetRules rules = PetRules.DEFAULT.withPickUp(false).withStance(CombatStance.RETALIATE);
 
         helper.assertTrue(PetServerPacketHandler.rule(owner, pet, rules), "the owner's rules were refused");
         helper.assertTrue(pet.getRules().equals(rules), "the pet did not take its owner's rules");
